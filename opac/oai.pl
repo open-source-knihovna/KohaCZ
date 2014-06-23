@@ -483,8 +483,10 @@ package C4::OAI::ListRecords;
 
 use strict;
 use warnings;
+use C4::Biblio;
 use HTTP::OAI;
 use C4::OAI::Sets;
+use MARC::File::XML;
 
 use base ("HTTP::OAI::ListRecords");
 
@@ -502,7 +504,7 @@ sub new {
     }
     my $max = $repository->{koha_max_count};
     my $sql = "
-        SELECT biblioitems.biblionumber, biblioitems.marcxml, biblioitems.timestamp
+        SELECT biblioitems.biblionumber, biblioitems.timestamp
         FROM biblioitems
     ";
     $sql .= " JOIN oai_sets_biblios ON biblioitems.biblionumber = oai_sets_biblios.biblionumber " if defined $set;
@@ -519,7 +521,7 @@ sub new {
     $sth->execute( @bind_params );
 
     my $count = 0;
-    while ( my ($biblionumber, $marcxml, $timestamp) = $sth->fetchrow ) {
+    while ( my ($biblionumber, $timestamp) = $sth->fetchrow ) {
         $count++;
         if ( $count > $max ) {
             $self->resumptionToken(
@@ -533,6 +535,8 @@ sub new {
             );
             last;
         }
+        my $record = GetMarcBiblio($biblionumber, 1, 1);
+        my $marcxml = $record->as_xml();
         my $oai_sets = GetOAISetsBiblio($biblionumber);
         my @setSpecs;
         foreach (@$oai_sets) {
