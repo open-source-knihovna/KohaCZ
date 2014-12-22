@@ -611,7 +611,7 @@ $template->param(
     dropboxmode    => $dropboxmode,
     dropboxdate    => output_pref($dropboxdate),
     overduecharges => $overduecharges,
-    soundon        => C4::Context->preference("SoundOn"),
+    AudioAlerts        => C4::Context->preference("AudioAlerts"),
     BlockReturnOfWithdrawnItems => C4::Context->preference("BlockReturnOfWithdrawnItems"),
 );
 

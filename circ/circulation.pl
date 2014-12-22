@@ -558,7 +558,7 @@ $template->param(
     inprocess         => $inprocess,
     is_child          => ($borrowernumber && $borrower->{'category_type'} eq 'C'),
     circview => 1,
-    soundon           => C4::Context->preference("SoundOn"),
+    AudioAlerts           => C4::Context->preference("AudioAlerts"),
     fast_cataloging   => $fast_cataloging,
     CircAutoPrintQuickSlip   => C4::Context->preference("CircAutoPrintQuickSlip"),
     activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
