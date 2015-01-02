@@ -23,7 +23,11 @@ use C4::Biblio;
 use C4::Branch;
 use Koha::Database;
 
-use Test::More tests => 6;
+use t::lib::Mocks;
+
+use Test::More tests => 9;
+
+use Test::Warn;
 
 BEGIN {
     use_ok('C4::Items');
@@ -407,6 +411,119 @@ subtest 'SearchItems test' => sub {
     is( ( scalar( @$cpl_items_after ) - scalar ( @$cpl_items_before ) ), 1, 'SearchItemsByField should return something' );
 
     $dbh->rollback;
+};
+
+subtest 'Koha::Item(s) tests' => sub {
+
+    plan tests => 5;
+
+    # Start transaction
+    my $schema = Koha::Database->new()->schema();
+    $schema->storage->txn_begin();
+    $dbh->{RaiseError} = 1;
+
+    # Create a biblio and item for testing
+    C4::Context->set_preference('marcflavour', 'MARC21');
+    my ($bibnum, $bibitemnum) = get_biblio();
+    my ($item_bibnum, $item_bibitemnum, $itemnumber) = AddItem({ homebranch => $branch1, holdingbranch => $branch2 } , $bibnum);
+
+    # Get item.
+    my $item = Koha::Items->find( $itemnumber );
+    is( ref($item), 'Koha::Item', "Got Koha::Item" );
+
+    my $homebranch = $item->home_branch();
+    is( ref($homebranch), 'Koha::Branch', "Got Koha::Branch from home_branch method" );
+    is( $homebranch->branchcode(), $branch1, "Home branch code matches homebranch" );
+
+    my $holdingbranch = $item->holding_branch();
+    is( ref($holdingbranch), 'Koha::Branch', "Got Koha::Branch from holding_branch method" );
+    is( $holdingbranch->branchcode(), $branch2, "Home branch code matches holdingbranch" );
+};
+
+subtest 'C4::Biblio::EmbedItemsInMarcBiblio' => sub {
+    plan tests => 7;
+
+    $dbh->{AutoCommit} = 0;
+    $dbh->{RaiseError} = 1;
+
+    my ( $biblionumber, $biblioitemnumber ) = get_biblio();
+    my $item_infos = [
+        { homebranch => 'CPL', holdingbranch => 'CPL' },
+        { homebranch => 'CPL', holdingbranch => 'CPL' },
+        { homebranch => 'CPL', holdingbranch => 'CPL' },
+        { homebranch => 'MPL', holdingbranch => 'MPL' },
+        { homebranch => 'MPL', holdingbranch => 'MPL' },
+        { homebranch => 'CPL', holdingbranch => 'MPL' },
+        { homebranch => 'CPL', holdingbranch => 'MPL' },
+        { homebranch => 'CPL', holdingbranch => 'MPL' },
+    ];
+    my $number_of_items = scalar @$item_infos;
+    my $number_of_items_with_homebranch_is_CPL =
+      grep { $_->{homebranch} eq 'CPL' } @$item_infos;
+
+    my @itemnumbers;
+    for my $item_info (@$item_infos) {
+        my ( undef, undef, $itemnumber ) = AddItem(
+            {
+                homebranch    => $item_info->{homebranch},
+                holdingbranch => $item_info->{holdingbanch}
+            },
+            $biblionumber
+        );
+        push @itemnumbers, $itemnumber;
+    }
+
+    # Emptied the OpacHiddenItems pref
+    t::lib::Mocks::mock_preference( 'OpacHiddenItems', '' );
+
+    my ($itemfield) =
+      C4::Biblio::GetMarcFromKohaField( 'items.itemnumber', '' );
+    my $record = C4::Biblio::GetMarcBiblio($biblionumber);
+    warning_is { C4::Biblio::EmbedItemsInMarcBiblio() }
+    { carped => 'EmbedItemsInMarcBiblio: No MARC record passed' },
+      'Should crap is no record passed.';
+
+    C4::Biblio::EmbedItemsInMarcBiblio( $record, $biblionumber );
+    my @items = $record->field($itemfield);
+    is( scalar @items, $number_of_items, 'Should return all items' );
+
+    C4::Biblio::EmbedItemsInMarcBiblio( $record, $biblionumber,
+        [ $itemnumbers[1], $itemnumbers[3] ] );
+    @items = $record->field($itemfield);
+    is( scalar @items, 2, 'Should return all items present in the list' );
+
+    C4::Biblio::EmbedItemsInMarcBiblio( $record, $biblionumber, undef, 1 );
+    @items = $record->field($itemfield);
+    is( scalar @items, $number_of_items, 'Should return all items for opac' );
+
+    my $opachiddenitems = "
+        homebranch: ['CPL']";
+    t::lib::Mocks::mock_preference( 'OpacHiddenItems', $opachiddenitems );
+
+    C4::Biblio::EmbedItemsInMarcBiblio( $record, $biblionumber );
+    @items = $record->field($itemfield);
+    is( scalar @items,
+        $number_of_items,
+        'Even with OpacHiddenItems set, all items should have been embeded' );
+
+    C4::Biblio::EmbedItemsInMarcBiblio( $record, $biblionumber, undef, 1 );
+    @items = $record->field($itemfield);
+    is(
+        scalar @items,
+        $number_of_items - $number_of_items_with_homebranch_is_CPL,
+'For OPAC, the pref OpacHiddenItems should have been take into account. Only items with homebranch ne CPL should have been embeded'
+    );
+
+    $opachiddenitems = "
+        homebranch: ['CPL', 'MPL']";
+    t::lib::Mocks::mock_preference( 'OpacHiddenItems', $opachiddenitems );
+    C4::Biblio::EmbedItemsInMarcBiblio( $record, $biblionumber, undef, 1 );
+    @items = $record->field($itemfield);
+    is(
+        scalar @items,
+        0,
+'For OPAC, If all items are hidden, no item should have been embeded'
+    );
 };
 
 # Helper method to set up a Biblio.
