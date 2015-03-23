@@ -26,6 +26,12 @@
   "accountline": {
     "$ref": "definitions/accountline.json"
   },
+  "checkouts": {
+    "$ref": "definitions/checkouts.json"
+  },
+  "checkout": {
+    "$ref": "definitions/checkout.json"
+  },
   "holds": {
     "$ref": "definitions/holds.json"
   },

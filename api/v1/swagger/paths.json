@@ -50,6 +50,12 @@
   "/libraries/{branchcode}": {
     "$ref": "paths/libraries.json#/~1libraries~1{branchcode}"
   },
+  "/checkouts": {
+    "$ref": "paths/checkouts.json#/~1checkouts"
+  },
+  "/checkouts/{checkout_id}": {
+    "$ref": "paths/checkouts.json#/~1checkouts~1{checkout_id}"
+  },
   "/patrons": {
     "$ref": "paths/patrons.json#/~1patrons"
   },

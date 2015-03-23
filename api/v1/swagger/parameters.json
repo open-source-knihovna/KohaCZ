@@ -34,5 +34,8 @@
   },
   "itemnumbersQueryParam": {
     "$ref": "parameters/item.json#/itemnumbersQueryParam"
+  },
+  "checkoutIdPathParam": {
+    "$ref": "parameters/checkout.json#/checkoutIdPathParam"
   }
 }
