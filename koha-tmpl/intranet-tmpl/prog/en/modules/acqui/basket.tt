@@ -99,6 +99,16 @@
             e.preventDefault();
             confirm_reopen();
         });
+        // Generates a dynamic link for exporting the selections data as CSV
+        $("#exportbutton").click(function() {
+            // Building the url from currently checked boxes
+            var url = '/cgi-bin/koha/acqui/basket.pl';
+            url += $('#exportbutton').attr('href');
+            url += '&amp;csv_profile=' + $("#csv_profile_for_export option:selected").val();
+            // And redirecting to the CSV page
+            location.href = url;
+            return false;
+        });
     });
 
     function UserSearchPopup(f) {
@@ -175,8 +185,21 @@
                             <a href="[% script_name %]?op=close&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="closebutton"><i class="fa fa-times-circle"></i> Close this basket</a>
                         </div>
                     [% END %]
-                        <div class="btn-group"><a href="[% script_name %]?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="exportbutton"><i class="fa fa-download"></i> Export this basket as CSV</a></div>
-                </div>
+                       <div class="btn-group">
+                       <fieldset class="action">
+                          <label for="csv_code">Select CSV profile:</label>
+                          <select id="csv_profile_for_export">
+                             <option value="default">default</option>
+                             [% IF csv_profiles %]
+                                [% FOR csv IN csv_profiles %]
+                                   <option value="[% csv.export_format_id %]">[% csv.profile %]</option>
+                                [% END %]
+                             [% END %]
+                          </select>
+                       </fieldset>
+                       </div>
+                       <div class="btn-group"><a href="[% script_name %]?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="exportbutton"><i class="fa fa-download"></i> Export </a></div>
+                   </div>
 <!-- Modal for confirm deletion box-->
                 <div class="modal hide" id="deleteBasketModal" tabindex="-1" role="dialog" aria-labelledby="delbasketModalLabel" aria-hidden="true">
                     <div class="modal-header">
@@ -210,8 +233,21 @@
             [% ELSE %]
                 [% UNLESS ( grouped ) %]
                 <div id="toolbar" class="btn-toolbar">
-                    <div class="btn-group"><a href="#" class="btn btn-small" id="reopenbutton"><i class="fa fa-refresh"></i> Reopen this basket</a></div>
-                    <div class="btn-group"><a href="[% script_name %]?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="exportbutton"><i class="fa fa-download"></i> Export this basket as CSV</a></div>
+                    <div class="btn-group"><a href="#" class="btn btn-small" id="reopenbutton"><i class="icon-refresh"></i> Reopen this basket</a></div>
+                    <div class="btn-group">
+                    <fieldset class="action">
+                       <label for="csv_code">Select CSV profile:</label>
+                       <select id="csv_profile_for_export">
+                          <option value="default">default</option>
+                          [% IF csv_profiles %]
+                             [% FOR csv IN csv_profiles %]
+                                <option value="[% csv.export_format_id %]">[% csv.profile %]</option>
+                             [% END %]
+                          [% END %]
+                       </select>
+                    </fieldset>
+                    </div>
+                    <div class="btn-group"><a href="[% script_name %]?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="exportbutton"><i class="fa fa-download"></i> Export </a></div>
                 </div>
                 [% END %]
             [% END %]
