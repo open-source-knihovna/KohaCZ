@@ -56,23 +56,26 @@ my $total_paid = $input->param('paid');
 
 my $individual   = $input->param('pay_individual');
 my $writeoff     = $input->param('writeoff_individual');
+my $writeoffoutstanding = $input->param('writeOffOutstanding');
 my $select_lines = $input->param('selected');
 my $select       = $input->param('selected_accts');
 my $payment_note = uri_unescape $input->param('payment_note');
 my $accountno;
 my $accountlines_id;
+my $itemnumber;
+my $accounttype;
 if ( $individual || $writeoff ) {
     if ($individual) {
         $template->param( pay_individual => 1 );
     } elsif ($writeoff) {
         $template->param( writeoff_individual => 1 );
     }
-    my $accounttype       = $input->param('accounttype');
+    $accounttype       = $input->param('accounttype');
     $accountlines_id       = $input->param('accountlines_id');
     my $amount            = $input->param('amount');
     my $amountoutstanding = $input->param('amountoutstanding');
     $accountno = $input->param('accountno');
-    my $itemnumber  = $input->param('itemnumber');
+    $itemnumber  = $input->param('itemnumber');
     my $description  = $input->param('description');
     my $title        = $input->param('title');
     my $notify_id    = $input->param('notify_id');
@@ -114,6 +117,11 @@ if ( $total_paid and $total_paid ne '0.00' ) {
             } else {
                 makepartialpayment( $accountlines_id, $borrowernumber, $accountno, $total_paid,
                     $user, $branch, $payment_note );
+                if ( $writeoffoutstanding ) {
+                    my $writeoffamount = $total_due - $total_paid;
+		    WriteOffFee( $borrowernumber, $accountlines_id, $itemnumber, $accounttype,
+		        $writeoffamount, $branch, $payment_note );
+                }
             }
             print $input->redirect(
                 "/cgi-bin/koha/members/pay.pl?borrowernumber=$borrowernumber");
