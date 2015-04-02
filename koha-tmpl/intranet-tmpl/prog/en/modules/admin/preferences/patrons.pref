@@ -44,6 +44,12 @@ Patrons:
            class: multi
          - (separate multiple choices with |)
      -
+         - pref: CheckPrevIssue
+           choices:
+               yes: "Unless overridden, do"
+               no: "Unless overridden, do not"
+         - " check borrower loan history to see if the current item has been loaned before."
+     -
          - pref: checkdigit
            choices:
                none: "Don't"

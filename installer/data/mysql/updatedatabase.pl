@@ -10820,7 +10820,6 @@ if ( CheckVersion($DBversion) ) {
     SetVersion ($DBversion);
 }
 
-
 $DBversion = "3.20.01.001";
 if ( CheckVersion($DBversion) ) {
     my $msg;
@@ -10878,7 +10877,14 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
-
+$DBversion = "3.21.XXX";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do("INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type) VALUES('CheckPrevIssue','0','','By default, for every item issued, should we warn if the patron has borrowed that item in the past?','YesNo')");
+    $dbh->do("ALTER IGNORE TABLE categories ADD (`checkprevissue` varchar(7) NOT NULL default 'inherit')");
+    $dbh->do("ALTER IGNORE TABLE borrowers ADD (`checkprevissue` varchar(7) NOT NULL default 'inherit')");
+    print "Upgrade to $DBversion done (Bug 6906: show 'Borrower has previously issued \$ITEM' alert on checkout)\n";
+    SetVersion ($DBversion);
+}
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
