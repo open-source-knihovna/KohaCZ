@@ -10515,7 +10515,6 @@ if ( CheckVersion($DBversion) ) {
     SetVersion ($DBversion);
 }
 
-
 $DBversion = "3.20.01.001";
 if ( CheckVersion($DBversion) ) {
     my $msg;
@@ -10669,8 +10668,6 @@ if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Koha 3.20.4)\n";
     SetVersion($DBversion);
 }
-
-
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068

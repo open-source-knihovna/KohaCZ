@@ -294,6 +294,10 @@ $(document).ready(function() {
     <li>High demand item. Loan period shortened to [% HIGHHOLDS.duration %] days (due [% HIGHHOLDS.returndate %]). Check out anyway?</li>
 [% END %]
 
+[% IF PREVISSUE %]
+    <li>This item has previously been issued to this patron on <span class="prevIssueDate">[% PREVISSUEDATE | $KohaDates %]</span>. Check out anyway?</li>
+[% END %]
+
 [% IF BIBLIO_ALREADY_ISSUED %]
   <li>
     Patron has already checked out another item from this record.
