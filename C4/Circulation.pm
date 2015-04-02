@@ -48,6 +48,7 @@ use Data::Dumper;
 use Koha::DateUtils;
 use Koha::Calendar;
 use Koha::Borrower::Debarments;
+use Koha::Borrower::CheckPrevIssue qw( WantsCheckPrevIssue CheckPrevIssue );
 use Koha::Database;
 use Carp;
 use List::MoreUtils qw( uniq );
@@ -899,6 +900,24 @@ sub CanBookBeIssued {
             $needsconfirmation{TOO_MANY} = $toomany->{reason};
             $issuingimpossible{current_loan_count} = $toomany->{count};
             $issuingimpossible{max_loans_allowed} = $toomany->{max_allowed};
+        }
+    }
+
+    # If patron uses checkPrevIssue or inherits it, check for previous
+    # issue of item to patron.
+    my $checkPrevIssueOverride = WantsCheckPrevIssue( $borrower );
+    if ( ( $checkPrevIssueOverride eq 'yes' )
+        or ( $checkPrevIssueOverride eq 'inherit'
+            and C4::Context->preference("checkPrevIssue") ) )
+    {
+        my ( $previssue, $previssuedate ) = CheckPrevIssue(
+            $borrower->{borrowernumber},
+            $item->{biblionumber},
+	    $item->{itemnumber}
+        );
+        if ( $previssue ) {
+	    $needsconfirmation{PREVISSUE} = $previssue;
+            $needsconfirmation{PREVISSUEDATE} = $previssuedate;
         }
     }
 
