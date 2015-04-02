@@ -144,6 +144,15 @@ sub recordpayment {
             }));
             push( @ids, $accdata->{'accountlines_id'} );
         }
+        my $amountpaid = $accdata->{'amountoutstanding'} - $newamtos;
+        UpdateStats({
+            branch => $branch,
+            type =>'payment',
+            amount => $amountpaid,
+            borrowernumber => $borrowernumber,
+            accountno => $nextaccntno,
+            other => $thisacct }
+        );
     }
 
     # create new line
@@ -157,14 +166,6 @@ sub recordpayment {
     $paytype .= $sip_paytype if defined $sip_paytype;
     $usth->execute( $borrowernumber, $nextaccntno, 0 - $data, $paytype, 0 - $amountleft, $manager_id, $payment_note );
     $usth->finish;
-
-    UpdateStats({
-                branch => $branch,
-                type =>'payment',
-                amount => $data,
-                borrowernumber => $borrowernumber,
-                accountno => $nextaccntno }
-    );
 
     if ( C4::Context->preference("FinesLog") ) {
         $accdata->{'amountoutstanding_new'} = $newamtos;
@@ -216,6 +217,7 @@ sub makepayment {
     my $sth         = $dbh->prepare("SELECT * FROM accountlines WHERE accountlines_id=?");
     $sth->execute( $accountlines_id );
     my $data = $sth->fetchrow_hashref;
+    $branch     = C4::Context->userenv->{'branch'};
 
     my $payment;
     if ( $data->{'accounttype'} eq "Pay" ){
@@ -276,12 +278,13 @@ sub makepayment {
     }
 
     UpdateStats({
-        branch => $branch,
-        type   => 'payment',
-        amount => $amount,
-        borrowernumber => $borrowernumber,
-        accountno => $accountno
-    });
+                branch => $branch,
+                type => 'payment',
+                amount => $amount,
+                borrowernumber => $borrowernumber,
+                accountno => $accountno,
+                other => $accountlines_id}
+    );
 
     #check to see what accounttype
     if ( $data->{'accounttype'} eq 'Rep' || $data->{'accounttype'} eq 'L' ) {
@@ -546,6 +549,10 @@ sub ReversePayment {
     my $row = $sth->fetchrow_hashref();
     my $amount_outstanding = $row->{'amountoutstanding'};
 
+    my $branch     = C4::Context->userenv->{'branch'};
+    my $manager_id = 0;
+    $manager_id = C4::Context->userenv->{'number'} if C4::Context->userenv;
+
     if ( $amount_outstanding <= 0 ) {
         $sth = $dbh->prepare('UPDATE accountlines SET amountoutstanding = amount * -1, description = CONCAT( description, " Reversed -" ) WHERE accountlines_id = ?');
         $sth->execute( $accountlines_id );
@@ -555,9 +562,6 @@ sub ReversePayment {
     }
 
     if ( C4::Context->preference("FinesLog") ) {
-        my $manager_id = 0;
-        $manager_id = C4::Context->userenv->{'number'} if C4::Context->userenv;
-
         if ( $amount_outstanding <= 0 ) {
             $row->{'amountoutstanding'} *= -1;
         } else {
@@ -600,7 +604,7 @@ sub recordpayment_selectaccts {
     my $dbh        = C4::Context->dbh;
     my $newamtos   = 0;
     my $accdata    = q{};
-    my $branch     = C4::Context->userenv->{branch};
+    my $branch     = C4::Context->userenv->{'branch'};
     my $amountleft = $amount;
     my $manager_id = 0;
     $manager_id = C4::Context->userenv->{'number'} if C4::Context->userenv;
@@ -650,7 +654,15 @@ sub recordpayment_selectaccts {
             }));
             push( @ids, $accdata->{'accountlines_id'} );
         }
-
+        my $amountpaid = $accdata->{'amountoutstanding'} - $newamtos;
+        UpdateStats({
+                branch => $branch,
+                type => 'payment',
+                amount => $amountpaid,
+                borrowernumber => $borrowernumber,
+                accountno => $nextaccntno,
+                other => $thisacct}
+        );
     }
 
     # create new line
@@ -658,13 +670,6 @@ sub recordpayment_selectaccts {
     '(borrowernumber, accountno,date,amount,description,accounttype,amountoutstanding,manager_id,note) ' .
     q|VALUES (?,?,now(),?,'','Pay',?,?,?)|;
     $dbh->do($sql,{},$borrowernumber, $nextaccntno, 0 - $amount, 0 - $amountleft, $manager_id, $note );
-    UpdateStats({
-                branch => $branch,
-                type => 'payment',
-                amount => $amount,
-                borrowernumber => $borrowernumber,
-                accountno => $nextaccntno}
-    );
 
     if ( C4::Context->preference("FinesLog") ) {
         logaction("FINES", 'CREATE',$borrowernumber,Dumper({
@@ -693,7 +698,7 @@ sub makepartialpayment {
     }
     $payment_note //= "";
     my $dbh = C4::Context->dbh;
-
+    $branch = C4::Context->userenv->{'branch'};
     my $nextaccntno = getnextacctno($borrowernumber);
     my $newamtos    = 0;
 
@@ -726,12 +731,13 @@ sub makepartialpayment {
         '', 'Pay', $data->{'itemnumber'}, $manager_id, $payment_note);
 
     UpdateStats({
-        branch => $branch,
-        type   => 'payment',
-        amount => $amount,
-        borrowernumber => $borrowernumber,
-        accountno => $accountno
-    });
+                branch => $branch,
+                type => 'payment',
+                amount => $amount,
+                borrowernumber => $borrowernumber,
+                accountno => $accountno,
+                other => $accountlines_id}
+    );
 
     if ( C4::Context->preference("FinesLog") ) {
         logaction("FINES", 'CREATE',$borrowernumber,Dumper({
@@ -767,7 +773,7 @@ C<$payment_note> is the note to attach to this payment
 sub WriteOffFee {
     my ( $borrowernumber, $accountlines_id, $itemnum, $accounttype, $amount, $branch, $payment_note ) = @_;
     $payment_note //= "";
-    $branch ||= C4::Context->userenv->{branch};
+    $branch = C4::Context->userenv->{'branch'};
     my $manager_id = 0;
     $manager_id = C4::Context->userenv->{'number'} if C4::Context->userenv;
 
@@ -819,7 +825,8 @@ sub WriteOffFee {
                 branch => $branch,
                 type => 'writeoff',
                 amount => $amount,
-                borrowernumber => $borrowernumber}
+                borrowernumber => $borrowernumber,
+                other => $accountlines_id}
     );
 
 }
