@@ -369,10 +369,10 @@
 			<th scope="col">Category name</th>
 			<th scope="col">Type</th>
 			<th scope="col">Enrollment period</th>
-                        <th scope="col">Check previous loans</th>
 			<th scope="col">Age required</th>
 			<th scope="col">Upper age limit</th>
 			<th scope="col">Enrollment fee</th>
+                        <th scope="col">Check previous loans</th>
 			<th scope="col">Overdue</th>
             <th scope="col">Lost items</th>
  			<th scope="col">Hold fee</th>
@@ -413,11 +413,11 @@
                         <td>[% loo.enrolmentfee %]</td>
                         <td>[% IF ( loo.checkprevissue == 'yes' ) %]
 	                              Yes
-	                            [% ELSIF ( loo.checkprevissue == 'no' ) %]
+				[% ELSIF ( loo.checkprevissue == 'no' ) %]
 	                              No
-	                            [% ELSE %]
+		                [% ELSE %]
 	                              Inherit
-	                            [% END %]
+                                [% END %]
 	                </td>
                         <td>[% IF ( loo.overduenoticerequired ) %]Yes[% ELSE %]No[% END %]</td>
                         <td>[% IF ( loo.hidelostitems ) %]Hidden[% ELSE %]Shown[% END %]</td>
