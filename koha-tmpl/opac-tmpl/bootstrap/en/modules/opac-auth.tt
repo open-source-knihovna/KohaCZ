@@ -152,7 +152,7 @@
                                 <input type="submit" value="Log in" class="btn" />
                                 [% IF Koha.Preference('OpacPasswordChange') && Koha.Preference('OpacResetPassword') %]
                                     <div id="forgotpassword">
-				        <a href="/cgi-bin/koha/opac-password-recovery.pl">Forgot your password?</a>
+                        <a href="/cgi-bin/koha/opac-password-recovery.pl">Forgot your password?</a>
                                     </div>
                                 [% END %]
                                 <div id="nologininstructions">
