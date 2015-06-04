@@ -10462,6 +10462,24 @@ if ( CheckVersion($DBversion) ) {
     SetVersion ($DBversion);
 }
 
+$DBversion = "3.20.00.001";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        INSERT IGNORE INTO language_subtag_registry( subtag, type, description, added)
+        VALUES ( 'IN', 'region', 'India','2015-05-28');
+    |);
+    $dbh->do(q|
+        INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
+        VALUES ( 'IN', 'region', 'en', 'India');
+    |);
+    $dbh->do(q|
+        INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
+        VALUES ( 'IN', 'region', 'bn', 'ভারত');
+    |);
+    print "Upgrade to $DBversion done (Bug 14285: Add new region India)\n";
+    SetVersion ($DBversion);
+}
+
 $DBversion = "3.21.00.000";
 if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (El tiempo vuela, un nuevo ciclo comienza.)\n";
@@ -10483,24 +10501,6 @@ if ( CheckVersion($DBversion) ) {
         UPDATE systempreferences SET variable='OPACUserJS' where variable='opacuserjs'
     |);
     print "Upgrade to $DBversion done (Bug 12160: Rename opacuserjs to OPACUserJS)\n";
-    SetVersion ($DBversion);
-}
-
-$DBversion = "3.21.00.003";
-if ( CheckVersion($DBversion) ) {
-    $dbh->do(q|
-        INSERT IGNORE INTO language_subtag_registry( subtag, type, description, added)
-        VALUES ( 'IN', 'region', 'India','2015-05-28');
-    |);
-    $dbh->do(q|
-        INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
-        VALUES ( 'IN', 'region', 'en', 'India');
-    |);
-    $dbh->do(q|
-        INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
-        VALUES ( 'IN', 'region', 'bn', 'ভারত');
-    |);
-    print "Upgrade to $DBversion done (Bug 14285: Add new region India)\n";
     SetVersion ($DBversion);
 }
 
