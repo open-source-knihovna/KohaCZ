@@ -1,0 +1,12 @@
+#api_selector td {
+    border-bottom: none;
+    padding 100px;
+}
+
+#api_selector tr.border {
+    border-bottom: 3px ridge #cccccc;
+}
+#api_selector li {
+    list-style: initial;
+    margin-left: 20px;
+}

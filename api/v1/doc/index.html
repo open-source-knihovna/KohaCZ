@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Swagger UI</title>
+  <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16" />
+  <link href='css/koha.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='css/reset.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='css/reset.css' media='print' rel='stylesheet' type='text/css'/>
+  <link href='css/print.css' media='print' rel='stylesheet' type='text/css'/>
+  <script src='lib/jquery-1.8.0.min.js' type='text/javascript'></script>
+  <script src='lib/jquery.slideto.min.js' type='text/javascript'></script>
+  <script src='lib/jquery.wiggle.min.js' type='text/javascript'></script>
+  <script src='lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
+  <script src='lib/handlebars-2.0.0.js' type='text/javascript'></script>
+  <script src='lib/underscore-min.js' type='text/javascript'></script>
+  <script src='lib/backbone-min.js' type='text/javascript'></script>
+  <script src='swagger-ui.js' type='text/javascript'></script>
+  <script src='lib/highlight.7.3.pack.js' type='text/javascript'></script>
+  <script src='lib/marked.js' type='text/javascript'></script>
+  <script src='lib/swagger-oauth.js' type='text/javascript'></script>
+  <script src="lib/sha256.js" type="text/javascript"></script>
+
+
+  <!-- Some basic translations -->
+  <!-- <script src='lang/translator.js' type='text/javascript'></script> -->
+  <!-- <script src='lang/ru.js' type='text/javascript'></script> -->
+  <!-- <script src='lang/en.js' type='text/javascript'></script> -->
+
+  <script type="text/javascript">
+    $(function () {
+      var url = window.location.search.match(/url=([^&]+)/);
+      if (url && url.length > 1) {
+        url = decodeURIComponent(url[1]);
+      } else {
+        url = "/api/v1/swagger.json"
+      }
+
+      // Pre load translate...
+      if(window.SwaggerTranslator) {
+        window.SwaggerTranslator.translate();
+      }
+      window.swaggerUi = new SwaggerUi({
+        url: url,
+        validatorUrl: null,
+        showRequestHeaders: true,
+        dom_id: "swagger-ui-container",
+        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+        onComplete: function(swaggerApi, swaggerUi){
+          if(typeof initOAuth == "function") {
+            initOAuth({
+              clientId: "your-client-id",
+              clientSecret: "your-client-secret",
+              realm: "your-realms",
+              appName: "your-app-name",
+              scopeSeparator: ","
+            });
+          }
+
+          if(window.SwaggerTranslator) {
+            window.SwaggerTranslator.translate();
+          }
+
+          $('pre code').each(function(i, e) {
+            hljs.highlightBlock(e)
+          });
+
+          createSubmitTriggersToInjectAuthorizationHeader();
+        },
+        onFailure: function(data) {
+          log("Unable to Load SwaggerUI");
+        },
+        docExpansion: "none",
+        apisSorter: "alpha",
+        showRequestHeaders: false
+      });
+
+      $('#input_apiKey').change(addApiKeyAuthorization);
+
+      // if you have an apiKey you would like to pre-populate on the page for demonstration purposes...
+      var apiUserid = "1";
+      $('#input_apiUserid').val(apiUserid);
+      var apiKey = "NCXF3acaCuvriMhj0tvnQfYBS46uJSdN";
+      $('#input_apiKey').val(apiKey);
+
+      // Keep updating the Date header used in authenticating.
+      var dateHeaderUpdateTimer = window.setInterval(function() {
+              var d = new Date();
+              $("#dateHeaderInput").val(d.toGMTString());
+          },
+          1000
+      );
+
+
+      window.swaggerUi.load();
+
+      function log() {
+        if ('console' in window) {
+          console.log.apply(console, arguments);
+        }
+      }
+  });
+function createSubmitTriggersToInjectAuthorizationHeader() {
+    //Create the Authorization-header just before sending the ajax request.
+    $("input[value='Try it out!']").click(function () {
+        //Get relevant (and easy to extract) data elements
+        var operationObjectBaseElement = $(this).parents("li.operation")[0];
+        var httpVerb = $(operationObjectBaseElement).find("span.http_method > a").text();
+        var userid = $("#input_apiUserid").val();
+        var date = $("#dateHeaderInput").val();
+        var apikey = $("#input_apiKey").val();
+
+        //Create the HMAC SHA-256 hash
+        var shaObj = new jsSHA("SHA-256", "TEXT");
+        shaObj.setHMACKey(apikey, "TEXT");
+        var message = httpVerb.toUpperCase() + " " + userid + " " + date;
+        shaObj.update(message);
+
+        var authorizationHeader = "Koha " + userid + ":" + shaObj.getHMAC("HEX");
+        addApiKeyAuthorization(authorizationHeader);
+        addDateAuthorization();
+    });
+}
+function addApiKeyAuthorization(headerValue){
+    if(headerValue && headerValue.trim() != "") {
+        var apiKeyAuth = new SwaggerClient.ApiKeyAuthorization("Authorization", headerValue, "header");
+        window.swaggerUi.api.clientAuthorizations.add("Authorization", apiKeyAuth);
+    }
+}
+function addDateAuthorization(){
+  var key = $('#dateHeaderInput')[0].value;
+  if(key && key.trim() != "") {
+      var apiKeyAuth = new SwaggerClient.ApiKeyAuthorization("X-Koha-Date", key, "header");
+      window.swaggerUi.api.clientAuthorizations.add("X-Koha-Date", apiKeyAuth);
+  }
+}
+  </script>
+</head>
+<body class="swagger-section">
+<div id='header'>
+  <div class="swagger-ui-wrap">
+    <a id="logo" href="http://swagger.io">swagger</a>
+    <br /><br />
+    <form id='api_selector' style="background-color: #89BF04; float: none;">
+      <table style="width: 100%;" style="">
+        <tr class="border">
+          <td><label for="input_baseUrl">Swagger specification url:</label></td>
+          <td><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text" style="width:100%"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><h2>Koha API Authentication parameters</h2></td>
+        </tr>
+        <tr class="border">
+          <td colspan="2"><p>You need to have a library card to consume our API, then you can add a new API Key for yourself from the OPAC.</p><p>You also need specific permissions to access most of these resources. Ask us!</p></td>
+        </tr>
+        <tr>
+          <td colspan="2"><h3>Authorization-header</h3></td>
+        </tr>
+        <tr>
+          <td><label for="input_apiUserid">Userid:</label></td>
+          <td><input placeholder="api_userid" id="input_apiUserid" name="apiUserid" type="text" style="width:100%"/></td>
+        </tr>
+        <tr class="border">
+          <td><label for="input_apiKey">Api key:</label></td>
+          <td><input placeholder="api_key" id="input_apiKey" name="apiKey" type="text" style="width:100%"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><h3>Date-header</h3></td>
+        </tr>
+        <tr>
+          <td><label for="dateHeaderInput">Date RFC 1123:</label></td>
+          <td><input placeholder="date RFC 1123" id="dateHeaderInput" name="dateHeaderInput" type="text" style="width:100%"/></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <a href="#authentication"><h2>Authentication system explained:</h2></a>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+</div>
+
+<h3>HUOM! There is currently a bug in the SwaggerUI preventing sending proper authentication headers with GET-requests. Atleast PUT-requests work and possibly some others. A fix is already submitted for this bug and is waiting for inclusion to the official release.</h3>
+
+<div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
+<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+<br /><br />
+<div id='header'>
+  <div class="swagger-ui-wrap">
+    <a id="logo" href="http://swagger.io">swagger</a>
+    <br /><br />
+      <table style="width: 100%;" style="">
+        <tr>
+          <td colspan="2">
+            <h2>Authentication system explained:</h2>
+            <div id="authentication">
+            <p>For authentication to succeed, the client have to send 2 HTTP headers:</p>
+            <ul>
+              <li> X-Koha-Date: the standard HTTP Date header complying to RFC 1123, simply wrapped to X-Koha-Date, since the w3-specification forbids setting the Date-header from javascript.</li>
+              <li> Authorization: the standard HTTP Authorization header, see below for how it is constructed.</li>
+            </ul>
+            <h3>HTTP Request example</h3>
+            <pre>
+  GET /api/v1/borrowers/12 HTTP/1.1
+  Host: api.yourkohadomain.fi
+  X-Koha-Date: Mon, 26 Mar 2007 19:37:58 +0000
+  Authorization: Koha admin69:frJIUN8DYpKDtOLCwo//yllqDzg=
+            </pre>
+            <h3>Constructing the Authorization header</h3>
+            <ul>
+              <li>You brand the authorization header with "Koha"</li>
+              <li>Then you give the userid/cardnumber of the user authenticating.</li>
+              <li>Then the hashed signature.</li>
+            </ul>
+            <h3>Signature</h3>
+            <p>The signature is a HMAC-SHA256-HEX hash of several elements of the request, separated by spaces:</p>
+            <ul>
+              <li>HTTP method (uppercase)</li>
+              <li>userid/cardnumber</li>
+              <li>X-Koha-Date-header</li>
+            </ul>
+            <p>Signed with the Borrowers API key</p>
+            <p>The server then tries to rebuild the signature with each of the user's API keys. If one matches the received signature, then authentication is almost OK.</p>
+            <p>To avoid requests to be replayed, the last request's X-Koha-Date-header is stored in database and the authentication succeeds only if the stored Date is lesser than the X-Koha-Date-header.</p>
+            <h3>Constructing the signature example</h3>
+            <pre>
+  Signature = HMAC-SHA256-HEX("HTTPS" + " " +
+                              "/api/v1/borrowers/12?howdoyoudo=voodoo" + " " +
+                              "admin69" + " " +
+                              "760818212" + " " +
+                              "frJIUN8DYpKDtOLCwo//yllqDzg="
+                             );
+            </pre>
+            </div>
+          </td>
+        </tr>
+      </table>
+  </div>
+</div>
+</body>
+</html>
