@@ -1276,6 +1276,13 @@ OpacHiddenItems to be applied.
 sub GetMarcBiblio {
     my $biblionumber = shift;
     my $embeditems   = shift || 0;
+    my $opac         = shift || 0;
+
+    if (not defined $biblionumber) {
+        carp 'GetMarcBiblio called with undefined biblionumber';
+        return;
+    }
+
     my $dbh          = C4::Context->dbh;
     my $sth          = $dbh->prepare("SELECT biblioitemnumber, marcxml FROM biblioitems WHERE biblionumber=? ");
     $sth->execute($biblionumber);

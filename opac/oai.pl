@@ -61,6 +61,9 @@ else {
 binmode STDOUT, ':encoding(UTF-8)';
 my $repository = C4::OAI::Repository->new();
 
+
+
+
 # __END__ Main Prog
 
 
@@ -100,7 +103,7 @@ sub new {
             $until = sprintf( "%.4d-%.2d-%.2d", $year+1900, $mon+1,$mday );
         }
         $offset = $args{ offset } || 0;
-        $set = $args{set};
+        $set = $args{set} || '';
     }
 
     $self->{ metadata_prefix } = $metadata_prefix;
@@ -267,7 +270,7 @@ sub new {
     my $prefix = $repository->{koha_identifier} . ':';
     my ($biblionumber) = $args{identifier} =~ /^$prefix(.*)/;
     $sth->execute( $biblionumber );
-    my ($timestamp);
+    my ($timestamp, $deleted);
     unless ( ($timestamp) = $sth->fetchrow ) {
         unless ( ($timestamp) = $dbh->selectrow_array(q/
             SELECT timestamp
@@ -290,11 +293,8 @@ sub new {
     # We fetch it using this method, rather than the database directly,
     # so it'll include the item data
     my $marcxml;
-    unless ($deleted) {
-        my $record = GetMarcBiblio($biblionumber, 1);
-        $marcxml = $record->as_xml();
-    }
-
+    $marcxml = $repository->get_biblio_marcxml->($biblionumber, $args{metadataPrefix})
+        unless $deleted;
     my $oai_sets = GetOAISetsBiblio($biblionumber);
     my @setSpecs;
     foreach (@$oai_sets) {
@@ -305,7 +305,7 @@ sub new {
     $self->record(
         $deleted
         ? C4::OAI::DeletedRecord->new($timestamp, \@setSpecs, %args)
-        : C4::OAI::Record->new($repository, $marcxml, $timestamp, \@setSpecs, %args);
+        : C4::OAI::Record->new($repository, $marcxml, $timestamp, \@setSpecs, %args)
     );
     return $self;
 }
@@ -504,7 +504,7 @@ sub new {
     }
     my $max = $repository->{koha_max_count};
     my $sql = "
-        SELECT biblioitems.biblionumber, biblioitems.timestamp
+        (SELECT biblioitems.biblionumber, biblioitems.timestamp, marcxml
         FROM biblioitems
     ";
     $sql .= " JOIN oai_sets_biblios ON biblioitems.biblionumber = oai_sets_biblios.biblionumber " if defined $set;
@@ -535,8 +535,7 @@ sub new {
             );
             last;
         }
-        my $record = GetMarcBiblio($biblionumber, 1, 1);
-        my $marcxml = $record->as_xml();
+        my $marcxml = $repository->get_biblio_marcxml($biblionumber, $args{metadataPrefix});
         my $oai_sets = GetOAISetsBiblio($biblionumber);
         my @setSpecs;
         foreach (@$oai_sets) {
@@ -647,6 +646,17 @@ sub new {
 
     bless $self, $class;
     return $self;
+}
+
+
+sub get_biblio_marcxml {
+    my ($self, $biblionumber, $format) = @_;
+    my $with_items = 0;
+    if ( my $conf = $self->{conf} ) {
+        $with_items = $conf->{format}->{$format}->{include_items};
+    }
+    my $record = GetMarcBiblio($biblionumber, $with_items, 1);
+    $record ? $record->as_xml() : undef;
 }
 
 
