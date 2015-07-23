@@ -767,24 +767,15 @@ sub CanBookBeIssued {
     if ( !defined $borrower->{dateexpiry} || $borrower->{'dateexpiry'} eq '0000-00-00') {
         $issuingimpossible{EXPIRED} = 1;
     } else {
-        my ($y, $m, $d) =  split /-/,$borrower->{'dateexpiry'};
-        if ($y && $m && $d) { # are we really writing oinvalid dates to borrs
-            my $expiry_dt = DateTime->new(
-                year => $y,
-                month => $m,
-                day   => $d,
-                time_zone => C4::Context->tz,
-            );
-            $expiry_dt->truncate( to => 'day');
-            my $today = $now->clone()->truncate(to => 'day');
-            if (DateTime->compare($today, $expiry_dt) == 1) {
-                $issuingimpossible{EXPIRED} = 1;
-            }
-        } else {
-            carp("Invalid expity date in borr");
+        my $expiry_dt = dt_from_string( $borrower->{dateexpiry}, 'sql', 'floating' );
+        $expiry_dt->truncate( to => 'day');
+        my $today = $now->clone()->truncate(to => 'day');
+        $today->set_time_zone( 'floating' );
+        if ( DateTime->compare($today, $expiry_dt) == 1 ) {
             $issuingimpossible{EXPIRED} = 1;
         }
     }
+
     #
     # BORROWER STATUS
     #
@@ -3457,10 +3448,13 @@ sub CalcDateDue {
 
     # if ReturnBeforeExpiry ON the datedue can't be after borrower expirydate
     if ( C4::Context->preference('ReturnBeforeExpiry') ) {
-        my $expiry_dt = dt_from_string( $borrower->{dateexpiry}, 'iso' );
-        $expiry_dt->set( hour => 23, minute => 59);
-        if ( DateTime->compare( $datedue, $expiry_dt ) == 1 ) {
-            $datedue = $expiry_dt->clone;
+        my $expiry_dt = dt_from_string( $borrower->{dateexpiry}, 'iso', 'floating');
+        if( $expiry_dt ) { #skip empty expiry date..
+            $expiry_dt->set( hour => 23, minute => 59);
+            my $d1= $datedue->clone->set_time_zone('floating');
+            if ( DateTime->compare( $d1, $expiry_dt ) == 1 ) {
+                $datedue = $expiry_dt->clone->set_time_zone( C4::Context->tz );
+            }
         }
     }
 
