@@ -1,3 +1,18 @@
+[% BLOCK btn_group %]
+    <div class="btn-group">
+       <fieldset class="action">
+          <label for="csv_code">Select CSV profile:</label>
+          <select id="csv_profile_for_export">
+             <option value="default">default</option>
+             [% IF csv_profiles %]
+                [% FOR csv IN csv_profiles %]
+                   <option value="[% csv.export_format_id %]">[% csv.profile %]</option>
+                [% END %]
+             [% END %]
+          </select>
+       </fieldset>
+    </div>
+[% END %]
 [% USE KohaDates %]
 [% USE Price %]
 [% USE AuthorisedValues %]
@@ -185,19 +200,7 @@
                             <a href="[% script_name %]?op=close&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="closebutton"><i class="fa fa-times-circle"></i> Close this basket</a>
                         </div>
                     [% END %]
-                       <div class="btn-group">
-                       <fieldset class="action">
-                          <label for="csv_code">Select CSV profile:</label>
-                          <select id="csv_profile_for_export">
-                             <option value="default">default</option>
-                             [% IF csv_profiles %]
-                                [% FOR csv IN csv_profiles %]
-                                   <option value="[% csv.export_format_id %]">[% csv.profile %]</option>
-                                [% END %]
-                             [% END %]
-                          </select>
-                       </fieldset>
-                       </div>
+                       [% PROCESS btn_group %]
                        <div class="btn-group"><a href="[% script_name %]?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="exportbutton"><i class="fa fa-download"></i> Export </a></div>
                    </div>
 <!-- Modal for confirm deletion box-->
@@ -234,19 +237,7 @@
                 [% UNLESS ( grouped ) %]
                 <div id="toolbar" class="btn-toolbar">
                     <div class="btn-group"><a href="#" class="btn btn-small" id="reopenbutton"><i class="icon-refresh"></i> Reopen this basket</a></div>
-                    <div class="btn-group">
-                    <fieldset class="action">
-                       <label for="csv_code">Select CSV profile:</label>
-                       <select id="csv_profile_for_export">
-                          <option value="default">default</option>
-                          [% IF csv_profiles %]
-                             [% FOR csv IN csv_profiles %]
-                                <option value="[% csv.export_format_id %]">[% csv.profile %]</option>
-                             [% END %]
-                          [% END %]
-                       </select>
-                    </fieldset>
-                    </div>
+                    [% PROCESS btn_group %]
                     <div class="btn-group"><a href="[% script_name %]?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="exportbutton"><i class="fa fa-download"></i> Export </a></div>
                 </div>
                 [% END %]
