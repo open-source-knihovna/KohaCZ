@@ -24,9 +24,11 @@ use String::Random qw( random_string );
 use C4::Auth;
 use C4::Output;
 use C4::Members;
+use C4::Form::MessagingPreferences;
 use Koha::Borrower::Modifications;
 use C4::Branch qw(GetBranchesLoop);
 use C4::Scrubber;
+use Email::Valid;
 
 my $cgi = new CGI;
 my $dbh = C4::Context->dbh;
@@ -75,10 +77,12 @@ if ( $action eq 'create' ) {
     %borrower = DelEmptyFields(%borrower);
 
     my @empty_mandatory_fields = CheckMandatoryFields( \%borrower, $action );
+    my $invalidformfields = CheckForInvalidFields(\%borrower);
 
-    if (@empty_mandatory_fields) {
+    if (@empty_mandatory_fields || @$invalidformfields) {
         $template->param(
             empty_mandatory_fields => \@empty_mandatory_fields,
+            invalid_form_fields    => $invalidformfields,
             borrower               => \%borrower
         );
     }
@@ -146,6 +150,7 @@ if ( $action eq 'create' ) {
                   C4::Context->preference('OpacPasswordChange') );
 
             my ( $borrowernumber, $password ) = AddMember_Opac(%borrower);
+            C4::Form::MessagingPreferences::handle_form_action($cgi, { borrowernumber => $borrowernumber }, $template, 1, C4::Context->preference('PatronSelfRegistrationDefaultCategory') ) if $borrowernumber && C4::Context->preference('EnhancedMessagingPreferences');
 
             $template->param( password_cleartext => $password );
             $template->param(
@@ -165,36 +170,46 @@ elsif ( $action eq 'update' ) {
     my %borrower_changes = DelEmptyFields(%borrower);
     my @empty_mandatory_fields =
       CheckMandatoryFields( \%borrower_changes, $action );
+    my $invalidformfields = CheckForInvalidFields(\%borrower);
 
-    if (@empty_mandatory_fields) {
+    if (@empty_mandatory_fields || @$invalidformfields) {
         $template->param(
             empty_mandatory_fields => \@empty_mandatory_fields,
+            invalid_form_fields    => $invalidformfields,
             borrower               => \%borrower
         );
 
         $template->param( action => 'edit' );
     }
     else {
-        ( $template, $borrowernumber, $cookie ) = get_template_and_user(
-            {
-                template_name   => "opac-memberentry-update-submitted.tt",
-                type            => "opac",
-                query           => $cgi,
-                authnotrequired => 1,
-            }
-        );
-
         my %borrower_changes = DelUnchangedFields( $borrowernumber, %borrower );
+        if (%borrower_changes) {
+            ( $template, $borrowernumber, $cookie ) = get_template_and_user(
+                {
+                    template_name   => "opac-memberentry-update-submitted.tt",
+                    type            => "opac",
+                    query           => $cgi,
+                    authnotrequired => 1,
+                }
+            );
 
-        my $m =
-          Koha::Borrower::Modifications->new(
-            borrowernumber => $borrowernumber );
+            my $m =
+              Koha::Borrower::Modifications->new(
+                borrowernumber => $borrowernumber );
 
-        $m->DelModifications;
-        $m->AddModifications(\%borrower_changes);
-        $template->param(
-            borrower => GetMember( borrowernumber => $borrowernumber ),
-        );
+            $m->DelModifications;
+            $m->AddModifications(\%borrower_changes);
+            $template->param(
+                borrower => GetMember( borrowernumber => $borrowernumber ),
+            );
+        }
+        else {
+            $template->param(
+                action => 'edit',
+                nochanges => 1,
+                borrower => GetMember( borrowernumber => $borrowernumber ),
+            );
+        }
     }
 }
 elsif ( $action eq 'edit' ) {    #Display logged in borrower's data
@@ -286,6 +301,21 @@ sub CheckMandatoryFields {
     }
 
     return @empty_mandatory_fields;
+}
+
+sub CheckForInvalidFields {
+    my $borrower = shift;
+    my @invalidFields;
+    if ($borrower->{'email'}) {
+        push(@invalidFields, "email") if (!Email::Valid->address($borrower->{'email'}));
+    }
+    if ($borrower->{'emailpro'}) {
+        push(@invalidFields, "emailpro") if (!Email::Valid->address($borrower->{'emailpro'}));
+    }
+    if ($borrower->{'B_email'}) {
+        push(@invalidFields, "B_email") if (!Email::Valid->address($borrower->{'B_email'}));
+    }
+    return \@invalidFields;
 }
 
 sub ParseCgiForBorrower {

@@ -42,6 +42,7 @@ use C4::Branch; # GetBranches
 use C4::Form::MessagingPreferences;
 use Koha::Borrower::Debarments;
 use Koha::DateUtils;
+use Email::Valid;
 use Module::Load;
 if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preference('NorwegianPatronDBEnable') == 1 ) {
     load Koha::NorwegianPatronDB, qw( NLGetSyncDataFromBorrowernumber );
@@ -237,8 +238,9 @@ if ( ( $op eq 'insert' ) and !$nodouble ) {
 }
 
   #recover all data from guarantor address phone ,fax... 
-if ( $guarantorid and ( $category_type eq 'C' || $category_type eq 'P' )) {
+if ( $guarantorid ) {
     if (my $guarantordata=GetMember(borrowernumber => $guarantorid)) {
+        $category_type = $guarantordata->{categorycode} eq 'I' ? 'P' : 'C';
         $guarantorinfo=$guarantordata->{'surname'}." , ".$guarantordata->{'firstname'};
         $newdata{'contactfirstname'}= $guarantordata->{'firstname'};
         $newdata{'contactname'}     = $guarantordata->{'surname'};
@@ -326,6 +328,21 @@ if ($op eq 'save' || $op eq 'insert'){
   push @errors, "ERROR_password_mismatch" if ( $password ne $password2 );
   push @errors, "ERROR_short_password" if( $password && $minpw && $password ne '****' && (length($password) < $minpw) );
 
+  # Validate emails
+  my $emailprimary = $input->param('email');
+  my $emailsecondary = $input->param('emailpro');
+  my $emailalt = $input->param('B_email');
+
+  if ($emailprimary) {
+      push (@errors, "ERROR_bad_email") if (!Email::Valid->address($emailprimary));
+  }
+  if ($emailsecondary) {
+      push (@errors, "ERROR_bad_email_secondary") if (!Email::Valid->address($emailsecondary));
+  }
+  if ($emailalt) {
+      push (@errors, "ERROR_bad_email_alternative") if (!Email::Valid->address($emailalt));
+  }
+
   if (C4::Context->preference('ExtendedPatronAttributes')) {
     $extended_patron_attributes = parse_extended_patron_attributes($input);
     foreach my $attr (@$extended_patron_attributes) {
@@ -349,14 +366,10 @@ if ( ($op eq 'modify' || $op eq 'insert' || $op eq 'save'|| $op eq 'duplicate') 
     }
 }
 
-if (
-        defined $input->param('SMSnumber')
-    &&  (
-           $input->param('SMSnumber') eq ""
-        or $input->param('SMSnumber') ne $newdata{'mobile'}
-        )
-) {
-    $newdata{smsalertnumber} = $input->param('SMSnumber');
+# BZ 14683: Do not mixup mobile [read: other phone] with smsalertnumber
+my $sms = $input->param('SMSnumber');
+if ( defined $sms ) {
+    $newdata{smsalertnumber} = $sms;
 }
 
 ###  Error checks should happen before this line.
@@ -672,7 +685,7 @@ if (C4::Context->preference('EnhancedMessagingPreferences')) {
         C4::Form::MessagingPreferences::set_form_values({ borrowernumber => $borrowernumber }, $template);
     }
     $template->param(SMSSendDriver => C4::Context->preference("SMSSendDriver"));
-    $template->param(SMSnumber     => defined $data{'smsalertnumber'} ? $data{'smsalertnumber'} : $data{'mobile'});
+    $template->param(SMSnumber     => $data{'smsalertnumber'} );
     $template->param(TalkingTechItivaPhone => C4::Context->preference("TalkingTechItivaPhoneNotification"));
 }
 

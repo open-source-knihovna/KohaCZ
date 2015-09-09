@@ -236,6 +236,21 @@
                         add it, pointing to the log4perl.conf file for your Koha instance.
                     </td>
                 </tr>
+                [% ELSIF config_entry.error == 'uploadpath_entry_missing' %]
+                <tr>
+                    <th scope="row"><b>Warning</b></th>
+                    <td>You are missing the <strong>&lt;upload_path&gt;</strong> entry in your koha-conf.xml file. Please
+                        add it, pointing to the configured file upload directory for your Koha instance.
+                    </td>
+                </tr>
+                [% ELSIF config_entry.error == 'uploadpath_and_opacbaseurl_entry_missing' %]
+                <tr>
+                    <th scope="row"><b>Warning</b></th>
+                    <td>You are missing the <strong>&lt;upload_path&gt;</strong> entry in your koha-conf.xml file. Please
+                        add it, pointing to the configured file upload directory for your Koha instance.
+                        Also note that you need to properly set the <strong>OPACBaseURL</strong> preference for the file upload plugin to work.
+                    </td>
+                </tr>
                 [% END %]
             [% END %]
             </table>
@@ -360,6 +375,7 @@
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544614260">Galen Charlton (3.2, 3.14, and 3.16 Release Manager; 3.16 Release Maintainer; 3.18 QA Team Member)</a></li>
                 <li>Evonne Cheung</li>
                 <li>Andrew Chilton</li>
+                <li>Barton Chittenden</li>
                 <li>Koha SAB CINECA</li>
                 <li>Nick Clemens</li>
                 <li>Garry Collum</li>
@@ -419,6 +435,7 @@
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544839606">Bernardo González Kriegel (3.14 - 3.20 Translation Manager; 3.10 Release Maintainer)</a></li>
                 <li>Daniel Grobani</li>
                 <li>Amit Gupta</li>
+                <li>Indranil Das Gupta</li>
                 <li>Michael Hafen</li>
                 <li>Christopher Hall (3.8 Release Maintainer)</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692261494">Kyle Hall (3.8 Release Maintainer; 3.14 - 3.20 QA Team Member)</a></li>
@@ -517,9 +534,11 @@
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544785220">Martin Renvoize (3.16 - 3.20 QA Team Member)</a></li>
                 <li>Abby Robertson</li>
                 <li>Waylon Robertson</li>
+                <li>Benjamin Rokseth</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544727712">Marcel de Rooy (3.8 - 3.20 QA Team Member)</a></li>
                 <li>Salvador Zaragoza Rubio</li>
                 <li>Mathieu Saby</li>
+                <li>Eivin Giske Skaaren</li>
                 <li>Brice Sanchez</li>
                 <li>Sam Sanders</li>
                 <li>Viktor Sarge</li>
@@ -544,6 +563,7 @@
                 <li>Ed Summers (Some code and Perl packages like MARC::Record)</li>
                 <li>Daniel Sweeney</li>
                 <li>Zeno Tajoli</li>
+                <li>Samanta Tello</li>
                 <li>Adam Thick</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544609107">Finlay Thompson</a></li>
                 <li>Peggy Thrasher</li>
@@ -566,6 +586,7 @@
                 <li><a href="https://www.openhub.net/accounts/janewagner">Jane Wagner</a></li>
                 <li>Ward van Wanrooij</li>
                 <li><a href="https://www.openhub.net/accounts/pianohacker">Jesse Weaver</a></li>
+                <li>Stefan Weil</li>
                 <li>Aaron Wells</li>
                 <li>Rick Welykochy</li>
                 <li>Piotr Wejman</li>
@@ -696,6 +717,11 @@
             <h2>Javascript Diff Algorithm</h2>
             <p>The <a href="http://ejohn.org/projects/javascript-diff-algorithm/">Javascript Diff Algorithm</a> plugin by John Resig is licensed under the <a href="http://opensource.org/licenses/mit-license.php">MIT License</a>.</p>
 
+            <h2>jQuery Validation Plugin</h2>
+            <p>The <a href="http://jqueryvalidation.org/">jQuery Validation Plugin</a> written and maintained by Jörn Zaefferer is licensed under the <a href="http://opensource.org/licenses/mit-license.php">MIT License</a>.</p>
+
+            <h2>TinyMCE WYSIWYG editor</h2>
+            <p>The <a href="http://www.tinymce.com/">TinyMCE WYSIWYG editor v3.5.8 </a> by Moxiecode (Ephox) is licensed under the <a href="http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt">LGPL v2.1</a>.</p>
         </div>
 
         <div id="translations">

@@ -103,7 +103,6 @@ BEGIN {
         &GetReservesForBranch
         &GetReservesToBranch
         &GetReserveCount
-        &GetReserveFee
         &GetReserveInfo
         &GetReserveStatus
 
@@ -146,21 +145,17 @@ BEGIN {
 
 =head2 AddReserve
 
-    AddReserve($branch,$borrowernumber,$biblionumber,$constraint,$bibitems,$priority,$resdate,$expdate,$notes,$title,$checkitem,$found)
+    AddReserve($branch,$borrowernumber,$biblionumber,$bibitems,$priority,$resdate,$expdate,$notes,$title,$checkitem,$found)
 
 =cut
 
 sub AddReserve {
     my (
         $branch,    $borrowernumber, $biblionumber,
-        $constraint, $bibitems,  $priority, $resdate, $expdate, $notes,
+        $bibitems,  $priority, $resdate, $expdate, $notes,
         $title,      $checkitem, $found
     ) = @_;
-    my $fee =
-          GetReserveFee($borrowernumber, $biblionumber, $constraint,
-            $bibitems );
     my $dbh     = C4::Context->dbh;
-    my $const   = lc substr( $constraint, 0, 1 );
     $resdate = format_date_in_iso( $resdate ) if ( $resdate );
     $resdate = C4::Dates->today( 'iso' ) unless ( $resdate );
     if ($expdate) {
@@ -179,37 +174,24 @@ sub AddReserve {
         $waitingdate = $resdate;
     }
 
-    #eval {
     # updates take place here
-    if ( $fee > 0 ) {
-        my $nextacctno = &getnextacctno( $borrowernumber );
-        my $query      = qq{
-        INSERT INTO accountlines
-            (borrowernumber,accountno,date,amount,description,accounttype,amountoutstanding)
-        VALUES
-            (?,?,now(),?,?,'Res',?)
-    };
-        my $usth = $dbh->prepare($query);
-        $usth->execute( $borrowernumber, $nextacctno, $fee,
-            "Reserve Charge - $title", $fee );
-    }
-
-    #if ($const eq 'a'){
     my $query = qq{
         INSERT INTO reserves
-            (borrowernumber,biblionumber,reservedate,branchcode,constrainttype,
+            (borrowernumber,biblionumber,reservedate,branchcode,
             priority,reservenotes,itemnumber,found,waitingdate,expirationdate)
         VALUES
              (?,?,?,?,?,
-             ?,?,?,?,?,?)
+             ?,?,?,?,?)
              };
     my $sth = $dbh->prepare($query);
     $sth->execute(
-        $borrowernumber, $biblionumber, $resdate, $branch,
-        $const,          $priority,     $notes,   $checkitem,
-        $found,          $waitingdate,	$expdate
+        $borrowernumber, $biblionumber, $resdate, $branch,      $priority,
+        $notes,          $checkitem,    $found,   $waitingdate, $expdate
     );
     my $reserve_id = $sth->{mysql_insertid};
+    # add a reserve fee if needed
+    my $fee = GetReserveFee( $borrowernumber, $biblionumber );
+    ChargeReserveFee( $borrowernumber, $fee, $title );
 
     # Send e-mail to librarian if syspref is active
     if(C4::Context->preference("emailLibrarianWhenHoldIsPlaced")){
@@ -240,19 +222,6 @@ sub AddReserve {
         }
     }
 
-    #}
-    ($const eq "o" || $const eq "e") or return;   # FIXME: why not have a useful return value?
-    $query = qq{
-        INSERT INTO reserveconstraints
-            (borrowernumber,biblionumber,reservedate,biblioitemnumber)
-        VALUES
-            (?,?,?,?)
-    };
-    $sth = $dbh->prepare($query);    # keep prepare outside the loop!
-    foreach (@$bibitems) {
-        $sth->execute($borrowernumber, $biblionumber, $resdate, $_);
-    }
-        
     return $reserve_id;
 }
 
@@ -312,7 +281,6 @@ sub GetReservesFromBiblionumber {
                 biblionumber,
                 borrowernumber,
                 reservedate,
-                constrainttype,
                 found,
                 itemnumber,
                 reservenotes,
@@ -334,44 +302,7 @@ sub GetReservesFromBiblionumber {
     my $sth = $dbh->prepare($query);
     $sth->execute( @params );
     my @results;
-    my $i = 0;
     while ( my $data = $sth->fetchrow_hashref ) {
-
-        # FIXME - What is this doing? How do constraints work?
-        if ($data->{constrainttype} eq 'o') {
-            $query = '
-                SELECT biblioitemnumber
-                FROM  reserveconstraints
-                WHERE  biblionumber   = ?
-                AND   borrowernumber = ?
-                AND   reservedate    = ?
-            ';
-            my $csth = $dbh->prepare($query);
-            $csth->execute($data->{biblionumber}, $data->{borrowernumber}, $data->{reservedate});
-            my @bibitemno;
-            while ( my $bibitemnos = $csth->fetchrow_array ) {
-                push( @bibitemno, $bibitemnos );    # FIXME: inefficient: use fetchall_arrayref
-            }
-            my $count = scalar @bibitemno;
-
-            # if we have two or more different specific itemtypes
-            # reserved by same person on same day
-            my $bdata;
-            if ( $count > 1 ) {
-                $bdata = GetBiblioItemData( $bibitemno[$i] );   # FIXME: This doesn't make sense.
-                $i++; #  $i can increase each pass, but the next @bibitemno might be smaller?
-            }
-            else {
-                # Look up the book we just found.
-                $bdata = GetBiblioItemData( $bibitemno[0] );
-            }
-            # Add the results of this latest search to the current
-            # results.
-            # FIXME - An 'each' would probably be more efficient.
-            foreach my $key ( keys %$bdata ) {
-                $data->{$key} = $bdata->{$key};
-            }
-        }
         push @results, $data;
     }
     return \@results;
@@ -450,7 +381,7 @@ sub GetReservesFromBorrowernumber {
     my $data = $sth->fetchall_arrayref({});
     return @$data;
 }
-#-------------------------------------------------------------------------------------
+
 =head2 CanBookBeReserved
 
   $canReserve = &CanBookBeReserved($borrowernumber, $biblionumber)
@@ -513,7 +444,6 @@ sub CanItemBeReserved{
     return 'ageRestricted' if $daysToAgeRestriction && $daysToAgeRestriction > 0;
 
     my $controlbranch = C4::Context->preference('ReservesControlBranch');
-    my $itemtypefield = C4::Context->preference('item-level_itypes') ? "itype" : "itemtype";
 
     # we retrieve user rights on this itemtype and branchcode
     my $sth = $dbh->prepare("SELECT categorycode, itemtype, branchcode, reservesallowed
@@ -561,7 +491,14 @@ sub CanItemBeReserved{
 
     $querycount .= "AND $branchfield = ?";
     
-    $querycount .= " AND $itemtypefield = ?" if ($ruleitemtype ne "*");
+    # If using item-level itypes, fall back to the record
+    # level itemtype if the hold has no associated item
+    $querycount .=
+      C4::Context->preference('item-level_itypes')
+      ? " AND COALESCE( itype, itemtype ) = ?"
+      : " AND itemtype = ?"
+      if ( $ruleitemtype ne "*" );
+
     my $sthcount = $dbh->prepare($querycount);
     
     if($ruleitemtype eq "*"){
@@ -631,7 +568,6 @@ sub CanReserveBeCanceledFromOpac {
 
 }
 
-#--------------------------------------------------------------------------------
 =head2 GetReserveCount
 
   $number = &GetReserveCount($borrowernumber);
@@ -704,102 +640,61 @@ sub GetOtherReserves {
     return ( $messages, $nextreservinfo );
 }
 
+=head2 ChargeReserveFee
+
+    $fee = ChargeReserveFee( $borrowernumber, $fee, $title );
+
+    Charge the fee for a reserve (if $fee > 0)
+
+=cut
+
+sub ChargeReserveFee {
+    my ( $borrowernumber, $fee, $title ) = @_;
+    return if !$fee;
+    my $accquery = qq{
+INSERT INTO accountlines ( borrowernumber, accountno, date, amount, description, accounttype, amountoutstanding ) VALUES (?, ?, NOW(), ?, ?, 'Res', ?)
+    };
+    my $dbh = C4::Context->dbh;
+    my $nextacctno = &getnextacctno( $borrowernumber );
+    $dbh->do( $accquery, undef, ( $borrowernumber, $nextacctno, $fee, "Reserve Charge - $title", $fee ) );
+}
+
 =head2 GetReserveFee
 
-  $fee = GetReserveFee($borrowernumber,$biblionumber,$constraint,$biblionumber);
+    $fee = GetReserveFee( $borrowernumber, $biblionumber );
 
-Calculate the fee for a reserve
+    Calculate the fee for a reserve (if applicable).
 
 =cut
 
 sub GetReserveFee {
-    my ($borrowernumber, $biblionumber, $constraint, $bibitems ) = @_;
-
-    #check for issues;
-    my $dbh   = C4::Context->dbh;
-    my $const = lc substr( $constraint, 0, 1 );
-    my $query = qq{
-      SELECT * FROM borrowers
-    LEFT JOIN categories ON borrowers.categorycode = categories.categorycode
-    WHERE borrowernumber = ?
+    my ( $borrowernumber, $biblionumber ) = @_;
+    my $borquery = qq{
+SELECT reservefee FROM borrowers LEFT JOIN categories ON borrowers.categorycode = categories.categorycode WHERE borrowernumber = ?
     };
-    my $sth = $dbh->prepare($query);
-    $sth->execute($borrowernumber);
-    my $data = $sth->fetchrow_hashref;
-    my $fee      = $data->{'reservefee'};
-    my $cntitems = @- > $bibitems;
+    my $issue_qry = qq{
+SELECT COUNT(*) FROM items
+LEFT JOIN issues USING (itemnumber)
+WHERE items.biblionumber=? AND issues.issue_id IS NULL
+    };
+    my $holds_qry = qq{
+SELECT COUNT(*) FROM reserves WHERE biblionumber=? AND borrowernumber<>?
+    };
 
-    if ( $fee > 0 ) {
-
-        # check for items on issue
-        # first find biblioitem records
-        my @biblioitems;
-        my $sth1 = $dbh->prepare(
-            "SELECT * FROM biblio LEFT JOIN biblioitems on biblio.biblionumber = biblioitems.biblionumber
-                   WHERE (biblio.biblionumber = ?)"
-        );
-        $sth1->execute($biblionumber);
-        while ( my $data1 = $sth1->fetchrow_hashref ) {
-            if ( $const eq "a" ) {
-                push @biblioitems, $data1;
-            }
-            else {
-                my $found = 0;
-                my $x     = 0;
-                while ( $x < $cntitems ) {
-                    if ( @$bibitems->{'biblioitemnumber'} ==
-                        $data->{'biblioitemnumber'} )
-                    {
-                        $found = 1;
-                    }
-                    $x++;
-                }
-                if ( $const eq 'o' ) {
-                    if ( $found == 1 ) {
-                        push @biblioitems, $data1;
-                    }
-                }
-                else {
-                    if ( $found == 0 ) {
-                        push @biblioitems, $data1;
-                    }
-                }
-            }
-        }
-        my $cntitemsfound = @biblioitems;
-        my $issues        = 0;
-        my $x             = 0;
-        my $allissued     = 1;
-        while ( $x < $cntitemsfound ) {
-            my $bitdata = $biblioitems[$x];
-            my $sth2    = $dbh->prepare(
-                "SELECT * FROM items
-                     WHERE biblioitemnumber = ?"
-            );
-            $sth2->execute( $bitdata->{'biblioitemnumber'} );
-            while ( my $itdata = $sth2->fetchrow_hashref ) {
-                my $sth3 = $dbh->prepare(
-                    "SELECT * FROM issues
-                       WHERE itemnumber = ?"
-                );
-                $sth3->execute( $itdata->{'itemnumber'} );
-                if ( my $isdata = $sth3->fetchrow_hashref ) {
-                }
-                else {
-                    $allissued = 0;
-                }
-            }
-            $x++;
-        }
-        if ( $allissued == 0 ) {
-            my $rsth =
-              $dbh->prepare("SELECT * FROM reserves WHERE biblionumber = ?");
-            $rsth->execute($biblionumber);
-            if ( my $rdata = $rsth->fetchrow_hashref ) {
-            }
-            else {
-                $fee = 0;
-            }
+    my $dbh = C4::Context->dbh;
+    my ( $fee ) = $dbh->selectrow_array( $borquery, undef, ($borrowernumber) );
+    if( $fee && $fee > 0 ) {
+        # This is a reconstruction of the old code:
+        # Compare number of items with items issued, and optionally check holds
+        # If not all items are issued and there are no holds: charge no fee
+        # NOTE: Lost, damaged, not-for-loan, etc. are just ignored here
+        my ( $notissued, $reserved );
+        ( $notissued ) = $dbh->selectrow_array( $issue_qry, undef,
+            ( $biblionumber ) );
+        if( $notissued ) {
+            ( $reserved ) = $dbh->selectrow_array( $holds_qry, undef,
+                ( $biblionumber, $borrowernumber ) );
+            $fee = 0 if $reserved == 0;
         }
     }
     return $fee;
@@ -1077,7 +972,6 @@ sub CancelExpiredReserves {
     # Cancel reserves that have been waiting too long
     if ( C4::Context->preference("ExpireReservesMaxPickUpDelay") ) {
         my $max_pickup_delay = C4::Context->preference("ReservesMaxPickUpDelay");
-        my $charge = C4::Context->preference("ExpireReservesMaxPickUpDelayCharge");
         my $cancel_on_holidays = C4::Context->preference('ExpireReservesOnHolidays');
 
         my $today = dt_from_string();
@@ -1098,11 +992,7 @@ sub CancelExpiredReserves {
             }
 
             if ( $do_cancel ) {
-                if ( $charge ) {
-                    manualinvoice($res->{'borrowernumber'}, $res->{'itemnumber'}, 'Hold waiting too long', 'F', $charge);
-                }
-
-                CancelReserve({ reserve_id => $res->{'reserve_id'} });
+                CancelReserve({ reserve_id => $res->{'reserve_id'}, charge_cancel_fee => 1 });
             }
         }
     }
@@ -1129,9 +1019,9 @@ sub AutoUnsuspendReserves {
 
 =head2 CancelReserve
 
-  CancelReserve({ reserve_id => $reserve_id, [ biblionumber => $biblionumber, borrowernumber => $borrrowernumber, itemnumber => $itemnumber ] });
+  CancelReserve({ reserve_id => $reserve_id, [ biblionumber => $biblionumber, borrowernumber => $borrrowernumber, itemnumber => $itemnumber, ] [ charge_cancel_fee => 1 ] });
 
-Cancels a reserve.
+Cancels a reserve. If C<charge_cancel_fee> is passed and the C<ExpireReservesMaxPickUpDelayCharge> syspref is set, charge that fee to the patron's account.
 
 =cut
 
@@ -1139,7 +1029,9 @@ sub CancelReserve {
     my ( $params ) = @_;
 
     my $reserve_id = $params->{'reserve_id'};
-    $reserve_id = GetReserveId( $params ) unless ( $reserve_id );
+    # Filter out only the desired keys; this will insert undefined values for elements missing in
+    # \%params, but GetReserveId filters them out anyway.
+    $reserve_id = GetReserveId( { biblionumber => $params->{'biblionumber'}, borrowernumber => $params->{'borrowernumber'}, itemnumber => $params->{'itemnumber'} } ) unless ( $reserve_id );
 
     return unless ( $reserve_id );
 
@@ -1174,6 +1066,12 @@ sub CancelReserve {
 
         # now fix the priority on the others....
         _FixPriority({ biblionumber => $reserve->{biblionumber} });
+
+        # and, if desired, charge a cancel fee
+        my $charge = C4::Context->preference("ExpireReservesMaxPickUpDelayCharge");
+        if ( $charge && $params->{'charge_cancel_fee'} ) {
+            manualinvoice($reserve->{'borrowernumber'}, $reserve->{'itemnumber'}, 'Hold waiting too long', 'F', $charge);
+        }
     }
 
     return $reserve;
@@ -1839,7 +1737,7 @@ sub _FixPriority {
 
     # get whats left
     my $query = "
-        SELECT reserve_id, borrowernumber, reservedate, constrainttype
+        SELECT reserve_id, borrowernumber, reservedate
         FROM   reserves
         WHERE  biblionumber   = ?
           AND  ((found <> 'W' AND found <> 'T') OR found IS NULL)
@@ -1901,12 +1799,9 @@ sub _FixPriority {
 
   @results = &_Findgroupreserve($biblioitemnumber, $biblionumber, $itemnumber, $lookahead, $ignore_borrowers);
 
-Looks for an item-specific match first, then for a title-level match, returning the
-first match found.  If neither, then we look for a 3rd kind of match based on
-reserve constraints.
+Looks for a holds-queue based item-specific match first, then for a holds-queue title-level match, returning the
+first match found.  If neither, then we look for non-holds-queue based holds.
 Lookahead is the number of days to look in advance.
-
-TODO: add more explanation about reserve constraints
 
 C<&_Findgroupreserve> returns :
 C<@results> is an array of references-to-hash whose keys are mostly
@@ -1999,23 +1894,17 @@ sub _Findgroupreserve {
                reserves.reservenotes               AS reservenotes,
                reserves.priority                   AS priority,
                reserves.timestamp                  AS timestamp,
-               reserveconstraints.biblioitemnumber AS biblioitemnumber,
                reserves.itemnumber                 AS itemnumber,
                reserves.reserve_id                 AS reserve_id
         FROM reserves
-          LEFT JOIN reserveconstraints ON reserves.biblionumber = reserveconstraints.biblionumber
         WHERE reserves.biblionumber = ?
-          AND ( ( reserveconstraints.biblioitemnumber = ?
-          AND reserves.borrowernumber = reserveconstraints.borrowernumber
-          AND reserves.reservedate    = reserveconstraints.reservedate )
-          OR  reserves.constrainttype='a' )
           AND (reserves.itemnumber IS NULL OR reserves.itemnumber = ?)
           AND reserves.reservedate <= DATE_ADD(NOW(),INTERVAL ? DAY)
           AND suspend = 0
           ORDER BY priority
     };
     $sth = $dbh->prepare($query);
-    $sth->execute( $biblio, $bibitem, $itemnumber, $lookahead||0);
+    $sth->execute( $biblio, $itemnumber, $lookahead||0);
     @results = ();
     while ( my $data = $sth->fetchrow_hashref ) {
         push( @results, $data )
@@ -2218,7 +2107,8 @@ If $cancelreserve boolean is set to true, it will remove existing reserve
 sub MoveReserve {
     my ( $itemnumber, $borrowernumber, $cancelreserve ) = @_;
 
-    my ( $restype, $res, $all_reserves ) = CheckReserves( $itemnumber );
+    my $lookahead = C4::Context->preference('ConfirmFutureHolds'); #number of days to look for future holds
+    my ( $restype, $res, $all_reserves ) = CheckReserves( $itemnumber, undef, $lookahead );
     return unless $res;
 
     my $biblionumber     =  $res->{biblionumber};
@@ -2288,7 +2178,7 @@ sub MergeHolds {
         );
         my $upd_sth = $dbh->prepare(
 "UPDATE reserves SET priority = ? WHERE biblionumber = ? AND borrowernumber = ?
-        AND reservedate = ? AND constrainttype = ? AND (itemnumber = ? or itemnumber is NULL) "
+        AND reservedate = ? AND (itemnumber = ? or itemnumber is NULL) "
         );
         $sth->execute( $to_biblio, 'W', 'T' );
         my $priority = 1;
@@ -2296,7 +2186,7 @@ sub MergeHolds {
             $upd_sth->execute(
                 $priority,                    $to_biblio,
                 $reserve->{'borrowernumber'}, $reserve->{'reservedate'},
-                $reserve->{'constrainttype'}, $reserve->{'itemnumber'}
+                $reserve->{'itemnumber'}
             );
             $priority++;
         }

@@ -23,10 +23,12 @@ use C4::Biblio;
 use C4::Branch;
 use Koha::Database;
 
-use Test::More tests => 6;
+use Test::More tests => 8;
+use Test::Warn;
 
 BEGIN {
     use_ok('C4::Items');
+    use_ok('Koha::Items');
 }
 
 my $dbh = C4::Context->dbh;
@@ -194,7 +196,7 @@ subtest 'GetItemsInfo tests' => sub {
 
 subtest q{Test Koha::Database->schema()->resultset('Item')->itemtype()} => sub {
 
-    plan tests => 2;
+    plan tests => 4;
 
     # Start transaction
     $dbh->{AutoCommit} = 0;
@@ -224,11 +226,24 @@ subtest q{Test Koha::Database->schema()->resultset('Item')->itemtype()} => sub {
     C4::Context->set_preference( 'item-level_itypes', 1 );
     ok( $item->effective_itemtype() eq 'ITEM_LEVEL', '$item->itemtype() returns items.itype when item-level_itypes is enabled' );
 
+    # If itemtype is not defined and item-level_level item types are set
+    # fallback to biblio-level itemtype (Bug 14651) and warn
+    $item->itype( undef );
+    $item->update();
+    my $effective_itemtype;
+    warning_is { $effective_itemtype = $item->effective_itemtype() }
+                "item-level_itypes set but no itemtype set for item ($item->itemnumber)",
+                '->effective_itemtype() raises a warning when falling back to bib-level';
+
+    ok( defined $effective_itemtype &&
+                $effective_itemtype eq 'BIB_LEVEL',
+        '$item->effective_itemtype() falls back to biblioitems.itemtype when item-level_itypes is enabled but undef' );
+
     $dbh->rollback;
 };
 
 subtest 'SearchItems test' => sub {
-    plan tests => 13;
+    plan tests => 14;
 
     # Start transaction
     $dbh->{AutoCommit} = 0;
@@ -383,7 +398,37 @@ subtest 'SearchItems test' => sub {
     ($items, $total_results) = SearchItems($filter);
     ok(scalar @$items == 1, 'found 1 item with itemnotes = "foobar"');
 
+    my $cpl_items = SearchItemsByField( 'homebranch', 'CPL');
+    is( ( $cpl_items and scalar( @$cpl_items ) ), 1, 'SearchItemsByField should return something' );
+
     $dbh->rollback;
+};
+
+subtest 'Koha::Item(s) tests' => sub {
+
+    plan tests => 5;
+
+    # Start transaction
+    my $schema = Koha::Database->new()->schema();
+    $schema->storage->txn_begin();
+    $dbh->{RaiseError} = 1;
+
+    # Create a biblio and item for testing
+    C4::Context->set_preference('marcflavour', 'MARC21');
+    my ($bibnum, $bibitemnum) = get_biblio();
+    my ($item_bibnum, $item_bibitemnum, $itemnumber) = AddItem({ homebranch => $branch1, holdingbranch => $branch2 } , $bibnum);
+
+    # Get item.
+    my $item = Koha::Items->find( $itemnumber );
+    is( ref($item), 'Koha::Item', "Got Koha::Item" );
+
+    my $homebranch = $item->home_branch();
+    is( ref($homebranch), 'Koha::Branch', "Got Koha::Branch from home_branch method" );
+    is( $homebranch->branchcode(), $branch1, "Home branch code matches homebranch" );
+
+    my $holdingbranch = $item->holding_branch();
+    is( ref($holdingbranch), 'Koha::Branch', "Got Koha::Branch from holding_branch method" );
+    is( $holdingbranch->branchcode(), $branch2, "Home branch code matches holdingbranch" );
 };
 
 # Helper method to set up a Biblio.

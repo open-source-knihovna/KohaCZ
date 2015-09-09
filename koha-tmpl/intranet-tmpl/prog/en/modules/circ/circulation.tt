@@ -2,6 +2,7 @@
 [% USE Branches %]
 [% USE KohaDates %]
 [% USE ColumnsSettings %]
+[% USE ItemTypes %]
 [% IF Koha.Preference('ExportRemoveFields') OR Koha.Preference('ExportWithCsvProfile') %]
    [% SET exports_enabled = 1 %]
 [% END %]
@@ -480,6 +481,10 @@ $(document).ready(function() {
             <li>No more renewals possible</li>
         [% END %]
 
+        [% IF NO_RENEWAL_FOR_ONSITE_CHECKOUTS %]
+            <li>This item can not be renewed, it's an on-site checkout</li>
+        [% END %]
+
         [%IF ( AGE_RESTRICTION ) %]
             <li>Age restriction [% AGE_RESTRICTION %].</li>
         [% END %]
@@ -670,7 +675,7 @@ No patron matched <span class="ex">[% message %]</span>
 </fieldset>
 [% IF ( issue ) %]
     <div class="lastchecked">
-        <p><strong>Checked out: </strong>[% issue.item.biblio.title %] ([% issue.item.barcode %]). Due on [% issue.date_due | $KohaDates %]</p>
+        <p><strong>Checked out: </strong>[% issue.item.biblioitemnumber.biblionumber.title %] ([% issue.item.barcode %]). Due on [% issue.date_due | $KohaDates %]</p>
     </div>
 [% END %]
 </form></div>
@@ -781,20 +786,29 @@ No patron matched <span class="ex">[% message %]</span>
 			</ul>
         </div>
 
-			[% IF ( WaitingReserveLoop ) %]
-			<div id="holdswaiting" class="circmessage">
-		    <h4>Holds waiting:</h4>
-			        [% FOREACH WaitingReserveLoo IN WaitingReserveLoop %]
-			            <ul>
-			                <li> <a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% WaitingReserveLoo.biblionumber %]">[% WaitingReserveLoo.title |html %]</a> ([% WaitingReserveLoo.itemtype %]), [% IF ( WaitingReserveLoo.author ) %]by [% WaitingReserveLoo.author %][% END %] [% IF ( WaitingReserveLoo.itemcallnumber ) %][[% WaitingReserveLoo.itemcallnumber %]] [% END %]Hold placed on [% WaitingReserveLoo.reservedate %].
-			            [% IF ( WaitingReserveLoo.waitingat ) %]
-			                <br />[% IF ( WaitingReserveLoo.waitinghere ) %]<strong class="waitinghere">[% ELSE %]<strong>[% END %]Waiting at [% WaitingReserveLoo.waitingat %]</strong>
-			            [% END %]
-			                </li>
-			            </ul>
-			    [% END %]
-			</div>
-			<!-- /If WaitingReserveLoop -->[% END %]
+            [% IF ( WaitingHolds ) %]
+                <div id="holdswaiting" class="circmessage">
+                    <h4>Holds waiting:</h4>
+                    [% FOREACH w IN WaitingHolds %]
+                        <ul>
+                            <li>
+                                <a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% w.biblio.biblionumber %]">[% w.biblio.title | html %]</a>
+                                ([% ItemTypes.GetDescription( w.item.effective_itemtype ) %]),
+                                [% IF ( w.biblio.author ) %] by [% w.biblio.author | html %] [% END %]
+                                [% IF ( w.item.itemcallnumber ) %] [[% w.item.itemcallnumber %]] [% END %]
+                                Hold placed on [% w.reservedate | $KohaDates %].
+
+                                <br/>
+                                [% IF ( w.branch.branchcode == Branches.GetLoggedInBranchcode()  ) %]<strong class="waitinghere">[% ELSE %]<strong>[% END %]
+                                    [% SET waiting_expires_on = w.waiting_expires_on %]
+                                    Waiting at [% w.branch.branchname | html %] [% IF waiting_expires_on %] until [% waiting_expires_on | $KohaDates %] [% END %]
+                                </strong>
+                            </li>
+                        </ul>
+                    [% END %]
+                </div>
+            [% END %]
+
 	[% IF ( notes ) %]
 			<div id="circnotes" class="circmessage">
 			<h4>Notes:</h4>

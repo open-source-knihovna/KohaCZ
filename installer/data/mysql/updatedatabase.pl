@@ -38,7 +38,6 @@ use C4::Context;
 use C4::Installer;
 use C4::Dates;
 use Koha::Database;
-
 use Koha;
 
 use MARC::Record;
@@ -10701,6 +10700,171 @@ if ( CheckVersion($DBversion) ) {
     });
 
     print "Upgrade to $DBversion done (Bug 12137: Extend functionality of CalendarFirstDayOfWeek to be any day)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.016";
+if ( CheckVersion($DBversion) ) {
+    my $rs = $schema->resultset('Systempreference');
+    $rs->find_or_create(
+        {
+            variable => 'DumpTemplateVarsIntranet',
+            value    => 0,
+            explanation => 'If enabled, dump all Template Toolkit variable to a comment in the html source for the staff intranet.',
+            type => 'YesNo',
+        }
+    );
+    $rs->find_or_create(
+        {
+            variable => 'DumpTemplateVarsOpac',
+            value    => 0,
+            explanation => 'If enabled, dump all Template Toolkit variable to a comment in the html source for the opac.',
+            type => 'YesNo',
+        }
+    );
+    print "Upgrade to $DBversion done (Bug 13948: Add ability to dump template toolkit variables to html comment)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.017";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do("
+        CREATE TABLE uploaded_files (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            hashvalue CHAR(40) NOT NULL,
+            filename TEXT NOT NULL,
+            dir TEXT NOT NULL,
+            filesize int(11),
+            dtcreated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            categorycode tinytext,
+            owner int(11),
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    ");
+
+    print "Upgrade to $DBversion done (Bug 6874: New cataloging plugin upload.pl)\n";
+    print "This plugin comes with a new config variable (upload_path) and a new table (uploaded_files)\n";
+    print "To use it, set 'upload_path' config variable and 'OPACBaseURL' system preference and link this plugin to a subfield (856\$u for instance)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.018";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES
+            ('RestrictedPageLocalIPs','',NULL,'Beginning of IP addresses considered as local (comma separated ex: \"127.0.0,127.0.2\")','Free'),
+            ('RestrictedPageContent','',NULL,'HTML content of the restricted page','TextArea'),
+            ('RestrictedPageTitle','',NULL,'Title of the restricted page (breadcrumb and header)','Free')
+    });
+    print "Upgrade to $DBversion done (Bug 13485: Add a page to display links to restricted sites)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.019";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE reserves DROP constrainttype
+    });
+    $dbh->do(q{
+        ALTER TABLE old_reserves DROP constrainttype
+    });
+    $dbh->do(q{
+        DROP TABLE IF EXISTS reserveconstraints
+    });
+    print "Upgrade to $DBversion done (Bug 9809: Get rid of reserveconstraints)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.020";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO `systempreferences` (`variable`, `value`, `options`, `explanation`, `type`)
+        VALUES ('FeeOnChangePatronCategory','1','','If set, when a patron changes to a category with enrolment fee, a fee is charged','YesNo')
+    });
+    print "Upgrade to $DBversion done (Bug 13697: Option to don't charge a fee, if the patron changes to a category with enrolment fee)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.021";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('UseWYSIWYGinSystemPreferences','0','','Show WYSIWYG editor when editing certain HTML system preferences.','YesNo')
+    });
+    print "Upgrade to $DBversion done (Bug 11584: Add wysiwyg editor to system preferences dealing with HTML)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.022";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        DELETE cr.*
+        FROM course_reserves AS cr
+        LEFT JOIN course_items USING(ci_id)
+        WHERE course_items.ci_id IS NULL
+    });
+    $dbh->do(q{
+        ALTER IGNORE TABLE course_reserves
+            add CONSTRAINT course_reserves_ibfk_2
+                FOREIGN KEY (ci_id) REFERENCES course_items (ci_id)
+                ON DELETE CASCADE ON UPDATE CASCADE
+    });
+    print "Upgrade to $DBversion done (Bug 14205: Deleting an Item/Record does not remove link to course reserve)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.023";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE borrowers SET debarred=NULL WHERE debarred='0000-00-00'
+    });
+    $dbh->do(q{
+        UPDATE borrowers SET dateexpiry=NULL where dateexpiry='0000-00-00'
+    });
+    $dbh->do(q{
+        UPDATE borrowers SET dateofbirth=NULL where dateofbirth='0000-00-00'
+    });
+    $dbh->do(q{
+        UPDATE borrowers SET dateenrolled=NULL where dateenrolled='0000-00-00'
+    });
+    print "Upgrade to $DBversion done (Bug 14717: Prevent 0000-00-00 dates in patron data)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.024";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE marc_modification_template_actions
+        MODIFY COLUMN action
+            ENUM('delete_field','update_field','move_field','copy_field','copy_and_replace_field')
+    });
+    print "Upgrade to $DBversion done (Bug 14098: Regression in Marc Modification Templates)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.025";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('RisExportAdditionalFields',  '', NULL ,  'Define additional RIS tags to export from MARC records in YAML format as an associative array with either a marc tag/subfield combination as the value, or a list of tag/subfield combinations.',  'textarea')
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('BibtexExportAdditionalFields',  '', NULL ,  'Define additional BibTex tags to export from MARC records in YAML format as an associative array with either a marc tag/subfield combination as the value, or a list of tag/subfield combinations.',  'textarea')
+    });
+    print "Upgrade to $DBversion done (Bug 12357: Enhancements to RIS and BibTeX exporting)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.026";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE matchpoints
+        SET search_index='issn'
+        WHERE matcher_id=(SELECT matcher_id FROM marc_matchers WHERE code = 'ISSN')
+    });
+    print "Upgrade to $DBversion done (Bug 14472: Wrong ISSN search index in record matching rules)\n";
     SetVersion($DBversion);
 }
 

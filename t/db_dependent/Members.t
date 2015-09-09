@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 61;
+use Test::More tests => 74;
 use Test::MockModule;
 use Data::Dumper;
 use C4::Context;
@@ -217,7 +217,9 @@ is( $borrower, undef, 'DelMember should remove the patron' );
     categorycode => "S",
     branchcode   => "MPL",
     dateofbirth  => '',
-    dateexpiry   => '9999-12-31',
+    debarred     => '',
+    dateexpiry   => '',
+    dateenrolled => '',
 );
 # Add a new borrower
 my $borrowernumber = AddMember( %data );
@@ -229,6 +231,26 @@ is( Check_Userid( 'tomasito.none', '' ), 0,
     'userid exists (blank borrowernumber)' );
 is( Check_Userid( 'tomasitoxxx', '' ), 1,
     'non-existent userid -> unique (blank borrowernumber)' );
+
+$borrower = GetMember( borrowernumber => $borrowernumber );
+is( $borrower->{dateofbirth}, undef, 'AddMember should undef dateofbirth if empty string is given');
+is( $borrower->{debarred}, undef, 'AddMember should undef debarred if empty string is given');
+isnt( $borrower->{dateexpiry}, '0000-00-00', 'AddMember should not set dateexpiry to 0000-00-00 if empty string is given');
+isnt( $borrower->{dateenrolled}, '0000-00-00', 'AddMember should not set dateenrolled to 0000-00-00 if empty string is given');
+
+ModMember( borrowernumber => $borrowernumber, dateofbirth => '', debarred => '', dateexpiry => '', dateenrolled => '' );
+$borrower = GetMember( borrowernumber => $borrowernumber );
+is( $borrower->{dateofbirth}, undef, 'ModMember should undef dateofbirth if empty string is given');
+is( $borrower->{debarred}, undef, 'ModMember should undef debarred if empty string is given');
+isnt( $borrower->{dateexpiry}, '0000-00-00', 'ModMember should not set dateexpiry to 0000-00-00 if empty string is given');
+isnt( $borrower->{dateenrolled}, '0000-00-00', 'ModMember should not set dateenrolled to 0000-00-00 if empty string is given');
+
+ModMember( borrowernumber => $borrowernumber, dateofbirth => '1970-01-01', debarred => '2042-01-01', dateexpiry => '9999-12-31', dateenrolled => '2015-09-06' );
+$borrower = GetMember( borrowernumber => $borrowernumber );
+is( $borrower->{dateofbirth}, '1970-01-01', 'ModMember should correctly set dateofbirth if a valid date is given');
+is( $borrower->{debarred}, '2042-01-01', 'ModMember should correctly set debarred if a valid date is given');
+is( $borrower->{dateexpiry}, '9999-12-31', 'ModMember should correctly set dateexpiry if a valid date is given');
+is( $borrower->{dateenrolled}, '2015-09-06', 'ModMember should correctly set dateenrolled if a valid date is given');
 
 # Add a new borrower with the same userid but different cardnumber
 $data{ cardnumber } = "987654321";
@@ -311,6 +333,28 @@ subtest 'GetMemberAccountBalance' => sub {
     is( $total_minus_charges, 10, "Holds charges are count if HoldsInNoissuesCharge=0");
     is( $other_charges, 5, "Holds charges are considered if HoldsInNoissuesCharge=1");
 
+    $dbh->rollback();
+};
+
+subtest 'purgeSelfRegistration' => sub {
+    plan tests => 2;
+
+    #purge unverified
+    my $d=360;
+    C4::Members::DeleteUnverifiedOpacRegistrations($d);
+    foreach(1..3) {
+        $dbh->do("INSERT INTO borrower_modifications (timestamp, borrowernumber, verification_token) VALUES ('2014-01-01 01:02:03',0,?)", undef, (scalar localtime)."_$_");
+    }
+    is( C4::Members::DeleteUnverifiedOpacRegistrations($d), 3, 'Test for DeleteUnverifiedOpacRegistrations' );
+
+    #purge members in temporary category
+    my $c= 'XYZ';
+    $dbh->do("INSERT IGNORE INTO categories (categorycode) VALUES ('$c')");
+    C4::Context->set_preference('PatronSelfRegistrationDefaultCategory', $c );
+    C4::Context->set_preference('PatronSelfRegistrationExpireTemporaryAccountsDelay', 360);
+    C4::Members::DeleteExpiredOpacRegistrations();
+    $dbh->do("INSERT INTO borrowers (surname, address, city, branchcode, categorycode, dateenrolled) VALUES ('Testaabbcc', 'Street 1', 'CITY', 'CPL', '$c', '2014-01-01 01:02:03')");
+    is( C4::Members::DeleteExpiredOpacRegistrations(), 1, 'Test for DeleteExpiredOpacRegistrations');
     $dbh->rollback();
 };
 

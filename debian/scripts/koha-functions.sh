@@ -100,6 +100,7 @@ is_zebra_running()
     local instancename=$1
 
     if daemon --name="$instancename-koha-zebra" \
+            --pidfiles="/var/run/koha/$instancename/" \
             --user="$instancename-koha.$instancename-koha" \
             --running ; then
         return 0
@@ -113,8 +114,40 @@ is_indexer_running()
     local instancename=$1
 
     if daemon --name="$instancename-koha-indexer" \
+            --pidfiles="/var/run/koha/$instancename/" \
             --user="$instancename-koha.$instancename-koha" \
             --running ; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+is_plack_enabled()
+{
+    local site=$1
+    local instancefile=$(get_apache_config_for $site)
+
+    if [ "$instancefile" = "" ]; then
+        return 1
+    fi
+
+    if grep -q '^[[:space:]]*Include /etc/koha/apache-shared-opac-plack.conf' \
+            "$instancefile" && \
+       grep -q '^[[:space:]]*Include /etc/koha/apache-shared-intranet-plack.conf' \
+            "$instancefile" ; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+is_plack_running()
+{
+    local instancename=$1
+
+    if start-stop-daemon --pidfile "/var/run/koha/${instancename}/plack.pid" \
+            --status ; then
         return 0
     else
         return 1

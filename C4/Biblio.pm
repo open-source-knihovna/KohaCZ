@@ -1268,10 +1268,12 @@ sub GetMarcBiblio {
     }
 
     my $dbh          = C4::Context->dbh;
-    my $sth          = $dbh->prepare("SELECT marcxml FROM biblioitems WHERE biblionumber=? ");
+    my $sth          = $dbh->prepare("SELECT biblioitemnumber, marcxml FROM biblioitems WHERE biblionumber=? ");
     $sth->execute($biblionumber);
     my $row     = $sth->fetchrow_hashref;
+    my $biblioitemnumber = $row->{'biblioitemnumber'};
     my $marcxml = StripNonXmlChars( $row->{'marcxml'} );
+    my $frameworkcode = GetFrameworkCode($biblionumber);
     MARC::File::XML->default_record_format( C4::Context->preference('marcflavour') );
     my $record = MARC::Record->new();
 
@@ -1280,8 +1282,8 @@ sub GetMarcBiblio {
         if ($@) { warn " problem with :$biblionumber : $@ \n$marcxml"; }
         return unless $record;
 
-        C4::Biblio::_koha_marc_update_bib_ids($record, '', $biblionumber, $biblionumber);
-	C4::Biblio::EmbedItemsInMarcBiblio($record, $biblionumber) if ($embeditems);
+        C4::Biblio::_koha_marc_update_bib_ids($record, $frameworkcode, $biblionumber, $biblioitemnumber);
+        C4::Biblio::EmbedItemsInMarcBiblio($record, $biblionumber) if ($embeditems);
 
         return $record;
     } else {
@@ -2315,6 +2317,8 @@ $auth_type contains :
 
 sub TransformHtmlToXml {
     my ( $tags, $subfields, $values, $indicator, $ind_tag, $auth_type ) = @_;
+    # NOTE: The parameter $ind_tag is NOT USED -- BZ 11247
+
     my $xml = MARC::File::XML::header('UTF-8');
     $xml .= "<record>\n";
     $auth_type = C4::Context->preference('marcflavour') unless $auth_type;

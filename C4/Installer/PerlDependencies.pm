@@ -4,6 +4,11 @@ use warnings;
 use strict;
 
 our $PERL_DEPS = {
+    'Plack::Middleware::ReverseProxy' => {
+        'usage'    => 'Plack',
+        'required' => '1',
+        'min_ver'  => '0.14'
+    },
     'XML::LibXSLT' => {
         'usage'    => 'Core',
         'required' => '1',
@@ -518,10 +523,15 @@ our $PERL_DEPS = {
         'min_ver'  => '2.05',
     },
     'Template' => {
-	'usage'    => 'Core',
-	'required' => '1',
-	'min_ver'  => '2.22',
-    },
+        'usage'    => 'Core',
+        'required' => '1',
+        'min_ver'  => '2.22',
+      },
+    'Template::Plugin::Stash' => {
+        'usage'    => 'Debugging',
+        'required' => '0',
+        'min_ver'  => '1.006',
+      },
     'Gravatar::URL' => {
         'usage'    => 'Photos in OPAC reviews',
         'required' => '0',
@@ -601,6 +611,11 @@ our $PERL_DEPS = {
         'usage'    => 'Command line scripts',
         'required' => '0',
         'min_ver'  => '2.13',
+    },
+    'Moo' => {
+        'usage'    => 'Core',
+        'required' => '0',
+        'min_ver'  => '1',
     },
     'String::Random' => {
         'usage'    => 'OpacSelfRegistration',
@@ -741,6 +756,16 @@ our $PERL_DEPS = {
         'usage'    => 'Core',
         'required' => '1',
         'min_ver'  => '1.29',
+    },
+    'Test::CGI::Multipart' => {
+        'usage'    => 'Tests',
+        'required' => '0',
+        'min_ver'  => '0.0.3',
+    },
+    'XML::Writer' => {
+        'usage'    => 'Command line scripts',
+        'required' => '0',
+        'min_ver'  => '0.614',
     },
 };
 

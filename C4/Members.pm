@@ -667,6 +667,7 @@ sub ModMember {
     $new_borrower->{dateofbirth}  ||= undef if exists $new_borrower->{dateofbirth};
     $new_borrower->{dateenrolled} ||= undef if exists $new_borrower->{dateenrolled};
     $new_borrower->{dateexpiry}   ||= undef if exists $new_borrower->{dateexpiry};
+    $new_borrower->{debarred}     ||= undef if exists $new_borrower->{debarred};
     my $rs = $schema->resultset('Borrower')->search({
         borrowernumber => $new_borrower->{borrowernumber},
      });
@@ -683,7 +684,9 @@ sub ModMember {
 
         # If the patron changes to a category with enrollment fee, we add a fee
         if ( $data{categorycode} and $data{categorycode} ne $old_categorycode ) {
-            AddEnrolmentFeeIfNeeded( $data{categorycode}, $data{borrowernumber} );
+            if ( C4::Context->preference('FeeOnChangePatronCategory') ) {
+                AddEnrolmentFeeIfNeeded( $data{categorycode}, $data{borrowernumber} );
+            }
         }
 
         # If NorwegianPatronDBEnable is enabled, we set syncstatus to something that a
@@ -757,7 +760,10 @@ sub AddMember {
 
     # create a disabled account if no password provided
     $data{'password'} = ($data{'password'})? hash_password($data{'password'}) : '!';
+
+    # we don't want invalid dates in the db (mysql has a bad habit of inserting 0000-00-00
     $data{'dateofbirth'} = undef if( not $data{'dateofbirth'} );
+    $data{'debarred'} = undef if ( not $data{'debarred'} );
 
     # get only the columns of Borrower
     my @columns = $schema->source('Borrower')->columns;
@@ -2459,6 +2465,10 @@ sub GetBorrowersWithEmail {
     return @result;
 }
 
+=head2 AddMember_Opac
+
+=cut
+
 sub AddMember_Opac {
     my ( %borrower ) = @_;
 
@@ -2505,6 +2515,10 @@ sub AddEnrolmentFeeIfNeeded {
     }
 }
 
+=head2 HasOverdues
+
+=cut
+
 sub HasOverdues {
     my ( $borrowernumber ) = @_;
 
@@ -2514,6 +2528,53 @@ sub HasOverdues {
     my ( $count ) = $sth->fetchrow_array();
 
     return $count;
+}
+
+=head2 DeleteExpiredOpacRegistrations
+
+    Delete accounts that haven't been upgraded from the 'temporary' category
+    Returns the number of removed patrons
+
+=cut
+
+sub DeleteExpiredOpacRegistrations {
+
+    my $delay = C4::Context->preference('PatronSelfRegistrationExpireTemporaryAccountsDelay');
+    my $category_code = C4::Context->preference('PatronSelfRegistrationDefaultCategory');
+
+    return 0 if not $category_code or not defined $delay or $delay eq q||;
+
+    my $query = qq|
+SELECT borrowernumber
+FROM borrowers
+WHERE categorycode = ? AND DATEDIFF( NOW(), dateenrolled ) > ? |;
+
+    my $dbh = C4::Context->dbh;
+    my $sth = $dbh->prepare($query);
+    $sth->execute( $category_code, $delay );
+    my $cnt=0;
+    while ( my ($borrowernumber) = $sth->fetchrow_array() ) {
+        DelMember($borrowernumber);
+        $cnt++;
+    }
+    return $cnt;
+}
+
+=head2 DeleteUnverifiedOpacRegistrations
+
+    Delete all unverified self registrations in borrower_modifications,
+    older than the specified number of days.
+
+=cut
+
+sub DeleteUnverifiedOpacRegistrations {
+    my ( $days ) = @_;
+    my $dbh = C4::Context->dbh;
+    my $sql=qq|
+DELETE FROM borrower_modifications
+WHERE borrowernumber = 0 AND DATEDIFF( NOW(), timestamp ) > ?|;
+    my $cnt=$dbh->do($sql, undef, ($days) );
+    return $cnt eq '0E0'? 0: $cnt;
 }
 
 END { }    # module clean-up code here (global destructor)

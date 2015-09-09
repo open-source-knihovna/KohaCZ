@@ -30,6 +30,9 @@ script to execute returns of books
 use strict;
 use warnings;
 
+use Carp 'verbose';
+$SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
+
 use CGI qw ( -utf8 );
 use DateTime;
 use C4::Context;
@@ -84,6 +87,7 @@ my $printers = GetPrinters();
 my $userenv = C4::Context->userenv;
 my $userenv_branch = $userenv->{'branch'} // '';
 my $printer = $userenv->{'branchprinter'} // '';
+my $forgivemanualholdsexpire = $query->param('forgivemanualholdsexpire');
 
 my $overduecharges = (C4::Context->preference('finesMode') && C4::Context->preference('finesMode') ne 'off');
 #
@@ -144,12 +148,18 @@ if ( $query->param('resbarcode') ) {
     my $resbarcode     = $query->param('resbarcode');
     my $diffBranchReturned = $query->param('diffBranch');
     my $iteminfo   = GetBiblioFromItemNumber($item);
+    my $cancel_reserve = $query->param('cancel_reserve');
     # fix up item type for display
     $iteminfo->{'itemtype'} = C4::Context->preference('item-level_itypes') ? $iteminfo->{'itype'} : $iteminfo->{'itemtype'};
-    my $diffBranchSend = ($userenv_branch ne $diffBranchReturned) ? $diffBranchReturned : undef;
-# diffBranchSend tells ModReserveAffect whether document is expected in this library or not,
-# i.e., whether to apply waiting status
-    ModReserveAffect( $item, $borrowernumber, $diffBranchSend);
+
+    if ( $cancel_reserve ) {
+        CancelReserve({ borrowernumber => $borrowernumber, itemnumber => $item, charge_cancel_fee => !$forgivemanualholdsexpire });
+    } else {
+        my $diffBranchSend = ($userenv_branch ne $diffBranchReturned) ? $diffBranchReturned : undef;
+        # diffBranchSend tells ModReserveAffect whether document is expected in this library or not,
+        # i.e., whether to apply waiting status
+        ModReserveAffect( $item, $borrowernumber, $diffBranchSend);
+    }
 #   check if we have other reserves for this document, if we have a return send the message of transfer
     my ( $messages, $nextreservinfo ) = GetOtherReserves($item);
 
@@ -466,7 +476,8 @@ foreach my $code ( keys %$messages ) {
     }
     elsif ( $code eq 'NotIssued' ) {
         $err{notissued} = 1;
-        $err{msg} = $branches->{ $messages->{'IsPermanent'} }->{'branchname'};
+        $err{msg} = '';
+        $err{msg} = $branches->{ $messages->{'IsPermanent'} }->{'branchname'} if $messages->{'IsPermanent'};
     }
     elsif ( $code eq 'LocalUse' ) {
         $err{localuse} = 1;
@@ -612,14 +623,17 @@ $template->param(
     exemptfine     => $exemptfine,
     dropboxmode    => $dropboxmode,
     dropboxdate    => output_pref($dropboxdate),
+    forgivemanualholdsexpire => $forgivemanualholdsexpire,
     overduecharges => $overduecharges,
     soundon        => C4::Context->preference("SoundOn"),
     BlockReturnOfWithdrawnItems => C4::Context->preference("BlockReturnOfWithdrawnItems"),
 );
 
-$itemnumber = GetItemnumberFromBarcode( $query->param('barcode') );
+$itemnumber = GetItemnumberFromBarcode( $barcode );
 if ( $itemnumber ) {
    my ( $holdingBranch, $collectionBranch ) = GetCollectionItemBranches( $itemnumber );
+    $holdingBranch //= '';
+    $collectionBranch //= '';
     if ( ! ( $holdingBranch eq $collectionBranch ) ) {
         $template->param(
           collectionItemNeedsTransferred => 1,

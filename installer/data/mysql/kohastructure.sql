@@ -243,7 +243,7 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `contactfirstname` text, -- used for children to include first name of guarentor
   `contacttitle` text, -- used for children to include title (Mr., Mrs., etc) of guarentor
   `guarantorid` int(11) default NULL, -- borrowernumber used for children or professionals to link them to guarentors or organizations
-  `borrowernotes` mediumtext, -- a note on the patron/borroewr's account that is only visible in the staff client
+  `borrowernotes` mediumtext, -- a note on the patron/borrower's account that is only visible in the staff client
   `relationship` varchar(100) default NULL, -- used for children to include the relationship to their guarentor
   `ethnicity` varchar(50) default NULL, -- unused in Koha
   `ethnotes` varchar(255) default NULL, -- unused in Koha
@@ -623,7 +623,9 @@ CREATE TABLE `course_reserves` (
 -- Constraints for table `course_reserves`
 --
 ALTER TABLE `course_reserves`
-  ADD CONSTRAINT `course_reserves_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`);
+  ADD CONSTRAINT `course_reserves_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`),
+  ADD CONSTRAINT `course_reserves_ibfk_2` FOREIGN KEY (`ci_id`) REFERENCES `course_items` (`ci_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 
 --
 -- Table structure for table `branch_borrower_circ_rules`
@@ -873,7 +875,7 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `contactfirstname` text, -- used for children to include first name of guarentor
   `contacttitle` text, -- used for children to include title (Mr., Mrs., etc) of guarentor
   `guarantorid` int(11) default NULL, -- borrowernumber used for children or professionals to link them to guarentors or organizations
-  `borrowernotes` mediumtext, -- a note on the patron/borroewr's account that is only visible in the staff client
+  `borrowernotes` mediumtext, -- a note on the patron/borrower's account that is only visible in the staff client
   `relationship` varchar(100) default NULL, -- used for children to include the relationship to their guarentor
   `ethnicity` varchar(50) default NULL, -- unused in Koha
   `ethnotes` varchar(255) default NULL, -- unused in Koha
@@ -1652,7 +1654,6 @@ CREATE TABLE `old_reserves` ( -- this table holds all holds/reserves that have b
   `borrowernumber` int(11) default NULL, -- foreign key from the borrowers table defining which patron this hold is for
   `reservedate` date default NULL, -- the date the hold was places
   `biblionumber` int(11) default NULL, -- foreign key from the biblio table defining which bib record this hold is on
-  `constrainttype` varchar(1) default NULL,
   `branchcode` varchar(10) default NULL, -- foreign key from the branches table defining which branch the patron wishes to pick this hold up at
   `notificationdate` date default NULL, -- currently unused
   `reminderdate` date default NULL, -- currently unused
@@ -1817,19 +1818,6 @@ CREATE TABLE reports_dictionary ( -- definitions (or snippets of SQL) stored for
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Table structure for table `reserveconstraints`
---
-
-DROP TABLE IF EXISTS `reserveconstraints`;
-CREATE TABLE `reserveconstraints` (
-  `borrowernumber` int(11) NOT NULL default 0,
-  `reservedate` date default NULL,
-  `biblionumber` int(11) NOT NULL default 0,
-  `biblioitemnumber` int(11) default NULL,
-  `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
 -- Table structure for table `reserves`
 --
 
@@ -1839,7 +1827,6 @@ CREATE TABLE `reserves` ( -- information related to holds/reserves in Koha
   `borrowernumber` int(11) NOT NULL default 0, -- foreign key from the borrowers table defining which patron this hold is for
   `reservedate` date default NULL, -- the date the hold was places
   `biblionumber` int(11) NOT NULL default 0, -- foreign key from the biblio table defining which bib record this hold is on
-  `constrainttype` varchar(1) default NULL,
   `branchcode` varchar(10) default NULL, -- foreign key from the branches table defining which branch the patron wishes to pick this hold up at
   `notificationdate` date default NULL, -- currently unused
   `reminderdate` date default NULL, -- currently unused
@@ -3358,6 +3345,23 @@ CREATE TABLE IF NOT EXISTS `borrower_modifications` (
   PRIMARY KEY (`verification_token`,`borrowernumber`),
   KEY `verification_token` (`verification_token`),
   KEY `borrowernumber` (`borrowernumber`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table uploaded_files
+--
+
+DROP TABLE IF EXISTS uploaded_files;
+CREATE TABLE uploaded_files (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    hashvalue CHAR(40) NOT NULL,
+    filename TEXT NOT NULL,
+    dir TEXT NOT NULL,
+    filesize int(11),
+    dtcreated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    categorycode tinytext,
+    owner int(11),
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
