@@ -43,6 +43,8 @@ my $damaged=$cgi->param('damaged');
 my $confirm=$cgi->param('confirm');
 my $dbh = C4::Context->dbh;
 
+my $submit=$cgi->param('submit');
+
 # get the rest of this item's information
 my $item_data_hashref = GetItem($itemnumber, undef);
 
@@ -64,6 +66,23 @@ if (defined $itemnotes) { # i.e., itemnotes parameter passed from form
     $item_changes->{'itemlost'} = $itemlost;
 } elsif ($withdrawn ne $item_data_hashref->{'withdrawn'}) {
     $item_changes->{'withdrawn'} = $withdrawn;
+
+    if (defined $submit && $submit eq 'submit_perm') {
+         my $sth = $dbh->prepare("
+		SELECT MAX(CAST( withdrawn_permanent AS UNSIGNED INT)) AS max 
+		FROM items 
+		WHERE withdrawn_permanent IS NOT NULL;");
+        $sth->execute();
+
+        my $max = $sth->fetchrow;
+        if (!$max) {
+            $max = 0;
+        }
+
+        $item_changes->{"withdrawn_permanent"} = ++$max;
+
+    }
+
 } elsif ($damaged ne $item_data_hashref->{'damaged'}) {
     $item_changes->{'damaged'} = $damaged;
 } else {
