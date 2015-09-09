@@ -50,12 +50,13 @@
     [% END %]
 [% END %]
 [% BLOCK authresult %]
-    [% IF ( summary.label ) %][% summary.label | html %]:[% END %]
-    [% IF summary.summary %]
-      <div class="authority-summary">
-        [% summary.summary %]
-      </div>
-    [% END %]
+    [% IF ( summary.summary ) %][% summary.summary | html %]:[% END %]
+    <div class="authres_repet">
+      [% FOREACH repet IN summary.repets %]
+        <span>[% repet | html %]</span>
+        [% UNLESS loop.last %] | [% END %]
+      [% END %]
+    </div>
     [% UNLESS ( summary.summaryonly ) %]
         <div class="authorizedheading">
           [% FOREACH authorize IN summary.authorized %]
@@ -111,6 +112,16 @@
                     </div>
                 [% END %]
             </div>
+            [% END %]
+            [% IF summary.notes %]
+		[% FOREACH note IN summary.notes %]
+			[% IF ( note.field == '678' ) %]
+				<br />Dalsi udaje:<br /> [% note.note | html %]
+	            	[% END %]
+            	[% END %]
+            [% END %]
+            [% IF summary.mainentry %]
+		<br /><br />Pole 100:<br /> [% summary.mainentry | html %]<br />
             [% END %]
             [% IF ( summary.seealso.size >= 1 ) %]
             <div class="seealso">

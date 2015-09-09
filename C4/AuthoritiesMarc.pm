@@ -3,18 +3,18 @@ package C4::AuthoritiesMarc;
 #
 # This file is part of Koha.
 #
-# Koha is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
+# Koha is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
 #
-# Koha is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# Koha is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
-# along with Koha; if not, see <http://www.gnu.org/licenses>.
+# You should have received a copy of the GNU General Public License along
+# with Koha; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 use strict;
 use warnings;
@@ -109,7 +109,6 @@ sub SearchAuthorities {
     my ($tags, $and_or, $excluding, $operator, $value, $offset,$length,$authtypecode,$sortby,$skipmetadata) = @_;
     # warn Dumper($tags, $and_or, $excluding, $operator, $value, $offset,$length,$authtypecode,$sortby);
     my $dbh=C4::Context->dbh;
-    $sortby="" unless $sortby;
     my $query;
     my $qpquery = '';
     my $QParser;
@@ -888,7 +887,7 @@ sub FindDuplicateAuthority {
 
 Returns a hashref with a summary of the specified record.
 
-Comment : authtypecode can be inferred from both record and authid.
+Comment : authtypecode can be infered from both record and authid.
 Moreover, authid can also be inferred from $record.
 Would it be interesting to delete those things.
 
@@ -909,8 +908,6 @@ sub BuildSummary {
         # for MARC21, the authority type summary displays a label meant for
         # display
         if (C4::Context->preference('marcflavour') ne 'UNIMARC') {
-            $summary{label} = $authref->{summary};
-        } else {
             $summary{summary} = $authref->{summary};
         }
     }
@@ -945,37 +942,35 @@ sub BuildSummary {
 #         suit the MARC21 version, so for now the "templating"
 #         feature will be enabled only for UNIMARC for backwards
 #         compatibility.
-    if ($summary{summary} and C4::Context->preference('marcflavour') eq 'UNIMARC') {
-        my @matches = ($summary{summary} =~ m/\[(.*?)(\d{3})([\*a-z0-9])(.*?)\]/g);
-        my (@textbefore, @tag, @subtag, @textafter);
-        for(my $i = 0; $i < scalar @matches; $i++){
-            push @textbefore, $matches[$i] if($i%4 == 0);
-            push @tag,        $matches[$i] if($i%4 == 1);
-            push @subtag,     $matches[$i] if($i%4 == 2);
-            push @textafter,  $matches[$i] if($i%4 == 3);
-        }
-        for(my $i = scalar @tag; $i >= 0; $i--){
-            my $textbefore = $textbefore[$i] || '';
-            my $tag = $tag[$i] || '';
-            my $subtag = $subtag[$i] || '';
-            my $textafter = $textafter[$i] || '';
-            my $value = '';
-            my $field = $record->field($tag);
-            if ( $field ) {
-                if($subtag eq '*') {
-                    if($tag < 10) {
-                        $value = $textbefore . $field->data() . $textafter;
-                    }
-                } else {
-                    my @subfields = $field->subfield($subtag);
-                    if(@subfields > 0) {
-                        $value = $textbefore . join (" - ", @subfields) . $textafter;
-                    }
+    if ($summary_template and C4::Context->preference('marcflavour') eq 'UNIMARC') {
+        my @fields = $record->fields();
+#             $reported_tag = '$9'.$result[$counter];
+        my @repets;
+        foreach my $field (@fields) {
+            my $tag = $field->tag();
+            my $tagvalue = $field->as_string();
+            my $localsummary= $summary_template;
+            $localsummary =~ s/\[(.?.?.?.?)$tag\*(.*?)\]/$1$tagvalue$2\[$1$tag$2\]/g;
+            if ($tag<10) {
+                if ($tag eq '001') {
+                    $reported_tag.='$3'.$field->data();
+                }
+            } else {
+                my @subf = $field->subfields;
+                for my $i (0..$#subf) {
+                    my $subfieldcode = $subf[$i][0];
+                    my $subfieldvalue = $subf[$i][1];
+                    my $tagsubf = $tag.$subfieldcode;
+                    $localsummary =~ s/\[(.?.?.?.?)$tagsubf(.*?)\]/$1$subfieldvalue$2\[$1$tagsubf$2\]/g;
                 }
             }
-            $summary{summary} =~ s/\[\Q$textbefore$tag$subtag$textafter\E\]/$value/;
+            if ($localsummary ne $summary_template) {
+                $localsummary =~ s/\[(.*?)\]//g;
+                $localsummary =~ s/\n/<br>/g;
+                push @repets, $localsummary;
+            }
         }
-        $summary{summary} =~ s/\\n/<br \/>/g;
+        $summary{repets} = \@repets;
     }
     my @authorized;
     my @notes;
@@ -1040,29 +1035,29 @@ sub BuildSummary {
 # in MARC21 -- purely local tags really ought to be
 # 9XX
             if ($tag eq '100') {
-                $subfields_to_report = 'abcdefghjklmnopqrstvxyz';
+                $subfields_to_report = 'abcdefghjklmnopqrstvxyz7';
             } elsif ($tag eq '110') {
-                $subfields_to_report = 'abcdefghklmnoprstvxyz';
+                $subfields_to_report = 'abcdefghklmnoprstvxyz7';
             } elsif ($tag eq '111') {
-                $subfields_to_report = 'acdefghklnpqstvxyz';
+                $subfields_to_report = 'acdefghklnpqstvxyz7';
             } elsif ($tag eq '130') {
-                $subfields_to_report = 'adfghklmnoprstvxyz';
+                $subfields_to_report = 'adfghklmnoprstvxyz7';
             } elsif ($tag eq '148') {
-                $subfields_to_report = 'abvxyz';
+                $subfields_to_report = 'abvxyz7';
             } elsif ($tag eq '150') {
-                $subfields_to_report = 'abvxyz';
+                $subfields_to_report = 'abvxyz7';
             } elsif ($tag eq '151') {
-                $subfields_to_report = 'avxyz';
+                $subfields_to_report = 'avxyz7';
             } elsif ($tag eq '155') {
-                $subfields_to_report = 'abvxyz';
+                $subfields_to_report = 'abvxyz7';
             } elsif ($tag eq '180') {
-                $subfields_to_report = 'vxyz';
+                $subfields_to_report = 'vxyz7';
             } elsif ($tag eq '181') {
-                $subfields_to_report = 'vxyz';
+                $subfields_to_report = 'vxyz7';
             } elsif ($tag eq '182') {
-                $subfields_to_report = 'vxyz';
+                $subfields_to_report = 'vxyz7';
             } elsif ($tag eq '185') {
-                $subfields_to_report = 'vxyz';
+                $subfields_to_report = 'vxyz7';
             }
             if ($subfields_to_report) {
                 push @authorized, {
