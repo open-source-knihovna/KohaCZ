@@ -100,9 +100,12 @@ BEGIN {
         &GetReservesFromItemnumber
         &GetReservesFromBiblionumber
         &GetReservesFromBorrowernumber
+	&GetReserveFromBorrowernumberAndItemnumber
         &GetReservesForBranch
         &GetReservesToBranch
         &GetReserveCount
+        &GetReserveCountFromItemnumber
+        &GetReserveFee
         &GetReserveInfo
         &GetReserveStatus
 
@@ -382,6 +385,30 @@ sub GetReservesFromBorrowernumber {
     return @$data;
 }
 
+=head2 GetReserveFromBorrowernumberAndItemnumber
+
+    $reserve = GetReserveFromBorrowernumberAndItemnumber($borrowernumber, $itemnumber);
+
+Returns matching reserve of borrower on an item specified.
+
+=cut
+
+sub GetReserveFromBorrowernumberAndItemnumber {
+    my ($borrowernumber, $itemnumber) = @_;
+    my $dbh    = C4::Context->dbh;
+    my $sth;
+    $sth = $dbh->prepare("
+                SELECT *
+                FROM reserves
+                WHERE borrowernumber=?
+                AND itemnumber =?
+                ");
+    $sth->execute($borrowernumber, $itemnumber);
+
+    return $sth->fetchrow_hashref();
+}
+
+#-------------------------------------------------------------------------------------
 =head2 CanBookBeReserved
 
   $canReserve = &CanBookBeReserved($borrowernumber, $biblionumber)
@@ -590,6 +617,30 @@ sub GetReserveCount {
     $sth->execute($borrowernumber);
     my $row = $sth->fetchrow_hashref;
     return $row->{counter};
+}
+
+=head2 GetReserveCountFromItemnumber
+
+  $number = &GetReserveCountFromItemnumber($itemnumber);
+
+this function returns the number of reservation for an itemnumber given on input arg.
+
+=cut
+
+
+sub GetReserveCountFromItemnumber {
+    my ($itemnumber) = @_;
+
+    my $dbh = C4::Context->dbh;
+
+    my $sth = $dbh->prepare("
+        SELECT COUNT(*) AS counter
+        FROM reserves
+        WHERE itemnumber = ?");
+
+    $sth->execute($itemnumber);
+
+    return $sth->fetchrow_hashref->{counter};
 }
 
 =head2 GetOtherReserves
