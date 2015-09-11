@@ -43,6 +43,8 @@ my $error        = $input->param('error');
 my @itemnumbers  = $input->param('itemnumber');
 my $biblionumber = $input->param('biblionumber');
 my $op           = $input->param('op');
+my $withdrawal   = $input->param('withdrawal');
+my $withdrawn_categorycode   = $input->param('withdrawn_categorycode');
 my $del          = $input->param('del');
 my $del_records  = $input->param('del_records');
 my $completedJobID = $input->param('completedJobID');
@@ -56,6 +58,9 @@ if (!defined $op) {
     $template_name = "tools/batchMod.tt";
     $template_flag = { tools => '*' };
     $op = q{};
+} elsif ($withdrawal) {
+    $template_name = "tools/batchMod-withdrawal.tt";
+    $template_flag = { tools => 'items_batchdel' };
 } else {
     $template_name = ($del) ? "tools/batchMod-del.tt" : "tools/batchMod-edit.tt";
     $template_flag = ($del) ? { tools => 'items_batchdel' }   : { tools => 'items_batchmod' };
@@ -79,6 +84,13 @@ $restrictededition = 0 if ($restrictededition != 0 && C4::Context->IsSuperLibrar
 my $today_iso = C4::Dates->today('iso');
 $template->param(today_iso => $today_iso);
 $template->param(del       => $del);
+$template->param(withdrawal=> $withdrawal);
+
+my $sth = C4::Context->dbh->prepare("SELECT * FROM `default_permanent_withdrawal_reason`");
+$sth->execute();
+
+$template->param(withdrawal_options => $sth->fetchall_arrayref({}));
+$template->param(withdrawn_categorycode => $withdrawn_categorycode);
 
 my $itemrecord;
 my $nextop="";
@@ -87,6 +99,7 @@ my $items_display_hashref;
 my $tagslib = &GetMarcStructure(1);
 
 my $deleted_items = 0;     # Number of deleted items
+my $withdrawn_items = 0;     # Number of deleted items
 my $deleted_records = 0;   # Number of deleted records ( with no items attached )
 my $not_deleted_items = 0; # Number of items that could not be deleted
 my @not_deleted;           # List of the itemnumbers that could not be deleted
@@ -190,6 +203,29 @@ if ($op eq "action") {
 			        $deleted_records++ unless ( $error );
                             }
                         }
+		} elsif ( $withdrawal ) {
+		     my $item_changes = {};
+
+		     $item_changes->{'withdrawn'} = 1;
+
+	             my $sth = $dbh->prepare("
+                             SELECT MAX(CAST( withdrawn_permanent AS UNSIGNED INT)) AS max 
+                             FROM items 
+                             WHERE withdrawn_permanent IS NOT NULL;");
+                     $sth->execute();
+ 
+                     my $max = $sth->fetchrow;
+                     if (!$max) {
+                         $max = 0;
+                     }
+ 
+                     $item_changes->{"withdrawn_permanent"} = ++$max;
+ 
+                     $item_changes->{"withdrawn_categorycode"} = $withdrawn_categorycode;	
+
+		     ModItem($item_changes, $itemdata->{'biblionumber'}, $itemdata->{'itemnumber'});		     
+
+		     $withdrawn_items++;
 		} else {
             if ($values_to_modify || $values_to_blank) {
                 my $localmarcitem = Item2Marc($itemdata);
@@ -502,6 +538,7 @@ if ($op eq "action") {
     $template->param(
 	not_deleted_items => $not_deleted_items,
 	deleted_items => $deleted_items,
+	withdrawn_items => $withdrawn_items,
 	delete_records => $del_records,
 	deleted_records => $deleted_records,
 	not_deleted_loop => \@not_deleted 

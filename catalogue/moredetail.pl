@@ -5,18 +5,18 @@
 #
 # This file is part of Koha.
 #
-# Koha is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
+# Koha is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
 #
-# Koha is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# Koha is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
-# along with Koha; if not, see <http://www.gnu.org/licenses>.
+# You should have received a copy of the GNU General Public License along
+# with Koha; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
 use strict;
@@ -35,6 +35,9 @@ use C4::Members; # to use GetMember
 use C4::Search;		# enabled_staff_search_views
 use C4::Members qw/GetHideLostItemsPreference/;
 use C4::Reserves qw(GetReservesFromBiblionumber GetReserveCountFromItemnumber);
+
+use C4::NCIP::NcipUtils qw/prinJson/;
+use JSON qw /to_json/;
 
 use Koha::Acquisition::Bookseller;
 use Koha::DateUtils;
@@ -200,6 +203,12 @@ foreach my $item (@items){
     }
 
     $item->{reservescount} = GetReserveCountFromItemnumber($item->{itemnumber});
+
+    my $sth = C4::Context->dbh->prepare("SELECT * FROM `default_permanent_withdrawal_reason`");
+    $sth->execute();
+
+    $item->{withdrawal_desc_options} = $sth->fetchall_arrayref({});
+#    $item->{json} = to_json($item);
 }
 $template->param(count => $data->{'count'},
 	subscriptionsnumber => $subscriptionsnumber,

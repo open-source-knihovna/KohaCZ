@@ -5,18 +5,18 @@
 #
 # This file is part of Koha.
 #
-# Koha is free software; you can redistribute it and/or modify it
-# under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
+# Koha is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
 #
-# Koha is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# Koha is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
-# along with Koha; if not, see <http://www.gnu.org/licenses>.
+# You should have received a copy of the GNU General Public License along
+# with Koha; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 use strict; 
 use warnings;
 use CGI qw ( -utf8 );
@@ -28,6 +28,9 @@ use C4::Output;
 use C4::Circulation;
 use C4::Reserves;
 
+use C4::NCIP::NcipUtils;
+use JSON qw/to_json/;
+
 my $cgi= new CGI;
 
 checkauth($cgi, 0, {circulate => 'circulate_remaining_permissions'}, 'intranet');
@@ -38,6 +41,7 @@ my $biblioitemnumber=$cgi->param('biblioitemnumber');
 my $itemlost=$cgi->param('itemlost');
 my $itemnotes=$cgi->param('itemnotes');
 my $withdrawn=$cgi->param('withdrawn');
+my $withdrawn_categorycode=$cgi->param('withdrawn_categorycode');
 my $damaged=$cgi->param('damaged');
 
 my $confirm=$cgi->param('confirm');
@@ -81,7 +85,8 @@ if (defined $itemnotes) { # i.e., itemnotes parameter passed from form
 
         $item_changes->{"withdrawn_permanent"} = ++$max;
 
-    }
+	$item_changes->{"withdrawn_categorycode"} = $withdrawn_categorycode;
+   }
 
 } elsif ($damaged ne $item_data_hashref->{'damaged'}) {
     $item_changes->{'damaged'} = $damaged;
