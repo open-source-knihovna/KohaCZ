@@ -161,21 +161,7 @@ if ( $op eq 'delete_confirm' ) {
         print GetBasketAsCSV($query->param('basketno'), $query);
     } else {
         my $csv_profile_id = $query->param('csv_profile');
-        my $csv_profile = C4::Csv::GetCsvProfile( $csv_profile_id );
-        die "There is no valid csv profile given" unless $csv_profile;
-
-        my $csv = Text::CSV_XS->new({'quote_char'=>'"','escape_char'=>'"','sep_char'=>$csv_profile->{csv_separator},'binary'=>1});
-        my $csv_profile_content = $csv_profile->{content};
-
-        my $basket_info = get_basket_csv_profile_info($csv_profile_content, $query->param('basketno'));
-
-        print join( $csv_profile->{csv_separator}, @{$basket_info->{headers}} ) . "\n";
-
-        for my $row ( @{$basket_info->{rows}} ) {
-            $csv->combine(@$row);
-            my $string = $csv->string;
-            print $string, "\n";
-        }
+        print  GetBasketAsCSV($query->param('basketno'), $query, $csv_profile_id);
     }
     exit;
 } elsif ($op eq 'close') {
@@ -488,62 +474,6 @@ sub get_order_infos {
     }
 
     return \%line;
-}
-
-sub get_basket_DB_info{
-    my ( $basketno ) = @_;
-    return () unless $basketno;
-    my $dbh   = C4::Context->dbh;
-    my $query  ="
-    SELECT biblio.*,biblioitems.*, aqbasket.*,aqcontract.*,
-                aqorders.*,
-                aqbudgets.*
-        FROM    aqorders
-            LEFT JOIN aqbasket         ON aqorders.basketno = aqbasket.basketno
-            LEFT JOIN aqcontract       ON aqbasket.contractnumber = aqcontract.contractnumber
-            LEFT JOIN aqbudgets        ON aqbudgets.budget_id = aqorders.budget_id
-            LEFT JOIN biblio           ON biblio.biblionumber = aqorders.biblionumber
-            LEFT JOIN biblioitems      ON biblioitems.biblionumber =biblio.biblionumber
-        WHERE   aqorders.basketno=?
-            AND (datecancellationprinted IS NULL OR datecancellationprinted='0000-00-00')
-            ORDER BY biblioitems.publishercode,biblio.title
-    ";
-    my $result_set =
-      $dbh->selectall_arrayref( $query, { Slice => {} }, $basketno );
-    return @{$result_set};
-}
-
-sub get_basket_csv_profile_info{
-    my ($csv_profile_content,$basketno) = @_;
-
-    my ( @headers, @fields );
-    while ( $csv_profile_content =~ /
-        ([^=]+) # header
-        =
-        ([^\|]+) # fieldname (table.row or row)
-        \|? /gxms
-    ) {
-        push @headers, $1;
-        my $field = $2;
-        $field =~ s/[^\.]*\.?//; # Remove the table name if exists.
-        push @fields, $field;
-    }
-
-    my @rows;
-    my @basket_info = get_basket_DB_info($basketno);
-
-    for my $basket_info ( @basket_info ) {
-        my @row;
-        for my $field ( @fields ) {
-            push @row, $basket_info->{$field};
-        }
-        push @rows, \@row;
-    }
-    my $hash_ref;
-    $hash_ref->{ 'headers' } = \@headers;
-    $hash_ref->{ 'rows' } = \@rows;
-
-    return $hash_ref;
 }
 
 output_html_with_http_headers $query, $cookie, $template->output;
