@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: inlibro-fr-CA-i-staff-t-prog-v-30611\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-04-28 02:47+0000\n"
-"Last-Translator: Marjorie <marjorie.barry-vila@ccsr.qc.ca>\n"
+"PO-Revision-Date: 2015-08-17 14:04+0000\n"
+"Last-Translator: fcharbonnier <francois.charbonnier@inlibro.com>\n"
 "Language-Team: French Canada <koha-translate@lists.koha-community.org>\n"
 "Language: fr_CA\n"
 "MIME-Version: 1.0\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1430189241.000000\n"
+"X-POOTLE-MTIME: 1439820263.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -159,12 +159,12 @@ msgid "acquisitions.pref#UniqueItemFields# The following <a href='http://schema.
 msgstr "Les champs suivants de la <a href='http://schema.koha-community.org/tables/items.html' target='blank'>table items</a> de la base de donnée doivent être uniques:"
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#gist# (enter in numeric form, 0.12 for 12%. First is the default. If you want more than 1 value, please separate with |)"
-msgstr "(entrer sous forme numérique, 0.12 pour 12%. La première est la valeur par défaut. Si vous voulez plus d'une valeur, séparez-les par |)"
+msgid "acquisitions.pref#gist# . Enter in numeric form, 0.12 for 12%. The first item in the list will be selected by default. For more than one value, separate with | (pipe)."
+msgstr ""
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#gist# Default tax rates are"
-msgstr "Les taux de taxes par défaut sont de"
+msgid "acquisitions.pref#gist# Tax rates are"
+msgstr ""
 
 # Administration
 msgid "admin.pref"
@@ -459,8 +459,8 @@ msgid "admin.pref#delimiter# #'s"
 msgstr "#"
 
 # Administration > Interface options
-msgid "admin.pref#delimiter# Separate columns in an exported report file with"
-msgstr "Séparer les colonnes dans les rapports exportés avec"
+msgid "admin.pref#delimiter# Separate columns in an exported CSV file with"
+msgstr ""
 
 # Administration > Interface options
 msgid "admin.pref#delimiter# backslashes"
@@ -2352,6 +2352,10 @@ msgid "circulation.pref#finesCalendar# not including days the library is closed.
 msgstr "en excluant les jours de fermeture"
 
 # Circulation > Fines Policy
+msgid "circulation.pref#finesMode# <br><b>Note:</b> Fines can also be charged by the CalculateFinesOnReturn system preference."
+msgstr ""
+
+# Circulation > Fines Policy
 msgid "circulation.pref#finesMode# Calculate (but only for mailing to the admin)"
 msgstr "Calculer (uniquement pour envoi à l'admin)"
 
@@ -3237,11 +3241,11 @@ msgstr "Dans le format de temps"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [Zip/Postal Code] [City] - [Country])"
-msgstr ""
+msgstr "Type allemand ([Adresse] [Numéro de rue] - [Code postal] [Ville] - [Pays])"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [Zip/Postal Code], [Country])"
-msgstr ""
+msgstr "i18n_l10n.pref#AddressFormat# Type US ([Numéro de rue], [Adresse] - [Ville], [Code postal], [Pays])"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Monday"
@@ -3377,15 +3381,15 @@ msgstr "les modification des notices bibliographiques et des exemplaires. Tout p
 
 # Logging
 msgid "logs.pref#CronjobLog# Don't log"
-msgstr ""
+msgstr "Ne pas journaliser"
 
 # Logging
 msgid "logs.pref#CronjobLog# Log"
-msgstr ""
+msgstr "Journaliser"
 
 # Logging
 msgid "logs.pref#CronjobLog# information from cron jobs."
-msgstr ""
+msgstr "les informations des tâches en cron."
 
 # Logging
 msgid "logs.pref#FinesLog# Don't log"
@@ -3648,12 +3652,12 @@ msgid "opac.pref#OPACAcquisitionDetails# the acquisition details on OPAC detail 
 msgstr "les détails de l'acquisition dans la vue détaillée d'une notice à l'OPAC."
 
 # OPAC > Appearance
-msgid "opac.pref#OPACBaseURL# . Do not include a trailing slash in the URL. (This must be filled in correctly for RSS, unAPI, and search plugins to work.)"
-msgstr "Ne pas inclure une barre oblique dans l'URL. (Doit être rempli correctement pour que les flux RSS, les API et les plugins de recherche fonctionnent.)"
+msgid "opac.pref#OPACBaseURL# . This should be a complete URL, starting with <code>http://</code> or <code>https://</code>. Do not include a trailing slash in the URL. (This must be filled in correctly for RSS, unAPI, and search plugins to work.)"
+msgstr ""
 
 # OPAC > Appearance
-msgid "opac.pref#OPACBaseURL# The OPAC is located at http://"
-msgstr "L'OPAC est localisé à http://"
+msgid "opac.pref#OPACBaseURL# The OPAC is located at "
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OPACDisplay856uAsImage# . Note: The corresponding OPACXSLT option must be turned on."
@@ -4016,8 +4020,8 @@ msgid "opac.pref#OpacCustomSearch# Replace the search box at the top of OPAC pag
 msgstr "Remplacer le contenu de la boite de recherche simple à l'opac par le texte HTML suivant:"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacExportOptions# List export options that should be available from OPAC detail page separated by |:"
-msgstr "Liste des options d'exportation qui devraient être disponibles à partir de la page de détails à l'OPAC, séparées par des |: "
+msgid "opac.pref#OpacExportOptions# Select export options that should be available from OPAC detail page:"
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OpacFavicon# Use the image at"
@@ -4028,8 +4032,8 @@ msgid "opac.pref#OpacFavicon# for the OPAC's favicon. (This should be a complete
 msgstr "pour l'image du favicon de l'OPAC. Cela doit être une URL complète commençant par <code>http://</code>."
 
 # OPAC > Policy
-msgid "opac.pref#OpacHiddenItems# Allows to define custom rules for hiding specific items at opac. See docs/opac/OpacHiddenItems.txt for more informations"
-msgstr "Permet de définir des règles personnalisées pour cacher des exemplaires spécifiques à l'opac. Voir docs/opac/OpacHiddenItems.txt pour plus d'informations"
+msgid "opac.pref#OpacHiddenItems# Define custom rules to hide specific items from search and view on the OPAC. How to write these rules is documented on the <a href=\"http://wiki.koha-community.org/wiki/OpacHiddenItems\" target=\"_blank\">Koha wiki</a>."
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OpacHighlightedWords# (separate columns with |)"
@@ -4484,8 +4488,8 @@ msgid "opac.pref#ShowReviewerPhoto# Show"
 msgstr "Afficher"
 
 # OPAC > Features
-msgid "opac.pref#ShowReviewerPhoto# reviewer's photo beside comments in OPAC."
-msgstr "la photo des utilisateurs avec leur commentaire à l'OPAC"
+msgid "opac.pref#ShowReviewerPhoto# reviewer's avatar beside comments in OPAC. The avatar will be searched on www.libravatar.org using the patron's e-mail address."
+msgstr ""
 
 # OPAC > Features
 msgid "opac.pref#SocialNetworks# Disable"
@@ -4953,7 +4957,7 @@ msgstr "Interdire"
 
 # Patrons > General
 msgid "patrons.pref#useDischarge# librarians to discharge borrowers and borrowers to request a discharge."
-msgstr ""
+msgstr "les bibliothécaires d'acquitter les utilisateurs et les utilisateur de demander une quittance."
 
 # Searching
 msgid "searching.pref"
@@ -5229,7 +5233,7 @@ msgstr "ne pas afficher"
 
 # Searching > Results Display
 msgid "searching.pref#SearchWithISBNVariations# on all variations of the ISBN. Note that this preference has no effect if UseQueryParser is on."
-msgstr ""
+msgstr "sur toutes les variantes de l'ISBN. Notez que cette préférence ne fonctionne pas si la préférence UseQueryParser est activée."
 
 # Searching > Results Display
 msgid "searching.pref#SearchWithISBNVariations# search"
@@ -5792,8 +5796,12 @@ msgid "web_services.pref#IdRef# Enable"
 msgstr "Activer"
 
 # Web services > IdRef
+msgid "web_services.pref#IdRef# Please note that this feature is available only for UNIMARC."
+msgstr "Merci de noter que cette fonctionnalité n'est disponible que pour UNIMARC."
+
+# Web services > IdRef
 msgid "web_services.pref#IdRef# the IdRef webservice from the opac detail page. IdRef allows to request authorities from the Sudoc database."
-msgstr ""
+msgstr "le service web IdRef depuis l'affichage détaillée d'une notice à l'opac. IdRef permet d'interroger les autorités du Sudoc."
 
 # Web services > OAI-PMH
 msgid "web_services.pref#OAI-PMH# <a href=\"http://www.openarchives.org/pmh/\">OAI-PMH</a> server."

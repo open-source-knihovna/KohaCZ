@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Koha 3.0.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-06-12 12:52+0000\n"
-"PO-Revision-Date: 2015-05-20 13:03+0000\n"
+"PO-Revision-Date: 2015-06-23 06:30+0000\n"
 "Last-Translator: Ugur <ugurbulgan@sdu.edu.tr>\n"
 "Language-Team: Koha Translation Team\n"
 "Language: tr\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1432127036.000000\n"
+"X-POOTLE-MTIME: 1435041004.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -32,11 +32,11 @@ msgstr "Öge oluşturma"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqCreateItem# cataloging the record."
-msgstr "Kayıt kataloglama."
+msgstr "kayıt kataloglama."
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqCreateItem# placing an order."
-msgstr "Sipariş etme."
+msgstr "sipariş etme."
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqCreateItem# receiving an order."
@@ -72,7 +72,7 @@ msgstr "personel tarafından oluşturulan ya da yönetilen."
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqViewBaskets# from staff member's library."
-msgstr "Personel kullanıcının kütüphanesinden."
+msgstr "personel kullanıcının kütüphanesinden."
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqViewBaskets# in system, regardless of owner."
@@ -159,12 +159,12 @@ msgid "acquisitions.pref#UniqueItemFields# The following <a href='http://schema.
 msgstr "Aşağıdaki <a href='http://schema.koha-community.org/tables/items.html' target='blank'> veritabanı sütunları </a> bir materyal içerisinde özgün olmalıdır:"
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#gist# (enter in numeric form, 0.12 for 12%. First is the default. If you want more than 1 value, please separate with |)"
-msgstr "(% 12’ye 0.12yi sayısal formda giriniz. Birincisi varsayılandır. 1 değerden fazlasını istiyorsanız, lütfen | ile ayırınız)"
+msgid "acquisitions.pref#gist# . Enter in numeric form, 0.12 for 12%. The first item in the list will be selected by default. For more than one value, separate with | (pipe)."
+msgstr ""
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#gist# Default tax rates are"
-msgstr "Varsayılan vergi oranı"
+msgid "acquisitions.pref#gist# Tax rates are"
+msgstr ""
 
 # Administration
 msgid "admin.pref"
@@ -459,8 +459,8 @@ msgid "admin.pref#delimiter# #'s"
 msgstr "ile"
 
 # Administration > Interface options
-msgid "admin.pref#delimiter# Separate columns in an exported report file with"
-msgstr "Dışa aktarılmış dosyadaki sütunları vasayılan olarak"
+msgid "admin.pref#delimiter# Separate columns in an exported CSV file with"
+msgstr ""
 
 # Administration > Interface options
 msgid "admin.pref#delimiter# backslashes"
@@ -520,7 +520,7 @@ msgstr "personel ve kullanıcıların kayıtlı listeleri oluşturmalarına ve g
 
 # Authorities
 msgid "authorities.pref"
-msgstr "Otorite"
+msgstr "Otoriteler"
 
 # Authorities > General
 msgid "authorities.pref General"
@@ -560,7 +560,7 @@ msgstr "oluştur"
 
 # Authorities > General
 msgid "authorities.pref#BiblioAddsAuthorities# When editing records,"
-msgstr "Kayıtları düzenlenlerken varolan otoritelere referans vermektense gereken otorite kayıtlarının otomatik olarak oluşturulmasına"
+msgstr "Kayıtları düzenlerken,"
 
 # Authorities > General
 msgid "authorities.pref#BiblioAddsAuthorities# allow"
@@ -2352,6 +2352,10 @@ msgid "circulation.pref#finesCalendar# not including days the library is closed.
 msgstr "kütüphanenin kapalı olduğu günler hariç."
 
 # Circulation > Fines Policy
+msgid "circulation.pref#finesMode# <br><b>Note:</b> Fines can also be charged by the CalculateFinesOnReturn system preference."
+msgstr ""
+
+# Circulation > Fines Policy
 msgid "circulation.pref#finesMode# Calculate (but only for mailing to the admin)"
 msgstr "Hesapla (fakat sadece yöneticiye gönderilen e-posta için)"
 
@@ -3237,8 +3241,7 @@ msgstr "Posta adreslerinin kullandığı format"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [Zip/Postal Code] [City] - [Country])"
-msgstr ""
-"Alma stili ([Adres] [Sokak numarası] - [Zip/Posta Kodu] [Şehir] - [Ülke])"
+msgstr "Alma stili ([Adres] [Sokak numarası] - [Zip/Posta Kodu] [Şehir] - [Ülke])"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [Zip/Postal Code], [Country])"
@@ -3649,12 +3652,12 @@ msgid "opac.pref#OPACAcquisitionDetails# the acquisition details on OPAC detail 
 msgstr "OPAC ayrıntılar sayfalarında sağlama ayrıntıları."
 
 # OPAC > Appearance
-msgid "opac.pref#OPACBaseURL# . Do not include a trailing slash in the URL. (This must be filled in correctly for RSS, unAPI, and search plugins to work.)"
-msgstr "Web sayfasına trailing slash dahil etmeyin! (RSS, UNAPI ve arama eklentilerinin çalışması için bu seçeneğin doldurulması gereklidir.)"
+msgid "opac.pref#OPACBaseURL# . This should be a complete URL, starting with <code>http://</code> or <code>https://</code>. Do not include a trailing slash in the URL. (This must be filled in correctly for RSS, unAPI, and search plugins to work.)"
+msgstr ". Bu <code>http://</code> veya <code>https://</code> ile başlayan tam bir URL olmalıdır. URL sonuna bir eğik çizgi dahil etmeyin. (Bunun, RSS, unAPI ve arama eklentilerinin çalışması için doğru olarak doldurulması gereklidir.)"
 
 # OPAC > Appearance
-msgid "opac.pref#OPACBaseURL# The OPAC is located at http://"
-msgstr "OPAC url adresi http://"
+msgid "opac.pref#OPACBaseURL# The OPAC is located at "
+msgstr "OPAC'ın bulunduğu konum"
 
 # OPAC > Appearance
 msgid "opac.pref#OPACDisplay856uAsImage# . Note: The corresponding OPACXSLT option must be turned on."
@@ -4017,8 +4020,8 @@ msgid "opac.pref#OpacCustomSearch# Replace the search box at the top of OPAC pag
 msgstr "OPAC sayfalarının üst kısmındaki arama kutusunu aşağıdaki HTML ile değiştirin:"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacExportOptions# List export options that should be available from OPAC detail page separated by |:"
-msgstr "|: ile ayrılan OPAC detay sayfasında mevcut olması gereken dışa aktarım (ihraç) seçeneklerini listele:"
+msgid "opac.pref#OpacExportOptions# Select export options that should be available from OPAC detail page:"
+msgstr "OPAC ayrıntılar sayfasından kullanılabilir olan dışa aktarma seçenekleri seçin:"
 
 # OPAC > Appearance
 msgid "opac.pref#OpacFavicon# Use the image at"
@@ -4029,8 +4032,8 @@ msgid "opac.pref#OpacFavicon# for the OPAC's favicon. (This should be a complete
 msgstr "OPAC'ın favori ikonu için. (Bunun <code>http://</code>. kodu ile başlayan tam bir URL olması gerekir.)"
 
 # OPAC > Policy
-msgid "opac.pref#OpacHiddenItems# Allows to define custom rules for hiding specific items at opac. See docs/opac/OpacHiddenItems.txt for more informations"
-msgstr "opactaki belirli materyalleri gizlemek için özel kurallar tanımaya izin verir. Daha fazla bilgi için docs/opac/OpacHiddenItems.txt’e bakınız ."
+msgid "opac.pref#OpacHiddenItems# Define custom rules to hide specific items from search and view on the OPAC. How to write these rules is documented on the <a href=\"http://wiki.koha-community.org/wiki/OpacHiddenItems\" target=\"_blank\">Koha wiki</a>."
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OpacHighlightedWords# (separate columns with |)"
@@ -4485,8 +4488,8 @@ msgid "opac.pref#ShowReviewerPhoto# Show"
 msgstr "opac.pref#ShowReviewerPhoto# Göster"
 
 # OPAC > Features
-msgid "opac.pref#ShowReviewerPhoto# reviewer's photo beside comments in OPAC."
-msgstr "OPAC’daki yorumların yanında gözden geçiren kişinin fotoğrafı."
+msgid "opac.pref#ShowReviewerPhoto# reviewer's avatar beside comments in OPAC. The avatar will be searched on www.libravatar.org using the patron's e-mail address."
+msgstr "OPAC'da yorumların yanında gözden geçirenin avatarı. Avatar, kullanıcının e-posta adresi kullanılarak www.libravatar.org adresinde aranacaktır."
 
 # OPAC > Features
 msgid "opac.pref#SocialNetworks# Disable"
@@ -5791,6 +5794,10 @@ msgstr "Devreden çıkar"
 # Web services > IdRef
 msgid "web_services.pref#IdRef# Enable"
 msgstr "Etkinleştir"
+
+# Web services > IdRef
+msgid "web_services.pref#IdRef# Please note that this feature is available only for UNIMARC."
+msgstr "Bu özelliğin yalnızca UNIMARC için kullanılabilir olduğunu unutmayın."
 
 # Web services > IdRef
 msgid "web_services.pref#IdRef# the IdRef webservice from the opac detail page. IdRef allows to request authorities from the Sudoc database."

@@ -138,6 +138,16 @@
                 [% END %]
             </div>
             [% END %]
+            [% IF summary.notes %]
+		[% FOREACH note IN summary.notes %]
+		    [% IF ( note.field == '678' ) %]
+                        <div class="note678">
+                            <span class="note678label">Another details:</span>
+                            <div class="note678content">[% note.note | html %]</div>
+                        </div>
+	            [% END %]
+                [% END %]
+            [% END %]
         [% END %]
     [% END %]
 [% END %]

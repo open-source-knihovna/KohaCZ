@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Koha 3.14\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-05-10 19:14+0200\n"
-"PO-Revision-Date: 2015-04-23 16:23+0000\n"
+"PO-Revision-Date: 2015-07-28 10:44+0000\n"
 "Last-Translator: KnowledgeWare <massoudalshareef@kwareict.com>\n"
 "Language-Team: za\n"
 "Language: ar\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1429806200.000000\n"
+"X-POOTLE-MTIME: 1438080297.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -159,12 +159,12 @@ msgid "acquisitions.pref#UniqueItemFields# The following <a href='http://schema.
 msgstr "أعمدة قاعدة البيانات <a href='http://schema.koha-community.org/tables/items.html' target='blank'>التالية</a> يجب أن تكون متفردة في المادة:"
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#gist# (enter in numeric form, 0.12 for 12%. First is the default. If you want more than 1 value, please separate with |)"
-msgstr "(ادخال بالشكل الرقمي, 0.12 لـ 12%. الأول هو الافتراضي. اذا كنت تريد أكثر من قيمة واحدة، الرجاء افصل بينها باستخدام  | )"
+msgid "acquisitions.pref#gist# . Enter in numeric form, 0.12 for 12%. The first item in the list will be selected by default. For more than one value, separate with | (pipe)."
+msgstr "قم بإدخال الصيغة العددية 0.12 ل 12%. سيتم تحديد أول مادة في القائمة افتراضيا. لأكثر من قيمة واحدة، قم بالفصل باستخدام علامة  | "
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#gist# Default tax rates are"
-msgstr "معدلات الضريبة الافتراضية هي"
+msgid "acquisitions.pref#gist# Tax rates are"
+msgstr "معدلات الضرائب هي"
 
 # Administration
 msgid "admin.pref"
@@ -459,8 +459,8 @@ msgid "admin.pref#delimiter# #'s"
 msgstr "s"
 
 # Administration > Interface options
-msgid "admin.pref#delimiter# Separate columns in an exported report file with"
-msgstr " أعمدة منفصلة في ملف التقرير المصدّر مع"
+msgid "admin.pref#delimiter# Separate columns in an exported CSV file with"
+msgstr "قم بفصل الأعمدة في ملف CSV متصدر بـ"
 
 # Administration > Interface options
 msgid "admin.pref#delimiter# backslashes"
@@ -2352,6 +2352,10 @@ msgid "circulation.pref#finesCalendar# not including days the library is closed.
 msgstr "عدم إدراج أيام إغلاق المكتبة."
 
 # Circulation > Fines Policy
+msgid "circulation.pref#finesMode# <br><b>Note:</b> Fines can also be charged by the CalculateFinesOnReturn system preference."
+msgstr "<br><b>ملاحظة:</b> يمكن فرض الغرامات أيضا بواسطة التفضيل  CalculateFinesOnReturn"
+
+# Circulation > Fines Policy
 msgid "circulation.pref#finesMode# Calculate (but only for mailing to the admin)"
 msgstr " حساب (لكن لمراسلة الإدارة فقط)"
 
@@ -3237,11 +3241,11 @@ msgstr "تنسيق الأوقات بـ"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [Zip/Postal Code] [City] - [Country])"
-msgstr ""
+msgstr "النمط الألماني ([العنوان] [رقم الشارع] - [الرمز البريدي] [المدينة] - [البلد])"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [Zip/Postal Code], [Country])"
-msgstr ""
+msgstr "النمط الأمريكي ([رقم الشارع], [العنوان] - [المدينة], [الرقم البريدي], [البلد])"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Monday"
@@ -3377,15 +3381,15 @@ msgstr "أي تغييرات في التسجيلة البيبلوجرافية أ�
 
 # Logging
 msgid "logs.pref#CronjobLog# Don't log"
-msgstr ""
+msgstr "عدم التسجيل"
 
 # Logging
 msgid "logs.pref#CronjobLog# Log"
-msgstr ""
+msgstr "التسجيل"
 
 # Logging
 msgid "logs.pref#CronjobLog# information from cron jobs."
-msgstr ""
+msgstr "معلومات من cron jobs"
 
 # Logging
 msgid "logs.pref#FinesLog# Don't log"
@@ -3648,12 +3652,12 @@ msgid "opac.pref#OPACAcquisitionDetails# the acquisition details on OPAC detail 
 msgstr "تفاصيل التزويد في صفحات تفاصيل الأوباك."
 
 # OPAC > Appearance
-msgid "opac.pref#OPACBaseURL# . Do not include a trailing slash in the URL. (This must be filled in correctly for RSS, unAPI, and search plugins to work.)"
-msgstr "عدم إدراج علامة مائلة في ال URL. ( يجب ملء ذلك بطريقة صحيحة لكي يعمل كلا من RSS, unAPI وبرامج البحث المساعدة. "
+msgid "opac.pref#OPACBaseURL# . This should be a complete URL, starting with <code>http://</code> or <code>https://</code>. Do not include a trailing slash in the URL. (This must be filled in correctly for RSS, unAPI, and search plugins to work.)"
+msgstr "يجب أن يكون ذلك URL يبدأ بـ <code>http://</code>  أو <code>https://</code>. لا تقم بإدراج علامة slash مائلة في ال URL. (يجب أن يتم ملء ذلك بشكل صحيح لكي تعمل برامج البحث المساعدة RSS و unAPI)"
 
 # OPAC > Appearance
-msgid "opac.pref#OPACBaseURL# The OPAC is located at http://"
-msgstr "يقع الأوباك في http://"
+msgid "opac.pref#OPACBaseURL# The OPAC is located at "
+msgstr "يقع الأوباك في"
 
 # OPAC > Appearance
 msgid "opac.pref#OPACDisplay856uAsImage# . Note: The corresponding OPACXSLT option must be turned on."
@@ -4016,8 +4020,8 @@ msgid "opac.pref#OpacCustomSearch# Replace the search box at the top of OPAC pag
 msgstr "استبدال مربع البحث أعلى صفحات الأوباك بال HTML التالي:"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacExportOptions# List export options that should be available from OPAC detail page separated by |:"
-msgstr "قائمة خيارات التصدير التي ينبغي أن تكون متاحة من صفحة تفاصيل أوباك مفصولةبواسطة |:"
+msgid "opac.pref#OpacExportOptions# Select export options that should be available from OPAC detail page:"
+msgstr "قم بتحديد خيارات التصدير التي يجب توافرها من صفحة تفاصيل الأوباك:"
 
 # OPAC > Appearance
 msgid "opac.pref#OpacFavicon# Use the image at"
@@ -4028,8 +4032,8 @@ msgid "opac.pref#OpacFavicon# for the OPAC's favicon. (This should be a complete
 msgstr "لأيقونة واجهة المستفيدOPAC . (يجب أن يكون ذلك URL كامل , يبدأ بـ <code>http://</code>.)"
 
 # OPAC > Policy
-msgid "opac.pref#OpacHiddenItems# Allows to define custom rules for hiding specific items at opac. See docs/opac/OpacHiddenItems.txt for more informations"
-msgstr "يسمح لتحديد قواعد مخصصة لإخفاء مواد محددة في أوباك. انظر docs/opac/OpacHiddenItems.txt لمعلومات أكثر"
+msgid "opac.pref#OpacHiddenItems# Define custom rules to hide specific items from search and view on the OPAC. How to write these rules is documented on the <a href=\"http://wiki.koha-community.org/wiki/OpacHiddenItems\" target=\"_blank\">Koha wiki</a>."
+msgstr "قم بتعريف قواعد مخصصة لإخفاء مواد معينة من البحث وعرضها في الأوباك. كيفية كتابة هذه القواعد موثقة في <a href=\"http://wiki.koha-community.org/wiki/OpacHiddenItems\" target=\"_blank\">كوها ويكي</a>"
 
 # OPAC > Appearance
 msgid "opac.pref#OpacHighlightedWords# (separate columns with |)"
@@ -4484,8 +4488,8 @@ msgid "opac.pref#ShowReviewerPhoto# Show"
 msgstr "عرض"
 
 # OPAC > Features
-msgid "opac.pref#ShowReviewerPhoto# reviewer's photo beside comments in OPAC."
-msgstr "صورة المراجع بجانب التعليقات في الأوباك"
+msgid "opac.pref#ShowReviewerPhoto# reviewer's avatar beside comments in OPAC. The avatar will be searched on www.libravatar.org using the patron's e-mail address."
+msgstr "أفاتار المراجع بجانب التعليقات في الأوباك. سيتم بحث الأفاتار على www.libravatar.org باستخدام عنوان البريد الالكتروني للمستفيد"
 
 # OPAC > Features
 msgid "opac.pref#SocialNetworks# Disable"
@@ -4953,7 +4957,7 @@ msgstr "عدم السماح"
 
 # Patrons > General
 msgid "patrons.pref#useDischarge# librarians to discharge borrowers and borrowers to request a discharge."
-msgstr ""
+msgstr "موظفي المكتبة لإخلاء طرف المستعيرين والمستعيرين لطلب إخلاء الطرف"
 
 # Searching
 msgid "searching.pref"
@@ -5229,7 +5233,7 @@ msgstr " عدم عرض"
 
 # Searching > Results Display
 msgid "searching.pref#SearchWithISBNVariations# on all variations of the ISBN. Note that this preference has no effect if UseQueryParser is on."
-msgstr ""
+msgstr "على جميع تنويعات الردمك. لاحظ أن هذا التفضيل ليس له أي تأثير في حالة تفعيل UseQueryParser "
 
 # Searching > Results Display
 msgid "searching.pref#SearchWithISBNVariations# search"
@@ -5792,8 +5796,12 @@ msgid "web_services.pref#IdRef# Enable"
 msgstr " تفعيل"
 
 # Web services > IdRef
+msgid "web_services.pref#IdRef# Please note that this feature is available only for UNIMARC."
+msgstr "يرجى ملاحظة أن هذه الخاصية متاحة فقط ليونيمارك"
+
+# Web services > IdRef
 msgid "web_services.pref#IdRef# the IdRef webservice from the opac detail page. IdRef allows to request authorities from the Sudoc database."
-msgstr ""
+msgstr "خدمة الويب IdRef من صفحة تفاصيل الأوباك. تتيح لك IdRef طلب الاستنادات من قاعدة بيانات Sudoc"
 
 # Web services > OAI-PMH
 msgid "web_services.pref#OAI-PMH# <a href=\"http://www.openarchives.org/pmh/\">OAI-PMH</a> server."

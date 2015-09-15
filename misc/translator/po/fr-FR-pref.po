@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Koha\n"
 "POT-Creation-Date: 2013-05-07 08:52+0200\n"
-"PO-Revision-Date: 2015-05-15 10:16+0000\n"
+"PO-Revision-Date: 2015-07-23 13:39+0000\n"
 "Last-Translator: simone <pascale.nalon@mines-paristech.fr>\n"
 "Language-Team: French (France) (http://www.transifex.com/projects/p/koha/language/fr_FR/)\n"
 "Language: fr\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1431684966.000000\n"
+"X-POOTLE-MTIME: 1437658765.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -158,12 +158,12 @@ msgid "acquisitions.pref#UniqueItemFields# The following <a href='http://schema.
 msgstr "Les champs suivants de la <a href='http://schema.koha-community.org/tables/items.html' target='blank'>table items</a> de la base de donnée doivent être uniques:"
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#gist# (enter in numeric form, 0.12 for 12%. First is the default. If you want more than 1 value, please separate with |)"
-msgstr "(écrivez sous forme numérique, 0.12 pour 12%. La première valeur sera utilisée comme valeur par défaut. Si vous voulez plus d'une valeur, séparez les avec |)"
+msgid "acquisitions.pref#gist# . Enter in numeric form, 0.12 for 12%. The first item in the list will be selected by default. For more than one value, separate with | (pipe)."
+msgstr "acquisitions.pref#gist# . Entrez sous forme numérique, 0.12 for 12%. Le premier exemplaire de la liste sera sélectionné par défaut. Pour plus d'une valeur, séparez les avec | (pipe)."
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#gist# Default tax rates are"
-msgstr "Les taux de TVA par défaut sont"
+msgid "acquisitions.pref#gist# Tax rates are"
+msgstr "acquisitions#gist# Les taux de taxes sont"
 
 # Administration
 msgid "admin.pref"
@@ -331,7 +331,7 @@ msgstr "Partager"
 
 # Administration > Share anonymous usage statistics
 msgid "admin.pref#UsageStats# anonymous Koha usage data with the Koha community. You can see the data on the <a href=\"http://hea.koha-community.org\">Hea Koha community website</a>."
-msgstr "anonymement des données d'utilisation de Koha avec la communauté des utilisateurs de Koha. Vous pouvez voir ces données sur le site communautaire <a href=\"http://hea.koha-community.org\">Hea."
+msgstr "anonymement des données d'utilisation de Koha avec la communauté des utilisateurs de Koha. Vous pouvez voir ces données sur le site communautaire <a href=\"http://hea.koha-community.org\">Hea</a>."
 
 # Administration > Share anonymous usage statistics
 msgid "admin.pref#UsageStatsCountry# Note that this value has no effect if the UsageStats system preference is set to \"Don't share\""
@@ -458,8 +458,8 @@ msgid "admin.pref#delimiter# #'s"
 msgstr "apostrophe (')"
 
 # Administration > Interface options
-msgid "admin.pref#delimiter# Separate columns in an exported report file with"
-msgstr "Séparer les colonnes dans les rapports exportés avec"
+msgid "admin.pref#delimiter# Separate columns in an exported CSV file with"
+msgstr "admin.pref#delimiter# Séparez les colonnes d'un fichier CSV exporté avec"
 
 # Administration > Interface options
 msgid "admin.pref#delimiter# backslashes"
@@ -835,15 +835,15 @@ msgstr "(Laisser vide si inutilisé. Définir une plage comme <code>192.168.</co
 
 # Cataloging > Display
 msgid "cataloguing.pref#OpacSuppression# <br />Display the following message on the redirect page for suppressed biblios"
-msgstr "Afficher le message suivant sur la page des notices supprimées"
+msgstr "cataloguing.pref#OpacSuppression# <br />Afficher le message suivant sur la page des notices supprimées"
 
 # Cataloging > Display
 msgid "cataloguing.pref#OpacSuppression# <br />Redirect the opac detail page for suppressed records to"
-msgstr "Faire une redirection de la page de détail des notices supprimées vers"
+msgstr "cataloguing.pref#OpacSuppression# <br />Faire une redirection de la page de détail des notices supprimées vers"
 
 # Cataloging > Display
 msgid "cataloguing.pref#OpacSuppression# <br />Restrict the suppression to IP adresses outside of the IP range"
-msgstr "Restreindre la suppression aux adresses IP en-dehors l'intervalle"
+msgstr "cataloguing.pref#OpacSuppression# <br />Restreindre la suppression aux adresses IP en-dehors l'intervalle"
 
 # Cataloging > Display
 msgid "cataloguing.pref#OpacSuppression# Don't hide"
@@ -1087,7 +1087,7 @@ msgstr "Recopier les sous-champs MARC"
 
 # Cataloging > Record Structure
 msgid "cataloguing.pref#itemcallnumber# to an item's callnumber. (This can contain multiple subfields to look in; for instance <code>082ab</code> would look in 082 subfields a and b.)<br />Examples (for MARC21 records): <strong>Dewey</strong>: <code>082ab</code> or <code>092ab</code>; <strong>LOC</strong>: <code>050ab</code> or <code>090ab</code>; <strong>from the item record</strong>: <code>852hi</code>"
-msgstr "dans la cote des exemplaires. Il peut y avoir plusieurs sous-champs examiner. Par exemple: 082ab pour le champ 082 et ses sous-champ a et b.<br/> Examples (for MARC21 records): <strong>Dewey</strong>: <code>082ab</code> or <code>092ab</code>; <strong>LOC</strong>: <code>050ab</code> or <code>090ab</code>; <strong>from the item record</strong>: <code>852hi</code>"
+msgstr "cataloguing.pref#itemcallnumber# dans la cote des exemplaires. Il peut y avoir plusieurs sous-champs examiner. Par exemple: <code>082ab</code> pour le champ 082 et ses sous-champ a et b.<br/> Exemples (en MARC21): <strong>Dewey</strong>: <code>082ab</code> or <code>092ab</code>; <strong>LOC</strong>: <code>050ab</code> or <code>090ab</code>; <strong>from the item record</strong>: <code>852hi</code>"
 
 # Cataloging > Record Structure
 msgid "cataloguing.pref#marcflavour# Interpret and store MARC records in the"
@@ -1527,7 +1527,7 @@ msgstr "<br>(Utilisé quand le script longoverdue.pl est appelé sans le paramè
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#DefaultLongOverdueChargeValue# <br>Leave this field empty if you don't want to charge the user for lost items."
-msgstr "<br/>Laisser vide si vous ne voulez pas faire payer les exemplaires perdus aux adhérents."
+msgstr "circulation.pref#DefaultLongOverdueChargeValue# <br>Laisser vide si vous ne voulez pas faire payer les exemplaires perdus aux adhérents."
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#DefaultLongOverdueChargeValue# Charge a lost item to the borrower's account when the LOST value of the item changes to :"
@@ -1535,15 +1535,15 @@ msgstr "Facturer  les exemplaires perdus aux adhérents quand la valeur LOST de 
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#DefaultLongOverdueLostValue# <br>(Used when the longoverdue.pl script is called without the --lost parameter)"
-msgstr "(Utilisé quand le script longoverdue.pl est appelé sans le paramètre --lost)"
+msgstr "circulation.pref#DefaultLongOverdueLostValue# <br>(Utilisé quand le script longoverdue.pl est appelé sans le paramètre --lost)"
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#DefaultLongOverdueLostValue# <br>Example: [1] [30] Sets an item to the LOST value 1 when it has been overdue for more than 30 days."
-msgstr "<br/>Exemple : [1] [30] passe LOST à la valeur 1 quand l'exemplaire à un retard de plus de 30 jours."
+msgstr "circulation.pref#DefaultLongOverdueLostValue# <br>Exemple : [1] [30] passe LOST à la valeur 1 quand l'exemplaire à un retard de plus de 30 jours."
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#DefaultLongOverdueLostValue# <br>WARNING — These preferences will activate the automatic item loss process. Leave these fields empty if you don't want to activate this feature."
-msgstr "<br/>Attention : Ces préférences activent le processus de traitement automatique des pertes d'exemplaire. Laissez ces champs vides si vous ne voulez pas activer cette fonctionnalité."
+msgstr "circulation.pref#DefaultLongOverdueLostValue# <br>Attention : Ces préférences activent le processus de traitement automatique des pertes d'exemplaire. Laissez ces champs vides si vous ne voulez pas activer cette fonctionnalité."
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#DefaultLongOverdueLostValue# By default, set the LOST value of an item to"
@@ -2349,6 +2349,10 @@ msgstr "en incluant les jours de fermeture"
 # Circulation > Fines Policy
 msgid "circulation.pref#finesCalendar# not including days the library is closed."
 msgstr "en excluant les jours de fermeture"
+
+# Circulation > Fines Policy
+msgid "circulation.pref#finesMode# <br><b>Note:</b> Fines can also be charged by the CalculateFinesOnReturn system preference."
+msgstr "circulation.pref#finesMode# <br><b>Note:</b> Les amendes peuvent aussi être calculées par la préférence système CalculateFinesOnReturn "
 
 # Circulation > Fines Policy
 msgid "circulation.pref#finesMode# Calculate (but only for mailing to the admin)"
@@ -3236,7 +3240,7 @@ msgstr "Afficher l'heure au"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [Zip/Postal Code] [City] - [Country])"
-msgstr ""
+msgstr "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [Zip/Postal Code] [City] - [Country])"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [Zip/Postal Code], [Country])"
@@ -3276,7 +3280,7 @@ msgstr "Afficher l'heure au"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#alphabet# <br/> Hint: Changing collation in the database for the 'surname' column of the 'borrowers' table is helpful to make browsing by last name work in members-home.pl when using an alphabet outside of A-Z"
-msgstr ""
+msgstr "i18n_l10n.pref#alphabet# <br/> Conseil: Le changement de la collation dans la base de données pour la colonne  \"surname'\"de la table \"borrowers\" est utile pour faire fonctionner la navigation par nom de famille( dans members-home.pl lors de l'utilisation un alphabet non latin"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#alphabet# Use the alphabet"
@@ -3376,15 +3380,15 @@ msgstr "les modification des notices bibliographiques et des exemplaires. Tout p
 
 # Logging
 msgid "logs.pref#CronjobLog# Don't log"
-msgstr ""
+msgstr "logs.pref#CronjobLog# Ne pas s'identifier"
 
 # Logging
 msgid "logs.pref#CronjobLog# Log"
-msgstr ""
+msgstr "logs.pref#CronjobLog# S'identifier"
 
 # Logging
 msgid "logs.pref#CronjobLog# information from cron jobs."
-msgstr ""
+msgstr "logs.pref#CronjobLog# information en provenance des cron jobs."
 
 # Logging
 msgid "logs.pref#FinesLog# Don't log"
@@ -3647,12 +3651,12 @@ msgid "opac.pref#OPACAcquisitionDetails# the acquisition details on OPAC detail 
 msgstr "les informations relatives à l'acquisition des exemplaires sur la page de détail de l'OPAC."
 
 # OPAC > Appearance
-msgid "opac.pref#OPACBaseURL# . Do not include a trailing slash in the URL. (This must be filled in correctly for RSS, unAPI, and search plugins to work.)"
-msgstr "Ne comprend pas de slash à la fin du répertoire source dans l'URL (important pour que RSS, unAPI et les plugins de recherche fonctionnent correctement)"
+msgid "opac.pref#OPACBaseURL# . This should be a complete URL, starting with <code>http://</code> or <code>https://</code>. Do not include a trailing slash in the URL. (This must be filled in correctly for RSS, unAPI, and search plugins to work.)"
+msgstr "opac.pref#OPACBaseURL# . Ça doit être une URL complète, commençant par <code>http://</code> ou <code>https://</code>. Ne pas inclure de barre oblique dans l'URL. (Ça doir être rempli correctement pour les RSS, unAPI, et les plugins de recherche pour que ça marche.)"
 
 # OPAC > Appearance
-msgid "opac.pref#OPACBaseURL# The OPAC is located at http://"
-msgstr "L'OPAC est localisé à http://"
+msgid "opac.pref#OPACBaseURL# The OPAC is located at "
+msgstr "opac.pref#OPACBaseURL# L'adresse de l'OPAC est"
 
 # OPAC > Appearance
 msgid "opac.pref#OPACDisplay856uAsImage# . Note: The corresponding OPACXSLT option must be turned on."
@@ -4015,8 +4019,8 @@ msgid "opac.pref#OpacCustomSearch# Replace the search box at the top of OPAC pag
 msgstr "Remplacer la boîte de recherche en haut des pages de l'OPAC par le code HTML suivant :"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacExportOptions# List export options that should be available from OPAC detail page separated by |:"
-msgstr "Lister les options d'export qui seront disponibles sur l'affichage détaillé à l'OPAC, séparées par |"
+msgid "opac.pref#OpacExportOptions# Select export options that should be available from OPAC detail page:"
+msgstr "opac.pref#OPacExportOptions#Sélectionnez les options d'export qui devraient être disponibles à partir de la page d'affichage des détails à l'OPAC"
 
 # OPAC > Appearance
 msgid "opac.pref#OpacFavicon# Use the image at"
@@ -4027,8 +4031,8 @@ msgid "opac.pref#OpacFavicon# for the OPAC's favicon. (This should be a complete
 msgstr "pour l'image du favicon de l'OPAC. (Cela doit être une URL complète, commençant par <code>http://</code>.)"
 
 # OPAC > Policy
-msgid "opac.pref#OpacHiddenItems# Allows to define custom rules for hiding specific items at opac. See docs/opac/OpacHiddenItems.txt for more informations"
-msgstr "Permet de définir des règles personnalisées pour masquer des exemplaires spécifiques à l'opac. Voir docs/opac/OpacHiddenItems.txt pour plus d'informations"
+msgid "opac.pref#OpacHiddenItems# Define custom rules to hide specific items from search and view on the OPAC. How to write these rules is documented on the <a href=\"http://wiki.koha-community.org/wiki/OpacHiddenItems\" target=\"_blank\">Koha wiki</a>."
+msgstr "opac.pref#OpacHiddenItems# Définissez vos règles personnalisées pour empêcher la visibilité de certains exemplaires à partir du catalogue et de la recherche. La documentation pour écrire ces règles est disponible à l'adresse <a href=\"http://wiki.koha-community.org/wiki/OpacHiddenItems\" target=\"_blank\">Koha wiki</a>."
 
 # OPAC > Appearance
 msgid "opac.pref#OpacHighlightedWords# (separate columns with |)"
@@ -4483,8 +4487,8 @@ msgid "opac.pref#ShowReviewerPhoto# Show"
 msgstr "Montrer"
 
 # OPAC > Features
-msgid "opac.pref#ShowReviewerPhoto# reviewer's photo beside comments in OPAC."
-msgstr "la photo des personnes ayant laissées des commentaires à l'OPAC."
+msgid "opac.pref#ShowReviewerPhoto# reviewer's avatar beside comments in OPAC. The avatar will be searched on www.libravatar.org using the patron's e-mail address."
+msgstr "opac.pref#ShowReviewerPhoto# L'avatar du critique à côté des commentaires de l'OPAC. L'avatar sera recherché sur www.libravatar.org en utilisant l'adresse électronique de l'adhérent."
 
 # OPAC > Features
 msgid "opac.pref#SocialNetworks# Disable"
@@ -4972,7 +4976,7 @@ msgstr "Formulaire de recherche"
 
 # Searching > Search Form
 msgid "searching.pref#AdvancedSearchLanguages# For example, to limit listing to French and Italian, enter <em>ita|fre</em>."
-msgstr "Par exemple, pour limiter au français et à l'italien: fre|ita."
+msgstr "searching.pref#AdvancedSearchLanguages# Par exemple, pour limiter au français et à l'italien: <em>fre|ita</em>."
 
 # Searching > Search Form
 msgid "searching.pref#AdvancedSearchLanguages# ISO 639-2 language codes (separate values with | or ,)."
@@ -5789,6 +5793,10 @@ msgstr "Désactiver"
 # Web services > IdRef
 msgid "web_services.pref#IdRef# Enable"
 msgstr "Activer"
+
+# Web services > IdRef
+msgid "web_services.pref#IdRef# Please note that this feature is available only for UNIMARC."
+msgstr "web_services.pref#IdRef# Merci de noter que cette fonctionnalité est disponible uniquement pour UNIMARC."
 
 # Web services > IdRef
 msgid "web_services.pref#IdRef# the IdRef webservice from the opac detail page. IdRef allows to request authorities from the Sudoc database."

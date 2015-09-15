@@ -165,7 +165,24 @@
 	<li><label for="dateofbirthrequired">Age required: </label> <input type="text" name="dateofbirthrequired" id="dateofbirthrequired" value="[% dateofbirthrequired %]" size="3" maxlength="3" /> years</li>
 	<li><label for="upperagelimit">Upperage limit: </label> <input type="text" name="upperagelimit" id="upperagelimit" size="3" maxlength="3" value="[% upperagelimit %]" /> years</li>
 	<li><label for="enrolmentfee">Enrollment fee: </label><input type="text" name="enrolmentfee" id="enrolmentfee" size="6" value="[% enrolmentfee %]" /></li>
-	<li><label for="overduenoticerequired">Overdue notice required: </label> <select name="overduenoticerequired" id="overduenoticerequired">
+
+	<li><label for="checkprevissue">Check for previous issues: </label>
+	   <select name="checkprevissue" id="checkprevissue">
+	            [% IF ( checkprevissue == 'yes' ) %]
+	              <option value="yes" selected="selected">Yes and override system preferences.</option>
+	              <option value="no">No and override system preferences.</option>
+	              <option value="inherit">Inherit from system preferences.</option>
+	            [% ELSIF (checkprevissue == 'no' ) %]
+	              <option value="yes">Yes and override system preferences.</option>
+	              <option value="no" selected="selected">No and override system preferences.</option>
+	              <option value="inherit">Inherit from system preferences.</option>
+	            [% ELSE %]
+	              <option value="yes">Yes and override system preferences.</option>
+	              <option value="no">No and override system preferences.</option>
+	              <option value="inherit" selected="selected">Inherit from system preferences.</option>
+	            [% END %]
+	</select></li>
+        <li><label for="overduenoticerequired">Overdue notice required: </label> <select name="overduenoticerequired" id="overduenoticerequired">
 			[% IF ( overduenoticerequired ) %]
 						<option value="0">No</option>
 						<option value="1" selected="selected">Yes</option>
@@ -296,6 +313,17 @@
 	<tr><th scope="row">Age required: </th><td>[% dateofbirthrequired %] years</td></tr>
 	<tr><th scope="row">Upperage limit: </th><td>[% upperagelimit %] years</td></tr>
 	<tr><th scope="row">Enrollment fee: </th><td>[% enrolmentfee %]</td></tr>
+	<tr><th scope="row">Check previous loans: </th>
+	   <td>
+	            [% IF ( checkprevissue == 'yes' ) %]
+	            Yes
+	            [% ELSIF ( checkprevissue == 'no' ) %]
+	            No
+	            [% ELSE %]
+	            Inherit
+	            [% END %]
+	        </td>
+	</tr>
 	<tr><th scope="row">Receives overdue notices: </th><td>[% IF ( overduenoticerequired ) %]Yes[% ELSE %]No[% END %]</td></tr>
 	<tr><th scope="row">Lost items in staff client</th><td>[% IF ( hidelostitems ) %]Hidden by default[% ELSE %]Shown[% END %]</td></tr>
 	<tr><th scope="row">Hold fee: </th><td>[% reservefee %]</td></tr>
@@ -344,6 +372,7 @@
 			<th scope="col">Age required</th>
 			<th scope="col">Upper age limit</th>
 			<th scope="col">Enrollment fee</th>
+                        <th scope="col">Check previous loans</th>
 			<th scope="col">Overdue</th>
             <th scope="col">Lost items</th>
  			<th scope="col">Hold fee</th>
@@ -382,6 +411,14 @@
                         <td>[% loo.dateofbirthrequired %] years</td>
 			<td>[% loo.upperagelimit %] years</td>
                         <td>[% loo.enrolmentfee %]</td>
+                        <td>[% IF ( loo.checkprevissue == 'yes' ) %]
+	                              Yes
+				[% ELSIF ( loo.checkprevissue == 'no' ) %]
+	                              No
+		                [% ELSE %]
+	                              Inherit
+                                [% END %]
+	                </td>
                         <td>[% IF ( loo.overduenoticerequired ) %]Yes[% ELSE %]No[% END %]</td>
                         <td>[% IF ( loo.hidelostitems ) %]Hidden[% ELSE %]Shown[% END %]</td>
                         <td>[% loo.reservefee %]</td>

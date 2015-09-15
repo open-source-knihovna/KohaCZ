@@ -10462,6 +10462,47 @@ if ( CheckVersion($DBversion) ) {
     SetVersion ($DBversion);
 }
 
+$DBversion = "3.20.00.001";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        INSERT IGNORE INTO language_subtag_registry( subtag, type, description, added)
+        VALUES ( 'IN', 'region', 'India','2015-05-28');
+    |);
+    $dbh->do(q|
+        INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
+        VALUES ( 'IN', 'region', 'en', 'India');
+    |);
+    $dbh->do(q|
+        INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
+        VALUES ( 'IN', 'region', 'bn', 'ভারত');
+    |);
+    print "Upgrade to $DBversion done (Bug 14285: Add new region India)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = '3.20.00.002';
+if ( CheckVersion($DBversion) ) {
+    my $OPACBaseURL = C4::Context->preference('OPACBaseURL');
+    if (defined($OPACBaseURL) && substr($OPACBaseURL,0,4) ne "http") {
+        my $explanation = q{Specify the Base URL of the OPAC, e.g., http://opac.mylibrary.com, including the protocol (http:// or https://). Otherwise, the http:// will be added automatically by Koha upon saving.};
+        $OPACBaseURL = 'http://' . $OPACBaseURL;
+        my $sth_OPACBaseURL = $dbh->prepare( q{
+            UPDATE systempreferences SET value=?,explanation=?
+            WHERE variable='OPACBaseURL'; } );
+        $sth_OPACBaseURL->execute($OPACBaseURL,$explanation);
+    }
+    if (defined($OPACBaseURL)) {
+        $dbh->do( q{ UPDATE letter
+                     SET content=replace(content,
+                                         'http://<<OPACBaseURL>>',
+                                         '<<OPACBaseURL>>')
+                     WHERE content LIKE "%http://<<OPACBaseURL>>%"; } );
+    }
+
+    print "Upgrade to $DBversion done (Bug 5010: Fix OPACBaseURL to include protocol)\n";
+    SetVersion($DBversion);
+}
+
 $DBversion = "3.21.00.000";
 if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (El tiempo vuela, un nuevo ciclo comienza.)\n";
@@ -10484,47 +10525,6 @@ if ( CheckVersion($DBversion) ) {
     |);
     print "Upgrade to $DBversion done (Bug 12160: Rename opacuserjs to OPACUserJS)\n";
     SetVersion ($DBversion);
-}
-
-$DBversion = "3.21.00.003";
-if ( CheckVersion($DBversion) ) {
-    $dbh->do(q|
-        INSERT IGNORE INTO language_subtag_registry( subtag, type, description, added)
-        VALUES ( 'IN', 'region', 'India','2015-05-28');
-    |);
-    $dbh->do(q|
-        INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
-        VALUES ( 'IN', 'region', 'en', 'India');
-    |);
-    $dbh->do(q|
-        INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
-        VALUES ( 'IN', 'region', 'bn', 'ভারত');
-    |);
-    print "Upgrade to $DBversion done (Bug 14285: Add new region India)\n";
-    SetVersion ($DBversion);
-}
-
-$DBversion = '3.21.00.004';
-if ( CheckVersion($DBversion) ) {
-    my $OPACBaseURL = C4::Context->preference('OPACBaseURL');
-    if (defined($OPACBaseURL) && substr($OPACBaseURL,0,4) ne "http") {
-        my $explanation = q{Specify the Base URL of the OPAC, e.g., http://opac.mylibrary.com, including the protocol (http:// or https://). Otherwise, the http:// will be added automatically by Koha upon saving.};
-        $OPACBaseURL = 'http://' . $OPACBaseURL;
-        my $sth_OPACBaseURL = $dbh->prepare( q{
-            UPDATE systempreferences SET value=?,explanation=?
-            WHERE variable='OPACBaseURL'; } );
-        $sth_OPACBaseURL->execute($OPACBaseURL,$explanation);
-    }
-    if (defined($OPACBaseURL)) {
-        $dbh->do( q{ UPDATE letter
-                     SET content=replace(content,
-                                         'http://<<OPACBaseURL>>',
-                                         '<<OPACBaseURL>>')
-                     WHERE content LIKE "%http://<<OPACBaseURL>>%"; } );
-    }
-
-    print "Upgrade to $DBversion done (Bug 5010: Fix OPACBaseURL to include protocol)\n";
-    SetVersion($DBversion);
 }
 
 $DBversion = "3.21.00.005";

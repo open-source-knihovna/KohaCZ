@@ -154,6 +154,7 @@ if ( $op eq 'add_form' ) {
           $data->{'BlockExpiredPatronOpacActions'},
         TalkingTechItivaPhone =>
           C4::Context->preference("TalkingTechItivaPhoneNotification"),
+        checkprevissue => $data->{'checkprevissue'},
     );
 
     if ( C4::Context->preference('EnhancedMessagingPreferences') ) {
@@ -193,7 +194,8 @@ elsif ( $op eq 'add_validate' ) {
                     overduenoticerequired=?,
                     category_type=?,
                     BlockExpiredPatronOpacActions=?,
-                    default_privacy=?
+                    default_privacy=?,
+                    checkprevissue=?
                 WHERE categorycode=?"
         );
         $sth->execute(
@@ -204,7 +206,7 @@ elsif ( $op eq 'add_validate' ) {
                 'reservefee',            'hidelostitems',
                 'overduenoticerequired', 'category_type',
                 'block_expired',         'default_privacy',
-                'categorycode'
+                'checkprevissue',        'categorycode'
             )
         );
         $sth->finish;
@@ -224,9 +226,10 @@ elsif ( $op eq 'add_validate' ) {
                 overduenoticerequired,
                 category_type,
                 BlockExpiredPatronOpacActions,
-                default_privacy
+                default_privacy,
+                checkprevissue
             )
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)" );
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)" );
         my $inserted = $sth->execute(
             map { $input->param($_) } (
                 'categorycode',    'description',
@@ -235,7 +238,7 @@ elsif ( $op eq 'add_validate' ) {
                 'enrolmentfee',    'reservefee',
                 'hidelostitems',   'overduenoticerequired',
                 'category_type',   'block_expired',
-                'default_privacy',
+                'default_privacy', 'checkprevissue'
             )
         );
         if ( $inserted ) {
@@ -358,6 +361,7 @@ if ( $op eq 'list' ) {
             enrolmentfee =>
               sprintf( "%.2f", $results->[$i]{'enrolmentfee'} || 0 ),
             "type_" . $results->[$i]{'category_type'} => 1,
+            checkprevissue => $results->[$i]{'checkprevissue'},
         );
 
         if ( C4::Context->preference('EnhancedMessagingPreferences') ) {

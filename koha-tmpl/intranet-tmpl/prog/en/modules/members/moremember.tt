@@ -370,6 +370,15 @@ function validate1(date) {
     </li>
     [% IF ( borrowernotes ) %]<li><span class="label">Circulation note: </span>[% borrowernotes %]</li>[% END %]
     [% IF ( opacnote ) %]<li><span class="label">OPAC note:</span>[% opacnote %]</li>[% END %]
+    <li><span class="label">Check previous loans: </span>
+	      [% IF ( checkprevissue == 'yes' ) %]
+	        Yes
+	      [% ELSIF ( checkprevissue == 'no' ) %]
+	        No
+	      [% ELSE %]
+	        Inherited
+	      [% END %]
+    </li>
     [% IF Koha.Preference( 'NorwegianPatronDBEnable' ) == 1 %]
         [% IF ( sync == 1 ) %]
             <li><span class="label">Activate sync: </span>Yes</li>
