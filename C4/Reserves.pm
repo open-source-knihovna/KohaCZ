@@ -701,7 +701,7 @@ sub GetOtherReserves {
 
 sub ChargeReserveFee {
     my ( $borrowernumber, $fee, $title ) = @_;
-    return if !$fee;
+    return if !$fee || $fee==0; # the last test is needed to include 0.00
     my $accquery = qq{
 INSERT INTO accountlines ( borrowernumber, accountno, date, amount, description, accounttype, amountoutstanding ) VALUES (?, ?, NOW(), ?, ?, 'Res', ?)
     };
@@ -2191,11 +2191,7 @@ sub MoveReserve {
             RevertWaitingStatus({ itemnumber => $itemnumber });
         }
         elsif ( $cancelreserve eq 'cancel' || $cancelreserve ) { # cancel reserves on this item
-            CancelReserve({
-                biblionumber   => $res->{'biblionumber'},
-                itemnumber     => $res->{'itemnumber'},
-                borrowernumber => $res->{'borrowernumber'}
-            });
+            CancelReserve( { reserve_id => $res->{'reserve_id'} } );
         }
     }
 }
