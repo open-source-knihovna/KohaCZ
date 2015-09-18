@@ -76,6 +76,16 @@ $(document).ready(function() {
                 $("#patron_list_dialog > span.patrons-length").html(data.patrons_added_to_list);
                 $("#patron_list_dialog > a").attr("href", "/cgi-bin/koha/patron_lists/list.pl?patron_list_id=" + data.patron_list.patron_list_id);
                 $("#patron_list_dialog > a").html(data.patron_list.name);
+                if ( $('#add_to_patron_list').val() == 'new' ) {
+                    var new_patron_list_added = $("<option>", {
+                        value: data.patron_list.patron_list_id,
+                        text: data.patron_list.name
+                    });
+                    $("#add_to_patron_list optgroup").append(new_patron_list_added);
+                    $("#add_to_patron_list").val(data.patron_list.patron_list_id);
+                    $("#new_patron_list").val('');
+                    $('#add_to_patron_list').change();
+                }
             },
             error: function() {
                 alert("an error occurred");
@@ -164,6 +174,9 @@ $(document).ready(function() {
                 'name': 'name_sorton',
                 'value': 'borrowers.surname borrowers.firstname'
             },{
+                'name': 'dateofbirth',
+                'value': 'borrowers.dateofbirth',
+            },{
                 'name': 'category_sorton',
                 'value': 'categories.description',
             },{
@@ -195,6 +208,7 @@ $(document).ready(function() {
             [% END %]
             { 'mDataProp': 'dt_cardnumber' },
             { 'mDataProp': 'dt_name' },
+            { 'mDataProp': 'dt_dateofbirth' },
             { 'mDataProp': 'dt_category' },
             { 'mDataProp': 'dt_branch' },
             { 'mDataProp': 'dt_dateexpiry' },
@@ -371,6 +385,7 @@ function filterByFirstLetterSurname(letter) {
                 [% END %]
                   <th>Card</th>
                   <th>Name</th>
+                  <th>Date of birth</th>
                   <th>Category</th>
                   <th>Library</th>
                   <th>Expires on</th>

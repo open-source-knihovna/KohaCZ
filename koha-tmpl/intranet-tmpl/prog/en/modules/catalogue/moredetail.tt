@@ -1,3 +1,4 @@
+[% USE Koha %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Catalog &rsaquo; Item details for [% title %] [% FOREACH subtitl IN subtitle %] [% subtitl.subfield %][% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -162,8 +163,8 @@
             </li>
             [% END %]
             <li><span class="label">Withdrawn?:</span>[% IF ( ITEM_DAT.withdrawn ) %]Yes[% ELSE %]No[% END %]
-                [% IF ( CAN_user_circulate ) %]
-                    <form action="updateitem.pl" method="post">
+                [% IF ( CAN_user_circulate && (! Koha.Preference('UsePermanentWithdrawal') || ! ITEM_DAT.withdrawn_permanent )) %]
+                    <form action="updateitem.pl" id="updateitemform" method="post">
                     <input type="hidden" name="biblionumber" value="[% ITEM_DAT.biblionumber %]" />
                     <input type="hidden" name="biblioitemnumber" value="[% ITEM_DAT.biblioitemnumber %]" />
                     <input type="hidden" name="itemnumber" value="[% ITEM_DAT.itemnumber %]" />
@@ -177,9 +178,29 @@
                     <input type="submit" name="submit" class="submit" value="Restore" />[% ELSE %]<input type="submit" name="submit" class="submit" value="Withdraw" />
             [% END %]
                     </form>
+                    [% IF Koha.Preference('UsePermanentWithdrawal') %]<li><span class="label">Permanent withdrawal:</span>
+			<select form="updateitemform" name="withdrawn_categorycode">
+				[% FOREACH withdrawal_desc_option IN ITEM_DAT.withdrawal_desc_options %]
+					<option value="[% withdrawal_desc_option.categorycode %]">[% withdrawal_desc_option.description %]</option>
+				[% END %]
+			<select>
+                        [% UNLESS ( ITEM_DAT.reservescount ) %]
+                            <button form="updateitemform" value="submit_perm" name="submit" type="submit" class="submit" onclick="return confirm('Do you really want to withdraw this item?\nThis action cannot be undone.');" >Withdraw permanently</button>
+                        [% ELSE %]
+                            <button form="updateitemform" value="submit_perm" name="submit" type="submit" class="submit" onclick="return confirm('!! ATTENTION !!\nIt has been placed a reservation on this item\n\nDo you really want to withdraw this item?\nThis action cannot be undone.');" >Withdraw permanently</button>
+                        [% END %]</li>
+                    [% END %]
                 [% END %]
             </li>
+            [% IF ITEM_DAT.withdrawn_permanent %]<li><span class="label">Withdraw number:</span>[% ITEM_DAT.withdrawn_permanent %]</li>[% END %]
             [% IF ITEM_DAT.withdrawn_on %]<li><span class="label">Withdrawn on:</span>[% ITEM_DAT.withdrawn_on | $KohaDates %] &nbsp;</li>[% END %]
+            [% IF ITEM_DAT.withdrawn_categorycode %]<li><span class="label">Withdrawn description:</span>
+
+		[% FOREACH withdrawal_desc_option IN ITEM_DAT.withdrawal_desc_options %]
+                   [% IF (ITEM_DAT.withdrawn_categorycode == withdrawal_desc_option.categorycode) %][% withdrawal_desc_option.description %][% END %]
+		[% END %]
+            &nbsp;</li>[% END %]
+				
             </ol></div>
             <div class="listgroup"><h4>History</h4>
             <ol class="bibliodetails">

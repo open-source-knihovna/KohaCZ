@@ -109,7 +109,6 @@ sub SearchAuthorities {
     my ($tags, $and_or, $excluding, $operator, $value, $offset,$length,$authtypecode,$sortby,$skipmetadata) = @_;
     # warn Dumper($tags, $and_or, $excluding, $operator, $value, $offset,$length,$authtypecode,$sortby);
     my $dbh=C4::Context->dbh;
-    $sortby="" unless $sortby;
     my $query;
     my $qpquery = '';
     my $QParser;
@@ -1040,29 +1039,29 @@ sub BuildSummary {
 # in MARC21 -- purely local tags really ought to be
 # 9XX
             if ($tag eq '100') {
-                $subfields_to_report = 'abcdefghjklmnopqrstvxyz';
+                $subfields_to_report = 'abcdefghjklmnopqrstvxyz7';
             } elsif ($tag eq '110') {
-                $subfields_to_report = 'abcdefghklmnoprstvxyz';
+                $subfields_to_report = 'abcdefghklmnoprstvxyz7';
             } elsif ($tag eq '111') {
-                $subfields_to_report = 'acdefghklnpqstvxyz';
+                $subfields_to_report = 'acdefghklnpqstvxyz7';
             } elsif ($tag eq '130') {
-                $subfields_to_report = 'adfghklmnoprstvxyz';
+                $subfields_to_report = 'adfghklmnoprstvxyz7';
             } elsif ($tag eq '148') {
-                $subfields_to_report = 'abvxyz';
+                $subfields_to_report = 'abvxyz7';
             } elsif ($tag eq '150') {
-                $subfields_to_report = 'abvxyz';
+                $subfields_to_report = 'abvxyz7';
             } elsif ($tag eq '151') {
-                $subfields_to_report = 'avxyz';
+                $subfields_to_report = 'avxyz7';
             } elsif ($tag eq '155') {
-                $subfields_to_report = 'abvxyz';
+                $subfields_to_report = 'abvxyz7';
             } elsif ($tag eq '180') {
-                $subfields_to_report = 'vxyz';
+                $subfields_to_report = 'vxyz7';
             } elsif ($tag eq '181') {
-                $subfields_to_report = 'vxyz';
+                $subfields_to_report = 'vxyz7';
             } elsif ($tag eq '182') {
-                $subfields_to_report = 'vxyz';
+                $subfields_to_report = 'vxyz7';
             } elsif ($tag eq '185') {
-                $subfields_to_report = 'vxyz';
+                $subfields_to_report = 'vxyz7';
             }
             if ($subfields_to_report) {
                 push @authorized, {
