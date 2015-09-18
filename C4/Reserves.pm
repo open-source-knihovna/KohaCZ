@@ -100,9 +100,11 @@ BEGIN {
         &GetReservesFromItemnumber
         &GetReservesFromBiblionumber
         &GetReservesFromBorrowernumber
+	&GetReserveFromBorrowernumberAndItemnumber
         &GetReservesForBranch
         &GetReservesToBranch
         &GetReserveCount
+        &GetReserveCountFromItemnumber
         &GetReserveFee
         &GetReserveInfo
         &GetReserveStatus
@@ -662,6 +664,30 @@ sub GetReserveCount {
     return $row->{counter};
 }
 
+=head2 GetReserveCountFromItemnumber
+
+  $number = &GetReserveCountFromItemnumber($itemnumber);
+
+this function returns the number of reservation for an itemnumber given on input arg.
+
+=cut
+
+
+sub GetReserveCountFromItemnumber {
+    my ($itemnumber) = @_;
+
+    my $dbh = C4::Context->dbh;
+
+    my $sth = $dbh->prepare("
+        SELECT COUNT(*) AS counter
+        FROM reserves
+        WHERE itemnumber = ?");
+
+    $sth->execute($itemnumber);
+
+    return $sth->fetchrow_hashref->{counter};
+}
+
 =head2 GetOtherReserves
 
   ($messages,$nextreservinfo)=$GetOtherReserves(itemnumber);
@@ -708,6 +734,25 @@ sub GetOtherReserves {
     }
 
     return ( $messages, $nextreservinfo );
+}
+
+=head2 ChargeReserveFee
+
+    $fee = ChargeReserveFee( $borrowernumber, $fee, $title );
+
+    Charge the fee for a reserve (if $fee > 0)
+
+=cut
+
+sub ChargeReserveFee {
+    my ( $borrowernumber, $fee, $title ) = @_;
+    return if !$fee;
+    my $accquery = qq{
+INSERT INTO accountlines ( borrowernumber, accountno, date, amount, description, accounttype, amountoutstanding ) VALUES (?, ?, NOW(), ?, ?, 'Res', ?)
+    };
+    my $dbh = C4::Context->dbh;
+    my $nextacctno = &getnextacctno( $borrowernumber );
+    $dbh->do( $accquery, undef, ( $borrowernumber, $nextacctno, $fee, "Reserve Charge - $title", $fee ) );
 }
 
 =head2 GetReserveFee

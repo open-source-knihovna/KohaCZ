@@ -14,7 +14,7 @@ $(document).ready(function(){
     .data( "ui-autocomplete" )._renderItem = function( ul, item ) {
         return $( "<li></li>" )
         .data( "ui-autocomplete-item", item )
-        .append( "<a>" + item.surname + ", " + item.firstname + " (" + item.cardnumber + ") <small>" + item.address + " " + item.city + " " + item.zipcode + " " + item.country + "</small></a>" )
+        .append( "<a>" + item.surname + ", " + item.firstname + " (" + item.cardnumber + ") <small>" + item.dateofbirth + " " + item.address + " " + item.city + " " + item.zipcode + " " + item.country + "</small></a>" )
         .appendTo( ul );
     };
 
@@ -26,7 +26,7 @@ $(document).ready(function(){
     <form action="/cgi-bin/koha/circ/circulation.pl" id="patronsearch" method="post">
     [% IF ( CircAutocompl ) %]
     <div class="autocomplete">
-                <input autocomplete="off" id="findborrower" name="findborrower" size="40" class="focus" type="text" />
+                <input autocomplete="off" id="findborrower" name="findborrower" size="40" class="head-searchbox focus" type="text" />
                 <input id="autocsubmit" type="submit" class="submit" value="Submit" />
                 <input name="branch" value="[% Branches.GetLoggedInBranchcode() %]" type="hidden" />
                 <input name="printer" value="" type="hidden" />
@@ -36,7 +36,7 @@ $(document).ready(function(){
             [% END %]
         </div>
 	[% ELSE %]
-            <input id="findborrower" name="findborrower" size="40" class="focus" type="text" />
+            <input id="findborrower" name="findborrower" size="40" class="head-searchbox focus" type="text" />
             <input name="branch" value="[% branch %]" type="hidden" />
             <input name="printer" value="" type="hidden" />
             [% IF ( stickyduedate ) %]
