@@ -1,0 +1,84 @@
+#!/usr/bin/perl
+
+# Copyright 2007 LibLime
+# Copyright 2012 software.coop and MJ Ray
+#
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# Koha is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with Koha; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+
+use strict;
+use warnings;
+
+use CGI qw ( -utf8 );
+use C4::Auth qw/check_api_auth/;
+use XML::Simple;
+
+use C4::NCIP::LookupItem qw/lookupItem/;
+use C4::NCIP::LookupItemSet qw/lookupItemSet/;
+use C4::NCIP::LookupUser qw/lookupUser/;
+use C4::NCIP::LookupRequest qw/lookupRequest/;
+use C4::NCIP::RequestItem qw/requestItem/;
+use C4::NCIP::RenewItem qw/renewItem/;
+use C4::NCIP::CancelRequestItem qw/cancelRequestItem/;
+
+my $query = new CGI;
+binmode STDOUT, ':encoding(UTF-8)';
+
+my ($status, $cookie, undef)
+    = check_api_auth($query, {catalogue => 'catalogue'});
+
+C4::NCIP::NcipUtils::print403($query, $status)
+    unless ($status eq "ok");
+
+# do initial validation
+
+my $service = $query->param('service');
+
+if ($query->request_method eq "GET") {
+
+    C4::NCIP::NcipUtils::print400($query, "Param service is undefined..")
+        unless $service;
+
+    if ($service eq 'lookup_item') {
+	C4::NCIP::LookupItem::lookupItem($query);
+    } elsif ($service eq 'lookup_item_set') {
+        C4::NCIP::LookupItemSet::lookupItemSet($query);
+    } elsif ($service eq 'lookup_user') {
+        C4::NCIP::LookupUser::lookupUser($query);
+    } elsif ($service eq 'lookup_request') {
+        C4::NCIP::LookupRequest::lookupRequest($query);
+    } elsif ($service eq 'request_item') {
+        C4::NCIP::RequestItem::requestItem($query);
+    } elsif ($service eq 'renew_item') {
+        C4::NCIP::RenewItem::renewItem($query);
+    } elsif ($service eq 'cancel_request_item') {
+        C4::NCIP::CancelRequestItem::cancelRequestItem($query);
+    }
+    C4::NCIP::NcipUtils::print400($query,
+        "Param service not recognized..");
+
+} elsif ($query->request_method eq "POST") {
+    # User is already authentified
+    print $query->header(-type => 'text/xml', cookie => $cookie);
+    print XMLout({ status => $status }, NoAttr => 1, RootName => 'response', XMLDecl => 1);
+} else {
+    print $query->header(
+        -type   => 'text/plain',
+        -status => '405 Method Not Allowed'
+        ),
+        'Only GET & POST method is allowed..';
+    exit 0;
+}

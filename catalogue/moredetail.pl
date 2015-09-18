@@ -34,7 +34,10 @@ use C4::Circulation;  # to use itemissues
 use C4::Members; # to use GetMember
 use C4::Search;		# enabled_staff_search_views
 use C4::Members qw/GetHideLostItemsPreference/;
-use C4::Reserves qw(GetReservesFromBiblionumber);
+use C4::Reserves qw(GetReservesFromBiblionumber GetReserveCountFromItemnumber);
+
+use C4::NCIP::NcipUtils qw/prinJson/;
+use JSON qw /to_json/;
 
 use Koha::Acquisition::Bookseller;
 use Koha::DateUtils;
@@ -199,6 +202,13 @@ foreach my $item (@items){
         }
     }
 
+    $item->{reservescount} = GetReserveCountFromItemnumber($item->{itemnumber});
+
+    my $sth = C4::Context->dbh->prepare("SELECT * FROM `default_permanent_withdrawal_reason`");
+    $sth->execute();
+
+    $item->{withdrawal_desc_options} = $sth->fetchall_arrayref({});
+#    $item->{json} = to_json($item);
 }
 $template->param(count => $data->{'count'},
 	subscriptionsnumber => $subscriptionsnumber,

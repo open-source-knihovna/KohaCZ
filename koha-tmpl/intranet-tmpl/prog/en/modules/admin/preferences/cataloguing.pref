@@ -136,6 +136,12 @@ Cataloging:
             - pref: URLLinkText
             - as the text of links embedded in MARC records.
         -
+            - pref: UsePermanentWithdrawal
+              choices:
+                  yes: Use
+                  no: "Don't use"
+            - permanent withdrawal mode for withdrawing items. This generates an unique withdrawal number.
+        -
             - pref: UseControlNumber
               choices:
                   yes: Use
