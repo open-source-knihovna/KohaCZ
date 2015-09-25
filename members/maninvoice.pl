@@ -72,7 +72,7 @@ if ($add){
             $template->param( 'ERROR' => $error );
             output_html_with_http_headers $input, $cookie, $template->output;
         } else {
-            print $input->redirect("/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber");
+            print $input->redirect("/cgi-bin/koha/members/pay.pl?borrowernumber=$borrowernumber");
             exit;
         }
     }
