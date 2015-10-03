@@ -23,4 +23,4 @@ Po úspěšném otestování nového kódu se vydá nový [Release](https://gith
 
 Pokud z jakéhokoliv důvodu budete chtít vyvíjet na nejnovější verzi Kohy, pak tak čiňte do větve [latest](https://github.com/open-source-knihovna/KohaCZ/tree/latest).
 
-Všechny naše patche je nutné přenést do Bugzilly a nechat projít stadardní cestou schvalování. [Podrobnosti k vývoji na wiki Koha] http://wiki.koha-community.org/wiki/Category:Development
+Všechny naše patche je nutné přenést do Bugzilly a nechat projít stadardní cestou schvalování. [Podrobnosti k vývoji na wiki Koha] (http://wiki.koha-community.org/wiki/Category:Development).
