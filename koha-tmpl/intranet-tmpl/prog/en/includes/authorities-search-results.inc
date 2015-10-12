@@ -112,16 +112,6 @@
                 [% END %]
             </div>
             [% END %]
-            [% IF summary.notes %]
-		[% FOREACH note IN summary.notes %]
-			[% IF ( note.field == '678' ) %]
-				<br />Dalsi udaje:<br /> [% note.note | html %]
-			[% END %]
-		[% END %]
-            [% END %]
-            [% IF summary.mainentry %]
-		<br /><br />Pole 100:<br /> [% summary.mainentry | html %]<br />
-            [% END %]
             [% IF ( summary.seealso.size >= 1 ) %]
             <div class="seealso">
                 <span class="seealso">see also:</span>
