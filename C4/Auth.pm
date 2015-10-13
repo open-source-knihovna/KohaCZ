@@ -1248,9 +1248,7 @@ sub checkauth {
         );
     }
 
-    my $self_url = $query->url( -absolute => 1 );
     $template->param(
-        url         => $self_url,
         LibraryName => C4::Context->preference("LibraryName"),
     );
     $template->param(%info);
