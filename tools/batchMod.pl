@@ -94,7 +94,7 @@ my $itemrecord;
 my $nextop="";
 my @errors; # store errors found while checking data BEFORE saving item.
 my $items_display_hashref;
-my $tagslib = &GetMarcStructure(1);
+our $tagslib = &GetMarcStructure(1);
 
 my $deleted_items = 0;     # Number of deleted items
 my $withdrawn_items = 0;     # Number of deleted items
