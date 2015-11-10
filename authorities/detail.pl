@@ -152,6 +152,16 @@ sub build_tabs {
             }
         }
         $template->param( singletab => (scalar(@BIG_LOOP)==1), BIG_LOOP => \@BIG_LOOP );
+
+        if (C4::Context->preference("EnablePushingToAuthorityServer")) {
+
+          my $sth = $dbh->prepare("select id, servername from z3950servers where recordtype='authority';");
+          $sth->execute();
+
+          my $z3950servers = $sth->fetchall_arrayref( {} );
+
+          $template->param( z3950servers => $z3950servers );
+        }
 }
 
 
