@@ -14,6 +14,9 @@
   "/accountlines": {
     "$ref": "paths/accountlines.json#/~1accountlines"
   },
+  "/accountlines/{accountlines_id}": {
+    "$ref": "paths/accountlines.json#/~1accountlines~1{accountlines_id}"
+  },
   "/holds": {
     "$ref": "paths/holds.json#/~1holds"
   },
