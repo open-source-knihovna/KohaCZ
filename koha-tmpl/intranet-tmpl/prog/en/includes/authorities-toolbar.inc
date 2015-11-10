@@ -69,7 +69,7 @@
             </a>
             <ul class="dropdown-menu">
 	        [% FOREACH z3950server IN z3950servers %]
-                    <li><a href="/cgi-bin/koha/authorities/push-to-server.pl?authid=[% authid %]&sid=[% z3950server.id %]">[% z3950server.servername %]</a></li>
+                    <li><a href="/cgi-bin/koha/authorities/detail.pl?authid=[% authid %]&pushToZ3950Server&sid=[% z3950server.id %]">[% z3950server.servername %]</a></li>
 		[% END %]
 	    </ul>
         </div>

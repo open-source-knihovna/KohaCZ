@@ -210,6 +210,26 @@ if (not defined $record) {
     exit;
 }
 
+if ( C4::Context->preference("EnablePushingToAuthorityServer") ) {
+  my $serverid = $query->param('sid');
+
+  if ( defined $query->param('pushToZ3950Server') and defined $serverid ) {
+    my $sth = $dbh->prepare("select host, port, userid, password from z3950servers where id=?");
+
+    $sth->execute($serverid);
+    my $server = $sth->fetchrow_hashref();
+
+    if ($server) {
+      my $host = $server->{host};
+      my $port = $server->{port};
+      my $uid  = $server->{userid};
+      my $pw   = $server->{password};
+
+      #TODO: Send the $record into $server ...
+    }
+  }
+}
+
 if (C4::Context->preference("AuthDisplayHierarchy")){
     $template->{VARS}->{'displayhierarchy'} = C4::Context->preference("AuthDisplayHierarchy");
     $template->{VARS}->{'loophierarchies'} = GenerateHierarchy($authid);
