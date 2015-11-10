@@ -11,6 +11,9 @@
   "/cities/{cityid}": {
     "$ref": "paths/cities.json#/~1cities~1{cityid}"
   },
+  "/accountlines": {
+    "$ref": "paths/accountlines.json#/~1accountlines"
+  },
   "/holds": {
     "$ref": "paths/holds.json#/~1holds"
   },

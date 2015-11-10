@@ -14,6 +14,9 @@
   "hold": {
     "$ref": "definitions/hold.json"
   },
+  "accountline": {
+    "$ref": "definitions/accountline.json"
+  },
   "holds": {
     "$ref": "definitions/holds.json"
   },
