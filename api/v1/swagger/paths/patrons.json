@@ -118,35 +118,94 @@
           "name": "body",
           "in": "body",
           "description": "A JSON object containing informations about passwords",
-          "required": true,
-          "schema": {
-            "type": "object",
-            "properties": {
-              "current_password": {
-                "description": "Current password",
-                "type": "string"
-              },
-              "new_password": {
-                "description": "New password",
-                "type": "string"
-              }
-            }
-          }
-        }
+	  "required": true,
+	  "schema": {
+	      "type": "object",
+	      "properties": {
+		  "current_password": {
+		      "description": "Current password",
+		      "type": "string"
+		  },
+		  "new_password": {
+		      "description": "New password",
+		      "type": "string"
+		  }
+	      }
+	  }
+	}
       ],
       "produces": [
           "application/json"
       ],
       "responses": {
-        "200": {
-          "description": "Password changed"
+          "200": {
+              "description": "Password changed"
+          },
+          "400": {
+              "description": "Bad request",
+              "schema": {
+                  "$ref": "../definitions.json#/error"
+	      }
+	  },
+          "403": {
+              "description": "Access forbidden",
+              "schema": {
+                  "$ref": "../definitions.json#/error"
+              }
+          },
+          "404": {
+		"description": "Patron not found",
+	        "schema": {
+		    "$ref": "../definitions.json#/error"
+	        }
+	    }
+	},
+        "x-koha-authorization": {
+            "allow-owner": true,
+            "permissions": {
+               "borrowers": "1"
+            }
+        }
+    }
+  },
+
+  "/patrons/{borrowernumber}/payment": {
+    "post": {
+      "operationId": "payForPatron",
+      "tags": ["accountlines"],
+      "produces": [
+        "application/json"
+      ],
+      "parameters": [
+        { "$ref": "../parameters.json#/borrowernumberPathParam" },
+        {
+          "name": "body",
+          "in": "body",
+          "description": "A JSON object containing fields to modify",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "amount": {
+                "description": "Amount to pay"
+              },
+              "note": {
+                "description": "Payment note"
+              }
+            }
+          }
+        }
+      ],
+      "consumes": ["application/json"],
+      "produces": ["application/json"],
+      "responses": {
+        "204": {
+          "description": "Success"
         },
         "400": {
-          "description": "Bad request",
-          "schema": {
-            "$ref": "../definitions.json#/error"
-          }
-        },
+          "description": "Missing or wrong parameters",
+          "schema": { "$ref": "../definitions.json#/error" }
+	},
         "403": {
           "description": "Access forbidden",
           "schema": {
@@ -161,9 +220,8 @@
         }
       },
       "x-koha-authorization": {
-        "allow-owner": true,
         "permissions": {
-          "borrowers": "1"
+          "updatecharges": "1"
         }
       }
     }

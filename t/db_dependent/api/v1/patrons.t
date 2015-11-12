@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 46;
+use Test::More tests => 57;
 use Test::Mojo;
 use t::lib::TestBuilder;
 use t::lib::Mocks;
@@ -28,6 +28,7 @@ use C4::Context;
 use Koha::AuthUtils;
 use Koha::Database;
 use Koha::Patron;
+use Koha::Account::Lines;
 
 my $schema  = Koha::Database->new->schema;
 my $builder = t::lib::TestBuilder->new();
@@ -152,8 +153,12 @@ my $loggedinuser = $builder->build({
     value => {
         branchcode   => $branchcode,
         categorycode => $categorycode,
+<<<<<<< HEAD
         flags        => 16, # borrowers flag
         password     => Koha::AuthUtils::hash_password($password),
+=======
+        flags        => 1040 # borrowers and updatecharges (2^4 | 2^10)
+>>>>>>> Bug 15165 - Add API routes to pay accountlines
     }
 });
 
@@ -236,4 +241,60 @@ $tx->req->cookies({name => 'CGISESSID', value => $session3->id});
 $t->request_ok($tx)
   ->status_is(200);
 
+<<<<<<< HEAD
 $schema->storage->txn_rollback;
+=======
+
+# Payment tests
+my $borrower2 = $builder->build({
+    source => 'Borrower',
+    value => {
+        branchcode   => $branchcode,
+        categorycode => $categorycode,
+    }
+});
+my $borrowernumber2 = $borrower2->{borrowernumber};
+
+$dbh->do(q|
+    INSERT INTO accountlines (borrowernumber, amount, accounttype, amountoutstanding)
+    VALUES (?, 26, 'A', 26)
+    |, undef, $borrowernumber2);
+
+$t->post_ok("/api/v1/patrons/$borrowernumber2/payment" => json => {'amount' => 8})
+    ->status_is(401);
+
+my $post_data2 = {
+    'amount' => 24,
+    'note' => 'Partial payment'
+};
+
+$tx = $t->ua->build_tx(POST => "/api/v1/patrons/8789798797/payment" => json => $post_data2);
+$tx->req->cookies({name => 'CGISESSID', value => $session->id});
+$tx->req->env({REMOTE_ADDR => '127.0.0.1'});
+$t->request_ok($tx)
+  ->status_is(404);
+
+$tx = $t->ua->build_tx(POST => "/api/v1/patrons/$borrowernumber2/payment" => json => {amount => 0});
+$tx->req->cookies({name => 'CGISESSID', value => $session->id});
+$tx->req->env({REMOTE_ADDR => '127.0.0.1'});
+$t->request_ok($tx)
+  ->status_is(400);
+
+$tx = $t->ua->build_tx(POST => "/api/v1/patrons/$borrowernumber2/payment" => json => {amount => 'foo'});
+$tx->req->cookies({name => 'CGISESSID', value => $session->id});
+$tx->req->env({REMOTE_ADDR => '127.0.0.1'});
+$t->request_ok($tx)
+  ->status_is(400);
+
+$tx = $t->ua->build_tx(POST => "/api/v1/patrons/$borrowernumber2/payment" => json => $post_data2);
+$tx->req->cookies({name => 'CGISESSID', value => $session->id});
+$tx->req->env({REMOTE_ADDR => '127.0.0.1'});
+$t->request_ok($tx)
+  ->status_is(204);
+
+my $accountline_partiallypaid = Koha::Account::Lines->search({'borrowernumber' => $borrowernumber2, 'amount' => 26})->unblessed()->[0];
+
+is($accountline_partiallypaid->{amountoutstanding}, '2.000000');
+
+$dbh->rollback;
+>>>>>>> Bug 15165 - Add API routes to pay accountlines
