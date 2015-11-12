@@ -18,6 +18,9 @@ package C4::AuthoritiesMarc;
 
 use strict;
 use warnings;
+
+use Net::Z3950::ZOOM;
+
 use C4::Context;
 use MARC::Record;
 use C4::Biblio;
@@ -62,6 +65,9 @@ BEGIN {
 
         &GuessAuthTypeCode
         &GuessAuthId
+
+        &PushAuthToZ3950
+
  	);
 }
 
@@ -1639,6 +1645,143 @@ sub get_auth_type_location {
             return C4::AuthoritiesMarc::UNIMARC::default_auth_type_location();
         }
     }
+}
+
+=head2 PushAuthToZ3950
+
+  my $result = PushAuthToZ3950($z3950serverId, $record)
+
+=cut
+
+sub PushAuthToZ3950 {
+
+  my ( $serverid, $record ) = @_;
+
+  my $toRet;
+
+  # Check we have what we need ..
+  if ( not defined $serverid or not defined $record ) {
+    $toRet->{msg}     = '$serverid or $authid was not specified while calling C4::AuthoritiesMarc::PushAuthToZ3950( $serverid, $authid )';
+    $toRet->{success} = 0;
+    return $toRet;
+  }
+
+  $record->encoding('UTF-8');
+
+  # Obtain the Z3950 server information
+  my $dbh = C4::Context->dbh;
+  my $sth = $dbh->prepare("select host, port, db, userid, password, syntax from z3950servers where id=?");
+
+  $sth->execute($serverid);
+  my $z3950server = $sth->fetchrow_hashref();
+
+  if ($z3950server) {
+
+    # Decide if we will create or update an authority (based on 100 $7 presence)
+    my ( $action, $czInfo );
+    my $authoritativeId = $record->subfield( '100', "7" );    #FIXME
+
+    if ( defined $authoritativeId ) {
+
+      $action = "recordReplace";
+      $czInfo = "J-OPRAVA";                                   # FIXME: Decide what to write where ... and should that be saved or not ?
+    }
+    else {
+      $action = "recordInsert";
+      $czInfo = "J-NAVRH";                                    # FIXME: Decide what to write where ... and should that be saved or not ?
+
+      $authoritativeId = "new";
+    }
+
+    # Replace the 001 with authoritativeId ..
+    my $field = $record->field('001');
+    $field->update("$authoritativeId");
+
+    $record->add_fields( 900, " ", " ", a => $czInfo, );
+
+    my $rawRecord = $record->as_usmarc();
+
+    my $server       = $z3950server->{host};
+    my $port         = $z3950server->{port};
+    my $databaseName = $z3950server->{db};
+    my $user         = $z3950server->{userid};
+    my $password     = $z3950server->{password};
+    my $syntax       = $z3950server->{syntax};
+
+    my $implementationVersion = "1.0";
+    my $implementationName    = "Koha's Z3950 authority pushing client";
+
+    my $options = Net::Z3950::ZOOM::options_create();
+
+    Net::Z3950::ZOOM::options_set( $options, user                  => $user )                  if defined $user;
+    Net::Z3950::ZOOM::options_set( $options, password              => $password )              if defined $password;
+    Net::Z3950::ZOOM::options_set( $options, implementationName    => $implementationName )    if defined $implementationName;
+    Net::Z3950::ZOOM::options_set( $options, implementationVersion => $implementationVersion ) if defined $implementationVersion;
+
+    Net::Z3950::ZOOM::options_set( $options, databaseName => $databaseName );
+
+    # Create the connection to the server
+    my $conn = Net::Z3950::ZOOM::connection_create($options);
+
+    # Send an "init request" (required by earlier version of YAZ's Z3950 servers)
+    Net::Z3950::ZOOM::connection_connect( $conn, $server, $port );
+
+    # Create an package to send over connection
+    $options = Net::Z3950::ZOOM::options_create();
+    my $package = Net::Z3950::ZOOM::connection_package( $conn, $options );
+
+    Net::Z3950::ZOOM::package_option_set( $package, 'package-name' => $implementationName ) if defined $implementationName;
+
+    Net::Z3950::ZOOM::package_option_set( $package, 'action'       => $action );
+    Net::Z3950::ZOOM::package_option_set( $package, 'record'       => $rawRecord );
+    Net::Z3950::ZOOM::package_option_set( $package, 'syntax'       => $syntax );
+    Net::Z3950::ZOOM::package_option_set( $package, 'databaseName' => $databaseName );
+
+    # Set empty targetReference ... here will be stored the result
+    Net::Z3950::ZOOM::package_option_set( $package, 'targetReference' => "" );
+
+    # Send the package containing the authority ..
+    Net::Z3950::ZOOM::package_send( $package, 'update' );
+
+    my $errmsg  = "";
+    my $addinfo = "";
+    my $dset    = "";
+
+    # Check for errors ..
+    my $errcode = Net::Z3950::ZOOM::connection_error_x( $conn, $errmsg, $addinfo, $dset );
+
+    if ( $errcode != 0 ) {
+
+      # The pushing have failed :( ..
+      $toRet->{errCode} = $errcode;
+
+      $toRet->{errMsg}  = $errmsg  if defined $errmsg;
+      $toRet->{addInfo} = $addinfo if defined $addinfo;
+
+      $toRet->{msg}     = "Authority was not pushed correctly";
+      $toRet->{success} = 0;
+
+    }
+    else {
+
+      # The pushing have succeeded :))
+      my $reference = Net::Z3950::ZOOM::package_option_get( $package, 'targetReference' );
+
+      $toRet->{reference} = $reference if defined $reference;
+
+      $toRet->{msg}     = "Authortity was successfully sent";
+      $toRet->{success} = 1;
+    }
+
+    Net::Z3950::ZOOM::package_destroy($package);
+    Net::Z3950::ZOOM::connection_destroy($conn);
+  }
+  else {
+    $toRet->{msg}     = "Server ID not recognized";
+    $toRet->{success} = 0;
+  }
+
+  return $toRet;
 }
 
 END { }       # module clean-up code here (global destructor)

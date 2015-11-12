@@ -40,6 +40,8 @@ parameters tables.
 use strict;
 use warnings;
 
+use JSON qw(to_json);
+
 use C4::AuthoritiesMarc;
 use C4::Auth;
 use C4::Context;
@@ -214,19 +216,11 @@ if ( C4::Context->preference("EnablePushingToAuthorityServer") ) {
   my $serverid = $query->param('sid');
 
   if ( defined $query->param('pushToZ3950Server') and defined $serverid ) {
-    my $sth = $dbh->prepare("select host, port, userid, password from z3950servers where id=?");
+    my $result = PushAuthToZ3950( $serverid, $record, $authid );
 
-    $sth->execute($serverid);
-    my $server = $sth->fetchrow_hashref();
-
-    if ($server) {
-      my $host = $server->{host};
-      my $port = $server->{port};
-      my $uid  = $server->{userid};
-      my $pw   = $server->{password};
-
-      #TODO: Send the $record into $server ...
-    }
+    # TODO: Print out the results of the pushing process ($result is hashref)
+    # Example success: {"msg":"Authortity was successfully sent","reference":"","success":1}
+    # Example failure: {"addInfo":"127.0.0.1:8888","errMsg":"Connect failed","msg":"Authority was not pushed correctly","success":0,"errCode":10000}
   }
 }
 
@@ -257,4 +251,3 @@ $template->param(authid => $authid,
 
 $template->{VARS}->{marcflavour} = C4::Context->preference("marcflavour");
 output_html_with_http_headers $query, $cookie, $template->output;
-
