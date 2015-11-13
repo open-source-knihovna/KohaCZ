@@ -10631,7 +10631,7 @@ if ( CheckVersion($DBversion) ) {
     $dbh->do(q|
         INSERT INTO letter (module, code, name, title, content, message_transport_type)
         VALUES
-        ('suggestions','TO_PROCESS','Notify budget owner', 'A suggestion is ready to be processed','Dear <<borrowers.firstname>> <<borrowers.surname>>,\n\nA new suggestion is ready to be processed: <<suggestions.title>> by <<suggestions.autho    r>>.\n\nThank you,\n\n<<branches.branchname>>', 'email')
+        ('suggestions','TO_PROCESS','Notify fund owner', 'A suggestion is ready to be processed','Dear <<borrowers.firstname>> <<borrowers.surname>>,\n\nA new suggestion is ready to be processed: <<suggestions.title>> by <<suggestions.autho    r>>.\n\nThank you,\n\n<<branches.branchname>>', 'email')
     |);
     print "Upgrade to $DBversion done (Bug 13014: Add the TO_PROCESS letter code)\n";
     SetVersion($DBversion);
@@ -11348,6 +11348,12 @@ if(CheckVersion($DBversion)) {
         VALUES('MergeReportFields','','Displayed fields for deleted MARC records after merge',NULL,'Free')
     });
     print "Upgrade to $DBversion done (Bug 8064: Merge several biblio records)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.055";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 3.22 beta)\n";
     SetVersion($DBversion);
 }
 
