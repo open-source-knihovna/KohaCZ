@@ -19,7 +19,7 @@ use Data::Dumper;
 use CGI qw ( -utf8 );
 use C4::Auth qw(&check_api_auth);
 
-use UNIVERSAL qw(can);	# make sure this is *after* C4 modules.
+use UNIVERSAL::can;
 
 use vars qw(@ISA $VERSION @EXPORT_OK);
 
@@ -643,7 +643,7 @@ sub handle_checkin {
         syslog("LOG_WARNING", "received no-block checkin from terminal '%s'", $account->{id});
         $status = $ils->checkin_no_block($item_id, $trans_date, $return_date, $item_props, $cancel);
     } else {
-        $status = $ils->checkin($item_id, $trans_date, $return_date, $my_branch, $item_props, $cancel);
+        $status = $ils->checkin($item_id, $trans_date, $return_date, $my_branch, $item_props, $cancel, $account->{checked_in_ok});
     }
 
     $patron = $status->patron;

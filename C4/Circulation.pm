@@ -2817,12 +2817,15 @@ sub CanBookBeRenewed {
         return ( 0, 'overdue');
     }
 
-    if ( $issuingrule->{norenewalbefore} ) {
+    if ( defined $issuingrule->{norenewalbefore}
+        and $issuingrule->{norenewalbefore} ne "" )
+    {
 
         # Get current time and add norenewalbefore.
         # If this is smaller than date_due, it's too soon for renewal.
+        my $now = dt_from_string;
         if (
-            DateTime->now( time_zone => C4::Context->tz() )->add(
+            $now->add(
                 $issuingrule->{lengthunit} => $issuingrule->{norenewalbefore}
             ) < $itemissue->{date_due}
           )
@@ -2830,9 +2833,20 @@ sub CanBookBeRenewed {
             return ( 0, "auto_too_soon" ) if $itemissue->{auto_renew};
             return ( 0, "too_soon" );
         }
+        elsif ( $itemissue->{auto_renew} ) {
+            return ( 0, "auto_renew" );
+        }
     }
 
-    return ( 0, "auto_renew" ) if $itemissue->{auto_renew};
+    # Fallback for automatic renewals:
+    # If norenewalbefore is undef, don't renew before due date.
+    elsif ( $itemissue->{auto_renew} ) {
+        my $now = dt_from_string;
+        return ( 0, "auto_renew" )
+          if $now >= $itemissue->{date_due};
+        return ( 0, "auto_too_soon" );
+    }
+
     return ( 1, undef );
 }
 
@@ -3044,9 +3058,11 @@ sub GetSoonestRenewDate {
     my $issuingrule =
       GetIssuingRule( $borrower->{categorycode}, $item->{itype}, $branchcode );
 
-    my $now = DateTime->now( time_zone => C4::Context->tz() );
+    my $now = dt_from_string;
 
-    if ( $issuingrule->{norenewalbefore} ) {
+    if ( defined $issuingrule->{norenewalbefore}
+        and $issuingrule->{norenewalbefore} ne "" )
+    {
         my $soonestrenewal =
           $itemissue->{date_due}->subtract(
             $issuingrule->{lengthunit} => $issuingrule->{norenewalbefore} );
@@ -3529,92 +3545,6 @@ sub CalcDateDue {
 
     return $datedue;
 }
-
-
-=head2 CheckRepeatableHolidays
-
-  $countrepeatable = CheckRepeatableHoliday($itemnumber,$week_day,$branchcode);
-
-This function checks if the date due is a repeatable holiday
-
-C<$date_due>   = returndate calculate with no day check
-C<$itemnumber>  = itemnumber
-C<$branchcode>  = localisation of issue 
-
-=cut
-
-sub CheckRepeatableHolidays{
-my($itemnumber,$week_day,$branchcode)=@_;
-my $dbh = C4::Context->dbh;
-my $query = qq|SELECT count(*)  
-	FROM repeatable_holidays 
-	WHERE branchcode=?
-	AND weekday=?|;
-my $sth = $dbh->prepare($query);
-$sth->execute($branchcode,$week_day);
-my $result=$sth->fetchrow;
-return $result;
-}
-
-
-=head2 CheckSpecialHolidays
-
-  $countspecial = CheckSpecialHolidays($years,$month,$day,$itemnumber,$branchcode);
-
-This function check if the date is a special holiday
-
-C<$years>   = the years of datedue
-C<$month>   = the month of datedue
-C<$day>     = the day of datedue
-C<$itemnumber>  = itemnumber
-C<$branchcode>  = localisation of issue 
-
-=cut
-
-sub CheckSpecialHolidays{
-my ($years,$month,$day,$itemnumber,$branchcode) = @_;
-my $dbh = C4::Context->dbh;
-my $query=qq|SELECT count(*) 
-	     FROM `special_holidays`
-	     WHERE year=?
-	     AND month=?
-	     AND day=?
-             AND branchcode=?
-	    |;
-my $sth = $dbh->prepare($query);
-$sth->execute($years,$month,$day,$branchcode);
-my $countspecial=$sth->fetchrow ;
-return $countspecial;
-}
-
-=head2 CheckRepeatableSpecialHolidays
-
-  $countspecial = CheckRepeatableSpecialHolidays($month,$day,$itemnumber,$branchcode);
-
-This function check if the date is a repeatble special holidays
-
-C<$month>   = the month of datedue
-C<$day>     = the day of datedue
-C<$itemnumber>  = itemnumber
-C<$branchcode>  = localisation of issue 
-
-=cut
-
-sub CheckRepeatableSpecialHolidays{
-my ($month,$day,$itemnumber,$branchcode) = @_;
-my $dbh = C4::Context->dbh;
-my $query=qq|SELECT count(*) 
-	     FROM `repeatable_holidays`
-	     WHERE month=?
-	     AND day=?
-             AND branchcode=?
-	    |;
-my $sth = $dbh->prepare($query);
-$sth->execute($month,$day,$branchcode);
-my $countspecial=$sth->fetchrow ;
-return $countspecial;
-}
-
 
 
 sub CheckValidBarcode{

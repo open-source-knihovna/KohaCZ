@@ -209,7 +209,7 @@ if ( $authcat =~ m/^Asort/ ) {
     $sth->finish;
     @authvals = sort { $a <=> $b } @authvals;
 }
-elsif ( $authcat eq 'MONTHS' ) {
+elsif ( $authcat eq 'MONTHS' && $budget_period_startdate && $budget_period_enddate ) {
 
     # build months
     my @start_date = UnixDate( $budget_period_startdate, ( '%Y', '%m', '%d' ) );

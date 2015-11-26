@@ -10801,9 +10801,17 @@ if ( CheckVersion($DBversion) ) {
         LEFT JOIN course_items USING(ci_id)
         WHERE course_items.ci_id IS NULL
     });
+
+    my ($print_error) = $dbh->{PrintError};
+    $dbh->{RaiseError} = 0;
+    $dbh->{PrintError} = 0;
+    $dbh->do(q{ALTER TABLE course_reserves DROP FOREIGN KEY course_reserves_ibfk_2});
+    $dbh->do(q{ALTER TABLE course_reserves DROP INDEX course_reserves_ibfk_2});
+    $dbh->{PrintError} = $print_error;
+
     $dbh->do(q{
         ALTER IGNORE TABLE course_reserves
-            add CONSTRAINT course_reserves_ibfk_2
+            ADD CONSTRAINT course_reserves_ibfk_2
                 FOREIGN KEY (ci_id) REFERENCES course_items (ci_id)
                 ON DELETE CASCADE ON UPDATE CASCADE
     });
@@ -10869,7 +10877,7 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "3.21.00.027";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q|
-        INSERT INTO permissions (module_bit, code, description)
+        INSERT IGNORE INTO permissions (module_bit, code, description)
         VALUES (1, 'self_checkout', 'Perform self checkout at the OPAC. It should be used for the patron matching the AutoSelfCheckID')
     |);
 
@@ -11268,11 +11276,11 @@ if ( CheckVersion($DBversion) ) {
             sound varchar(255) NOT NULL,
             PRIMARY KEY (id),
             KEY precedence (precedence)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
     });
 
     $dbh->do(q{
-        INSERT INTO audio_alerts VALUES
+        INSERT IGNORE INTO audio_alerts VALUES
         (1, 1, '.audio-alert-action', 'opening.ogg'),
         (2, 2, '.audio-alert-warning', 'critical.ogg'),
         (3, 3, '.audio-alert-success', 'beep.ogg');
@@ -11354,6 +11362,19 @@ if(CheckVersion($DBversion)) {
 $DBversion = "3.21.00.055";
 if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Koha 3.22 beta)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.056";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        UPDATE systempreferences
+        SET
+            options='metric|us|iso|dmydot',
+            explanation='Define global date format (us mm/dd/yyyy, metric dd/mm/yyy, ISO yyyy-mm-dd, DMY separated by dots dd.mm.yyyy)'
+        WHERE variable='dateformat'
+    });
+    print "Upgrade to $DBversion done (Bug 12072: New dateformat dd.mm.yyyy)\n";
     SetVersion($DBversion);
 }
 

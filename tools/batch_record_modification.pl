@@ -167,7 +167,6 @@ if ( $op eq 'form' ) {
             exit 0;
         } elsif (defined $pid) {
             close STDOUT;
-            close STDERR;
         } else {
             warn "fork failed while attempting to run tools/batch_record_modification.pl as a background job";
             exit 0;
@@ -192,7 +191,8 @@ if ( $op eq 'form' ) {
             my $error = eval {
                 my $record = GetMarcBiblio( $biblionumber );
                 ModifyRecordWithTemplate( $mmtid, $record );
-                ModBiblio( $record, $biblionumber );
+                my $frameworkcode = C4::Biblio::GetFrameworkCode( $biblionumber );
+                ModBiblio( $record, $biblionumber, $frameworkcode );
             };
             if ( $error and $error != 1 or $@ ) { # ModBiblio returns 1 if everything as gone well
                 push @messages, {

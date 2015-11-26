@@ -1,5 +1,5 @@
 INSERT IGNORE INTO biblio_framework VALUES
-		('FA', 'Fast Add Framework');
+		('FA', 'Cat. veloce');
 
 INSERT IGNORE INTO marc_tag_structure (tagfield, liblibrarian, libopac, repeatable, mandatory, authorised_value, frameworkcode)
 SELECT tagfield, liblibrarian, libopac, repeatable, mandatory, authorised_value, 'FA'

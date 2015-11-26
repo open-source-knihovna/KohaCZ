@@ -21,6 +21,11 @@
 <script type="text/javascript">
 //<![CDATA[
 $(document).ready(function() {
+        if($('#barcodelist').length) {
+            $('#barcodelist').focus();
+        } else if ($('#checkoutrenew').length) {
+            $('#checkoutrenew').focus();
+        }
         $("#issuest").dataTable($.extend(true, {}, dataTablesDefaults, {
             "sDom": 't',
             "aaSorting": [],
@@ -52,8 +57,19 @@ $(document).ready(function() {
 
 <div class="yui-g">
 
+[% IF ( borrowernumber ) %]
+[% INCLUDE 'members-toolbar.inc' %]
+[% END %]
+
 [% IF NOT batch_allowed %]
   <div class="dialog message">You are not allowed to use batch checkout for this patron</div>
+[% ELSIF noissues and not checkout_infos %]
+  <div class="dialog message">
+    Cannot check out!
+    [% IF charges_is_blocker %]
+      Checkouts are <span class="circ-hlt">BLOCKED</span> because fine balance is <span class="circ-hlt">OVER THE LIMIT</span>.
+    [% END %]
+  </div>
 [% ELSIF NOT checkout_infos %]
   <form method="post" enctype="multipart/form-data" action="/cgi-bin/koha/circ/circulation.pl">
     <fieldset id="circ_circulation_issue">
@@ -85,7 +101,10 @@ $(document).ready(function() {
 
 [% ELSE %]
   [% IF confirmation_needed && CAN_user_circulate_force_checkout %]
+    <h3>Batch checkout confirmation [% IF borrowernumber %] for [% INCLUDE 'patron-title.inc' invert_name = 1 %] [% END %]</h1>
     <form method="post" action="/cgi-bin/koha/circ/circulation.pl" id="mainform" name="mainform" autocomplete="off">
+  [% ELSE %]
+    <h3>Batch checkout information [% IF borrowernumber %] for [% INCLUDE 'patron-title.inc' invert_name = 1 %] [% END %]</h1>
   [% END %]
     <table id="checkout_infos">
       <thead>
@@ -117,9 +136,6 @@ $(document).ready(function() {
                 <p class="warn">
                   [% IF checkout_info.AGE_RESTRICTION %]
                     Age restriction [% checkout_info.AGE_RESTRICTION %]
-                  [% END %]
-                  [% IF checkout_info.DEBT %]
-                    The patron has a debt of [% checkout_info.DEBT %] <!-- Need debt_confirmed -->
                   [% END %]
                   [% IF checkout_info.RENEW_ISSUE %]
                     This Item is currently checked out to this patron. Renew?
@@ -241,6 +257,9 @@ $(document).ready(function() {
                   [% IF checkout_info.UNKNOWN_BARCODE %]
                     <li>The barcode was not found [% checkout_info.barcode |html %]
                   [% END %]
+                  [% IF checkout_info.DEBT %]
+                    The patron has a debt of [% checkout_info.DEBT %] <!-- Need debt_confirmed -->
+                  [% END %]
                 </p>
               [% END %]
             </td>
@@ -256,7 +275,7 @@ $(document).ready(function() {
       <input type="hidden" name="debt_confirmed" value="1" />
       <input type="hidden" name="branch" value="[% branch %]" />
       <input type="hidden" name="batch" value="1" />
-      <input type="submit" class="approve" value="Checkout or renew" />
+      <input type="submit" id="checkoutrenew" class="approve" value="Checkout or renew" />
     </form>
     [% END %]
 

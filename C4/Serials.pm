@@ -22,7 +22,6 @@ use Modern::Perl;
 
 use C4::Auth qw(haspermission);
 use C4::Context;
-use C4::Dates qw(format_date format_date_in_iso);
 use DateTime;
 use Date::Calc qw(:all);
 use POSIX qw(strftime);
@@ -32,6 +31,7 @@ use C4::Debug;
 use C4::Serials::Frequency;
 use C4::Serials::Numberpattern;
 use Koha::AdditionalField;
+use Koha::DateUtils;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
@@ -69,7 +69,7 @@ BEGIN {
       &HasSubscriptionStrictlyExpired &HasSubscriptionExpired &GetExpirationDate &abouttoexpire
       &GetSubscriptionHistoryFromSubscriptionId
 
-      &GetNextSeq &GetSeq &NewIssue           &ItemizeSerials    &GetSerials
+      &GetNextSeq &GetSeq &NewIssue           &GetSerials
       &GetLatestSerials   &ModSerialStatus    &GetNextDate       &GetSerials2
       &ReNewSubscription  &GetLateOrMissingIssues
       &GetSerialInformation                   &AddItem2Serial
@@ -467,9 +467,9 @@ sub GetSubscriptionsFromBiblionumber {
     $sth->execute($biblionumber);
     my @res;
     while ( my $subs = $sth->fetchrow_hashref ) {
-        $subs->{startdate}     = format_date( $subs->{startdate} );
-        $subs->{histstartdate} = format_date( $subs->{histstartdate} );
-        $subs->{histenddate}   = format_date( $subs->{histenddate} );
+        $subs->{startdate}     = output_pref( { dt => dt_from_string( $subs->{startdate} ),     dateonly => 1 } );
+        $subs->{histstartdate} = output_pref( { dt => dt_from_string( $subs->{histstartdate} ), dateonly => 1 } );
+        $subs->{histenddate}   = output_pref( { dt => dt_from_string( $subs->{histenddate} ),   dateonly => 1 } );
         $subs->{opacnote}     =~ s/\n/\<br\/\>/g;
         $subs->{missinglist}  =~ s/\n/\<br\/\>/g;
         $subs->{recievedlist} =~ s/\n/\<br\/\>/g;
@@ -480,7 +480,7 @@ sub GetSubscriptionsFromBiblionumber {
         if ( $subs->{enddate} eq '0000-00-00' ) {
             $subs->{enddate} = '';
         } else {
-            $subs->{enddate} = format_date( $subs->{enddate} );
+            $subs->{enddate} = output_pref( { dt => dt_from_string( $subs->{enddate}), dateonly => 1 } );
         }
         $subs->{'abouttoexpire'}       = abouttoexpire( $subs->{'subscriptionid'} );
         $subs->{'subscriptionexpired'} = HasSubscriptionExpired( $subs->{'subscriptionid'} );
@@ -710,7 +710,7 @@ sub GetSerials {
         $line->{ "status" . $line->{status} } = 1;                                         # fills a "statusX" value, used for template status select list
         for my $datefield ( qw( planneddate publisheddate) ) {
             if ($line->{$datefield} && $line->{$datefield}!~m/^00/) {
-                $line->{$datefield} = format_date( $line->{$datefield});
+                $line->{$datefield} =  output_pref( { dt => dt_from_string( $line->{$datefield} ), dateonly => 1 } );
             } else {
                 $line->{$datefield} = q{};
             }
@@ -733,7 +733,7 @@ sub GetSerials {
         $line->{ "status" . $line->{status} } = 1;                                         # fills a "statusX" value, used for template status select list
         for my $datefield ( qw( planneddate publisheddate) ) {
             if ($line->{$datefield} && $line->{$datefield}!~m/^00/) {
-                $line->{$datefield} = format_date( $line->{$datefield});
+                $line->{$datefield} = output_pref( { dt => dt_from_string( $line->{$datefield} ), dateonly => 1 } );
             } else {
                 $line->{$datefield} = q{};
             }
@@ -788,7 +788,7 @@ sub GetSerials2 {
                 $line->{$datefield} = q{};
             }
             else {
-                $line->{$datefield} = format_date( $line->{$datefield} );
+                $line->{$datefield} = output_pref( { dt => dt_from_string( $line->{$datefield} ), dateonly => 1 } );
             }
         }
         push @serials, $line;
@@ -824,8 +824,8 @@ sub GetLatestSerials {
     my @serials;
     while ( my $line = $sth->fetchrow_hashref ) {
         $line->{ "status" . $line->{status} } = 1;                        # fills a "statusX" value, used for template status select list
-        $line->{"planneddate"} = format_date( $line->{"planneddate"} );
-        $line->{"publisheddate"} = format_date( $line->{"publisheddate"} );
+        $line->{planneddate}   = output_pref( { dt => dt_from_string( $line->{planneddate} ),   dateonly => 1 } );
+        $line->{publisheddate} = output_pref( { dt => dt_from_string( $line->{publisheddate} ), dateonly => 1 } );
         push @serials, $line;
     }
 
@@ -863,7 +863,7 @@ $subscription is a hashref containing all the attributes of the table
 'subscription'.
 $pattern is a hashref containing all the attributes of the table
 'subscription_numberpatterns'.
-$planneddate is a C4::Dates object.
+$planneddate is a date string in iso format.
 This function get the next issue for the subscription given on input arg
 
 =cut
@@ -1588,141 +1588,6 @@ sub NewIssue {
     return $serialid;
 }
 
-=head2 ItemizeSerials
-
-ItemizeSerials($serialid, $info);
-$info is a hashref containing  barcode branch, itemcallnumber, status, location
-$serialid the serialid
-return :
-1 if the itemize is a succes.
-0 and @error otherwise. @error containts the list of errors found.
-
-=cut
-
-sub ItemizeSerials {
-    my ( $serialid, $info ) = @_;
-
-    return unless ($serialid);
-
-    my $now = POSIX::strftime( "%Y-%m-%d", localtime );
-
-    my $dbh   = C4::Context->dbh;
-    my $query = qq|
-        SELECT *
-        FROM   serial
-        WHERE  serialid=?
-    |;
-    my $sth = $dbh->prepare($query);
-    $sth->execute($serialid);
-    my $data = $sth->fetchrow_hashref;
-    if ( C4::Context->preference("RoutingSerials") ) {
-
-        # check for existing biblioitem relating to serial issue
-        my ( $count, @results ) = GetBiblioItemByBiblioNumber( $data->{'biblionumber'} );
-        my $bibitemno = 0;
-        for ( my $i = 0 ; $i < $count ; $i++ ) {
-            if ( $results[$i]->{'volumeddesc'} eq $data->{'serialseq'} . ' (' . $data->{'planneddate'} . ')' ) {
-                $bibitemno = $results[$i]->{'biblioitemnumber'};
-                last;
-            }
-        }
-        if ( $bibitemno == 0 ) {
-            my $sth = $dbh->prepare( "SELECT * FROM biblioitems WHERE biblionumber = ? ORDER BY biblioitemnumber DESC" );
-            $sth->execute( $data->{'biblionumber'} );
-            my $biblioitem = $sth->fetchrow_hashref;
-            $biblioitem->{'volumedate'}  = $data->{planneddate};
-            $biblioitem->{'volumeddesc'} = $data->{serialseq} . ' (' . format_date( $data->{'planneddate'} ) . ')';
-            $biblioitem->{'dewey'}       = $info->{itemcallnumber};
-        }
-    }
-
-    my $fwk = GetFrameworkCode( $data->{'biblionumber'} );
-    if ( $info->{barcode} ) {
-        my @errors;
-        if ( is_barcode_in_use( $info->{barcode} ) ) {
-            push @errors, 'barcode_not_unique';
-        } else {
-            my $marcrecord = MARC::Record->new();
-            my ( $tag, $subfield ) = GetMarcFromKohaField( "items.barcode", $fwk );
-            my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{barcode} );
-            $marcrecord->insert_fields_ordered($newField);
-            if ( $info->{branch} ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.homebranch", $fwk );
-
-                #warn "items.homebranch : $tag , $subfield";
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{branch} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{branch} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-                ( $tag, $subfield ) = GetMarcFromKohaField( "items.holdingbranch", $fwk );
-
-                #warn "items.holdingbranch : $tag , $subfield";
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{branch} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{branch} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            if ( $info->{itemcallnumber} ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.itemcallnumber", $fwk );
-
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{itemcallnumber} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{itemcallnumber} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            if ( $info->{notes} ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.itemnotes", $fwk );
-
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{notes} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{notes} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            if ( $info->{location} ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.location", $fwk );
-
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{location} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{location} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            if ( $info->{status} ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.notforloan", $fwk );
-
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{status} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{status} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            if ( C4::Context->preference("RoutingSerials") ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.dateaccessioned", $fwk );
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $now );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $now );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            require C4::Items;
-            C4::Items::AddItemFromMarc( $marcrecord, $data->{'biblionumber'} );
-            return 1;
-        }
-        return ( 0, @errors );
-    }
-}
-
 =head2 HasSubscriptionStrictlyExpired
 
 1 or 0 = HasSubscriptionStrictlyExpired($subscriptionid)
@@ -1983,11 +1848,11 @@ sub GetLateOrMissingIssues {
 
         if ($line->{planneddate} && $line->{planneddate} !~/^0+\-/) {
             $line->{planneddateISO} = $line->{planneddate};
-            $line->{planneddate} = format_date( $line->{planneddate} );
+            $line->{planneddate} = output_pref( { dt => dt_from_string( $line->{"planneddate"} ), dateonly => 1 } );
         }
         if ($line->{claimdate} && $line->{claimdate} !~/^0+\-/) {
             $line->{claimdateISO} = $line->{claimdate};
-            $line->{claimdate}   = format_date( $line->{claimdate} );
+            $line->{claimdate}   = output_pref( { dt => dt_from_string( $line->{"claimdate"} ), dateonly => 1 } );
         }
         $line->{"status".$line->{status}}   = 1;
 

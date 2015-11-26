@@ -644,7 +644,6 @@ C<$year> Is the year to check whether if is a holiday or not.
 sub isHoliday {
     my ($self, $day, $month, $year) = @_;
 	# FIXME - date strings are stored in non-padded metric format. should change to iso.
-	# FIXME - should change arguments to accept C4::Dates object
 	$month=$month+0;
 	$year=$year+0;
 	$day=$day+0;
@@ -694,74 +693,6 @@ sub copy_to_branch {
       foreach grep { $_->{date} gt $today } values %{ $self->get_single_holidays };
 
     return 1;
-}
-
-=head2 addDate
-
-    my ($day, $month, $year) = $calendar->addDate($date, $offset)
-
-C<$date> is a C4::Dates object representing the starting date of the interval.
-
-C<$offset> Is the number of days that this function has to count from $date.
-
-=cut
-
-sub addDate {
-    my ($self, $startdate, $offset) = @_;
-    my ($year,$month,$day) = split("-",$startdate->output('iso'));
-	my $daystep = 1;
-	if ($offset < 0) { # In case $offset is negative
-       # $offset = $offset*(-1);
-		$daystep = -1;
-    }
-	my $daysMode = C4::Context->preference('useDaysMode');
-    if ($daysMode eq 'Datedue') {
-        ($year, $month, $day) = &Date::Calc::Add_Delta_Days($year, $month, $day, $offset );
-	 	while ($self->isHoliday($day, $month, $year)) {
-            ($year, $month, $day) = &Date::Calc::Add_Delta_Days($year, $month, $day, $daystep);
-        }
-    } elsif($daysMode eq 'Calendar') {
-        while ($offset !=  0) {
-            ($year, $month, $day) = &Date::Calc::Add_Delta_Days($year, $month, $day, $daystep);
-            if (!($self->isHoliday($day, $month, $year))) {
-                $offset = $offset - $daystep;
-			}
-        }
-	} else { ## ($daysMode eq 'Days') 
-        ($year, $month, $day) = &Date::Calc::Add_Delta_Days($year, $month, $day, $offset );
-    }
-    return(C4::Dates->new( sprintf(ISO_DATE_FORMAT,$year,$month,$day),'iso'));
-}
-
-=head2 daysBetween
-
-    my $daysBetween = $calendar->daysBetween($startdate, $enddate)
-
-C<$startdate> and C<$enddate> are C4::Dates objects that define the interval.
-
-Returns the number of non-holiday days in the interval.
-useDaysMode syspref has no effect here.
-=cut
-
-sub daysBetween {
-    my $self      = shift or return;
-    my $startdate = shift or return;
-    my $enddate   = shift or return;
-    my ($yearFrom,$monthFrom,$dayFrom) = split("-",$startdate->output('iso'));
-    my ($yearTo,  $monthTo,  $dayTo  ) = split("-",  $enddate->output('iso'));
-    if (Date_to_Days($yearFrom,$monthFrom,$dayFrom) > Date_to_Days($yearTo,$monthTo,$dayTo)) {
-        return 0;
-        # we don't go backwards  ( FIXME - handle this error better )
-    }
-    my $count = 0;
-    while (1) {
-        ($yearFrom != $yearTo or $monthFrom != $monthTo or $dayFrom != $dayTo) or last; # if they all match, it's the last day
-        unless ($self->isHoliday($dayFrom, $monthFrom, $yearFrom)) {
-            $count++;
-        }
-        ($yearFrom, $monthFrom, $dayFrom) = &Date::Calc::Add_Delta_Days($yearFrom, $monthFrom, $dayFrom, 1);
-    }
-    return($count);
 }
 
 1;
