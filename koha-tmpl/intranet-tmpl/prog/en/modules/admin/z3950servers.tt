@@ -230,6 +230,7 @@ $(function() {
     <div id="updateServ">
     <form action="[% script_name %]" name="Aform" method="post" id="serverentry">
         <input type="hidden" name="op" value="add_validated" />
+        <input type="hidden" name="updateServer" value="1" />
         <input type="hidden" name="servertype" value="[% server.servertype||type||'zed' %]"/>
         [% IF op == 'edit' %]
             <h1>Modify [% PROCESS ServerType %] server</h1>

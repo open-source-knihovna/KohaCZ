@@ -37,6 +37,9 @@ my $input = new CGI;
 my $op = $input->param('op') || 'list';
 my $id = $input->param('id') || 0;
 my $type = $input->param('type') || '';
+
+my $isUpdateServer = $input->param('updateServer') || 0;
+
 my $searchfield = '';
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user( {
@@ -71,6 +74,12 @@ if( $op eq 'delete_confirmed' && $id ) {
     my $formdata = _form_data_hashref( $input, \@fields );
     if( $id ) {
         my $server = $schema->resultset('Z3950server')->find($id);
+
+	unless ( $server ) {
+		# Check for updateServers
+		$server = $schema->resultset('Z3950updateserver')->find($id);
+	}
+
         if ( $server ) {
             $server->update( $formdata );
             $template->param( msg_updated => 1, msg_add => $formdata->{servername} );
@@ -78,6 +87,9 @@ if( $op eq 'delete_confirmed' && $id ) {
             $template->param( msg_notfound => 1, msg_add => $id );
         }
         $id = 0;
+    } elsif ($isUpdateServer) {
+        $schema->resultset('Z3950updateserver')->create( $formdata );
+        $template->param( msg_added => 1, msg_add => $formdata->{servername} );
     } else {
         $schema->resultset('Z3950server')->create( $formdata );
         $template->param( msg_added => 1, msg_add => $formdata->{servername} );
