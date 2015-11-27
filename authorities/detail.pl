@@ -157,12 +157,12 @@ sub build_tabs {
 
         if (C4::Context->preference("EnablePushingToAuthorityServer")) {
 
-          my $sth = $dbh->prepare("select id, servername from z3950servers where recordtype='authority';");
+          my $sth = $dbh->prepare("select id, servername from z3950servers where servertype='zed_update';");
           $sth->execute();
 
-          my $z3950servers = $sth->fetchall_arrayref( {} );
+          my $z3950updateservers = $sth->fetchall_arrayref( {} );
 
-          $template->param( z3950servers => $z3950servers );
+          $template->param( z3950updateservers => $z3950updateservers );
         }
 }
 
