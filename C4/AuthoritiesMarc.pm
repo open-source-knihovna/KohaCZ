@@ -1748,7 +1748,7 @@ sub PushAuthToZ3950 {
     if (defined $msg) {
 	    my ( $msgField, $msgSubfield ) = split(/\$/, $msgFieldDef);
 
-	    $record->add_fields( $msgFieldVal, " ", " ", $msgSubfieldVal => $msg, );
+	    $record->add_fields( $msgField, " ", " ", $msgSubfield => $msg, );
     }
 
     my $rawRecord = $record->as_usmarc();
