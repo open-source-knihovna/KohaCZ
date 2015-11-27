@@ -120,10 +120,32 @@ __PACKAGE__->table("z3950servers");
   data_type: 'mediumtext'
   is_nullable: 1
 
-=head2 update_omit_fields
+=head2 zedu_omit_fields
 
   data_type: 'mediumtext'
-  is_nullable: 0
+  is_nullable: 1
+
+=head2 zedu_authoritative_id_field
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 8
+
+=head2 zedu_msg_field
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 8
+
+=head2 zedu_msg_oncreate
+
+  data_type: 'mediumtext'
+  is_nullable: 1
+
+=head2 zedu_msg_onupdate
+
+  data_type: 'mediumtext'
+  is_nullable: 1
 
 =cut
 
@@ -172,8 +194,16 @@ __PACKAGE__->add_columns(
   { data_type => "mediumtext", is_nullable => 1 },
   "add_xslt",
   { data_type => "mediumtext", is_nullable => 1 },
-  "update_omit_fields",
-  { data_type => "mediumtext", is_nullable => 0 },
+  "zedu_omit_fields",
+  { data_type => "mediumtext", is_nullable => 1 },
+  "zedu_authoritative_id_field",
+  { data_type => "varchar", is_nullable => 1, size => 8 },
+  "zedu_msg_field",
+  { data_type => "varchar", is_nullable => 1, size => 8 },
+  "zedu_msg_oncreate",
+  { data_type => "mediumtext", is_nullable => 1 },
+  "zedu_msg_onupdate",
+  { data_type => "mediumtext", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY

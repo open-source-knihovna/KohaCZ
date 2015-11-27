@@ -203,9 +203,27 @@
         [% END %]
         [% IF (server.servertype||type) == 'zed_update' %]
             <li>
-            <label for="add_xslt">MARC fields not to send to update server: </label>
-            <input type="text" name="update_omit_fields" id="update_omit_fields" size="100" value="[% server.update_omit_fields %]" />
-            <div class="hint">Separate multiple fields/subfields by commas. Example: 100$7, 005, 900$a</span>
+            <label for="zedu_omit_fields">MARC fields not to send to update server: </label>
+            <input type="text" name="zedu_omit_fields" id="zedu_omit_fields" size="100" value="[% server.zedu_omit_fields %]" />
+            <div class="hint">Separate multiple fields/subfields by commas. Example: 200$7, 005, 900$a</span>
+            </li>
+            <li>
+            <label for="zedu_authoritative_id_field">MARC authoritative id field: </label>
+            <input type="text" name="zedu_authoritative_id_field" id="zedu_authoritative_id_field" size="8" value="[% server.zedu_authoritative_id_field %]" />
+            <div class="hint">Example: 100$7</span>
+            </li>
+            <li>
+            <label for="zedu_msg_field">MARC field where to put your message: </label>
+            <input type="text" name="zedu_msg_field" id="zedu_msg_field" size="8" value="[% server.zedu_msg_field %]" />
+            <div class="hint">Example: 900$a</span>
+            </li>
+            <li>
+            <label for="zedu_msg_oncreate">Message sent when create takes place: </label>
+            <input type="text" name="zedu_msg_oncreate" id="zedu_msg_oncreate" size="100" value="[% server.zedu_msg_oncreate %]" />
+            </li>
+            <li>
+            <label for="zedu_msg_onupdate">Message sent when update takes place: </label>
+            <input type="text" name="zedu_msg_onupdate" id="zedu_msg_onupdate" size="100" value="[% server.zedu_msg_onupdate %]" />
             </li>
             <input type="hidden" hidden="hidden" name="add_xslt" id="add_xslt" value=""/>
         [% ELSE %]
@@ -214,7 +232,11 @@
             <input type="text" name="add_xslt" id="add_xslt" size="100" value="[% server.add_xslt %]"/>
             <div class="hint">Separate multiple filenames by commas.</span>
             </li>
-            <input type="hidden" hidden="hidden" name="update_omit_fields" id="update_omit_fields" value=""/>
+            <input type="hidden" hidden="hidden" name="zedu_omit_fields" id="zedu_omit_fields" value=""/>
+            <input type="hidden" hidden="hidden" name="zedu_authoritative_id_field" id="zedu_authoritative_id_field" value=""/>
+            <input type="hidden" hidden="hidden" name="zedu_msg_field" id="zedu_msg_field" value=""/>
+            <input type="hidden" hidden="hidden" name="zedu_msg_field_oncreate" id="zedu_msg_field_oncreate" value=""/>
+            <input type="hidden" hidden="hidden" name="zedu_msg_field_onupdate" id="zedu_msg_field_onupdate" value=""/>
         [% END %]
         </ol>
         </fieldset>

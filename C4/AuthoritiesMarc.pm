@@ -31,6 +31,8 @@ use C4::Charset;
 use C4::Log;
 use Koha::Authority;
 
+use Data::Dumper;
+
 use vars qw($VERSION @ISA @EXPORT);
 
 BEGIN {
@@ -1655,7 +1657,7 @@ sub get_auth_type_location {
 
 sub PushAuthToZ3950 {
 
-  my ( $serverid, $record ) = @_;
+  my ( $serverid, $record, $input ) = @_;
 
   my $toRet;
 
@@ -1670,26 +1672,72 @@ sub PushAuthToZ3950 {
 
   # Obtain the Z3950 server information
   my $dbh = C4::Context->dbh;
-  my $sth = $dbh->prepare("select host, port, db, userid, password, syntax from z3950servers where id=?");
+  my $sth = $dbh->prepare("select * from z3950servers where id=?");
 
   $sth->execute($serverid);
   my $z3950server = $sth->fetchrow_hashref();
 
   if ($z3950server) {
 
-    # Decide if we will create or update an authority (based on 100 $7 presence)
-    my ( $action, $czInfo );
-    my $authoritativeId = $record->subfield( '100', "7" );    #FIXME
+    my @updateOmitFields = split( /\s*,\s*/, $z3950server->{zedu_omit_fields} );
 
-    if ( defined $authoritativeId ) {
+    # Do not send those fields/subfields which are configured about not to be sent to the server
+    foreach my $updateOmitField (@updateOmitFields) {
+      my ( $field, $subfield ) = split( /\$/, $updateOmitField );
+
+      my $marcField = $record->field($field);
+      if ( defined $subfield ) {
+        my @subfields = $marcField->subfields();
+
+        my @newSubfields;
+
+        foreach my $marcSubfield (@subfields) {
+          unless ( $subfield == ${$marcSubfield}[0] ) {
+            push( @newSubfields, ${$marcSubfield}[0], ${$marcSubfield}[1] );
+          }
+        }
+
+        if ( scalar(@newSubfields) ) {
+
+          # There have been left some subfields ..
+          # Recreate the field
+
+          $record->delete_field($marcField);
+
+          $marcField = MARC::Field->new( $field, '', '', @newSubfields );
+          $record->add_fields($marcField);
+        }
+        else {
+          # We have actually deleted all the subfields ..
+          $record->delete_field($marcField);
+        }
+      }
+      else {
+        $record->delete_field($marcField);
+      }
+    }
+
+    my ($authoritativeIdField, $authoritativeIdSubfield) = split(/\$/, $z3950server->{zedu_authoritative_id_field});
+
+    my $msgFieldDef = $z3950server->{zedu_msg_field};
+    
+    my $isMsgFieldDefined = defined $msgFieldDef and not $msgFieldDef == '';
+
+    # Decide if we will create or update an authority (based on presence of the authoritativeId)
+    my ( $action, $msg );
+    my $authoritativeId = $record->subfield( $authoritativeIdField, $authoritativeIdSubfield );
+
+      if ( defined $authoritativeId ) {
 
       $action = "recordReplace";
-      $czInfo = "J-OPRAVA";                                   # FIXME: Decide what to write where ... and should that be saved or not ?
+
+      $msg = $z3950server->{zedu_msg_onupdate} if $isMsgFieldDefined;
     }
     else {
       $action = "recordInsert";
-      $czInfo = "J-NAVRH";                                    # FIXME: Decide what to write where ... and should that be saved or not ?
+      $msg = $z3950server->{zedu_msg_oncreate} if $isMsgFieldDefined;
 
+      # We are creating whole new authority, thus assign it "new" 001
       $authoritativeId = "new";
     }
 
@@ -1697,7 +1745,11 @@ sub PushAuthToZ3950 {
     my $field = $record->field('001');
     $field->update("$authoritativeId");
 
-    $record->add_fields( 900, " ", " ", a => $czInfo, );
+    if (defined $msg) {
+	    my ( $msgField, $msgSubfield ) = split(/\$/, $msgFieldDef);
+
+	    $record->add_fields( $msgFieldVal, " ", " ", $msgSubfieldVal => $msg, );
+    }
 
     my $rawRecord = $record->as_usmarc();
 
@@ -1784,7 +1836,7 @@ sub PushAuthToZ3950 {
   return $toRet;
 }
 
-END { }       # module clean-up code here (global destructor)
+END { }    # module clean-up code here (global destructor)
 
 1;
 __END__
