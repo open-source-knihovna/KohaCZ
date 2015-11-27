@@ -929,6 +929,8 @@ CREATE TABLE `deleteditems` (
   `itemlost_on` datetime DEFAULT NULL, -- the date and time an item was last marked as lost, NULL if not lost
   `withdrawn` tinyint(1) NOT NULL default 0, -- authorized value defining this item as withdrawn (MARC21 952$0)
   `withdrawn_on` datetime DEFAULT NULL, -- the date and time an item was last marked as withdrawn, NULL if not withdrawn
+  `withdrawn_permanent` varchar(32) default NULL,
+  `withdrawn_categorycode` varchar(10) default NULL,
   `itemcallnumber` varchar(255) default NULL, -- call number for this item (MARC21 952$o)
   `coded_location_qualifier` varchar(10) default NULL, -- coded location qualifier(MARC21 952$f)
   `issues` smallint(6) default NULL, -- number of times this item has been checked out
@@ -1223,6 +1225,8 @@ CREATE TABLE `items` ( -- holdings/item information
   `itemlost_on` datetime DEFAULT NULL, -- the date and time an item was last marked as lost, NULL if not lost
   `withdrawn` tinyint(1) NOT NULL default 0, -- authorized value defining this item as withdrawn (MARC21 952$0)
   `withdrawn_on` datetime DEFAULT NULL, -- the date and time an item was last marked as withdrawn, NULL if not withdrawn
+  `withdrawn_permanent` varchar(32) default NULL,
+  `withdrawn_categorycode` varchar(10) default NULL,
   `itemcallnumber` varchar(255) default NULL, -- call number for this item (MARC21 952$o)
   `coded_location_qualifier` varchar(10) default NULL, -- coded location qualifier(MARC21 952$f)
   `issues` smallint(6) default NULL, -- number of times this item has been checked out/issued
@@ -3597,6 +3601,20 @@ CREATE TABLE audio_alerts (
   PRIMARY KEY (id),
   KEY precedence (precedence)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DROP TABLE IF EXISTS borrower_password_recovery;
+CREATE TABLE borrower_password_recovery (
+  borrowernumber int(11) NOT NULL,
+  uuid varchar(128) NOT NULL,
+  valid_until timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY borrowernumber (borrowernumber)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+DROP TABLE IF EXISTS default_permanent_withdrawal_reason;
+CREATE TABLE default_permanent_withdrawal_reason(
+        categorycode VARCHAR(10) DEFAULT NULL,
+        description VARCHAR(250) DEFAULT NULL
+);
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
