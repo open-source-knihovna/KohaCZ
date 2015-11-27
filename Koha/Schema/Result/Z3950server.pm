@@ -120,6 +120,11 @@ __PACKAGE__->table("z3950servers");
   data_type: 'mediumtext'
   is_nullable: 1
 
+=head2 update_omit_fields
+
+  data_type: 'mediumtext'
+  is_nullable: 0
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -149,7 +154,7 @@ __PACKAGE__->add_columns(
   {
     data_type => "enum",
     default_value => "zed",
-    extra => { list => ["zed", "sru"] },
+    extra => { list => ["zed", "sru", "zed_update"] },
     is_nullable => 0,
   },
   "encoding",
@@ -167,6 +172,8 @@ __PACKAGE__->add_columns(
   { data_type => "mediumtext", is_nullable => 1 },
   "add_xslt",
   { data_type => "mediumtext", is_nullable => 1 },
+  "update_omit_fields",
+  { data_type => "mediumtext", is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY

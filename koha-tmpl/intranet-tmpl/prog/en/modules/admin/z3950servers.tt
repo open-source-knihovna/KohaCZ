@@ -5,6 +5,8 @@
         SRU
     [% ELSIF (server.servertype||type) == 'zed' %]
         Z39.50
+    [% ELSIF (server.servertype||type) == 'zed_update' %]
+        Z39.50 Update
     [% END %]
 [% END %]
 
@@ -30,7 +32,7 @@
             $("#recordtype").val('[% server.recordtype %]');
         [% END %]
         // Disable recordtype (and default to bib) for non-Z3950 servers until auth is supported
-        [% UNLESS (server.servertype||type) == 'zed' %]
+        [% IF (server.servertype||type) == 'sru' %]
             $("#recordtype").prop('disabled',true);
         [% END %]
         $( "#serverentry" ).validate({
@@ -78,21 +80,6 @@
         return false;
     }
 [% END %]
-//<![CDATA[
-$(function() {
-    $('#servertypes').tabs();
-
-    $("li.csv_profiles").hide();
-
-    $("#bibs select[name='output_format']").on('change', function(){
-        var format = $(this).val();
-        if ( format == 'csv' ) { 
-            $("#bibs li.csv_profiles").show();
-        } else {
-            $("#bibs li.csv_profiles").hide();
-        }
-    }); 
-});
 //]]>
 </script>
 
@@ -123,11 +110,6 @@ $(function() {
 [% END %]
 
 [% IF ( add_form ) %]
-  <div id="servertypes" class="toptabs">
-    <ul>
-      <li><a href="#searchServ">New Z39.50 Search Server</a></li>
-      <li><a href="#updateServ">New Z39.50 Update Server</a></li>
-    </ul>
     <div id="searchServ">
     <form action="[% script_name %]" name="Aform" method="post" id="serverentry">
         <input type="hidden" name="op" value="add_validated" />
@@ -136,7 +118,7 @@ $(function() {
             <h1>Modify [% PROCESS ServerType %] server</h1>
             <input type="hidden" name="id" value="[% server.id %]" />
         [% ELSE %]
-            <h1>New [% PROCESS ServerType %] Search server</h1>
+            <h1>New [% PROCESS ServerType %] server</h1>
         [% END %]                
         <fieldset class="rows">
         <ol>
@@ -155,13 +137,17 @@ $(function() {
         </li>
         <li><label for="password">Password: </label> <input type="text" name="password" id="password" value="[% server.password %]" />
         </li>
-        <li><label for="checked">Preselected (searched by default): </label>
-        [% IF ( server.checked ) %]
-            <input type="checkbox" name="checked" id="checked" value="1" checked="checked" />
+        [% IF (server.servertype||type) == 'zed_update' %]
+            <input type="hidden" hidden="hidden" name="checked" id="checked" value="0" />
         [% ELSE %]
-            <input type="checkbox" name="checked" id="checked" value="1" />
+            <li><label for="checked">Preselected (searched by default): </label>
+            [% IF ( server.checked ) %]
+                <input type="checkbox" name="checked" id="checked" value="1" checked="checked" />
+            [% ELSE %]
+                <input type="checkbox" name="checked" id="checked" value="1" />
+            [% END %]
+            </li>
         [% END %]
-        </li>
         <li><label for="rank">Rank (display order): </label> <input type="text" name="rank" id="rank" size="4" value="[% server.rank %]" />
         </li>
 
@@ -215,125 +201,34 @@ $(function() {
         <input type="text" name="show_sru_fields" id="show_sru_fields" size="100" value="[% server.sru_fields %]" disabled/> <input type="button" value="Modify" onclick="ModMapping()" />
         </li>
         [% END %]
-        <li>
-        <label for="add_xslt">XSLT File(s) for transforming results: </label>
-        <input type="text" name="add_xslt" id="add_xslt" size="100" value="[% server.add_xslt %]"/>
-        <div class="hint">Separate multiple filenames by commas.</span>
-        </li>
-
+        [% IF (server.servertype||type) == 'zed_update' %]
+            <li>
+            <label for="add_xslt">MARC fields not to send to update server: </label>
+            <input type="text" name="update_omit_fields" id="update_omit_fields" size="100" value="[% server.update_omit_fields %]" />
+            <div class="hint">Separate multiple fields/subfields by commas. Example: 100$7, 005, 900$a</span>
+            </li>
+            <input type="hidden" hidden="hidden" name="add_xslt" id="add_xslt" value=""/>
+        [% ELSE %]
+            <li>
+            <label for="add_xslt">XSLT File(s) for transforming results: </label>
+            <input type="text" name="add_xslt" id="add_xslt" size="100" value="[% server.add_xslt %]"/>
+            <div class="hint">Separate multiple filenames by commas.</span>
+            </li>
+            <input type="hidden" hidden="hidden" name="update_omit_fields" id="update_omit_fields" value=""/>
+        [% END %]
         </ol>
         </fieldset>
 
         <fieldset class="action"><input type="submit" value="Save" /> <a class="cancel" href="/cgi-bin/koha/admin/z3950servers.pl">Cancel</a></fieldset>
     </form>
     </div>
-    <div id="updateServ">
-    <form action="[% script_name %]" name="Aform" method="post" id="serverentry">
-        <input type="hidden" name="op" value="add_validated" />
-        <input type="hidden" name="updateServer" value="1" />
-        <input type="hidden" name="servertype" value="[% server.servertype||type||'zed' %]"/>
-        [% IF op == 'edit' %]
-            <h1>Modify [% PROCESS ServerType %] server</h1>
-            <input type="hidden" name="id" value="[% server.id %]" />
-        [% ELSE %]
-            <h1>New [% PROCESS ServerType %] Update server</h1>
-        [% END %]                
-        <fieldset class="rows">
-        <ol>
-        <li><label for="name">Server name: </label><input type="text" name="servername" id="servername" size="65" maxlength="100" onblur="toUC(this)" value="[% server.servername | html %]"/></li>
-
-        <li><label for="host" class="required">Hostname: </label> <input type="text" name="host" id="host" size="30" value="[% server.host %]" required="required" /> <span class="required">Required</span>
-            [% IF (server.servertype||type) == 'sru' %]
-                <div class="hint">Includes the domain part, but the path part of the URL should go into Database.</div>
-            [% END %]
-        </li>
-        <li><label for="port" class="required">Port: </label> <input type="text" name="port" id="port" size="5" value="[% server.port %]" required="required" /> <span class="required">Required</span>
-        </li>
-        <li><label for="db" class="required">Database: </label> <input type="text" name="db" id="db" value="[% server.db %]" required="required" /> <span class="required">Required</span>
-        </li>
-        <li><label for="userid">Userid: </label> <input type="text" name="userid" id="userid" value="[% server.userid %]" />
-        </li>
-        <li><label for="password">Password: </label> <input type="text" name="password" id="password" value="[% server.password %]" />
-        </li>
-        <li><label for="checked">Preselected (searched by default): </label>
-        [% IF ( server.checked ) %]
-            <input type="checkbox" name="checked" id="checked" value="1" checked="checked" />
-        [% ELSE %]
-            <input type="checkbox" name="checked" id="checked" value="1" />
-        [% END %]
-        </li>
-        <li><label for="rank">Rank (display order): </label> <input type="text" name="rank" id="rank" size="4" value="[% server.rank %]" />
-        </li>
-
-        <li><label for="syntax">Syntax (z3950 can send<br /> records in various format. Choose one): </label>
-        <select name="syntax" id="syntax">
-            <option value="UNIMARC">UNIMARC</option>
-            <option value="INTERMARC">INTERMARC</option>
-            <option value="CCF">CCF</option>
-            <option value="USMARC">MARC21/USMARC</option>
-            <option value="UKMARC">UKMARC</option>
-            <option value="NORMARC">NORMARC</option>
-            <option value="LIBRISMARC">LIBRISMARC</option>
-            <option value="DANMARC">DANMARC</option>
-            <option value="FINMARC">FINMARC</option>
-            <option value="CANMARC">CANMARC</option>
-            <option value="SBN">SBN</option>
-            <option value="PICAMARC">PICAMARC</option>
-            <option value="AUSMARC">AUSMARC</option>
-            <option value="IBERMARC">IBERMARC</option>
-            <option value="CATMARC">CATMARC</option>
-            <option value="MALMARC">MALMARC</option>
-        </select>
-        </li>
-
-        <li><label for="encoding">Encoding (z3950 can send<br /> records in various encodings. Choose one): </label>
-        <select name="encoding" id="encoding">
-            [% FOREACH enc IN [ 'utf8' 'EUC-KR' 'ISO_5426' 'ISO_6937' 'ISO_8859-1' 'MARC-8' ] %]
-                <option value="[% enc %]">[% enc %]</option>
-            [% END %]
-        </select>
-        </li>
-
-        <li><label for="timeout">Timeout (0 its like not set): </label>
-        <input type="text" name="timeout" id="timeout" size="4" value="[% server.timeout %]" /> seconds
-        </li>
-        <li><label for="recordtype">Record type: </label>
-        <select name="recordtype" id="recordtype">
-            <option value="biblio">Bibliographic</option>
-            <option value="authority">Authority</option>
-        </select>
-        </li>
-        [% IF (server.servertype||type) == 'sru' %]
-        <li>
-        <label for="sru_options">Additional SRU options: </label>
-        <input type="text" name="sru_options" id="sru_options" size="50" value="[% server.sru_options %]"/>
-        <div class="hint">Separate options by commas. Example: sru=get,sru_version=1.1. See also http://www.indexdata.com/yaz/doc/zoom.html.</div>
-        </li>
-        <li>
-        <label for="sru_fields">SRU Search fields mapping: </label>
-        <input type="hidden" name="sru_fields" id="sru_fields" value="[% server.sru_fields %]" />
-        <input type="text" name="show_sru_fields" id="show_sru_fields" size="100" value="[% server.sru_fields %]" disabled/> <input type="button" value="Modify" onclick="ModMapping()" />
-        </li>
-        [% END %]
-        <li>
-        <label for="add_xslt">XSLT File(s) for transforming results: </label>
-        <input type="text" name="add_xslt" id="add_xslt" size="100" value="[% server.add_xslt %]"/>
-        <div class="hint">Separate multiple filenames by commas.</span>
-        </li>
-
-        </ol>
-        </fieldset>
-
-        <fieldset class="action"><input type="submit" value="Save" /> <a class="cancel" href="/cgi-bin/koha/admin/z3950servers.pl">Cancel</a></fieldset>
-    </form>
-    </div>
-  </div>
 [% END %]
 
 [% IF op == 'list' %]
     <div id="toolbar" class="btn-toolbar">
         <a id="newserver" class="btn btn-small" href="/cgi-bin/koha/admin/z3950servers.pl?op=add&type=zed"><i class="fa fa-plus"></i> New Z39.50 server</a>
         <a id="newserver" class="btn btn-small" href="/cgi-bin/koha/admin/z3950servers.pl?op=add&type=sru"><i class="fa fa-plus"></i> New SRU server</a>
+        <a id="newserver" class="btn btn-small" href="/cgi-bin/koha/admin/z3950servers.pl?op=add&type=zed_update"><i class="fa fa-plus"></i> New Z39.50 Update server</a>
     </div>
     <h3>Z39.50/SRU servers administration</h3>
     [% IF id %]
@@ -342,10 +237,19 @@ $(function() {
         You searched for [% searchfield %]
     [% END %]
     <table id="serverst">
-        <thead><tr><th>Target</th><th>Hostname/Port</th><th>Database</th><th>Userid</th><th>Password</th><th>Preselected</th><th>Rank</th><th>Syntax</th><th>Encoding</th><th>Timeout</th><th>Record type</th><th>Options</th>
+        <thead><tr><th>Target</th><th>Hostname/Port</th><th>Database</th><th>Userid</th><th>Password</th><th>Preselected</th><th>Rank</th><th>Syntax</th><th>Encoding</th><th>Timeout</th><th>Record type</th><th>Options</th><th>Server type</th>
         </tr></thead>
         <tbody>
         [% FOREACH loo IN loop %]
+            [% BLOCK LoopServerType %]
+                [% IF (loo.servertype) == 'sru' %]
+                    SRU
+                [% ELSIF (loo.servertype) == 'zed' %]
+                    Z39.50
+                [% ELSIF (loo.servertype) == 'zed_update' %]
+                    Z39.50 Update
+                [% END %]
+            [% END %]
             <tr>
             <td><a href="[% loo.script_name %]?op=edit&amp;id=[% loo.id %]">[% loo.servername %]</a></td><td>[% loo.host %]:[% loo.port %]</td><td>[% loo.db %]</td><td>[% loo.userid %]</td><td>[% IF loo.password %]########[% END %]</td><td>[% IF ( loo.checked ) %]Yes[% ELSE %]No[% END %]</td><td>[% loo.rank %]</td>
             <td>[% loo.syntax %]</td><td>[% loo.encoding %]</td><td>[% loo.timeout %]</td>
@@ -356,6 +260,7 @@ $(function() {
                 [% END %]
             </td>
             <td><a href="[% loo.script_name %]?op=edit&amp;id=[% loo.id %]">Edit</a> <a href="[% loo.script_name %]?op=add&amp;id=[% loo.id %]">Copy</a> <a href="javascript:void(0);" onclick="ConfirmDelete('[% loo.servername | replace("['\"]","") %]','[% loo.id %]');">Delete</a></td>
+            <td>[% PROCESS LoopServerType %]</td>
             </tr>
         [% END %]
         </tbody>
