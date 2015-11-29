@@ -87,6 +87,15 @@ function searchauthority() {
 [% IF ( unknownauthid ) %]
     <div class="dialog message">The authority record you requested does not exist ([% errauthid %]).</div>
 [% ELSE %]
+
+[% IF ( pushAuthResult ) %]
+    <div class="dialog message">
+        [% pushAuthResult.msg %]
+      [% UNLESS ( pushAuthResult.success ) %]
+        <br/>[% pushAuthResult.errMsg %] ([% pushAuthResult.addInfo %])
+      [% END %]
+    </div>
+[% END %]
 <h1>Authority #[% authid %] ([% authtypetext %])</h1>
 
 <div id="action">

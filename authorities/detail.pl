@@ -218,9 +218,7 @@ if ( C4::Context->preference("EnablePushingToAuthorityServer") ) {
   if ( defined $query->param('pushToZ3950Server') and defined $serverid ) {
     my $result = PushAuthToZ3950( $serverid, $record, $query );
 
-    # TODO: Print out the results of the pushing process ($result is hashref)
-    # Example success: {"msg":"Authortity was successfully sent","reference":"","success":1}
-    # Example failure: {"addInfo":"127.0.0.1:8888","errMsg":"Connect failed","msg":"Authority was not pushed correctly","success":0,"errCode":10000}
+    $template->param( pushAuthResult => $result );
   }
 }
 
