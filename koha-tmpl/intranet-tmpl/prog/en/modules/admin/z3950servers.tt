@@ -201,6 +201,11 @@
         <input type="text" name="show_sru_fields" id="show_sru_fields" size="100" value="[% server.sru_fields %]" disabled/> <input type="button" value="Modify" onclick="ModMapping()" />
         </li>
         [% END %]
+        <li>
+        <label for="add_xslt">XSLT File(s) for transforming results: </label>
+        <input type="text" name="add_xslt" id="add_xslt" size="100" value="[% server.add_xslt %]"/>
+        <div class="hint">Separate multiple filenames by commas.</span>
+        </li>
         [% IF (server.servertype||type) == 'zed_update' %]
             <li>
             <label for="zedu_omit_fields">MARC fields not to send to update server: </label>
@@ -227,11 +232,6 @@
             </li>
             <input type="hidden" hidden="hidden" name="add_xslt" id="add_xslt" value=""/>
         [% ELSE %]
-            <li>
-            <label for="add_xslt">XSLT File(s) for transforming results: </label>
-            <input type="text" name="add_xslt" id="add_xslt" size="100" value="[% server.add_xslt %]"/>
-            <div class="hint">Separate multiple filenames by commas.</span>
-            </li>
             <input type="hidden" hidden="hidden" name="zedu_omit_fields" id="zedu_omit_fields" value=""/>
             <input type="hidden" hidden="hidden" name="zedu_authoritative_id_field" id="zedu_authoritative_id_field" value=""/>
             <input type="hidden" hidden="hidden" name="zedu_msg_field" id="zedu_msg_field" value=""/>

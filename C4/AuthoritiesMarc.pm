@@ -24,14 +24,13 @@ use Net::Z3950::ZOOM;
 use C4::Context;
 use MARC::Record;
 use C4::Biblio;
+use C4::Breeding;
 use C4::Search;
 use C4::AuthoritiesMarc::MARC21;
 use C4::AuthoritiesMarc::UNIMARC;
 use C4::Charset;
 use C4::Log;
 use Koha::Authority;
-
-use Data::Dumper;
 
 use vars qw($VERSION @ISA @EXPORT);
 
@@ -1678,6 +1677,15 @@ sub PushAuthToZ3950 {
   my $z3950server = $sth->fetchrow_hashref();
 
   if ($z3950server) {
+
+    my $error;
+    # Apply the XSLT ..
+    ($record, $error) = C4::Breeding::_do_xslt_proc($record, $z3950server, Koha::XSLT_Handler->new);
+
+    if ( $error ) {
+	    $toRet->{msg} = 'An error occured apllying the XSLT';
+	    $toRet->{success} = 0;
+    }
 
     my @updateOmitFields = split( /\s*,\s*/, $z3950server->{zedu_omit_fields} );
 
