@@ -1818,7 +1818,7 @@ sub PushAuthToZ3950 {
       $toRet->{errMsg}  = $errmsg  if defined $errmsg;
       $toRet->{addInfo} = $addinfo if defined $addinfo;
 
-      $toRet->{msg}     = "Failed sending authority to $z3950server->{servername}!";
+      $toRet->{msg}     = "Failed sending authority to $z3950server->{servername}";
       $toRet->{success} = 0;
 
     }
@@ -1829,7 +1829,7 @@ sub PushAuthToZ3950 {
 
       $toRet->{reference} = $reference if defined $reference;
 
-      $toRet->{msg}     = "Authortity was successfully sent";
+      $toRet->{msg}     = "Authortity was successfully sent to $z3950server->{servername}";
       $toRet->{success} = 1;
     }
 
