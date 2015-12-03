@@ -1753,7 +1753,7 @@ sub PushAuthToZ3950 {
     my $field = $record->field('001');
     $field->update("$authoritativeId");
 
-    if (defined $msg) {
+    if ($msg) {
 	    my ( $msgField, $msgSubfield ) = split(/\$/, $msgFieldDef);
 
 	    $record->add_fields( $msgField, " ", " ", $msgSubfield => $msg, );
