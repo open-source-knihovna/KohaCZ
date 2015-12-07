@@ -28,6 +28,7 @@ use CGI qw ( -utf8 );
 use C4::Context;
 use C4::Members;
 use C4::Auth;
+use Koha::DateUtils;
 
 my $input = new CGI;
 
@@ -42,14 +43,14 @@ my $dateexpiry;
 my $borrower = GetMemberDetails( $borrowernumber, '');
 
 my $date = $borrower->{'dateexpiry'};
-my $today = C4::Dates->new()->output("iso");
+my $today = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
 $date = ($date gt $today) ? $date : $today;
 $date = GetExpiryDate( $borrower->{'categorycode'}, $date );
 
 $dateexpiry = ExtendMemberSubscriptionTo( $borrowernumber , $date );
 
 if($destination eq "circ") {
-    print $input->redirect("/cgi-bin/koha/circ/circulation.pl?findborrower=$cardnumber&was_renewed=1");
+    print $input->redirect("/cgi-bin/koha/circ/circulation.pl?borrowernumber=$borrowernumber&was_renewed=1");
 } else {
     print $input->redirect("/cgi-bin/koha/members/moremember.pl?borrowernumber=$borrowernumber&was_renewed=1");
 }
