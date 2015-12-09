@@ -553,7 +553,7 @@ sub new {
     }
     my $max = $repository->{koha_max_count};
     my $sql = "
-        SELECT biblioitems.biblionumber, biblioitems.timestamp
+        (SELECT biblioitems.biblionumber, biblioitems.timestamp, marcxml
         FROM biblioitems
     ";
     $sql .= " JOIN oai_sets_biblios ON biblioitems.biblionumber = oai_sets_biblios.biblionumber " if defined $set;
