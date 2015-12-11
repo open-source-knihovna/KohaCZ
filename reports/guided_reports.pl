@@ -771,7 +771,7 @@ elsif ($phase eq 'Run this report'){
             unless ($sth) {
                 die "execute_query failed to return sth for report $report_id: $sql";
             } else {
-                my $headers= header_cell_loop($sth);
+                my $headers = header_cell_loop($sth);
                 $template->param(header_row => $headers);
                 while (my $row = $sth->fetchrow_arrayref()) {
                     my @cells = map { +{ cell => $_ } } @$row;
@@ -816,6 +816,7 @@ elsif ($phase eq 'Export'){
         if ($format eq 'tab') {
             $type = 'application/octet-stream';
             $content .= join("\t", header_cell_values($sth)) . "\n";
+            $content = Encode::decode('UTF-8', $content);
             while (my $row = $sth->fetchrow_arrayref()) {
                 $content .= join("\t", @$row) . "\n";
             }
@@ -823,10 +824,10 @@ elsif ($phase eq 'Export'){
             my $delimiter = C4::Context->preference('delimiter') || ',';
             if ( $format eq 'csv' ) {
                 $type = 'application/csv';
-                my $csv = Text::CSV::Encoded->new({ encoding_out => 'utf8', sep_char => $delimiter});
+                my $csv = Text::CSV::Encoded->new({ encoding_out => 'UTF-8', sep_char => $delimiter});
                 $csv or die "Text::CSV::Encoded->new({binary => 1}) FAILED: " . Text::CSV::Encoded->error_diag();
                 if ($csv->combine(header_cell_values($sth))) {
-                    $content .= $csv->string(). "\n";
+                    $content .= Encode::decode('UTF-8', $csv->string()) . "\n";
                 } else {
                     push @$q_errors, { combine => 'HEADER ROW: ' . $csv->error_diag() } ;
                 }
@@ -948,7 +949,7 @@ sub header_cell_values {
 
 # pass $sth, get back a TMPL_LOOP-able set of names for the column headers
 sub header_cell_loop {
-    my @headers = map { +{ cell => $_ } } header_cell_values (shift);
+    my @headers = map { +{ cell => decode('UTF-8',$_) } } header_cell_values (shift);
     return \@headers;
 }
 
