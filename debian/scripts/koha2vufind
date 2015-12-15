@@ -1,0 +1,133 @@
+#!/bin/sh
+#
+# koha2vufind - export from Koha and import to remote vufind server
+# Copyright 2015 Josef Moravec
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+# include helper functions
+if [ -f "/usr/share/koha/bin/koha-functions.sh" ]; then
+    . "/usr/share/koha/bin/koha-functions.sh"
+else
+    echo "Error: /usr/share/koha/bin/koha-functions.sh not present." 1>&2
+    exit 1
+fi
+
+
+# Simple usage function
+usage()
+{
+cat <<EOF
+
+Export cataloging records to xml marc file and import it to vufind catalog
+
+Usage: $0 [-t X] instancename vufind_server
+Options:
+    --time|-t    Time from to export. In minutes before now.
+    --help|-h    Print this help.
+
+Without options it exports whole catalog.
+
+Example:
+    $0 -t 15 library1 192.168.1.100 - exports records updated from 15 minutes ago to now
+
+Note: This script could be called by koha-foreach. Any other options are passed directly to export_records.pl.
+
+EOF
+}
+
+# Default parameters
+other_options=""
+DATEFROM="1970-01-01"
+RUNTIME=$(date)
+ENDDATE=$(date "+%Y-%m-%d_%H_%M_%S")
+TMPFILE="/tmp/export-koha-tmp.xml"
+
+# Read command line parameters
+while [ -n "$*" ]; do
+    case "$1" in
+        -h|--help)
+            usage ; exit 0
+            ;;
+        -t|--time)
+            shift
+            DATEFROM=$(date "+%Y-%m-%d %H:%M:%S" --date="now -$1 minutes")
+            ;;
+        -*)
+            other_options="$other_options $1";
+            ;;
+        *)
+            break
+            ;;
+    esac
+
+    shift
+done
+
+# Check presence of instance name
+if [ $# -lt 1 ]; then
+    usage
+    die "Missing instance name."
+fi
+
+INSTANCE="$1"
+shift
+
+# Check presence of vufind server
+if [ $# -lt 1 ]; then
+    usage
+    die "Missing vufind server address."
+fi
+
+SERVER="$1"
+
+# Set logging
+LOG="/var/log/koha/export.log"
+exec >> $LOG 2>&1
+
+if is_instance $INSTANCE; then
+    EXPORTFILE="export$INSTANCE-$ENDDATE.xml"
+#    EXPORTAUTHFILE="exportAuthority$INSTANCE-$ENDDATE.xml"
+
+    echo "$RUNTIME - exporting biblio for instance $INSTANCE"
+    env KOHA_CONF=/etc/koha/sites/$INSTANCE/koha-conf.xml \
+        PERL5LIB=/usr/share/koha/lib \
+        /usr/share/koha/bin/export_records.pl --format=xml --record-type=bibs --date="$DATEFROM" --filename="$EXPORTFILE" $other_options
+
+#    echo "$RUNTIME - exporting authority for instance $INSTANCE"
+#    env KOHA_CONF=/etc/koha/sites/$INSTANCE/koha-conf.xml \
+#        PERL5LIB=/usr/share/koha/lib \
+#        /usr/share/koha/bin/export_records.pl --format=xml --record-type=auths --date="$DATEFROM" --filename="$EXPORTAUTHFILE" $other_options
+
+    scp "$EXPORTFILE" "root@$SERVER:/usr/local/vufind2/data/kohaUpdate"
+#    scp "$EXPORTAUTHFILE" root@$SERVER:/usr/local/vufind2/data/kohaUpdate
+
+echo "scp done, doing ssh"
+    ssh root@$SERVER <<ENDSSH
+        cd /usr/local/vufind2
+        if [ -s "data/kohaUpdate/$EXPORTFILE" ]; then
+            ./import-marc.sh data/kohaUpdate/$EXPORTFILE
+        fi
+#        if [ -s "data/kohaUpdate/$EXPORTAUTHFILE" ]; then
+#            ./import-marc-auth.sh data/kohaUpdate/$EXPORTAUTHFILE
+#        fi
+        rm data/kohaUpdate/$EXPORTFILE
+#        rm data/kohaUpdate/$EXPORTAUTHFILE
+ENDSSH
+
+    rm $EXPORTFILE
+#    rm $EXPORTAUTHFILE
+fi
+
