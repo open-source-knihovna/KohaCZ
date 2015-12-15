@@ -95,7 +95,7 @@ open STDOUT, '>', $filename if $filename;
 
 my @record_ids;
 
-$timestamp = ($timestamp) ? output_pref({ dt => dt_from_string($timestamp), dateformat => 'iso', dateonly => 1, }): '';
+$timestamp = ($timestamp) ? output_pref({ dt => dt_from_string($timestamp), dateformat => 'iso', dateonly => 0, }): '';
 
 if ( $record_type eq 'bibs' ) {
     if ( $timestamp ) {
