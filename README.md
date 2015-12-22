@@ -1,5 +1,8 @@
+ 
 Pravidla vývoje KohaCZ
 =
+[![Gitter](https://badges.gitter.im/open-source-knihovna/KohaCZ.svg)](https://gitter.im/open-source-knihovna/KohaCZ?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Tento repozitář provozuje česká komunita Koha, která je složená z aktivních zástupců knihoven provozujících tento otevřený knihovní systém a vývojářů. Jeho cílem je soustředit výsledky vývoje lokálních rozšíření a úprav na jedno místo a usnadnit tím samotný voývoj i distribuci.
 Do vývoje se může zapojit kdokoli, pokud bude respektovat pravidla sepsaná níže.
 
