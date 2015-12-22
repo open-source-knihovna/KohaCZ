@@ -67,7 +67,8 @@ if( $op eq 'delete_confirmed' && $id ) {
 } elsif ( $op eq 'add_validated' ) {
     my @fields=qw/host port db userid password rank syntax encoding timeout
         recordtype checked servername servertype sru_options sru_fields
-        add_xslt/;
+        add_xslt zedu_omit_fields zedu_authoritative_id_field zedu_msg_field
+	zedu_msg_oncreate zedu_msg_onupdate/;
     my $formdata = _form_data_hashref( $input, \@fields );
     if( $id ) {
         my $server = $schema->resultset('Z3950server')->find($id);

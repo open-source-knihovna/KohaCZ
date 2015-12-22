@@ -49,6 +49,13 @@ Authorities:
               defautl: "afrey50      ba0"
               type: textarea
               class: code
+        -
+            - pref: EnablePushingToAuthorityServer
+              default: no
+              choices:
+                  yes: Use
+                  no: "Don't use"
+            - Enables pushing to authority server as an update or create action
     Linker:
         -
             - Use the
