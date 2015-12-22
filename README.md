@@ -25,3 +25,5 @@ Všechny naše patche je nakonec přenést do Bugzilly a nechat projít stadardn
 
 [Seznam](https://github.com/open-source-knihovna/KohaCZ/wiki/Zm%C4%9Bny-v-KohaCZ-oproti-standardn%C3%AD-instalaci) změn v KohaCZ oproti standardní instalaci.
 
+Pokud budete mít jakékoli dotazy k vývoji pište na info@knihovni-system-koha.cz 
+
