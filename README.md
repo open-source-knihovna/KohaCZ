@@ -1,6 +1,7 @@
 Pravidla vývoje KohaCZ
 =
-Tento repozitář provozuje česká komunita Koha, která je složená z aktivních zástupců knihoven provozujících tento otevřený knihovní systém a vývojářů. Jeho cílem je soustředit výsledky vývoje lokálních rozšíření a úprav na jedno místo a usnadnit tím samotný voývoj i dostribuci.
+Tento repozitář provozuje česká komunita Koha, která je složená z aktivních zástupců knihoven provozujících tento otevřený knihovní systém a vývojářů. Jeho cílem je soustředit výsledky vývoje lokálních rozšíření a úprav na jedno místo a usnadnit tím samotný voývoj i distribuci.
+Do vývoje se může zapojit kdokoli, pokud bude respektovat pravidla sepsaná níže.
 
 Na GitHubu budeme aktivně udržovat dvě větve, [master](https://github.com/open-source-knihovna/KohaCZ/tree/master) a [production](https://github.com/open-source-knihovna/KohaCZ/tree/production).
 
@@ -8,7 +9,7 @@ Master větev kopíruje oficiální repozitář Koha, production je vždy aktuá
 
 **Změny se aplikují na větev production vždy, když se dokonči logický celek vývoje**, který by stálo za to zavést do produkce. 
 
-Při aplikaci změn je třeba myslet na to, že **větev production může používat jinou verzi, než větev master**. Pokud se budou míchat soubory z jiných verzí, tak téměř zaručeně na produkčním serveru něco rozbijou (vlastní zkušenost :)
+Při aplikaci změn je třeba myslet na to, že **větev production může používat jinou verzi, než větev master**. Vždy je nutné při vývoji zvážit možnosti aplikaci patche na master i production. V případě, že to není možné má přednost master větev
 
 Na větvi master se bude vždy vyskytovat **aktuální stable verze** určovaná Koha komunitou. Obdobně se s mírným spožděním bude stable verze vyskytovat i na větvi production.
 
