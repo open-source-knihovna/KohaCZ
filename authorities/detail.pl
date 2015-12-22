@@ -152,6 +152,16 @@ sub build_tabs {
             }
         }
         $template->param( singletab => (scalar(@BIG_LOOP)==1), BIG_LOOP => \@BIG_LOOP );
+
+        if (C4::Context->preference("EnablePushingToAuthorityServer")) {
+
+          my $sth = $dbh->prepare("select id, servername from z3950servers where servertype='zed_update';");
+          $sth->execute();
+
+          my $z3950updateservers = $sth->fetchall_arrayref( {} );
+
+          $template->param( z3950updateservers => $z3950updateservers );
+        }
 }
 
 
@@ -198,6 +208,16 @@ if (not defined $record) {
                        authtypesloop => \@authtypesloop );
     output_html_with_http_headers $query, $cookie, $template->output;
     exit;
+}
+
+if ( C4::Context->preference("EnablePushingToAuthorityServer") ) {
+  my $serverid = $query->param('sid');
+
+  if ( defined $query->param('pushToZ3950Server') and defined $serverid ) {
+    my $result = PushAuthToZ3950( $serverid, $record, $query );
+
+    $template->param( pushAuthResult => $result );
+  }
 }
 
 if (C4::Context->preference("AuthDisplayHierarchy")){
