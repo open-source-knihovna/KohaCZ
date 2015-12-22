@@ -23,5 +23,5 @@ Po úspěšném otestování nového kódu se vydá nový [Release](https://gith
 
 Všechny naše patche je nakonec přenést do Bugzilly a nechat projít stadardní cestou schvalování na kvalitu. [Podrobnosti k vývoji na wiki Koha] (http://wiki.koha-community.org/wiki/Category:Development).
 
-[Seznam všech změn](https://github.com/open-source-knihovna/KohaCZ/wiki/Zm%C4%9Bny-v-KohaCZ-oproti-standardn%C3%AD-instalaci)
+[Seznam](https://github.com/open-source-knihovna/KohaCZ/wiki/Zm%C4%9Bny-v-KohaCZ-oproti-standardn%C3%AD-instalaci) všech dosud vytvořených rozšíření a vylepšení.
 
