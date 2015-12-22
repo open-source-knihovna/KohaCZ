@@ -108,7 +108,7 @@ sub lookupUser {
             = C4::Reserves::GetReservesFromBorrowernumber($userId, undef);
 
         C4::NCIP::NcipUtils::clearEmptyKeysWithinArray(@reserves);
-	
+
 	# Get reserve's titles ..
 	foreach my $reserve (@reserves) {
 		my $bibData = C4::Biblio::GetBiblioItemData($reserve->{biblionumber});
@@ -173,7 +173,7 @@ sub checkUserAndPassword {
 }
 
 =head2 parseUserData
-	
+
 	parseUserData($borrowenumber)
 
 	Returns hashref of user's personal data as they are in table borrowers
@@ -294,7 +294,7 @@ sub parseLoanedItems {
 
 	parseUserFiscalAccount($borrowenumber)
 
-	Returns array of user's accountlines with these keys: accountno, itemnumber, date, amount, description, note		
+	Returns array of user's accountlines with these keys: accountno, itemnumber, date, amount, description, note
 
 =cut
 

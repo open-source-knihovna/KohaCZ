@@ -102,10 +102,12 @@ BEGIN {
         &GetReservesFromItemnumber
         &GetReservesFromBiblionumber
         &GetReservesFromBorrowernumber
-	    &GetReserveFromBorrowernumberAndItemnumber
+	&GetReserveFromBorrowernumberAndItemnumber
         &GetReservesForBranch
         &GetReservesToBranch
         &GetReserveCount
+        &GetReserveCountFromItemnumber
+        &GetReserveFee
         &GetReserveInfo
         &GetReserveStatus
 

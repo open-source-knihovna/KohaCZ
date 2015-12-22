@@ -200,7 +200,7 @@
                    [% IF (ITEM_DAT.withdrawn_categorycode == withdrawal_desc_option.categorycode) %][% withdrawal_desc_option.description %][% END %]
 		[% END %]
             &nbsp;</li>[% END %]
-				
+
             </ol></div>
             <div class="listgroup"><h4>History</h4>
             <ol class="bibliodetails">

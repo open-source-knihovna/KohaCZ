@@ -35,6 +35,7 @@ use C4::Biblio;
 use C4::Members qw/GetMember/;  #needed for permissions checking for changing basketgroup of a basket
 use C4::Items;
 use C4::Suggestions;
+use C4::Csv;
 use Date::Calc qw/Add_Delta_Days/;
 
 =head1 NAME
@@ -156,7 +157,12 @@ if ( $op eq 'delete_confirm' ) {
         -type       => 'text/csv',
         -attachment => 'basket' . $basket->{'basketno'} . '.csv',
     );
-    print GetBasketAsCSV($query->param('basketno'), $query);
+    if ( $query->param('csv_profile') eq 'default'){
+        print GetBasketAsCSV($query->param('basketno'), $query);
+    } else {
+        my $csv_profile_id = $query->param('csv_profile');
+        print  GetBasketAsCSV($query->param('basketno'), $query, $csv_profile_id);
+    }
     exit;
 } elsif ($op eq 'close') {
     my $confirm = $query->param('confirm') || $confirm_pref eq '2';
@@ -392,6 +398,7 @@ if ( $op eq 'delete_confirm' ) {
         unclosable           => @orders ? 0 : 1, 
         has_budgets          => $has_budgets,
         duplinbatch          => $duplinbatch,
+        csv_profiles         => C4::Csv::GetCsvProfiles( "sql" ),
     );
 }
 

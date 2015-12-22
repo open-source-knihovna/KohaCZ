@@ -85,6 +85,11 @@
                                     </fieldset>
                                     [% IF PatronSelfRegistration && PatronSelfRegistrationDefaultCategory %]<div id="patronregistration"><p>Don't have an account? <a href="/cgi-bin/koha/opac-memberentry.pl">Register here.</a></p></div>[% END %]
                                     </fieldset>
+                                [% IF Koha.Preference('OpacPasswordChange') && Koha.Preference('OpacResetPassword') %]
+                                    <div id="forgotpassword">
+                                        <a href="/cgi-bin/koha/opac-password-recovery.pl">Forgot your password?</a>
+                                    </div>
+                                [% END %]
                                 [% IF Koha.Preference( 'NoLoginInstructions' ) %]
                                     <div id="nologininstructions-main">
                                         [% Koha.Preference( 'NoLoginInstructions' ) %]

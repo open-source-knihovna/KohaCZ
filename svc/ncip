@@ -69,7 +69,7 @@ if ($query->request_method eq "GET") {
     }
     C4::NCIP::NcipUtils::print400($query,
         "Param service not recognized..");
-    
+
 } elsif ($query->request_method eq "POST") {
     # User is already authentified
     print $query->header(-type => 'text/xml', cookie => $cookie);

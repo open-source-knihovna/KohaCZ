@@ -207,21 +207,21 @@ if ($op eq "action") {
 		     $item_changes->{'withdrawn'} = 1;
 
 	             my $sth = $dbh->prepare("
-                             SELECT MAX(CAST( withdrawn_permanent AS UNSIGNED INT)) AS max 
-                             FROM items 
+                             SELECT MAX(CAST( withdrawn_permanent AS UNSIGNED INT)) AS max
+                             FROM items
                              WHERE withdrawn_permanent IS NOT NULL;");
                      $sth->execute();
- 
+
                      my $max = $sth->fetchrow;
                      if (!$max) {
                          $max = 0;
                      }
- 
-                     $item_changes->{"withdrawn_permanent"} = ++$max;
- 
-                     $item_changes->{"withdrawn_categorycode"} = $withdrawn_categorycode;	
 
-		     ModItem($item_changes, $itemdata->{'biblionumber'}, $itemdata->{'itemnumber'});		     
+                     $item_changes->{"withdrawn_permanent"} = ++$max;
+
+                     $item_changes->{"withdrawn_categorycode"} = $withdrawn_categorycode;
+
+		     ModItem($item_changes, $itemdata->{'biblionumber'}, $itemdata->{'itemnumber'});
 
 		     $withdrawn_items++;
 		} else {

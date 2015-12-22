@@ -147,6 +147,10 @@ function moneyFormat(textObj) {
             <!-- default to paying all -->
         <input name="paid" id="paid" value="[% amountoutstanding | format('%.2f') %]" onchange="moneyFormat(document.payindivfine.paid)"/>
     </li>
+    <li>
+        <label for="writeOffOutstanding">Write off outstanding part</label>
+        <input name="writeOffOutstanding" id="writeOffOutstanding" type="checkbox" value="1"/>
+    </li>
 </ol>
 </fieldset>
 

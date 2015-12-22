@@ -80,8 +80,8 @@ elsif (defined $itemnotes) { # i.e., itemnotes parameter passed from form
 
     if (defined $submit && $submit eq 'submit_perm') {
          my $sth = $dbh->prepare("
-		SELECT MAX(CAST( withdrawn_permanent AS UNSIGNED INT)) AS max 
-		FROM items 
+		SELECT MAX(CAST( withdrawn_permanent AS UNSIGNED INT)) AS max
+		FROM items
 		WHERE withdrawn_permanent IS NOT NULL;");
         $sth->execute();
 

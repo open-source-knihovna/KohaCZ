@@ -316,6 +316,11 @@
                     <fieldset class="brief">
                         <label for="muserid">Login:</label><input type="text" id="muserid" name="userid" />
                         <label for="mpassword">Password:</label><input type="password" id="mpassword" name="password" />
+                    [% IF Koha.Preference('OpacPasswordChange') && Koha.Preference('OpacResetPassword') %]
+                        <div id="forgotpassword-modal">
+                            <a href="/cgi-bin/koha/opac-password-recovery.pl">Forgot your password?</a>
+                        </div>
+                    [% END %]
                     [% IF Koha.Preference( 'NoLoginInstructions' ) %]
                         <div id="nologininstructions-modal">
                             [% Koha.Preference( 'NoLoginInstructions' ) %]
