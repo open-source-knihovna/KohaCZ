@@ -1,5 +1,6 @@
 Pravidla vývoje KohaCZ
 =
+Tento repozitář provozuje česká komunita Koha, která je složená z aktivních zástupců knihoven provozujících tento otevřený knihovní systém a vývojářů. Jeho cílem je soustředit výsledky vývoje lokálních rozšíření a úprav na jedno místo a usnadnit tím samotný voývoj i dostribuci.
 
 Na GitHubu budeme aktivně udržovat dvě větve, [master](https://github.com/open-source-knihovna/KohaCZ/tree/master) a [production](https://github.com/open-source-knihovna/KohaCZ/tree/production).
 
