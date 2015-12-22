@@ -3,7 +3,7 @@ Pravidla vývoje KohaCZ
 
 Na GitHubu budeme aktivně udržovat dvě větve, [master](https://github.com/open-source-knihovna/KohaCZ/tree/master) a [production](https://github.com/open-source-knihovna/KohaCZ/tree/production).
 
-Master větev obsahuje stejnou verzi Kohy jako production. **Veškerý vývoj se posílá do větve master** a to proto, aby byly všechny změny přehledně na jednom místě.
+Master větev kopíruje oficiální repozitář Koha, production je vždy aktuální vychází stable verze (mění se tedy každých cca 6 měsíců). **Veškerý vývoj se posílá do větve master** a to proto, aby byly všechny změny přehledně na jednom místě.
 
 **Změny se aplikují na větev production vždy, když se dokonči logický celek vývoje**, který by stálo za to zavést do produkce. 
 
