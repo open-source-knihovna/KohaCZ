@@ -26,8 +26,8 @@ use CGI qw ( -utf8 );
 use C4::Context;
 use C4::Auth;
 use C4::Output;
-use C4::Dates qw/format_date format_date_in_iso/;
 use C4::Contract;
+use Koha::DateUtils;
 
 use Koha::Acquisition::Bookseller;
 
@@ -53,6 +53,7 @@ $template->param(
     booksellerid   => $booksellerid,
     booksellername => $bookseller->{name},
     basketcount   => $bookseller->{'basketcount'},
+    active         => $bookseller->{active},
     subscriptioncount   => $bookseller->{'subscriptioncount'},
 );
 
@@ -70,8 +71,8 @@ if ( $op eq 'add_form' ) {
             contractnumber      => $contract->{contractnumber},
             contractname        => $contract->{contractname},
             contractdescription => $contract->{contractdescription},
-            contractstartdate => format_date( $contract->{contractstartdate} ),
-            contractenddate   => format_date( $contract->{contractenddate} ),
+            contractstartdate   => $contract->{contractstartdate},
+            contractenddate     => $contract->{contractenddate},
         );
     } else {
         $template->param(
@@ -92,10 +93,18 @@ elsif ( $op eq 'add_validate' ) {
 
     my $is_a_modif = $input->param("is_a_modif");
 
+    my $contractstart_dt = eval { dt_from_string( $input->param('contractstartdate') ); };
+    my $contractend_dt = eval { dt_from_string( $input->param('contractenddate') ); };
+    unless ( $contractstart_dt and $contractend_dt ) {
+        my $today = dt_from_string;
+        $contractstart_dt ||= $today;
+        $contractend_dt   ||= $today;
+    }
+
     if ( $is_a_modif ) {
         ModContract({
-            contractstartdate   => format_date_in_iso( $input->param('contractstartdate') ),
-            contractenddate     => format_date_in_iso( $input->param('contractenddate') ),
+            contractstartdate   => eval { output_pref({ dt => dt_from_string( $contractstart_dt ), dateformat => 'iso', dateonly => 1 } ); },
+            contractenddate     => eval { output_pref({ dt => dt_from_string( $contractend_dt ), dateformat => 'iso', dateonly => 1 } ); },
             contractname        => $input->param('contractname'),
             contractdescription => $input->param('contractdescription'),
             booksellerid        => $input->param('booksellerid'),
@@ -106,8 +115,8 @@ elsif ( $op eq 'add_validate' ) {
             contractname        => $input->param('contractname'),
             contractdescription => $input->param('contractdescription'),
             booksellerid        => $input->param('booksellerid'),
-            contractstartdate   => format_date_in_iso( $input->param('contractstartdate') ),
-            contractenddate     => format_date_in_iso( $input->param('contractenddate') ),
+            contractstartdate   => eval { output_pref({ dt => dt_from_string( $input->param('contractstartdate') ), dateformat => 'iso', dateonly => 1 } ); },
+            contractenddate     => eval { output_pref({ dt => dt_from_string( $input->param('contractenddate') ), dateformat => 'iso', dateonly => 1 } ); },
         });
     }
 
@@ -126,8 +135,8 @@ elsif ( $op eq 'delete_confirm' ) {
         contractnumber      => $$contract{contractnumber},
         contractname        => $$contract{contractname},
         contractdescription => $$contract{contractdescription},
-        contractstartdate   => format_date( $$contract{contractstartdate} ),
-        contractenddate     => format_date( $$contract{contractenddate} ),
+        contractstartdate   => $$contract{contractstartdate},
+        contractenddate     => $$contract{contractenddate},
     );
 
     # END $OP eq DELETE_CONFIRM
@@ -154,9 +163,9 @@ if ( $op eq 'list' ) {
     my @contracts = @{GetContracts( { booksellerid => $booksellerid } )};
 
     # format dates
-    for ( @contracts ) {
-        $$_{contractstartdate} = format_date($$_{contractstartdate});
-        $$_{contractenddate}   = format_date($$_{contractenddate});
+    for my $contract ( @contracts ) {
+        $contract->{contractstartdate} =  output_pref({ dt => dt_from_string( $contract->{contractstartdate} ), dateonly => 1 });
+        $contract->{contractenddate}   =  output_pref({ dt => dt_from_string( $contract->{contractenddate} ), dateonly => 1 }),
     }
 
     $template->param(loop => \@contracts);

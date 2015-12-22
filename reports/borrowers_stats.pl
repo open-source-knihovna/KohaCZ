@@ -25,13 +25,12 @@ use C4::Auth;
 use C4::Context;
 use C4::Branch; # GetBranches
 use C4::Koha;
-use C4::Dates;
+use Koha::DateUtils;
 use C4::Acquisition;
 use C4::Output;
 use C4::Reports;
 use C4::Circulation;
 use C4::Members::AttributeTypes;
-use C4::Dates qw/format_date format_date_in_iso/;
 use Date::Calc qw(
   Today
   Add_Delta_YM
@@ -43,8 +42,6 @@ plugin that shows a stats on borrowers
 
 =head1 DESCRIPTION
 
-=over 2
-
 =cut
 
 my $input = new CGI;
@@ -53,8 +50,10 @@ my $fullreportname = "reports/borrowers_stats.tt";
 my $line = $input->param("Line");
 my $column = $input->param("Column");
 my @filters = $input->param("Filter");
-$filters[3]=format_date_in_iso($filters[3]);
-$filters[4]=format_date_in_iso($filters[4]);
+$filters[3] = eval { output_pref( { dt => dt_from_string( $filters[3]), dateonly => 1, dateformat => 'iso' } ); }
+    if ( $filters[3] );
+$filters[4] = eval { output_pref ({ dt => dt_from_string( $filters[4]), dateonly => 1, dateformat => 'iso' } ); }
+    if ( $filters[4] );
 my $digits = $input->param("digits");
 our $period = $input->param("period");
 my $borstat = $input->param("status");
@@ -221,7 +220,8 @@ sub calculate {
         my %cell;
         if ( @$filters[$i] ) {
             if ($i == 3 or $i == 4) {
-                $cell{filter} = format_date(@$filters[$i]);
+                $cell{filter} = eval { output_pref( { dt => dt_from_string( @$filters[$i] ), dateonly => 1 }); }
+                    if ( @$filters[$i] );
             } else {
                 $cell{filter} = @$filters[$i];
             }

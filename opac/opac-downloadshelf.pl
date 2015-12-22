@@ -27,10 +27,12 @@ use C4::Auth;
 use C4::Biblio;
 use C4::Items;
 use C4::Output;
-use C4::VirtualShelves;
 use C4::Record;
 use C4::Ris;
 use C4::Csv;
+
+use Koha::Virtualshelves;
+
 use utf8;
 my $query = new CGI;
 
@@ -39,22 +41,22 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user (
         template_name   => "opac-downloadshelf.tt",
         query           => $query,
         type            => "opac",
-        authnotrequired => 1,
-        flagsrequired   => { borrow => 1 },
+        authnotrequired => ( C4::Context->preference("OpacPublic") ? 1 : 0 ),
     }
 );
 
-my $shelfid = $query->param('shelfid');
+my $shelfnumber = $query->param('shelfnumber');
 my $format  = $query->param('format');
 my $context = $query->param('context');
-my $showprivateshelves = $query->param('showprivateshelves');
 my $dbh     = C4::Context->dbh;
 
-if ( ShelfPossibleAction( (defined($borrowernumber) ? $borrowernumber : -1), $shelfid, 'view' ) ) {
+my $shelf = Koha::Virtualshelves->find( $shelfnumber );
+if ( $shelf and $shelf->can_be_viewed( $borrowernumber ) ) {
 
-    if ($shelfid && $format) {
+    if ($shelfnumber && $format) {
 
-        my ($items, $totitems)  = GetShelfContents($shelfid);
+
+        my $contents = $shelf->get_contents;
         my $marcflavour         = C4::Context->preference('marcflavour');
         my $output;
         my $extension;
@@ -63,15 +65,14 @@ if ( ShelfPossibleAction( (defined($borrowernumber) ? $borrowernumber : -1), $sh
        # CSV
         if ($format =~ /^\d+$/) {
             my @biblios;
-            foreach (@$items) {
-                push @biblios, $_->{biblionumber};
+            while ( my $content = $contents->next ) {
+                push @biblios, $content->biblionumber->biblionumber;
             }
             $output = marc2csv(\@biblios, $format);
-                
         # Other formats
         } else {
-            foreach my $biblio (@$items) {
-                my $biblionumber = $biblio->{biblionumber};
+            while ( my $content = $contents->next ) {
+                my $biblionumber = $content->biblionumber->biblionumber;
 
                 my $record = GetMarcBiblio($biblionumber, 1);
                 next unless $record;
@@ -105,9 +106,6 @@ if ( ShelfPossibleAction( (defined($borrowernumber) ? $borrowernumber : -1), $sh
 
     } else {
 
-        # get details of the list
-        my ($shelfnumber,$shelfname,$owner,$category,$sorton) = GetShelf($shelfid);
-
         # if modal context is passed set a variable so that page markup can be different
         if($context eq "modal"){
             $template->param(modal => 1);
@@ -115,13 +113,7 @@ if ( ShelfPossibleAction( (defined($borrowernumber) ? $borrowernumber : -1), $sh
             $template->param(fullpage => 1);
         }
         $template->param(csv_profiles => GetCsvProfilesLoop('marc'));
-        $template->param(
-            showprivateshelves  => $showprivateshelves,
-            shelfid             => $shelfid,
-            shelfname           => $shelfname,
-            shelfnumber         => $shelfnumber,
-            viewshelf           => $shelfnumber
-        );
+        $template->param( shelf => $shelf );
         output_html_with_http_headers $query, $cookie, $template->output;
     }
 

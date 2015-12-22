@@ -1,41 +1,66 @@
 #!/usr/bin/perl
-#
-# Tests 'fetch', 'fake db data', and 'checks for existant attributes'
 
-use strict;
-use warnings;
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
+
+use Modern::Perl;
+
 use Test::MockModule;
-use Test::More tests => 9;
+use Test::More;
+
+use Module::Load::Conditional qw/check_install/;
 
 BEGIN {
-    use_ok('C4::Members::AttributeTypes');
+    if ( check_install( module => 'Test::DBIx::Class' ) ) {
+        plan tests => 10;
+    } else {
+        plan skip_all => "Need Test::DBIx::Class"
+    }
 }
 
-my $module = new Test::MockModule('C4::Context');
-$module->mock(
-    '_new_dbh',
-    sub {
-        my $dbh = DBI->connect( 'DBI:Mock:', '', '' )
-          || die "Cannot create handle: $DBI::errstr\n";
-        return $dbh;
-    }
-);
-my $members_attributetypes = [
+use_ok('C4::Members::AttributeTypes');
+
+use Test::DBIx::Class {
+    schema_class => 'Koha::Schema',
+    connect_info => ['dbi:SQLite:dbname=:memory:','',''],
+    connect_opts => { name_sep => '.', quote_char => '`', },
+    fixture_class => '::Populate',
+}, 'BorrowerAttributeType', 'Category' ;
+
+fixtures_ok [
+    Category => [
+        ['categorycode'],
+        ['orange'], ['yellow'],
+    ],
+    BorrowerAttributeType => [
     [
         'code',             'description',
         'repeatable',       'unique_id',
         'opac_display',     'password_allowed',
         'staff_searchable', 'authorised_value_category',
-        'display_checkout', 'catagory_code',
+        'display_checkout', 'category_code',
         'class'
     ],
     [ 'one', 'ISBN', '1', '1', '1', '1', '1', 'red',  '1', 'orange', 'green' ],
     [ 'two', 'ISSN', '0', '0', '0', '0', '0', 'blue', '0', 'yellow', 'silver' ]
-];
 
-my $dbh = C4::Context->dbh();
+    ],
+], 'add fixtures';
 
-$dbh->{mock_add_resultset} = $members_attributetypes;
+my $db = Test::MockModule->new('Koha::Database');
+$db->mock( _new_schema => sub { return Schema(); } );
 
 my @members_attributetypes = C4::Members::AttributeTypes::GetAttributeTypes(undef, 1);
 
@@ -49,8 +74,6 @@ is( $members_attributetypes[0]->{'class'},
 is( $members_attributetypes[1]->{'class'},
     'silver', 'Second class value is silver' );
 
-$dbh->{mock_add_resultset} = $members_attributetypes;
-
 ok( C4::Members::AttributeTypes::AttributeTypeExists('one'),
     'checking an attribute type exists' );
 
@@ -59,9 +82,7 @@ ok(
     "checking a attribute that isn't in the code doesn't exist"
 );
 
-$dbh->{mock_add_resultset} = $members_attributetypes;
-
-ok( C4::Members::AttributeTypes->fetch('ISBN'), "testing fetch feature" );
+ok( C4::Members::AttributeTypes->fetch('one'), "testing fetch feature" );
 
 ok( !C4::Members::AttributeTypes->fetch('FAKE'),
     "testing fetch feature doesn't work if value not in database" );

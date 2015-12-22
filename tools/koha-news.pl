@@ -28,20 +28,20 @@ use CGI qw ( -utf8 );
 use C4::Auth;
 use C4::Koha;
 use C4::Context;
-use C4::Dates qw(format_date_in_iso);
 use C4::Output;
 use C4::NewsChannels;
 use C4::Languages qw(getTranslatedLanguages);
 use Date::Calc qw/Date_to_Days Today/;
 use C4::Branch qw/GetBranches/;
+use Koha::DateUtils;
 
 my $cgi = new CGI;
 
 my $id             = $cgi->param('id');
 my $title          = $cgi->param('title');
 my $new            = $cgi->param('new');
-my $expirationdate = format_date_in_iso($cgi->param('expirationdate'));
-my $timestamp      = format_date_in_iso($cgi->param('timestamp'));
+my $expirationdate = output_pref({ dt => dt_from_string( $cgi->param('expirationdate') ), dateformat => 'iso', dateonly => 1 });
+my $timestamp      = output_pref({ dt => dt_from_string( $cgi->param('timestamp') ), dateformat => 'iso', dateonly => 1 });
 my $number         = $cgi->param('number');
 my $lang           = $cgi->param('lang');
 my $branchcode     = $cgi->param('branch');
@@ -114,6 +114,7 @@ elsif ( $op eq 'add' ) {
                 timestamp      => $timestamp,
                 number         => $number,
                 branchcode     => $branchcode,
+                borrowernumber => $borrowernumber,
             }
         );
         print $cgi->redirect("/cgi-bin/koha/tools/koha-news.pl");
@@ -149,7 +150,6 @@ else {
     
     foreach my $new ( @$opac_news ) {
         next unless $new->{'expirationdate'};
-       	#$new->{'expirationdate'}=format_date_in_iso($new->{'expirationdate'});
         my @date = split (/-/,$new->{'expirationdate'});
         if ($date[0]*$date[1]*$date[2]>0 && Date_to_Days( @date ) < Date_to_Days(&Today) ){
 			$new->{'expired'} = 1;

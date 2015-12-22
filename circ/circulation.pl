@@ -30,7 +30,6 @@ use DateTime::Duration;
 use C4::Output;
 use C4::Print;
 use C4::Auth qw/:DEFAULT get_session haspermission/;
-use C4::Dates qw/format_date/;
 use C4::Branch; # GetBranches
 use C4::Koha;   # GetPrinter
 use C4::Circulation;
@@ -40,6 +39,7 @@ use C4::Biblio;
 use C4::Search;
 use MARC::Record;
 use C4::Reserves;
+use Koha::Holds;
 use C4::Context;
 use CGI::Session;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
@@ -54,7 +54,6 @@ use Date::Calc qw(
   Date_to_Days
 );
 use List::MoreUtils qw/uniq/;
-
 
 #
 # PARAMETERS READING
@@ -88,9 +87,44 @@ if (!C4::Context->userenv && !$branch){
     }
 }
 
+my $barcodes = [];
+if ( my $barcode = $query->param('barcode') ) {
+    $barcodes = [ $barcode ];
+} else {
+    my $filefh = $query->upload('uploadfile');
+    if ( $filefh ) {
+        while ( my $content = <$filefh> ) {
+            $content =~ s/[\r\n]*$//g;
+            push @$barcodes, $content if $content;
+        }
+    } elsif ( my $list = $query->param('barcodelist') ) {
+        push @$barcodes, split( /\s\n/, $list );
+        $barcodes = [ map { $_ =~ /^\s*$/ ? () : $_ } @$barcodes ];
+    } else {
+        @$barcodes = $query->param('barcodes');
+    }
+}
+
+$barcodes = [ uniq @$barcodes ];
+
+my $template_name = q|circ/circulation.tt|;
+my $borrowernumber = $query->param('borrowernumber');
+my $borrower = $borrowernumber ? GetMember( borrowernumber => $borrowernumber ) : undef;
+my $batch = $query->param('batch');
+my $batch_allowed = 0;
+if ( $batch && C4::Context->preference('BatchCheckouts') ) {
+    $template_name = q|circ/circulation_batch_checkouts.tt|;
+    my @batch_category_codes = split '\|', C4::Context->preference('BatchCheckoutsValidCategories');
+    if ( grep {/^$borrower->{categorycode}$/} @batch_category_codes ) {
+        $batch_allowed = 1;
+    } else {
+        $barcodes = [];
+    }
+}
+
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user (
     {
-        template_name   => 'circ/circulation.tt',
+        template_name   => $template_name,
         query           => $query,
         type            => "intranet",
         authnotrequired => 0,
@@ -117,11 +151,9 @@ for (@failedreturns) { $return_failed{$_} = 1; }
 
 my $findborrower = $query->param('findborrower') || q{};
 $findborrower =~ s|,| |g;
-my $borrowernumber = $query->param('borrowernumber');
 
 $branch  = C4::Context->userenv->{'branch'};  
 $printer = C4::Context->userenv->{'branchprinter'};
-
 
 # If AutoLocation is not activated, we show the Circulation Parameters to chage settings of librarian
 if (C4::Context->preference("AutoLocation") != 1) {
@@ -132,12 +164,20 @@ if (C4::Context->preference("DisplayClearScreenButton")) {
     $template->param(DisplayClearScreenButton => 1);
 }
 
-my $barcode        = $query->param('barcode') || q{};
-$barcode =~  s/^\s*|\s*$//g; # remove leading/trailing whitespace
+for my $barcode ( @$barcodes ) {
+    $barcode =~ s/^\s*|\s*$//g; # remove leading/trailing whitespace
+    $barcode = barcodedecode($barcode)
+        if( $barcode && C4::Context->preference('itemBarcodeInputFilter'));
+}
 
-$barcode = barcodedecode($barcode) if( $barcode && C4::Context->preference('itemBarcodeInputFilter'));
 my $stickyduedate  = $query->param('stickyduedate') || $session->param('stickyduedate');
 my $duedatespec    = $query->param('duedatespec')   || $session->param('stickyduedate');
+$duedatespec = eval { output_pref( { dt => dt_from_string( $duedatespec ), dateformat => 'iso' }); }
+    if ( $duedatespec );
+my $restoreduedatespec  = $query->param('restoreduedatespec') || $session->param('stickyduedate') || $duedatespec;
+if ($restoreduedatespec eq "highholds_empty") {
+    undef $restoreduedatespec;
+}
 my $issueconfirmed = $query->param('issueconfirmed');
 my $cancelreserve  = $query->param('cancelreserve');
 my $print          = $query->param('print') || q{};
@@ -145,7 +185,7 @@ my $debt_confirmed = $query->param('debt_confirmed') || 0; # Don't show the debt
 my $charges        = $query->param('charges') || q{};
 
 # Check if stickyduedate is turned off
-if ( $barcode ) {
+if ( @$barcodes ) {
     # was stickyduedate loaded from session?
     if ( $stickyduedate && ! $query->param("stickyduedate") ) {
         $session->clear( 'stickyduedate' );
@@ -165,25 +205,22 @@ if( $onsite_checkout && !$duedatespec_allow ) {
     $datedue = output_pref({ dt => dt_from_string, dateonly => 1, dateformat => 'iso' });
     $datedue .= ' 23:59:00';
 } elsif( $duedatespec_allow ) {
-    if ($duedatespec) {
-        if ($duedatespec =~ C4::Dates->regexp('syspref')) {
-                $datedue = dt_from_string($duedatespec);
-        } else {
+    if ( $duedatespec ) {
+        $datedue = eval { dt_from_string( $duedatespec ) };
+        if (! $datedue ) {
             $invalidduedate = 1;
-            $template->param(IMPOSSIBLE=>1, INVALID_DATE=>$duedatespec);
+            $template->param( IMPOSSIBLE=>1, INVALID_DATE=>$duedatespec );
         }
     }
 }
 
-our $todaysdate = C4::Dates->new->output('iso');
-
 # check and see if we should print
-if ( $barcode eq '' && $print eq 'maybe' ) {
+if ( @$barcodes == 0 && $print eq 'maybe' ) {
     $print = 'yes';
 }
 
-my $inprocess = ($barcode eq '') ? '' : $query->param('inprocess');
-if ( $barcode eq '' && $charges eq 'yes' ) {
+my $inprocess = (@$barcodes == 0) ? '' : $query->param('inprocess');
+if ( @$barcodes == 0 && $charges eq 'yes' ) {
     $template->param(
         PAYCHARGES     => 'yes',
         borrowernumber => $borrowernumber
@@ -213,6 +250,7 @@ if ($findborrower) {
         my $results = C4::Utils::DataTables::Members::search(
             {
                 searchmember => $findborrower,
+                searchtype => 'contain',
                 dt_params => $dt_params,
             }
         );
@@ -231,7 +269,6 @@ if ($findborrower) {
 }
 
 # get the borrower information.....
-my $borrower;
 if ($borrowernumber) {
     $borrower = GetMemberDetails( $borrowernumber, 0 );
     my ( $od, $issue, $fines ) = GetMemberIssuesAndFines( $borrowernumber );
@@ -258,7 +295,7 @@ if ($borrowernumber) {
             noissues => ($force_allow_issue) ? 0 : "1",
             forceallow => $force_allow_issue,
             expired => "1",
-            renewaldate => format_date("$renew_year-$renew_month-$renew_day")
+            renewaldate => "$renew_year-$renew_month-$renew_day",
         );
     }
     # check for NotifyBorrowerDeparture
@@ -267,8 +304,9 @@ if ($borrowernumber) {
             Date_to_Days( $today_year, $today_month, $today_day ) ) 
     {
         # borrower card soon to expire warn librarian
-        $template->param("warndeparture" => format_date($borrower->{dateexpiry}),
-        flagged       => "1",);
+        $template->param( "warndeparture" => $borrower->{dateexpiry} ,
+                          flagged         => "1"
+                        );
         if (C4::Context->preference('ReturnBeforeExpiry')){
             $template->param("returnbeforeexpiry" => 1);
         }
@@ -286,8 +324,7 @@ if ($borrowernumber) {
         );
 
         if ( $borrower->{debarred} ne "9999-12-31" ) {
-            $template->param( 'userdebarreddate' =>
-                  C4::Dates::format_date( $borrower->{debarred} ) );
+            $template->param( 'userdebarreddate' => $borrower->{debarred} );
         }
     }
 
@@ -297,25 +334,30 @@ if ($borrowernumber) {
 # STEP 3 : ISSUING
 #
 #
-if ($barcode) {
+if (@$barcodes) {
+  my $checkout_infos;
+  for my $barcode ( @$barcodes ) {
+    my $template_params = { barcode => $barcode };
     # always check for blockers on issuing
     my ( $error, $question, $alerts ) =
-    CanBookBeIssued( $borrower, $barcode, $datedue , $inprocess );
+    CanBookBeIssued( $borrower, $barcode, $datedue , $inprocess, undef, { onsite_checkout => $onsite_checkout } );
     my $blocker = $invalidduedate ? 1 : 0;
 
-    $template->param( alert => $alerts );
+    $template_params->{alert} = $alerts;
 
     #  Get the item title for more information
     my $getmessageiteminfo = GetBiblioFromItemNumber(undef,$barcode);
-    $template->param(
-        authvalcode_notforloan => C4::Koha::GetAuthValCode('items.notforloan', $getmessageiteminfo->{'frameworkcode'}),
-    );
+    $template_params->{authvalcode_notforloan} =
+        C4::Koha::GetAuthValCode('items.notforloan', $getmessageiteminfo->{'frameworkcode'});
+
     # Fix for bug 7494: optional checkout-time fallback search for a book
 
     if ( $error->{'UNKNOWN_BARCODE'}
-        && C4::Context->preference("itemBarcodeFallbackSearch") )
+        && C4::Context->preference("itemBarcodeFallbackSearch")
+        && not $batch
+    )
     {
-     $template->param( FALLBACK => 1 );
+     $template_params->{FALLBACK} = 1;
 
         my $query = "kw=" . $barcode;
         my ( $searcherror, $results, $total_hits ) = SimpleSearch($query);
@@ -337,37 +379,33 @@ if ($barcode) {
                     }
                 }
             }
-            $template->param( options => \@options );
+            $template_params->{options} = \@options;
         }
     }
 
     unless( $onsite_checkout and C4::Context->preference("OnSiteCheckoutsForce") ) {
         delete $question->{'DEBT'} if ($debt_confirmed);
         foreach my $impossible ( keys %$error ) {
-            $template->param(
-                $impossible => $$error{$impossible},
-                IMPOSSIBLE  => 1
-            );
+            $template_params->{$impossible} = $$error{$impossible};
+            $template_params->{IMPOSSIBLE} = 1;
             $blocker = 1;
         }
     }
+    my $iteminfo = GetBiblioFromItemNumber(undef, $barcode);
     if( !$blocker || $force_allow_issue ){
         my $confirm_required = 0;
         unless($issueconfirmed){
             #  Get the item title for more information
-            my $getmessageiteminfo  = GetBiblioFromItemNumber(undef,$barcode);
-	    $template->{VARS}->{'additional_materials'} = $getmessageiteminfo->{'materials'};
-            $template->param( itemhomebranch => $getmessageiteminfo->{'homebranch'} );
+            $template_params->{additional_materials} = $iteminfo->{'materials'};
+            $template_params->{itemhomebranch} = $iteminfo->{'homebranch'};
 
             # pass needsconfirmation to template if issuing is possible and user hasn't yet confirmed.
             foreach my $needsconfirmation ( keys %$question ) {
-                $template->param(
-                    $needsconfirmation => $$question{$needsconfirmation},
-                    getTitleMessageIteminfo => $getmessageiteminfo->{'title'},
-                    getBarcodeMessageIteminfo => $getmessageiteminfo->{'barcode'},
-                    NEEDSCONFIRMATION  => 1,
-                    onsite_checkout => $onsite_checkout,
-                );
+                $template_params->{$needsconfirmation} = $$question{$needsconfirmation};
+                $template_params->{getTitleMessageIteminfo} = $iteminfo->{'title'};
+                $template_params->{getBarcodeMessageIteminfo} = $iteminfo->{'barcode'};
+                $template_params->{NEEDSCONFIRMATION} = 1;
+                $template_params->{onsite_checkout} = $onsite_checkout;
                 $confirm_required = 1;
             }
         }
@@ -378,9 +416,35 @@ if ($barcode) {
             $inprocess = 1;
         }
     }
-    
+
+    # FIXME If the issue is confirmed, we launch another time GetMemberIssuesAndFines, now display the issue count after issue
     my ( $od, $issue, $fines ) = GetMemberIssuesAndFines($borrowernumber);
-    $template->param( issuecount => $issue );
+
+    if ($question->{RESERVE_WAITING} or $question->{RESERVED}){
+        $template->param(
+            reserveborrowernumber => $question->{'resborrowernumber'},
+            itembiblionumber => $getmessageiteminfo->{'biblionumber'}
+        );
+    }
+
+    $template_params->{issuecount} = $issue;
+
+    if ( $iteminfo ) {
+        $iteminfo->{subtitle} = GetRecordValue('subtitle', GetMarcBiblio($iteminfo->{biblionumber}), GetFrameworkCode($iteminfo->{biblionumber}));
+        $template_params->{item} = $iteminfo;
+    }
+    push @$checkout_infos, $template_params;
+  }
+  unless ( $batch ) {
+    $template->param( %{$checkout_infos->[0]} );
+    $template->param( barcode => $barcodes->[0] );
+  } else {
+    my $confirmation_needed = grep { $_->{NEEDSCONFIRMATION} } @$checkout_infos;
+    $template->param(
+        checkout_infos => $checkout_infos,
+        confirmation_needed => $confirmation_needed,
+    );
+  }
 }
 
 # reload the borrower info for the sake of reseting the flags.....
@@ -392,34 +456,11 @@ if ($borrowernumber) {
 # BUILD HTML
 # show all reserves of this borrower, and the position of the reservation ....
 if ($borrowernumber) {
+    my $holds = Koha::Holds->search( { borrowernumber => $borrowernumber } );
     $template->param(
-        holds_count => Koha::Database->new()->schema()->resultset('Reserve')
-          ->count( { borrowernumber => $borrowernumber } ) );
-    my @borrowerreserv = GetReservesFromBorrowernumber($borrowernumber);
-
-    my @WaitingReserveLoop;
-    foreach my $num_res (@borrowerreserv) {
-        if ( $num_res->{'found'} && $num_res->{'found'} eq 'W' ) {
-            my $getiteminfo  = GetBiblioFromItemNumber( $num_res->{'itemnumber'} );
-            my $itemtypeinfo = getitemtypeinfo( (C4::Context->preference('item-level_itypes')) ? $getiteminfo->{'itype'} : $getiteminfo->{'itemtype'} );
-            my %getWaitingReserveInfo;
-            $getWaitingReserveInfo{title} = $getiteminfo->{'title'};
-            $getWaitingReserveInfo{biblionumber} =
-              $getiteminfo->{'biblionumber'};
-            $getWaitingReserveInfo{itemtype} = $itemtypeinfo->{'description'};
-            $getWaitingReserveInfo{author}   = $getiteminfo->{'author'};
-            $getWaitingReserveInfo{itemcallnumber} =
-              $getiteminfo->{'itemcallnumber'};
-            $getWaitingReserveInfo{reservedate} =
-              format_date( $num_res->{'reservedate'} );
-            $getWaitingReserveInfo{waitingat} =
-              GetBranchName( $num_res->{'branchcode'} );
-            $getWaitingReserveInfo{waitinghere} = 1
-              if $num_res->{'branchcode'} eq $branch;
-            push( @WaitingReserveLoop, \%getWaitingReserveInfo );
-        }
-    }
-    $template->param( WaitingReserveLoop => \@WaitingReserveLoop );
+        holds_count  => $holds->count(),
+        WaitingHolds => scalar $holds->waiting(),
+    );
 
     $template->param( adultborrower => 1 ) if ( $borrower->{category_type} eq 'A' || $borrower->{category_type} eq 'I' );
 }
@@ -524,6 +565,9 @@ if (C4::Context->preference('ExtendedPatronAttributes')) {
         extendedattributes => $attributes
     );
 }
+my $view = $batch
+    ?'batch_checkout_view'
+    : 'circview';
 
 my @relatives = GetMemberRelatives( $borrower->{'borrowernumber'} );
 my $relatives_issues_count =
@@ -534,6 +578,17 @@ my $roadtype = C4::Koha::GetAuthorisedValueByCode( 'ROADTYPE', $borrower->{stree
 
 $template->param(%$borrower);
 
+# Restore date if changed by holds and/or save stickyduedate to session
+if ($restoreduedatespec || $stickyduedate) {
+    $duedatespec = $restoreduedatespec || $duedatespec;
+
+    if ($stickyduedate) {
+        $session->param( 'stickyduedate', $duedatespec );
+    }
+} elsif (defined($duedatespec) && !defined($restoreduedatespec)) {
+    undef $duedatespec;
+}
+
 $template->param(
     lib_messages_loop => $lib_messages_loop,
     bor_messages_loop => $bor_messages_loop,
@@ -541,23 +596,26 @@ $template->param(
     findborrower      => $findborrower,
     borrower          => $borrower,
     borrowernumber    => $borrowernumber,
+    categoryname      => $borrower->{'description'},
     branch            => $branch,
     branchname        => GetBranchName($borrower->{'branchcode'}),
     printer           => $printer,
     printername       => $printer,
     was_renewed       => $query->param('was_renewed') ? 1 : 0,
-    expiry            => format_date($borrower->{'dateexpiry'}),
+    expiry            => $borrower->{'dateexpiry'},
     roadtype          => $roadtype,
     amountold         => $amountold,
-    barcode           => $barcode,
+    barcodes          => $barcodes,
     stickyduedate     => $stickyduedate,
     duedatespec       => $duedatespec,
+    restoreduedatespec => $restoreduedatespec,
     message           => $message,
     totaldue          => sprintf('%.2f', $total),
     inprocess         => $inprocess,
     is_child          => ($borrowernumber && $borrower->{'category_type'} eq 'C'),
-    circview => 1,
-    soundon           => C4::Context->preference("SoundOn"),
+    $view             => 1,
+    batch_allowed     => $batch_allowed,
+    AudioAlerts           => C4::Context->preference("AudioAlerts"),
     fast_cataloging   => $fast_cataloging,
     CircAutoPrintQuickSlip   => C4::Context->preference("CircAutoPrintQuickSlip"),
     activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
@@ -567,11 +625,6 @@ $template->param(
     relatives_issues_count => $relatives_issues_count,
     relatives_borrowernumbers => \@relatives,
 );
-
-# save stickyduedate to session
-if ($stickyduedate) {
-    $session->param( 'stickyduedate', $duedatespec );
-}
 
 my ($picture, $dberror) = GetPatronImage($borrower->{'borrowernumber'});
 $template->param( picture => 1 ) if $picture;

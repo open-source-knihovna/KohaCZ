@@ -31,7 +31,6 @@ BEGIN {
 
 use C4::Context;
 use C4::Circulation;
-use C4::Dates;
 use Date::Calc qw(
   Today
   Add_Delta_Days
@@ -46,6 +45,7 @@ Usage: $0  --days DAYS  [-h|--help]
    -v --verbose       gives a little more information
    -h --help          prints this help message, and exits, ignoring all
                       other options
+Note: If the system preference 'AnonymousPatron' is not defined, NULL will be used.
 USAGE
     exit $_[0];
 }

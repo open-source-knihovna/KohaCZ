@@ -1,3 +1,4 @@
+[% USE Koha %]
 [% IF ( borrowernumber ) %]
 <div class="patroninfo"><h5>[% INCLUDE 'patron-title.inc' %]</h5>
 <!--[if IE 6]>
@@ -63,6 +64,10 @@
 <div id="menu">
 <ul>
     [% IF ( circview ) %]<li class="active">[% ELSE %]<li>[% END %]<a href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=[% borrowernumber %]">Check out</a></li>
+    [% IF Koha.Preference('BatchCheckouts') &&
+          Koha.Preference('BatchCheckoutsValidCategories').split('\|').grep('^' _ categorycode _ '$').size > 0 %]
+      [% IF ( batch_checkout_view ) %]<li class="active">[% ELSE %]<li>[% END %]<a href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=[% borrowernumber %]&amp;batch=1">Batch check out</a></li>
+    [% END %]
     [% IF ( CAN_user_borrowers ) %]
         [% IF ( detailview ) %]<li class="active">[% ELSE %]<li>[% END %]<a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">Details</a></li>
     [% END %]
@@ -77,9 +82,7 @@
     [% IF ( CAN_user_parameters ) %]
         [% IF ( logview ) %]<li class="active">[% ELSE %]<li>[% END %]<a href="/cgi-bin/koha/tools/viewlog.pl?do_it=1&amp;modules=MEMBERS&amp;modules=circulation&amp;object=[% borrowernumber %]&amp;src=circ">Modification log</a></li>
     [% END %]
-    [% IF ( EnhancedMessagingPreferences ) %]
 	[% IF ( sentnotices ) %]<li class="active">[% ELSE %]<li>[% END %]<a href="/cgi-bin/koha/members/notices.pl?borrowernumber=[% borrowernumber %]">Notices</a></li>
-    [% END %]
     <!-- Added IF statement to check if user has borrowers permission. The menu item will not be shown unless user has borrowers permission  -->
     [% IF ( CAN_user_borrowers ) %]
         [% IF (  statisticsview ) %]<li class="active">[% ELSE %]<li>[% END %]<a href="/cgi-bin/koha/members/statistics.pl?borrowernumber=[% borrowernumber %]">Statistics</a></li>

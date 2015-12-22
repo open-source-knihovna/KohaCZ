@@ -18,7 +18,7 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Test::More tests => 61;
+use Test::More tests => 68;
 use Test::MockModule;
 use Test::Warn;
 
@@ -42,26 +42,31 @@ use_ok('C4::Biblio');
 use_ok('C4::Bookseller');
 use_ok('C4::Letters');
 use t::lib::Mocks;
+use t::lib::TestBuilder;
+use Koha::Database;
 use Koha::DateUtils qw( dt_from_string output_pref );
 use Koha::Acquisition::Order;
 use Koha::Acquisition::Bookseller;
+my $schema = Koha::Database->schema;
+$schema->storage->txn_begin();
 
+my $builder = t::lib::TestBuilder->new;
 my $dbh = C4::Context->dbh;
-
-# Start transaction
-$dbh->{AutoCommit} = 0;
 $dbh->{RaiseError} = 1;
 
 $dbh->do(q|DELETE FROM letter|);
 $dbh->do(q|DELETE FROM message_queue|);
 $dbh->do(q|DELETE FROM message_transport_types|);
 
+my $library = $builder->build({
+    source => 'Branch',
+});
 my $date = dt_from_string;
 my $borrowernumber = AddMember(
     firstname    => 'Jane',
     surname      => 'Smith',
     categorycode => 'PT',
-    branchcode   => 'CPL',
+    branchcode   => $library->{branchcode},
     dateofbirth  => $date,
 );
 
@@ -137,7 +142,7 @@ my $letters = C4::Letters::GetLetters();
 is( @$letters, 0, 'GetLetters returns the correct number of letters' );
 
 my $title = q|<<branches.branchname>> - <<status>>|;
-my $content = q|Dear <<borrowers.firstname>> <<borrowers.surname>>,
+my $content = q{Dear <<borrowers.firstname>> <<borrowers.surname>>,
 According to our current records, you have items that are overdue.Your library does not charge late fines, but please return or renew them at the branch below as soon as possible.
 
 <<branches.branchname>>
@@ -151,20 +156,20 @@ The following item(s) is/are currently <<status>>:
 Thank-you for your prompt attention to this matter.
 Don't forget your date of birth: <<borrowers.dateofbirth>>.
 Look at this wonderful biblio timestamp: <<biblio.timestamp>>.
-|;
+};
 
-$dbh->do( q|INSERT INTO letter(branchcode,module,code,name,is_html,title,content,message_transport_type) VALUES ('CPL','my module','my code','my name',1,?,?,'email')|, undef, $title, $content );
+$dbh->do( q|INSERT INTO letter(branchcode,module,code,name,is_html,title,content,message_transport_type) VALUES (?,'my module','my code','my name',1,?,?,'email')|, undef, $library->{branchcode}, $title, $content );
 $letters = C4::Letters::GetLetters();
 is( @$letters, 1, 'GetLetters returns the correct number of letters' );
-is( $letters->[0]->{branchcode}, 'CPL', 'GetLetters gets the branch code correctly' );
+is( $letters->[0]->{branchcode}, $library->{branchcode}, 'GetLetters gets the branch code correctly' );
 is( $letters->[0]->{module}, 'my module', 'GetLetters gets the module correctly' );
 is( $letters->[0]->{code}, 'my code', 'GetLetters gets the code correctly' );
 is( $letters->[0]->{name}, 'my name', 'GetLetters gets the name correctly' );
 
 
 # getletter
-my $letter = C4::Letters::getletter('my module', 'my code', 'CPL', 'email');
-is( $letter->{branchcode}, 'CPL', 'GetLetters gets the branch code correctly' );
+my $letter = C4::Letters::getletter('my module', 'my code', $library->{branchcode}, 'email');
+is( $letter->{branchcode}, $library->{branchcode}, 'GetLetters gets the branch code correctly' );
 is( $letter->{module}, 'my module', 'GetLetters gets the module correctly' );
 is( $letter->{code}, 'my code', 'GetLetters gets the code correctly' );
 is( $letter->{name}, 'my name', 'GetLetters gets the name correctly' );
@@ -230,11 +235,11 @@ is( @$alerts, 0, 'delalert removes an alert' );
 t::lib::Mocks::mock_preference('OPACBaseURL', 'http://thisisatest.com');
 
 my $sms_content = 'This is a SMS for an <<status>>';
-$dbh->do( q|INSERT INTO letter(branchcode,module,code,name,is_html,title,content,message_transport_type) VALUES ('CPL','my module','my code','my name',1,'my title',?,'sms')|, undef, $sms_content );
+$dbh->do( q|INSERT INTO letter(branchcode,module,code,name,is_html,title,content,message_transport_type) VALUES (?,'my module','my code','my name',1,'my title',?,'sms')|, undef, $library->{branchcode}, $sms_content );
 
 my $tables = {
     borrowers => $borrowernumber,
-    branches => 'CPL',
+    branches => $library->{branchcode},
     biblio => $biblionumber,
 };
 my $substitute = {
@@ -252,13 +257,13 @@ my $repeat = [
 ];
 my $prepared_letter = GetPreparedLetter((
     module      => 'my module',
-    branchcode  => 'CPL',
+    branchcode  => $library->{branchcode},
     letter_code => 'my code',
     tables      => $tables,
     substitute  => $substitute,
     repeat      => $repeat,
 ));
-my $branch = GetBranchDetail('CPL');
+my $branch = GetBranchDetail($library->{branchcode});
 my $my_title_letter = qq|$branch->{branchname} - $substitute->{status}|;
 my $my_content_letter = qq|Dear Jane Smith,
 According to our current records, you have items that are overdue.Your library does not charge late fines, but please return or renew them at the branch below as soon as possible.
@@ -275,12 +280,13 @@ The following item(s) is/are currently $substitute->{status}:
 Thank-you for your prompt attention to this matter.
 Don't forget your date of birth: | . output_pref({ dt => $date, dateonly => 1 }) . q|.
 Look at this wonderful biblio timestamp: | . output_pref({ dt => $date }) . ".\n";
+
 is( $prepared_letter->{title}, $my_title_letter, 'GetPreparedLetter returns the title correctly' );
 is( $prepared_letter->{content}, $my_content_letter, 'GetPreparedLetter returns the content correctly' );
 
 $prepared_letter = GetPreparedLetter((
     module                 => 'my module',
-    branchcode             => 'CPL',
+    branchcode             => $library->{branchcode},
     letter_code            => 'my code',
     tables                 => $tables,
     substitute             => $substitute,
@@ -289,6 +295,39 @@ $prepared_letter = GetPreparedLetter((
 ));
 $my_content_letter = qq|This is a SMS for an $substitute->{status}|;
 is( $prepared_letter->{content}, $my_content_letter, 'GetPreparedLetter returns the content correctly' );
+
+$dbh->do(q{INSERT INTO letter (module, code, name, title, content) VALUES ('test_date','TEST_DATE','Test dates','Test dates','This one only contains the date: <<biblio.timestamp | dateonly>>.');});
+$prepared_letter = GetPreparedLetter((
+    module                 => 'test_date',
+    branchcode             => '',
+    letter_code            => 'test_date',
+    tables                 => $tables,
+    substitute             => $substitute,
+    repeat                 => $repeat,
+));
+is( $prepared_letter->{content}, q|This one only contains the date: | . output_pref({ dt => $date, dateonly => 1 }) . q|.|, 'dateonly test 1' );
+
+$dbh->do(q{UPDATE letter SET content = 'And also this one:<<timestamp | dateonly>>.' WHERE code = 'test_date';});
+$prepared_letter = GetPreparedLetter((
+    module                 => 'test_date',
+    branchcode             => '',
+    letter_code            => 'test_date',
+    tables                 => $tables,
+    substitute             => $substitute,
+    repeat                 => $repeat,
+));
+is( $prepared_letter->{content}, q|This one only contains the date: | . output_pref({ dt => $date, dateonly => 1 }) . q|.|, 'dateonly test 2' );
+
+$dbh->do(q{UPDATE letter SET content = 'And also this one:<<timestamp|dateonly >>.' WHERE code = 'test_date';});
+$prepared_letter = GetPreparedLetter((
+    module                 => 'test_date',
+    branchcode             => '',
+    letter_code            => 'test_date',
+    tables                 => $tables,
+    substitute             => $substitute,
+    repeat                 => $repeat,
+));
+is( $prepared_letter->{content}, q|This one only contains the date: | . output_pref({ dt => $date, dateonly => 1 }) . q|.|, 'dateonly test 3' );
 
 $dbh->do(q{INSERT INTO letter (module, code, name, title, content) VALUES ('claimacquisition','TESTACQCLAIM','Acquisition Claim','Item Not Received','<<aqbooksellers.name>>|<<aqcontacts.name>>|<order>Ordernumber <<aqorders.ordernumber>> (<<biblio.title>>) (<<aqorders.quantity>> ordered)</order>');});
 
@@ -347,6 +386,7 @@ $bookseller->contacts->[0]->email('testemail@mydomain.com');
 C4::Bookseller::ModBookseller($bookseller);
 $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
 
+{
 warning_is {
     $err = SendAlerts( 'claimacquisition', [ $ordernumber ], 'TESTACQCLAIM' ) }
     "Fake sendmail",
@@ -355,5 +395,43 @@ warning_is {
 is($err, 1, "Successfully sent claim");
 is($mail{'To'}, 'testemail@mydomain.com', "mailto correct in sent claim");
 is($mail{'Message'}, 'my vendor|John Smith|Ordernumber ' . $ordernumber . ' (Silence in the library) (1 ordered)', 'Claim notice text constructed successfully');
+}
 
-$dbh->rollback;
+{
+use C4::Serials;
+
+my $notes = 'notes';
+my $internalnotes = 'intnotes';
+$dbh->do(q|UPDATE subscription_numberpatterns SET numberingmethod='No. {X}' WHERE id=1|);
+my $subscriptionid = NewSubscription(
+     undef,      "",     undef, undef, undef, $biblionumber,
+    '2013-01-01', 1, undef, undef,  undef,
+    undef,      undef,  undef, undef, undef, undef,
+    1,          $notes,undef, '2013-01-01', undef, 1,
+    undef,       undef,  0,    $internalnotes,  0,
+    undef, undef, 0,          undef,         '2013-12-31', 0
+);
+$dbh->do(q{INSERT INTO letter (module, code, name, title, content) VALUES ('serial','RLIST','Serial issue notification','Serial issue notification','<<biblio.title>>,<<subscription.subscriptionid>>,<<serial.serialseq>>');});
+my ($serials_count, @serials) = GetSerials($subscriptionid);
+my $serial = $serials[0];
+
+my $borrowernumber = AddMember(
+    firstname    => 'John',
+    surname      => 'Smith',
+    categorycode => 'PT',
+    branchcode   => $library->{branchcode},
+    dateofbirth  => $date,
+    email        => 'john.smith@test.de',
+);
+my $alert_id = C4::Letters::addalert($borrowernumber, 'issue', $subscriptionid);
+
+
+my $err2;
+warning_is {
+$err2 = SendAlerts( 'issue', $serial->{serialid}, 'RLIST' ) }
+    "Fake sendmail",
+    "SendAlerts is using the mocked sendmail routine";
+is($err2, "", "Successfully sent serial notification");
+is($mail{'To'}, 'john.smith@test.de', "mailto correct in sent serial notification");
+is($mail{'Message'}, 'Silence in the library,'.$subscriptionid.',No. 0', 'Serial notification text constructed successfully');
+}

@@ -26,8 +26,8 @@ use C4::Output;
 use C4::Log;
 use C4::Items;
 use C4::Debug;
-use C4::Dates;
 use C4::Search::History;
+
 use URI::Escape;
 use POSIX qw(strftime);
 
@@ -72,8 +72,7 @@ unless ( $loggedinuser ) {
         C4::Search::History::set_to_session({ cgi => $cgi, search_history => \@searches });
 
         # Redirecting to this same url so the user won't see the search history link in the header
-        my $uri = $cgi->url();
-        print $cgi->redirect(-uri => $uri);
+        print $cgi->redirect(-uri => '/cgi-bin/koha/opac-search-history.pl');
     # Showing search history
     } else {
         # Getting the searches from session
@@ -115,8 +114,7 @@ unless ( $loggedinuser ) {
             );
         }
         # Redirecting to this same url so the user won't see the search history link in the header
-        my $uri = $cgi->url();
-        print $cgi->redirect($uri);
+        print $cgi->redirect(-uri => '/cgi-bin/koha/opac-search-history.pl');
 
     # Showing search history
     } else {
@@ -158,4 +156,4 @@ unless ( $loggedinuser ) {
 
 $template->param(searchhistoryview => 1);
 
-output_html_with_http_headers $cgi, $cookie, $template->output;
+output_html_with_http_headers $cgi, $cookie, $template->output, undef, { force_no_caching => 1 };

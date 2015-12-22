@@ -17,6 +17,7 @@
 
 use Modern::Perl;
 
+$| = 1;
 use Module::Load::Conditional qw/check_install/;
 use Test::More;
 use Test::MockModule;
@@ -27,7 +28,7 @@ use C4::Context;
 
 BEGIN {
     if ( check_install( module => 'Test::DBIx::Class' ) ) {
-        plan tests => 9;
+        plan tests => 11;
     } else {
         plan skip_all => "Need Test::DBIx::Class"
     }
@@ -216,7 +217,9 @@ subtest "checkpw_shib tests" => sub {
     warnings_exist {
         ( $retval, $retcard, $retuserid ) = checkpw_shib( $shib_login );
     }
-    [ qr/checkpw_shib/, qr/User Shibboleth-authenticated as:/ ],
+    [ qr/checkpw_shib/, qr/koha borrower field to match: userid/,
+      qr/shibboleth attribute to match: uid/,
+      qr/User Shibboleth-authenticated as:/ ],
       "good user with debug enabled";
     is( $retval,    "1",              "user authenticated" );
     is( $retcard,   "testcardnumber", "expected cardnumber returned" );
@@ -229,6 +232,8 @@ subtest "checkpw_shib tests" => sub {
     }
     [
         qr/checkpw_shib/,
+        qr/koha borrower field to match: userid/,
+        qr/shibboleth attribute to match: uid/,
         qr/User Shibboleth-authenticated as:/,
         qr/not a valid Koha user/
     ],
@@ -244,10 +249,8 @@ is( C4::Auth_with_shibboleth::_get_uri(),
 
 $OPACBaseURL = "http://testopac.com";
 my $result;
-warnings_are { $result = C4::Auth_with_shibboleth::_get_uri() }
-             [ { carped =>
-                 'Shibboleth requires OPACBaseURL to use the https protocol!' },
-             ],
+warning_like { $result = C4::Auth_with_shibboleth::_get_uri() }
+             [ qr/Shibboleth requires OPACBaseURL to use the https protocol!/ ],
              "improper protocol - received expected warning";
 is( $result, "https://testopac.com", "https opac uri returned" );
 
@@ -256,9 +259,8 @@ is( C4::Auth_with_shibboleth::_get_uri(),
     "https://testopac.com", "https opac uri returned" );
 
 $OPACBaseURL = undef;
-warnings_are { $result = C4::Auth_with_shibboleth::_get_uri() }
-             [ { carped => 'OPACBaseURL not set!' },
-             ],
+warning_like { $result = C4::Auth_with_shibboleth::_get_uri() }
+             [ qr/OPACBaseURL not set!/ ],
              "undefined OPACBaseURL - received expected warning";
 is( $result, "https://", "https opac uri returned" );
 

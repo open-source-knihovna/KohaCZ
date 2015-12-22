@@ -32,7 +32,9 @@ use C4::Context;
 use C4::Letters;
 use C4::Members ();
 use C4::Output;
-use C4::VirtualShelves;
+
+use Koha::Virtualshelves;
+use Koha::Virtualshelfshares;
 
 #-------------------------------------------------------------------------------
 
@@ -67,11 +69,12 @@ sub _init {
     }
 
     #get some list details
-    my @temp;
-    @temp = GetShelf( $param->{shelfnumber} ) if !$param->{errcode};
-    $param->{shelfname} = @temp ? $temp[1] : '';
-    $param->{owner}     = @temp ? $temp[2] : -1;
-    $param->{category}  = @temp ? $temp[3] : -1;
+    my $shelf;
+    my $shelfnumber = $param->{shelfnumber};
+    $shelf = Koha::Virtualshelves->find( $shelfnumber ) unless $param->{errcode};
+    $param->{shelfname} = $shelf ? $shelf->shelfname : q||;
+    $param->{owner}     = $shelf ? $shelf->owner : -1;
+    $param->{category}  = $shelf ? $shelf->category : -1;
 
     load_template($param);
     return $param;
@@ -111,28 +114,44 @@ sub confirm_invite {
 sub show_accept {
     my ($param) = @_;
 
-    my @rv = ShelfPossibleAction( $param->{loggedinuser},
-        $param->{shelfnumber}, 'acceptshare' );
-    $param->{errcode} = $rv[1] if !$rv[0];
-    return if $param->{errcode};
+    my $shelfnumber = $param->{shelfnumber};
+    my $shelf = Koha::Virtualshelves->find( $shelfnumber );
 
-    #errorcode 5: should be private list
-    #errorcode 8: should not be owner
-
-    my $dbkey = keytostring( stringtokey( $param->{key}, 0 ), 1 );
-    if ( AcceptShare( $param->{shelfnumber}, $dbkey, $param->{loggedinuser} ) )
-    {
-        notify_owner($param);
-
-        #redirect to view of this shared list
-        print $param->{query}->redirect(
-            -uri    => SHELVES_URL . $param->{shelfnumber},
-            -cookie => $param->{cookie}
-        );
-        exit;
+    # The key for accepting is checked later in Koha::Virtualshelf->share
+    # You must not be the owner and the list must be private
+    if ( $shelf->category == 2 or $shelf->owner == $param->{loggedinuser} ) {
+        return;
     }
-    else {
+
+    # We could have used ->find with the share id, but we don't want to change
+    # the url sent to the patron
+    my $shared_shelf = Koha::Virtualshelfshares->search(
+        {
+            shelfnumber => $param->{shelfnumber},
+        },
+        {
+            order_by => 'sharedate desc',
+            limit => 1,
+        }
+    );
+
+    if ( $shared_shelf ) {
+        $shared_shelf = $shared_shelf->next;
+        my $key = keytostring( stringtokey( $param->{key}, 0 ), 1 );
+        my $is_accepted = eval { $shared_shelf->accept( $key, $param->{loggedinuser} ) };
+        if ( $is_accepted ) {
+            notify_owner($param);
+
+            #redirect to view of this shared list
+            print $param->{query}->redirect(
+                -uri    => SHELVES_URL . $param->{shelfnumber},
+                -cookie => $param->{cookie}
+            );
+            exit;
+        }
         $param->{errcode} = 7;    #not accepted (key not found or expired)
+    } else {
+        # This shelf is not shared
     }
 }
 
@@ -197,7 +216,11 @@ sub send_invitekey {
         my @newkey = randomlist( KEYLENGTH, 64 );    #generate a new key
 
         #add a preliminary share record
-        if ( !AddShare( $param->{shelfnumber}, keytostring( \@newkey, 1 ) ) ) {
+        my $shelf = Koha::Virtualshelves->find( $param->{shelfnumber} );
+        my $key = keytostring( \@newkey, 1 );
+        my $is_shared = eval { $shelf->share( $key ); };
+        # TODO Better error handling, catch the exceptions
+        if ( $@ or not $is_shared ) {
             push @{ $param->{fail_addr} }, $a;
             next;
         }

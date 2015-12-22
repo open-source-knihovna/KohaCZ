@@ -129,7 +129,6 @@ sub BuildReport {
         AutoRemoveOverduesRestrictions
         CircControl
         HomeOrHoldingBranch
-        HomeOrHoldingBranchReturn
         InProcessingToShelvingCart
         IssueLostItem
         IssuingInProcess
@@ -179,7 +178,7 @@ sub BuildReport {
         itemBarcodeInputFilter
         previousIssuesDefaultSortOrder
         RecordLocalUseOnReturn
-        soundon
+        AudioAlerts
         SpecifyDueDate
         todaysIssuesDefaultSortOrder
         UpdateTotalIssuesOnCirc

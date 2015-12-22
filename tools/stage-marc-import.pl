@@ -39,7 +39,7 @@ use C4::Output;
 use C4::Biblio;
 use C4::ImportBatch;
 use C4::Matcher;
-use C4::UploadedFile;
+use Koha::Upload;
 use C4::BackgroundJob;
 use C4::MarcModificationTemplates;
 use Koha::Plugins;
@@ -72,7 +72,7 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 );
 
 $template->param(
-    SCRIPT_NAME => $ENV{'SCRIPT_NAME'},
+    SCRIPT_NAME => '/cgi-bin/koha/tools/stage-marc-import.pl',
     uploadmarc  => $fileID,
     record_type => $record_type,
 );
@@ -84,8 +84,9 @@ if ($completedJobID) {
     my $results = $job->results();
     $template->param(map { $_ => $results->{$_} } keys %{ $results });
 } elsif ($fileID) {
-    my $uploaded_file = C4::UploadedFile->fetch($sessionID, $fileID);
-    my $fh = $uploaded_file->fh();
+    my $upload = Koha::Upload->new->get({ id => $fileID, filehandle => 1 });
+    my $fh = $upload->{fh};
+    my $filename = $upload->{name}; # filename only, no path
 	my $marcrecord='';
     $/ = "\035";
 	while (<$fh>) {
@@ -93,15 +94,15 @@ if ($completedJobID) {
         s/\s+$//;
 		$marcrecord.=$_;
 	}
+    $fh->close;
 
-    my $filename = $uploaded_file->name();
     my $job = undef;
     my $dbh;
     if ($runinbackground) {
         my $job_size = () = $marcrecord =~ /\035/g;
         # if we're matching, job size is doubled
         $job_size *= 2 if ($matcher_id ne "");
-        $job = C4::BackgroundJob->new($sessionID, $filename, $ENV{'SCRIPT_NAME'}, $job_size);
+        $job = C4::BackgroundJob->new($sessionID, $filename, '/cgi-bin/koha/tools/stage-marc-import.pl', $job_size);
         my $jobID = $job->id();
 
         # fork off
@@ -120,7 +121,7 @@ if ($completedJobID) {
             # close STDERR; # there is no good reason to close STDERR
         } else {
             # fork failed, so exit immediately
-            warn "fork failed while attempting to run $ENV{'SCRIPT_NAME'} as a background job: $!";
+            warn "fork failed while attempting to run tools/stage-marc-import.pl as a background job: $!";
             exit 0;
         }
 

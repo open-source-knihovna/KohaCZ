@@ -24,11 +24,11 @@ use warnings;
 use CGI qw ( -utf8 );
 use C4::Auth;
 use C4::Koha;
-use C4::Dates qw/format_date/;
 use C4::Serials;
 use C4::Letters;
 use C4::Output;
 use C4::Context;
+
 use List::MoreUtils qw/uniq/;
 
 
@@ -55,8 +55,12 @@ my $subscriptions;
 
 if($op eq 'gennext' && @subscriptionid){
     my $subscriptionid = $subscriptionid[0];
-    my $sth = $dbh->prepare("SELECT publisheddate, serialid, serialseq, planneddate
-							FROM serial WHERE status = 1 AND subscriptionid = ?");
+    my $sth = $dbh->prepare("
+        SELECT publisheddate, publisheddatetext, serialid, serialseq,
+            planneddate
+        FROM serial
+        WHERE status = 1 AND subscriptionid = ?
+    ");
     my $status = defined( $nbissues ) ? 2 : 3;
     $nbissues ||= 1;
     for ( my $i = 0; $i < $nbissues; $i++ ){
@@ -65,7 +69,7 @@ if($op eq 'gennext' && @subscriptionid){
         if ( my $issue = $sth->fetchrow_hashref ) {
             ModSerialStatus( $issue->{serialid}, $issue->{serialseq},
                     $issue->{planneddate}, $issue->{publisheddate},
-                    $status, "" );
+                    $issue->{publisheddatetext}, $status, "" );
         } else {
             require C4::Serials::Numberpattern;
             my $subscription = GetSubscription($subscriptionid);
@@ -110,15 +114,8 @@ if (@subscriptionid){
     $subs->{opacnote}     =~ s/\n/\<br\/\>/g;
     $subs->{missinglist}  =~ s/\n/\<br\/\>/g;
     $subs->{recievedlist} =~ s/\n/\<br\/\>/g;
+
     ##these are display information
-    $subs->{startdate}     = format_date( $subs->{startdate} );
-    $subs->{histstartdate} = format_date( $subs->{histstartdate} );
-    if ( !defined $subs->{enddate} || $subs->{enddate} eq '0000-00-00' ) {
-        $subs->{enddate} = '';
-    }
-    else {
-        $subs->{enddate} = format_date( $subs->{enddate} );
-    }
     $subs->{'abouttoexpire'}=abouttoexpire($subs->{'subscriptionid'});
     $subs->{'subscriptionexpired'}=HasSubscriptionExpired($subs->{'subscriptionid'});
     $subs->{'subscriptionid'} = $subscriptionid;  # FIXME - why was this lost ?

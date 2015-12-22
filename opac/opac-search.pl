@@ -84,7 +84,7 @@ my ($template,$borrowernumber,$cookie);
 my $template_name;
 my $template_type = 'basic';
 my @params = $cgi->param("limit");
-
+my @searchCategories = $cgi->param('searchcat');
 
 my $format = $cgi->param("format") || '';
 my $build_grouped_results = C4::Context->preference('OPACGroupResults');
@@ -210,7 +210,16 @@ my $languages_limit_loop = getLanguages($lang, 1);
 $template->param(search_languages_loop => $languages_limit_loop,);
 
 # load the Type stuff
-my $itemtypes = GetItemTypes;
+my $itemtypes = GetItemTypesCategorized;
+# add translated_description to itemtypes
+foreach my $itemtype ( keys %{$itemtypes} ) {
+    # Itemtypes search categories don't have (yet) translated descriptions, they are auth values
+    my $translated_description = getitemtypeinfo( $itemtype, 'opac' )->{translated_description};
+    $itemtypes->{$itemtype}->{translated_description} =
+            ( $translated_description ) ? $translated_description : $itemtypes->{$itemtype}->{description};
+}
+# Load the Type stuff without search categories for facets
+my $itemtypes_nocategory = GetItemTypes;
 # the index parameter is different for item-level itemtypes
 my $itype_or_itemtype = (C4::Context->preference("item-level_itypes"))?'itype':'itemtype';
 my @advancedsearchesloop;
@@ -236,16 +245,21 @@ foreach my $advanced_srch_type (@advanced_search_types) {
    if ($advanced_srch_type eq 'itemtypes') {
    # itemtype is a special case, since it's not defined in authorized values
         my @itypesloop;
-	foreach my $thisitemtype ( sort {$itemtypes->{$a}->{'description'} cmp $itemtypes->{$b}->{'description'} } keys %$itemtypes ) {
+        foreach my $thisitemtype ( sort {$itemtypes->{$a}->{translated_description} cmp $itemtypes->{$b}->{translated_description} } keys %$itemtypes ) {
             next if $hidingrules->{itype} && any { $_ eq $thisitemtype } @{$hidingrules->{itype}};
             next if $hidingrules->{itemtype} && any { $_ eq $thisitemtype } @{$hidingrules->{itemtype}};
 	    my %row =(  number=>$cnt++,
 		ccl => "$itype_or_itemtype,phr",
                 code => $thisitemtype,
-                description => $itemtypes->{$thisitemtype}->{'description'},
+                description => $itemtypes->{$thisitemtype}->{translated_description},
                 imageurl=> getitemtypeimagelocation( 'opac', $itemtypes->{$thisitemtype}->{'imageurl'} ),
+                cat => $itemtypes->{$thisitemtype}->{'iscat'},
+                hideinopac => $itemtypes->{$thisitemtype}->{'hideinopac'},
+                searchcategory => $itemtypes->{$thisitemtype}->{'searchcategory'},
             );
-	    push @itypesloop, \%row;
+            if ( !$itemtypes->{$thisitemtype}->{'hideinopac'} ) {
+                push @itypesloop, \%row;
+            }
 	}
         my %search_code = (  advanced_search_type => $advanced_srch_type,
                              code_loop => \@itypesloop );
@@ -263,6 +277,7 @@ foreach my $advanced_srch_type (@advanced_search_types) {
 				ccl => $advanced_srch_type,
                 code => $thisitemtype->{authorised_value},
                 description => $thisitemtype->{'lib_opac'} || $thisitemtype->{'lib'},
+                searchcategory => $itemtypes->{$thisitemtype}->{'searchcategory'},
                 imageurl => getitemtypeimagelocation( 'opac', $thisitemtype->{'imageurl'} ),
                 );
 		push @authvalueloop, \%row;
@@ -450,6 +465,19 @@ my @nolimits = $cgi->param('nolimit');
 my %is_nolimit = map { $_ => 1 } @nolimits;
 @limits = grep { not $is_nolimit{$_} } @limits;
 
+if (@searchCategories > 0) {
+    my @tabcat;
+    foreach my $typecategory (@searchCategories) {
+        push (@tabcat, GetItemTypesByCategory($typecategory));
+    }
+
+    foreach my $itemtypeInCategory (@tabcat) {
+        push (@limits, "mc-$itype_or_itemtype,phr:".$itemtypeInCategory);
+    }
+}
+
+@limits = map { uri_unescape($_) } @limits;
+
 if($params->{'multibranchlimit'}) {
     my $multibranch = '('.join( " or ", map { "branch: $_ " } @{ GetBranchesInCategory( $params->{'multibranchlimit'} ) } ).')';
     push @limits, $multibranch if ($multibranch ne  '()');
@@ -527,7 +555,7 @@ if (C4::Context->preference('OpacSuppression')) {
         my $IPRange = C4::Context->preference('OpacSuppressionByIPRange');
         if ($IPAddress !~ /^$IPRange/)  {
             if ( $query_type eq 'pqf' ) {
-                $query = '@not '.$query.' @attr 1=9011 1';
+                $query = '@not '.$query.' @attr 14=1 @attr 1=9011 1';
             } else {
                 $query = "($query) not Suppress=1";
             }
@@ -536,7 +564,7 @@ if (C4::Context->preference('OpacSuppression')) {
     else {
         if ( $query_type eq 'pqf' ) {
             #$query = "($query) && -(suppress:1)"; #QP syntax
-            $query = '@not '.$query.' @attr 1=9011 1'; #PQF syntax
+            $query = '@not '.$query.' @attr 14=1 @attr 1=9011 1'; #PQF syntax
         } else {
             $query = "($query) not Suppress=1";
         }
@@ -573,7 +601,7 @@ if ($tag) {
     $pasarParams .= '&amp;simple_query=' . uri_escape_utf8($simple_query);
     $pasarParams .= '&amp;query_type=' . uri_escape_utf8($query_type) if ($query_type);
     eval {
-        ($error, $results_hashref, $facets) = getRecords($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,$branches,$itemtypes,$query_type,$scan,1);
+        ($error, $results_hashref, $facets) = getRecords($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,$branches,$itemtypes_nocategory,$query_type,$scan,1);
     };
 }
 # This sorts the facets into alphabetical order
@@ -920,15 +948,25 @@ if ($query_desc || $limit_desc) {
 }
 
 # VI. BUILD THE TEMPLATE
-# Build drop-down list for 'Add To:' menu...
-my ($totalref, $pubshelves, $barshelves)=
-	C4::VirtualShelves::GetSomeShelfNames($borrowernumber,'COMBO',1);
+my $some_private_shelves = Koha::Virtualshelves->get_some_shelves(
+    {
+        borrowernumber => $borrowernumber,
+        add_allowed    => 1,
+        category       => 1,
+    }
+);
+my $some_public_shelves = Koha::Virtualshelves->get_some_shelves(
+    {
+        borrowernumber => $borrowernumber,
+        add_allowed    => 1,
+        category       => 2,
+    }
+);
+
 $template->param(
-	addbarshelves     => $totalref->{bartotal},
-	addbarshelvesloop => $barshelves,
-	addpubshelves     => $totalref->{pubtotal},
-	addpubshelvesloop => $pubshelves,
-	);
+    add_to_some_private_shelves => $some_private_shelves,
+    add_to_some_public_shelves  => $some_public_shelves,
+);
 
 my $content_type = ($format eq 'rss' or $format eq 'atom') ? $format : 'html';
 

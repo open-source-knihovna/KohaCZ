@@ -36,7 +36,6 @@ use File::Find;
 use Test::Warn;
 use File::Temp qw/ tempdir /;
 use File::Path;
-use DBI;
 
 our $child;
 our $datadir;
@@ -97,10 +96,6 @@ our $QueryRemoveStopwords = 0;
 our $UseQueryParser = 0;
 our $marcflavour = 'MARC21';
 our $contextmodule = new Test::MockModule('C4::Context');
-$contextmodule->mock('_new_dbh', sub {
-    my $dbh = DBI->connect( 'DBI:Mock:', '', '' )
-    || die "Cannot create handle: $DBI::errstr\n";
-    return $dbh });
 $contextmodule->mock('preference', sub {
     my ($self, $pref) = @_;
     if ($pref eq 'marcflavour') {
@@ -125,6 +120,10 @@ $contextmodule->mock('preference', sub {
         return 20;
     } elsif ($pref eq 'OpacHiddenItems') {
         return '';
+    } elsif ($pref eq 'opacthemes') {
+        return 'bootstrap';
+    } elsif ($pref eq 'opaclanguages') {
+        return 'en';
     } elsif ($pref eq 'AlternateHoldingsField') {
         return '490av';
     } elsif ($pref eq 'AuthoritySeparator') {
@@ -259,29 +258,6 @@ sub run_marc21_search_tests {
         );
         return \%hash;
     });
-    my $dbh = C4::Context->dbh;
-    $dbh->{mock_add_resultset} = {
-        sql     => 'SHOW COLUMNS FROM items',
-        results => [
-            [ 'rows' ], # seems like $sth->rows is getting called
-                        # implicitly, so we need this to make
-                        # DBD::Mock return all of the results
-            [ 'itemnumber' ], [ 'biblionumber' ], [ 'biblioitemnumber' ],
-            [ 'barcode' ], [ 'dateaccessioned' ], [ 'booksellerid' ],
-            [ 'homebranch' ], [ 'price' ], [ 'replacementprice' ],
-            [ 'replacementpricedate' ], [ 'datelastborrowed' ], [ 'datelastseen' ],
-            [ 'stack' ], [ 'notforloan' ], [ 'damaged' ],
-            [ 'itemlost' ], [ 'withdrawn' ], [ 'itemcallnumber' ],
-            [ 'issues' ], [ 'renewals' ], [ 'reserves' ],
-            [ 'restricted' ], [ 'itemnotes' ], [ 'nonpublicnote' ],
-            [ 'holdingbranch' ], [ 'paidfor' ], [ 'timestamp' ],
-            [ 'location' ], [ 'permanent_location' ], [ 'onloan' ],
-            [ 'cn_source' ], [ 'cn_sort' ], [ 'ccode' ],
-            [ 'materials' ], [ 'uri' ], [ 'itype' ],
-            [ 'more_subfields_xml' ], [ 'enumchron' ], [ 'copynumber' ],
-            [ 'stocknumber' ],
-        ]
-    };
 
     my %branches = (
         'CPL' => { 'branchaddress1' => 'Jefferson Summit', 'branchcode' => 'CPL', 'branchname' => 'Centerville', },
@@ -708,8 +684,11 @@ if ( $indexing_mode eq 'dom' ) {
     ( undef, $results_hashref, $facets_loop ) =
         getRecords('ti:punctuation', 'punctuation', [], [ 'biblioserver' ], '19', 0, undef, \%branches, \%itemtypes, 'ccl', undef);
     is($results_hashref->{biblioserver}->{hits}, 1, "search for ti:punctuation returned expected number of records");
-    @newresults = searchResults('intranet', $query_desc, $results_hashref->{'biblioserver'}->{'hits'}, 20, 0, 0,
-        $results_hashref->{'biblioserver'}->{"RECORDS"});
+    warning_like { @newresults = searchResults('intranet', $query_desc,
+                    $results_hashref->{'biblioserver'}->{'hits'}, 20, 0, 0,
+                    $results_hashref->{'biblioserver'}->{"RECORDS"}) }
+                qr/^ERROR DECODING RECORD - Tag "50%" is not a valid tag/,
+                "Warning is raised correctly for invalid tags in MARC::Record";
     is(scalar(@newresults), 0, 'a record that cannot be parsed by MARC::Record is simply skipped (bug 10684)');
 
     # Testing exploding indexes
@@ -1006,12 +985,12 @@ sub run_unimarc_search_tests {
 }
 
 subtest 'MARC21 + GRS-1' => sub {
-    plan tests => 109;
+    plan tests => 110;
     run_marc21_search_tests('grs1');
 };
 
 subtest 'MARC21 + DOM' => sub {
-    plan tests => 109;
+    plan tests => 110;
     run_marc21_search_tests('dom');
 };
 

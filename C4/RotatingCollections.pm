@@ -88,7 +88,7 @@ sub CreateCollection {
     my $schema = Koha::Database->new()->schema();
     my $duplicate_titles = $schema->resultset('Collection')->count({ colTitle => $title });
 
-    ## Check for all neccessary parameters
+    ## Check for all necessary parameters
     if ( !$title ) {
         return ( 0, 1, "NO_TITLE" );
     } elsif ( $duplicate_titles ) {
@@ -136,7 +136,7 @@ sub UpdateCollection {
     my $schema = Koha::Database->new()->schema();
     my $duplicate_titles = $schema->resultset('Collection')->count({ colTitle => $title,  -not => { colId => $colId } });
 
-    ## Check for all neccessary parameters
+    ## Check for all necessary parameters
     if ( !$colId ) {
         return ( 0, 1, "NO_ID" );
     }
@@ -171,7 +171,7 @@ sub UpdateCollection {
  Deletes a collection of the given id
 
  Input:
-   $colId : id of the Archtype to be deleted
+   $colId : id of the Archetype to be deleted
 
  Output:
    $success: 1 if all database operations were successful, 0 otherwise
@@ -183,7 +183,7 @@ sub UpdateCollection {
 sub DeleteCollection {
     my ($colId) = @_;
 
-    ## Paramter check
+    ## Parameter check
     if ( !$colId ) {
         return ( 0, 1, "NO_ID" );
     }
@@ -247,7 +247,7 @@ sub GetCollections {
 sub GetItemsInCollection {
     my ($colId) = @_;
 
-    ## Paramter check
+    ## Parameter check
     if ( !$colId ) {
         return ( 0, 0, 1, "NO_ID" );
     }
@@ -326,7 +326,7 @@ Adds an item to a rotating collection.
 sub AddItemToCollection {
     my ( $colId, $itemnumber ) = @_;
 
-    ## Check for all neccessary parameters
+    ## Check for all necessary parameters
     if ( !$colId ) {
         return ( 0, 1, "NO_ID" );
     }
@@ -376,7 +376,7 @@ Removes an item to a collection
 sub RemoveItemFromCollection {
     my ( $colId, $itemnumber ) = @_;
 
-    ## Check for all neccessary parameters
+    ## Check for all necessary parameters
     if ( !$itemnumber ) {
         return ( 0, 2, "NO_ITEM" );
     }
@@ -417,7 +417,7 @@ Transfers a collection to another branch
 sub TransferCollection {
     my ( $colId, $colBranchcode ) = @_;
 
-    ## Check for all neccessary parameters
+    ## Check for all necessary parameters
     if ( !$colId ) {
         return ( 0, 1, "NO_ID" );
     }
@@ -447,8 +447,8 @@ sub TransferCollection {
     my @results;
     while ( my $item = $sth->fetchrow_hashref ) {
         my ($status) = CheckReserves( $item->{itemnumber} );
-        my @transfers = GetTransfers( $item->{itemnumber} );
-        transferbook( $colBranchcode, $item->{barcode}, my $ignore_reserves = 1 ) unless ( $status eq 'Waiting' || @transfers );
+        my @transfers = C4::Circulation::GetTransfers( $item->{itemnumber} );
+        C4::Circulation::transferbook( $colBranchcode, $item->{barcode}, my $ignore_reserves = 1 ) unless ( $status eq 'Waiting' || @transfers );
     }
 
     return 1;

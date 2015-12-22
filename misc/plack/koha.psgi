@@ -28,7 +28,7 @@ $ENV{PLACK_DEBUG} = 1; # toggle debugging
 $ENV{MEMCACHED_SERVERS} = "localhost:11211";
 #$ENV{MEMCACHED_DEBUG} = 0;
 
-$ENV{PROFILE_PER_PAGE} = 1; # reset persistant and profile counters after each page, like CGI
+$ENV{PROFILE_PER_PAGE} = 1; # reset persistent and profile counters after each page, like CGI
 #$ENV{INTRANET} = 1; # usually passed from script
 
 #$ENV{DBI_AUTOPROXY}='dbi:Gofer:transport=null;cache=DBI::Util::CacheMemory'
@@ -38,19 +38,21 @@ $ENV{PROFILE_PER_PAGE} = 1; # reset persistant and profile counters after each p
 use C4::Context;
 use C4::Languages;
 use C4::Members;
-use C4::Dates;
 use C4::Boolean;
 use C4::Letters;
 use C4::Koha;
 use C4::XSLT;
 use C4::Branch;
 use C4::Category;
+use Koha::DateUtils;
 =for preload
 use C4::Tags; # FIXME
 =cut
 
 use Devel::Size 0.77; # 0.71 doesn't work for Koha
 my $watch_capture_regex = '(C4|Koha)';
+
+C4::Context->disable_syspref_cache;
 
 sub watch_for_size {
 	my @watch =

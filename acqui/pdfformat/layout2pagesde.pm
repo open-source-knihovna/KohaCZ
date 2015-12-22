@@ -31,6 +31,7 @@ use utf8;
 use C4::Branch qw(GetBranchDetail);
 
 use Koha::Number::Price;
+use Koha::DateUtils;
 
 BEGIN {
          use Exporter   ();
@@ -43,7 +44,7 @@ BEGIN {
 
 
 #be careful, all the sizes (height, width, etc...) are in mm, not PostScript points (the default measurment of PDF::API2).
-#The constants exported tranform that into PostScript points (/mm for milimeter, /in for inch, pt is postscript point, and as so is there only to show what is happening.
+#The constants exported transform that into PostScript points (/mm for milimeter, /in for inch, pt is postscript point, and as so is there only to show what is happening.
 use constant mm => 25.4 / 72;
 use constant in => 1 / 72;
 use constant pt => 1;
@@ -170,7 +171,7 @@ sub printhead {
     $text->text($basketgroup->{'id'});
     
     # print the date
-    my $today = C4::Dates->today();
+    my $today = output_pref({ dt => dt_from_string, dateonly => 1 });
     $text->translate(130/mm,  ($height-5-48)/mm);
     $text->text($today);
     

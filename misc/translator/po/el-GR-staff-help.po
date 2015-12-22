@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2015-08-17 17:10-0300\n"
-"PO-Revision-Date: 2015-01-15 16:33+0000\n"
-"Last-Translator: kyr.stefanidis <kyr.stefanidis@gmail.com>\n"
+"POT-Creation-Date: 2015-11-19 23:10-0300\n"
+"PO-Revision-Date: 2015-11-22 23:56+0000\n"
+"Last-Translator: Dimitris <dimantonak@gmail.com>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1421339597.000000\n"
+"X-POOTLE-MTIME: 1448236614.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -725,6 +725,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/serials/claims.tt:15
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
@@ -838,7 +839,6 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:68
 #: intranet-tmpl/prog/en/modules/help/acqui/lateorders.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/uncertainprice.tt:7
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:12
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:122
 #: intranet-tmpl/prog/en/modules/help/acqui/invoice.tt:11
@@ -878,7 +878,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:58
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:141
 #: intranet-tmpl/prog/en/modules/help/tools/tools-home.tt:7
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:41
 #: intranet-tmpl/prog/en/modules/help/tools/picture-upload.tt:23
 #: intranet-tmpl/prog/en/modules/help/tools/quotes-upload.tt:43
@@ -950,6 +950,14 @@ msgstr "-8 =&gt; Σημαία"
 #, c-format
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Μελλοντική χρήση"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#, c-format
+msgid ""
+". For example, if you use the selector \"#circ_impossible\" your selected "
+"sound will be triggered when a checkout for a patron is not possible (such "
+"as the barcode not being found). "
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:35
 #, c-format
@@ -1768,7 +1776,7 @@ msgstr "Προσθήκη ειδοποίησης"
 msgid "Add a Batch"
 msgstr "Προσθήκη Παρτίδας"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:7
 #, fuzzy, c-format
 msgid "Add a Contract"
 msgstr "Προσθήκη Συμβολαίου"
@@ -1915,6 +1923,11 @@ msgstr "Προσθήκη κονδυλίου"
 #, c-format
 msgid "Adding a group"
 msgstr "Προσθήκη ομάδας"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, fuzzy, c-format
+msgid "Adding a new alert"
+msgstr "Προσθήκη κονδυλίου"
 
 #: intranet-tmpl/prog/en/modules/help/admin/aqbudgetperiods.tt:13
 #, fuzzy, c-format
@@ -2552,19 +2565,12 @@ msgstr ""
 msgid "Any"
 msgstr "Οποιοδήποτε"
 
-#: intranet-tmpl/prog/en/modules/help/mainpage.tt:24
-#, c-format
+#: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:196
+#, fuzzy, c-format
 msgid ""
-"As part of the upgrade process your online help will be overwritten with the "
-"new Help as part of the install. If you want to keep a copy of your online "
-"help, you should instruct your System Administrator to upgrade the Online "
-"Help directory in the Koha file tree."
-msgstr ""
-"Ως μέρος της διαδικασίας αναβάθμισης και εγκατάστασης η ηλεκτρονική σας "
-"βοήθεια θα επικαλυφθεί με τη νέα Βοήθεια. Αν θέλετε να κρατήσετε ένα "
-"αντίγραφο της ηλεκτρονικής σας βοήθειας, πρέπει να καθοδηγήσετε τον "
-"Διαχειριστή Συστήματος να αναβαθμίσει την Ηλεκτρονική Βοήθεια στο δέντρο "
-"αρχείων του Koha."
+"As your file is uploaded you will see an image that will confirm that the "
+"system is working."
+msgstr "Μόλις φορτωθεί το αρχείο θα σας εμφανιστεί ένα μήνυμα επιβεβαίωσης."
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:196
 #, fuzzy, c-format
@@ -2584,7 +2590,7 @@ msgstr ""
 "δανειστεί το μέλος αυτή τη στιγμή μαζί με την ημερομηνία επιστροφής, τα "
 "τεκμήρια που δανείστηκε σήμερα εμφανίζονται στην κορυφή."
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:9
 #, fuzzy, c-format
 msgid ""
 "At the top of a Vendor Information Page, you will see a 'New Contract' "
@@ -2700,6 +2706,13 @@ msgstr ""
 "Τουλάχιστον, αν σκοπεύεται να κυκλοφορήσετε το τεκμήριο, τα ακόλουθα πεδία "
 "πρέπει να εισαχθούν για νέα αντίτυπα:"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#, c-format
+msgid ""
+"At this point, you can preview your sound by clicking the \"Play sound\" "
+"button"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/fieldmapping.tt:7
 #, c-format
 msgid "At this time the only keyword in use is 'subtitle.'"
@@ -2710,6 +2723,11 @@ msgstr ""
 #, c-format
 msgid "Audience"
 msgstr "Κοινό"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:3
+#, c-format
+msgid "Audio alerts"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:69
 #, c-format
@@ -4089,6 +4107,11 @@ msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr ""
 "Κάντε κλικ στο \"Πληρωμή\" δίπλα στο πρόστιμο που θέλετε να πληρώσετε πλήρως"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#, fuzzy, c-format
+msgid "Click \"Save alert\" and your done!"
+msgstr "Κάντε κλικ στο Αποθήκευση για να αποθηκεύσετε τη νέα σας απόδοση"
+
 #: intranet-tmpl/prog/en/modules/help/members/pay.tt:43
 #: intranet-tmpl/prog/en/modules/help/members/paycollect.tt:43
 #, c-format
@@ -5019,6 +5042,11 @@ msgstr "Διαγραφή λίστας"
 msgid "Deleting Item Types"
 msgstr "Διαγραφή Τύπων Τεκμηρίου"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#, fuzzy, c-format
+msgid "Deleting alerts"
+msgstr "Διαγραφή Αντιτύπων"
+
 #: intranet-tmpl/prog/en/modules/help/cataloguing/additem.tt:67
 #, fuzzy, c-format
 msgid "Deleting items"
@@ -5483,6 +5511,21 @@ msgstr "Εισαγωγή τίτλου και περιγραφής για την 
 #, c-format
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "Εισάγετε σε απλό κείμενο την κατηγορία στο πεδίο 'Περιγραφή'."
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#, c-format
+msgid ""
+"Enter a selector in the \"selector\" input, you can see documentation on "
+"jQuery selectors "
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#, c-format
+msgid ""
+"Enter a sound to be played, you can either select a built-in Koha sound "
+"using the pulldown selector, or you can enter a full URL to a sound file on "
+"another server."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/pay.tt:36
 #: intranet-tmpl/prog/en/modules/help/members/paycollect.tt:36
@@ -7775,10 +7818,10 @@ msgstr "Αργία που επαναλαμβάνεται κάθε χρόνο τ�
 #: intranet-tmpl/prog/en/modules/help/mainpage.tt:5
 #, fuzzy, c-format
 msgid ""
-"If this is your first time logging into Koha, you should now got to Koha "
-"Administration and setup all system preferences, patron categories, item "
+"If this is your first time logging into Koha, you should now go to Koha "
+"Administration and set up all system preferences, patron categories, item "
 "types and libraries. You should also review the other settings found in "
-"administration."
+"Administration."
 msgstr ""
 "Αν αυτή είναι η πρώτη φορά που συνδέεστε στο Koha, πρέπει να πάτε στη "
 "Διαχείριση του Koha και να ρυθμίσετε τις παραμέτρους, ειδικά τις Κατηγορίες "
@@ -9679,7 +9722,7 @@ msgid ""
 "to enter an owner as well as choose a restriction"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:13
 #, fuzzy, c-format
 msgid ""
 "Important: You cannot enter a contract retrospectively. The end date must "
@@ -10124,7 +10167,7 @@ msgstr ""
 msgid "It will also appear on the main staff dashboard under the module labels"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:17
 #, c-format
 msgid "It will also be an option when creating a basket."
 msgstr "Θα είναι επίσης επιλογή κατά τη δημιουργία καλαθιού."
@@ -10492,7 +10535,7 @@ msgid "Koha reports library"
 msgstr "Βιβλιοθήκη Εκθέσεων Koha"
 
 #: intranet-tmpl/prog/en/modules/help/about.tt:20
-#, fuzzy, c-format
+#, c-format
 msgid "Koha team"
 msgstr "Ομάδα Koha"
 
@@ -10820,6 +10863,11 @@ msgstr "Καθολικές προτιμήσεις συστήματος"
 #, fuzzy, c-format
 msgid "Local Use:"
 msgstr "Τοπική Χρήση"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#, c-format
+msgid "Locate the \"Add new alert\" form."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/aqbudgetperiods.tt:26
 #, c-format
@@ -11847,7 +11895,7 @@ msgid ""
 "edit the quotes prior to saving them."
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:15
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:15
 #, c-format
 msgid "Once the contract is saved it will appear below the vendor information."
 msgstr ""
@@ -12163,9 +12211,9 @@ msgstr ""
 #, fuzzy, c-format
 msgid ""
 "Once you have set up patron categories, you should create a new user in the "
-"Patrons module with superlibrarian permissions. Once that user is set you "
-"should use that user to log in rather than the root user set up as part of "
-"installation."
+"Patrons module with superlibrarian permissions. Once that user is created, "
+"you should log in as that user rather than the root user which is set up as "
+"part of installation."
 msgstr ""
 "Μόλις ρυθμίσετε τις κατηγορίες μελών, πρέπει να δημιουργήσετε ένα νέο χρήστη "
 "στο &quot;Μέλη&quot; με προνόμια ύπερ βιβλιοθηκονόμου. Τότε χρησιμοποιήστε "
@@ -13822,7 +13870,7 @@ msgstr "Βλέπε την πλήρη τεκμηρίωση για την Συγχ
 msgid "See the full documentation for Moving Items in the "
 msgstr "Βλέπε την πλήρη τεκμηρίωση για τη Μεταφορά Τεκμηρίων στο "
 
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #, c-format
 msgid "See the full documentation for News in the "
 msgstr "Βλέπε την πλήρη τεκμηρίωση για τα Νέα στο "
@@ -14069,7 +14117,7 @@ msgstr ""
 "Βλέπε την πλήρη τεκμηρίωση για τη Φόρτωση Αρχείων Κυκλοφορίας Υλικού Χωρίς "
 "Σύνδεση στο "
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #, fuzzy, c-format
 msgid "See the full documentation for Vendor Contracts in the "
 msgstr "Βλέπε την πλήρη τεκμηρίωση για τα Συμβόλαια Προμηθευτών στο "
@@ -14553,6 +14601,18 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/members/members-home.tt:52
 #, c-format
 msgid "Sort field 2 "
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#, c-format
+msgid "Sound precedence"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#, c-format
+msgid ""
+"Sounds will be played in order from top to bottom. That is, the first select "
+"that finds a match will have its sound played."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/classsources.tt:5
@@ -15692,7 +15752,7 @@ msgstr ""
 "επιλέξει να μην αποθηκεύει η βιβλιοθήκη αυτή την πληροφορία, η καρτέλα αυτή "
 "θα δείχνει μόνο τους τρέχοντες δανεισμούς."
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:11
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:11
 #, c-format
 msgid ""
 "The contract form will ask for some very basic information about the "
@@ -16118,6 +16178,11 @@ msgstr ""
 msgid "The new value will appear in the list along with existing values"
 msgstr "Η νέα τιμή θα εμφανιστεί στη λίστα μαζί με τις υπάρχουσες τιμές"
 
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:23
+#, c-format
+msgid "The news item's author will be set to the currently logged in user."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:46
 #, fuzzy, c-format
 msgid "The next option for ordering is to order from a staged record. "
@@ -16390,6 +16455,13 @@ msgid ""
 "The suggestions page will automatically be limited to suggestions for your "
 "library. To see information for all (or any other) libraries click on the "
 "'Acquisition information' filter and change the library."
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:24
+#, c-format
+msgid ""
+"The system preference 'NewsAuthorDisplay' can be used to hide or show the "
+"author for news item."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/tools/scheduler.tt:5
@@ -17106,6 +17178,13 @@ msgstr ""
 msgid "This section can be expanded"
 msgstr "Ο τομέας μπορεί να διευρυνθεί"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:5
+#, c-format
+msgid ""
+"This section of Koha lets you specify a given sound to play when a given "
+"jQuery selector is matched."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/about.tt:5
 #, c-format
 msgid ""
@@ -17372,9 +17451,9 @@ msgstr ""
 "λεπτά)"
 
 #: intranet-tmpl/prog/en/modules/help/about.tt:34
-#, fuzzy, c-format
+#, c-format
 msgid "Timeline"
-msgstr "Χρονοδιάγραμμα Koha"
+msgstr "Χρονολόγιο Koha"
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:31
 #, fuzzy, c-format
@@ -17656,6 +17735,11 @@ msgstr ""
 "Για να προσθέσετε ένα Τύπο Απόδοσης Μέλους, κάντε κλικ στο 'Νέος Τύπος "
 "Απόδοσης Μέλους' στην κορυφή της σελίδας"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#, fuzzy, c-format
+msgid "To add a new alert:"
+msgstr "Για να προσθέσετε μία νέα βιβλιοθήκη:"
+
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities.tt:5
 #, fuzzy, c-format
 msgid ""
@@ -17838,6 +17922,13 @@ msgstr ""
 "Για να έχετε τη δυνατότητα να παραγγείλετε από έναν προμηθευτή πρέπει να "
 "τους κάνετε 'Ενεργούς'"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#, c-format
+msgid ""
+"To change the precedence of a given alert, use the four arrows to move it "
+"up, down, or to the top or bottom of the list."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/circ/returns.tt:16
 #, c-format
 msgid ""
@@ -17939,6 +18030,15 @@ msgstr ""
 "'Διαγραφή' στα δεξιά της εγγραφής στα αποτελέσματα αναζήτησης και επίσης θα "
 "εμφανιστεί ως κουμπί αφού κάνετε κλικ στην περίληψη εγγραφής καθιερωμένου "
 "όρου."
+
+#. %1$s:  INCLUDE 'help-bottom.inc' 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#, c-format
+msgid ""
+"To delete one or more alerts, check the checkboxes for those alerts you wish "
+"to delete, then click the \"Delete selected alerts\" button and confirm you "
+"want to delete those alerts. %s "
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
 #, c-format
@@ -19008,7 +19108,7 @@ msgstr "VANCOUVER PUBLIC LIBRARY z3950.vpl.ca:210 Horizon"
 msgid "Values that are pre-configured in Koha are:"
 msgstr "Οι τιμές που είναι προ-διαμορφωμένες στο Koha είναι:"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:3
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:3
 #, fuzzy, c-format
 msgid "Vendor Contracts"
 msgstr "Συμβόλαια Προμηθευτών"
@@ -19970,7 +20070,7 @@ msgid ""
 "follow the rule set in the BlockExpiredPatronOpacActions preference"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:5
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:5
 #, fuzzy, c-format
 msgid ""
 "You can define contracts (with a start and end date) and attach them to a "
@@ -20540,6 +20640,20 @@ msgstr ""
 msgid "Your new item type will now appear on the list"
 msgstr "Ο νέος τύπος τεκμηρίου θα εμφανιστεί τώρα στη λίστα"
 
+#: intranet-tmpl/prog/en/modules/help/mainpage.tt:24
+#, fuzzy, c-format
+msgid ""
+"Your online help will be overwritten by the new Help when there is an "
+"upgrade. If you want to keep a copy of your online help, you should instruct "
+"your System Administrator to upgrade the Online Help directory in the Koha "
+"file tree."
+msgstr ""
+"Ως μέρος της διαδικασίας αναβάθμισης και εγκατάστασης η ηλεκτρονική σας "
+"βοήθεια θα επικαλυφθεί με τη νέα Βοήθεια. Αν θέλετε να κρατήσετε ένα "
+"αντίγραφο της ηλεκτρονικής σας βοήθειας, πρέπει να καθοδηγήσετε τον "
+"Διαχειριστή Συστήματος να αναβαθμίσει την Ηλεκτρονική Βοήθεια στο δέντρο "
+"αρχείων του Koha."
+
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:27
 #: intranet-tmpl/prog/en/modules/help/acqui/newordersubscription.tt:11
 #, c-format
@@ -21096,6 +21210,11 @@ msgstr "fic:1 Λογοτεχνικό"
 msgid "group_manage "
 msgstr "group_manage "
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#, c-format
+msgid "here"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/preferences.tt:19
 #, fuzzy, c-format
 msgid ""
@@ -21384,6 +21503,7 @@ msgstr "διαχείριση "
 #: intranet-tmpl/prog/en/modules/help/serials/claims.tt:15
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
@@ -21496,7 +21616,6 @@ msgstr "διαχείριση "
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:68
 #: intranet-tmpl/prog/en/modules/help/acqui/lateorders.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/uncertainprice.tt:7
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:12
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:122
 #: intranet-tmpl/prog/en/modules/help/acqui/invoice.tt:11
@@ -21536,7 +21655,7 @@ msgstr "διαχείριση "
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:58
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:141
 #: intranet-tmpl/prog/en/modules/help/tools/tools-home.tt:7
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:41
 #: intranet-tmpl/prog/en/modules/help/tools/picture-upload.tt:23
 #: intranet-tmpl/prog/en/modules/help/tools/quotes-upload.tt:43

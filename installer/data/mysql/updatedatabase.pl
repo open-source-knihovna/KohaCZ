@@ -36,10 +36,9 @@ use Getopt::Long;
 # Koha modules
 use C4::Context;
 use C4::Installer;
-use C4::Dates;
 use Koha::Database;
-
 use Koha;
+use Koha::DateUtils;
 
 use MARC::Record;
 use MARC::File::XML ( BinaryEncoding => 'utf8' );
@@ -4171,10 +4170,10 @@ if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
     $dbh->do("ALTER TABLE `issuingrules` ADD hardduedatecompare tinyint NOT NULL default 0 AFTER hardduedate");
     my $duedate;
     if (C4::Context->preference("globalDueDate")) {
-      $duedate = C4::Dates::format_date_in_iso(C4::Context->preference("globalDueDate"));
+      $duedate = eval { output_pref( { dt => dt_from_string( C4::Context->preference("globalDueDate") ), dateonly => 1, dateformat => 'iso' } ); };
       $dbh->do("UPDATE `issuingrules` SET hardduedate = '$duedate', hardduedatecompare = 0");
     } elsif (C4::Context->preference("ceilingDueDate")) {
-      $duedate = C4::Dates::format_date_in_iso(C4::Context->preference("ceilingDueDate"));
+      $duedate = eval { output_pref( { dt => dt_from_string( C4::Context->preference("ceilingDueDate") ), dateonly => 1, dateformat => 'iso' } ); };
       $dbh->do("UPDATE `issuingrules` SET hardduedate = '$duedate', hardduedatecompare = -1");
     }
     $dbh->do("DELETE FROM `systempreferences` WHERE variable = 'globalDueDate' OR variable = 'ceilingDueDate'");
@@ -7020,13 +7019,11 @@ if(CheckVersion($DBversion)) {
 
 $DBversion = "3.13.00.006";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(
-        q{
-INSERT INTO systempreferences (variable,value,explanation,options,type) VALUES ('CalculateFinesOnReturn','1','Switch to control if overdue fines are calculated on return or not', '', 'YesNo');
-}
-    );
-    print
-"Upgrade to $DBversion done (Bug 10120 - Fines on item return controlled by a systempreference)\n";
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('CalculateFinesOnReturn','1','Switch to control if overdue fines are calculated on return or not', '', 'YesNo')
+    });
+    print "Upgrade to $DBversion done (Bug 10120: Fines on item return controlled by a systempreference)\n";
     SetVersion($DBversion);
 }
 
@@ -9671,8 +9668,7 @@ if ( CheckVersion($DBversion) ) {
         });
         print "Upgrade to $DBversion done (Bug 1861: Unique patrons logins not (totally) enforced)\n";
     }
-
-    SetVersion($DBversion);
+    SetVersion ($DBversion);
 }
 
 $DBversion = "3.19.00.004";
@@ -9976,6 +9972,7 @@ if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Bug 5786: Move AllowOnShelfHolds to circulation matrix; Move OPACItemHolds system preference to circulation matrix)\n";
     SetVersion ($DBversion);
 }
+
 
 $DBversion = "3.19.00.018";
 if ( CheckVersion($DBversion) ) {
@@ -10462,31 +10459,49 @@ if ( CheckVersion($DBversion) ) {
     SetVersion ($DBversion);
 }
 
-$DBversion = "3.20.00.001";
+$DBversion = "3.21.00.000";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(
-        q|
-                    INSERT IGNORE INTO language_subtag_registry( subtag, type, description, added)
-                    VALUES ( 'IN', 'region', 'India','2015-05-28');
-                |
-    );
-    $dbh->do(
-        q|
-                    INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
-                    VALUES ( 'IN', 'region', 'en', 'India');
-                |
-    );
-    $dbh->do(
-        q|
-                    INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
-                    VALUES ( 'IN', 'region', 'bn', 'ভারত');
-                |
-    );
-    print "Upgrade to $DBversion done (Bug 14285: Add new region India)\n";
-    SetVersion($DBversion);
+    print "Upgrade to $DBversion done (El tiempo vuela, un nuevo ciclo comienza.)\n";
+    SetVersion ($DBversion);
 }
 
-$DBversion = '3.20.00.002';
+$DBversion = "3.21.00.001";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        UPDATE systempreferences SET variable='IntranetUserJS' where variable='intranetuserjs'
+    |);
+    print "Upgrade to $DBversion done (Bug 12160: Rename intranetuserjs to IntranetUserJS)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.002";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        UPDATE systempreferences SET variable='OPACUserJS' where variable='opacuserjs'
+    |);
+    print "Upgrade to $DBversion done (Bug 12160: Rename opacuserjs to OPACUserJS)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.003";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        INSERT IGNORE INTO language_subtag_registry( subtag, type, description, added)
+        VALUES ( 'IN', 'region', 'India','2015-05-28');
+    |);
+    $dbh->do(q|
+        INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
+        VALUES ( 'IN', 'region', 'en', 'India');
+    |);
+    $dbh->do(q|
+        INSERT IGNORE INTO language_descriptions(subtag, type, lang, description)
+        VALUES ( 'IN', 'region', 'bn', 'ভারত');
+    |);
+    print "Upgrade to $DBversion done (Bug 14285: Add new region India)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = '3.21.00.004';
 if ( CheckVersion($DBversion) ) {
     my $OPACBaseURL = C4::Context->preference('OPACBaseURL');
     if (defined($OPACBaseURL) && substr($OPACBaseURL,0,4) ne "http") {
@@ -10509,14 +10524,120 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
-$DBversion = "3.20.01.000";
+$DBversion = "3.21.00.005";
 if ( CheckVersion($DBversion) ) {
-    print "Upgrade to $DBversion done (Koha 3.20.1)\n";
+    $dbh->do(q|
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('ReportsLog','0',NULL,'If ON, log information about reports.','YesNo')
+    |);
+    print "Upgrade to $DBversion done (Bug 14024: Add reports to action logs)\n";
     SetVersion ($DBversion);
 }
 
+$DBversion = "3.21.00.006";
+if ( CheckVersion($DBversion) ) {
+    # Remove the borrow permission flag (bit 7)
+    $dbh->do(q|
+        UPDATE borrowers
+        SET flags = flags - ( flags & (1<<7) )
+        WHERE flags IS NOT NULL
+            AND flags > 0
+    |);
+    $dbh->do(q|
+        DELETE FROM userflags WHERE bit=7;
+    |);
+    print "Upgrade to $DBversion done (Bug 7976: Remove the 'borrow' permission)\n";
+    SetVersion($DBversion);
+}
 
-$DBversion = "3.20.01.001";
+$DBversion = "3.21.00.007";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        ALTER IGNORE TABLE aqbasket
+            ADD KEY authorisedby (authorisedby)
+    |);
+    $dbh->do(q|
+        ALTER IGNORE TABLE aqbooksellers
+            ADD KEY name (name(255))
+    |);
+    $dbh->do(q|
+        ALTER IGNORE TABLE aqbudgets
+            ADD KEY budget_parent_id (budget_parent_id),
+            ADD KEY budget_code (budget_code),
+            ADD KEY budget_branchcode (budget_branchcode),
+            ADD KEY budget_period_id (budget_period_id),
+            ADD KEY budget_owner_id (budget_owner_id)
+    |);
+    $dbh->do(q|
+        ALTER IGNORE TABLE aqbudgets_planning
+            ADD KEY budget_period_id (budget_period_id)
+    |);
+    $dbh->do(q|
+        ALTER IGNORE TABLE aqorders
+            ADD KEY parent_ordernumber (parent_ordernumber),
+            ADD KEY orderstatus (orderstatus)
+    |);
+    print "Upgrade to $DBversion done (Bug 14053: Acquisition db tables are missing indexes)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.008";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        DELETE IGNORE FROM systempreferences
+        WHERE variable = 'HomeOrHoldingBranchReturn';
+    });
+    print "Upgrade to $DBversion done (Bug 7981: Transfer message on return. HomeOrHoldingBranchReturn syspref removed in favour of circulation rules.)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.009";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        UPDATE aqorders SET orderstatus='cancelled'
+        WHERE (datecancellationprinted IS NOT NULL OR
+               datecancellationprinted<>'0000-00-00');
+    |);
+    print "Upgrade to $DBversion done (Bug 13993: Correct orderstatus for transferred orders)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.010";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        ALTER TABLE message_queue
+            DROP message_id
+    |);
+    $dbh->do(q|
+        ALTER TABLE message_queue
+            ADD message_id INT( 11 ) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST
+    |);
+    print "Upgrade to $DBversion done (Bug 7793: redefine the field message_id as PRIMARY KEY of message_queue)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.011";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('OpacLangSelectorMode','footer','top|both|footer','Select the location to display the language selector','Choice')
+    });
+    print "Upgrade to $DBversion done (Bug 14252: Make the OPAC language switcher available in the masthead navbar, footer, or both)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.012";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        INSERT INTO letter (module, code, name, title, content, message_transport_type)
+        VALUES
+        ('suggestions','TO_PROCESS','Notify fund owner', 'A suggestion is ready to be processed','Dear <<borrowers.firstname>> <<borrowers.surname>>,\n\nA new suggestion is ready to be processed: <<suggestions.title>> by <<suggestions.autho    r>>.\n\nThank you,\n\n<<branches.branchname>>', 'email')
+    |);
+    print "Upgrade to $DBversion done (Bug 13014: Add the TO_PROCESS letter code)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.013";
 if ( CheckVersion($DBversion) ) {
     my $msg;
     if ( C4::Context->preference('OPACPrivacy') ) {
@@ -10550,30 +10671,724 @@ if ( CheckVersion($DBversion) ) {
     SetVersion ($DBversion);
 }
 
-$DBversion = "3.20.01.002";
+$DBversion = "3.21.00.014";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('OAI-PMH:DeletedRecord','persistent','Koha\'s deletedbiblio table will never be deleted (persistent) or might be deleted (transient)','transient|persistent','Choice')
+    });
+    $dbh->do(q|
+        ALTER TABLE oai_sets_biblios DROP FOREIGN KEY oai_sets_biblios_ibfk_1
+    |);
+    print "Upgrade to $DBversion done (Bug 3206: OAI repository deleted record support)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.015";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE systempreferences SET value='0' WHERE variable='CalendarFirstDayOfWeek' AND value='Sunday';
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value='1' WHERE variable='CalendarFirstDayOfWeek' AND value='Monday';
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET options='0|1|2|3|4|5|6' WHERE variable='CalendarFirstDayOfWeek';
+    });
+
+    print "Upgrade to $DBversion done (Bug 12137: Extend functionality of CalendarFirstDayOfWeek to be any day)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.016";
+if ( CheckVersion($DBversion) ) {
+    my $rs = $schema->resultset('Systempreference');
+    $rs->find_or_create(
+        {
+            variable => 'DumpTemplateVarsIntranet',
+            value    => 0,
+            explanation => 'If enabled, dump all Template Toolkit variable to a comment in the html source for the staff intranet.',
+            type => 'YesNo',
+        }
+    );
+    $rs->find_or_create(
+        {
+            variable => 'DumpTemplateVarsOpac',
+            value    => 0,
+            explanation => 'If enabled, dump all Template Toolkit variable to a comment in the html source for the opac.',
+            type => 'YesNo',
+        }
+    );
+    print "Upgrade to $DBversion done (Bug 13948: Add ability to dump template toolkit variables to html comment)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.017";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do("
+        CREATE TABLE uploaded_files (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            hashvalue CHAR(40) NOT NULL,
+            filename TEXT NOT NULL,
+            dir TEXT NOT NULL,
+            filesize int(11),
+            dtcreated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            categorycode tinytext,
+            owner int(11),
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    ");
+
+    print "Upgrade to $DBversion done (Bug 6874: New cataloging plugin upload.pl)\n";
+    print "This plugin comes with a new config variable (upload_path) and a new table (uploaded_files)\n";
+    print "To use it, set 'upload_path' config variable and 'OPACBaseURL' system preference and link this plugin to a subfield (856\$u for instance)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.018";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES
+            ('RestrictedPageLocalIPs','',NULL,'Beginning of IP addresses considered as local (comma separated ex: \"127.0.0,127.0.2\")','Free'),
+            ('RestrictedPageContent','',NULL,'HTML content of the restricted page','TextArea'),
+            ('RestrictedPageTitle','',NULL,'Title of the restricted page (breadcrumb and header)','Free')
+    });
+    print "Upgrade to $DBversion done (Bug 13485: Add a page to display links to restricted sites)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.019";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE reserves DROP constrainttype
+    });
+    $dbh->do(q{
+        ALTER TABLE old_reserves DROP constrainttype
+    });
+    $dbh->do(q{
+        DROP TABLE IF EXISTS reserveconstraints
+    });
+    print "Upgrade to $DBversion done (Bug 9809: Get rid of reserveconstraints)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.020";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO `systempreferences` (`variable`, `value`, `options`, `explanation`, `type`)
+        VALUES ('FeeOnChangePatronCategory','1','','If set, when a patron changes to a category with enrolment fee, a fee is charged','YesNo')
+    });
+    print "Upgrade to $DBversion done (Bug 13697: Option to don't charge a fee, if the patron changes to a category with enrolment fee)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.021";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('UseWYSIWYGinSystemPreferences','0','','Show WYSIWYG editor when editing certain HTML system preferences.','YesNo')
+    });
+    print "Upgrade to $DBversion done (Bug 11584: Add wysiwyg editor to system preferences dealing with HTML)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.022";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        DELETE cr.*
+        FROM course_reserves AS cr
+        LEFT JOIN course_items USING(ci_id)
+        WHERE course_items.ci_id IS NULL
+    });
+
+    my ($print_error) = $dbh->{PrintError};
+    $dbh->{RaiseError} = 0;
+    $dbh->{PrintError} = 0;
+    $dbh->do(q{ALTER TABLE course_reserves DROP FOREIGN KEY course_reserves_ibfk_2});
+    $dbh->do(q{ALTER TABLE course_reserves DROP INDEX course_reserves_ibfk_2});
+    $dbh->{PrintError} = $print_error;
+
+    $dbh->do(q{
+        ALTER IGNORE TABLE course_reserves
+            ADD CONSTRAINT course_reserves_ibfk_2
+                FOREIGN KEY (ci_id) REFERENCES course_items (ci_id)
+                ON DELETE CASCADE ON UPDATE CASCADE
+    });
+    print "Upgrade to $DBversion done (Bug 14205: Deleting an Item/Record does not remove link to course reserve)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.023";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE borrowers SET debarred=NULL WHERE debarred='0000-00-00'
+    });
+    $dbh->do(q{
+        UPDATE borrowers SET dateexpiry=NULL where dateexpiry='0000-00-00'
+    });
+    $dbh->do(q{
+        UPDATE borrowers SET dateofbirth=NULL where dateofbirth='0000-00-00'
+    });
+    $dbh->do(q{
+        UPDATE borrowers SET dateenrolled=NULL where dateenrolled='0000-00-00'
+    });
+    print "Upgrade to $DBversion done (Bug 14717: Prevent 0000-00-00 dates in patron data)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.024";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE marc_modification_template_actions
+        MODIFY COLUMN action
+            ENUM('delete_field','update_field','move_field','copy_field','copy_and_replace_field')
+            NOT NULL
+    });
+    print "Upgrade to $DBversion done (Bug 14098: Regression in Marc Modification Templates)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.025";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('RisExportAdditionalFields',  '', NULL ,  'Define additional RIS tags to export from MARC records in YAML format as an associative array with either a marc tag/subfield combination as the value, or a list of tag/subfield combinations.',  'textarea')
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('BibtexExportAdditionalFields',  '', NULL ,  'Define additional BibTex tags to export from MARC records in YAML format as an associative array with either a marc tag/subfield combination as the value, or a list of tag/subfield combinations.',  'textarea')
+    });
+    print "Upgrade to $DBversion done (Bug 12357: Enhancements to RIS and BibTeX exporting)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.026";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE matchpoints
+        SET search_index='issn'
+        WHERE matcher_id IN (SELECT matcher_id FROM marc_matchers WHERE code = 'ISSN')
+    });
+    print "Upgrade to $DBversion done (Bug 14472: Wrong ISSN search index in record matching rules)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.027";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q|
-        UPDATE aqorders SET orderstatus='cancelled'
-        WHERE (datecancellationprinted IS NOT NULL OR
-               datecancellationprinted<>'0000-00-00');
+        INSERT IGNORE INTO permissions (module_bit, code, description)
+        VALUES (1, 'self_checkout', 'Perform self checkout at the OPAC. It should be used for the patron matching the AutoSelfCheckID')
     |);
-    print "Upgrade to $DBversion done (Bug 13993: Correct orderstatus for transferred orders)\n";
+
+    my $AutoSelfCheckID = C4::Context->preference('AutoSelfCheckID');
+
+    $dbh->do(q|
+        UPDATE borrowers
+        SET flags=0
+        WHERE userid=?
+    |, undef, $AutoSelfCheckID);
+
+    $dbh->do(q|
+        DELETE FROM user_permissions
+        WHERE borrowernumber=(SELECT borrowernumber FROM borrowers WHERE userid=?)
+    |, undef, $AutoSelfCheckID);
+
+    $dbh->do(q|
+        INSERT INTO user_permissions(borrowernumber, module_bit, code)
+        SELECT borrowernumber, 1, 'self_checkout' FROM borrowers WHERE userid=?
+    |, undef, $AutoSelfCheckID);
+    print "Upgrade to $DBversion done (Bug 14298: AutoSelfCheckID user should only be able to access SCO)\n";
     SetVersion($DBversion);
 }
 
-$DBversion = "3.20.02.000";
+$DBversion = "3.21.00.028";
 if ( CheckVersion($DBversion) ) {
-    print "Upgrade to $DBversion done (Koha 3.20.2)\n";
+    $dbh->do(q{
+        ALTER TABLE uploaded_files
+            ADD COLUMN public tinyint,
+            ADD COLUMN permanent tinyint
+    });
+    $dbh->do(q{
+        UPDATE uploaded_files SET public=1, permanent=1
+    });
+    $dbh->do(q{
+        ALTER TABLE uploaded_files
+            CHANGE COLUMN categorycode uploadcategorycode tinytext
+    });
+    print "Upgrade to $DBversion done (Bug 14321: Merge UploadedFile and UploadedFiles into Koha::Upload)\n";
     SetVersion($DBversion);
 }
 
-$DBversion = "3.20.03.000";
+$DBversion = "3.21.00.029";
 if ( CheckVersion($DBversion) ) {
-    print "Upgrade to $DBversion done (Koha 3.20.3)\n";
+    $dbh->do(q{
+        ALTER IGNORE TABLE discharges
+            ADD COLUMN discharge_id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST
+    });
+    print "Upgrade to $DBversion done (Bug 14368: Add discharges history)\n";
     SetVersion($DBversion);
 }
 
+$DBversion = "3.21.00.030";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE marc_subfield_structure
+        SET value_builder='marc21_leader.pl'
+        WHERE value_builder='marc21_leader_book.pl'
+    });
+    $dbh->do(q{
+        UPDATE marc_subfield_structure
+        SET value_builder='marc21_leader.pl'
+        WHERE value_builder='marc21_leader_computerfile.pl'
+    });
+    $dbh->do(q{
+        UPDATE marc_subfield_structure
+        SET value_builder='marc21_leader.pl'
+        WHERE value_builder='marc21_leader_video.pl'
+    });
+    print "Upgrade to $DBversion done (Bug 14201: Remove unused code or template from some MARC21 leader plugins )\n";
+    SetVersion($DBversion);
+}
 
+$DBversion = "3.21.00.031";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES
+            ('SMSSendPassword', '', '', 'Password used to send SMS messages', 'free'),
+            ('SMSSendUsername', '', '', 'Username/Login used to send SMS messages', 'free')
+    });
+    print "Upgrade to $DBversion done (Bug 14820: SMSSendUsername and SMSSendPassword are not listed in the system preferences)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.032";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        CREATE TABLE additional_fields (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            tablename varchar(255) NOT NULL DEFAULT '',
+            name varchar(255) NOT NULL DEFAULT '',
+            authorised_value_category varchar(16) NOT NULL DEFAULT '',
+            marcfield varchar(16) NOT NULL DEFAULT '',
+            searchable tinyint(1) NOT NULL DEFAULT '0',
+            PRIMARY KEY (id),
+            UNIQUE KEY fields_uniq (tablename,name)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    });
+    $dbh->do(q{
+        CREATE TABLE additional_field_values (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            field_id int(11) NOT NULL,
+            record_id int(11) NOT NULL,
+            value varchar(255) NOT NULL DEFAULT '',
+            PRIMARY KEY (id),
+            UNIQUE KEY field_record (field_id,record_id),
+            CONSTRAINT afv_fk FOREIGN KEY (field_id) REFERENCES additional_fields (id) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    });
+    print "Upgrade to $DBversion done (Bug 10855: Additional fields for subscriptions)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.033";
+if ( CheckVersion($DBversion) ) {
+
+    my $done = 0;
+    my $count_ethnicity = $dbh->selectrow_arrayref(q|
+        SELECT COUNT(*) FROM ethnicity
+    |);
+    my $count_borrower_modifications = $dbh->selectrow_arrayref(q|
+        SELECT COUNT(*)
+        FROM borrower_modifications
+        WHERE ethnicity IS NOT NULL
+            OR ethnotes IS NOT NULL
+    |);
+    my $count_borrowers = $dbh->selectrow_arrayref(q|
+        SELECT COUNT(*)
+        FROM borrowers
+        WHERE ethnicity IS NOT NULL
+            OR ethnotes IS NOT NULL
+    |);
+    # We don't care about the ethnicity of the deleted borrowers, right?
+    if ( $count_ethnicity->[0] == 0
+            and $count_borrower_modifications->[0] == 0
+            and $count_borrowers->[0] == 0
+    ) {
+        $dbh->do(q|
+            DROP TABLE ethnicity
+        |);
+        $dbh->do(q|
+            ALTER TABLE borrower_modifications
+            DROP COLUMN ethnicity,
+            DROP COLUMN ethnotes
+        |);
+        $dbh->do(q|
+            ALTER TABLE borrowers
+            DROP COLUMN ethnicity,
+            DROP COLUMN ethnotes
+        |);
+        $dbh->do(q|
+            ALTER TABLE deletedborrowers
+            DROP COLUMN ethnicity,
+            DROP COLUMN ethnotes
+        |);
+        $done = 1;
+    }
+    if ( $done ) {
+        print "Upgrade to $DBversion done (Bug 10020: Drop table ethnicity and columns ethnicity and ethnotes)\n";
+    }
+    else {
+        print "Upgrade to $DBversion done (Bug 10020: This database contains data related to 'ethnicity'. No change will be done on the DB structure but note that the Koha codebase does not use it)\n";
+    }
+
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.034";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES('MembershipExpiryDaysNotice',NULL,'Send an account expiration notice that a patron''s card is about to expire after',NULL,'Integer')
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO letter (module, code, branchcode, name, title, content, message_transport_type)
+        VALUES('members','MEMBERSHIP_EXPIRY','','Account expiration','Account expiration','Dear <<borrowers.title>> <<borrowers.firstname>> <<borrowers.surname>>,\r\n\r\nYour library card will expire soon, on:\r\n\r\n<<borrowers.dateexpiry>>\r\n\r\nThank you,\r\n\r\nLibrarian\r\n\r\n<<branches.branchname>>', 'email')
+    });
+    print "Upgrade to $DBversion done (Bug 6810: Send membership expiry reminder notices)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.035";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        ALTER TABLE branch_borrower_circ_rules ADD COLUMN maxonsiteissueqty int(4) DEFAULT NULL AFTER maxissueqty;
+    |);
+    $dbh->do(q|
+        UPDATE branch_borrower_circ_rules SET maxonsiteissueqty = maxissueqty;
+    |);
+    $dbh->do(q|
+        ALTER TABLE default_borrower_circ_rules ADD COLUMN maxonsiteissueqty int(4) DEFAULT NULL AFTER maxissueqty;
+    |);
+    $dbh->do(q|
+        UPDATE default_borrower_circ_rules SET maxonsiteissueqty = maxissueqty;
+    |);
+    $dbh->do(q|
+        ALTER TABLE default_branch_circ_rules ADD COLUMN maxonsiteissueqty int(4) DEFAULT NULL AFTER maxissueqty;
+    |);
+    $dbh->do(q|
+        UPDATE default_branch_circ_rules SET maxonsiteissueqty = maxissueqty;
+    |);
+    $dbh->do(q|
+        ALTER TABLE default_circ_rules ADD COLUMN maxonsiteissueqty int(4) DEFAULT NULL AFTER maxissueqty;
+    |);
+    $dbh->do(q|
+        UPDATE default_circ_rules SET maxonsiteissueqty = maxissueqty;
+    |);
+    $dbh->do(q|
+        ALTER TABLE issuingrules ADD COLUMN maxonsiteissueqty int(4) DEFAULT NULL AFTER maxissueqty;
+    |);
+    $dbh->do(q|
+        UPDATE issuingrules SET maxonsiteissueqty = maxissueqty;
+    |);
+    $dbh->do(q|
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('ConsiderOnSiteCheckoutsAsNormalCheckouts','1',NULL,'Consider on-site checkouts as normal checkouts','YesNo');
+    |);
+
+    print "Upgrade to $DBversion done (Bug 14045: Add DB fields maxonsiteissueqty and pref ConsiderOnSiteCheckoutsAsNormalCheckouts)\n";
+    SetVersion ($DBversion);
+}
+
+$DBversion = "3.21.00.036";
+if ( CheckVersion($DBversion) ) {
+   $dbh->do(q{
+        ALTER TABLE authorised_values_branches
+        DROP FOREIGN KEY authorised_values_branches_ibfk_1,
+        DROP FOREIGN KEY authorised_values_branches_ibfk_2
+    });
+    $dbh->do(q{
+        ALTER TABLE authorised_values_branches
+        MODIFY av_id INT( 11 ) NOT NULL,
+        MODIFY branchcode VARCHAR( 10 ) NOT NULL,
+        ADD FOREIGN KEY (`av_id`) REFERENCES `authorised_values` (`id`) ON DELETE CASCADE,
+        ADD FOREIGN KEY (`branchcode`) REFERENCES `branches` (`branchcode`) ON DELETE CASCADE
+   });
+   print "Upgrade to $DBversion done (Bug 10363: There is no package for authorised values)\n";
+   SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.037";
+if ( CheckVersion($DBversion) ) {
+   $dbh->do(q{
+       INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+       VALUES ('OverduesBlockRenewing','allow','If any of a patron checked out documents is late, should renewal be allowed, blocked only on overdue items or blocked on whatever checked out document','allow|blockitem|block','Choice')
+   });
+   $dbh->do(q{
+       INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+       VALUES ('RestrictionBlockRenewing','0','If patron is restricted, should renewal be allowed or blocked',NULL,'YesNo')
+    });
+   print "Upgrade to $DBversion done (Bug 8236: Prevent renewing if overdue or restriction)\n";
+   SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.038";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+        VALUES ('BatchCheckouts','0','','Enable or disable batch checkouts','YesNo')
+    |);
+    $dbh->do(q|
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+        VALUES ('BatchCheckoutsValidCategories','',NULL,'Patron categories allowed to checkout in a batch','Free')
+    |);
+    print "Upgrade to $DBversion done (Bug 11759: Add the batch checkout feature)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.039";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        ALTER TABLE creator_layouts ADD COLUMN oblique_title INT(1) NULL DEFAULT 1 AFTER guidebox
+    |);
+    print "Upgrade to $DBversion done (Bug 12194: Add column oblique_title to layouts)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.040";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE itemtypes
+            ADD hideinopac TINYINT(1) NOT NULL DEFAULT 0
+              AFTER sip_media_type,
+            ADD searchcategory VARCHAR(80) DEFAULT NULL
+              AFTER hideinopac;
+    });
+    print "Upgrade to $DBversion done (Bug 10937: Option to hide and group itemtypes from advanced search)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.041";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        ALTER TABLE issuingrules
+            ADD chargeperiod_charge_at BOOLEAN NOT NULL DEFAULT  '0' AFTER chargeperiod
+    |);
+    print "Upgrade to $DBversion done (Bug 13590: Add ability to charge fines at start of charge period)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.042";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        ALTER TABLE items_search_fields
+            MODIFY COLUMN authorised_values_category VARCHAR(32) DEFAULT NULL
+    |);
+    print "Upgrade to $DBversion done (Bug 15069: items_search_fields.authorised_values_category is still a varchar(32))\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.043";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+        VALUES ('EnableAdvancedCatalogingEditor','0','','Enable the Rancor advanced cataloging editor','YesNo')
+    |);
+    print "Upgrade to $DBversion done (Bug 11559: Professional cataloger's interface)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.044";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        CREATE TABLE localization (
+            localization_id int(11) NOT NULL AUTO_INCREMENT,
+            entity varchar(16) COLLATE utf8_unicode_ci NOT NULL,
+            code varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+            lang varchar(25) COLLATE utf8_unicode_ci NOT NULL,
+            translation text COLLATE utf8_unicode_ci,
+            PRIMARY KEY (localization_id),
+            UNIQUE KEY entity_code_lang (entity,code,lang)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    |);
+    print "Upgrade to $DBversion done (Bug 14100: Generic solution for language overlay)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.045";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        ALTER TABLE opac_news
+            ADD borrowernumber int(11) default NULL
+                AFTER number
+    |);
+    $dbh->do(q|
+        ALTER TABLE opac_news
+            ADD CONSTRAINT borrowernumber_fk
+                FOREIGN KEY (borrowernumber)
+                REFERENCES borrowers (borrowernumber)
+                ON DELETE SET NULL ON UPDATE CASCADE
+    |);
+    print "Upgrade to $DBversion done (Bug 14246: (newsauthor) Add borrowernumber to koha_news)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.046";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+        VALUES ('NewsAuthorDisplay','none','none|opac|staff|both','Display the author name for news items.','Choice')
+    });
+    print "Upgrade to $DBversion done (Bug 14247: (newsauthor) System preference for news author display)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.047";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('IndependentBranchesPatronModifications','0','Show only modification request for the logged in branch','','YesNo')
+    });
+    print "Upgrade to $DBversion done (Bug 10904: Limit patron update request management by branch)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '3.21.00.048';
+if ( CheckVersion($DBversion) ) {
+    my $create_table_issues = @{ $dbh->selectall_arrayref(q|SHOW CREATE TABLE issues|) }[0]->[1];
+    if ($create_table_issues !~ m|UNIQUE KEY.*itemnumber| ) {
+        $dbh->do(q|ALTER TABLE issues ADD CONSTRAINT UNIQUE KEY (itemnumber)|);
+    }
+    print "Upgrade to $DBversion done (Bug 14978: Make sure issues.itemnumber is a unique key)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.049";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{UPDATE systempreferences SET variable = 'AudioAlerts' WHERE variable = 'soundon'});
+
+    $dbh->do(q{
+        CREATE TABLE audio_alerts (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            precedence smallint(5) unsigned NOT NULL,
+            selector varchar(255) NOT NULL,
+            sound varchar(255) NOT NULL,
+            PRIMARY KEY (id),
+            KEY precedence (precedence)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+
+    $dbh->do(q{
+        INSERT IGNORE INTO audio_alerts VALUES
+        (1, 1, '.audio-alert-action', 'opening.ogg'),
+        (2, 2, '.audio-alert-warning', 'critical.ogg'),
+        (3, 3, '.audio-alert-success', 'beep.ogg');
+    });
+
+    print "Upgrade to $DBversion done (Bug 11431: Add additional sound options for warnings)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.050";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        INSERT INTO letter ( module, code, branchcode, name, is_html, title, content, message_transport_type )
+        VALUES ( 'circulation', 'OVERDUES_SLIP', '', 'Overdues Slip', '0', 'OVERDUES_SLIP', 'The following item(s) is/are currently overdue:
+
+<item>"<<biblio.title>>" by <<biblio.author>>, <<items.itemcallnumber>>, Barcode: <<items.barcode>> Fine: <<items.fine>></item>
+', 'print' )
+    });
+    print "Upgrade to $DBversion done (Bug 12933: Add ability to print overdue slip from staff intranet)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.051";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE virtualshelves
+            CHANGE COLUMN sortfield sortfield VARCHAR(16) DEFAULT 'title'
+    });
+    $dbh->do(q{
+        UPDATE virtualshelves
+        SET sortfield='title'
+            WHERE sortfield IS NULL;
+    });
+    print "Upgrade to $DBversion done (Bug 14544: Move the list related code to Koha::Virtualshelves)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.052";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE serial
+            ADD COLUMN publisheddatetext VARCHAR(100) DEFAULT NULL AFTER publisheddate
+    });
+    print "Upgrade to $DBversion done (Bug 8296: Add descriptive (text) published date field for serials)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.053";
+if ( CheckVersion($DBversion) ) {
+    my $query = q{ SELECT * FROM itemtypes ORDER BY description };
+    my $sth   = C4::Context->dbh->prepare($query);
+    $sth->execute;
+    my $suggestion_formats = $sth->fetchall_arrayref( {} );
+
+    foreach my $format (@$suggestion_formats) {
+        $dbh->do(
+            q|
+            INSERT IGNORE INTO authorised_values (category, authorised_value, lib, lib_opac, imageurl)
+            VALUES (?, ?, ?, ?, ?)
+        |, {},
+            'SUGGEST_FORMAT', $format->{itemtype}, $format->{description}, $format->{description},
+            $format->{imageurl}
+        );
+    }
+    print "Upgrade to $DBversion done (Bug 9468: create new SUGGEST_FORMAT authorised_value list)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.054";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES('MergeReportFields','','Displayed fields for deleted MARC records after merge',NULL,'Free')
+    });
+    print "Upgrade to $DBversion done (Bug 8064: Merge several biblio records)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.055";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 3.22 beta)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.21.00.056";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        UPDATE systempreferences
+        SET
+            options='metric|us|iso|dmydot',
+            explanation='Define global date format (us mm/dd/yyyy, metric dd/mm/yyy, ISO yyyy-mm-dd, DMY separated by dots dd.mm.yyyy)'
+        WHERE variable='dateformat'
+    });
+    print "Upgrade to $DBversion done (Bug 12072: New dateformat dd.mm.yyyy)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.00.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 3.22)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (The year of the monkey will be here soon.)\n";
+    SetVersion ($DBversion);
+}
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068

@@ -16,11 +16,10 @@ package Koha::DateUtils;
 # Koha; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-use strict;
-use warnings;
-use 5.010;
+use Modern::Perl;
 use DateTime;
 use C4::Context;
+use Carp;
 
 use base 'Exporter';
 use version; our $VERSION = qv('1.0.0');
@@ -83,6 +82,16 @@ sub dt_from_string {
             /
             (?<month>\d{2})
             /
+            (?<year>\d{4})
+        |xms;
+    }
+    elsif ( $date_format eq 'dmydot' ) {
+        # dmydot format is "dd.mm.yyyy[ hh:mm:ss]"
+        $regex = qr|
+            (?<day>\d{2})
+            .
+            (?<month>\d{2})
+            .
             (?<year>\d{4})
         |xms;
     }
@@ -189,9 +198,10 @@ should be returned without the time.
 
 sub output_pref {
     my $params = shift;
-    my ( $dt, $force_pref, $force_time, $dateonly, $as_due_date );
+    my ( $dt, $str, $force_pref, $force_time, $dateonly, $as_due_date );
     if ( ref $params eq 'HASH' ) {
         $dt         = $params->{dt};
+        $str        = $params->{str};
         $force_pref = $params->{dateformat};         # if testing we want to override Context
         $force_time = $params->{timeformat};
         $dateonly   = $params->{dateonly} || 0;    # if you don't want the hours and minutes
@@ -199,6 +209,13 @@ sub output_pref {
     } else {
         $dt = $params;
     }
+
+    carp "output_pref should not be called with both dt and str parameters"
+        and return
+            if $dt and $str;
+
+    $dt = eval { dt_from_string( $str ) } if $str;
+    carp "Invalid date '$str' passed to output_pref\n" if $@;
 
     return unless defined $dt;
 
@@ -224,6 +241,12 @@ sub output_pref {
           ? $dt->strftime("%d/%m/%Y")
           : $dt->strftime("%d/%m/%Y $time");
     }
+    elsif ( $pref =~ m/^dmydot/ ) {
+        $date = $dateonly
+          ? $dt->strftime("%d.%m.%Y")
+          : $dt->strftime("%d.%m.%Y $time");
+    }
+
     elsif ( $pref =~ m/^us/ ) {
         $date = $dateonly
           ? $dt->strftime("%m/%d/%Y")

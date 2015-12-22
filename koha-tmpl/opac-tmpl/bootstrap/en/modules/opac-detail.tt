@@ -53,7 +53,7 @@
                         <div title="[% biblionumber |url %]" class="[% biblionumber %]" id="local-thumbnail-preview"></div>
                     [% END %]
                     [% IF ( OPACAmazonCoverImages ) %]
-                        [% IF ( OPACurlOpenInNewWindow ) %]
+                        [% IF ( OPACURLOpenInNewWindow ) %]
                             <a href="http://www.amazon[% AmazonTld %]/gp/reader/[% normalized_isbn %]/ref=sib_dp_pt/002-7879865-0184864#reader-link" target="_blank">
                         [% ELSE %]
                             <a href="http://www.amazon[% AmazonTld %]/dp/[% normalized_isbn %]">
@@ -88,15 +88,16 @@
                     [% IF OpenLibraryCovers %]
                         <div title="[% biblionumber |url %]" class="[% normalized_isbn %]" id="openlibrary-thumbnail-preview"></div>
                     [% END %]
-                    [% IF ( BakerTaylorEnabled && normalized_isbn ) %]
+                    [% bt_id = ( normalized_upc || normalized_isbn ) %]
+                    [% IF ( BakerTaylorEnabled && bt_id ) %]
                         [% IF BakerTaylorBookstoreURL %]
-                            [% IF ( OPACurlOpenInNewWindow ) %]
-                                <a href="https://[% BakerTaylorBookstoreURL |html %][% normalized_isbn %]" target="_blank"><img alt="See Baker &amp; Taylor" src="[% BakerTaylorImageURL |html %][% normalized_isbn %]" /></a>
+                            [% IF ( OPACURLOpenInNewWindow ) %]
+                                <a href="https://[% BakerTaylorBookstoreURL |html %][% bt_id %]" target="_blank"><img alt="See Baker &amp; Taylor" src="[% BakerTaylorImageURL |html %][% bt_id %]" /></a>
                             [% ELSE %]
-                                <a href="https://[% BakerTaylorBookstoreURL |html %][% normalized_isbn %]"><img alt="See Baker &amp; Taylor" src="[% BakerTaylorImageURL |html %][% normalized_isbn %]" /></a>
+                                <a href="https://[% BakerTaylorBookstoreURL |html %][% bt_id %]"><img alt="See Baker &amp; Taylor" src="[% BakerTaylorImageURL |html %][% bt_id %]" /></a>
                             [% END %]
                         [% ELSE %]
-                            <img alt="See Baker &amp; Taylor" src="[% BakerTaylorImageURL |html %][% normalized_isbn %]" />
+                            <img alt="See Baker &amp; Taylor" src="[% BakerTaylorImageURL |html %][% bt_id %]" />
                         [% END %]
                     [% END %]
                     </div><!-- / #bookcover -->
@@ -338,7 +339,7 @@
                                     [% FOREACH MARCurl IN MARCURLS %]
                                         <li>[% IF ( MARCurl.part ) %][% MARCurl.part %]<br />[% END %]
 
-                                        [% IF ( OPACurlOpenInNewWindow ) %]
+                                        [% IF ( OPACURLOpenInNewWindow ) %]
                                             [% IF trackclicks == 'track' || trackclicks == 'anonymous' %]
                                                 <a href="/cgi-bin/koha/tracklinks.pl?uri=[% MARCurl.MARCURL |url%]&amp;biblionumber=[% biblionumber | url %]" title="[% MARCurl.MARCURL %]" target="_blank">
                                             [% ELSE %]
@@ -389,14 +390,14 @@
                     [% END # / LibraryThingForLibrariesID %]
 
                     <!--This grabs all of the lists a bib record appears in -->
-                    [% IF ( GetShelves ) %]
+                    [% IF shelves.count %]
                         <span class="results_summary lists"><span class="label">List(s) this item appears in: </span>
-                        [% FOREACH GetShelve IN GetShelves %]
-                            <a href="/cgi-bin/koha/opac-shelves.pl?viewshelf=[% GetShelve.shelfnumber %]">[% GetShelve.shelfname %]</a>
+                        [% FOREACH s IN shelves %]
+                            <a href="/cgi-bin/koha/opac-shelves.pl?op=view&amp;shelfnumber=[% s.shelfnumber %]">[% s.shelfname %]</a>
                             [% IF ( loop.last ) %][% ELSE %]|[% END %]
                         [% END %]
                         </span>
-                    [% END # / GetShelves %]
+                    [% END %]
 
                     [% IF ( TagsShowEnabled ) %]
                         <div class="results_summary tags">
@@ -518,7 +519,7 @@
                     [% IF ( BakerTaylorContentURL ) %]
                         <span class="results_summary">
                         <span class="label">Enhanced content: </span>
-                              [% IF ( OPACurlOpenInNewWindow ) %]<a href="[% BakerTaylorContentURL |html %]" target="_blank">Content Cafe</a>[% ELSE %]<a href="[% BakerTaylorContentURL |html %]">Content Cafe</a>[% END %]
+                              [% IF ( OPACURLOpenInNewWindow ) %]<a href="[% BakerTaylorContentURL |html %]" target="_blank">Content Cafe</a>[% ELSE %]<a href="[% BakerTaylorContentURL |html %]">Content Cafe</a>[% END %]
                         </span>
                     [% END # / IF BakerTaylorContentURL %]
 
@@ -1276,9 +1277,17 @@
                         <td class="url">
                             [% IF ITEM_RESULT.uri %]
                                 [% IF trackclicks == 'track' || trackclicks == 'anonymous' %]
+                                    [% IF Koha.Preference("OPACURLOpenInNewWindow") %]
+                                    <a target="_blank" href="/cgi-bin/koha/tracklinks.pl?uri=[% ITEM_RESULT.uri | url %]&amp;biblionumber=[% biblionumber |url %]&amp;itemnumber=[% ITEM_RESULT.itemnumber | url %]" property="url"> Link to resource </a>
+                                    [% ELSE %]
                                     <a href="/cgi-bin/koha/tracklinks.pl?uri=[% ITEM_RESULT.uri | url %]&amp;biblionumber=[% biblionumber |url %]&amp;itemnumber=[% ITEM_RESULT.itemnumber | url %]" property="url"> Link to resource </a>
+                                    [% END %]
                                 [% ELSE %]
+                                    [% IF Koha.Preference("OPACURLOpenInNewWindow") %]
+                                    <a target="_blank" href="[% ITEM_RESULT.uri %]" property="url">[% ITEM_RESULT.uri %]</a>
+                                    [% ELSE %]
                                     <a href="[% ITEM_RESULT.uri %]" property="url">[% ITEM_RESULT.uri %]</a>
+                                    [% END %]
                                 [% END %]
                             [% END %]
                         </td>
@@ -1304,14 +1313,16 @@
                         <td>
                             [% IF ITEM_RESULT.course_reserves %]
                                 [% FOREACH r IN ITEM_RESULT.course_reserves %]
-                                    <p>
-                                        <a href="opac-course-details.pl?course_id=[% r.course.course_id %]">
-                                        [% r.course.course_name %]
-                                        <!--[% IF r.course.course_number %] [% r.course.course_number %] [% END %]-->
-                                        [% IF r.course.section %] [% r.course.section %] [% END %]
-                                        [% IF r.course.term %] [% AuthorisedValues.GetByCode( 'TERM', r.course.term ) %] [% END %]
-                                        </a>
-                                    </p>
+                                    [% IF r.course.enabled == 'yes' %]
+                                        <p>
+                                            <a href="opac-course-details.pl?course_id=[% r.course.course_id %]">
+                                            [% r.course.course_name %]
+                                            <!--[% IF r.course.course_number %] [% r.course.course_number %] [% END %]-->
+                                            [% IF r.course.section %] [% r.course.section %] [% END %]
+                                            [% IF r.course.term %] [% AuthorisedValues.GetByCode( 'TERM', r.course.term ) %] [% END %]
+                                            </a>
+                                        </p>
+                                    [% END %]
                                 [% END %]
                             [% END %]
                         </td>
@@ -1612,7 +1623,7 @@
         if ($.browser.msie && parseInt($.browser.version, 10) >= 8 && window.XDomainRequest) {
         // Use Microsoft XDR for IE version 8 or above
             var xdr = new XDomainRequest();
-            xdr.open("get", "http://idreambooks.com/newbooks/api.json?q="+encodeURIComponent(isbn)+"&key=8bf66516232d1b72f3e47df939653e1e");
+            xdr.open("get", "https://idreambooks.com/newbooks/api.json?q="+encodeURIComponent(isbn)+"&key=8bf66516232d1b72f3e47df939653e1e");
             xdr.onload = function() {
                 json = 'json = '+xdr.responseText; // the string now looks like..  json = { ... };
                 eval(json); // json is now a regular JSON object
@@ -1620,7 +1631,7 @@
             }
             xdr.send();
         } else {
-            $.getJSON("http://idreambooks.com/newbooks/api.json?q="+encodeURIComponent(isbn)+"&key=8bf66516232d1b72f3e47df939653e1e", function(json){
+            $.getJSON("https://idreambooks.com/newbooks/api.json?q="+encodeURIComponent(isbn)+"&key=8bf66516232d1b72f3e47df939653e1e", function(json){
                 parseIDBJSON(json);
             });
         }
@@ -1632,7 +1643,7 @@
         function parseIDBJSON( json ) {
             if(json.total_results > 0 && json.book.rating > 0){
                 var isbn = $(".isbn:last").text().split(" ")[1];
-                isbn = isbn.replace(/-/, '');
+                isbn = isbn.replace(/\W+/g, '');
 
                 [% IF ( IDreamBooksReadometer ) %]
                     $(".title").append('<a href="'+json.book.detail_link+'" id="idreambooksreadometer"><img src="https://idreambooks.com/remotereadometer/'+isbn+'.jpg" alt="'+json.book.title+_(" by ")+json.book.author+'" title="'+_("Rating based on reviews of ")+json.book.title+'"></a>');

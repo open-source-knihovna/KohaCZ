@@ -27,7 +27,6 @@ use C4::Auth;
 use C4::Biblio;
 use C4::Items;
 use C4::Output;
-use C4::VirtualShelves;
 use C4::Record;
 use C4::Ris;
 use C4::Csv;
@@ -39,8 +38,7 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user (
         template_name   => "opac-downloadcart.tt",
         query           => $query,
         type            => "opac",
-        authnotrequired => 1,
-        flagsrequired   => { borrow => 1 },
+        authnotrequired => ( C4::Context->preference("OpacPublic") ? 1 : 0 ),
     }
 );
 

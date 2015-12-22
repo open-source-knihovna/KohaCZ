@@ -35,7 +35,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user (
         query           => $query,
         type            => "opac",
         authnotrequired => ( C4::Context->preference("OpacPublic") ? 1 : 0 ),
-        flagsrequired   => { borrow => 1 },
     }
 );
 
@@ -136,4 +135,4 @@ $template->param(
     BIBLIO_RESULTS => $resultsarray,
 );
 
-output_html_with_http_headers $query, $cookie, $template->output;
+output_html_with_http_headers $query, $cookie, $template->output, undef, { force_no_caching => 1 };

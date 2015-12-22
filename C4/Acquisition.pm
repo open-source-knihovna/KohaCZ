@@ -22,7 +22,6 @@ use Modern::Perl;
 use Carp;
 use C4::Context;
 use C4::Debug;
-use C4::Dates qw(format_date format_date_in_iso);
 use C4::Suggestions;
 use C4::Biblio;
 use C4::Contract;
@@ -237,24 +236,11 @@ close a basket (becomes unmodifiable, except for receives)
 sub CloseBasket {
     my ($basketno) = @_;
     my $dbh        = C4::Context->dbh;
-    my $query = "
-        UPDATE aqbasket
-        SET    closedate=now()
-        WHERE  basketno=?
-    ";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($basketno);
+    $dbh->do('UPDATE aqbasket SET closedate=now() WHERE basketno=?', {}, $basketno );
 
-    my @orders = GetOrders($basketno);
-    foreach my $order (@orders) {
-        $query = qq{
-            UPDATE aqorders
-            SET orderstatus = 'ordered'
-            WHERE ordernumber = ?;
-        };
-        $sth = $dbh->prepare($query);
-        $sth->execute($order->{'ordernumber'});
-    }
+    $dbh->do( q{UPDATE aqorders SET orderstatus = 'ordered' WHERE basketno = ? AND orderstatus != 'complete'},
+        {}, $basketno);
+    return;
 }
 
 =head3 ReopenBasket
@@ -268,24 +254,15 @@ reopen a basket
 sub ReopenBasket {
     my ($basketno) = @_;
     my $dbh        = C4::Context->dbh;
-    my $query = "
-        UPDATE aqbasket
-        SET    closedate=NULL
-        WHERE  basketno=?
-    ";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($basketno);
+    $dbh->do( q{UPDATE aqbasket SET closedate=NULL WHERE  basketno=?}, {}, $basketno );
 
-    my @orders = GetOrders($basketno);
-    foreach my $order (@orders) {
-        $query = qq{
-            UPDATE aqorders
-            SET orderstatus = 'new'
-            WHERE ordernumber = ?;
-        };
-        $sth = $dbh->prepare($query);
-        $sth->execute($order->{'ordernumber'});
-    }
+    $dbh->do( q{
+        UPDATE aqorders
+        SET orderstatus = 'new'
+        WHERE basketno = ?
+        AND orderstatus != 'complete'
+        }, {}, $basketno);
+    return;
 }
 
 #------------------------------------------------------------#
@@ -1393,7 +1370,13 @@ sub ModReceiveOrder {
     my $order_vendornote = $params->{order_vendornote};
 
     my $dbh = C4::Context->dbh;
-    $datereceived = C4::Dates->output('iso') unless $datereceived;
+    $datereceived = output_pref(
+        {
+            dt => ( $datereceived ? dt_from_string( $datereceived ) : dt_from_string ),
+            dateformat => 'iso',
+            dateonly => 1,
+        }
+    );
     my $suggestionid = GetSuggestionFromBiblionumber( $biblionumber );
     if ($suggestionid) {
         ModSuggestion( {suggestionid=>$suggestionid,
@@ -1692,7 +1675,7 @@ sub SearchOrders {
             LEFT JOIN biblioitems ON biblioitems.biblionumber=biblio.biblionumber
     };
 
-    # If we search on ordernumber, we retrieve the transfered order if a transfer has been done.
+    # If we search on ordernumber, we retrieve the transferred order if a transfer has been done.
     $query .= q{
             LEFT JOIN aqorders_transfers ON aqorders_transfers.ordernumber_to = aqorders.ordernumber
     } if $ordernumber;
@@ -1838,11 +1821,11 @@ sub DelOrder {
     my $newordernumber = TransferOrder($ordernumber, $basketno);
 
 Transfer an order line to a basket.
-Mark $ordernumber as cancelled with an internal note 'Cancelled and transfered
+Mark $ordernumber as cancelled with an internal note 'Cancelled and transferred
 to BOOKSELLER on DATE' and create new order with internal note
-'Transfered from BOOKSELLER on DATE'.
+'Transferred from BOOKSELLER on DATE'.
 Move all attached items to the new order.
-Received orders cannot be transfered.
+Received orders cannot be transferred.
 Return the ordernumber of created order.
 
 =cut
@@ -2719,7 +2702,7 @@ sub CloseInvoice {
 
 Reopen an invoice
 
-Equivalent to ModInvoice(invoiceid => $invoiceid, closedate => C4::Dates->new()->output('iso'))
+Equivalent to ModInvoice(invoiceid => $invoiceid, closedate => output_pref({ dt=>dt_from_string, dateonly=>1, otputpref=>'iso' }))
 
 =cut
 

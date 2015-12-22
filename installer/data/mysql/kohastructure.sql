@@ -245,8 +245,6 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `guarantorid` int(11) default NULL, -- borrowernumber used for children or professionals to link them to guarentors or organizations
   `borrowernotes` mediumtext, -- a note on the patron/borrower's account that is only visible in the staff client
   `relationship` varchar(100) default NULL, -- used for children to include the relationship to their guarentor
-  `ethnicity` varchar(50) default NULL, -- unused in Koha
-  `ethnotes` varchar(255) default NULL, -- unused in Koha
   `sex` varchar(1) default NULL, -- patron/borrower's gender
   `password` varchar(60) default NULL, -- patron/borrower's encrypted password
   `flags` int(11) default NULL, -- will include a number associated with the staff member's permissions
@@ -623,7 +621,9 @@ CREATE TABLE `course_reserves` (
 -- Constraints for table `course_reserves`
 --
 ALTER TABLE `course_reserves`
-  ADD CONSTRAINT `course_reserves_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`);
+  ADD CONSTRAINT `course_reserves_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`),
+  ADD CONSTRAINT `course_reserves_ibfk_2` FOREIGN KEY (`ci_id`) REFERENCES `course_items` (`ci_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 
 --
 -- Table structure for table `branch_borrower_circ_rules`
@@ -634,6 +634,7 @@ CREATE TABLE `branch_borrower_circ_rules` ( -- includes default circulation rule
   `branchcode` VARCHAR(10) NOT NULL, -- the branch this rule applies to (branches.branchcode)
   `categorycode` VARCHAR(10) NOT NULL, -- the patron category this rule applies to (categories.categorycode)
   `maxissueqty` int(4) default NULL, -- the maximum number of checkouts this patron category can have at this branch
+  `maxonsiteissueqty` int(4) default NULL, -- the maximum number of on-site checkouts this patron category can have at this branch
   PRIMARY KEY (`categorycode`, `branchcode`),
   CONSTRAINT `branch_borrower_circ_rules_ibfk_1` FOREIGN KEY (`categorycode`) REFERENCES `categories` (`categorycode`)
     ON DELETE CASCADE ON UPDATE CASCADE,
@@ -649,6 +650,7 @@ DROP TABLE IF EXISTS `default_borrower_circ_rules`;
 CREATE TABLE `default_borrower_circ_rules` ( -- default checkout rules found under "Default checkout, hold and return policy"
   `categorycode` VARCHAR(10) NOT NULL, -- patron category this rul
   `maxissueqty` int(4) default NULL,
+  `maxonsiteissueqty` int(4) default NULL,
   PRIMARY KEY (`categorycode`),
   CONSTRAINT `borrower_borrower_circ_rules_ibfk_1` FOREIGN KEY (`categorycode`) REFERENCES `categories` (`categorycode`)
     ON DELETE CASCADE ON UPDATE CASCADE
@@ -662,6 +664,7 @@ DROP TABLE IF EXISTS `default_branch_circ_rules`;
 CREATE TABLE `default_branch_circ_rules` (
   `branchcode` VARCHAR(10) NOT NULL,
   `maxissueqty` int(4) default NULL,
+  `maxonsiteissueqty` int(4) default NULL,
   `holdallowed` tinyint(1) default NULL,
   `returnbranch` varchar(15) default NULL,
   PRIMARY KEY (`branchcode`),
@@ -690,6 +693,7 @@ DROP TABLE IF EXISTS `default_circ_rules`;
 CREATE TABLE `default_circ_rules` (
     `singleton` enum('singleton') NOT NULL default 'singleton',
     `maxissueqty` int(4) default NULL,
+    `maxonsiteissueqty` int(4) default NULL,
     `holdallowed` int(1) default NULL,
     `returnbranch` varchar(15) default NULL,
     PRIMARY KEY (`singleton`)
@@ -875,8 +879,6 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `guarantorid` int(11) default NULL, -- borrowernumber used for children or professionals to link them to guarentors or organizations
   `borrowernotes` mediumtext, -- a note on the patron/borrower's account that is only visible in the staff client
   `relationship` varchar(100) default NULL, -- used for children to include the relationship to their guarentor
-  `ethnicity` varchar(50) default NULL, -- unused in Koha
-  `ethnotes` varchar(255) default NULL, -- unused in Koha
   `sex` varchar(1) default NULL, -- patron/borrower's gender
   `password` varchar(30) default NULL, -- patron/borrower's encrypted password
   `flags` int(11) default NULL, -- will include a number associated with the staff member's permissions
@@ -957,17 +959,6 @@ CREATE TABLE `deleteditems` (
   KEY `delhomebranch` (`homebranch`),
   KEY `delholdingbranch` (`holdingbranch`),
   KEY `itype_idx` (`itype`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Table structure for table `ethnicity`
---
-
-DROP TABLE IF EXISTS `ethnicity`;
-CREATE TABLE `ethnicity` (
-  `code` varchar(10) NOT NULL default '',
-  `name` varchar(255) default NULL,
-  PRIMARY KEY  (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -1157,6 +1148,7 @@ CREATE TABLE `issues` ( -- information related to check outs or issues
   `issuedate` datetime default NULL, -- date the item was checked out or issued
   `onsite_checkout` int(1) NOT NULL default 0, -- in house use flag
   PRIMARY KEY (`issue_id`),
+  UNIQUE KEY `itemnumber` (`itemnumber`),
   KEY `issuesborridx` (`borrowernumber`),
   KEY `itemnumber_idx` (`itemnumber`),
   KEY `branchcode_idx` (`branchcode`),
@@ -1181,9 +1173,11 @@ CREATE TABLE `issuingrules` ( -- circulation and fine rules
   `maxsuspensiondays` int(11) default NULL, -- max suspension days
   `firstremind` int(11) default NULL, -- fine grace period
   `chargeperiod` int(11) default NULL, -- how often the fine amount is charged
+  `chargeperiod_charge_at` tinyint(1) NOT NULL DEFAULT '0', -- Should fine be given at the start ( 1 ) or the end ( 0 ) of the period
   `accountsent` int(11) default NULL, -- not used? always NULL
   `chargename` varchar(100) default NULL, -- not used? always NULL
   `maxissueqty` int(4) default NULL, -- total number of checkouts allowed
+  `maxonsiteissueqty` int(4) default NULL, -- total number of on-site checkouts allowed
   `issuelength` int(4) default NULL, -- length of checkout in the unit set in issuingrules.lengthunit
   `lengthunit` varchar(10) default 'days', -- unit of checkout length (days, hours)
   `hardduedate` date default NULL, -- hard due date
@@ -1282,6 +1276,8 @@ CREATE TABLE `itemtypes` ( -- defines the item types
   checkinmsg VARCHAR(255), -- message that is displayed when an item with the given item type is checked in
   checkinmsgtype CHAR(16) DEFAULT 'message' NOT NULL, -- type (CSS class) for the checkinmsg, can be "alert" or "message"
   sip_media_type VARCHAR(3) DEFAULT NULL, -- SIP2 protocol media type for this itemtype
+  hideinopac tinyint(1) NOT NULL DEFAULT 0, -- Hide the item type from the search options in OPAC
+  searchcategory varchar(80) default NULL, -- Group this item type with others with the same value on OPAC search options
   PRIMARY KEY  (`itemtype`),
   UNIQUE KEY `itemtype` (`itemtype`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1339,6 +1335,7 @@ CREATE TABLE `creator_layouts` (
   `printing_type` char(32) NOT NULL DEFAULT 'BAR',
   `layout_name` char(20) NOT NULL DEFAULT 'DEFAULT',
   `guidebox` int(1) DEFAULT '0',
+  `oblique_title` int(1) DEFAULT '1',
   `font` char(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'TR',
   `font_size` int(4) NOT NULL DEFAULT '10',
   `units` char(20) NOT NULL DEFAULT 'POINT',
@@ -1610,7 +1607,6 @@ CREATE TABLE `oai_sets_biblios` (
   `biblionumber` int(11) NOT NULL,
   `set_id` int(11) NOT NULL,
   PRIMARY KEY (`biblionumber`, `set_id`),
-  CONSTRAINT `oai_sets_biblios_ibfk_1` FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `oai_sets_biblios_ibfk_2` FOREIGN KEY (`set_id`) REFERENCES `oai_sets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -1653,7 +1649,6 @@ CREATE TABLE `old_reserves` ( -- this table holds all holds/reserves that have b
   `borrowernumber` int(11) default NULL, -- foreign key from the borrowers table defining which patron this hold is for
   `reservedate` date default NULL, -- the date the hold was places
   `biblionumber` int(11) default NULL, -- foreign key from the biblio table defining which bib record this hold is on
-  `constrainttype` varchar(1) default NULL,
   `branchcode` varchar(10) default NULL, -- foreign key from the branches table defining which branch the patron wishes to pick this hold up at
   `notificationdate` date default NULL, -- currently unused
   `reminderdate` date default NULL, -- currently unused
@@ -1695,7 +1690,9 @@ CREATE TABLE `opac_news` ( -- data from the news tool
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP, -- pulibcation date and time
   `expirationdate` date default NULL, -- date the article is set to expire or no longer be visible
   `number` int(11) default NULL, -- the order in which this article appears in that specific location
+  `borrowernumber` int(11) default NULL, -- The user who created the news article
   PRIMARY KEY  (`idnew`),
+  CONSTRAINT `borrowernumber_fk` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT opac_news_branchcode_ibfk FOREIGN KEY (branchcode) REFERENCES branches (branchcode)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1818,19 +1815,6 @@ CREATE TABLE reports_dictionary ( -- definitions (or snippets of SQL) stored for
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Table structure for table `reserveconstraints`
---
-
-DROP TABLE IF EXISTS `reserveconstraints`;
-CREATE TABLE `reserveconstraints` (
-  `borrowernumber` int(11) NOT NULL default 0,
-  `reservedate` date default NULL,
-  `biblionumber` int(11) NOT NULL default 0,
-  `biblioitemnumber` int(11) default NULL,
-  `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
 -- Table structure for table `reserves`
 --
 
@@ -1840,7 +1824,6 @@ CREATE TABLE `reserves` ( -- information related to holds/reserves in Koha
   `borrowernumber` int(11) NOT NULL default 0, -- foreign key from the borrowers table defining which patron this hold is for
   `reservedate` date default NULL, -- the date the hold was places
   `biblionumber` int(11) NOT NULL default 0, -- foreign key from the biblio table defining which bib record this hold is on
-  `constrainttype` varchar(1) default NULL,
   `branchcode` varchar(10) default NULL, -- foreign key from the branches table defining which branch the patron wishes to pick this hold up at
   `notificationdate` date default NULL, -- currently unused
   `reminderdate` date default NULL, -- currently unused
@@ -1958,6 +1941,7 @@ CREATE TABLE `serial` ( -- issues related to subscriptions
   `planneddate` date default NULL, -- date expected
   `notes` text, -- notes
   `publisheddate` date default NULL, -- date published
+  publisheddatetext varchar(100) default NULL, -- date published (descriptive)
   `claimdate` date default NULL, -- date claimed
   claims_count int(11) default 0, -- number of claims made related to this issue
   `routingnotes` text, -- notes from the routing list
@@ -2314,14 +2298,14 @@ CREATE TABLE `virtualshelves` ( -- information about lists (or virtual shelves)
   `shelfname` varchar(255) default NULL, -- name of the list
   `owner` int default NULL, -- foreign key linking to the borrowers table (using borrowernumber) for the creator of this list (changed from varchar(80) to int)
   `category` varchar(1) default NULL, -- type of list (private [1], public [2])
-  `sortfield` varchar(16) default NULL, -- the field this list is sorted on
+  `sortfield` varchar(16) default 'title', -- the field this list is sorted on
   `lastmodified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- date and time the list was last modified
   `created_on` TIMESTAMP NOT NULL, -- creation time
   `allow_add` tinyint(1) default 0, -- permission for adding entries to list
   `allow_delete_own` tinyint(1) default 1, -- permission for deleting entries frm list that you added yourself
   `allow_delete_other` tinyint(1) default 0, -- permission for deleting entries from list that another person added
   PRIMARY KEY  (`shelfnumber`),
-  CONSTRAINT `virtualshelves_ibfk_1` FOREIGN KEY (`owner`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE SET NULL -- no cascaded delete, please see HandleDelBorrower in VirtualShelves.pm
+  CONSTRAINT `virtualshelves_ibfk_1` FOREIGN KEY (`owner`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE SET NULL -- no cascaded delete, please see HandleDelBorrower in Members.pm
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -2339,7 +2323,7 @@ CREATE TABLE `virtualshelfcontents` ( -- information about the titles in a list 
   KEY `biblionumber` (`biblionumber`),
   CONSTRAINT `virtualshelfcontents_ibfk_1` FOREIGN KEY (`shelfnumber`) REFERENCES `virtualshelves` (`shelfnumber`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `shelfcontents_ibfk_2` FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `shelfcontents_ibfk_3` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE SET NULL -- no cascaded delete, please see HandleDelBorrower in VirtualShelves.pm
+  CONSTRAINT `shelfcontents_ibfk_3` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE SET NULL -- no cascaded delete, please see HandleDelBorrower in Members.pm
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -2354,7 +2338,7 @@ CREATE TABLE `virtualshelfshares` ( -- shared private lists
   `invitekey` varchar(10), -- temporary string used in accepting the invitation to access thist list; not-empty means that the invitation has not been accepted yet
   `sharedate` datetime,  -- date of invitation or acceptance of invitation
   CONSTRAINT `virtualshelfshares_ibfk_1` FOREIGN KEY (`shelfnumber`) REFERENCES `virtualshelves` (`shelfnumber`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `virtualshelfshares_ibfk_2` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE SET NULL -- no cascaded delete, please see HandleDelBorrower in VirtualShelves.pm
+  CONSTRAINT `virtualshelfshares_ibfk_2` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE SET NULL -- no cascaded delete, please see HandleDelBorrower in Members.pm
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -2568,7 +2552,7 @@ CREATE TABLE `message_queue` (
   `to_address` mediumtext,
   `from_address` mediumtext,
   `content_type` text,
-  KEY `message_id` (`message_id`),
+  PRIMARY KEY `message_id` (`message_id`),
   KEY `borrowernumber` (`borrowernumber`),
   KEY `message_transport_type` (`message_transport_type`),
   CONSTRAINT `messageq_ibfk_1` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -2854,6 +2838,7 @@ CREATE TABLE `aqbasket` ( -- stores data about baskets in acquisitions
   KEY `booksellerid` (`booksellerid`),
   KEY `basketgroupid` (`basketgroupid`),
   KEY `contractnumber` (`contractnumber`),
+  KEY `authorisedby` (`authorisedby`),
   CONSTRAINT `aqbasket_ibfk_1` FOREIGN KEY (`booksellerid`) REFERENCES `aqbooksellers` (`id`) ON UPDATE CASCADE,
   CONSTRAINT `aqbasket_ibfk_2` FOREIGN KEY (`contractnumber`) REFERENCES `aqcontract` (`contractnumber`),
   CONSTRAINT `aqbasket_ibfk_3` FOREIGN KEY (`basketgroupid`) REFERENCES `aqbasketgroups` (`id`) ON UPDATE CASCADE,
@@ -2908,6 +2893,7 @@ CREATE TABLE `aqbooksellers` ( -- information about the vendors listed in acquis
   PRIMARY KEY  (`id`),
   KEY `listprice` (`listprice`),
   KEY `invoiceprice` (`invoiceprice`),
+  KEY `name` (`name`(255)),
   CONSTRAINT `aqbooksellers_ibfk_1` FOREIGN KEY (`listprice`) REFERENCES `currency` (`currency`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `aqbooksellers_ibfk_2` FOREIGN KEY (`invoiceprice`) REFERENCES `currency` (`currency`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -2933,7 +2919,12 @@ CREATE TABLE `aqbudgets` ( -- information related to Funds
   `sort2_authcat` varchar(80) default NULL, -- second statistical category for this fund
   `budget_owner_id` int(11) default NULL, -- borrowernumber of the person who owns this fund (borrowers.borrowernumber)
   `budget_permission` int(1) default '0', -- level of permission for this fund (used only by the owner, only by the library, or anyone)
-  PRIMARY KEY  (`budget_id`)
+  PRIMARY KEY  (`budget_id`),
+  KEY `budget_parent_id` (`budget_parent_id`),
+  KEY `budget_code` (`budget_code`),
+  KEY `budget_branchcode` (`budget_branchcode`),
+  KEY `budget_period_id` (`budget_period_id`),
+  KEY `budget_owner_id` (`budget_owner_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -2986,6 +2977,7 @@ CREATE TABLE `aqbudgets_planning` (
   `authvalue` varchar(30) NOT NULL,
   `display` tinyint(1) DEFAULT 1,
   PRIMARY KEY  (`plan_id`),
+  KEY `budget_period_id` (`budget_period_id`),
   CONSTRAINT `aqbudgets_planning_ifbk_1` FOREIGN KEY (`budget_id`) REFERENCES `aqbudgets` (`budget_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -3075,6 +3067,8 @@ CREATE TABLE `aqorders` ( -- information related to the basket line items
   KEY `basketno` (`basketno`),
   KEY `biblionumber` (`biblionumber`),
   KEY `budget_id` (`budget_id`),
+  KEY `parent_ordernumber` (`parent_ordernumber`),
+  KEY `orderstatus` (`orderstatus`),
   CONSTRAINT `aqorders_budget_id_fk` FOREIGN KEY (`budget_id`) REFERENCES `aqbudgets` (`budget_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `aqorders_ibfk_1` FOREIGN KEY (`basketno`) REFERENCES `aqbasket` (`basketno`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `aqorders_ibfk_2` FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -3253,8 +3247,8 @@ CREATE TABLE categories_branches( -- association table between categories and br
 
 DROP TABLE IF EXISTS authorised_values_branches;
 CREATE TABLE authorised_values_branches( -- association table between authorised_values and branches
-    av_id INTEGER,
-    branchcode VARCHAR(10),
+    av_id INT(11) NOT NULL,
+    branchcode VARCHAR(10) NOT NULL,
     FOREIGN KEY (av_id) REFERENCES authorised_values(id) ON DELETE CASCADE,
     FOREIGN KEY (branchcode) REFERENCES branches(branchcode) ON DELETE CASCADE
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -3325,8 +3319,6 @@ CREATE TABLE IF NOT EXISTS `borrower_modifications` (
   `guarantorid` int(11) DEFAULT NULL,
   `borrowernotes` mediumtext,
   `relationship` varchar(100) DEFAULT NULL,
-  `ethnicity` varchar(50) DEFAULT NULL,
-  `ethnotes` varchar(255) DEFAULT NULL,
   `sex` varchar(1) DEFAULT NULL,
   `password` varchar(30) DEFAULT NULL,
   `flags` int(11) DEFAULT NULL,
@@ -3349,6 +3341,25 @@ CREATE TABLE IF NOT EXISTS `borrower_modifications` (
   PRIMARY KEY (`verification_token`,`borrowernumber`),
   KEY `verification_token` (`verification_token`),
   KEY `borrowernumber` (`borrowernumber`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table uploaded_files
+--
+
+DROP TABLE IF EXISTS uploaded_files;
+CREATE TABLE uploaded_files (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    hashvalue CHAR(40) NOT NULL,
+    filename TEXT NOT NULL,
+    dir TEXT NOT NULL,
+    filesize int(11),
+    dtcreated timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    uploadcategorycode tinytext,
+    owner int(11),
+    public tinyint,
+    permanent tinyint,
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -3440,7 +3451,7 @@ CREATE TABLE IF NOT EXISTS marc_modification_template_actions (
   mmta_id int(11) NOT NULL AUTO_INCREMENT,
   template_id int(11) NOT NULL,
   ordering int(3) NOT NULL,
-  action enum('delete_field','update_field','move_field','copy_field') NOT NULL,
+  action ENUM('delete_field','update_field','move_field','copy_field','copy_and_replace_field') NOT NULL,
   field_number smallint(6) NOT NULL DEFAULT '0',
   from_field varchar(3) NOT NULL,
   from_subfield varchar(1) DEFAULT NULL,
@@ -3516,11 +3527,73 @@ CREATE TABLE items_search_fields (
 
 DROP TABLE IF EXISTS discharges;
 CREATE TABLE discharges (
+  discharge_id int(11) NOT NULL AUTO_INCREMENT,
   borrower int(11) DEFAULT NULL,
   needed timestamp NULL DEFAULT NULL,
   validated timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (discharge_id),
   KEY borrower_discharges_ibfk1 (borrower),
   CONSTRAINT borrower_discharges_ibfk1 FOREIGN KEY (borrower) REFERENCES borrowers (borrowernumber) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table additional_fields
+-- This table add the ability to add new fields for a record
+--
+
+CREATE TABLE `additional_fields` (
+  `id` int(11) NOT NULL AUTO_INCREMENT, -- primary key identifier
+  `tablename` varchar(255) NOT NULL DEFAULT '', -- tablename of the new field
+  `name` varchar(255) NOT NULL DEFAULT '', -- name of the field
+  `authorised_value_category` varchar(16) NOT NULL DEFAULT '', -- is an authorised value category
+  `marcfield` varchar(16) NOT NULL DEFAULT '', -- contains the marc field to copied into the record
+  `searchable` tinyint(1) NOT NULL DEFAULT '0', -- is the field searchable?
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `fields_uniq` (`tablename`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table additional_field_values
+-- This table store values for additional fields
+--
+
+CREATE TABLE `additional_field_values` (
+  `id` int(11) NOT NULL AUTO_INCREMENT, -- primary key identifier
+  `field_id` int(11) NOT NULL, -- foreign key references additional_fields(id)
+  `record_id` int(11) NOT NULL, -- record_id
+  `value` varchar(255) NOT NULL DEFAULT '', -- value for this field
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `field_record` (`field_id`,`record_id`),
+  CONSTRAINT `afv_fk` FOREIGN KEY (`field_id`) REFERENCES `additional_fields` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table 'localization'
+--
+
+DROP TABLE IF EXISTS localization;
+CREATE TABLE `localization` (
+      localization_id int(11) NOT NULL AUTO_INCREMENT,
+      entity varchar(16) COLLATE utf8_unicode_ci NOT NULL,
+      code varchar(64) COLLATE utf8_unicode_ci NOT NULL,
+      lang varchar(25) COLLATE utf8_unicode_ci NOT NULL, -- could be a foreign key
+      translation text COLLATE utf8_unicode_ci,
+      PRIMARY KEY (localization_id),
+      UNIQUE KEY `entity_code_lang` (`entity`,`code`,`lang`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table 'audio_alerts'
+--
+
+DROP TABLE IF EXISTS audio_alerts;
+CREATE TABLE audio_alerts (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  precedence smallint(5) unsigned NOT NULL,
+  selector varchar(255) NOT NULL,
+  sound varchar(255) NOT NULL,
+  PRIMARY KEY (id),
+  KEY precedence (precedence)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

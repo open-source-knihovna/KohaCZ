@@ -35,14 +35,13 @@ use C4::Members;
 use C4::Members::Attributes;
 use C4::Members::AttributeTypes;
 use C4::Koha;
-use C4::Dates qw/format_date format_date_in_iso/;
-use C4::Input;
 use C4::Log;
 use C4::Letters;
 use C4::Branch; # GetBranches
 use C4::Form::MessagingPreferences;
 use Koha::Borrower::Debarments;
 use Koha::DateUtils;
+use Email::Valid;
 use Module::Load;
 if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preference('NorwegianPatronDBEnable') == 1 ) {
     load Koha::NorwegianPatronDB, qw( NLGetSyncDataFromBorrowernumber );
@@ -90,7 +89,6 @@ my $guarantorinfo = $input->param('guarantorinfo');
 my $step          = $input->param('step') || 0;
 my @errors;
 my $default_city;
-# NOTE: Alert for ethnicity and ethnotes fields, they are invalid in all borrowers form
 my $borrower_data;
 my $NoUpdateLogin;
 my $userenv = C4::Context->userenv;
@@ -168,19 +166,16 @@ if ( $op eq 'insert' || $op eq 'modify' || $op eq 'save' || $op eq 'duplicate' )
         }
     }
 
-    my $dateobject = C4::Dates->new();
-    my $syspref = $dateobject->regexp();		# same syspref format for all 3 dates
-    my $iso     = $dateobject->regexp('iso');	#
     foreach (qw(dateenrolled dateexpiry dateofbirth)) {
         next unless exists $newdata{$_};
         my $userdate = $newdata{$_} or next;
-        if ($userdate =~ /$syspref/) {
-            $newdata{$_} = format_date_in_iso($userdate);	# if they match syspref format, then convert to ISO
-        } elsif ($userdate =~ /$iso/) {
-            warn "Date $_ ($userdate) is already in ISO format";
+
+        my $formatteddate = eval { output_pref({ dt => dt_from_string( $userdate ), dateformat => 'iso', dateonly => 1 } ); };
+        if ( $formatteddate ) {
+            $newdata{$_} = $formatteddate;
         } else {
             ($userdate eq '0000-00-00') and warn "Data error: $_ is '0000-00-00'";
-            $template->param( "ERROR_$_" => 1 );	# else ERROR!
+            $template->param( "ERROR_$_" => 1 );
             push(@errors,"ERROR_$_");
         }
     }
@@ -238,8 +233,9 @@ if ( ( $op eq 'insert' ) and !$nodouble ) {
 }
 
   #recover all data from guarantor address phone ,fax... 
-if ( $guarantorid and ( $category_type eq 'C' || $category_type eq 'P' )) {
+if ( $guarantorid ) {
     if (my $guarantordata=GetMember(borrowernumber => $guarantorid)) {
+        $category_type = $guarantordata->{categorycode} eq 'I' ? 'P' : 'C';
         $guarantorinfo=$guarantordata->{'surname'}." , ".$guarantordata->{'firstname'};
         $newdata{'contactfirstname'}= $guarantordata->{'firstname'};
         $newdata{'contactname'}     = $guarantordata->{'surname'};
@@ -261,8 +257,9 @@ $newdata{'city'}    = $input->param('city')    if defined($input->param('city'))
 $newdata{'zipcode'} = $input->param('zipcode') if defined($input->param('zipcode'));
 $newdata{'country'} = $input->param('country') if defined($input->param('country'));
 
-#builds default userid
-if ( (defined $newdata{'userid'}) && ($newdata{'userid'} eq '')){
+# builds default userid
+# userid input text may be empty or missing because of syspref BorrowerUnwantedField
+if ( ( defined $newdata{'userid'} && $newdata{'userid'} eq '' ) || $check_BorrowerUnwantedField =~ /userid/ ) {
     if ( ( defined $newdata{'firstname'} ) && ( defined $newdata{'surname'} ) ) {
         # Full page edit, firstname and surname input zones are present
         $newdata{'userid'} = Generate_Userid( $borrowernumber, $newdata{'firstname'}, $newdata{'surname'} );
@@ -327,6 +324,21 @@ if ($op eq 'save' || $op eq 'insert'){
   push @errors, "ERROR_password_mismatch" if ( $password ne $password2 );
   push @errors, "ERROR_short_password" if( $password && $minpw && $password ne '****' && (length($password) < $minpw) );
 
+  # Validate emails
+  my $emailprimary = $input->param('email');
+  my $emailsecondary = $input->param('emailpro');
+  my $emailalt = $input->param('B_email');
+
+  if ($emailprimary) {
+      push (@errors, "ERROR_bad_email") if (!Email::Valid->address($emailprimary));
+  }
+  if ($emailsecondary) {
+      push (@errors, "ERROR_bad_email_secondary") if (!Email::Valid->address($emailsecondary));
+  }
+  if ($emailalt) {
+      push (@errors, "ERROR_bad_email_alternative") if (!Email::Valid->address($emailalt));
+  }
+
   if (C4::Context->preference('ExtendedPatronAttributes')) {
     $extended_patron_attributes = parse_extended_patron_attributes($input);
     foreach my $attr (@$extended_patron_attributes) {
@@ -345,19 +357,15 @@ if ($op eq 'save' || $op eq 'insert'){
 
 if ( ($op eq 'modify' || $op eq 'insert' || $op eq 'save'|| $op eq 'duplicate') and ($step == 0 or $step == 3 )){
     unless ($newdata{'dateexpiry'}){
-        my $arg2 = $newdata{'dateenrolled'} || C4::Dates->today('iso');
+        my $arg2 = $newdata{'dateenrolled'} || output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
         $newdata{'dateexpiry'} = GetExpiryDate($newdata{'categorycode'},$arg2);
     }
 }
 
-if (
-        defined $input->param('SMSnumber')
-    &&  (
-           $input->param('SMSnumber') eq ""
-        or $input->param('SMSnumber') ne $newdata{'mobile'}
-        )
-) {
-    $newdata{smsalertnumber} = $input->param('SMSnumber');
+# BZ 14683: Do not mixup mobile [read: other phone] with smsalertnumber
+my $sms = $input->param('SMSnumber');
+if ( defined $sms ) {
+    $newdata{smsalertnumber} = $sms;
 }
 
 ###  Error checks should happen before this line.
@@ -495,26 +503,13 @@ if(!defined($data{'sex'})){
 }
 
 ##Now all the data to modify a member.
-my ($categories,$labels)=ethnicitycategories();
-  
-my $ethnicitycategoriescount=$#{$categories};
-my $ethcatpopup;
-if ($ethnicitycategoriescount>=0) {
-  $ethcatpopup = CGI::popup_menu(-name=>'ethnicity',
-        -id => 'ethnicity',
-        -tabindex=>'',
-        -values=>$categories,
-        -default=>$data{'ethnicity'},
-        -labels=>$labels);
-  $template->param(ethcatpopup => $ethcatpopup); # bad style, has to be fixed
-}
 
 my @typeloop;
 my $no_categories = 1;
 my $no_add;
 foreach (qw(C A S P I X)) {
     my $action="WHERE category_type=?";
-	($categories,$labels)=GetborCatFromCatType($_,$action);
+    my ($categories,$labels)=GetborCatFromCatType($_,$action);
     if(scalar(@$categories) > 0){ $no_categories = 0; }
 	my @categoryloop;
 	foreach my $cat (@$categories){
@@ -645,10 +640,10 @@ if ($nok) {
   #Formatting data for display    
   
 if (!defined($data{'dateenrolled'}) or $data{'dateenrolled'} eq ''){
-  $data{'dateenrolled'}=C4::Dates->today('iso');
+  $data{'dateenrolled'} = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
 }
 if ( $op eq 'duplicate' ) {
-    $data{'dateenrolled'} = C4::Dates->today('iso');
+    $data{'dateenrolled'} = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
     $data{'dateexpiry'} = GetExpiryDate( $data{'categorycode'}, $data{'dateenrolled'} );
 }
 if (C4::Context->preference('uppercasesurnames')) {
@@ -657,8 +652,10 @@ if (C4::Context->preference('uppercasesurnames')) {
 }
 
 foreach (qw(dateenrolled dateexpiry dateofbirth)) {
-	$data{$_} = format_date($data{$_});	# back to syspref for display
-	$template->param( $_ => $data{$_});
+    if ( $data{$_} ) {
+       $data{$_} = eval { output_pref({ dt => dt_from_string( $data{$_} ), dateonly => 1 } ); };  # back to syspref for display
+    }
+    $template->param( $_ => $data{$_});
 }
 
 if (C4::Context->preference('ExtendedPatronAttributes')) {
@@ -673,7 +670,7 @@ if (C4::Context->preference('EnhancedMessagingPreferences')) {
         C4::Form::MessagingPreferences::set_form_values({ borrowernumber => $borrowernumber }, $template);
     }
     $template->param(SMSSendDriver => C4::Context->preference("SMSSendDriver"));
-    $template->param(SMSnumber     => defined $data{'smsalertnumber'} ? $data{'smsalertnumber'} : $data{'mobile'});
+    $template->param(SMSnumber     => $data{'smsalertnumber'} );
     $template->param(TalkingTechItivaPhone => C4::Context->preference("TalkingTechItivaPhoneNotification"));
 }
 
@@ -697,7 +694,6 @@ $template->param(
   nodouble  => $nodouble,
   borrowernumber  => $borrowernumber, #register number
   guarantorid => ($borrower_data->{'guarantorid'} || $guarantorid),
-  ethcatpopup => $ethcatpopup,
   relshiploop => \@relshipdata,
   city_loop => $city_arrayref,
   borrotitlepopup => $borrotitlepopup,

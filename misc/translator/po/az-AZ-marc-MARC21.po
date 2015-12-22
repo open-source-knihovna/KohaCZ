@@ -3,7 +3,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Koha 3.0.2\n"
-"POT-Creation-Date: 2015-04-30 13:57-0300\n"
+"POT-Creation-Date: 2015-11-19 22:47-0300\n"
 "PO-Revision-Date: 2011-06-21 08:16+0200\n"
 "Last-Translator: Anonymous Pootle User\n"
 "Language-Team: Koha Translation Team\n"
@@ -95,7 +95,7 @@ msgstr "#- Coğrafi olarak alt bölümlere ayrılmamış"
 msgid "#- Undefined"
 msgstr "7-8 Tanımlanmamış"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:111
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:112
 #, fuzzy, c-format
 msgid "#record"
 msgstr "%s yazı"
@@ -129,12 +129,6 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:12
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:88
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:115
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:12
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:199
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:311
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:11
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:198
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:309
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:12
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:191
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:313
@@ -147,10 +141,10 @@ msgstr "(otomatik dolar)"
 msgid "(if exact bit depth known, enter; <br />otherwise use pulldown)"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:544
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:585
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:593
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:646
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:684
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:726
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:731
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:785
 #, fuzzy, c-format
 msgid "(su"
 msgstr "(%s"
@@ -161,20 +155,20 @@ msgid ""
 "(three digits, pad with zero as needed, <br />or ||| for no attempt to code)"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:244
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:272
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:253
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:277
 #, c-format
 msgid "+and+(bib-level:a+or+bib-level:b)"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:261
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:289
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:270
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:294
 #, c-format
 msgid "+not+(bib-level:a+or+bib-level:b)"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:24
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:26
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:25
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:27
 #, fuzzy, c-format
 msgid ",complete-subfield"
 msgstr "Alt alanı sil"
@@ -186,8 +180,8 @@ msgstr "Alt alanı sil"
 msgid "--- - Unknown"
 msgstr "u - Bilinmeyen"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:151
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:181
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:160
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:186
 #, fuzzy, c-format
 msgid ".png"
 msgstr "Bahar"
@@ -202,7 +196,7 @@ msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 msgid "/cgi-bin/koha/catalogue/MARCdetail.pl?biblionumber="
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:741
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:883
 #: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:79
 #: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:91
 #: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:188
@@ -215,71 +209,67 @@ msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 msgid "/cgi-bin/koha/catalogue/labeledMARCdetail.pl?biblionumber="
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:541
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:582
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:681
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:723
 #: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:200
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/catalogue/search.pl?q="
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:279
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:735
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:804
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:861
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:923
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:288
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:877
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:946
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1003
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1065
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/catalogue/search.pl?q=Control-number:"
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:247
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:256
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/catalogue/search.pl?q=Host-item:"
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:538
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:579
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1035
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:678
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:720
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1179
 #: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:194
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:346
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:361
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:383
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:354
 #, c-format
 msgid "/cgi-bin/koha/catalogue/search.pl?q=an:"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1038
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:349
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:364
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:386
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1182
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:357
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/catalogue/search.pl?q=au:\""
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:244
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:261
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:253
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:270
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/catalogue/search.pl?q=rcn:"
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:174
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:189
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:217
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:183
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:198
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:226
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/catalogue/search.pl?q=se,phr:\""
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:550
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:591
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:691
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:732
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/catalogue/search.pl?q=su"
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:264
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:282
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:746
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:807
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:866
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:928
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:273
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:291
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:888
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:949
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1008
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1070
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/catalogue/search.pl?q=ti,phr:"
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
@@ -294,116 +284,116 @@ msgstr "%s/cgi-bin/koha/opac-detail.pl?biblionumber=%s"
 msgid "/cgi-bin/koha/opac-MARCdetail.pl?biblionumber="
 msgstr "%s/cgi-bin/koha/opac-detail.pl?biblionumber=%s"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:615
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1157
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:754
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1366
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-authoritiesdetail.pl?authid="
 msgstr "%s/cgi-bin/koha/opac-detail.pl?biblionumber=%s"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:940
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1082
 #: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:79
 #: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:88
 #: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:185
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:856
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:996
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-detail.pl?biblionumber="
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
 #: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:197
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:590
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:643
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:728
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:782
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-search.pl?q="
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:307
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:850
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:947
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1004
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1067
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:312
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:990
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1087
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1144
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1207
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-search.pl?q=Control-number:"
 msgstr "%s/cgi-bin/koha/opac-search.pl?%s%s&format=atom"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:275
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:280
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-search.pl?q=Host-item:"
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
 #: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:191
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:587
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:640
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:724
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:779
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-search.pl?q=an:"
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1111
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1259
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-search.pl?q=an:\""
 msgstr "%s/cgi-bin/koha/opac-search.pl?%s%s&format=atom"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1114
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1262
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-search.pl?q=au:\""
 msgstr "%s/cgi-bin/koha/opac-search.pl?%s%s&format=atom"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:272
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:289
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:277
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:294
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-search.pl?q=rcn:"
 msgstr "10; url=/cgi-bin/koha/mainpage.pl"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:203
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:218
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:246
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:208
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:223
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:251
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-search.pl?q=se,phr:\""
 msgstr "%s/cgi-bin/koha/opac-search.pl?%s%s&format=atom"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:599
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:652
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:738
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:791
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-search.pl?q=su"
 msgstr "%s/cgi-bin/koha/opac-search.pl?%s%s&format=atom"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:292
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:310
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:861
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:950
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1009
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1072
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:297
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:315
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1001
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1090
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1149
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1212
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/opac-search.pl?q=ti,phr:"
 msgstr "%s/cgi-bin/koha/opac-search.pl?%s%s&format=atom"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:691
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:694
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1002
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1005
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1037
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1040
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:831
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:834
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1017
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1020
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1052
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1055
 #, fuzzy, c-format
 msgid "/cgi-bin/koha/tracklinks.pl?uri="
 msgstr "%s/cgi-bin/koha/opac-search.pl?%s%s&format=atom"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:617
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1159
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:756
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1368
 #, c-format
 msgid "/images/filefind.png"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:151
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:160
 #, c-format
 msgid "/intranet-tmpl/prog/img/famfamfam/"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:617
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1159
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:756
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1368
 #, c-format
 msgid "/opac-tmpl/"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:181
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:186
 #, c-format
 msgid "/opac-tmpl/lib/famfamfam/"
 msgstr ""
@@ -427,7 +417,6 @@ msgid "00-05- Date entered on file"
 msgstr "00-05-Kayda alındığı tarih"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:6
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:6
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:8
 #, fuzzy, c-format
 msgid "000 - Leader"
@@ -768,16 +757,17 @@ msgstr "09- Kaydın türü"
 msgid "09-10 Data type"
 msgstr "Materyal Türü"
 
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:45
+#, fuzzy, c-format
+msgid "1 - Full level, material not examined"
+msgstr "1- Ayrıntılı kataloglama, materyal incelenmemiş"
+
 #. For the first occurrence,
 #. SCRIPT
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:93
 msgid "1- 10-19%"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:211
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:213
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:209
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:211
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:203
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:205
 #, c-format
@@ -785,8 +775,6 @@ msgid "1- Full level, material not examined"
 msgstr "1- Ayrıntılı kataloglama, materyal incelenmemiş"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:11
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:11
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:10
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:11
 #, c-format
 msgid "1-4 Record size"
@@ -820,16 +808,14 @@ msgid "10- Descriptive cataloging rules"
 msgstr "10- Niteleyici kataloglama kuralları"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:87
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:198
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:197
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:190
 #, c-format
 msgid "10-16 indicator/subfields/size"
 msgstr "10-16 gösterge/alt alanlar/boyut"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:136
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:137
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:334
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:158
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:159
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:448
 #, c-format
 msgid "100,110,111,700,710,711"
@@ -903,8 +889,8 @@ msgstr ""
 msgid "13- Numbered or unnumbered series"
 msgstr "13- Numaralandırılmış veya numaralandırılmamış seri"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:503
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:548
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:563
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:606
 #, c-format
 msgid "130,240"
 msgstr ""
@@ -941,12 +927,6 @@ msgstr "Bütünlük"
 msgid "16- Heading use--series added entry"
 msgstr "16- Başlık kullanımı--seri ek girişi"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:202
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:200
-#, c-format
-msgid "17- Encoding"
-msgstr "17- Kodlama"
-
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:91
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:194
 #, c-format
@@ -964,8 +944,6 @@ msgstr "17- Konu alt bölüm türü"
 msgid "17-22 Film inspection date"
 msgstr "Film denetim tarihi"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:260
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:258
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:252
 #, c-format
 msgid "18 - Descriptive cataloging form"
@@ -981,21 +959,12 @@ msgstr "18-19 Tanımlanmamış"
 msgid "18-27 Undefined character positions"
 msgstr "18-27 Tanımlanmamış karakter pozisyonları"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:293
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:291
-#, c-format
-msgid "19 - Linked record requirement"
-msgstr "19 - Bağlantılı kayıt gereği"
-
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:285
 #, c-format
 msgid "19 - Multipart resource record level"
 msgstr "19 - Çok parçalı kaynak kayıt düzeyi"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:216
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:218
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:214
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:216
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:46
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:208
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:210
 #, c-format
@@ -1009,8 +978,6 @@ msgid "2- 20-29%"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:114
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:310
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:308
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:312
 #, c-format
 msgid "20-24 entry map &amp; lengths"
@@ -1026,16 +993,17 @@ msgstr "28- Resmi kurum türü"
 msgid "29- Reference evaluation"
 msgstr "29 - Referans değerlendirmesi"
 
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:47
+#, fuzzy, c-format
+msgid "3 - Abbreviated level"
+msgstr "3- Kısaltılmış düzey"
+
 #. For the first occurrence,
 #. SCRIPT
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:93
 msgid "3- 30-39%"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:221
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:223
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:219
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:221
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:213
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:215
 #, c-format
@@ -1077,27 +1045,33 @@ msgstr "38- Üzerinde değişiklik yapılmış kayıt"
 msgid "39- Cataloging source"
 msgstr "39- Kataloglama kaynağı"
 
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:48
+#, fuzzy, c-format
+msgid "4 - Core level"
+msgstr "4- Temel düzey"
+
 #. For the first occurrence,
 #. SCRIPT
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:93
 msgid "4- 40-49%"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:226
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:228
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:224
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:226
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:218
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:220
 #, c-format
 msgid "4- Core level"
 msgstr "4- Temel düzey"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:161
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:190
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:170
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:195
 #, c-format
 msgid "440,490"
 msgstr ""
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:49
+#, fuzzy, c-format
+msgid "5 - Partial (preliminary) level"
+msgstr "5- Kısmi (başlangıç) düzeyi"
 
 #. For the first occurrence,
 #. SCRIPT
@@ -1105,10 +1079,6 @@ msgstr ""
 msgid "5- 50-59%"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:231
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:233
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:229
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:231
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:223
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:225
 #, c-format
@@ -1116,8 +1086,6 @@ msgid "5- Partial (preliminary) level"
 msgstr "5- Kısmi (başlangıç) düzeyi"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:15
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:15
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:14
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:15
 #, c-format
 msgid "5- Record status"
@@ -1130,12 +1098,15 @@ msgid "6- 60-69%"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:58
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:48
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:47
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:48
 #, c-format
 msgid "6- Type of record"
 msgstr "Kayıt türü"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:50
+#, fuzzy, c-format
+msgid "7 - Minimal level"
+msgstr "7- En alt düzey"
 
 #. For the first occurrence,
 #. SCRIPT
@@ -1143,17 +1114,11 @@ msgstr "Kayıt türü"
 msgid "7- 70-79%"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:120
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:119
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:125
 #, c-format
 msgid "7- Bibliographic level"
 msgstr "7- Bibliyografik düzey"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:236
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:238
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:234
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:236
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:228
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:230
 #, c-format
@@ -1165,22 +1130,17 @@ msgstr "7- En alt düzey"
 msgid "7-8 Undefined"
 msgstr "7-8 Tanımlanmamış"
 
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:51
+#, fuzzy, c-format
+msgid "8 - Prepublication level"
+msgstr "8- Yayınlanma öncesi düzeyi"
+
 #. For the first occurrence,
 #. SCRIPT
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:93
 msgid "8- 80-89%"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:163
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:162
-#, c-format
-msgid "8- Hierarchic level"
-msgstr "8- Hiyerarşik düzey"
-
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:241
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:243
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:239
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:241
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:233
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:235
 #, c-format
@@ -1204,64 +1164,62 @@ msgid "9- Character coding scheme"
 msgstr "9- Karakter kodlama sistemi"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:70
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:181
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:180
 #, c-format
 msgid "9- Encoding"
 msgstr "9- Kodlama"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:706
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:865
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:732
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:882
 #, fuzzy, c-format
 msgid "; Audience: "
 msgstr "Kullanıcı Grubu "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:426
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:563
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:452
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:580
 #, fuzzy, c-format
 msgid "; Format: "
 msgstr "Biçim "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:552
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:593
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:711
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:752
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:578
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:619
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:728
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:769
 #, fuzzy, c-format
 msgid "; Literary form: "
 msgstr "33- Edebi biçim "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:456
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:542
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:599
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:698
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:482
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:568
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:616
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:715
 #, fuzzy, c-format
 msgid "; Nature of contents: "
 msgstr "İçerik kodunun Yapısı "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:530
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:677
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:556
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:694
 #, fuzzy, c-format
 msgid "; Type of computer file: "
 msgstr "Materyal Türü "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:435
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:572
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:461
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:589
 #, fuzzy, c-format
 msgid "; Type of continuing resource: "
 msgstr "Elektronik kaynak türü: "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:640
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:799
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:666
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:816
 #, fuzzy, c-format
 msgid "; Type of visual material: "
 msgstr "Materyal Türü "
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:691
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:694
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1002
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1005
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1037
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1040
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:831
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:834
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1017
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1020
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1052
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1055
 #, c-format
 msgid ";biblionumber="
 msgstr ""
@@ -1504,45 +1462,45 @@ msgid ""
 "A date specified by the code in 008/06 (Type of date/Publication status)"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:543
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:584
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:592
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:645
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:683
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:725
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:730
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:784
 #, fuzzy, c-format
 msgid "AND "
 msgstr "Tümü "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:53
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:57
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:54
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:58
 #, fuzzy, c-format
 msgid "AR"
 msgstr "MARC"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:899
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1043
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1041
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1183
 #, fuzzy, c-format
 msgid "Absorbed by:"
 msgstr "Yayınlayan:"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:902
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1046
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1044
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1186
 #, c-format
 msgid "Absorbed in part by:"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:847
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:990
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:989
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1130
 #, c-format
 msgid "Absorbed in part:"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:844
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:987
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:986
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1127
 #, c-format
 msgid "Absorbed:"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:906
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1046
 #, fuzzy, c-format
 msgid "Abstract: "
 msgstr " Öz: "
@@ -1572,11 +1530,6 @@ msgstr ""
 msgid "Accompanying matter"
 msgstr "Ek materyal 1"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1030
-#, fuzzy, c-format
-msgid "Additional author(s): "
-msgstr "Ek Yazarlar: "
-
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:137
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:418
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:854
@@ -1589,8 +1542,8 @@ msgstr "Ek Yazarlar: "
 msgid "Adolescent"
 msgstr "Genç"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:717
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:876
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:743
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:893
 #, fuzzy, c-format
 msgid "Adolescent; "
 msgstr "Genç "
@@ -1607,8 +1560,8 @@ msgstr "Genç "
 msgid "Adult"
 msgstr "Yetişkin"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:720
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:879
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:746
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:896
 #, fuzzy, c-format
 msgid "Adult; "
 msgstr "Yetişkin "
@@ -1630,8 +1583,8 @@ msgstr "Albers eşit alanı"
 msgid "All Item Types"
 msgstr "Materyal türü ekle"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:240
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:268
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:249
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:273
 #, fuzzy, c-format
 msgid "Analytics: "
 msgstr "anaglifik "
@@ -1698,10 +1651,10 @@ msgstr "orijinal"
 msgid "Art reproduction"
 msgstr "reprodüksiyon olmayan"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:77
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:408
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:81
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:546
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:78
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:434
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:82
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:563
 #, fuzzy, c-format
 msgid "Article"
 msgstr "Dikey"
@@ -1711,11 +1664,6 @@ msgstr "Dikey"
 #, fuzzy, c-format
 msgid "Atlas"
 msgstr "atlas"
-
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1029
-#, fuzzy, c-format
-msgid "Author(s): "
-msgstr "Yazar: "
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:328
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:893
@@ -1739,13 +1687,13 @@ msgstr "otobiyografi"
 msgid "Autonomous or semi-autonomous component"
 msgstr "a- Otonom veya yarı otonom bileşen/parça"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1076
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1091
 #, fuzzy, c-format
 msgid "Availability: "
 msgstr "İşlədiləbilmə: "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:691
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:818
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:833
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:958
 #, c-format
 msgid "Awards: "
 msgstr ""
@@ -1768,8 +1716,8 @@ msgstr "diğer"
 msgid "Azimuthal, specific type unknown"
 msgstr "azimutal,  bilinmeyen spesifik tür"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:51
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:56
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:52
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:57
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:68
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:72
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:57
@@ -1780,8 +1728,8 @@ msgstr "azimutal,  bilinmeyen spesifik tür"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:46
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:24
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:28
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:55
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:60
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:56
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:61
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:46
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:50
 #, c-format
@@ -1823,6 +1771,12 @@ msgstr "batimetri - iskandil"
 #, fuzzy, c-format
 msgid "Bibliographic data"
 msgstr "Bibliyografyalar"
+
+#. SELECT name=f7
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:27
+#, fuzzy
+msgid "Bibliographic level"
+msgstr "7- Bibliyografik düzey"
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:163
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:194
@@ -1903,15 +1857,15 @@ msgstr "blues"
 msgid "Bonne"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:70
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:80
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:406
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:411
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:74
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:84
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:99
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:544
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:549
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:71
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:81
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:432
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:437
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:75
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:85
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:100
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:561
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:566
 #, fuzzy, c-format
 msgid "Book"
 msgstr "Kitaplar"
@@ -1958,13 +1912,19 @@ msgstr "Braille"
 msgid "Butterfly"
 msgstr "kelebek"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:58
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1172
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1242
+#, c-format
+msgid "By: "
+msgstr ""
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:59
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:74
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:63
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:69
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:48
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:30
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:62
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:63
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:52
 #, fuzzy, c-format
 msgid "CF"
@@ -1995,12 +1955,17 @@ msgstr "Takvim"
 msgid "Calendars"
 msgstr "Takvim"
 
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1117
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1132
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1159
+#, fuzzy, c-format
+msgid "Call number: "
+msgstr "Rapor Adı: "
+
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:91
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_006.tt:59
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_008_authorities.tt:713
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:119
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:315
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:313
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_008.tt:64
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:317
 #, c-format
@@ -2031,6 +1996,12 @@ msgstr "yıllık"
 msgid "Carols"
 msgstr "kömür"
 
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:427
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:464
+#, fuzzy, c-format
+msgid "Carrier type: "
+msgstr "Materyal Türü "
+
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:196
 #, fuzzy, c-format
 msgid "Cartographic material"
@@ -2042,7 +2013,7 @@ msgstr "e- Kartografik materyal"
 msgid "Cassini-Soldner"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:880
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1020
 #, c-format
 msgid "Cast: "
 msgstr ""
@@ -2089,8 +2060,8 @@ msgstr ""
 msgid "Chance compositions"
 msgstr "Uyarıyı iptal et"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:911
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1055
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1053
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1195
 #, fuzzy, c-format
 msgid "Changed back to:"
 msgstr "ayarına dön"
@@ -2128,7 +2099,7 @@ msgstr "tablolar"
 msgid "Charts"
 msgstr "tablolar"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1151
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1178
 #, fuzzy, c-format
 msgid "Checked out ("
 msgstr "Ödəmə alındı"
@@ -2174,11 +2145,11 @@ msgstr ""
 msgid "Clear field"
 msgstr "Alanı Temizle"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:641
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:900
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:716
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1026
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1061
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:783
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:920
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:856
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1041
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1076
 #, fuzzy, c-format
 msgid "Click here to access online"
 msgstr "Devam etmek için 'İleri' butonuna tıklayın"
@@ -2257,20 +2228,16 @@ msgstr ""
 msgid "Completely romanized/printed cards romanized"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:414
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:552
-#, fuzzy, c-format
-msgid "Computer File"
-msgstr "Bilgisayar Dosyaları"
-
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:359
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:137
 #, fuzzy, c-format
 msgid "Computer Files"
 msgstr "Bilgisayar Dosyaları"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:83
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:87
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:84
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:440
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:88
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:569
 #, fuzzy, c-format
 msgid "Computer file"
 msgstr "Bilgisayar Dosyaları"
@@ -2352,6 +2319,12 @@ msgstr "diğer"
 msgid "Conic, specific type unknown"
 msgstr "konik, özel türü bilinmeyen"
 
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:630
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:677
+#, fuzzy, c-format
+msgid "Contained works: "
+msgstr "Devam"
+
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:310
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:649
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:655
@@ -2368,47 +2341,46 @@ msgstr ""
 msgid "Contains biographical information"
 msgstr "bibliyografik bilgi içerir"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:907
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1047
 #, fuzzy, c-format
 msgid "Content advice: "
 msgstr "Kontent kənarı "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:659
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:760
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:403
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:440
+#, fuzzy, c-format
+msgid "Content type: "
+msgstr "Kontent kənarı "
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:801
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:900
 #, fuzzy, c-format
 msgid "Contents:"
 msgstr "İçindekiler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:887
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1031
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1029
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1171
 #, fuzzy, c-format
 msgid "Continued by:"
 msgstr "Devam"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:890
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1034
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1032
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1174
 #, c-format
 msgid "Continued in part by:"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:832
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:975
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:974
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1115
 #, fuzzy, c-format
 msgid "Continues in part:"
 msgstr "Devam"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:829
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:972
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:971
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1112
 #, fuzzy, c-format
 msgid "Continues:"
 msgstr "Devam"
-
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:407
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:77
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:545
-#, fuzzy, c-format
-msgid "Continuing Resource"
-msgstr "Çevrimiçi Kaynaklar:"
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:951
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:514
@@ -2416,7 +2388,10 @@ msgstr "Çevrimiçi Kaynaklar:"
 msgid "Continuing Resources"
 msgstr "Çevrimiçi Kaynaklar:"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:73
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:74
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:433
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:78
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:562
 #, fuzzy, c-format
 msgid "Continuing resource"
 msgstr "Çevrimiçi Kaynaklar:"
@@ -2466,6 +2441,12 @@ msgstr "Devam"
 msgid "Contours"
 msgstr "kontür"
 
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1174
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1244
+#, fuzzy, c-format
+msgid "Contributor(s): "
+msgstr "Kullanıcı Nitelik Türleri "
+
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MADS.xsl:252
 #, c-format
 msgid "Converted from MARCXML to MADS version 2.0 (Revision 2.10)"
@@ -2482,6 +2463,12 @@ msgstr ""
 msgid "Cooperative cataloging program"
 msgstr "c- Ortak Kataloglama Programı"
 
+#: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:256
+#: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:254
+#, c-format
+msgid "Copyright date: "
+msgstr ""
+
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:603
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:260
 #, fuzzy, c-format
@@ -2494,7 +2481,7 @@ msgstr "kordiform"
 msgid "Country music"
 msgstr "c- Notaya dökülmüş müzik"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:102
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:103
 #, fuzzy, c-format
 msgid "CreativeWork"
 msgstr "anlaşmalar"
@@ -2520,8 +2507,8 @@ msgstr "konik, özel türü bilinmeyen"
 msgid "Cyrillic"
 msgstr "ca- Kiril"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:608
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:669
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:749
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:808
 #, fuzzy, c-format
 msgid "DDC classification: "
 msgstr "Sınıflama: "
@@ -2532,7 +2519,7 @@ msgstr "Sınıflama: "
 msgid "Daily"
 msgstr "Günlük"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1170
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1197
 #, fuzzy, c-format
 msgid "Damaged ("
 msgstr "Xarab (%s),"
@@ -2553,6 +2540,11 @@ msgstr "için Planlanan"
 #, fuzzy, c-format
 msgid "Dashed-on information omitted"
 msgstr "#- Bilgi sağlanamamıştır"
+
+#. SPAN
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:42
+msgid "Data base address (autogenerated)"
+msgstr ""
 
 #. SCRIPT
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:93
@@ -2782,14 +2774,20 @@ msgstr ""
 msgid "Dates unknown"
 msgstr "bilinmeyen"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:377
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:382
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:802
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:415
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:420
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:380
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:385
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:822
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:414
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:419
 #, fuzzy, c-format
 msgid "Description: "
 msgstr "Tanım: "
+
+#. SELECT name=f18
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:55
+#, fuzzy
+msgid "Descriptive cataloging form"
+msgstr "18- Niteliyici kataloglama biçimi"
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:9
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:365
@@ -2885,16 +2883,16 @@ msgstr "Diskografi"
 msgid "Discography"
 msgstr "diskografi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:764
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:791
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:890
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:950
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:906
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:811
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1030
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:965
 #, fuzzy, c-format
 msgid "Dissertation note: "
 msgstr "Dolaşım notu: "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:263
-#: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:261
+#: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:250
+#: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:248
 #, fuzzy, c-format
 msgid "Distributor: "
 msgstr "Kullanıcı Nitelik Türleri "
@@ -2935,12 +2933,12 @@ msgstr ""
 msgid "Eckert"
 msgstr "Eckert"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:352
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:357
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:837
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:388
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:393
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:515
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:355
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:360
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:857
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:387
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:392
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:532
 #, fuzzy, c-format
 msgid "Edition: "
 msgstr "Basımlar "
@@ -2968,6 +2966,17 @@ msgstr "s- elektronik"
 #, fuzzy, c-format
 msgid "Electronic resource"
 msgstr "elektronik kaynak"
+
+#. SPAN
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:40
+msgid "Encoding (forced Unicode)"
+msgstr ""
+
+#. SELECT name=f17
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:43
+#, fuzzy
+msgid "Encoding level"
+msgstr "17- Kodlama düzeyi"
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:166
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:197
@@ -3093,6 +3102,12 @@ msgstr "Filmografi"
 msgid "Filmstrip"
 msgstr "Filtre"
 
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:72
+#, fuzzy
+msgid "Fixed data:"
+msgstr "p - Karma materyaller"
+
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:770
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:357
 #, c-format
@@ -3176,8 +3191,8 @@ msgstr "Kartografik Materyale Ait Form"
 msgid "Format of music"
 msgstr "Müzik Eserinin Biçimi:"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:841
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:984
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:983
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1124
 #, c-format
 msgid "Formed by the union: ... and: ..."
 msgstr ""
@@ -3203,8 +3218,6 @@ msgstr "Sıklık"
 msgid "Fugues"
 msgstr "Fugues"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:208
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:206
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:200
 #, c-format
 msgid "Full level"
@@ -3271,14 +3284,14 @@ msgstr "Genel"
 msgid "General vertical near-sided"
 msgstr "Üretim"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:723
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:882
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:749
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:899
 #, fuzzy, c-format
 msgid "General; "
 msgstr "Genel "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:574
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:635
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:715
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:774
 #, fuzzy, c-format
 msgid "Genre/Form: "
 msgstr "Biçim "
@@ -3404,8 +3417,8 @@ msgstr "diğer tarihi bilgiler"
 msgid "History"
 msgstr "Geçmiş"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:776
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:919
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:918
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1059
 #, fuzzy, c-format
 msgid "Holdings note: "
 msgstr "Koleksiyon "
@@ -3422,16 +3435,16 @@ msgstr "mizah, hiciv"
 msgid "Hymns"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:398
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:817
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:437
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:442
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:837
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:479
 #, fuzzy, c-format
 msgid "ISBN: "
 msgstr "ISBN: "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:417
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:827
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:456
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:461
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:847
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:498
 #, fuzzy, c-format
 msgid "ISSN: "
 msgstr "ISSN: "
@@ -3477,13 +3490,13 @@ msgstr "Resim kodları 4:"
 
 # For the first occurrence,
 # %1../../koha-tmpl/opac-tmpl/prog/en/modules/opac-results-grouped.tmpl:223 ../../koha-tmpl/opac-tmpl/prog/en/modules/opac-results.tmpl:278$s: TMPL_VAR name=intransitcount
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1182
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1209
 #, fuzzy, c-format
 msgid "In transit ("
 msgstr "(%s), göndərildi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:718
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:833
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:860
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:973
 #, fuzzy, c-format
 msgid "In: "
 msgstr "Bilgi: "
@@ -3499,8 +3512,8 @@ msgstr "Bilgi: "
 msgid "Inclusive dates of collection"
 msgstr "Bir koleksiyon seçin"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:662
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:754
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:804
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:894
 #, fuzzy, c-format
 msgid "Incomplete contents:"
 msgstr "Bütünlük"
@@ -3533,6 +3546,12 @@ msgstr "1 - dizin var"
 #, c-format
 msgid "Indexes"
 msgstr "Dizinler"
+
+#. SPAN
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:41
+#, fuzzy
+msgid "Indicator/subfield lengths"
+msgstr "10-16 gösterge/alt alanlar/boyut"
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:329
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:131
@@ -3607,12 +3626,12 @@ msgstr "i - Müzik dışı ses kaydı"
 msgid "Item type"
 msgstr "Materyal türü"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1095
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1110
 #, fuzzy, c-format
 msgid "Items available for loan: "
 msgstr "Nüsxələr mümkündür: "
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1127
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1152
 #, fuzzy, c-format
 msgid "Items available for reference: "
 msgstr "İşlədiləbilən nüsxələr: "
@@ -3641,21 +3660,21 @@ msgstr ""
 msgid "Juvenile"
 msgstr "Çocuk koleksiyonu"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:726
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:885
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:752
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:902
 #, fuzzy, c-format
 msgid "Juvenile; "
 msgstr "Çocuk koleksiyonu "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:81
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:412
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:82
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:438
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:1303
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:693
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:747
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:52
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:54
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:85
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:550
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:86
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:567
 #, c-format
 msgid "Kit"
 msgstr "Araç Gereç"
@@ -3688,12 +3707,6 @@ msgstr "Koha &rsaquo; Kataloglama &rsaquo; Tutanak başlığı kurucu"
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_008.tt:2
 #, fuzzy, c-format
 msgid "Koha &rsaquo; Cataloging &rsaquo; 008 builder"
-msgstr "Koha &rsaquo; Kataloglama &rsaquo; Tutanak başlığı kurucu"
-
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:2
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:2
-#, c-format
-msgid "Koha &rsaquo; Cataloging &rsaquo; Leader builder"
 msgstr "Koha &rsaquo; Kataloglama &rsaquo; Tutanak başlığı kurucu"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_linking_section.tt:2
@@ -3814,6 +3827,11 @@ msgstr "Yer"
 msgid "Law reports and digests"
 msgstr "Hukuk raporları ve özetler"
 
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:2
+#, c-format
+msgid "Leader:&nbsp;"
+msgstr ""
+
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:904
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:491
 #, fuzzy, c-format
@@ -3859,6 +3877,12 @@ msgstr "Dava konu ve notları"
 msgid "Legislation"
 msgstr "Mevzuat"
 
+#. SPAN
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:68
+#, fuzzy
+msgid "Length of directory elements"
+msgstr "Üretim elementleri"
+
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:318
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:120
 #, fuzzy, c-format
@@ -3889,6 +3913,11 @@ msgstr "m - ses kayıtları"
 msgid "Live action"
 msgstr "Diğer hareket"
 
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:72
+msgid "Loading..."
+msgstr ""
+
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:287
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:455
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:628
@@ -3903,7 +3932,7 @@ msgstr "Diğer hareket"
 msgid "Local"
 msgstr "I- Yerel"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1196
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1223
 #, fuzzy, c-format
 msgid "Location(s): "
 msgstr "Yer "
@@ -3914,7 +3943,7 @@ msgstr "Yer "
 msgid "Loose-leaf"
 msgstr "d- Çıkarılabilir sayfalı"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1164
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1191
 #, fuzzy, c-format
 msgid "Lost ("
 msgstr "İtib (%s),"
@@ -3943,10 +3972,6 @@ msgstr "35-37 Dil bkz. <a1>MARC Dil Kodları Listesi</a>"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:74
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:76
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:185
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:187
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:184
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:186
 #, c-format
 msgid "MARC-8"
 msgstr "MARC-8"
@@ -3964,33 +3989,33 @@ msgstr ""
 msgid "MM"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:59
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:60
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:75
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:64
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:70
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:49
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:31
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:63
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:64
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:53
 #, c-format
 msgid "MP"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:61
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:62
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:77
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:66
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:72
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:51
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:33
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:65
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:66
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:55
 #, c-format
 msgid "MU"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:57
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:58
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:47
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:61
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:62
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:51
 #, c-format
 msgid "MX"
@@ -4002,8 +4027,8 @@ msgstr ""
 msgid "Madrigals"
 msgstr "hava"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:266
-#: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:264
+#: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:253
+#: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:251
 #, fuzzy, c-format
 msgid "Manufacturer: "
 msgstr "Master: "
@@ -4029,13 +4054,13 @@ msgstr "t - El yazması dil materyali"
 msgid "Manuscript notated music"
 msgstr "d- Elle notaya dökülmüş müzik"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:84
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:415
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:85
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:441
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:12
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:14
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:88
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:100
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:553
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:89
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:101
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:570
 #, c-format
 msgid "Map"
 msgstr "Harita"
@@ -4075,11 +4100,11 @@ msgstr "Mart"
 msgid "Masses"
 msgstr "Basse"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:150
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:401
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:159
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:427
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:9
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:180
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:539
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:185
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:556
 #, fuzzy, c-format
 msgid "Material type: "
 msgstr "Materyal Türü "
@@ -4089,6 +4114,12 @@ msgstr "Materyal Türü "
 #, fuzzy, c-format
 msgid "Mazurkas"
 msgstr "tek ses"
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:415
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:452
+#, fuzzy, c-format
+msgid "Media type: "
+msgstr "Materyal Türü "
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:905
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:492
@@ -4102,8 +4133,8 @@ msgstr "anılar"
 msgid "Mercator"
 msgstr "Mercator"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:908
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1052
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1050
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1192
 #, c-format
 msgid "Merged with ... to form ..."
 msgstr ""
@@ -4203,10 +4234,8 @@ msgstr "Dakika:"
 msgid "Missing characters"
 msgstr "x- Eksik karakterler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:413
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:1358
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:778
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:551
 #, fuzzy, c-format
 msgid "Mixed Materials"
 msgstr "p - Karma materyaller"
@@ -4222,8 +4251,10 @@ msgstr "çoklu formatlar"
 msgid "Mixed material"
 msgstr "p - Karma materyaller"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:82
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:86
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:83
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:439
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:87
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:568
 #, fuzzy, c-format
 msgid "Mixed materials"
 msgstr "p - Karma materyaller"
@@ -4303,6 +4334,12 @@ msgstr "sinema filmi"
 msgid "Multilocal"
 msgstr ""
 
+#. SELECT name=f19
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:62
+#, fuzzy
+msgid "Multipart record resource level"
+msgstr "19 - Çok parçalı kaynak kayıt düzeyi"
+
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:12
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:368
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:498
@@ -4351,8 +4388,8 @@ msgstr "çoklu formatlar"
 msgid "Multistate"
 msgstr "m- Çok devletli"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:86
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:419
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:87
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:445
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:64
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:83
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:102
@@ -4362,8 +4399,8 @@ msgstr "m- Çok devletli"
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:16
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:327
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:474
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:90
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:557
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:91
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:574
 #, c-format
 msgid "Music"
 msgstr "Müzik"
@@ -4374,12 +4411,12 @@ msgstr "Müzik"
 msgid "Music Parts"
 msgstr "Temel parametreler"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:101
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:102
 #, fuzzy, c-format
 msgid "MusicAlbum"
 msgstr "Müzik"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1130
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1278
 #, fuzzy, c-format
 msgid "MusicGroup"
 msgstr "Müzik"
@@ -4663,7 +4700,7 @@ msgstr "dizin"
 msgid "No information provided"
 msgstr "#- Bilgi sağlanamamıştır"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1090
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1105
 #, fuzzy, c-format
 msgid "No items available "
 msgstr "İşlədiləbiləcək materiyal yoxdur:"
@@ -4702,10 +4739,6 @@ msgstr ""
 msgid "No relief shown"
 msgstr "Yapılacak aktarım yok"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:167
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:169
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:166
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:168
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:172
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:174
 #, c-format
@@ -4733,10 +4766,6 @@ msgstr "Özel reprodüksiyon karakteristikleri:"
 msgid "Nocturnes"
 msgstr "Resim"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:264
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:266
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:262
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:264
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:256
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:258
 #, c-format
@@ -4891,14 +4920,12 @@ msgstr "sayısal tablo"
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_006.tt:59
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_008_authorities.tt:713
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:119
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:315
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:313
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_008.tt:64
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:317
 msgid "OK"
 msgstr "OK"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:939
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1081
 #, fuzzy, c-format
 msgid "OPAC view: "
 msgstr "OPAC notu: "
@@ -4918,12 +4945,12 @@ msgstr "Oblik Merkator"
 msgid "Offprints"
 msgstr "baskı"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1188
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1215
 #, fuzzy, c-format
 msgid "On hold ("
 msgstr "Əldədir"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1176
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1203
 #, fuzzy, c-format
 msgid "On order ("
 msgstr "Sifarişdə (%s),"
@@ -5276,14 +5303,14 @@ msgstr ""
 msgid "Online"
 msgstr "Çevrimiçi Yardım"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:881
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:995
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:901
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1010
 #, fuzzy, c-format
-msgid "Online Access: "
+msgid "Online access: "
 msgstr "Çevrimiçi Kaynaklar: "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:622
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:685
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:764
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:825
 #, fuzzy, c-format
 msgid "Online resources: "
 msgstr "Çevrimiçi Kaynaklar: "
@@ -5294,7 +5321,7 @@ msgstr "Çevrimiçi Kaynaklar: "
 msgid "Online system or service"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:940
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1082
 #, c-format
 msgid "Open in new window"
 msgstr ""
@@ -5311,7 +5338,7 @@ msgstr "bakır"
 msgid "Oratorios"
 msgstr "Oratoryolar"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1134
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1282
 #, c-format
 msgid "Organization"
 msgstr "Kurum"
@@ -5375,24 +5402,20 @@ msgstr "ortografik"
 msgid "Other"
 msgstr "Diğer"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:863
-#, fuzzy, c-format
-msgid "Other Title: "
-msgstr "Seri Başlıkları: "
-
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:788
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:931
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:930
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1071
 #, fuzzy, c-format
 msgid "Other editions: "
 msgstr "Diğer hareket "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:465
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:470
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:869
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:504
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:509
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:966
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:972
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:509
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:514
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:883
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:889
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:546
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:551
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:981
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:987
 #, fuzzy, c-format
 msgid "Other title: "
 msgstr "Seri Başlıkları: "
@@ -5403,9 +5426,9 @@ msgstr "Seri Başlıkları: "
 msgid "Overtures"
 msgstr "Gecikmiş"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:62
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:63
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:52
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:66
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:67
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:56
 #, c-format
 msgid "PR"
@@ -5417,8 +5440,8 @@ msgstr ""
 msgid "Part-songs"
 msgstr "Bariton"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:665
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:757
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:807
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:897
 #, fuzzy, c-format
 msgid "Partial contents:"
 msgstr "7-10 İçeriğin mahiyeti"
@@ -5444,8 +5467,8 @@ msgstr "Passions"
 msgid "Patent document"
 msgstr "Patent dokümanı"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:436
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:475
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:480
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:517
 #, fuzzy, c-format
 msgid "Patent information: "
 msgstr "Takvim bilgisi "
@@ -5468,7 +5491,7 @@ msgstr ""
 msgid "Periodical"
 msgstr "Dönemsel"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1131
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1279
 #, c-format
 msgid "Person"
 msgstr ""
@@ -5595,8 +5618,8 @@ msgstr "Portre"
 msgid "Pre-adolescent"
 msgstr "Preadolesan"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:714
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:873
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:740
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:890
 #, fuzzy, c-format
 msgid "Pre-adolescent; "
 msgstr "Preadolesan "
@@ -5619,8 +5642,8 @@ msgstr ""
 msgid "Preschool"
 msgstr "Okul öncesi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:708
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:867
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:734
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:884
 #, fuzzy, c-format
 msgid "Preschool; "
 msgstr "Okul öncesi "
@@ -5637,8 +5660,8 @@ msgstr "Okul öncesi "
 msgid "Primary"
 msgstr "Temel"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:711
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:870
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:737
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:887
 #, fuzzy, c-format
 msgid "Primary; "
 msgstr "Temel "
@@ -5648,21 +5671,25 @@ msgstr "Temel "
 msgid "Print Page"
 msgstr "Sayfayı Yazdır"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:257
-#: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:255
+#: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:244
+#: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:242
 #, fuzzy, c-format
 msgid "Producer: "
 msgstr "Yazıcı: "
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:110
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:111
 #, c-format
 msgid "Product"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:703
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:805
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:945
 #, fuzzy, c-format
 msgid "Production Credits: "
+msgstr "Üretim elementleri"
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:845
+#, fuzzy, c-format
+msgid "Production credits: "
 msgstr "Üretim elementleri"
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:790
@@ -5718,16 +5745,16 @@ msgstr ""
 msgid "Publication date and copyright date"
 msgstr "Yayın Tarihi 1"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:301
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:308
-#: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:260
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:745
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:752
-#: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:258
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:329
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:336
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:904
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:911
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:310
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:320
+#: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:247
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:771
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:781
+#: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:245
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:334
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:344
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:921
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:931
 #, fuzzy, c-format
 msgid "Publisher: "
 msgstr "Yayıncı: "
@@ -5778,6 +5805,17 @@ msgstr "Bir koleksiyon seçin"
 msgid "Realia"
 msgstr "kopyalar"
 
+#. SPAN
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:3
+msgid "Record length (autogenerated)"
+msgstr ""
+
+#. SELECT name=f5
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:4
+#, fuzzy
+msgid "Record status"
+msgstr "5- Kaydın durumu"
+
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:1028
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:542
 #, fuzzy, c-format
@@ -5812,13 +5850,11 @@ msgstr "Düzenlilik"
 msgid "Rehearsals"
 msgstr "provalar"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:297
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:299
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:295
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:297
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:588
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:635
 #, c-format
-msgid "Related record not required"
-msgstr "İlişkili kayda gerek yok"
+msgid "Related works: "
+msgstr ""
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:542
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:199
@@ -5832,8 +5868,8 @@ msgstr ""
 msgid "Remote-sensing image"
 msgstr "Uzak-algılamalı Görüntü:"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:449
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:488
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:493
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:530
 #, fuzzy, c-format
 msgid "Report number: "
 msgstr "Rapor Adı: "
@@ -5867,7 +5903,7 @@ msgstr ""
 msgid "Requiems"
 msgstr "Gerekli"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:904
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1044
 #, fuzzy, c-format
 msgid "Review: "
 msgstr "Görüşlər "
@@ -5939,19 +5975,19 @@ msgstr ""
 msgid "Running time for motion pictures and videorecordings"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:52
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:53
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:69
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:58
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:64
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:25
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:56
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:57
 #, c-format
 msgid "SE"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:48
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:49
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:39
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:52
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:53
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:43
 #, fuzzy, c-format
 msgid "ST"
@@ -5966,17 +6002,17 @@ msgstr "KDV"
 msgid "Samples"
 msgstr "örnekler"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:905
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1045
 #, fuzzy, c-format
 msgid "Scope and content: "
 msgstr "Zənginləşdirilmiş kontent: "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:88
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:417
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:89
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:443
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:833
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:420
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:92
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:555
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:93
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:572
 #, fuzzy, c-format
 msgid "Score"
 msgstr "Puan:"
@@ -6029,8 +6065,8 @@ msgstr "Yarı haftalık"
 msgid "Separate supplement to another work"
 msgstr "bir dergi veya kitaba ayrı ek olarak vb."
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:850
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:993
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:992
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1133
 #, fuzzy, c-format
 msgid "Separated from:"
 msgstr "için tarandı"
@@ -6040,30 +6076,30 @@ msgstr "için tarandı"
 msgid "Serial/Integrating resource"
 msgstr "i- Güncelleyici kaynak"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:74
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:78
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:75
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:79
 #, c-format
 msgid "Series"
 msgstr "Seriler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:164
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:171
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:193
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:200
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:173
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:180
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:198
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:205
 #, fuzzy, c-format
 msgid "Series: "
 msgstr "Seriler: "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:67
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:403
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:71
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:541
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:68
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:429
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:72
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:558
 #, fuzzy, c-format
 msgid "Set"
 msgstr "Harcanmış"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:274
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:302
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:283
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:307
 #, fuzzy, c-format
 msgid "Set: "
 msgstr "Cinsiyet: "
@@ -6091,8 +6127,8 @@ msgstr "kısa hikayeler"
 msgid "Shortened"
 msgstr "s-Kısaltmalı"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:250
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:278
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:259
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:283
 #, fuzzy, c-format
 msgid "Show analytics"
 msgstr "Hata analizi:"
@@ -6104,8 +6140,8 @@ msgstr "Hata analizi:"
 msgid "Show values for '%s' material type?"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:267
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:295
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:276
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:300
 #, fuzzy, c-format
 msgid "Show volumes"
 msgstr "Daha Fazlasını Göster"
@@ -6170,12 +6206,12 @@ msgstr "İrtibat"
 msgid "Songs"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:87
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:418
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:88
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:444
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:440
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:169
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:91
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:556
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:92
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:573
 #, fuzzy, c-format
 msgid "Sound"
 msgstr "sesler"
@@ -6192,8 +6228,8 @@ msgstr "Ses Kayıt"
 msgid "Sounds"
 msgstr "sesler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:850
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:528
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:870
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:545
 #, fuzzy, c-format
 msgid "Source: "
 msgstr "Puan: "
@@ -6222,8 +6258,8 @@ msgstr "Özel reprodüksiyon karakteristikleri:"
 msgid "Specialized"
 msgstr "Özelleştirilmiş"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:729
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:888
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:755
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:905
 #, fuzzy, c-format
 msgid "Specialized; "
 msgstr "Özelleştirilmiş "
@@ -6234,8 +6270,8 @@ msgstr "Özelleştirilmiş "
 msgid "Speeches"
 msgstr "s- Konuşmalar"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:905
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1049
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1047
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1189
 #, c-format
 msgid "Split into .. and ...:"
 msgstr ""
@@ -6313,13 +6349,13 @@ msgstr "stereografik"
 msgid "Studies and exercises"
 msgstr "Para birimleri ve döviz kurları"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:533
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:581
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:672
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:718
 #, fuzzy, c-format
 msgid "Subject(s): "
 msgstr "Konular "
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:903
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1043
 #, fuzzy, c-format
 msgid "Subject: "
 msgstr "Konular:"
@@ -6336,31 +6372,31 @@ msgstr "Başarı"
 msgid "Suites"
 msgstr "Süitler"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:908
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1048
 #, fuzzy, c-format
 msgid "Summary: "
 msgstr "Özet: "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:893
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1037
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1035
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1177
 #, fuzzy, c-format
 msgid "Superseded by:"
 msgstr "Tarafından önerilen"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:896
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1040
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1038
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1180
 #, c-format
 msgid "Superseded in part by:"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:838
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:981
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:980
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1121
 #, c-format
 msgid "Supersedes in part:"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:835
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:978
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:977
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1118
 #, fuzzy, c-format
 msgid "Supersedes:"
 msgstr "Hız:"
@@ -6538,9 +6574,9 @@ msgstr ""
 msgid "Three-dimensional artifact or naturally occurring object"
 msgstr "r- Üç boyutlu eserler veya doğal olarak varolan şeyler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:486
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:528
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:984
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:546
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:586
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:999
 #, fuzzy, c-format
 msgid "Title translated: "
 msgstr "Eser adı sözcük grubu "
@@ -6686,6 +6722,12 @@ msgstr "Materyal Türü"
 msgid "Type of continuing resource"
 msgstr "Elektronik kaynak türü:"
 
+#. SELECT name=f8
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:36
+#, fuzzy
+msgid "Type of control"
+msgstr "8-Denetim türü"
+
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:5
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:361
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:491
@@ -6701,6 +6743,12 @@ msgstr "Yayın Tarihinin Türü: Yayın Tarihleri 1 ve 2"
 #, c-format
 msgid "Type of material"
 msgstr "Materyal Türü"
+
+#. SELECT name=f6
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:11
+#, fuzzy
+msgid "Type of record"
+msgstr "Kayıt türü"
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:1301
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:745
@@ -6801,14 +6849,14 @@ msgstr ""
 msgid "Undetermined"
 msgstr "Tanımlanmamış"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:506
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:566
 #, fuzzy, c-format
 msgid "Uniform title: "
 msgstr "Tekbiçimeseradı: "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:511
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:551
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:557
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:571
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:609
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:615
 #, fuzzy, c-format
 msgid "Uniform titles: "
 msgstr "Tekbiçimeseradı: "
@@ -6963,6 +7011,11 @@ msgid ""
 "position contains a blank (#)."
 msgstr ""
 
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:72
+msgid "Updated: "
+msgstr ""
+
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:1041
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:555
 #, fuzzy, c-format
@@ -6981,13 +7034,13 @@ msgstr "Veritabanı yapısını güncelleme"
 msgid "Updating loose-leaf"
 msgstr "d- Çıkarılabilir sayfalı"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:60
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:61
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:76
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:65
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:71
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:50
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:32
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:64
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:65
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:54
 #, c-format
 msgid "VM"
@@ -7030,20 +7083,16 @@ msgstr "videokaydı"
 msgid "Villancicos"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:416
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:554
-#, fuzzy, c-format
-msgid "Visual Material"
-msgstr "Görsel Materyaller"
-
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:1199
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:689
 #, fuzzy, c-format
 msgid "Visual Materials"
 msgstr "Görsel Materyaller"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:85
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:89
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:86
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:442
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:90
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:571
 #, fuzzy, c-format
 msgid "Visual material"
 msgstr "Görsel Materyaller"
@@ -7066,8 +7115,8 @@ msgstr "Dikey:"
 msgid "Voice score with accompaniment omitted"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:257
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:285
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:266
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:290
 #, fuzzy, c-format
 msgid "Volumes: "
 msgstr "Cilt: "
@@ -7105,7 +7154,7 @@ msgid ""
 "arrangement of another work."
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1158
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1185
 #, fuzzy, c-format
 msgid "Withdrawn ("
 msgstr "İşlətmədən götürülüb (%s),"
@@ -7129,12 +7178,116 @@ msgstr "yıllık"
 msgid "Zarzuelas"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:940
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:701
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:738
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:530
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:568
+#, c-format
+msgid "[Added title page title]"
+msgstr ""
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:531
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:569
+#, c-format
+msgid "[Caption title]"
+msgstr ""
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:529
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:567
+#, fuzzy, c-format
+msgid "[Cover title]"
+msgstr "Seri Başlıkları: "
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:527
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:565
+#, c-format
+msgid "[Distinctive title]"
+msgstr ""
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:528
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:566
+#, fuzzy, c-format
+msgid "[Other title]"
+msgstr "Seri Başlıkları: "
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:526
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:564
+#, c-format
+msgid "[Parallel title]"
+msgstr ""
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:525
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:563
+#, fuzzy, c-format
+msgid "[Portion of title]"
+msgstr "Materyal Sayısı:"
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:532
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:570
+#, c-format
+msgid "[Running title]"
+msgstr ""
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:533
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:571
+#, c-format
+msgid "[Spine title]"
+msgstr ""
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:44
+#, fuzzy, c-format
+msgid "_ - Full level"
+msgstr "Ayrıntılı kataloglama"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:37
+#, fuzzy, c-format
+msgid "_ - No specific type"
+msgstr "Özel bir tür yok"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:56
+#, fuzzy, c-format
+msgid "_ - Non-ISBD"
+msgstr "ISBD-dışı"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:63
+#, fuzzy, c-format
+msgid "_ - Not specified or not applicable"
+msgstr "Geçersiz yada uygulanamaz"
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1082
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:841
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:878
 #, fuzzy, c-format
 msgid "_blank"
 msgstr "Sıralamadaki yer (Rank)"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:57
+#, fuzzy, c-format
+msgid "a - AACR 2"
+msgstr "a-AACR 2"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:38
+#, fuzzy, c-format
+msgid "a - Archival"
+msgstr "a- Arşivsel"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:5
+#, fuzzy, c-format
+msgid "a - Increase in encoding level"
+msgstr "a- Kodlama düzeyinde artış"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:12
+#, fuzzy, c-format
+msgid "a - Language material"
+msgstr "a- Dil materyalleri"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:28
+#, fuzzy, c-format
+msgid "a - Monographic component part"
+msgstr "a- Monografik tamamlayıcı parça"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:64
+#, fuzzy, c-format
+msgid "a - Set"
+msgstr "a- Ayar"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:187
 #, c-format
@@ -7180,10 +7333,6 @@ msgstr ""
 msgid "a- 8 mm. microfilm"
 msgstr "8 mm (mikrofilm)"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:269
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:271
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:267
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:269
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:261
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:263
 #, c-format
@@ -7241,10 +7390,6 @@ msgstr "ae- kartpostal"
 msgid "a- Appropriate"
 msgstr "a- Uygun"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:172
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:174
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:171
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:173
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:177
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:179
 #, c-format
@@ -7342,10 +7487,6 @@ msgstr ""
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:19
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:21
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:19
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:21
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:18
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:20
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:19
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:21
 #, c-format
@@ -7369,14 +7510,6 @@ msgstr ""
 #, c-format
 msgid "a- Language material"
 msgstr "a- Dil materyalleri"
-
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:52
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:54
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:51
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:53
-#, c-format
-msgid "a- Language material (monography)"
-msgstr "a- Dil materyali (monografi)"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_008_authorities.tt:223
 #, c-format
@@ -7428,10 +7561,6 @@ msgstr "master teyp"
 msgid "a- Meteorological"
 msgstr "meteorolojik"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:124
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:126
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:123
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:125
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:129
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:131
 #, c-format
@@ -7538,12 +7667,6 @@ msgstr "Düzenli baskı"
 msgid "a- Safety base, undetermined"
 msgstr "h- düzey belirlenmemiş"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:131
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:130
-#, c-format
-msgid "a- Serial component part"
-msgstr "a- Süreli yayın tamamlayıcı parçası"
-
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:294
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:296
 #, c-format
@@ -7617,10 +7740,6 @@ msgstr "a- İzlemeler başlıkla tutarlıdır"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:79
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:81
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:190
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:192
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:189
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:191
 #, c-format
 msgid "a- UCS/Unicode"
 msgstr "a- UCS/Unicode"
@@ -7645,20 +7764,20 @@ msgstr "Yeni Giriş"
 msgid "a- Workprint"
 msgstr "filmin deneme baskısı"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:210
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:221
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:730
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:792
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:811
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:856
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:917
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:239
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:250
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:845
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:935
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:954
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:999
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1061
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:219
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:230
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:872
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:934
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:953
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:998
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1059
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:244
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:255
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:985
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1075
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1094
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1139
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1201
 #, fuzzy, c-format
 msgid "a_t"
 msgstr "konumu"
@@ -7689,8 +7808,8 @@ msgstr "bilgisayarla"
 msgid "aat"
 msgstr "konumu"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:350
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:362
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:353
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:365
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MADS.xsl:838
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MADS.xsl:1077
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:754
@@ -7723,9 +7842,9 @@ msgstr "konumu"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:1602
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:1612
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:1620
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:840
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:861
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:872
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:860
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:881
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:892
 #: intranet-tmpl/prog/en/xslt/MARC21slim2DC.xsl:69
 #: intranet-tmpl/prog/en/xslt/MARC21slim2RDFDC.xsl:64
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:635
@@ -7736,18 +7855,20 @@ msgstr "konumu"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:949
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1342
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1350
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:386
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:399
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:518
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:964
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:975
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:385
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:398
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:535
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:979
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:990
 #, fuzzy, c-format
 msgid "ab"
 msgstr "Sekme:"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:137
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:138
+#: intranet-tmpl/prog/en/xslt/MARC21slimUtils.xsl:260
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:335
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:159
+#: opac-tmpl/bootstrap/en/xslt/MARC21slimUtils.xsl:258
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:160
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:449
 #, fuzzy, c-format
 msgid "abc"
@@ -7762,7 +7883,7 @@ msgstr "Etiket"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2DC.xsl:159
 #: intranet-tmpl/prog/en/xslt/MARC21slim2RDFDC.xsl:154
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1845
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:733
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:873
 #, c-format
 msgid "abcd"
 msgstr ""
@@ -7798,7 +7919,7 @@ msgstr ""
 msgid "abcdefghklmnoprstu4"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:793
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:933
 #, c-format
 msgid "abcdefgijklnou"
 msgstr ""
@@ -7811,26 +7932,56 @@ msgstr ""
 msgid "abcdeqnp"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:542
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:556
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:591
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:605
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1194
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:366
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1294
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:472
+#, fuzzy, c-format
+msgid "abcdeqt"
+msgstr "Barkod"
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1210
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1310
+#, fuzzy, c-format
+msgid "abcdfghiklmnoprstux"
+msgstr "yeryüzü şekilleri"
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:592
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:634
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:639
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:681
+#, fuzzy, c-format
+msgid "abcdfghiklmnporstux"
+msgstr "yeryüzü şekilleri"
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:682
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:697
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:729
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:744
 #, fuzzy, c-format
 msgid "abcdfgklmnopqrstvxyz"
 msgstr "yeryüzü şekilleri"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:767
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:794
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:893
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:953
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:909
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:814
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1033
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:968
 #, c-format
 msgid "abcdgo"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:963
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:932
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1187
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1247
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1195
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:367
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1295
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:473
+#, c-format
+msgid "abcdjqt"
+msgstr ""
+
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1105
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:952
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1400
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1274
 #, c-format
 msgid "abcdn"
 msgstr ""
@@ -7881,42 +8032,42 @@ msgstr ""
 msgid "abce"
 msgstr "Etiket"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:375
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:387
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:807
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:413
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:426
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:378
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:390
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:827
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:412
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:425
 #, fuzzy, c-format
 msgid "abceg"
 msgstr "Etiket"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:299
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:743
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:327
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:902
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:308
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:769
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:332
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:919
 #, fuzzy, c-format
 msgid "abcg"
 msgstr "Etiket"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:491
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:534
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:551
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:592
 #, fuzzy, c-format
 msgid "abchnp"
 msgstr "Etiket"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:950
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:919
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1092
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:939
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1010
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1195
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1634
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1764
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1174
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1234
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1387
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1261
 #, c-format
 msgid "abcq"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:912
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1052
 #, c-format
 msgid "abcu"
 msgstr ""
@@ -7943,21 +8094,23 @@ msgstr ""
 msgid "abfgk"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:987
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1002
 #, c-format
 msgid "abh"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:98
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:99
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:288
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:119
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:120
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:401
 #, c-format
 msgid "abhfgknps"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:463
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:502
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:507
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:519
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:544
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:557
 #, c-format
 msgid "abhfgnp"
 msgstr ""
@@ -7982,8 +8135,8 @@ msgstr "Etiket"
 msgid "abstract or summary"
 msgstr "Öz ya da özet"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:458
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:601
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:484
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:618
 #, fuzzy, c-format
 msgid "abstract or summary "
 msgstr "Öz ya da özet "
@@ -8019,8 +8172,8 @@ msgstr "Başarı"
 msgid "accompanying material"
 msgstr "Ek materyal 1"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:439
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:478
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:483
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:520
 #, fuzzy, c-format
 msgid "acdef"
 msgstr "Barkod"
@@ -8035,14 +8188,14 @@ msgstr ""
 msgid "acdenq"
 msgstr "Barkod"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:974
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1116
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:2402
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:2167
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:1967
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:943
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:963
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1645
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1198
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1258
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1411
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1285
 #, fuzzy, c-format
 msgid "acdeq"
 msgstr "Barkod"
@@ -8057,8 +8210,8 @@ msgstr "Kullanıcı"
 msgid "adfghklmnoprst"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:504
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:549
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:564
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:607
 #, fuzzy, c-format
 msgid "adfklmor"
 msgstr "flora"
@@ -8164,8 +8317,8 @@ msgstr ""
 msgid "art original"
 msgstr "orijinal"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:642
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:801
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:668
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:818
 #, fuzzy, c-format
 msgid "art original "
 msgstr "orijinal "
@@ -8178,15 +8331,15 @@ msgstr "orijinal "
 msgid "art reproduction"
 msgstr "reprodüksiyon olmayan"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:648
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:807
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:674
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:824
 #, fuzzy, c-format
 msgid "art reproduction "
 msgstr "reprodüksiyon olmayan "
 
 #. IMG
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:408
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:546
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:434
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:563
 #, fuzzy
 msgid "article"
 msgstr "Dikey"
@@ -8206,29 +8359,29 @@ msgstr "atlas"
 msgid "atlas "
 msgstr "atlas "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:678
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:773
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:820
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:913
 #, fuzzy, c-format
 msgid "atru"
 msgstr "konumu"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:138
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:160
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:139
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:161
 #, c-format
 msgid "au"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1122
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1270
 #, fuzzy, c-format
 msgid "author"
 msgstr "Yazıçı"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:162
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:178
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:193
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:191
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:207
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:222
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:171
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:187
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:202
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:196
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:212
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:227
 #, fuzzy, c-format
 msgid "av"
 msgstr "Kaydet"
@@ -8239,23 +8392,33 @@ msgstr "Kaydet"
 msgid "available online "
 msgstr "... tarihinden bu yana mevcut "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:583
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:595
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:644
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:657
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:724
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:736
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:783
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:795
 #, c-format
 msgid "avxyz"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:779
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:921
 #, fuzzy, c-format
 msgid "axz"
 msgstr "Faks"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:922
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1062
 #, c-format
 msgid "az"
 msgstr ""
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:65
+#, fuzzy, c-format
+msgid "b - Part with independent title"
+msgstr "b- Bağımsız ad taşıyan kısım"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:29
+#, fuzzy, c-format
+msgid "b - Serial component part"
+msgstr "b- Süreli yayın tamamlayıcı parçası"
 
 #. For the first occurrence,
 #. SCRIPT
@@ -8537,8 +8700,6 @@ msgstr "baskı kalıbı"
 msgid "b- Record is being updated"
 msgstr "b- Kayıt güncelleniyor"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:129
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:128
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:134
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:136
 #, c-format
@@ -8646,13 +8807,13 @@ msgstr ""
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:368
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:343
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:267
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:606
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:623
 #, c-format
 msgid "bibliography"
 msgstr "bibliyografya"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:461
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:604
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:487
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:621
 #, fuzzy, c-format
 msgid "bibliography "
 msgstr "bibliyografya "
@@ -8665,24 +8826,24 @@ msgstr "bibliyografya "
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:472
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:363
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:401
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:707
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:724
 #, c-format
 msgid "biography"
 msgstr "biyografi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:594
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:753
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:620
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:770
 #, fuzzy, c-format
 msgid "biography "
 msgstr "biyografi "
 
 #. IMG
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:403
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:406
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:411
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:541
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:544
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:549
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:429
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:432
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:437
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:558
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:561
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:566
 #, fuzzy
 msgid "book"
 msgstr "El kitapları"
@@ -8712,17 +8873,40 @@ msgstr "Braille "
 msgid "broader"
 msgstr "Sipariş"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:341
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:167
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:454
 #, fuzzy, c-format
 msgid "by "
 msgstr ", yazar: %s "
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1121
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1269
 #, c-format
 msgid "byArtist"
 msgstr ""
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:30
+#, fuzzy, c-format
+msgid "c - Collection"
+msgstr "c- Koleksiyon"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:6
+#, fuzzy, c-format
+msgid "c - Corrected or revised"
+msgstr "c- Düzeltilmiş veya gözden geçirilmiş"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:58
+#, c-format
+msgid "c - ISBD punctuation omitted"
+msgstr ""
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:13
+#, fuzzy, c-format
+msgid "c - Notated music"
+msgstr "c- Notaya dökülmüş müzik"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:66
+#, fuzzy, c-format
+msgid "c - Part with dependent title"
+msgstr "c- Bağımlı bir ad taşıyan kısım (Part with dependent title)"
 
 #. For the first occurrence,
 #. SCRIPT
@@ -8806,10 +8990,6 @@ msgstr "c- Kronolojik olarak"
 msgid "c- Collage"
 msgstr "kolaj"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:134
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:136
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:133
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:135
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:139
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:141
 #, c-format
@@ -8844,10 +9024,6 @@ msgstr "c- Ortak Kataloglama Programı"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:25
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:27
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:25
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:27
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:24
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:26
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:25
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:27
 #, c-format
@@ -8895,10 +9071,6 @@ msgstr "videokaset (videocartridge)"
 msgid "c- High reduction"
 msgstr "düşük indirim"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:274
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:276
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:272
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:274
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:266
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:268
 #, c-format
@@ -8961,10 +9133,6 @@ msgstr "c- Ulusal kütüphane derneği standartı"
 msgid "c- Nitrate: pungent odor"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:57
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:59
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:56
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:58
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:57
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:59
 #, c-format
@@ -9137,8 +9305,8 @@ msgstr "Yerler"
 msgid "catalog"
 msgstr "katalog"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:464
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:608
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:490
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:625
 #, fuzzy, c-format
 msgid "catalog "
 msgstr "katalog "
@@ -9166,10 +9334,10 @@ msgstr ""
 msgid "celestial globe"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:327
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:769
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:361
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:928
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:339
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:798
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:369
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:948
 #, fuzzy, c-format
 msgid "cg"
 msgstr "Etiket"
@@ -9184,8 +9352,8 @@ msgstr "Etiket"
 msgid "chart"
 msgstr "tablolar"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:672
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:831
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:698
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:848
 #, fuzzy, c-format
 msgid "chart "
 msgstr "tablolar "
@@ -9251,15 +9419,15 @@ msgstr "kombinasyon "
 msgid "comic strip"
 msgstr "c- Çizgi romanlar"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:567
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:726
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:593
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:743
 #, fuzzy, c-format
 msgid "comic strip "
 msgstr "c- Çizgi romanlar "
 
 #. IMG
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:414
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:552
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:440
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:569
 #, fuzzy
 msgid "computer file"
 msgstr "Bilgisayar Dosyaları"
@@ -9282,10 +9450,10 @@ msgstr ""
 msgid "conference publication"
 msgstr "toplantı yayını"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:520
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:597
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:667
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:756
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:546
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:623
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:684
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:773
 #, fuzzy, c-format
 msgid "conference publication "
 msgstr "toplantı yayını "
@@ -9306,7 +9474,7 @@ msgstr "İçerik"
 msgid "continuing"
 msgstr "Devam"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1125
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1273
 #, c-format
 msgid "contributor"
 msgstr ""
@@ -9345,6 +9513,21 @@ msgstr "silindir"
 #, fuzzy, c-format
 msgid "cylinder "
 msgstr "silindir "
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:7
+#, fuzzy, c-format
+msgid "d - Deleted"
+msgstr "d- Silindi"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:14
+#, fuzzy, c-format
+msgid "d - Manuscript notated music"
+msgstr "d- Elle notaya dökülmüş müzik"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:31
+#, c-format
+msgid "d - Subunit"
+msgstr ""
 
 #. For the first occurrence,
 #. SCRIPT
@@ -9419,10 +9602,6 @@ msgstr "da- Japonca- betik belirtilmemiş"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:30
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:32
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:30
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:32
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:29
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:31
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:30
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:32
 #, c-format
@@ -9526,10 +9705,6 @@ msgstr "d- Çıkarılabilir sayfalı"
 msgid "d- Lossy"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:62
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:64
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:61
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:63
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:62
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:64
 #, c-format
@@ -9619,10 +9794,6 @@ msgstr "d- Coğrafi olarak alt bölümlere ayrılmış&mdash;doğrudan"
 msgid "d- Subdivision"
 msgstr "d- Alt birim"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:139
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:141
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:138
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:140
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:144
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:146
 #, c-format
@@ -9677,8 +9848,8 @@ msgstr ""
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:417
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:240
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:342
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:576
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:684
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:593
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:701
 #, fuzzy, c-format
 msgid "database"
 msgstr "Veri tabanı"
@@ -9758,8 +9929,8 @@ msgstr "diyagram "
 msgid "dictionary"
 msgstr "sözlük"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:467
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:611
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:493
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:628
 #, fuzzy, c-format
 msgid "dictionary "
 msgstr "sözlük "
@@ -9794,8 +9965,8 @@ msgstr ""
 msgid "diorama"
 msgstr "dioramas"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:651
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:810
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:677
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:827
 #, fuzzy, c-format
 msgid "diorama "
 msgstr "dioramas "
@@ -9813,8 +9984,8 @@ msgstr "rehber/dizin (directory)"
 msgid "directory"
 msgstr "rehber/dizin (directory)"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:503
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:647
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:529
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:664
 #, fuzzy, c-format
 msgid "directory "
 msgstr "rehber/dizin (directory) "
@@ -9827,8 +9998,8 @@ msgstr "rehber/dizin (directory) "
 msgid "discography"
 msgstr "diskografi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:482
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:626
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:508
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:643
 #, fuzzy, c-format
 msgid "discography "
 msgstr "diskografi "
@@ -9859,10 +10030,10 @@ msgstr "yağlıboya (oil)"
 msgid "drama"
 msgstr "tiyatro oyunları"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:564
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:600
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:723
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:759
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:590
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:626
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:740
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:776
 #, fuzzy, c-format
 msgid "drama "
 msgstr "tiyatro oyunları "
@@ -9886,6 +10057,11 @@ msgstr "kombinasyon"
 #, fuzzy
 msgid "dz- Other infrared data"
 msgstr "Diğer veri"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:15
+#, fuzzy, c-format
+msgid "e - Cartographic material"
+msgstr "e- Kartografik materyal"
 
 #. For the first occurrence,
 #. SCRIPT
@@ -9932,10 +10108,6 @@ msgstr ""
 msgid "e- Analog electrical storage"
 msgstr "Elektronik kaynak türü:"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:67
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:69
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:66
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:68
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:67
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:69
 #, c-format
@@ -10125,8 +10297,8 @@ msgstr "s- elektronik "
 msgid "encyclopedia"
 msgstr "ansiklopedi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:470
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:614
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:496
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:631
 #, fuzzy, c-format
 msgid "encyclopedia "
 msgstr "ansiklopedi "
@@ -10148,18 +10320,15 @@ msgstr ""
 msgid "essay"
 msgstr "denemeler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:561
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:603
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:720
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:762
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:587
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:629
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:737
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:779
 #, fuzzy, c-format
 msgid "essay "
 msgstr "denemeler "
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:72
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:74
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:71
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:73
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:16
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:72
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:74
 #, c-format
@@ -10354,14 +10523,14 @@ msgstr "Videokaset"
 msgid "festschrift"
 msgstr "1 - anı kitabı"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:547
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:703
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:573
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:720
 #, fuzzy, c-format
 msgid "festschrift "
 msgstr "1 - anı kitabı "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:983
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:990
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1125
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:1132
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MADS.xsl:325
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MADS.xsl:332
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:1940
@@ -10369,8 +10538,8 @@ msgstr "1 - anı kitabı "
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:1995
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1478
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1485
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1207
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1214
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1420
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1427
 #, c-format
 msgid "fghkdlmor"
 msgstr ""
@@ -10397,12 +10566,12 @@ msgstr "flora"
 msgid "fiction"
 msgstr "roman"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:558
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:570
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:606
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:717
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:729
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:765
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:584
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:596
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:632
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:734
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:746
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:782
 #, fuzzy, c-format
 msgid "fiction "
 msgstr "roman "
@@ -10448,8 +10617,8 @@ msgstr "film makarası "
 msgid "filmography"
 msgstr "Biyografi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:500
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:644
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:526
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:661
 #, fuzzy, c-format
 msgid "filmography "
 msgstr "Biyografi "
@@ -10473,8 +10642,8 @@ msgstr "Filtre "
 msgid "filmstrip"
 msgstr "Filtre"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:654
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:813
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:680
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:830
 #, fuzzy, c-format
 msgid "filmstrip "
 msgstr "Filtre "
@@ -10511,8 +10680,8 @@ msgstr "film makarası "
 msgid "flash card"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:675
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:834
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:701
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:851
 #, fuzzy, c-format
 msgid "flash card "
 msgstr "ah- oyun kartları "
@@ -10525,8 +10694,8 @@ msgstr "ah- oyun kartları "
 msgid "folktale"
 msgstr "halk masalları"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:609
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:768
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:635
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:785
 #, fuzzy, c-format
 msgid "folktale "
 msgstr "halk masalları "
@@ -10535,22 +10704,17 @@ msgstr "halk masalları "
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:446
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:420
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:345
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:687
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:704
 #, fuzzy, c-format
 msgid "font"
 msgstr "Yazı:"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:206
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:204
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:198
 #, c-format
 msgid "full level"
 msgstr "en üst düzey"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:77
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:79
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:76
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:78
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:17
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:77
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:79
 #, c-format
@@ -10732,7 +10896,7 @@ msgstr "Yana Bakan Hava Radarı"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:449
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:423
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:348
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:690
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:707
 #, fuzzy, c-format
 msgid "game"
 msgstr "Ad"
@@ -10810,8 +10974,8 @@ msgstr ""
 msgid "graphic"
 msgstr "Grafit"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:663
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:822
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:689
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:839
 #, fuzzy, c-format
 msgid "graphic "
 msgstr "Grafit "
@@ -10943,8 +11107,8 @@ msgstr ""
 msgid "handbook"
 msgstr "El kitapları"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:473
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:617
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:499
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:634
 #, fuzzy, c-format
 msgid "handbook "
 msgstr "El kitapları "
@@ -10956,13 +11120,13 @@ msgstr "El kitapları "
 msgid "hdl"
 msgstr "sil"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:705
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1048
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:845
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1063
 #, c-format
 msgid "height:100px"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1013
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1028
 #, c-format
 msgid "height:100px;"
 msgstr ""
@@ -10976,18 +11140,13 @@ msgstr ""
 msgid "history"
 msgstr "Geçmiş"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:612
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:771
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:638
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:788
 #, fuzzy, c-format
 msgid "history "
 msgstr "Geçmiş "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:940
-#, c-format
-msgid "http://"
-msgstr ""
-
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:109
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:110
 #, c-format
 msgid "http://schema.org/"
 msgstr ""
@@ -11004,18 +11163,25 @@ msgstr ""
 msgid "humor, satire"
 msgstr "mizah, hiciv"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:573
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:615
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:732
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:774
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:599
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:641
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:749
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:791
 #, fuzzy, c-format
 msgid "humor, satire "
 msgstr "mizah, hiciv "
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:82
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:84
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:81
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:83
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:59
+#, c-format
+msgid "i - ISBD punctuation included"
+msgstr ""
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:32
+#, fuzzy, c-format
+msgid "i - Integrating resource"
+msgstr "i- Güncelleyici kaynak"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:18
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:82
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:84
 #, c-format
@@ -11054,10 +11220,6 @@ msgstr "Video8 (videokaset)"
 msgid "i- Cyan strip"
 msgstr "c- Çizgi romanlar"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:279
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:281
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:277
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:279
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:271
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:273
 #, c-format
@@ -11077,10 +11239,6 @@ msgstr "tamamlanmamış"
 msgid "i- Instantaneous (recorded on the spot)"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:144
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:146
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:143
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:145
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:149
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:151
 #, c-format
@@ -11145,12 +11303,6 @@ msgstr "Uzaktan algılanmış görüntü"
 msgid "i- Videodisc"
 msgstr "videodisk"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:475
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:515
-#, c-format
-msgid "iabhfgnp"
-msgstr ""
-
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:372
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:386
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:361
@@ -11159,8 +11311,8 @@ msgstr ""
 msgid "index"
 msgstr "dizin"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:479
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:623
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:505
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:640
 #, fuzzy, c-format
 msgid "index "
 msgstr "dizin "
@@ -11213,10 +11365,7 @@ msgstr "Eksik"
 msgid "issue number"
 msgstr "Yayın numarası"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:87
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:89
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:86
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:88
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:19
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:87
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:89
 #, c-format
@@ -11339,10 +11488,7 @@ msgstr ""
 msgid "jz- Other ultraviolet data"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:92
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:94
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:91
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:93
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:20
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:92
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:94
 #, c-format
@@ -11442,17 +11588,17 @@ msgstr "c- Çizgi romanlar"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:966
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:552
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:521
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:412
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:438
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:451
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:550
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:567
 #, fuzzy, c-format
 msgid "kit"
 msgstr "Araç Gereç"
 
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:126
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:645
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:671
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:209
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:804
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:821
 #, fuzzy, c-format
 msgid "kit "
 msgstr "Araç Gereç "
@@ -11558,8 +11704,8 @@ msgstr "deri"
 msgid "law report or digest"
 msgstr "Hukuk raporları ve özetler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:512
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:659
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:538
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:676
 #, fuzzy, c-format
 msgid "law report or digest "
 msgstr "Hukuk raporları ve özetler "
@@ -11613,10 +11759,10 @@ msgstr "Yerler"
 msgid "legal article"
 msgstr "hukuki makaleler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:476
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:657
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:620
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:816
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:502
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:683
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:637
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:833
 #, fuzzy, c-format
 msgid "legal article "
 msgstr "hukuki makaleler "
@@ -11629,8 +11775,8 @@ msgstr "hukuki makaleler "
 msgid "legal case and case notes"
 msgstr "Davalar ve dava notları"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:509
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:656
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:535
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:673
 #, fuzzy, c-format
 msgid "legal case and case notes "
 msgstr "Davalar ve dava notları "
@@ -11643,8 +11789,8 @@ msgstr "Davalar ve dava notları "
 msgid "legislation"
 msgstr "Mevzuat"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:485
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:629
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:511
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:646
 #, fuzzy, c-format
 msgid "legislation "
 msgstr "Mevzuat "
@@ -11657,8 +11803,8 @@ msgstr "Mevzuat "
 msgid "letter"
 msgstr "mektuplar"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:576
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:735
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:602
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:752
 #, fuzzy, c-format
 msgid "letter "
 msgstr "mektuplar "
@@ -11679,21 +11825,23 @@ msgstr ""
 msgid "loose-leaf"
 msgstr "d- Çıkarılabilir sayfalı"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:438
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:578
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:464
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:595
 #, fuzzy, c-format
 msgid "loose-leaf "
 msgstr "d- Çıkarılabilir sayfalı "
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:97
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:99
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:96
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:98
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:21
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:97
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:99
 #, c-format
 msgid "m - Computer file"
 msgstr "m - Bilgisayar dosyası"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:33
+#, fuzzy, c-format
+msgid "m - Monograph/item"
+msgstr "m- Monograf/materyal"
 
 #. For the first occurrence,
 #. SCRIPT
@@ -11807,10 +11955,6 @@ msgstr "m- Karma formlar"
 msgid "m- Monaural"
 msgstr "tek ses"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:149
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:151
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:148
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:150
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:154
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:156
 #, c-format
@@ -11917,9 +12061,9 @@ msgstr "yazma"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:976
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:329
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:306
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:415
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:441
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:228
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:553
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:570
 #, c-format
 msgid "map"
 msgstr "harita"
@@ -11947,12 +12091,12 @@ msgstr "Hesap"
 msgid "marcgac"
 msgstr "marc"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:181
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:186
 #, fuzzy, c-format
 msgid "materialTypeLabel"
 msgstr "Davamlı Yayın Tipi:"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:181
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:186
 #, fuzzy, c-format
 msgid "materialtype"
 msgstr "Davamlı Yayın Tipi:"
@@ -11980,8 +12124,8 @@ msgstr "m- Çok devletli"
 msgid "memoir"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:618
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:777
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:644
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:794
 #, fuzzy, c-format
 msgid "memoir "
 msgstr "anılar "
@@ -12090,8 +12234,8 @@ msgstr "mikroopak "
 msgid "microscope slide"
 msgstr "mikrofilm fişi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:678
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:837
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:704
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:854
 #, fuzzy, c-format
 msgid "microscope slide "
 msgstr "mikrofilm fişi "
@@ -12110,8 +12254,8 @@ msgid "mixed material"
 msgstr "p - Karma materyaller"
 
 #. IMG
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:413
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:551
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:439
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:568
 #, fuzzy
 msgid "mixed materials"
 msgstr "p - Karma materyaller"
@@ -12140,9 +12284,9 @@ msgid "model"
 msgstr "model"
 
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:139
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:681
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:707
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:222
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:840
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:857
 #, fuzzy, c-format
 msgid "model "
 msgstr "model "
@@ -12174,8 +12318,8 @@ msgstr "ay "
 msgid "motion picture"
 msgstr "sinema filmi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:669
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:828
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:695
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:845
 #, fuzzy, c-format
 msgid "motion picture "
 msgstr "sinema filmi "
@@ -12194,8 +12338,8 @@ msgid "moving image"
 msgstr "Uzaktan algılanmış görüntü"
 
 #. IMG
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:419
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:557
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:445
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:574
 msgid "music"
 msgstr "müzik"
 
@@ -12215,6 +12359,11 @@ msgstr "müzik"
 msgid "music publisher"
 msgstr "yayımcı"
 
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:8
+#, fuzzy, c-format
+msgid "n - New"
+msgstr "n- Yeni"
+
 #. For the first occurrence,
 #. SCRIPT
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:93
@@ -12230,10 +12379,6 @@ msgstr "n- Tamamlanmış otorite kaydı"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:35
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:37
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:35
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:37
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:34
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:36
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:35
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:37
 #, c-format
@@ -12313,8 +12458,8 @@ msgstr "Üye"
 msgid "newspaper"
 msgstr "gazete"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:444
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:584
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:470
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:601
 #, fuzzy, c-format
 msgid "newspaper "
 msgstr "gazete "
@@ -12349,8 +12494,8 @@ msgstr "Herkese açık olmayan not:"
 msgid "not applicable"
 msgstr "geçersiz"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:555
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:714
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:581
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:731
 #, fuzzy, c-format
 msgid "not fiction "
 msgstr "Roman dışı "
@@ -12383,8 +12528,8 @@ msgstr "Notaya dökülmüş Müzik"
 msgid "novel"
 msgstr "roman"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:579
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:738
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:605
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:755
 #, fuzzy, c-format
 msgid "novel "
 msgstr "roman "
@@ -12397,16 +12542,13 @@ msgstr "roman "
 msgid "numeric data"
 msgstr "sayısal tablo"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:533
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:680
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:559
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:697
 #, fuzzy, c-format
 msgid "numeric data "
 msgstr "sayısal tablo "
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:102
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:104
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:101
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:103
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:22
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:102
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:104
 #, c-format
@@ -12558,6 +12700,12 @@ msgstr "diğer film türü "
 msgid "other rules"
 msgstr "diğerleri"
 
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:9
+#, fuzzy, c-format
+msgid "p - Increase in encoding level from prepublication"
+msgstr "p- Kodlama düzeyini yayınöncesi düzeyden yükseltin"
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:23
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:107
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:109
 #, c-format
@@ -12589,10 +12737,6 @@ msgstr ""
 msgid "p- 8 mm."
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:40
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:42
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:39
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:41
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:40
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:42
 #, c-format
@@ -12672,8 +12816,8 @@ msgstr "patent"
 msgid "patent"
 msgstr "patent"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:544
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:700
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:570
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:717
 #, fuzzy, c-format
 msgid "patent "
 msgstr "patent "
@@ -12710,8 +12854,8 @@ msgstr ""
 msgid "periodical"
 msgstr "süreli yayın"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:447
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:587
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:473
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:604
 #, fuzzy, c-format
 msgid "periodical "
 msgstr "süreli yayın "
@@ -12767,8 +12911,8 @@ msgstr "fotoprint "
 msgid "picture"
 msgstr "resim"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:660
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:819
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:686
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:836
 #, fuzzy, c-format
 msgid "picture "
 msgstr "resim "
@@ -12787,8 +12931,8 @@ msgstr ""
 msgid "poetry"
 msgstr "şiirler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:621
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:780
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:647
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:797
 #, fuzzy, c-format
 msgid "poetry "
 msgstr "şiirler "
@@ -12843,8 +12987,8 @@ msgstr "profil "
 msgid "programmed text"
 msgstr "programlanmış metinler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:497
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:641
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:523
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:658
 #, fuzzy, c-format
 msgid "programmed text "
 msgstr "programlanmış metinler "
@@ -12927,10 +13071,7 @@ msgstr ""
 msgid "q- Roll"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:107
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:109
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:106
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:108
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:24
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:112
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:114
 #, c-format
@@ -13000,14 +13141,6 @@ msgstr "a- otobiyografi"
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:93
 msgid "r- Reference print/viewing copy"
 msgstr ""
-
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:302
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:304
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:300
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:302
-#, c-format
-msgid "r- Related record required"
-msgstr "r- İlgili kayıt gereklidir"
 
 #. For the first occurrence,
 #. SCRIPT
@@ -13083,13 +13216,13 @@ msgstr ""
 msgid "realia"
 msgstr "kopyalar"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:684
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:843
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:710
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:860
 #, fuzzy, c-format
 msgid "realia "
 msgstr "kopyalar "
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:108
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:109
 #, fuzzy, c-format
 msgid "record"
 msgstr "%s yazı"
@@ -13126,8 +13259,8 @@ msgstr "normal baskı "
 msgid "rehearsal"
 msgstr "provalar"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:624
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:783
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:650
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:800
 #, fuzzy, c-format
 msgid "rehearsal "
 msgstr "provalar "
@@ -13185,52 +13318,52 @@ msgstr "Yerine Koyma Ücreti"
 msgid "reporting"
 msgstr "raporlama"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:627
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:786
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:653
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:803
 #, fuzzy, c-format
 msgid "reporting "
 msgstr "raporlama "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:744
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:862
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:770
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:882
 #, fuzzy, c-format
 msgid "results_summary"
 msgstr "Sayıların özet bilgisi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:376
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:414
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:379
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:413
 #, fuzzy, c-format
 msgid "results_summary description"
 msgstr "Sayıların özet bilgisi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:351
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:387
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:354
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:386
 #, fuzzy, c-format
 msgid "results_summary edition"
 msgstr "Sayıların özet bilgisi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:464
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:503
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:965
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:508
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:545
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:980
 #, fuzzy, c-format
 msgid "results_summary other_title"
 msgstr "Sayıların özet bilgisi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:300
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:328
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:903
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:309
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:333
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:920
 #, fuzzy, c-format
 msgid "results_summary publisher"
 msgstr "Sayıların özet bilgisi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:163
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:192
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:172
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:197
 #, fuzzy, c-format
 msgid "results_summary series"
 msgstr "Sayıların özet bilgisi"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:505
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:550
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:565
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:608
 #, fuzzy, c-format
 msgid "results_summary uniform_title"
 msgstr "Sayıların özet bilgisi"
@@ -13243,8 +13376,8 @@ msgstr "Sayıların özet bilgisi"
 msgid "review"
 msgstr "Önizleme"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:494
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:638
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:520
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:655
 #, fuzzy, c-format
 msgid "review "
 msgstr "Önizleme "
@@ -13280,6 +13413,11 @@ msgstr ""
 #, c-format
 msgid "rvm"
 msgstr ""
+
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:34
+#, fuzzy, c-format
+msgid "s - Serial"
+msgstr "s- Süreğen"
 
 #. For the first occurrence,
 #. SCRIPT
@@ -13336,10 +13474,6 @@ msgstr "s- Sears Konu Başlıkları Listesi"
 msgid "s- Section"
 msgstr "bölüm"
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:154
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:156
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:153
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:155
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:159
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:161
 #, c-format
@@ -13428,13 +13562,13 @@ msgid "sa- Magnetic field"
 msgstr "a- Mikrofilm"
 
 #. IMG
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:417
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:555
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:443
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:572
 msgid "score"
 msgstr "skor"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:165
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:194
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:174
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:199
 #, fuzzy, c-format
 msgid "se"
 msgstr "Kullanıldı"
@@ -13456,8 +13590,8 @@ msgid "section "
 msgstr "bölüm "
 
 #. IMG
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:407
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:545
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:433
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:562
 msgid "serial"
 msgstr "süreli yayın"
 
@@ -13469,8 +13603,8 @@ msgstr "süreli yayın"
 msgid "series"
 msgstr "Seriler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:441
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:581
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:467
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:598
 #, fuzzy, c-format
 msgid "series "
 msgstr "Seriler "
@@ -13483,8 +13617,8 @@ msgstr "Seriler "
 msgid "short story"
 msgstr "kısa hikaye"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:582
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:741
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:608
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:758
 #, fuzzy, c-format
 msgid "short story "
 msgstr "kısa hikaye "
@@ -13504,8 +13638,8 @@ msgstr "Müzik"
 msgid "slide"
 msgstr "Hatırlatıldı"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:687
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:846
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:713
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:863
 #, fuzzy, c-format
 msgid "slide "
 msgstr "Hatırlatıldı "
@@ -13526,15 +13660,15 @@ msgstr "multimedya"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:519
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:538
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:508
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:418
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:444
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:437
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:556
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:573
 #, fuzzy, c-format
 msgid "sound"
 msgstr "sesler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:630
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:789
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:656
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:806
 #, fuzzy, c-format
 msgid "sound "
 msgstr "sesler "
@@ -13638,10 +13772,10 @@ msgstr "Özelleştirilmiş"
 msgid "speech"
 msgstr "s- Konuşmalar"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:585
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:633
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:744
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:792
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:611
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:659
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:761
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:809
 #, fuzzy, c-format
 msgid "speech "
 msgstr "s- Konuşmalar "
@@ -13659,8 +13793,8 @@ msgstr "pastel"
 msgid "statistics"
 msgstr "istatistikler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:506
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:650
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:532
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:667
 #, fuzzy, c-format
 msgid "statistics "
 msgstr "istatistikler "
@@ -13707,16 +13841,13 @@ msgstr ""
 msgid "survey of literature"
 msgstr "çocuk edebiyatı"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:491
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:635
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:517
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:652
 #, fuzzy, c-format
 msgid "survey of literature "
 msgstr "çocuk edebiyatı "
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:112
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:114
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:111
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:113
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:25
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:117
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:119
 #, c-format
@@ -13850,9 +13981,9 @@ msgid "technical drawing"
 msgstr "teknik çizim"
 
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:200
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:666
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:692
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:298
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:825
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:842
 #, fuzzy, c-format
 msgid "technical drawing "
 msgstr "teknik çizim "
@@ -13861,7 +13992,7 @@ msgstr "teknik çizim "
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:416
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:391
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:315
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:654
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:671
 #, c-format
 msgid "technical report"
 msgstr "teknik rapor"
@@ -13907,8 +14038,8 @@ msgstr ""
 msgid "theses"
 msgstr "Tezler"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:488
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:632
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:514
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:649
 #, fuzzy, c-format
 msgid "theses "
 msgstr "Tezler "
@@ -13940,8 +14071,8 @@ msgstr "title"
 msgid "toy"
 msgstr "oyuncaklar"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:696
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:855
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:722
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:872
 #, fuzzy, c-format
 msgid "toy "
 msgstr "konumu : "
@@ -13964,9 +14095,9 @@ msgid "transparency"
 msgstr "saydamlar"
 
 #: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:215
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:690
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:716
 #: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:319
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:849
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:866
 #, fuzzy, c-format
 msgid "transparency "
 msgstr "saydamlar "
@@ -13979,22 +14110,20 @@ msgstr "saydamlar "
 msgid "treaty"
 msgstr "anlaşmalar"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:515
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:662
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:541
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:679
 #, fuzzy, c-format
 msgid "treaty "
 msgstr "anlaşmalar "
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:673
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:768
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:815
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:908
 #, c-format
 msgid "tru"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:246
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:248
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:244
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:246
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:52
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:60
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:238
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:240
 #, c-format
@@ -14006,10 +14135,6 @@ msgstr "u - Bilinmeyen"
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_007.tt:93
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_008_authorities.tt:700
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_field_008_authorities.tt:702
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:284
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:286
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:282
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:284
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:276
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:278
 #, c-format
@@ -14028,6 +14153,11 @@ msgstr "u- Başlığın resmi kurum olup olmadığı bilinmiyor"
 #, fuzzy
 msgid "u- Unspecified"
 msgstr "Belirlenmemiş"
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:72
+msgid "unset"
+msgstr ""
 
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:2026
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:1779
@@ -14107,8 +14237,8 @@ msgstr ""
 msgid "v- Videorecording"
 msgstr "videokaydı"
 
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:618
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1160
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:757
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:1369
 #, c-format
 msgid "vertical-align:middle"
 msgstr ""
@@ -14149,8 +14279,8 @@ msgstr "videodisk"
 msgid "videorecording"
 msgstr "video kaydı"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:693
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:852
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:719
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:869
 #, fuzzy, c-format
 msgid "videorecording "
 msgstr "video kaydı "
@@ -14186,22 +14316,22 @@ msgid "view "
 msgstr "görüntüle "
 
 #. IMG
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:416
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:554
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:442
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:571
 #, fuzzy
 msgid "visual material"
 msgstr "Görsel Materyaller"
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:557
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:596
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:698
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:737
 #: intranet-tmpl/prog/en/xslt/MARC21slim2SRWDC.xsl:126
 #: intranet-tmpl/prog/en/xslt/MARC21slim2SRWDC.xsl:141
 #: intranet-tmpl/prog/en/xslt/MARC21slim2SRWDC.xsl:156
 #: intranet-tmpl/prog/en/xslt/MARC21slim2SRWDC.xsl:171
 #: intranet-tmpl/prog/en/xslt/MARC21slim2SRWDC.xsl:185
 #: intranet-tmpl/prog/en/xslt/MARC21slim2SRWDC.xsl:207
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:606
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:658
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:745
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:796
 #, c-format
 msgid "vxyz"
 msgstr ""
@@ -14236,7 +14366,7 @@ msgstr "video kaydı"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:356
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:332
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:255
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:591
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:608
 #, fuzzy, c-format
 msgid "web site"
 msgstr "Web sitesi:"
@@ -14307,14 +14437,14 @@ msgstr "Görüntüle"
 msgid "y3"
 msgstr ""
 
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:632
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetDetail.xsl:774
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:2043
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:1796
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:1639
-#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:891
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:709
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1017
-#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1052
+#: intranet-tmpl/prog/en/xslt/MARC21slim2intranetResults.xsl:911
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACDetail.xsl:849
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1032
+#: opac-tmpl/bootstrap/en/xslt/MARC21slim2OPACResults.xsl:1067
 #, c-format
 msgid "y3z"
 msgstr ""
@@ -14339,24 +14469,21 @@ msgstr ""
 msgid "yes"
 msgstr "Evet"
 
+#: intranet-tmpl/prog/en/includes/cateditor-widgets-marc21.inc:53
+#, fuzzy, c-format
+msgid "z - Not applicable"
+msgstr "z- Geçersiz"
+
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:60
 #, fuzzy, c-format
 msgid "z- Authority data "
 msgstr "z- Otorite verileri "
 
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:251
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:249
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:243
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader.tt:245
 #, c-format
 msgid "z- Not applicable"
 msgstr "z- Geçersiz"
-
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_computerfile.tt:253
-#: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_book.tt:251
-#, c-format
-msgid "z- Not applicableFull level"
-msgstr "z- Geçersiz Tam kataloglama"
 
 #. For the first occurrence,
 #. SCRIPT

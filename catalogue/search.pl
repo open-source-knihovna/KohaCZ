@@ -147,12 +147,12 @@ use C4::Search;
 use C4::Languages qw(getLanguages);
 use C4::Koha;
 use C4::Members qw(GetMember);
-use C4::VirtualShelves;
 use URI::Escape;
 use POSIX qw(ceil floor);
-use String::Random;
 use C4::Branch; # GetBranches
 use C4::Search::History;
+
+use Koha::Virtualshelves;
 
 use URI::Escape;
 
@@ -263,11 +263,11 @@ foreach my $advanced_srch_type (@advanced_search_types) {
    if ($advanced_srch_type eq 'itemtypes') {
    # itemtype is a special case, since it's not defined in authorized values
         my @itypesloop;
-	foreach my $thisitemtype ( sort {$itemtypes->{$a}->{'description'} cmp $itemtypes->{$b}->{'description'} } keys %$itemtypes ) {
+        foreach my $thisitemtype ( sort {$itemtypes->{$a}->{translated_description} cmp $itemtypes->{$b}->{translated_description} } keys %$itemtypes ) {
 	    my %row =(  number=>$cnt++,
 		ccl => "$itype_or_itemtype,phr",
                 code => $thisitemtype,
-                description => $itemtypes->{$thisitemtype}->{'description'},
+                description => $itemtypes->{$thisitemtype}->{translated_description},
                 imageurl=> getitemtypeimagelocation( 'intranet', $itemtypes->{$thisitemtype}->{'imageurl'} ),
             );
 	    push @itypesloop, \%row;
@@ -747,14 +747,25 @@ if ($query_desc || $limit_desc) {
 
 # VI. BUILD THE TEMPLATE
 
-# Build drop-down list for 'Add To:' menu...
-my ($totalref, $pubshelves, $barshelves)=
-	C4::VirtualShelves::GetSomeShelfNames($borrowernumber,'COMBO',1);
+my $some_private_shelves = Koha::Virtualshelves->get_some_shelves(
+    {
+        borrowernumber => $borrowernumber,
+        add_allowed    => 1,
+        category       => 1,
+    }
+);
+my $some_public_shelves = Koha::Virtualshelves->get_some_shelves(
+    {
+        borrowernumber => $borrowernumber,
+        add_allowed    => 1,
+        category       => 2,
+    }
+);
+
+
 $template->param(
-        addbarshelves     => $totalref->{bartotal},
-        addbarshelvesloop => $barshelves,
-	addpubshelves     => $totalref->{pubtotal},
-	addpubshelvesloop => $pubshelves,
-	);
+    add_to_some_private_shelves => $some_private_shelves,
+    add_to_some_public_shelves  => $some_public_shelves,
+);
 
 output_html_with_http_headers $cgi, $cookie, $template->output;

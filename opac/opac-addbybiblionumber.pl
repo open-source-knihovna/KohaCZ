@@ -1,9 +1,6 @@
 #!/usr/bin/perl
 
 #script to provide virtualshelf management
-# WARNING: This file uses 4-character tabs!
-#
-# $Header$
 #
 # Copyright 2000-2002 Katipo Communications
 #
@@ -27,9 +24,10 @@ use warnings;
 
 use CGI qw ( -utf8 );
 use C4::Biblio;
-use C4::VirtualShelves qw/:DEFAULT GetAllShelves/;
 use C4::Output;
 use C4::Auth;
+
+use Koha::Virtualshelves;
 
 our $query        	= new CGI;
 our @biblionumber 	= $query->param('biblionumber');
@@ -41,6 +39,11 @@ our $category     	= $query->param('category');
 our $authorized          = 1;
 our $errcode		= 0;
 our @biblios;
+
+
+if (scalar(@biblionumber) == 1) {
+    @biblionumber = (split /\//,$biblionumber[0]);
+}
 
 our ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     {
@@ -73,87 +76,114 @@ else {
 }
 #end
 
-sub AddBibliosToShelf {
-    #splits incoming biblionumber(s) to array and adds each to shelf.
-    my ($shelfnumber,@biblionumber)=@_;
-
-    #multiple bibs might come in as '/' delimited string (from where, i don't see), or as array.
-    if (scalar(@biblionumber) == 1) {
-        @biblionumber = (split /\//,$biblionumber[0]);
-    }
-    for my $bib (@biblionumber) {
-        AddToShelf($bib, $shelfnumber, $loggedinuser);
-    }
-}
-
 sub HandleNewVirtualShelf {
-    if($authorized= ShelfPossibleAction($loggedinuser, undef, $category==1? 'new_private': 'new_public')) {
-    $shelfnumber = AddShelf( {
-            shelfname => $newvirtualshelf,
-            category => $category }, $loggedinuser);
-    if($shelfnumber == -1) {
-        $authorized=0;
-        $errcode=1;
-        return;
-    }
-    AddBibliosToShelf($shelfnumber, @biblionumber);
-    #Reload the page where you came from
-    print $query->header;
-    print "<html><meta http-equiv=\"refresh\" content=\"0\" /><body onload=\"window.opener.location.reload(true);self.close();\"></body></html>";
+    if ( $loggedinuser > 0 and
+        (
+            $category == 1
+                or $category == 2 and $loggedinuser>0 && C4::Context->preference('OpacAllowPublicListCreation')
+        )
+    ) {
+        my $shelf = eval {
+            Koha::Virtualshelf->new(
+                {
+                    shelfname => $newvirtualshelf,
+                    category => $category,
+                    owner => $loggedinuser,
+                }
+            )->store;
+        };
+        if ( $@ or not $shelf ) {
+            $authorized = 0;
+            $errcode = 1;
+            return;
+        }
+
+        for my $bib (@biblionumber) {
+            $shelf->add_biblio( $bib, $loggedinuser );
+        }
+
+        #Reload the page where you came from
+        print $query->header;
+        print "<html><meta http-equiv=\"refresh\" content=\"0\" /><body onload=\"window.opener.location.reload(true);self.close();\"></body></html>";
     }
 }
 
 sub HandleShelfNumber {
-    if($authorized= ShelfPossibleAction($loggedinuser, $shelfnumber, 'add')) {
-    AddBibliosToShelf($shelfnumber,@biblionumber);
-    #Close this page and return
-    print $query->header;
-    print "<html><meta http-equiv=\"refresh\" content=\"0\" /><body onload=\"self.close();\"></body></html>";
+    my $shelfnumber = $query->param('shelfnumber');
+    my $shelf = Koha::Virtualshelves->find( $shelfnumber );
+    if ( $shelf->can_biblios_be_added( $loggedinuser ) ) {
+        for my $bib (@biblionumber) {
+            $shelf->add_biblio( $bib, $loggedinuser );
+        }
+        #Close this page and return
+        print $query->header;
+        print "<html><meta http-equiv=\"refresh\" content=\"0\" /><body onload=\"self.close();\"></body></html>";
+    } else {
+        # TODO
     }
 }
 
 sub HandleSelectedShelf {
-    if($authorized= ShelfPossibleAction( $loggedinuser, $selectedshelf, 'add')){
-        #adding to specific shelf
-        my ($singleshelf, $singleshelfname)= GetShelf($query->param('selectedshelf'));
+    my $shelfnumber = $query->param('selectedshelf');
+    my $shelf = Koha::Virtualshelves->find( $shelfnumber );
+    if ( $shelf->can_biblios_be_added( $loggedinuser ) ) {
         $template->param(
-        singleshelf               => 1,
-        shelfnumber               => $singleshelf,
-        shelfname                 => $singleshelfname,
+            singleshelf               => 1,
+            shelfnumber               => $shelf->shelfnumber,
+            shelfname                 => $shelf->shelfname,
         );
+    } else {
+        # TODO
     }
 }
 
 sub HandleSelect {
     return unless $authorized= $loggedinuser>0;
-    my $privateshelves = GetAllShelves(1,$loggedinuser,1);
-    if(@{$privateshelves}){
-        $template->param (
-        privatevirtualshelves          => $privateshelves,
-        existingshelves => 1
+    my $private_shelves = Koha::Virtualshelves->search(
+        {
+            category => 1,
+            owner => $loggedinuser,
+        },
+        { order_by => 'shelfname' }
     );
-    }
-    my $publicshelves = GetAllShelves(2,$loggedinuser,1);
-    if(@{$publicshelves}){
-        $template->param (
-        publicvirtualshelves          => $publicshelves,
-        existingshelves => 1
+    my $shelves_shared_with_me = Koha::Virtualshelves->search(
+        {
+            category => 1,
+            'virtualshelfshares.borrowernumber' => $loggedinuser,
+            -or => {
+                allow_add => 1,
+                owner => $loggedinuser,
+            }
+        },
+        {
+            join => 'virtualshelfshares',
+        }
     );
-    }
+    my $public_shelves= Koha::Virtualshelves->search(
+        {
+            category => 2,
+            -or => {
+                allow_add => 1,
+                owner => $loggedinuser,
+            }
+        },
+        { order_by => 'shelfname' }
+    );
+    $template->param (
+        private_shelves => $private_shelves,
+        private_shelves_shared_with_me => $shelves_shared_with_me,
+        public_shelves  => $public_shelves,
+    );
 }
 
 sub LoadBib {
-    #see comment in AddBibliosToShelf
-    if (scalar(@biblionumber) == 1) {
-        @biblionumber = (split /\//,$biblionumber[0]);
-    }
     for my $bib (@biblionumber) {
         my $data = GetBiblioData( $bib );
-    push(@biblios,
-        { biblionumber => $bib,
-          title        => $data->{'title'},
-          author       => $data->{'author'},
-    } );
+        push(@biblios,
+            { biblionumber => $bib,
+              title        => $data->{'title'},
+              author       => $data->{'author'},
+        } );
     }
     $template->param(
         multiple => (scalar(@biblios) > 1),

@@ -254,6 +254,18 @@ msgstr "Empêcher"
 msgid "admin.pref#IndependentBranches# staff (but not superlibrarians) from modifying objects (holds, items, patrons, etc.) belonging to other libraries."
 msgstr "le personnel d'un site (sauf les superbibliothécaires) de modifier des éléments (réservations, adhérents, exemplaires...) appartenant à d'autres sites."
 
+# Administration > Login options
+msgid "admin.pref#IndependentBranchesPatronModifications# Don't prevent"
+msgstr ""
+
+# Administration > Login options
+msgid "admin.pref#IndependentBranchesPatronModifications# Prevent"
+msgstr ""
+
+# Administration > Login options
+msgid "admin.pref#IndependentBranchesPatronModifications# staff (but not superlibrarians) from viewing and approving/denying patron modification requests for patrons belonging to other libraries."
+msgstr ""
+
 # Administration > Interface options
 msgid "admin.pref#KohaAdminEmailAddress# Use"
 msgstr "Utiliser"
@@ -331,8 +343,8 @@ msgid "admin.pref#UsageStats# Share"
 msgstr "Partager"
 
 # Administration > Share anonymous usage statistics
-msgid "admin.pref#UsageStats# anonymous Koha usage data with the Koha community. You can see the data on the <a href=\"http://hea.koha-community.org\">Hea Koha community website</a>."
-msgstr "anonymement vos statistiques d'utilisation de Koha avec la communauté internationale. Vous pouvez consulter les données sur le site <a href=\"http://hea.koha-community.org\">Site communautaire Koha Hea</a>."
+msgid "admin.pref#UsageStats# anonymous Koha usage data with the Koha community. You can see the data on the <a href=\"http://hea.koha-community.org\">Hea Koha community website</a>. You have to run misc/cronjobs/share_usage_with_koha_community.pl in a cronjob."
+msgstr ""
 
 # Administration > Share anonymous usage statistics
 msgid "admin.pref#UsageStatsCountry# Note that this value has no effect if the UsageStats system preference is set to \"Don't share\""
@@ -678,6 +690,10 @@ msgstr "Catalogage"
 msgid "cataloguing.pref Display"
 msgstr "Affichage"
 
+# Cataloging > Exporting
+msgid "cataloguing.pref Exporting"
+msgstr ""
+
 # Cataloging > Importing
 msgid "cataloguing.pref Importing"
 msgstr "Importation"
@@ -741,6 +757,32 @@ msgstr "."
 # Cataloging > Display
 msgid "cataloguing.pref#AuthoritySeparator# Separate multiple displayed authors, series or subjects with "
 msgstr "Séparer les multiples auteurs, collections et sujets avec "
+
+# Cataloging > Exporting
+# Cataloging > Exporting
+# Cataloging > Exporting
+msgid "cataloguing.pref#BibtexExportAdditionalFields# <br/>"
+msgstr ""
+
+# Cataloging > Exporting
+msgid "cataloguing.pref#BibtexExportAdditionalFields# All values of repeating tags and subfields will be printed with the given BibTeX tag."
+msgstr ""
+
+# Cataloging > Exporting
+msgid "cataloguing.pref#BibtexExportAdditionalFields# Include following fields when exporting BibTeX,"
+msgstr ""
+
+# Cataloging > Exporting
+msgid "cataloguing.pref#BibtexExportAdditionalFields# To specificy multiple marc tags/subfields as targets for a repeating BibTex tag, use the following format: BT_TAG: [TAG2$SUBFIELD1, TAG2$SUBFIELD2] ( e.g. notes: [501$a, 505$g] )"
+msgstr ""
+
+# Cataloging > Exporting
+msgid "cataloguing.pref#BibtexExportAdditionalFields# Use '@' ( with quotes ) as the BT_TAG to replace the bibtex record type with a field value of your choosing."
+msgstr ""
+
+# Cataloging > Exporting
+msgid "cataloguing.pref#BibtexExportAdditionalFields# Use one line per tag in the format BT_TAG: TAG$SUBFIELD ( e.g. lccn: 010$a )"
+msgstr ""
 
 # Cataloging > Interface
 msgid "cataloguing.pref#DefaultClassificationSource# Use"
@@ -814,6 +856,34 @@ msgstr "Utiliser le <a href=\"http://www.loc.gov/marc/organizations/orgshome.htm
 msgid "cataloguing.pref#MARCOrgCode# by default in new MARC21 records (leave blank to disable)."
 msgstr "valeur par défaut dans les nouvelles notices MARC21 (laisser vide pour désactiver)"
 
+# Cataloging > Display
+msgid "cataloguing.pref#MergeReportFields# <br />example: '001,245ab,600'"
+msgstr ""
+
+# Cataloging > Display
+msgid "cataloguing.pref#MergeReportFields# <li>all subfields of fields 600</li>"
+msgstr ""
+
+# Cataloging > Display
+msgid "cataloguing.pref#MergeReportFields# <li>subfields a and b of fields 245</li>"
+msgstr ""
+
+# Cataloging > Display
+msgid "cataloguing.pref#MergeReportFields# <li>value of 001</li>"
+msgstr ""
+
+# Cataloging > Display
+msgid "cataloguing.pref#MergeReportFields# <ul>"
+msgstr ""
+
+# Cataloging > Display
+msgid "cataloguing.pref#MergeReportFields# displays:"
+msgstr ""
+
+# Cataloging > Display
+msgid "cataloguing.pref#MergeReportFields# fields to display for deleted records after merge"
+msgstr ""
+
 # Cataloging > Record Structure
 msgid "cataloguing.pref#NewItemsDefaultLocation# (should be a location code, or blank to disable)."
 msgstr "(doit être un code de localisation valide ou bien laissé vide pour désactiver cette fonctionnalité)."
@@ -877,6 +947,32 @@ msgstr "le nouvel exemplaire n'est pas pré-rempli avec les dernières valeurs d
 # Cataloging > Record Structure
 msgid "cataloguing.pref#PrefillItem# the new item is prefilled with last created item values."
 msgstr "le nouvel exemplaire est pré-rempli avec les dernières valeurs de l'exemplaire créé."
+
+# Cataloging > Exporting
+# Cataloging > Exporting
+# Cataloging > Exporting
+msgid "cataloguing.pref#RisExportAdditionalFields# <br/>"
+msgstr ""
+
+# Cataloging > Exporting
+msgid "cataloguing.pref#RisExportAdditionalFields# All values of repeating tags and subfields will be printed with the given RIS tag."
+msgstr ""
+
+# Cataloging > Exporting
+msgid "cataloguing.pref#RisExportAdditionalFields# Include following fields when exporting RIS,"
+msgstr ""
+
+# Cataloging > Exporting
+msgid "cataloguing.pref#RisExportAdditionalFields# To specificy multiple marc tags/subfields as targets for a repeating RIS tag, use the following format: RIS_TAG: [TAG2$SUBFIELD1, TAG2$SUBFIELD2] ( e.g. NT: [501$a, 505$g] )"
+msgstr ""
+
+# Cataloging > Exporting
+msgid "cataloguing.pref#RisExportAdditionalFields# Use of TY ( record type ) as a key will <i>replace</i> the default TY with the field value of your choosing."
+msgstr ""
+
+# Cataloging > Exporting
+msgid "cataloguing.pref#RisExportAdditionalFields# Use one line per tag in the format RIS_TAG: TAG$SUBFIELD ( e.g. LC: 010$a )"
+msgstr ""
 
 # Cataloging > Display
 msgid "cataloguing.pref#SeparateHoldings# Don't separate"
@@ -1129,6 +1225,10 @@ msgstr "(séparées par des virgules) dans les zones MARC appropriées en import
 # Circulation
 msgid "circulation.pref"
 msgstr "Circulation"
+
+# Circulation > Batch checkout
+msgid "circulation.pref Batch checkout"
+msgstr ""
 
 # Circulation > Checkin Policy
 msgid "circulation.pref Checkin Policy"
@@ -1434,6 +1534,26 @@ msgstr "Ne pas transférer"
 msgid "circulation.pref#AutomaticItemReturn# automatically transfer items to their home library when they are returned."
 msgstr "transférer automatiquement les exemplaires à leur bibliothèque de rattachement quand ils sont retournés."
 
+# Circulation > Batch checkout
+msgid "circulation.pref#BatchCheckouts# Allow"
+msgstr ""
+
+# Circulation > Batch checkout
+msgid "circulation.pref#BatchCheckouts# Don't allow"
+msgstr ""
+
+# Circulation > Batch checkout
+msgid "circulation.pref#BatchCheckouts# batch checkouts"
+msgstr ""
+
+# Circulation > Batch checkout
+msgid "circulation.pref#BatchCheckoutsValidCategories# (list of patron categories separated with a pipe '|')"
+msgstr ""
+
+# Circulation > Batch checkout
+msgid "circulation.pref#BatchCheckoutsValidCategories# Patron categories allowed to checkout in a batch"
+msgstr ""
+
 # Circulation > Checkin Policy
 msgid "circulation.pref#BlockReturnOfWithdrawnItems# Block"
 msgstr "Bloquer"
@@ -1521,6 +1641,26 @@ msgstr "Confirmer les futures demandes de réservations (départ au plus tard"
 # Circulation > Holds Policy
 msgid "circulation.pref#ConfirmFutureHolds# days from now) at checkin time. Note that this number of days will be used too in calculating the default end date for the Holds to pull-report. But it does not interfere with issuing, renewing or transferring books."
 msgstr "jours à partir de maintenant) au moment de notre arrivée. A noter que ce nombre de jours sera utilisé aussi dans le calcul de la date de fin par défaut pour les cales de pull-rapport. Mais il n'interfère pas avec la délivrance, le renouvellement ou le transfert de livres."
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#ConsiderOnSiteCheckoutsAsNormalCheckouts# Consider"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#ConsiderOnSiteCheckoutsAsNormalCheckouts# Don't consider"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#ConsiderOnSiteCheckoutsAsNormalCheckouts# If disabled, both values will be checked separately."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#ConsiderOnSiteCheckoutsAsNormalCheckouts# If enabled, the number of checkouts allowed will be normal checkouts + on-site checkouts."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#ConsiderOnSiteCheckoutsAsNormalCheckouts# on-site checkouts as normal checkouts."
+msgstr ""
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#DefaultLongOverdueChargeValue# <br>(Used when the longoverdue.pl script is called without the --charge parameter)"
@@ -1693,18 +1833,6 @@ msgstr "la bibliothèque de l'exemplaire"
 # Circulation > Checkout Policy
 msgid "circulation.pref#HomeOrHoldingBranch# the library the item was checked out from."
 msgstr "la bibliothèque où l'exemplaire a été emprunté"
-
-# Circulation > Checkout Policy
-msgid "circulation.pref#HomeOrHoldingBranchReturn# On checkin route the returned item to"
-msgstr "Lors de la restitution, l'exemplaire est remis à"
-
-# Circulation > Checkout Policy
-msgid "circulation.pref#HomeOrHoldingBranchReturn# the library the item is from."
-msgstr "la bibliothèque à laquelle il appartient"
-
-# Circulation > Checkout Policy
-msgid "circulation.pref#HomeOrHoldingBranchReturn# the library the item was checked out from."
-msgstr "la bibliothèque où il a été emprunté."
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#InProcessingToShelvingCart# Don't move"
@@ -1880,6 +2008,22 @@ msgid "circulation.pref#OverduesBlockCirc# when checking out to a borrower that 
 msgstr "quand un prêt est fait à un utilisateurs qui détient des documents en retards."
 
 # Circulation > Checkout Policy
+msgid "circulation.pref#OverduesBlockRenewing# When a patron's checked out item is overdue,"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#OverduesBlockRenewing# allow renewing."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#OverduesBlockRenewing# block renewing for all the patron's items."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#OverduesBlockRenewing# block renewing only for this item."
+msgstr ""
+
+# Circulation > Checkout Policy
 msgid "circulation.pref#PrintNoticesMaxLines# Include up to"
 msgstr "Inclure jusqu'à"
 
@@ -1998,6 +2142,22 @@ msgstr "Ne pas marquer automatiquement"
 # Circulation > Holds Policy
 msgid "circulation.pref#ReservesNeedReturns# mark a hold as found and waiting when a hold is placed on a specific item and that item is already checked in."
 msgstr "signale que la réservation a été trouvée et en attente quand celle-ci a été réalisée sur un exemplaire précis et que cet exemplaire est déjà emprunté."
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#RestrictionBlockRenewing# Allow"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#RestrictionBlockRenewing# Block"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#RestrictionBlockRenewing# If patron is restricted,"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#RestrictionBlockRenewing# renewing of items."
+msgstr ""
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#ReturnBeforeExpiry# Don't require"
@@ -2460,18 +2620,6 @@ msgid "circulation.pref#previousIssuesDefaultSortOrder# latest to earliest"
 msgstr "du plus récent au plus ancien"
 
 # Circulation > Interface
-msgid "circulation.pref#soundon# Don't enable"
-msgstr "Désactiver"
-
-# Circulation > Interface
-msgid "circulation.pref#soundon# Enable"
-msgstr "Activer"
-
-# Circulation > Interface
-msgid "circulation.pref#soundon# circulation sounds during checkin and checkout in the staff interface.  Not supported by all web browsers yet."
-msgstr "les effets sonores dans l'interface pro de circulation. Non supportée par tous les navigateurs."
-
-# Circulation > Interface
 msgid "circulation.pref#todaysIssuesDefaultSortOrder# Sort today's checkouts on the circulation page from"
 msgstr "Trier les prêts du jour à l'écran de circulation"
 
@@ -2776,8 +2924,8 @@ msgid "enhanced_content.pref#IDreamBooksReadometer# Don't add"
 msgstr "Ne pas ajouter"
 
 # Enhanced Content > IDreamLibraries
-msgid "enhanced_content.pref#IDreamBooksReadometer# a \"Readometer\" that summarizes the reviews gathered by <a href='http://idreambooks.com/'>IDreamBooks.com</a> to the OPAC details page."
-msgstr "un 'Readometer' qui résume les commentaires recueillis par <a href='http://idreambooks.com/'> IDreamBooks.com </a> sur la page des détails à l'OPAC."
+msgid "enhanced_content.pref#IDreamBooksReadometer# a \"Readometer\" that summarizes the reviews gathered by <a href='https://idreambooks.com/'>IDreamBooks.com</a> to the OPAC details page."
+msgstr ""
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksResults# Add"
@@ -2788,8 +2936,8 @@ msgid "enhanced_content.pref#IDreamBooksResults# Don't add"
 msgstr "Ne pas ajouter"
 
 # Enhanced Content > IDreamLibraries
-msgid "enhanced_content.pref#IDreamBooksResults# the rating from <a href='http://idreambooks.com/'>IDreamBooks.com</a> to OPAC search results."
-msgstr "le classement par <a href='http://idreambooks.com/'> IDreamBooks.com </a> sur les résultats de recherche à l'OPAC."
+msgid "enhanced_content.pref#IDreamBooksResults# the rating from <a href='https://idreambooks.com/'>IDreamBooks.com</a> to OPAC search results."
+msgstr ""
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReviews# Add"
@@ -2800,8 +2948,8 @@ msgid "enhanced_content.pref#IDreamBooksReviews# Don't add"
 msgstr "Ne pas ajouter"
 
 # Enhanced Content > IDreamLibraries
-msgid "enhanced_content.pref#IDreamBooksReviews# a tab on the OPAC details with book reviews from critics aggregated by <a href='http://idreambooks.com/'>IDreamBooks.com</a>."
-msgstr "un onglet sur les détails à l'OPAC avec des commentaires de livres à partir des critiques regroupées par <a href='http://idreambooks.com/'>IDreamBooks.com</a>."
+msgid "enhanced_content.pref#IDreamBooksReviews# a tab on the OPAC details with book reviews from critics aggregated by <a href='https://idreambooks.com/'>IDreamBooks.com</a>."
+msgstr ""
 
 # Enhanced Content > Library Thing
 msgid "enhanced_content.pref#LibraryThingForLibrariesEnabled# <a href=\"http://www.librarything.com/forlibraries/\">sign up</a>, then enter in your ID below."
@@ -3248,16 +3396,36 @@ msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [Cit
 msgstr "i18n_l10n.pref#AddressFormat# Type US ([Numéro de rue], [Adresse] - [Ville], [Code postal], [Pays])"
 
 # I18N/L10N
+msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Friday"
+msgstr ""
+
+# I18N/L10N
 msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Monday"
 msgstr "Lundi"
+
+# I18N/L10N
+msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Saturday"
+msgstr ""
 
 # I18N/L10N
 msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Sunday"
 msgstr "dimanche"
 
 # I18N/L10N
+msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Thursday"
+msgstr ""
+
+# I18N/L10N
+msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Tuesday"
+msgstr ""
+
+# I18N/L10N
 msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Use"
 msgstr "Utiliser"
+
+# I18N/L10N
+msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Wednesday"
+msgstr ""
 
 # I18N/L10N
 msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# as the first day of week in the calendar."
@@ -3300,6 +3468,10 @@ msgid "i18n_l10n.pref#dateformat# Format dates like"
 msgstr "Renseigner les dates au format"
 
 # I18N/L10N
+msgid "i18n_l10n.pref#dateformat# dd.mm.yyyy"
+msgstr ""
+
+# I18N/L10N
 msgid "i18n_l10n.pref#dateformat# dd/mm/yyyy"
 msgstr "jj/mm/aaaa"
 
@@ -3331,6 +3503,34 @@ msgstr "Ne pas permettre"
 msgid "i18n_l10n.pref#opaclanguagesdisplay# patrons to change the language they see on the OPAC."
 msgstr "aux utilisateurs de changer la langue d'utilisation de Koha à l'OPAC."
 
+# Labs
+msgid "labs.pref"
+msgstr ""
+
+# Labs > All
+msgid "labs.pref All"
+msgstr ""
+
+# Labs > All
+msgid "labs.pref#EnableAdvancedCatalogingEditor# <br/> NOTE:"
+msgstr ""
+
+# Labs > All
+msgid "labs.pref#EnableAdvancedCatalogingEditor# Don't enable"
+msgstr ""
+
+# Labs > All
+msgid "labs.pref#EnableAdvancedCatalogingEditor# Enable"
+msgstr ""
+
+# Labs > All
+msgid "labs.pref#EnableAdvancedCatalogingEditor# This feature is currently experimental, and may have bugs that cause corruption of records. It also does not include any support for UNIMARC or NORMARC fixed fields. Please help us test it and report any bugs, but do so at your own risk."
+msgstr ""
+
+# Labs > All
+msgid "labs.pref#EnableAdvancedCatalogingEditor# the advanced cataloging editor."
+msgstr ""
+
 # Local Use
 msgid "local_use.pref"
 msgstr "Usage local"
@@ -3343,111 +3543,155 @@ msgstr "Rien de défini encore."
 msgid "logs.pref"
 msgstr "Log"
 
-# Logging
+# Logging > Debugging
+msgid "logs.pref Debugging"
+msgstr ""
+
+# Logging > Logging
+msgid "logs.pref Logging"
+msgstr ""
+
+# Logging > Logging
 msgid "logs.pref#AuthoritiesLog# Don't log"
 msgstr "Ne pas journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#AuthoritiesLog# Log"
 msgstr "Journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#AuthoritiesLog# changes to authority records."
 msgstr "les changements apportés aux autorités."
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#BorrowersLog# Don't log"
 msgstr "Ne pas journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#BorrowersLog# Log"
 msgstr "Journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#BorrowersLog# changes to patron records."
 msgstr "les modifications des utilisateurs."
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#CataloguingLog# Don't log"
 msgstr "Ne pas journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#CataloguingLog# Log"
 msgstr "Journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#CataloguingLog# any changes to bibliographic or item records. Since this occurs whenever a book is checked in or out as well, it is not advisable to turn this on."
 msgstr "les modification des notices bibliographiques et des exemplaires. Tout prêt et tout retour d'un exemplaire est ainsi journalisé, ce qui crée un grand nombre d'entrées dans le journal de Koha. Aussi est-il déconseillé d'activer ce suivi."
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#CronjobLog# Don't log"
 msgstr "Ne pas journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#CronjobLog# Log"
 msgstr "Journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#CronjobLog# information from cron jobs."
 msgstr "les informations des tâches en cron."
 
-# Logging
+# Logging > Debugging
+msgid "logs.pref#DumpTemplateVarsIntranet# Do"
+msgstr ""
+
+# Logging > Debugging
+msgid "logs.pref#DumpTemplateVarsIntranet# Don't"
+msgstr ""
+
+# Logging > Debugging
+msgid "logs.pref#DumpTemplateVarsIntranet# dump all Template Toolkit variable to a comment in the html source for the staff intranet."
+msgstr ""
+
+# Logging > Debugging
+msgid "logs.pref#DumpTemplateVarsOpac# Do"
+msgstr ""
+
+# Logging > Debugging
+msgid "logs.pref#DumpTemplateVarsOpac# Don't"
+msgstr ""
+
+# Logging > Debugging
+msgid "logs.pref#DumpTemplateVarsOpac# dump all Template Toolkit variable to a comment in the html source for the OPAC."
+msgstr ""
+
+# Logging > Logging
 msgid "logs.pref#FinesLog# Don't log"
 msgstr "Ne pas journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#FinesLog# Log"
 msgstr "Journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#FinesLog# when fines are charged, paid, or forgiven."
 msgstr "lorsque les amendes sont facturées, payées, ou remises."
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#IssueLog# Don't log"
 msgstr "Ne pas journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#IssueLog# Log"
 msgstr "Journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#IssueLog# when items are checked out."
 msgstr "les prêts."
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#LetterLog# Don't log"
 msgstr "Ne pas journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#LetterLog# Log"
 msgstr "Journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#LetterLog# when an automatic claim notice is sent."
 msgstr "les réclamations automatiques."
 
-# Logging
+# Logging > Logging
+msgid "logs.pref#ReportsLog# Don't log"
+msgstr ""
+
+# Logging > Logging
+msgid "logs.pref#ReportsLog# Log"
+msgstr ""
+
+# Logging > Logging
+msgid "logs.pref#ReportsLog# when reports are added, deleted or changed."
+msgstr ""
+
+# Logging > Logging
 msgid "logs.pref#ReturnLog# Don't log"
 msgstr "Ne pas journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#ReturnLog# Log"
 msgstr "Journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#ReturnLog# when items are returned."
 msgstr "les retours d'exemplaires."
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#SubscriptionLog# Don't log"
 msgstr "Ne pas journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#SubscriptionLog# Log"
 msgstr "Journaliser"
 
-# Logging
+# Logging > Logging
 msgid "logs.pref#SubscriptionLog# when serials are added, deleted or changed."
 msgstr "les ajouts, modifications et suppressions de périodiques."
 
@@ -3474,6 +3718,10 @@ msgstr "Politique"
 # OPAC > Privacy
 msgid "opac.pref Privacy"
 msgstr "Vie privée"
+
+# OPAC > Restricted page
+msgid "opac.pref Restricted page"
+msgstr ""
 
 # OPAC > Self Registration
 msgid "opac.pref Self Registration"
@@ -3875,6 +4123,10 @@ msgstr "le site web dans une nouvelle fenêtre."
 msgid "opac.pref#OPACUserCSS# Include the following CSS on all pages in the OPAC:"
 msgstr "Inclure le code CSS suivant à toutes les pages de l'OPAC :"
 
+# OPAC > Appearance
+msgid "opac.pref#OPACUserJS# Include the following JavaScript on all pages in the OPAC:"
+msgstr ""
+
 # OPAC > Policy
 msgid "opac.pref#OPACViewOthersSuggestions# Don't show"
 msgstr "Cacher"
@@ -4094,6 +4346,22 @@ msgstr "Ne pas afficher"
 # OPAC > Appearance
 msgid "opac.pref#OpacKohaUrl# Show"
 msgstr "Afficher"
+
+# OPAC > Appearance
+msgid "opac.pref#OpacLangSelectorMode# Display language selector on "
+msgstr ""
+
+# OPAC > Appearance
+msgid "opac.pref#OpacLangSelectorMode# both top and footer"
+msgstr ""
+
+# OPAC > Appearance
+msgid "opac.pref#OpacLangSelectorMode# only footer"
+msgstr ""
+
+# OPAC > Appearance
+msgid "opac.pref#OpacLangSelectorMode# top"
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OpacLocationBranchToDisplay# Display the"
@@ -4399,6 +4667,26 @@ msgstr "Ne pas autoriser"
 msgid "opac.pref#RequestOnOpac# patrons to place holds on items from the OPAC."
 msgstr "les utilisateurs à faire des réservations à l'OPAC."
 
+# OPAC > Restricted page
+msgid "opac.pref#RestrictedPageContent# HTML content of your restricted page"
+msgstr ""
+
+# OPAC > Restricted page
+msgid "opac.pref#RestrictedPageLocalIPs# Access from IP addresses beginning with"
+msgstr ""
+
+# OPAC > Restricted page
+msgid "opac.pref#RestrictedPageLocalIPs# do not need to be authenticated (comma separated - ex: '127.0.0,127.0.1')"
+msgstr ""
+
+# OPAC > Restricted page
+msgid "opac.pref#RestrictedPageTitle# Use"
+msgstr ""
+
+# OPAC > Restricted page
+msgid "opac.pref#RestrictedPageTitle# as title of your restricted page (appears in the breadcrumb and on the top of the restricted page)"
+msgstr ""
+
 # OPAC > Policy
 msgid "opac.pref#SearchMyLibraryFirst# Don't limit"
 msgstr "Ne pas limiter"
@@ -4587,10 +4875,6 @@ msgstr "Utiliser le thème"
 msgid "opac.pref#opacthemes# theme on the OPAC."
 msgstr "à l'OPAC."
 
-# OPAC > Appearance
-msgid "opac.pref#opacuserjs# Include the following JavaScript on all pages in the OPAC:"
-msgstr "Inclure le code JavaScript suivant à toutes les pages de l'OPAC :"
-
 # OPAC > Features
 msgid "opac.pref#opacuserlogin# Allow"
 msgstr "Autoriser"
@@ -4776,6 +5060,18 @@ msgid "patrons.pref#ExtendedPatronAttributes# searching, editing and display of 
 msgstr "les attributs étendus des utilisateurs."
 
 # Patrons > General
+msgid "patrons.pref#FeeOnChangePatronCategory# Do"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#FeeOnChangePatronCategory# Don't"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#FeeOnChangePatronCategory# charge a fee when a patron changes to a category with an enrollment fee."
+msgstr ""
+
+# Patrons > General
 msgid "patrons.pref#MaxFine# Empty value means no limit. Single item caps are specified in the circulation rules matrix."
 msgstr "Valeur vide signifie aucune limite. Les limites des exemplaires simples sont précisées dans les règles de circulation de la matrice."
 
@@ -4786,6 +5082,14 @@ msgstr "L'amende en retard pour tous les prêts ira seulement jusqu'à "
 # Patrons > General
 msgid "patrons.pref#MaxFine# [% local_currency %]."
 msgstr "[% local_currency %]."
+
+# Patrons > General
+msgid "patrons.pref#MembershipExpiryDaysNotice# Send an account expiration notice when a patron's card will expire in."
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#MembershipExpiryDaysNotice# days."
+msgstr ""
 
 # Patrons > Norwegian patron database
 msgid "patrons.pref#NorwegianPatronDBEnable# Disable"
@@ -4844,8 +5148,16 @@ msgid "patrons.pref#PatronsPerPage# results per page in the staff client."
 msgstr "utilisateurs par page en résultat d'une recherche."
 
 # Patrons > General
+msgid "patrons.pref#SMSSendDriver# Define a username/login"
+msgstr ""
+
+# Patrons > General
 msgid "patrons.pref#SMSSendDriver# Use the SMS::Send::"
 msgstr "Pour envoyer des SMS, utiliser le pilote SMS::Send::"
+
+# Patrons > General
+msgid "patrons.pref#SMSSendDriver# and a password"
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
@@ -5507,6 +5819,18 @@ msgstr "Apparence"
 msgid "staff_client.pref Options"
 msgstr "Options"
 
+# Staff Client > Options
+msgid "staff_client.pref#AudioAlerts# Don't enable"
+msgstr ""
+
+# Staff Client > Options
+msgid "staff_client.pref#AudioAlerts# Enable"
+msgstr ""
+
+# Staff Client > Options
+msgid "staff_client.pref#AudioAlerts# audio alerts for events defined in the audio alerts section of administration."
+msgstr ""
+
 # Staff Client > Appearance
 msgid "staff_client.pref#Display856uAsImage# . Note: The corresponding XSLT option must be turned on."
 msgstr "Note : Les options XSLT correspondantes doivent être activées."
@@ -5576,6 +5900,10 @@ msgid "staff_client.pref#IntranetUserCSS# Include the following CSS on all pages
 msgstr "Inclure le CSS suivant sur toutes les pages de l'interface pro :"
 
 # Staff Client > Appearance
+msgid "staff_client.pref#IntranetUserJS# Include the following JavaScript on all pages in the staff client:"
+msgstr ""
+
+# Staff Client > Appearance
 msgid "staff_client.pref#IntranetmainUserblock# Show the following HTML in its own column on the main page of the staff client:"
 msgstr "Afficher le code HTML suivant sur la page principale de l'interface pro :"
 
@@ -5610,6 +5938,18 @@ msgstr "Activer"
 # Staff Client > Options
 msgid "staff_client.pref#StaffDetailItemSelection# item selection in record detail page."
 msgstr "la sélection des exemplaires dans l'affichage détaillé des notices."
+
+# Staff Client > Options
+msgid "staff_client.pref#UseWYSIWYGinSystemPreferences# Don't show"
+msgstr ""
+
+# Staff Client > Options
+msgid "staff_client.pref#UseWYSIWYGinSystemPreferences# Show"
+msgstr ""
+
+# Staff Client > Options
+msgid "staff_client.pref#UseWYSIWYGinSystemPreferences# WYSIWYG editor when editing certain HTML system preferences."
+msgstr ""
 
 # Staff Client > Appearance
 msgid "staff_client.pref#XSLTDetailsDisplay# <br />Options:<ul><li><a href=\"#\" class=\"set_syspref\" data-syspref=\"XSLTDetailsDisplay\" data-value=\"\">Leave empty</a> for \"no xslt\"</li><li>enter \"<a href=\"#\" class=\"set_syspref\" data-syspref=\"XSLTDetailsDisplay\" data-value=\"default\">default</a>\" for the default one</li><li>put a path to define a xslt file</li><li>put an URL for an external specific stylesheet.</li></ul>{langcode} will be replaced with current interface language"
@@ -5662,10 +6002,6 @@ msgstr "Utilisez la feuille de style CSS"
 # Staff Client > Appearance
 msgid "staff_client.pref#intranetstylesheet# on all pages in the staff interface, instead of the default css (used when leaving this field blank). Enter just a filename, a full local path or a complete URL starting with <code>http://</code> (if the file lives on a remote server). Please note that if you just enter a filename, the file should be in the css subdirectory for each active theme and language within the Koha templates directory. A full local path is expected to start from your HTTP document root."
 msgstr "sur toutes les pages dans l'interface du personnel, au lieu du css par défaut (utilisé lorsque vous laissez ce champ vide). Il suffit d'entrer un nom de fichier, un chemin d'accès local complet ou une URL complète commençant par <code>http://</code> (si le fichier se trouve sur un serveur distant). Veuillez noter que si vous entrez seulement un nom de fichier, le fichier doit être dans le sous-répertoire css pour chaque thème actif et la langue dans le répertoire des modèles Koha. Un chemin d'accès local complet est attendu à partir de votre document root HTTP."
-
-# Staff Client > Appearance
-msgid "staff_client.pref#intranetuserjs# Include the following JavaScript on all pages in the staff client:"
-msgstr "Inclure le code Javascript suivant sur toutes les pages de l'administration :"
 
 # Staff Client > Appearance
 msgid "staff_client.pref#staffClientBaseURL# . Do not include a trailing slash in the URL."
@@ -5727,6 +6063,10 @@ msgstr " "
 msgid "tools.pref Batch item modification"
 msgstr "Modification d'exemplaires en lot"
 
+# Tools > News
+msgid "tools.pref News"
+msgstr ""
+
 # Tools > Patron cards
 msgid "tools.pref Patron cards"
 msgstr "Cartes des utilisateurs"
@@ -5746,6 +6086,26 @@ msgstr "Traiter jusqu'à"
 # Tools > Batch item modification
 msgid "tools.pref#MaxItemsForBatch# items in a single modification or deletion batch."
 msgstr "exemplaires dans une seule opération de modification ou suppression par lot."
+
+# Tools > News
+msgid "tools.pref#NewsAuthorDisplay# Both OPAC and staff client"
+msgstr ""
+
+# Tools > News
+msgid "tools.pref#NewsAuthorDisplay# Not at all"
+msgstr ""
+
+# Tools > News
+msgid "tools.pref#NewsAuthorDisplay# OPAC only"
+msgstr ""
+
+# Tools > News
+msgid "tools.pref#NewsAuthorDisplay# Show the author for news items:"
+msgstr ""
+
+# Tools > News
+msgid "tools.pref#NewsAuthorDisplay# Staff client only"
+msgstr ""
 
 # Web services
 msgid "web_services.pref"
@@ -5838,6 +6198,26 @@ msgstr "Si vide, le serveur OAI fonctionne en mode normal, autrement il opère e
 # Web services > OAI-PMH
 msgid "web_services.pref#OAI-PMH:ConfFile# YAML OAI Koha server configuration file:"
 msgstr "Fichier YAML de configuration du serveur OAI de Koha :"
+
+# Web services > OAI-PMH
+msgid "web_services.pref#OAI-PMH:DeletedRecord# ."
+msgstr ""
+
+# Web services > OAI-PMH
+msgid "web_services.pref#OAI-PMH:DeletedRecord# Koha's deletedbiblio table"
+msgstr ""
+
+# Web services > OAI-PMH
+msgid "web_services.pref#OAI-PMH:DeletedRecord# might be emptied or truncated at some point (transient)"
+msgstr ""
+
+# Web services > OAI-PMH
+msgid "web_services.pref#OAI-PMH:DeletedRecord# will never be emptied or truncated (persistent)"
+msgstr ""
+
+# Web services > OAI-PMH
+msgid "web_services.pref#OAI-PMH:DeletedRecord# will never have any data in it (no)"
+msgstr ""
 
 # Web services > OAI-PMH
 msgid "web_services.pref#OAI-PMH:MaxCount# Only return"

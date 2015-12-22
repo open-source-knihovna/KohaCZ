@@ -18,7 +18,9 @@ VALUES
 ('suggestions','AVAILABLE','Suggestion disponible', 'Suggestion d\'achat disponible','cher(e) <<borrowers.firstname>> <<borrowers.surname>>,\n\nVous avez effectué une suggestion d\'achat pour le docuement  <<suggestions.title>> de <<suggestions.author>>.\n\nNous sommes heureux de vous informer que le document que vous aviez demandé est maintenant disponible dans nos collections.\n\nSi vous avez des questions, merci de nous contacter par courriel à l\'adresse <<branches.branchemail>>.\n\nMerci,\n\n<<branches.branchname>>', 'email'),
 ('suggestions','ORDERED','Suggestion commandée', 'Suggestion commandée','Cher(e) <<borrowers.firstname>> <<borrowers.surname>>,\n\nVous avez effectué une demande de suggestion d\'achat sur le docuement <<suggestions.title>> de <<suggestions.author>>.\n\nNous sommes heureux de vous informer que le document que vous avez demandé est maintenant en commande. Le document devrait arriver rapidement dans nos collections.\n\nVous serez averti quand le docuement sera disponible.\n\nSi vous avez des questions, merci de nous contacter à l\'adresse <<branches.branchemail>>\n\nMerci,\n\n<<branches.branchname>>', 'email'),
 ('suggestions','REJECTED','Suggestion rejetée', 'Suggestion d\'achat rejeté','Cher(e) <<borrowers.firstname>> <<borrowers.surname>>,\n\nVous avez fait la demande du document <<suggestions.title>> de <<suggestions.author>>.\n\nla Bibliothèque a examiné votre demande ce jour, et a décidé de ne pas retenir la suggestion pour l\'instant.\n\nLa raison est la suivante: <<suggestions.reason>>\n\nSi vous avez des questions, merci de nous contacter à l\'adresse <<branches.branchemail>>.\n\nMerci,\n\n<<branches.branchname>>', 'email'),
+('suggestions','TO_PROCESS','Avis au propriétaire du poste budgétaire', 'Une suggestion est prête à être traitée','<<borrowers.firstname>> <<borrowers.surname>>,\n\nUne nouvelle suggestion est prête à être traitée : <<suggestions.title>> / <<suggestions.author>>.\n\nMerci,\n\n<<branches.branchname>>', 'email'),
 ('members', 'DISCHARGE', 'Quitus', 'Quitus pour <<borrowers.firstname>> <<borrowers.surname>>', '<h1>Quitus</h1>\r\n\r\nLa librairie <<borrowers.branchcode>> certifies que lecteur suivant :\r\n\r\n    <<borrowers.firstname>> <<borrowers.surname>>\r\n   Numéro de carte : <<borrowers.cardnumber>>\r\n\r\na bien retourné tous ses documents.', 'email');
+
 INSERT INTO `letter` (module, code, name, title, content, is_html)
 VALUES ('circulation','ISSUESLIP','Ticket de de prêt','Ticket de prêt', '<h3><<branches.branchname>></h3>
 Prêts à <<borrowers.title>> <<borrowers.firstname>> <<borrowers.initials>> <<borrowers.surname>> <br />
@@ -148,4 +150,11 @@ Your library.'
 );
 
 INSERT INTO letter(module, code, branchcode, name, title, content, message_transport_type)
-VALUES ('acquisition', 'ACQ_NOTIF_ON_RECEIV', '', 'Notification on receiving', 'Order received', 'Dear <<borrowers.firstname>> <<borrowers.surname>>,\n\n The order <<aqorders.ordernumber>> (<<biblio.title>>) has been received.\n\nYour library.', 'email')
+VALUES ('acquisition', 'ACQ_NOTIF_ON_RECEIV', '', 'Notification on receiving', 'Order received', 'Dear <<borrowers.firstname>> <<borrowers.surname>>,\n\n The order <<aqorders.ordernumber>> (<<biblio.title>>) has been received.\n\nYour library.', 'email'),
+('members','MEMBERSHIP_EXPIRY','','Account expiration','Account expiration','Dear <<borrowers.title>> <<borrowers.firstname>> <<borrowers.surname>>,.\r\n\r\nYour library card will expire soon, on:\r\n\r\n<<borrowers.dateexpiry>>\r\n\r\nThank you,\r\n\r\nLibrarian\r\n\r\n<<branches.branchname>>','email');
+
+INSERT INTO letter ( module, code, branchcode, name, is_html, title, content, message_transport_type )
+VALUES ( 'circulation', 'OVERDUES_SLIP', '', 'Overdues Slip', '0', 'OVERDUES_SLIP', 'The following item(s) is/are currently overdue:
+
+<item>"<<biblio.title>>" by <<biblio.author>>, <<items.itemcallnumber>>, Barcode: <<items.barcode>> Fine: <<items.fine>></item>
+', 'print' );

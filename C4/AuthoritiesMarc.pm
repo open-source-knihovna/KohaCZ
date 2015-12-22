@@ -887,7 +887,7 @@ sub FindDuplicateAuthority {
 
 Returns a hashref with a summary of the specified record.
 
-Comment : authtypecode can be infered from both record and authid.
+Comment : authtypecode can be inferred from both record and authid.
 Moreover, authid can also be inferred from $record.
 Would it be interesting to delete those things.
 
@@ -1514,7 +1514,7 @@ sub merge {
     # BulkEdit marc records
     # May be used as a template for a bulkedit field  
     foreach my $marcrecord(@reccache){
-        my $update;           
+        my $update = 0;
         foreach my $tagfield (@tags_using_authtype){
 #             warn "tagfield : $tagfield ";
             foreach my $field ($marcrecord->field($tagfield)){

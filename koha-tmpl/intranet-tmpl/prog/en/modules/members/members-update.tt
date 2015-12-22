@@ -1,4 +1,5 @@
 [% USE Branches %]
+[% USE KohaDates %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Patrons &rsaquo; Update patron records</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -49,8 +50,6 @@
 [% CASE 'contactfirstname'    %]<span>Contact: First name</span>
 [% CASE 'contacttitle'        %]<span>Contact: Title</span>
 [% CASE 'relationship'        %]<span>Contact: Relationship</span>
-[% CASE 'ethnicity'           %]<span>Ethnicity</span>
-[% CASE 'ethnotes'            %]<span>Ethnicity notes</span>
 [% CASE 'sex'                 %]<span>Sex</span>
 [% CASE 'altcontactfirstname' %]<span>Alternate contact: First name</span>
 [% CASE 'altcontactsurname'   %]<span>Alternate contact: Surname</span>
@@ -79,8 +78,9 @@
                     <div id="pending_updates">
                             [% FOREACH pm IN PendingModifications %]
                                 [% SET borrowernumber = pm.borrowernumber %]
-                                <h3><a href="#panel_modify_[% pm.borrowernumber %]">[% borrowers.$borrowernumber.surname %], [% borrowers.$borrowernumber.firstname %] ([% Branches.GetName( borrowers.$borrowernumber.branchcode ) %])</a></h3>
+                                <h3><a href="#panel_modify_[% pm.borrowernumber %]">[% borrowers.$borrowernumber.surname %][% IF ( borrowers.$borrowernumber.firstname ) %], [% borrowers.$borrowernumber.firstname %][% END %] ([% Branches.GetName( borrowers.$borrowernumber.branchcode ) %]) ([% borrowers.$borrowernumber.cardnumber %])</a></h3>
                                 <div id="panel_modify_[% pm.borrowernumber %]">
+                                    <a target="_blank" href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">View record</a>
                                     <div style="background-color:#E6F0F2;padding:.5em;margin:.3em 0;">
                                         <input type="radio" id="approve_modify_[% pm.borrowernumber %]" name="modify_[% pm.borrowernumber %]" value="approve" />
                                         <label for="approve_modify_[% pm.borrowernumber %]">Approve</label>
@@ -90,6 +90,7 @@
 
                                         <input type="radio" id="ignore_modify_[% pm.borrowernumber %]" name="modify_[% pm.borrowernumber %]" value="ignore" checked="checked"/>
                                         <label for="ignore_modify_[% pm.borrowernumber %]">Ignore</label>
+                                        | <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% pm.borrowernumber %]" >Patron details</a>
                                     </div>
                                         <table>
                                             <tr>
@@ -104,8 +105,13 @@
                                                     [% IF ( ( pm.$key OR borrowers.$borrowernumber.$key ) && ( pm.$key != borrowers.$borrowernumber.$key ) ) %]
                                                         <tr>
                                                             <td>[% PROCESS display_names field = key %]</td>
-                                                            <td>[% borrowers.$borrowernumber.$key %]</td>
-                                                            <td>[% pm.$key %]</td>
+                                                            [% IF ( key == "dateofbirth" ) %]
+                                                                <td>[% borrowers.$borrowernumber.$key | $KohaDates %]</td>
+                                                                <td>[% pm.$key | $KohaDates %]</td>
+                                                            [% ELSE %]
+                                                                <td>[% borrowers.$borrowernumber.$key %]</td>
+                                                                <td>[% pm.$key %]</td>
+                                                            [% END %]
                                                         </tr>
                                                     [% END %]
                                                 [% END %]

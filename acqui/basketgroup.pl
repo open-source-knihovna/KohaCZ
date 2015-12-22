@@ -47,7 +47,6 @@ use strict;
 use warnings;
 use Carp;
 
-use C4::Input;
 use C4::Auth;
 use C4::Output;
 use CGI qw ( -utf8 );
@@ -355,7 +354,7 @@ if ( $op eq "add" ) {
 # FIXME
         }
     }else{
-    # we create a new basketgroup (whith a closed basket)
+    # we create a new basketgroup (with a closed basket)
         $basketgroup = {
             name              => $basketgroupname,
             booksellerid      => $booksellerid,

@@ -3,6 +3,16 @@
 <title>Koha &rsaquo; Catalog &rsaquo; [% IF ( searchdesc ) %]Results of search [% IF ( query_desc ) %]for '[% query_desc | html %]'[% END %][% IF ( limit_desc ) %]&nbsp;with limit(s):&nbsp;'[% limit_desc | html %]'[% END %][% ELSE %]You did not specify any search criteria[% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'browser-strings.inc' %]
+[% IF BiblioDefaultViewmarc %]
+    [% SET DetailPage="MARCdetail.pl" %]
+[% ELSIF BiblioDefaultViewlabeled_marc %]
+    [% SET DetailPage="labeledMARCdetail.pl" %]
+[% ELSIF BiblioDefaultViewisbd %]
+    [% SET DetailPage="ISBDdetail.pl" %]
+[% ELSE %]
+    [% SET DetailPage="detail.pl" %]
+[% END %]
+
 <!--[if lt IE 9]>
 <script type="text/javascript" src="[% interface %]/lib/shims/json2.min.js"></script>
 <![endif]-->
@@ -91,17 +101,38 @@ $('#sort_by').change(function() {
     });
         var param1 = "<label for=\"addto\">"+_("Add to:")+"<\/label><select name=\"addto\" id=\"addto\"><option value=\"\"><\/option>";
         [% IF ( intranetbookbag ) %]     param1 += "<option value=\"addtocart\">"+_("Cart")+"<\/option>"; [% END %]
-        [% IF ( virtualshelves ) %][% IF ( addbarshelves ) %]
-        param1 += "<optgroup label=\""+_("Your lists:")+"\">";[% FOREACH addbarshelvesloo IN addbarshelvesloop %]
-        param1 += "<option id=\"s[% addbarshelvesloo.shelfnumber %]\" value=\"addtolist\">[% addbarshelvesloo.shelfname |html %]<\/option>";[% END %]
-        param1 += "<\/optgroup>";[% END %]
-        [% IF ( addpubshelves ) %]param1 += "<optgroup label=\""+_("Public lists:")+"\">"[% FOREACH addpubshelvesloo IN addpubshelvesloop %]+"<option id=\"s[% addpubshelvesloo.shelfnumber %]\" value=\"addtolist\">[% addpubshelvesloo.shelfname |html %]<\/option>"[% END %]
-        param1 += "<\/optgroup>";[% END %]
-        [% IF ( ( addbarshelvesloop && addbarshelvesloop.size>9 ) || (addpubshelvesloop && addpubshelvesloop.size>9 )) %]
-            param1 += "<option value=\"morelists\">[ "+_("More lists")+" ]<\/option>";
+
+        [% IF Koha.Preference('virtualshelves') %]
+            [% IF add_to_some_private_shelves.count %]
+                param1 += "<optgroup label=\""+_("Your lists:")+"\">";
+                [% SET number_of_private_shelves = 0 %]
+                [% FOREACH s IN add_to_some_private_shelves %]
+                    [% IF shelfnumber != s.shelfnumber %]
+                        param1 += "<option id=\"s[% s.shelfnumber %]\" value=\"addtolist\">[% s.shelfname |html %]<\/option>";
+                        [% SET number_of_private_shelves = number_of_private_shelves + 1 %]
+                        [% IF number_of_private_shelves == 10 %][% LAST %][% END %]
+                    [% END %]
+                [% END %]
+                param1 += "<\/optgroup>";
+            [% END %]
+            [% IF add_to_some_public_shelves.count %]
+                param1 += "<optgroup label=\""+_("Public lists:")+"\">";
+                [% SET number_of_public_shelves = 0 %]
+                [% FOREACH s IN add_to_some_public_shelves %]
+                    [% IF shelfnumber != s.shelfnumber %]
+                        param1 += "<option id=\"s[% s.shelfnumber %]\" value=\"addtolist\">[% s.shelfname |html %]<\/option>";
+                        [% SET number_of_public_shelves = number_of_public_shelves + 1 %]
+                        [% IF number_of_public_shelves == 10 %][% LAST %][% END %]
+                    [% END %]
+                [% END %]
+                param1 += "<\/optgroup>";
+            [% END %]
+            [% IF add_to_some_private_shelves.count > 10 or add_to_some_public_shelves.count > 10 %]
+                param1 += "<option value=\"morelists\">[ "+_("More lists")+" ]<\/option>";
+            [% END %]
+            param1 +="<option value=\"newlist\">"+_("[ New list ]")+"<\/option>"
         [% END %]
-        param1 +="<option value=\"newlist\">"+_("[ New list ]")+"<\/option>"
-        [% END %]
+
         param1 += "<\/select> <input id=\"cartsubmit\" type=\"submit\" class=\"submit\" value=\""+_("Save")+"\" />";
  $('#sortsubmit').hide();
         $("span.clearall").html("<a id=\"CheckNone\" href=\"#\">"+_("Clear all")+"<\/a>");
@@ -206,7 +237,7 @@ function placeHold () {
 function forgetPatron(){
     $.removeCookie("holdfor", { path: '/' });
     $(".holdforlink").remove();
-    $("#placeholdc").html("<a class=\"btn btn-mini placehold\" href=\"#\"><i class=\"icon-hold\"></i> "+_("Place hold")+"</a>");
+    $("#placeholdc").html("<a class=\"btn btn-mini placehold\" href=\"#\"><i class=\"fa fa-sticky-note-o\"></i> "+_("Place hold")+"</a>");
 }
 
 function addToList () {
@@ -318,7 +349,7 @@ var holdForPatron = function () {
                 [% IF ( CAN_user_reserveforothers && DisplayMultiPlaceHold ) %]
                 [% IF ( holdfor ) %]
                     <div id="placeholdc" class="btn-group">
-                        <button class="btn btn-mini placehold"><i class="icon-hold"></i> Place hold</button>
+                        <button class="btn btn-mini placehold"><i class="fa fa-sticky-note-o"></i> Place hold</button>
                         <button class="btn btn-mini dropdown-toggle" data-toggle="dropdown">
                         <span class="caret"></span>
                         </button>
@@ -330,11 +361,11 @@ var holdForPatron = function () {
                         </ul>
                     </div>
                 [% ELSE %]
-                    <div id="placeholdc" class="btn-group"><a class="btn btn-mini placehold" href="#"><i class="icon-hold"></i> Place hold</a></div>
+                    <div id="placeholdc" class="btn-group"><a class="btn btn-mini placehold" href="#"><i class="fa fa-sticky-note-o""></i> Place hold</a></div>
                 [% END %]
                 [% END %]
 
-                [% IF ( CAN_user_editcatalogue_edit_catalogue ) %] <div class="btn-group"><a class="btn btn-mini" id="z3950submit" href="#"><i class="icon-search"></i> Z39.50/SRU search</a></div>[% END %]
+                [% IF ( CAN_user_editcatalogue_edit_catalogue ) %] <div class="btn-group"><a class="btn btn-mini" id="z3950submit" href="#"><i class="fa fa-search"></i> Z39.50/SRU search</a></div>[% END %]
             </div>
         </div>
     [% IF ( stopwords_removed ) %]<div><p class="tip">Ignored the following common words: "[% stopwords_removed %]"<p></div>[% END %]
@@ -447,16 +478,16 @@ var holdForPatron = function () {
                             [% IF ( AmazonCoverImages || LocalCoverImages ) %]
                                 <td>
                                     [% IF ( LocalCoverImages) %]
-                                        <a class="p1" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% SEARCH_RESULT.biblionumber |url %]">
+                                        <a class="p1" href="/cgi-bin/koha/catalogue/[% DetailPage %]?biblionumber=[% SEARCH_RESULT.biblionumber |url %]">
                                         <span title="[% SEARCH_RESULT.biblionumber |url %]" class="[% SEARCH_RESULT.biblionumber %]" id="local-thumbnail[% loop.count %]"></span>
                                         </a>
                                     [% END %]
                                     [% IF ( AmazonCoverImages ) %]
                                         [% IF ( SEARCH_RESULT.normalized_isbn ) %]
-                                            <a class="p1" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% SEARCH_RESULT.biblionumber |url %]">
+                                            <a class="p1" href="/cgi-bin/koha/catalogue/[% DetailPage %]?biblionumber=[% SEARCH_RESULT.biblionumber |url %]">
                                             <img src="https://images-na.ssl-images-amazon.com/images/P/[% SEARCH_RESULT.normalized_isbn %].01.TZZZZZZZ.jpg" alt="" class="thumbnail" />
                                         [% ELSIF ( !LocalCoverImages ) %]
-                                            <a class="p1 no-amazon-cover" href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% SEARCH_RESULT.biblionumber |url %]">
+                                            <a class="p1 no-amazon-cover" href="/cgi-bin/koha/catalogue/[% DetailPage %]?biblionumber=[% SEARCH_RESULT.biblionumber |url %]">
                                             <img src="https://images-na.ssl-images-amazon.com/images/G/01/x-site/icons/no-img-sm.gif" alt="" class="thumbnail" />
                                         [% END %]
                                         </a>

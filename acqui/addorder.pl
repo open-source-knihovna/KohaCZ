@@ -235,7 +235,7 @@ my $user = $input->remote_user;
 if ( $orderinfo->{quantity} ne '0' ) {
     #TODO:check to see if biblio exists
     unless ( $$orderinfo{biblionumber} ) {
-        #if it doesnt create it
+        #if it doesn't create it
         my $record = TransformKohaToMarc(
             {
                 "biblio.title"                => "$$orderinfo{title}",
@@ -307,8 +307,8 @@ if ( $orderinfo->{quantity} ne '0' ) {
             my $xml = TransformHtmlToXml( $itemhash{$item}->{'tags'},
                                     $itemhash{$item}->{'subfields'},
                                     $itemhash{$item}->{'field_values'},
-                                    $itemhash{$item}->{'ind_tag'},
                                     $itemhash{$item}->{'indicator'},
+                                    $itemhash{$item}->{'ind_tag'},
                                     'ITEM');
             my $record=MARC::Record::new_from_xml($xml, 'UTF-8');
             my ($biblionumber,$bibitemnum,$itemnumber) = AddItemFromMarc($record,$$orderinfo{biblionumber});

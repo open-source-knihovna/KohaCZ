@@ -5,12 +5,18 @@ use C4::Acquisition;
 use C4::Biblio;
 use C4::Bookseller;
 use C4::Letters;
-
+use Koha::Database;
 use Koha::Acquisition::Order;
 
-my $dbh = C4::Context->dbh;
-$dbh->{RaiseError} = 1;
-$dbh->{AutoCommit} = 0;
+use t::lib::TestBuilder;
+
+my $schema = Koha::Database->schema;
+$schema->storage->txn_begin;
+my $builder = t::lib::TestBuilder->new;
+
+my $library = $builder->build({
+    source => "Branch",
+});
 
 # Creating some orders
 my $booksellerid = C4::Bookseller::AddBookseller(
@@ -64,7 +70,7 @@ my $borrowernumber = C4::Members::AddMember(
     firstname =>  'TESTFN',
     surname => 'TESTSN',
     categorycode => 'S',
-    branchcode => 'CPL',
+    branchcode => $library->{branchcode},
     dateofbirth => '',
     dateexpiry => '9999-12-31',
     userid => 'TESTUSERID'

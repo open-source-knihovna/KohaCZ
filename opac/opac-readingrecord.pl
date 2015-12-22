@@ -46,7 +46,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
         query           => $query,
         type            => "opac",
         authnotrequired => 0,
-        flagsrequired   => { borrow => 1 },
         debug           => 1,
     }
 );
@@ -85,8 +84,8 @@ my $opac_summary_html = C4::Context->preference('OPACMySummaryHTML');
 foreach my $issue ( @{$issues} ) {
     $issue->{normalized_isbn} = GetNormalizedISBN( $issue->{isbn} );
     if ( $issue->{$itype_attribute} ) {
-        $issue->{description} =
-          $itemtypes->{ $issue->{$itype_attribute} }->{description};
+        $issue->{translated_description} =
+          $itemtypes->{ $issue->{$itype_attribute} }->{translated_description};
         $issue->{imageurl} =
           getitemtypeimagelocation( 'opac',
             $itemtypes->{ $issue->{$itype_attribute} }->{imageurl} );
@@ -98,6 +97,7 @@ foreach my $issue ( @{$issues} ) {
             C4::Context->preference('marcflavour') );
         $issue->{subtitle} =
           GetRecordValue( 'subtitle', $marc_rec, $issue->{frameworkcode} );
+        $issue->{normalized_upc} = GetNormalizedUPC( $marc_rec, C4::Context->preference('marcflavour') );
     }
     # My Summary HTML
     if ($opac_summary_html) {
@@ -151,4 +151,4 @@ $template->param(
     OPACMySummaryHTML => $opac_summary_html ? 1 : 0,
 );
 
-output_html_with_http_headers $query, $cookie, $template->output;
+output_html_with_http_headers $query, $cookie, $template->output, undef, { force_no_caching => 1 };

@@ -57,8 +57,12 @@ if ( $op eq 'request' ) {
 }
 elsif ( $op eq 'get' ) {
     eval {
+
+        # Getting member data
+        my $data = GetMember( borrowernumber => $loggedinuser );
         my $pdf_path = Koha::Borrower::Discharge::generate_as_pdf({
-            borrowernumber => $loggedinuser
+            borrowernumber => $loggedinuser,
+            branchcode => $data->{'branchcode'},
         });
 
         binmode(STDOUT);
@@ -88,11 +92,11 @@ else {
         validated      => 1,
     });
     $template->param(
-        available => $available,
+        available => $available && Koha::Borrower::Discharge::is_discharged({borrowernumber => $loggedinuser}),
         pending   => $pending,
     );
 }
 
 $template->param( dischargeview => 1 );
 
-output_html_with_http_headers $input, $cookie, $template->output;
+output_html_with_http_headers $input, $cookie, $template->output, undef, { force_no_caching => 1 };

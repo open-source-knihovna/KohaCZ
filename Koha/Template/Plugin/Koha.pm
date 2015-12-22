@@ -18,7 +18,6 @@ package Koha::Template::Plugin::Koha;
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Encode qw( encode );
 
 use base qw( Template::Plugin );
 
@@ -43,20 +42,18 @@ is necessary.
 
 sub Preference {
     my ( $self, $pref ) = @_;
-    return encode('UTF-8', C4::Context->preference( $pref ) );
+    return C4::Context->preference( $pref );
 }
 
 sub Version {
     my $version_string = Koha::version();
-    my ($major,$minor,$maintenance,$development) = split('\.',$version_string);
+    my ( $major, $minor, $maintenance, $development ) = split( '\.', $version_string );
 
     return {
         major       => $major,
         release     => $major . "." . $minor,
         maintenance => $major . "." . $minor . "." . $maintenance,
-        development => ( $development ne '000' )
-                            ? $development
-                            : undef
+        development => ( $development ne '000' ) ? $development : undef,
     };
 }
 

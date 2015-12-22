@@ -35,14 +35,15 @@ BEGIN {
 }
 
 use C4::Context;
-use C4::Dates;
 use C4::Search;
+use C4::Search::History;
 use Getopt::Long;
 use C4::Log;
+use C4::Accounts;
 
 sub usage {
     print STDERR <<USAGE;
-Usage: $0 [-h|--help] [--sessions] [--sessdays DAYS] [-v|--verbose] [--zebraqueue DAYS] [-m|--mail] [--merged] [--import DAYS] [--logs DAYS] [--searchhistory DAYS] [--restrictions DAYS] [--all-restrictions]
+Usage: $0 [-h|--help] [--sessions] [--sessdays DAYS] [-v|--verbose] [--zebraqueue DAYS] [-m|--mail] [--merged] [--import DAYS] [--logs DAYS] [--searchhistory DAYS] [--restrictions DAYS] [--all-restrictions] [--fees DAYS]
 
    -h --help          prints this help message, and exits, ignoring all
                       other options
@@ -60,6 +61,13 @@ Usage: $0 [-h|--help] [--sessions] [--sessdays DAYS] [-v|--verbose] [--zebraqueu
                       Defaults to 60 days if no days specified.
    --z3950            purge records from import tables that are the result
                       of Z39.50 searches
+   --fees DAYS        purge entries accountlines older than DAYS days, where
+                      amountoutstanding is 0 or NULL.
+                      In the case of --feees, DAYS must be greater than
+                      or equal to 1.
+                      WARNING: Fees and payments may not be deleted together.
+                      This will not affect the account balance but may be
+                      confusing to staff.
    --logs DAYS        purge entries from action_logs older than DAYS days.
                       Defaults to 180 days if no days specified.
    --searchhistory DAYS  purge entries from search_history older than DAYS days.
@@ -69,15 +77,29 @@ Usage: $0 [-h|--help] [--sessions] [--sessdays DAYS] [-v|--verbose] [--zebraqueu
    --restrictions DAYS   purge patrons restrictions expired since more than DAYS days.
                          Defaults to 30 days if no days specified.
     --all-restrictions   purge all expired patrons restrictions.
+   --del-exp-selfreg  Delete expired self registration accounts
+   --del-unv-selfreg DAYS  Delete unverified self registrations older than DAYS
 USAGE
     exit $_[0];
 }
 
-my (
-    $help,   $sessions,          $sess_days, $verbose, $zebraqueue_days,
-    $mail,   $purge_merged,      $pImport,   $pLogs,   $pSearchhistory,
-    $pZ3950, $pListShareInvites, $pDebarments, $allDebarments,
-);
+my $help;
+my $sessions;
+my $sess_days;
+my $verbose;
+my $zebraqueue_days;
+my $mail;
+my $purge_merged;
+my $pImport;
+my $pLogs;
+my $pSearchhistory;
+my $pZ3950;
+my $pListShareInvites;
+my $pDebarments;
+my $allDebarments;
+my $pExpSelfReg;
+my $pUnvSelfReg;
+my $fees_days;
 
 GetOptions(
     'h|help'          => \$help,
@@ -90,10 +112,13 @@ GetOptions(
     'import:i'        => \$pImport,
     'z3950'           => \$pZ3950,
     'logs:i'          => \$pLogs,
+    'fees:i'          => \$fees_days,
     'searchhistory:i' => \$pSearchhistory,
     'list-invites:i'  => \$pListShareInvites,
     'restrictions:i'  => \$pDebarments,
     'all-restrictions' => \$allDebarments,
+    'del-exp-selfreg' => \$pExpSelfReg,
+    'del-unv-selfreg' => \$pUnvSelfReg,
 ) || usage(1);
 
 # Use default values
@@ -116,12 +141,15 @@ unless ( $sessions
     || $purge_merged
     || $pImport
     || $pLogs
+    || $fees_days
     || $pSearchhistory
     || $pZ3950
     || $pListShareInvites
     || $pDebarments
-    || $allDebarments )
-{
+    || $allDebarments
+    || $pExpSelfReg
+    || $pUnvSelfReg
+) {
     print "You did not specify any cleanup work for the script to do.\n\n";
     usage(1);
 }
@@ -222,9 +250,15 @@ if ($pLogs) {
     print "Done with purging action_logs.\n" if $verbose;
 }
 
+if ($fees_days) {
+    print "Purging records from accountlines.\n" if $verbose;
+    purge_zero_balance_fees( $fees_days );
+    print "Done purging records from accountlines.\n" if $verbose;
+}
+
 if ($pSearchhistory) {
     print "Purging records older than $pSearchhistory from search_history.\n" if $verbose;
-    PurgeSearchHistory($pSearchhistory);
+    C4::Search::History::delete({ interval => $pSearchhistory });
     print "Done with purging search_history.\n" if $verbose;
 }
 
@@ -251,6 +285,13 @@ if($allDebarments) {
     print "All expired patrons restrictions purge triggered.\n" if $verbose;
     $count = PurgeDebarments(0);
     print "$count restrictions were deleted.\nDone with all restrictions purge.\n" if $verbose;
+}
+
+if( $pExpSelfReg ) {
+    DeleteExpiredSelfRegs();
+}
+if( $pUnvSelfReg ) {
+    DeleteUnverifiedSelfRegs( $pUnvSelfReg );
 }
 
 exit(0);
@@ -339,4 +380,14 @@ sub PurgeDebarments {
         $count++;
     }
     return $count;
+}
+
+sub DeleteExpiredSelfRegs {
+    my $cnt= C4::Members::DeleteExpiredOpacRegistrations();
+    print "Removed $cnt expired self-registered borrowers\n" if $verbose;
+}
+
+sub DeleteUnverifiedSelfRegs {
+    my $cnt= C4::Members::DeleteUnverifiedOpacRegistrations( $_[0] );
+    print "Removed $cnt unverified self-registrations\n" if $verbose;
 }

@@ -40,7 +40,7 @@
 [% END %]
 
 <!-- login prompt time-->
-<form action="[% url %]" method="post" name="loginform" id="loginform">
+<form action="/cgi-bin/koha/mainpage.pl" method="post" name="loginform" id="loginform">
     <input type="hidden" name="koha_login_context" value="intranet" />
 [% FOREACH INPUT IN INPUTS %]
     <input type="hidden" name="[% INPUT.name |html %]" value="[% INPUT.value |html %]" />
@@ -76,7 +76,7 @@
 <p>Sorry, the CAS login failed.</p>
 [% END %]
 
-<p>If you have a <acronym title="Central Authentication Service">CAS</acronym> account,
+<p>If you have a CAS account,
 [% IF ( casServerUrl ) %]
     please <a href="[% casServerUrl %]">click here to login</a>.<p>
 [% END %]
@@ -102,5 +102,13 @@ please choose against which one you would like to authenticate: </p>
 
 </div>
 </div>
+
+<script>
+$(document).ready( function() {
+    if ( document.location.hash ) {
+        $( '#loginform' ).append( '<input name="auth_forwarded_hash" type="hidden" value="' + document.location.hash + '"/>' );
+    }
+} );
+</script>
 
 [% INCLUDE 'intranet-bottom.inc' %]

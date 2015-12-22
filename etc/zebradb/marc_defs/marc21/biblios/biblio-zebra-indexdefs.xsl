@@ -140,10 +140,31 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
         </z:index>
       </xslo:if>
     </xslo:for-each>
+    <xslo:for-each select="marc:subfield">
+      <xslo:if test="contains('z', @code)">
+        <z:index name="ISBN:w Identifier-standard:w">
+          <xslo:value-of select="."/>
+        </z:index>
+      </xslo:if>
+    </xslo:for-each>
   </xslo:template>
   <xslo:template mode="index_subfields" match="marc:datafield[@tag='022']">
     <xslo:for-each select="marc:subfield">
       <xslo:if test="contains('a', @code)">
+        <z:index name="ISSN:w Identifier-standard:w">
+          <xslo:value-of select="."/>
+        </z:index>
+      </xslo:if>
+    </xslo:for-each>
+    <xslo:for-each select="marc:subfield">
+      <xslo:if test="contains('y', @code)">
+        <z:index name="ISSN:w Identifier-standard:w">
+          <xslo:value-of select="."/>
+        </z:index>
+      </xslo:if>
+    </xslo:for-each>
+    <xslo:for-each select="marc:subfield">
+      <xslo:if test="contains('z', @code)">
         <z:index name="ISSN:w Identifier-standard:w">
           <xslo:value-of select="."/>
         </z:index>
@@ -1840,7 +1861,20 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     </z:index>
   </xslo:template>
   <xslo:template mode="index_data_field" match="marc:datafield[@tag='260']">
-    <z:index name="pl:w">
+    <z:index name="pl:w Provider:w">
+      <xslo:variable name="raw_heading">
+        <xslo:for-each select="marc:subfield">
+          <xslo:if test="position() &gt; 1">
+            <xslo:value-of select="substring(' ', 1, 1)"/>
+          </xslo:if>
+          <xslo:value-of select="."/>
+        </xslo:for-each>
+      </xslo:variable>
+      <xslo:value-of select="normalize-space($raw_heading)"/>
+    </z:index>
+  </xslo:template>
+  <xslo:template mode="index_data_field" match="marc:datafield[@tag='264']">
+    <z:index name="Provider:w">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
           <xslo:if test="position() &gt; 1">
@@ -1944,7 +1978,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     </z:index>
   </xslo:template>
   <xslo:template mode="index_data_field" match="marc:datafield[@tag='502']">
-    <z:index name="Material-type:w">
+    <z:index name="Material-type:w Dissertation-information:p Dissertation-information:w">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
           <xslo:if test="position() &gt; 1">

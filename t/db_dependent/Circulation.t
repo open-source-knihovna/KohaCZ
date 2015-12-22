@@ -27,32 +27,42 @@ use C4::Overdues qw(UpdateFine);
 use Koha::DateUtils;
 use Koha::Database;
 
-use Test::More tests => 61;
+use t::lib::TestBuilder;
+
+use Test::More tests => 82;
 
 BEGIN {
     use_ok('C4::Circulation');
 }
 
+my $schema = Koha::Database->schema;
+$schema->storage->txn_begin;
+my $builder = t::lib::TestBuilder->new;
 my $dbh = C4::Context->dbh;
-my $schema = Koha::Database->new()->schema();
 
 # Start transaction
-$dbh->{AutoCommit} = 0;
 $dbh->{RaiseError} = 1;
 
 # Start with a clean slate
 $dbh->do('DELETE FROM issues');
 
+my $library = $builder->build({
+    source => 'Branch',
+});
+my $library2 = $builder->build({
+    source => 'Branch',
+});
+
 my $CircControl = C4::Context->preference('CircControl');
 my $HomeOrHoldingBranch = C4::Context->preference('HomeOrHoldingBranch');
 
 my $item = {
-    homebranch => 'MPL',
-    holdingbranch => 'MPL'
+    homebranch => $library2->{branchcode},
+    holdingbranch => $library2->{branchcode}
 };
 
 my $borrower = {
-    branchcode => 'MPL'
+    branchcode => $library2->{branchcode}
 };
 
 # No userenv, PickupLibrary
@@ -96,8 +106,8 @@ is(
 
 # Now, set a userenv
 C4::Context->_new_userenv('xxx');
-C4::Context->set_userenv(0,0,0,'firstname','surname', 'MPL', 'Midway Public Library', '', '', '');
-is(C4::Context->userenv->{branch}, 'MPL', 'userenv set');
+C4::Context->set_userenv(0,0,0,'firstname','surname', $library2->{branchcode}, 'Midway Public Library', '', '', '');
+is(C4::Context->userenv->{branch}, $library2->{branchcode}, 'userenv set');
 
 # Userenv set, PickupLibrary
 C4::Context->set_preference('CircControl', 'PickupLibrary');
@@ -108,7 +118,7 @@ is(
 );
 is(
     C4::Circulation::_GetCircControlBranch($item, $borrower),
-    'MPL',
+    $library2->{branchcode},
     '_GetCircControlBranch returned current branch'
 );
 
@@ -165,7 +175,7 @@ $dbh->do(
     '*', '*', '*', 25,
     20, 14, 'days',
     1, 7,
-    '', 0,
+    undef, 0,
     .10, 1
 );
 
@@ -174,7 +184,7 @@ my $sth = C4::Context->dbh->prepare("SELECT COUNT(*) FROM accountlines WHERE amo
 $sth->execute();
 my ( $original_count ) = $sth->fetchrow_array();
 
-C4::Context->dbh->do("INSERT INTO borrowers ( cardnumber, surname, firstname, categorycode, branchcode ) VALUES ( '99999999999', 'Hall', 'Kyle', 'S', 'MPL' )");
+C4::Context->dbh->do("INSERT INTO borrowers ( cardnumber, surname, firstname, categorycode, branchcode ) VALUES ( '99999999999', 'Hall', 'Kyle', 'S', ? )", undef, $library2->{branchcode} );
 
 C4::Circulation::ProcessOfflinePayment({ cardnumber => '99999999999', amount => '123.45' });
 
@@ -200,7 +210,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my ($biblionumber, $biblioitemnumber) = AddBiblio($biblio, '');
 
     my $barcode = 'R00000342';
-    my $branch = 'MPL';
+    my $branch = $library2->{branchcode};
 
     my ( $item_bibnum, $item_bibitemnum, $itemnumber ) = AddItem(
         {
@@ -234,6 +244,9 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         $biblionumber
     );
 
+
+
+
     # Create borrowers
     my %renewing_borrower_data = (
         firstname =>  'John',
@@ -256,13 +269,22 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         branchcode => $branch,
     );
 
+    my %restricted_borrower_data = (
+        firstname =>  'Alice',
+        surname => 'Reservation',
+        categorycode => 'S',
+        debarred => '3228-01-01',
+        branchcode => $branch,
+    );
+
     my $renewing_borrowernumber = AddMember(%renewing_borrower_data);
     my $reserving_borrowernumber = AddMember(%reserving_borrower_data);
     my $hold_waiting_borrowernumber = AddMember(%hold_waiting_borrower_data);
+    my $restricted_borrowernumber = AddMember(%restricted_borrower_data);
 
     my $renewing_borrower = GetMember( borrowernumber => $renewing_borrowernumber );
+    my $restricted_borrower = GetMember( borrowernumber => $restricted_borrowernumber );
 
-    my $constraint     = 'a';
     my $bibitems       = '';
     my $priority       = '1';
     my $resdate        = undef;
@@ -279,6 +301,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     $datedue = dt_from_string( $issue->date_due() );
     is (defined $issue2, 1, "Item 2 checked out, due date: " . $issue2->date_due());
 
+
     my $borrowing_borrowernumber = GetItemIssue($itemnumber)->{borrowernumber};
     is ($borrowing_borrowernumber, $renewing_borrowernumber, "Item checked out to $renewing_borrower->{firstname} $renewing_borrower->{surname}");
 
@@ -289,7 +312,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     # Biblio-level hold, renewal test
     AddReserve(
         $branch, $reserving_borrowernumber, $biblionumber,
-        $constraint, $bibitems,  $priority, $resdate, $expdate, $notes,
+        $bibitems,  $priority, $resdate, $expdate, $notes,
         $title, $checkitem, $found
     );
 
@@ -354,7 +377,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     # Item-level hold, renewal test
     AddReserve(
         $branch, $reserving_borrowernumber, $biblionumber,
-        $constraint, $bibitems,  $priority, $resdate, $expdate, $notes,
+        $bibitems,  $priority, $resdate, $expdate, $notes,
         $title, $itemnumber, $found
     );
 
@@ -365,7 +388,6 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber2, 1);
     is( $renewokay, 1, 'Can renew item 2, item-level hold is on item 1');
 
-
     # Items can't fill hold for reasons
     ModItem({ notforloan => 1 }, $biblionumber, $itemnumber);
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber, 1);
@@ -373,6 +395,62 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     ModItem({ notforloan => 0, itype => '' }, $biblionumber, $itemnumber,1);
 
     # FIXME: Add more for itemtype not for loan etc.
+
+    # Restricted users cannot renew when RestrictionBlockRenewing is enabled
+    my $barcode5 = 'R00000347';
+    my ( $item_bibnum5, $item_bibitemnum5, $itemnumber5 ) = AddItem(
+        {
+            homebranch       => $branch,
+            holdingbranch    => $branch,
+            barcode          => $barcode5,
+            replacementprice => 23.00
+        },
+        $biblionumber
+    );
+    my $datedue5 = AddIssue($restricted_borrower, $barcode5);
+    is (defined $datedue5, 1, "Item with date due checked out, due date: $datedue5");
+
+    C4::Context->set_preference('RestrictionBlockRenewing','1');
+    ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber2);
+    is( $renewokay, 1, '(Bug 8236), Can renew, user is not restricted');
+    ( $renewokay, $error ) = CanBookBeRenewed($restricted_borrowernumber, $itemnumber5);
+    is( $renewokay, 0, '(Bug 8236), Cannot renew, user is restricted');
+
+    # Users cannot renew an overdue item
+    my $barcode6 = 'R00000348';
+    my ( $item_bibnum6, $item_bibitemnum6, $itemnumber6 ) = AddItem(
+        {
+            homebranch       => $branch,
+            holdingbranch    => $branch,
+            barcode          => $barcode6,
+            replacementprice => 23.00
+        },
+        $biblionumber
+    );
+
+    my $barcode7 = 'R00000349';
+    my ( $item_bibnum7, $item_bibitemnum7, $itemnumber7 ) = AddItem(
+        {
+            homebranch       => $branch,
+            holdingbranch    => $branch,
+            barcode          => $barcode7,
+            replacementprice => 23.00
+        },
+        $biblionumber
+    );
+    my $datedue6 = AddIssue( $renewing_borrower, $barcode6);
+    is (defined $datedue6, 1, "Item 2 checked out, due date: $datedue6");
+
+    my $passeddatedue1 = AddIssue($renewing_borrower, $barcode7, DateTime->from_epoch(epoch => 1));
+    is (defined $passeddatedue1, 1, "Item with passed date due checked out, due date: $passeddatedue1");
+
+
+    C4::Context->set_preference('OverduesBlockRenewing','blockitem');
+    ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber6);
+    is( $renewokay, 1, '(Bug 8236), Can renew, this item is not overdue');
+    ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber7);
+    is( $renewokay, 0, '(Bug 8236), Cannot renew, this item is overdue');
+
 
     $reserveid = C4::Reserves::GetReserveId({ biblionumber => $biblionumber, itemnumber => $itemnumber, borrowernumber => $reserving_borrowernumber});
     CancelReserve({ reserve_id => $reserveid });
@@ -392,28 +470,48 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     AddIssue( $renewing_borrower, $barcode4, undef, undef, undef, undef, { auto_renew => 1 } );
     ( $renewokay, $error ) =
       CanBookBeRenewed( $renewing_borrowernumber, $itemnumber4 );
-    is( $renewokay, 0, 'Cannot renew, renewal is automatic' );
-    is( $error, 'auto_renew',
-        'Cannot renew, renewal is automatic (returned code is auto_renew)' );
+    is( $renewokay, 0, 'Bug 14101: Cannot renew, renewal is automatic and premature' );
+    is( $error, 'auto_too_soon',
+        'Bug 14101: Cannot renew, renewal is automatic and premature, "No renewal before" = undef (returned code is auto_too_soon)' );
 
     # set policy to require that loans cannot be
     # renewed until seven days prior to the due date
     $dbh->do('UPDATE issuingrules SET norenewalbefore = 7');
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber);
-    is( $renewokay, 0, 'Cannot renew, renewal is premature');
-    is( $error, 'too_soon', 'Cannot renew, renewal is premature (returned code is too_soon)');
+    is( $renewokay, 0, 'Bug 7413: Cannot renew, renewal is premature');
+    is( $error, 'too_soon', 'Bug 7413: Cannot renew, renewal is premature (returned code is too_soon)');
     is(
         GetSoonestRenewDate($renewing_borrowernumber, $itemnumber),
         $datedue->clone->add(days => -7),
-        'renewals permitted 7 days before due date, as expected',
+        'Bug 7413: Renewals permitted 7 days before due date, as expected',
     );
 
     # Test automatic renewal again
     ( $renewokay, $error ) =
       CanBookBeRenewed( $renewing_borrowernumber, $itemnumber4 );
-    is( $renewokay, 0, 'Cannot renew, renewal is automatic and premature' );
+    is( $renewokay, 0, 'Bug 14101: Cannot renew, renewal is automatic and premature' );
     is( $error, 'auto_too_soon',
-'Cannot renew, renewal is automatic and premature (returned code is auto_too_soon)'
+'Bug 14101: Cannot renew, renewal is automatic and premature (returned code is auto_too_soon)'
+    );
+
+    # Change policy so that loans can only be renewed exactly on due date (0 days prior to due date)
+    # and test automatic renewal again
+    $dbh->do('UPDATE issuingrules SET norenewalbefore = 0');
+    ( $renewokay, $error ) =
+      CanBookBeRenewed( $renewing_borrowernumber, $itemnumber4 );
+    is( $renewokay, 0, 'Bug 14101: Cannot renew, renewal is automatic and premature' );
+    is( $error, 'auto_too_soon',
+'Bug 14101: Cannot renew, renewal is automatic and premature, "No renewal before" = 0 (returned code is auto_too_soon)'
+    );
+
+    # Change policy so that loans can be renewed 99 days prior to the due date
+    # and test automatic renewal again
+    $dbh->do('UPDATE issuingrules SET norenewalbefore = 99');
+    ( $renewokay, $error ) =
+      CanBookBeRenewed( $renewing_borrowernumber, $itemnumber4 );
+    is( $renewokay, 0, 'Bug 14101: Cannot renew, renewal is automatic' );
+    is( $error, 'auto_renew',
+'Bug 14101: Cannot renew, renewal is automatic (returned code is auto_renew)'
     );
 
     # Too many renewals
@@ -434,7 +532,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 
     LostItem( $itemnumber, 1 );
 
-    my $item = $schema->resultset('Item')->find( $itemnumber );
+    my $item = Koha::Database->new()->schema()->resultset('Item')->find($itemnumber);
     ok( !$item->onloan(), "Lost item marked as returned has false onloan value" );
 
     my $total_due = $dbh->selectrow_array(
@@ -454,7 +552,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 
     LostItem( $itemnumber2, 0 );
 
-    my $item2 = $schema->resultset('Item')->find( $itemnumber2 );
+    my $item2 = Koha::Database->new()->schema()->resultset('Item')->find($itemnumber2);
     ok( $item2->onloan(), "Lost item *not* marked as returned has true onloan value" );
 
     $total_due = $dbh->selectrow_array(
@@ -467,16 +565,24 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my $now = dt_from_string();
     my $future = dt_from_string();
     $future->add( days => 7 );
-    my $units = C4::Overdues::get_chargeable_units('days', $future, $now, 'MPL');
+    my $units = C4::Overdues::get_chargeable_units('days', $future, $now, $library2->{branchcode});
     ok( $units == 0, '_get_chargeable_units returns 0 for items not past due date (Bug 12596)' );
-}
+
+    # Users cannot renew any item if there is an overdue item
+    C4::Context->set_preference('OverduesBlockRenewing','block');
+    ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber6);
+    is( $renewokay, 0, '(Bug 8236), Cannot renew, one of the items is overdue');
+    ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber7);
+    is( $renewokay, 0, '(Bug 8236), Cannot renew, one of the items is overdue');
+
+  }
 
 {
     # GetUpcomingDueIssues tests
     my $barcode  = 'R00000342';
     my $barcode2 = 'R00000343';
     my $barcode3 = 'R00000344';
-    my $branch   = 'MPL';
+    my $branch   = $library2->{branchcode};
 
     #Create another record
     my $biblio2 = MARC::Record->new();
@@ -561,7 +667,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 
 {
     my $barcode  = '1234567890';
-    my $branch   = 'MPL';
+    my $branch   = $library2->{branchcode};
 
     my $biblio = MARC::Record->new();
     my ($biblionumber, $biblioitemnumber) = AddBiblio($biblio, '');
@@ -594,6 +700,132 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     is ( $count, 0, "Calling UpdateFine on non-existant fine with an amount of 0 does not result in an empty fine" );
 }
 
-$dbh->rollback;
+{
+    $dbh->do('DELETE FROM issues');
+    $dbh->do('DELETE FROM items');
+    $dbh->do('DELETE FROM issuingrules');
+    $dbh->do(
+        q{
+        INSERT INTO issuingrules ( categorycode, branchcode, itemtype, reservesallowed, maxissueqty, issuelength, lengthunit, renewalsallowed, renewalperiod,
+                    norenewalbefore, auto_renew, fine, chargeperiod ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
+        },
+        {},
+        '*', '*', '*', 25,
+        20,  14,  'days',
+        1,   7,
+        undef,  0,
+        .10, 1
+    );
+    my $biblio = MARC::Record->new();
+    my ( $biblionumber, $biblioitemnumber ) = AddBiblio( $biblio, '' );
+
+    my $barcode1 = '1234';
+    my ( undef, undef, $itemnumber1 ) = AddItem(
+        {
+            homebranch    => $library2->{branchcode},
+            holdingbranch => $library2->{branchcode},
+            barcode       => $barcode1,
+        },
+        $biblionumber
+    );
+    my $barcode2 = '4321';
+    my ( undef, undef, $itemnumber2 ) = AddItem(
+        {
+            homebranch    => $library2->{branchcode},
+            holdingbranch => $library2->{branchcode},
+            barcode       => $barcode2,
+        },
+        $biblionumber
+    );
+
+    my $borrowernumber1 = AddMember(
+        firstname    => 'Kyle',
+        surname      => 'Hall',
+        categorycode => 'S',
+        branchcode   => $library2->{branchcode},
+    );
+    my $borrowernumber2 = AddMember(
+        firstname    => 'Chelsea',
+        surname      => 'Hall',
+        categorycode => 'S',
+        branchcode   => $library2->{branchcode},
+    );
+
+    my $borrower1 = GetMember( borrowernumber => $borrowernumber1 );
+    my $borrower2 = GetMember( borrowernumber => $borrowernumber2 );
+
+    my $issue = AddIssue( $borrower1, $barcode1 );
+
+    my ( $renewokay, $error ) = CanBookBeRenewed( $borrowernumber1, $itemnumber1 );
+    is( $renewokay, 1, 'Bug 14337 - Verify the borrower can renew with no hold on the record' );
+
+    AddReserve(
+        $library2->{branchcode}, $borrowernumber2, $biblionumber,
+        '',  1, undef, undef, '',
+        undef, undef, undef
+    );
+
+    C4::Context->dbh->do("UPDATE issuingrules SET onshelfholds = 0");
+    C4::Context->set_preference( 'AllowRenewalIfOtherItemsAvailable', 0 );
+    ( $renewokay, $error ) = CanBookBeRenewed( $borrowernumber1, $itemnumber1 );
+    is( $renewokay, 0, 'Bug 14337 - Verify the borrower cannot renew with a hold on the record if AllowRenewalIfOtherItemsAvailable and onshelfholds are disabled' );
+
+    C4::Context->dbh->do("UPDATE issuingrules SET onshelfholds = 0");
+    C4::Context->set_preference( 'AllowRenewalIfOtherItemsAvailable', 1 );
+    ( $renewokay, $error ) = CanBookBeRenewed( $borrowernumber1, $itemnumber1 );
+    is( $renewokay, 0, 'Bug 14337 - Verify the borrower cannot renew with a hold on the record if AllowRenewalIfOtherItemsAvailable is enabled and onshelfholds is disabled' );
+
+    C4::Context->dbh->do("UPDATE issuingrules SET onshelfholds = 1");
+    C4::Context->set_preference( 'AllowRenewalIfOtherItemsAvailable', 0 );
+    ( $renewokay, $error ) = CanBookBeRenewed( $borrowernumber1, $itemnumber1 );
+    is( $renewokay, 0, 'Bug 14337 - Verify the borrower cannot renew with a hold on the record if AllowRenewalIfOtherItemsAvailable is disabled and onshelfhold is enabled' );
+
+    C4::Context->dbh->do("UPDATE issuingrules SET onshelfholds = 1");
+    C4::Context->set_preference( 'AllowRenewalIfOtherItemsAvailable', 1 );
+    ( $renewokay, $error ) = CanBookBeRenewed( $borrowernumber1, $itemnumber1 );
+    is( $renewokay, 1, 'Bug 14337 - Verify the borrower can renew with a hold on the record if AllowRenewalIfOtherItemsAvailable and onshelfhold are enabled' );
+
+    # Setting item not checked out to be not for loan but holdable
+    ModItem({ notforloan => -1 }, $biblionumber, $itemnumber2);
+
+    ( $renewokay, $error ) = CanBookBeRenewed( $borrowernumber1, $itemnumber1 );
+    is( $renewokay, 0, 'Bug 14337 - Verify the borrower can not renew with a hold on the record if AllowRenewalIfOtherItemsAvailable is enabled but the only available item is notforloan' );
+}
+
+{
+    # Don't allow renewing onsite checkout
+    my $barcode  = 'R00000XXX';
+    my $branch   = $library->{branchcode};
+
+    #Create another record
+    my $biblio = MARC::Record->new();
+    $biblio->append_fields(
+        MARC::Field->new('100', ' ', ' ', a => 'Anonymous'),
+        MARC::Field->new('245', ' ', ' ', a => 'A title'),
+    );
+    my ($biblionumber, $biblioitemnumber) = AddBiblio($biblio, '');
+
+    my (undef, undef, $itemnumber) = AddItem(
+        {
+            homebranch       => $branch,
+            holdingbranch    => $branch,
+            barcode          => $barcode,
+        },
+        $biblionumber
+    );
+
+    my $borrowernumber = AddMember(
+        firstname =>  'fn',
+        surname => 'dn',
+        categorycode => 'S',
+        branchcode => $branch,
+    );
+
+    my $borrower = GetMember( borrowernumber => $borrowernumber );
+    my $issue = AddIssue( $borrower, $barcode, undef, undef, undef, undef, { onsite_checkout => 1 } );
+    my ( $renewed, $error ) = CanBookBeRenewed( $borrowernumber, $itemnumber );
+    is( $renewed, 0, 'CanBookBeRenewed should not allow to renew on-site checkout' );
+    is( $error, 'onsite_checkout', 'A correct error code should be returned by CanBookBeRenewed for on-site checkout' );
+}
 
 1;

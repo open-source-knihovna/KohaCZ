@@ -27,11 +27,11 @@ use warnings;
 
 use C4::Auth;
 use C4::Output;
-use C4::Dates qw/format_date/;
 use CGI qw ( -utf8 );
 use C4::Members;
 use C4::Branch;
 use C4::Accounts;
+use Koha::DateUtils;
 
 my $input=new CGI;
 
@@ -89,7 +89,8 @@ for (my $i=0;$i<$numaccts;$i++){
     if($accts->[$i]{'amountoutstanding'} <= 0){
         $accts->[$i]{'amountoutstandingcredit'} = 1;
     }
-    my %row = ( 'date'              => format_date($accts->[$i]{'date'}),
+
+    my %row = ( 'date'         => dt_from_string( $accts->[$i]{'date'} ),
                 'amountcredit' => $accts->[$i]{'amountcredit'},
                 'amountoutstandingcredit' => $accts->[$i]{'amountoutstandingcredit'},
                 'toggle' => $accts->[$i]{'toggle'},

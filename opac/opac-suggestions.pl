@@ -27,7 +27,6 @@ use C4::Koha;
 use C4::Output;
 use C4::Suggestions;
 use C4::Koha;
-use C4::Dates;
 use C4::Scrubber;
 
 use Koha::DateUtils qw( dt_from_string );
@@ -35,7 +34,6 @@ use Koha::DateUtils qw( dt_from_string );
 my $input           = new CGI;
 my $op              = $input->param('op');
 my $suggestion      = $input->Vars;
-delete $suggestion->{negcap};
 my $negcaptcha      = $input->param('negcap');
 my $suggested_by_anyone = $input->param('suggested_by_anyone') || 0;
 
@@ -43,6 +41,10 @@ my $suggested_by_anyone = $input->param('suggested_by_anyone') || 0;
 if ($negcaptcha ) {
     print $input->redirect("/cgi-bin/koha/opac-suggestions.pl");
     exit;
+} else {
+    # don't pass 'negcap' column to DB, else DBI::Class will error
+    # DBIx::Class::Row::store_column(): No such column 'negcap' on Koha::Schema::Result::Suggestion at  Koha/C4/Suggestions.pm
+    delete $suggestion->{negcap};
 }
 
 #If suggestions are turned off we redirect to 404 error. This will also redirect guest suggestions
@@ -148,15 +150,6 @@ if ( $op eq "delete_confirm" ) {
     exit;
 }
 map{ $_->{'branchcodesuggestedby'}=GetBranchInfo($_->{'branchcodesuggestedby'})->[0]->{'branchname'}} @$suggestions_loop;
-my $supportlist=GetSupportList();
-foreach my $support(@$supportlist){
-	if ($$support{'imageurl'}){
-		$$support{'imageurl'}= getitemtypeimagelocation( 'opac', $$support{'imageurl'} );
-	}
-	else {
-	   delete $$support{'imageurl'}
-	}
-}
 
 foreach my $suggestion(@$suggestions_loop) {
     if($suggestion->{'suggestedby'} == $borrowernumber) {
@@ -189,7 +182,6 @@ if ( C4::Context->preference("AllowPurchaseSuggestionBranchChoice") ) {
 
 $template->param(
 	%$suggestion,
-	itemtypeloop=> $supportlist,
     suggestions_loop => $suggestions_loop,
     patron_reason_loop => $patron_reason_loop,
     "op_$op"         => 1,

@@ -27,12 +27,15 @@ use C4::Koha;
 sub GetDescription {
     my ( $self, $itemtype ) = @_;
 
-    my $query = "SELECT description FROM itemtypes WHERE itemtype = ?";
-    my $sth   = C4::Context->dbh->prepare($query);
-    $sth->execute($itemtype);
-    my $d = $sth->fetchrow_hashref();
-    return $d->{description}
+    $itemtype = C4::Koha::getitemtypeinfo( $itemtype );
+    return $itemtype->{translated_description};
 
+}
+
+sub Get {
+    my @itemtypes = @{ GetItemTypes(style => 'array') };
+    @itemtypes = sort { $a->{description} cmp $b->{description} } @itemtypes;
+    return \@itemtypes;
 }
 
 1;

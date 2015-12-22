@@ -1,4 +1,5 @@
 [% USE Koha %]
+[% SET OpacLangSelectorMode = Koha.Preference('OpacLangSelectorMode') %]
 <div id="wrap">
     <div id="header-region" class="noprint">
         <div class="navbar navbar-inverse navbar-static-top">
@@ -36,41 +37,54 @@
                             <li class="dropdown">
                                 <a href="#" title="Show lists" class="dropdown-toggle" id="listsmenu" data-toggle="dropdown" role="button"><i class="icon-list icon-white"></i> <span class="listslabel">Lists</span> <b class="caret"></b></a>
                                 <ul aria-labelledby="listsmenu" role="menu" class="dropdown-menu">
-                                    [% IF ( pubshelves ) %]
-                                            <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?display=publicshelves" tabindex="-1" role="menuitem"><strong>Public lists</strong></a></li>
-                                        [% FOREACH pubshelvesloo IN pubshelvesloop %]
-                                            <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?viewshelf=[% pubshelvesloo.shelfnumber %]&amp;sortfield=[% pubshelvesloo.sortfield %]" tabindex="-1" role="menuitem">[% pubshelvesloo.shelfname |html %]</a></li>
-                                        [% END %]
-                                            <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?display=publicshelves" tabindex="-1" role="menuitem" class="listmenulink">View All</a></li>
-                                    [% ELSE %]
-                                        <li role="presentation"><a href="#" tabindex="-1" class="menu-inactive" role="menuitem">No public lists</a></li>
+                                [% IF some_public_shelves.count %]
+                                    <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?op=list&amp;category=2" tabindex="-1" role="menuitem"><strong>Public lists</strong></a></li>
+                                    [% SET number_of_public_shelves = 0 %]
+                                    [% FOREACH s IN some_public_shelves %]
+                                        <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?op=view&amp;shelfnumber=[% s.shelfnumber %]&amp;sortfield=[% s.sortfield %]" tabindex="-1" role="menuitem">[% s.shelfname |html %]</a></li>
+                                        [% SET number_of_public_shelves = number_of_public_shelves + 1 %]
+                                        [% IF number_of_public_shelves >= 10 %][% LAST %][% END %]
                                     [% END %]
-                                    <li class="divider" role="presentation"></li>
-                                    [% IF Koha.Preference( 'opacuserlogin' ) == 1 %]
-                                        <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?display=privateshelves" tabindex="-1" role="menuitem"><strong>Your lists</strong></a></li>
-                                        [% IF ( loggedinusername ) %]
-                                            [% IF ( barshelves ) %]
-                                                [% FOREACH barshelvesloo IN barshelvesloop %]
-                                                    <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?viewshelf=[% barshelvesloo.shelfnumber %]&amp;sortfield=[% barshelvesloo.sortfield %]" tabindex="-1" role="menuitem">[% barshelvesloo.shelfname |html %]</a></li>
-                                                [% END %]
-                                                <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?display=privateshelves" tabindex="-1" role="menuitem" class="listmenulink">View all</a></li>
-                                            [% ELSE %]
-                                                <li role="presentation"><a href="#" tabindex="-1" class="menu-inactive" role="menuitem">No private lists</a></li>
-                                                <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?display=privateshelves" tabindex="-1" role="menuitem" class="listmenulink">New list</a></li>
+                                    [% IF some_public_shelves > 10 %]
+                                        <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?op=list&amp;category=2" tabindex="-1" role="menuitem" class="listmenulink">View All</a></li>
+                                    [% END %]
+                                [% ELSE %]
+                                    <li role="presentation"><a href="#" tabindex="-1" class="menu-inactive" role="menuitem">No public lists</a></li>
+                                [% END %]
+                                <li class="divider" role="presentation"></li>
+                                [% IF Koha.Preference( 'opacuserlogin' ) == 1 %]
+                                    <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?op=list&amp;category=1" tabindex="-1" role="menuitem"><strong>Your lists</strong></a></li>
+                                    [% IF loggedinusername %]
+                                        [% IF some_private_shelves.count %]
+                                            [% SET number_of_private_shelves = 0 %]
+                                            [% FOREACH s IN some_private_shelves %]
+                                                <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?op=view&amp;shelfnumber=[% s.shelfnumber %]&amp;sortfield=[% s.sortfield %]" tabindex="-1" role="menuitem">[% s.shelfname |html %]</a></li>
+                                                [% SET number_of_private_shelves = number_of_private_shelves + 1 %]
+                                                [% IF number_of_private_shelves >= 10 %][% LAST %][% END %]
+                                            [% END %]
+                                            [% IF some_private_shelves > 10 %]
+                                                <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?op=list&amp;category=1" tabindex="-1" role="menuitem" class="listmenulink">View All</a></li>
                                             [% END %]
                                         [% ELSE %]
-                                            <li role="presentation"><a href="/cgi-bin/koha/opac-user.pl" tabindex="-1" class="menu-inactive loginModal-trigger" role="menuitem">Log in to create your own lists</a></li>
-                                        [% END # / IF loggedinusername %]
-                                    [% END # / IF opacuserlogin %]
+                                            <li role="presentation"><a href="#" tabindex="-1" class="menu-inactive" role="menuitem">No private lists</a></li>
+                                            <li role="presentation"><a href="/cgi-bin/koha/opac-shelves.pl?op=list&amp;category=1" tabindex="-1" role="menuitem" class="listmenulink">New list</a></li>
+                                        [% END %]
+                                    [% ELSE %]
+                                        <li role="presentation"><a href="/cgi-bin/koha/opac-user.pl" tabindex="-1" class="menu-inactive loginModal-trigger" role="menuitem">Log in to create your own lists</a></li>
+                                    [% END # / IF loggedinusername %]
+                                [% END # / IF opacuserlogin %]
                                 </ul> <!-- / .dropdown-menu -->
                             </li> <!-- / .dropdown -->
                         [% END # / IF virtualshelves %]
                     </ul> <!-- / .nav -->
                     [% IF Koha.Preference( 'virtualshelves' ) == 1 %]<div id="listsDetails"></div>[% END %]
-                    [% IF Koha.Preference( 'opacuserlogin' ) == 1 || EnableOpacSearchHistory %]
+                    [% IF Koha.Preference( 'opacuserlogin' ) == 1 || opaclanguagesdisplay || EnableOpacSearchHistory %]
                         <a id="user-menu-trigger" class="pull-right" href="#"><i class="icon-user"></i> <span class="caret"></span></a>
                         <div id="members">
                             <ul class="nav pull-right">
+
+                                [% INCLUDE 'masthead-langmenu.inc' %]
+
                                 [% IF Koha.Preference( 'opacuserlogin' ) == 1 %]
                                     [% UNLESS ( loggedinusername ) %]
                                         [% IF Koha.Preference('casAuthentication') %]

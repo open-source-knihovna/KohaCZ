@@ -60,7 +60,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
         query           => $query,
         type            => "opac",
         authnotrequired => 0,
-        flagsrequired   => { borrow => 1 },
         debug           => 1,
     }
 );
@@ -82,8 +81,6 @@ my ( $borr ) = GetMemberDetails( $borrowernumber );
 
 my (  $today_year,   $today_month,   $today_day) = Today();
 my ($warning_year, $warning_month, $warning_day) = split /-/, $borr->{'dateexpiry'};
-
-$borr->{'ethnicity'} = fixEthnicity( $borr->{'ethnicity'} );
 
 my $debar = IsDebarred($borrowernumber);
 my $userdebarred;
@@ -186,7 +183,8 @@ if ($issues){
             }
         }
         $issue->{'charges'} = $charges;
-        $issue->{'subtitle'} = GetRecordValue('subtitle', GetMarcBiblio($issue->{'biblionumber'}), GetFrameworkCode($issue->{'biblionumber'}));
+        my $marcrecord = GetMarcBiblio( $issue->{'biblionumber'} );
+        $issue->{'subtitle'} = GetRecordValue('subtitle', $marcrecord, GetFrameworkCode($issue->{'biblionumber'}));
         # check if item is renewable
         my ($status,$renewerror) = CanBookBeRenewed( $borrowernumber, $issue->{'itemnumber'} );
         ($issue->{'renewcount'},$issue->{'renewsallowed'},$issue->{'renewsleft'}) = GetRenewCount($borrowernumber, $issue->{'itemnumber'});
@@ -199,6 +197,7 @@ if ($issues){
         if ($renewerror) {
             $issue->{'too_many'}       = 1 if $renewerror eq 'too_many';
             $issue->{'on_reserve'}     = 1 if $renewerror eq 'on_reserve';
+            $issue->{'norenew_overdue'} = 1 if $renewerror eq 'overdue';
             $issue->{'auto_renew'}     = 1 if $renewerror eq 'auto_renew';
             $issue->{'auto_too_soon'}  = 1 if $renewerror eq 'auto_too_soon';
 
@@ -232,6 +231,7 @@ if ($issues){
 
         my $isbn = GetNormalizedISBN($issue->{'isbn'});
         $issue->{normalized_isbn} = $isbn;
+        $issue->{normalized_upc} = GetNormalizedUPC( $marcrecord, C4::Context->preference('marcflavour') );
 
                 # My Summary HTML
                 if (my $my_summary_html = C4::Context->preference('OPACMySummaryHTML')){
@@ -245,6 +245,8 @@ if ($issues){
                 }
     }
 }
+my $overduesblockrenewing = C4::Context->preference('OverduesBlockRenewing');
+$canrenew = 0 if ($overduesblockrenewing ne 'allow' and $overdues_count == $count);
 $template->param( ISSUES       => \@issuedat );
 $template->param( issues_count => $count );
 $template->param( canrenew     => $canrenew );
@@ -293,7 +295,9 @@ foreach my $res (@reserves) {
     if ($show_priority) {
         $res->{'priority'} ||= '';
     }
-    $res->{'suspend_until'} = C4::Dates->new( $res->{'suspend_until'}, "iso")->output("syspref") if ( $res->{'suspend_until'} );
+    if ( $res->{'suspend_until'} ) {
+        $res->{'suspend_until'} = output_pref({ dt => dt_from_string( $res->{'suspend_until'} , 'iso' ), dateonly => 1 });
+    }
 }
 
 # use Data::Dumper;
@@ -384,18 +388,15 @@ if ( $borr->{'opacnote'} ) {
 }
 
 $template->param(
-    bor_messages_loop    => GetMessages( $borrowernumber, 'B', 'NONE' ),
-    waiting_count      => $wcount,
-    patronupdate => $patronupdate,
-    OpacRenewalAllowed => C4::Context->preference("OpacRenewalAllowed"),
-    userview => 1,
-);
-
-$template->param(
-    SuspendHoldsOpac => C4::Context->preference('SuspendHoldsOpac'),
+    bor_messages_loop        => GetMessages( $borrowernumber, 'B', 'NONE' ),
+    waiting_count            => $wcount,
+    patronupdate             => $patronupdate,
+    OpacRenewalAllowed       => C4::Context->preference("OpacRenewalAllowed"),
+    userview                 => 1,
+    SuspendHoldsOpac         => C4::Context->preference('SuspendHoldsOpac'),
     AutoResumeSuspendedHolds => C4::Context->preference('AutoResumeSuspendedHolds'),
-    OpacHoldNotes => C4::Context->preference('OpacHoldNotes'),
+    OpacHoldNotes            => C4::Context->preference('OpacHoldNotes'),
+    failed_holds             => $query->param('failed_holds'),
 );
 
-output_html_with_http_headers $query, $cookie, $template->output;
-
+output_html_with_http_headers $query, $cookie, $template->output, undef, { force_no_caching => 1 };

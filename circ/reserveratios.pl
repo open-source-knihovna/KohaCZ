@@ -27,10 +27,10 @@ use Date::Calc qw/Today Add_Delta_YM/;
 use C4::Context;
 use C4::Output;
 use C4::Auth;
-use C4::Dates qw/format_date format_date_in_iso/;
 use C4::Debug;
 use C4::Biblio qw/GetMarcBiblio GetRecordValue GetFrameworkCode/;
 use C4::Acquisition qw/GetOrdersByBiblionumber/;
+use Koha::DateUtils;
 
 my $input = new CGI;
 my $startdate       = $input->param('from');
@@ -55,22 +55,17 @@ if ($booksellerid && $basketno) {
      $template->param( booksellerid => $booksellerid, basketno => $basketno );
 }
 
-my ( $year, $month, $day ) = Today();
-my $todaysdate     = sprintf("%-04.4d-%-02.2d-%02.2d", $year, $month, $day);
-# Find yesterday for the default shelf pull start and end dates
-#    A default of the prior years's holds is a reasonable way to pull holds 
-my $datelastyear = sprintf("%-04.4d-%-02.2d-%02.2d", Add_Delta_YM($year, $month, $day, -1, 0));
+$startdate = eval { dt_from_string( $startdate ) } if $startdate;
+$enddate = eval { dt_from_string( $enddate ) } if $enddate;
 
-#		Predefine the start and end dates if they are not already defined
-#		Check if null, should string match, if so set start and end date to yesterday
-if (!defined($startdate) or $startdate !~ s/^\s*(\S+)\s*$/$1/) {   # strip spaces, remove Taint
-	$startdate = format_date($datelastyear);
-}
-if (!defined($enddate)   or $enddate   !~ s/^\s*(\S+)\s*$/$1/) {   # strip spaces, remove Taint
-	$enddate   = format_date($todaysdate);
-}
+my $todaysdate = dt_from_string;
+
+#    A default of the prior years's holds is a reasonable way to pull holds
+$enddate = $todaysdate unless $enddate;
+$startdate = $todaysdate->clone->subtract( years => 1 ) unless $startdate;
+
 if (!defined($ratio)) {
-	$ratio = 3;
+    $ratio = 3;
 }
 # Force to be a number
 $ratio += 0;
@@ -80,16 +75,13 @@ if ($ratio <= 0) {
 
 my $dbh    = C4::Context->dbh;
 my $sqldatewhere = "";
-$debug and warn format_date_in_iso($startdate) . "\n" . format_date_in_iso($enddate);
+$debug and warn output_pref({ dt => $startdate, dateformat => 'iso', dateonly => 1 }) . "\n" . output_pref({ dt => $enddate, dateformat => 'iso', dateonly => 1 });
 my @query_params = ();
-if ($startdate) {
-    $sqldatewhere .= " AND reservedate >= ?";
-    push @query_params, format_date_in_iso($startdate);
-}
-if ($enddate) {
-    $sqldatewhere .= " AND reservedate <= ?";
-    push @query_params, format_date_in_iso($enddate);
-}
+
+$sqldatewhere .= " AND reservedate >= ?";
+push @query_params, output_pref({ dt => $startdate, dateformat => 'iso' }) ;
+$sqldatewhere .= " AND reservedate <= ?";
+push @query_params, output_pref({ dt => $enddate, dateformat => 'iso' });
 
 my $nfl_comparison = $include_ordered ? '<=' : '=';
 my $strsth =
@@ -146,7 +138,7 @@ while ( my $data = $sth->fetchrow_hashref ) {
     push(
         @reservedata,
         {
-            reservedate        => format_date( $data->{reservedate} ),
+            reservedate        => $data->{reservedate},
             priority           => $data->{priority},
             name               => $data->{borrower},
             title              => $data->{title},
@@ -178,7 +170,7 @@ for my $rd ( @reservedata ) {
 
 $template->param(
     ratio_atleast1  => $ratio_atleast1,
-    todaysdate      => format_date($todaysdate),
+    todaysdate      => $todaysdate,
     from            => $startdate,
     to              => $enddate,
     ratio           => $ratio,

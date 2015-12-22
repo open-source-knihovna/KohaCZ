@@ -24,55 +24,62 @@ use strict;
 use Date::Calc qw/Today Date_to_Days/;
 use Date::Manip qw/UnixDate/;
 use List::MoreUtils qw( uniq );
+use POSIX qw( floor ceil );
+use Locale::Currency::Format 1.28;
 
 use C4::Circulation;
 use C4::Context;
 use C4::Accounts;
 use C4::Log; # logaction
 use C4::Debug;
+use C4::Budgets qw(GetCurrency);
+use Koha::DateUtils;
 
 use vars qw($VERSION @ISA @EXPORT);
 
 BEGIN {
-	# set the version for version checking
+    # set the version for version checking
     $VERSION = 3.07.00.049;
-	require Exporter;
-	@ISA    = qw(Exporter);
-	# subs to rename (and maybe merge some...)
-	push @EXPORT, qw(
-        &CalcFine
-        &Getoverdues
-        &checkoverdues
-        &NumberNotifyId
-        &AmountNotify
-        &UpdateFine
-        &GetFine
-        &get_chargeable_units
-        &CheckItemNotify
-        &GetOverduesForBranch
-        &RemoveNotifyLine
-        &AddNotifyLine
-        &GetOverdueMessageTransportTypes
-	);
-	# subs to remove
-	push @EXPORT, qw(
-        &BorType
-	);
+    require Exporter;
+    @ISA = qw(Exporter);
 
-	# check that an equivalent don't exist already before moving
+    # subs to rename (and maybe merge some...)
+    push @EXPORT, qw(
+      &CalcFine
+      &Getoverdues
+      &checkoverdues
+      &NumberNotifyId
+      &AmountNotify
+      &UpdateFine
+      &GetFine
+      &get_chargeable_units
+      &CheckItemNotify
+      &GetOverduesForBranch
+      &RemoveNotifyLine
+      &AddNotifyLine
+      &GetOverdueMessageTransportTypes
+      &parse_overdues_letter
+    );
 
-	# subs to move to Circulation.pm
-	push @EXPORT, qw(
-        &GetIssuesIteminfo
-	);
+    # subs to remove
+    push @EXPORT, qw(
+      &BorType
+    );
 
-     # &GetIssuingRules - delete.
-   # use C4::Circulation::GetIssuingRule instead.
+    # check that an equivalent don't exist already before moving
 
-	# subs to move to Biblio.pm
-	push @EXPORT, qw(
-        &GetItems
-	);
+    # subs to move to Circulation.pm
+    push @EXPORT, qw(
+      &GetIssuesIteminfo
+    );
+
+    # &GetIssuingRules - delete.
+    # use C4::Circulation::GetIssuingRule instead.
+
+    # subs to move to Biblio.pm
+    push @EXPORT, qw(
+      &GetItems
+    );
 }
 
 =head1 NAME
@@ -251,15 +258,15 @@ sub CalcFine {
     my $chargeable_units = get_chargeable_units($fine_unit, $start_date, $end_date, $branchcode);
     my $units_minus_grace = $chargeable_units - $data->{firstremind};
     my $amount = 0;
-    if ($data->{'chargeperiod'}  && ($units_minus_grace > 0)  ) {
-        if ( C4::Context->preference('FinesIncludeGracePeriod') ) {
-            $amount = int($chargeable_units / $data->{'chargeperiod'}) * $data->{'fine'};# TODO fine calc should be in cents
-        } else {
-            $amount = int($units_minus_grace / $data->{'chargeperiod'}) * $data->{'fine'};
-        }
-    } else {
-        # a zero (or null) chargeperiod or negative units_minus_grace value means no charge.
-    }
+    if ( $data->{'chargeperiod'} && ( $units_minus_grace > 0 ) ) {
+        my $units = C4::Context->preference('FinesIncludeGracePeriod') ? $chargeable_units : $units_minus_grace;
+        my $charge_periods = $units / $data->{'chargeperiod'};
+        # If chargeperiod_charge_at = 1, we charge a fine at the start of each charge period
+        # if chargeperiod_charge_at = 0, we charge at the end of each charge period
+        $charge_periods = $data->{'chargeperiod_charge_at'} == 1 ? ceil($charge_periods) : floor($charge_periods);
+        $amount = $charge_periods * $data->{'fine'};
+    } # else { # a zero (or null) chargeperiod or negative units_minus_grace value means no charge. }
+
     $amount = $data->{overduefinescap} if $data->{overduefinescap} && $amount > $data->{overduefinescap};
     $debug and warn sprintf("CalcFine returning (%s, %s, %s, %s)", $amount, $data->{'chargename'}, $units_minus_grace, $chargeable_units);
     return ($amount, $data->{'chargename'}, $units_minus_grace, $chargeable_units);
@@ -947,6 +954,74 @@ sub GetOverdueMessageTransportTypes {
         if grep {/^print$/} @mtts;
 
     return \@mtts;
+}
+
+=head2 parse_overdues_letter
+
+parses the letter template, replacing the placeholders with data
+specific to this patron, biblio, or item for overdues
+
+named parameters:
+  letter - required hashref
+  borrowernumber - required integer
+  substitute - optional hashref of other key/value pairs that should
+    be substituted in the letter content
+
+returns the C<letter> hashref, with the content updated to reflect the
+substituted keys and values.
+
+=cut
+
+sub parse_overdues_letter {
+    my $params = shift;
+    foreach my $required (qw( letter_code borrowernumber )) {
+        return unless ( exists $params->{$required} && $params->{$required} );
+    }
+
+    my $substitute = $params->{'substitute'} || {};
+    $substitute->{today} ||= output_pref( { dt => dt_from_string, dateonly => 1} );
+
+    my %tables = ( 'borrowers' => $params->{'borrowernumber'} );
+    if ( my $p = $params->{'branchcode'} ) {
+        $tables{'branches'} = $p;
+    }
+
+    my $currencies = GetCurrency();
+    my $currency_format;
+    $currency_format = $currencies->{currency} if defined($currencies);
+
+    my @item_tables;
+    if ( my $i = $params->{'items'} ) {
+        my $item_format = '';
+        foreach my $item (@$i) {
+            my $fine = GetFine($item->{'itemnumber'}, $params->{'borrowernumber'});
+            if ( !$item_format and defined $params->{'letter'}->{'content'} ) {
+                $params->{'letter'}->{'content'} =~ m/(<item>.*<\/item>)/;
+                $item_format = $1;
+            }
+
+            $item->{'fine'} = currency_format($currency_format, "$fine", FMT_SYMBOL);
+            # if active currency isn't correct ISO code fallback to sprintf
+            $item->{'fine'} = sprintf('%.2f', $fine) unless $item->{'fine'};
+
+            push @item_tables, {
+                'biblio' => $item->{'biblionumber'},
+                'biblioitems' => $item->{'biblionumber'},
+                'items' => $item,
+                'issues' => $item->{'itemnumber'},
+            };
+        }
+    }
+
+    return C4::Letters::GetPreparedLetter (
+        module => 'circulation',
+        letter_code => $params->{'letter_code'},
+        branchcode => $params->{'branchcode'},
+        tables => \%tables,
+        substitute => $substitute,
+        repeat => { item => \@item_tables },
+        message_transport_type => $params->{message_transport_type},
+    );
 }
 
 1;

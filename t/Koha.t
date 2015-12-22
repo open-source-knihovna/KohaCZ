@@ -18,41 +18,50 @@
 use Modern::Perl;
 
 use C4::Context;
-use Test::More tests => 29;
+use Test::More;
 use Test::MockModule;
-use DBD::Mock;
+
+use Module::Load::Conditional qw/check_install/;
+
+BEGIN {
+    if ( check_install( module => 'Test::DBIx::Class' ) ) {
+        plan tests => 30;
+    } else {
+        plan skip_all => "Need Test::DBIx::Class"
+    }
+}
 
 use_ok('C4::Koha');
 
-my $module_context = new Test::MockModule('C4::Context');
-$module_context->mock(
-    '_new_dbh',
-    sub {
-        my $dbh = DBI->connect( 'DBI:Mock:', '', '' )
-          || die "Cannot create handle: $DBI::errstr\n";
-        return $dbh;
-    }
-);
+use Test::DBIx::Class {
+    schema_class => 'Koha::Schema',
+    connect_info => ['dbi:SQLite:dbname=:memory:','',''],
+    connect_opts => { name_sep => '.', quote_char => '`', },
+    fixture_class => '::Populate',
+}, 'AuthorisedValue' ;
 
-SKIP: {
+sub fixtures {
+    my ( $data ) = @_;
+    fixtures_ok [
+        AuthorisedValue => [
+            [ 'category', 'authorised_value' ],
+            @$data,
+        ],
+    ], 'add fixtures';
+}
 
-    skip "DBD::Mock is too old", 3
-        unless $DBD::Mock::VERSION >= 1.45;
+my $db = Test::MockModule->new('Koha::Database');
+$db->mock( _new_schema => sub { return Schema(); } );
 
-    my @loc_results = (['category'],['LOC']);
-    my @empty_results = ([]);
-    my @relterms_results = (['category'],['RELTERMS']);
+my $authorised_values = [
+    ['LOC', 'LOC'],
+    ['RELTERMS', 'RELTERMS'],
+];
+fixtures($authorised_values);
 
-    my $dbh = C4::Context->dbh();
-
-    $dbh->{mock_add_resultset} = \@loc_results;
-    is ( IsAuthorisedValueCategory('LOC'), 1, 'LOC is a valid authorized value category');
-    $dbh->{mock_add_resultset} = \@empty_results;
-    is ( IsAuthorisedValueCategory('something'), 0, 'something is not a valid authorized value category');
-    $dbh->{mock_add_resultset} = \@relterms_results;
-    is ( IsAuthorisedValueCategory('RELTERMS'), 1, 'RELTERMS is a valid authorized value category');
-
-} # End SKIP block
+is ( IsAuthorisedValueCategory('LOC'), 1, 'LOC is a valid authorized value category');
+is ( IsAuthorisedValueCategory('something'), 0, 'something is not a valid authorized value category');
+is ( IsAuthorisedValueCategory('RELTERMS'), 1, 'RELTERMS is a valid authorized value category');
 
 #
 # test that &slashifyDate returns correct (non-US) date

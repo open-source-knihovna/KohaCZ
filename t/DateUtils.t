@@ -3,8 +3,11 @@ use DateTime;
 use DateTime::TimeZone;
 
 use C4::Context;
-use Test::More tests => 55;
+
+use Test::More tests => 60;
+
 use Test::MockModule;
+use Test::Warn;
 use Time::HiRes qw/ gettimeofday /;
 use t::lib::Mocks;
 
@@ -89,8 +92,6 @@ cmp_ok( $new_dt->ymd(), 'eq', $testdate_iso, 'sql returns correct date' );
 
 $new_dt = dt_from_string( $dt, 'iso' );
 isa_ok( $new_dt, 'DateTime', 'Passed a DateTime dt_from_string returns it' );
-
-# C4::Dates allowed 00th of the month
 
 my $ymd = '2012-01-01';
 my $dt0 = dt_from_string( '00/01/2012', 'metric' );
@@ -196,6 +197,8 @@ $dt = eval { dt_from_string( '31/01/2015', 'us' ); };
 is( ref($dt), '', '31/01/2015 is not a correct date in us format' );
 $dt = dt_from_string( '01/01/2015', 'us' );
 is( ref($dt), 'DateTime', '01/01/2015 is a correct date in us format' );
+$dt = dt_from_string( '01.01.2015', 'dmydot' );
+is( ref($dt), 'DateTime', '01.01.2015 is a correct date in dmydot format' );
 
 
 # default value for hh and mm is 00:00
@@ -215,3 +218,14 @@ is( output_pref( { dt => $dt, dateonly => 1 } ), '01/01/1900', 'dt_from_string s
 # fallback
 $dt = dt_from_string('2015-01-31 01:02:03');
 is( output_pref( {dt => $dt} ), '31/01/2015 01:02', 'dt_from_string should fallback to sql format' );
+
+# output_pref with str parameter
+is( output_pref( { 'str' => $testdate_iso, dateformat => 'iso', dateonly => 1 } ), $testdate_iso, 'output_pref should handle correctly the iso parameter' );
+my $output_for_invalid_date;
+warning_like { $output_for_invalid_date = output_pref( { str => 'invalid_date' } ) }
+             { carped => qr[^Invalid date 'invalid_date' passed to output_pref] },
+             'output_pref should carp if an invalid date is passed for the str parameter';
+is( $output_for_invalid_date, undef, 'output_pref should return undef if an invalid date is passed' );
+warning_is { output_pref( { 'str' => $testdate_iso, dt => $dt, dateformat => 'iso', dateonly => 1 } ) }
+           { carped => 'output_pref should not be called with both dt and str parameters' },
+           'output_pref should carp if str and dt parameters are passed together';

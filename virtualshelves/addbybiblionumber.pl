@@ -64,9 +64,9 @@ use warnings;
 use CGI qw ( -utf8 );
 use C4::Biblio;
 use C4::Output;
-use C4::VirtualShelves qw/:DEFAULT GetAllShelves/;
 use C4::Auth;
 
+use Koha::Virtualshelves;
 
 our $query           = new CGI;
 our @biblionumber    = HandleBiblioPars();
@@ -123,49 +123,54 @@ sub HandleBiblioPars {
     return @bib;
 }
 
-sub AddBibliosToShelf {
-    my ($shelfnumber, @biblionumber)=@_;
-    for my $bib (@biblionumber){
-        AddToShelf($bib, $shelfnumber, $loggedinuser);
-    }
-}
-
 sub HandleNewVirtualShelf {
-    $shelfnumber = AddShelf( {
-        shelfname => $newvirtualshelf,
-        sortfield => $sortfield,
-        category => $category }, $loggedinuser);
-    if($shelfnumber == -1) {
-        $authorized=0;
-        $errcode=1; #add failed
+    my $shelf = eval {
+        Koha::Virtualshelf->new(
+            {
+                shelfname => $newvirtualshelf,
+                category => $category,
+                sortfield => $sortfield,
+                owner => $loggedinuser,
+            }
+        );
+    }->store;
+    if ( $@ or not $shelf ) {
+        $authorized = 0;
+        $errcode    = 1;
         return;
     }
-    AddBibliosToShelf($shelfnumber, @biblionumber);
+
+    for my $bib (@biblionumber){
+        $shelf->add_biblio( $bib, $loggedinuser );
+    }
     #Reload the page where you came from
     print $query->header;
     print "<html><meta http-equiv=\"refresh\" content=\"0\" /><body onload=\"window.opener.location.reload(true);self.close();\"></body></html>";
 }
 
 sub HandleShelfNumber {
-    if($authorized= ShelfPossibleAction($loggedinuser, $shelfnumber, 'add')) {
-    AddBibliosToShelf($shelfnumber, @biblionumber);
-    #Close this page and return
-    print $query->header;
-    print "<html><meta http-equiv=\"refresh\" content=\"0\" /><body onload=\"self.close();\"></body></html>";
+    my $shelf = Koha::Virtualshelves->find( $shelfnumber );
+    if($authorized = $shelf->can_biblios_be_added( $loggedinuser ) ) {
+        for my $bib (@biblionumber){
+            $shelf->add_biblio( $bib, $loggedinuser );
+        }
+        #Close this page and return
+        print $query->header;
+        print "<html><meta http-equiv=\"refresh\" content=\"0\" /><body onload=\"self.close();\"></body></html>";
     }
     else {
-    $errcode=2; #no perm
+        $errcode=2; #no perm
     }
 }
 
 sub HandleSelectedShelf {
-    if($authorized= ShelfPossibleAction( $loggedinuser, $shelfnumber, 'add')){
+    my $shelf = Koha::Virtualshelves->find( $shelfnumber );
+    if($authorized = $shelf->can_biblios_be_added( $loggedinuser ) ) {
         #confirm adding to specific shelf
-        my ($singleshelf, $singleshelfname)= GetShelf($shelfnumber);
         $template->param(
         singleshelf               => 1,
-        shelfnumber               => $singleshelf,
-        shelfname                 => $singleshelfname,
+        shelfnumber               => $shelf->shelfnumber,
+        shelfname                 => $shelf->shelfname,
         );
     }
     else {
@@ -174,11 +179,40 @@ sub HandleSelectedShelf {
 }
 
 sub HandleSelect {
-    my $privateshelves = GetAllShelves(1,$loggedinuser,1);
-    my $publicshelves = GetAllShelves(2,$loggedinuser,1);
-    $template->param(
-    privatevirtualshelves => $privateshelves,
-    publicvirtualshelves  => $publicshelves,
+    my $private_shelves = Koha::Virtualshelves->search(
+        {
+            category => 1,
+            owner => $loggedinuser,
+        },
+        { order_by => 'shelfname' }
+    );
+    my $shelves_shared_with_me = Koha::Virtualshelves->search(
+        {
+            category => 1,
+            'virtualshelfshares.borrowernumber' => $loggedinuser,
+            -or => {
+                allow_add => 1,
+                owner => $loggedinuser,
+            }
+        },
+        {
+            join => 'virtualshelfshares',
+        }
+    );
+    my $public_shelves= Koha::Virtualshelves->search(
+        {
+            category => 2,
+            -or => {
+                allow_add => 1,
+                owner => $loggedinuser,
+            }
+        },
+        { order_by => 'shelfname' }
+    );
+    $template->param (
+        private_shelves => $private_shelves,
+        private_shelves_shared_with_me => $shelves_shared_with_me,
+        public_shelves  => $public_shelves,
     );
 }
 

@@ -83,6 +83,77 @@ modules:
         -
           columnname: actions
 
+  cataloguing:
+    additem:
+      itemst:
+        # NOTE: These columns are in the same order as kohastructure.sql, and contain all items
+        # columns except for the following internal/obsolete fields: stack, more_subfields_xml,
+        # cn_sort, permanent_location, itemlost_on, withdrawn_on, issues, renewals and reserves.
+        -
+          columnname: barcode
+        -
+          columnname: dateaccessioned
+        -
+          columnname: booksellerid
+        -
+          columnname: homebranch
+        -
+          columnname: price
+        -
+          columnname: replacementprice
+        -
+          columnname: replacementpricedate
+        -
+          columnname: datelastborrowed
+        -
+          columnname: datelastseen
+        -
+          columnname: stack
+        -
+          columnname: notforloan
+        -
+          columnname: damaged
+        -
+          columnname: itemlost
+        -
+          columnname: withdrawn
+        -
+          columnname: itemcallnumber
+        -
+          columnname: coded_location_qualifier
+        -
+          columnname: restricted
+        -
+          columnname: itemnotes
+        -
+          columnname: itemnotes_nonpublic
+        -
+          columnname: holdingbranch
+        -
+          columnname: paidfor
+        -
+          columnname: timestamp
+        -
+          columnname: location
+        -
+          columnname: onloan
+        -
+          columnname: cn_source
+        -
+          columnname: ccode
+        -
+          columnname: materials
+        -
+          columnname: uri
+        -
+          columnname: itype
+        -
+          columnname: enumchron
+        -
+          columnname: copynumber
+        -
+          columnname: stocknumber
+
   members:
     member:
       memberresultst:
@@ -146,6 +217,8 @@ modules:
           columnname: callno
         -
           columnname: charge
+        -
+          columnname: fine
         -
           columnname: price
         -
@@ -227,6 +300,8 @@ modules:
           columnname: callno
         -
           columnname: charge
+        -
+          columnname: fine
         -
           columnname: price
         -

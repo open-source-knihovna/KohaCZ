@@ -1,6 +1,7 @@
 [% USE Koha %]
 [% USE KohaDates %]
 [% USE AuthorisedValues %]
+[% USE Branches %]
 
 [% ShowCourseReserves = 0 %]
 [% IF UseCourseReserves %]
@@ -83,8 +84,8 @@ function verify_images() {
         var no_images_msg = _("No images have been uploaded for this bibliographic record yet.");
         no_images_msg = '<p>' + no_images_msg + '</p>';
     [% IF ( CAN_user_tools_upload_local_cover_images ) %]
-        var please_upload = _("Please %supload%s one.").format(
-            "<a href='/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=[% biblionumber %]&amp;filetype=image'>",
+        var please_upload = _("Please select the image file to upload. %sUpload%s").format(
+            "<a class='btn' href='/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=[% biblionumber %]&amp;filetype=image'>",
             "</a>");
         no_images_msg += "<p id='upload_image'>" + please_upload + '</p>';
     [% END %]
@@ -295,9 +296,9 @@ function verify_images() {
                 'sDom': 't',
                 'bPaginate': false,
                 'bAutoWidth': false,
-                "aaSorting": [[ 3, "desc" ]],
+                "aaSorting": [[ 4, "desc" ]],
                 "aoColumnDefs": [
-                    { "aTargets": [ 3, 4 ], "sType": "title-string" }
+                    { "aTargets": "title-string", "sType": "title-string" }
                 ]
             }));
 
@@ -356,10 +357,10 @@ function verify_images() {
     [% IF ( XSLTDetailsDisplay ) %]
         [% XSLTBloc %]
 
-        [% IF ( GetShelves ) %]
+        [% IF shelves.count %]
             <span class="results_summary"><span class="label">Lists that include this title: </span>
-            [% FOREACH GetShelve IN GetShelves %]
-                <a href="/cgi-bin/koha/virtualshelves/shelves.pl?viewshelf=[% GetShelve.shelfnumber %]">[% GetShelve.shelfname %]</a>
+            [% FOREACH s IN shelves %]
+                <a href="/cgi-bin/koha/virtualshelves/shelves.pl?op=view&amp;shelfnumber=[% s.shelfnumber %]">[% s.shelfname %]</a>
                 [% IF ( loop.last ) %][% ELSE %]|[% END %]
             [% END %]
             </span>
@@ -401,7 +402,7 @@ function verify_images() {
     [% FOREACH subtitl IN subtitle %]
     	<h4>[% subtitl.subfield %]</h4>
     [% END %]
-            [% UNLESS ( item_level_itypes ) %]<img src="[% imageurl %]" alt="[% description %]" title="[% description %]">[% END %]
+            [% UNLESS ( item_level_itypes ) %]<img src="[% imageurl %]" alt="[% translated_description %]" title="[% translated_description %]">[% END %]
             [% IF ( unititle ) %]<p>[% unititle |html %]</p>[% END %]
             [% IF ( author ) %]<p>By <a href="/cgi-bin/koha/catalogue/search.pl?q=au:[% author |url %]">[% author %]</a></p>[% END %]
         <ul>
@@ -520,14 +521,14 @@ function verify_images() {
             </li>
         [% END %]
         <!--This grabs all of the lists a bib record appears in -->
-        [% IF ( GetShelves ) %]
-	        <li><strong>Lists that include this title: </strong>
-	        <ul>
-	        [% FOREACH GetShelve IN GetShelves %]
-		        <li><a href="/cgi-bin/koha/virtualshelves/shelves.pl?viewshelf=[% GetShelve.shelfnumber %]">[% GetShelve.shelfname %]</a></li>
-	        [% END %]
-	        </ul>
-	        </li>
+        [% IF shelves %]
+            <li><strong>Lists that include this title: </strong>
+            <ul>
+            [% FOREACH s IN shelves %]
+                <li><a href="/cgi-bin/koha/virtualshelves/shelves.pl?op=view&amp;shelfnumber=[% s.shelfnumber %]">[% s.shelfname %]</a></li>
+            [% END %]
+            </ul>
+            </li>
         [% END %]
         [% IF ( TagsEnabled &&  TagsShowOnDetail &&  TagLoop ) %]
                 <li><strong>Tags:</strong>
@@ -618,13 +619,13 @@ function verify_images() {
                     [% IF ( item_level_itypes ) %]
                         <td class="itype">
                             [% IF !noItemTypeImages && item.imageurl %]
-                                <img src="[% item.imageurl %]" alt="[% item.description %]" title="[% item.description %]" />
+                                <img src="[% item.imageurl %]" alt="[% item.translated_description %]" title="[% item.translated_description %]" />
                             [% END %]
-                            [% item.description %]
+                            [% item.translated_description %]
                         </td>
                     [% END %]
                     <td class="location">[% UNLESS ( singlebranchmode ) %][% item.branchname %] [% END %]</td>
-                    <td class="homebranch">[% item.homebranch %]<span class="shelvingloc">[% item.location %]</span> </td>
+                    <td class="homebranch">[% Branches.GetName(item.homebranch) %]<span class="shelvingloc">[% item.location %]</span> </td>
                     [% IF ( itemdata_ccode ) %]<td>[% item.ccode %]</td>[% END %]
                     <td class="itemcallnumber">[% IF ( item.itemcallnumber ) %] [% item.itemcallnumber %][% END %]</td>
                     <td class="status">
@@ -651,7 +652,7 @@ function verify_images() {
                                 : due [% item.datedue %]
                             </span>
                         [% ELSIF ( item.transfertwhen ) %]
-                            <span class="intransit">In transit from [% item.transfertfrom %] to [% item.transfertto %] since [% item.transfertwhen %]</span>
+                            <span class="intransit">In transit from [% item.transfertfrom %] to [% item.transfertto %] since [% item.transfertwhen | $KohaDates %]</span>
                         [% END %]
 
                         [% IF ( item.itemlost ) %]
@@ -712,7 +713,7 @@ function verify_images() {
                                 since [% item.waitingdate | $KohaDates %]
                             [% ELSE %]
                                 [% IF ( item.reservedate ) %]
-                                    (placed [% item.reservedate %])
+                                    (placed [% item.reservedate | $KohaDates %])
                                 [% END %]
                             [% END %]
                         [% END %]
@@ -734,7 +735,7 @@ function verify_images() {
                         [% END %]
 
                     </td>
-                    <td class="datelastseen">[% item.datelastseen %]</td>
+                    <td class="datelastseen">[% item.datelastseen | $KohaDates %]</td>
                     <td><a href="/cgi-bin/koha/catalogue/moredetail.pl?type=[% item.type %]&amp;itemnumber=[% item.itemnumber %]&amp;biblionumber=[% item.biblionumber %]&amp;bi=[% item.biblioitemnumber %]#item[% item.itemnumber %]">[% item.barcode %]</a></td>
                     [% IF ( volinfo ) %]
                         <td class="enumchron">
@@ -806,8 +807,12 @@ function verify_images() {
                        [% END %]
                     </td>
                 [% END %]
-                [% IF ( CAN_user_editcatalogue_edit_items ) %]
-                    <td><a href="/cgi-bin/koha/cataloguing/additem.pl?op=edititem&biblionumber=[% item.biblionumber %]&itemnumber=[% item.itemnumber %]#edititem">Edit</a></td>
+                [% IF CAN_user_editcatalogue_edit_items %]
+                    <td>
+                        [% UNLESS item.cannot_be_edited %]
+                            <a href="/cgi-bin/koha/cataloguing/additem.pl?op=edititem&biblionumber=[% item.biblionumber %]&itemnumber=[% item.itemnumber %]#edititem">Edit</a>
+                        [% END %]
+                    </td>
                 [% END %]
                 </tr>
             [% END %]
@@ -932,11 +937,12 @@ function verify_images() {
     <table id="orders">
       <thead>
         <tr>
+          <th>Vendor</th>
           <th>Basket group</th>
           <th>Basket</th>
           <th>Order number</th>
-          <th>Creation date</th>
-          <th>Receive date</th>
+          <th class="title-string">Creation date</th>
+          <th class="title-string">Receive date</th>
           <th>Status</th>
           <th>Quantity</th>
         </tr>
@@ -944,6 +950,11 @@ function verify_images() {
       <tbody>
       [% FOR order IN orders %]
           <tr>
+            <td>
+            [% IF (order.id) %]
+                <a href="/cgi-bin/koha/acqui/supplier.pl?booksellerid=[% order.id %]" title="Vendor detail page">[% order.name %]</a>
+            [% END %]
+            </td>
             <td>
             [% IF (order.basketgroupid) %]
                 [% IF CAN_user_acquisition_group_manage %]
@@ -970,7 +981,7 @@ function verify_images() {
                 [% CASE 'cancelled' %]Cancelled
               [% END %]
             </td>
-            <td>[% order.quantity %]</th>
+            <td>[% order.quantity %]</td>
           </tr>
       [% END %]
       </tbody>

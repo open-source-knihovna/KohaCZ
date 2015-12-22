@@ -4,6 +4,11 @@ use warnings;
 use strict;
 
 our $PERL_DEPS = {
+    'Plack::Middleware::ReverseProxy' => {
+        'usage'    => 'Plack',
+        'required' => '1',
+        'min_ver'  => '0.14'
+    },
     'XML::LibXSLT' => {
         'usage'    => 'Core',
         'required' => '1',
@@ -59,11 +64,6 @@ our $PERL_DEPS = {
         'required' => '1',
         'min_ver'  => '0.07039'
     },
-    'DBIx::Connector' => {
-        'usage'    => 'Core',
-        'required' => '1',
-        'min_ver'  => '0.47'
-    },
     'Net::Z3950::ZOOM' => {
         'usage'    => 'Core',
         'required' => '1',
@@ -98,6 +98,11 @@ our $PERL_DEPS = {
         'usage'    => 'Core',
         'required' => '1',
         'min_ver'  => '1.103'
+    },
+    'Exception::Class' => {
+        'usage'    => 'Core',
+        'required' => '1.39',
+        'min_ver'  => '1.39'
     },
     'HTML::Scrubber' => {
         'usage'    => 'Core',
@@ -518,10 +523,15 @@ our $PERL_DEPS = {
         'min_ver'  => '2.05',
     },
     'Template' => {
-	'usage'    => 'Core',
-	'required' => '1',
-	'min_ver'  => '2.22',
-    },
+        'usage'    => 'Core',
+        'required' => '1',
+        'min_ver'  => '2.22',
+      },
+    'Template::Plugin::Stash' => {
+        'usage'    => 'Debugging',
+        'required' => '0',
+        'min_ver'  => '1.006',
+      },
     'Gravatar::URL' => {
         'usage'    => 'Photos in OPAC reviews',
         'required' => '0',
@@ -601,6 +611,11 @@ our $PERL_DEPS = {
         'usage'    => 'Command line scripts',
         'required' => '0',
         'min_ver'  => '2.13',
+    },
+    'Moo' => {
+        'usage'    => 'Core',
+        'required' => '0',
+        'min_ver'  => '1',
     },
     'String::Random' => {
         'usage'    => 'OpacSelfRegistration',
@@ -731,6 +746,41 @@ our $PERL_DEPS = {
         'usage'    => 'Discharge generation',
         'required' => '0',
         'min_ver'  => '0.31',
+    },
+    'Devel::Cover' => {
+        'usage'    => 'Test code coverage',
+        'required' => '0',
+        'min_ver'  => '0.89',
+    },
+    'Log::Log4perl' => {
+        'usage'    => 'Core',
+        'required' => '1',
+        'min_ver'  => '1.29',
+    },
+    'XML::Writer' => {
+        'usage'    => 'Command line scripts',
+        'required' => '0',
+        'min_ver'  => '0.614',
+    },
+    'UUID' => {
+        'usage'    => 'Professional cataloging interface',
+        'required' => '1',
+        'min_ver'  => '0.05',
+    },
+    'Mojolicious' => {
+        'usage'    => 'REST API',
+        'required' => '0',
+        'min_ver'  => '5.54',
+    },
+    'Swagger2' => {
+        'usage'    => 'REST API',
+        'required' => '0',
+        'min_ver'  => '0.28',
+    },
+    'UNIVERSAL::can' => {
+        'usage'    => 'SIP',
+        'required' => '1',
+        'min_ver'  => '1.10',
     },
 };
 

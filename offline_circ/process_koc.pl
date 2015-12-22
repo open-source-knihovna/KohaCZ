@@ -32,7 +32,7 @@ use C4::Circulation;
 use C4::Items;
 use C4::Members;
 use C4::Stats;
-use C4::UploadedFile;
+use Koha::Upload;
 use C4::BackgroundJob;
 
 use Date::Calc qw( Add_Delta_Days Date_to_Days );
@@ -69,16 +69,16 @@ if ($completedJobID) {
     $template->param(transactions_loaded => 1);
     $template->param(messages => $results->{results});
 } elsif ($fileID) {
-    my $uploaded_file = C4::UploadedFile->fetch($sessionID, $fileID);
-    my $fh = $uploaded_file->fh();
+    my $upload = Koha::Upload->new->get({ id => $fileID, filehandle => 1 });
+    my $fh = $upload->{fh};
+    my $filename = $upload->{name};
     my @input_lines = <$fh>;
 
-    my $filename = $uploaded_file->name();
     my $job = undef;
 
     if ($runinbackground) {
         my $job_size = scalar(@input_lines);
-        $job = C4::BackgroundJob->new($sessionID, $filename, $ENV{'SCRIPT_NAME'}, $job_size);
+        $job = C4::BackgroundJob->new($sessionID, $filename, '/cgi-bin/koha/offline_circ/process_koc.pl', $job_size);
         my $jobID = $job->id();
 
         # fork off
@@ -104,7 +104,7 @@ if ($completedJobID) {
         } else {
             # fork failed, so exit immediately
             # fork failed, so exit immediately
-            warn "fork failed while attempting to run $ENV{'SCRIPT_NAME'} as a background job";
+            warn "fork failed while attempting to run offline_circ/process_koc.pl as a background job";
             exit 0;
         }
 

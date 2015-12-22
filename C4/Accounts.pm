@@ -46,9 +46,10 @@ BEGIN {
 		&getrefunds
 		&chargelostitem
 		&ReversePayment
-                &makepartialpayment
-                &recordpayment_selectaccts
-                &WriteOffFee
+        &makepartialpayment
+        &recordpayment_selectaccts
+        &WriteOffFee
+        &purge_zero_balance_fees
 	);
 }
 
@@ -276,12 +277,12 @@ sub makepayment {
     }
 
     UpdateStats({
-                branch => $user,
-                type => 'payment',
-                amount => $amount,
-                borrowernumber => $borrowernumber,
-                accountno => $accountno}
-    );
+        branch => $branch,
+        type   => 'payment',
+        amount => $amount,
+        borrowernumber => $borrowernumber,
+        accountno => $accountno
+    });
 
     #check to see what accounttype
     if ( $data->{'accounttype'} eq 'Rep' || $data->{'accounttype'} eq 'L' ) {
@@ -726,12 +727,12 @@ sub makepartialpayment {
         '', 'Pay', $data->{'itemnumber'}, $manager_id, $payment_note);
 
     UpdateStats({
-                branch => $user,
-                type => 'payment',
-                amount => $amount,
-                borrowernumber => $borrowernumber,
-                accountno => $accountno}
-    );
+        branch => $branch,
+        type   => 'payment',
+        amount => $amount,
+        borrowernumber => $borrowernumber,
+        accountno => $accountno
+    });
 
     if ( C4::Context->preference("FinesLog") ) {
         logaction("FINES", 'CREATE',$borrowernumber,Dumper({
@@ -822,6 +823,36 @@ sub WriteOffFee {
                 borrowernumber => $borrowernumber}
     );
 
+}
+
+=head2 purge_zero_balance_fees
+
+  purge_zero_balance_fees( $days );
+
+Delete accountlines entries where amountoutstanding is 0 or NULL which are more than a given number of days old.
+
+B<$days> -- Zero balance fees older than B<$days> days old will be deleted.
+
+B<Warning:> Because fines and payments are not linked in accountlines, it is
+possible for a fine to be deleted without the accompanying payment,
+or vise versa. This won't affect the account balance, but might be
+confusing to staff.
+
+=cut
+
+sub purge_zero_balance_fees {
+    my $days  = shift;
+    my $count = 0;
+
+    my $dbh = C4::Context->dbh;
+    my $sth = $dbh->prepare(
+        q{
+            DELETE FROM accountlines
+            WHERE date < date_sub(curdate(), INTERVAL ? DAY)
+              AND ( amountoutstanding = 0 or amountoutstanding IS NULL );
+        }
+    );
+    $sth->execute($days) or die $dbh->errstr;
 }
 
 END { }    # module clean-up code here (global destructor)

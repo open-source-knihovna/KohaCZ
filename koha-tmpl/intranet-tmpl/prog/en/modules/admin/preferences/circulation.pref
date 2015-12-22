@@ -40,12 +40,6 @@ Circulation:
                   desc: latest to earliest
             - due date.
         -
-            - pref: soundon
-              choices: 
-                 yes: "Enable"
-                 no: "Don't enable"
-            - circulation sounds during checkin and checkout in the staff interface.  Not supported by all web browsers yet.
-        -
             - pref: SpecifyDueDate
               choices:
                   yes: Allow
@@ -366,13 +360,6 @@ Circulation:
             - <br>Leave this field empty if you don't want to charge the user for lost items.
             - <br>(Used when the longoverdue.pl script is called without the --charge parameter)
         -
-            - On checkin route the returned item to
-            - pref: HomeOrHoldingBranchReturn
-              type: choice
-              choices:
-                  homebranch: the library the item is from.
-                  holdingbranch: the library the item was checked out from.
-        -
             - "When issuing an item that has been marked as lost, "
             - pref: IssueLostItem
               choices:
@@ -398,6 +385,29 @@ Circulation:
                   yes: Enable
                   no: Disable
             - the on-site for all cases (Even if a user is debarred, etc.).
+        -
+            - pref: ConsiderOnSiteCheckoutsAsNormalCheckouts
+              choices:
+                  yes: Consider
+                  no: "Don't consider"
+            - on-site checkouts as normal checkouts.
+            - If enabled, the number of checkouts allowed will be normal checkouts + on-site checkouts.
+            - If disabled, both values will be checked separately.
+        -
+            - When a patron's checked out item is overdue,
+            - pref: OverduesBlockRenewing
+              type: choice
+              choices:
+                  allow: allow renewing.
+                  blockitem: block renewing only for this item.
+                  block: block renewing for all the patron's items.
+        -
+            - If patron is restricted,
+            - pref: RestrictionBlockRenewing
+              choices:
+                  yes: Block
+                  no: Allow
+            - renewing of items.
     Checkin Policy:
         -
             - pref: BlockReturnOfWithdrawnItems
@@ -670,7 +680,7 @@ Circulation:
         -
             - "Include the following HTML in the Help page of the web-based self checkout system:"
             - pref: SelfCheckHelpMessage
-              type: textarea
+              type: htmlarea
               class: code
         -
             - pref: AutoSelfCheckAllowed
@@ -688,7 +698,6 @@ Circulation:
                   yes: Show
                   no: "Don't show"
             - "the print receipt popup dialog when self checkout is finished"
-
     Course Reserves:
         -
             - pref: UseCourseReserves
@@ -696,3 +705,14 @@ Circulation:
                   yes: Use
                   no: "Don't use"
             - course reserves
+    Batch checkout:
+        -
+            - pref: BatchCheckouts
+              choices:
+                  yes: Allow
+                  no: "Don't allow"
+            - "batch checkouts"
+        -
+            - "Patron categories allowed to checkout in a batch"
+            - pref: BatchCheckoutsValidCategories
+            - "(list of patron categories separated with a pipe '|')"

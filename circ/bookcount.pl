@@ -31,7 +31,7 @@ use C4::Koha;
 use C4::Auth;
 use C4::Branch; # GetBranches
 use C4::Biblio; # GetBiblioItemData
-use C4::Dates qw/format_date/;
+use Koha::DateUtils;
 
 my $input        = new CGI;
 my $itm          = $input->param('itm');
@@ -71,11 +71,8 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 
 my $branchloop = GetBranchesLoop(C4::Context->userenv->{branch});
 foreach (@$branchloop) {
-    my $date = lastseenat( $itm, $_->{value} );
-    my ($datechunk, $timechunk) =  slashdate($date);
     $_->{issues}     = issuesat($itm, $_->{value});
-    $_->{seen}       = $datechunk;
-    $_->{seentime}   = $timechunk;
+    $_->{seen}       = lastseenat( $itm, $_->{value} ) || undef;
 }
 
 $template->param(
@@ -86,7 +83,7 @@ $template->param(
     biblioitemnumber        => $bi,
     homebranch              => $homebranch,
     holdingbranch           => $holdingbranch,
-    lastdate                => $lastdate ?  format_date($lastdate) : 0,
+    lastdate                => $lastdate ? $lastdate : 0,
     count                   => $count,
     branchloop              => $branchloop,
 );
@@ -169,15 +166,4 @@ sub lastseenat {
 
     my $date = ( $date1 lt $date2 ) ? $date2 : $date1 ;
     return ($date);
-}
-
-#####################################################
-# return date and time from timestamp
-sub slashdate {
-    my ($date) = @_;
-    $date or return;
-    return (
-        format_date($date),
-        substr($date,11,5)
-    );
 }

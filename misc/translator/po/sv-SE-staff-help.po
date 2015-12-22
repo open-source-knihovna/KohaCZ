@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION.\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-17 18:09-0300\n"
+"POT-Creation-Date: 2015-11-20 01:38-0300\n"
 "PO-Revision-Date: 2015-05-22 09:29+0100\n"
 "Last-Translator: Viktor Sarge <viktor.sarge@regionhalland.se>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -765,6 +765,7 @@ msgstr "(! betyder 'inte synlig' eller vid minimering 'inte minimerad')"
 #: intranet-tmpl/prog/en/modules/help/serials/claims.tt:15
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
@@ -878,7 +879,6 @@ msgstr "(! betyder 'inte synlig' eller vid minimering 'inte minimerad')"
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:68
 #: intranet-tmpl/prog/en/modules/help/acqui/lateorders.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/uncertainprice.tt:7
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:12
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:122
 #: intranet-tmpl/prog/en/modules/help/acqui/invoice.tt:11
@@ -918,7 +918,7 @@ msgstr "(! betyder 'inte synlig' eller vid minimering 'inte minimerad')"
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:58
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:141
 #: intranet-tmpl/prog/en/modules/help/tools/tools-home.tt:7
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:41
 #: intranet-tmpl/prog/en/modules/help/tools/picture-upload.tt:23
 #: intranet-tmpl/prog/en/modules/help/tools/quotes-upload.tt:43
@@ -990,6 +990,14 @@ msgstr "-8 =&gt; Flagga"
 #, c-format
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Framtida användning"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#, c-format
+msgid ""
+". For example, if you use the selector \"#circ_impossible\" your selected "
+"sound will be triggered when a checkout for a patron is not possible (such "
+"as the barcode not being found). "
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:35
 #, c-format
@@ -1793,7 +1801,7 @@ msgstr "Lägg till citat"
 msgid "Add a Batch"
 msgstr "Lägg till en sats"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:7
 #, c-format
 msgid "Add a Contract"
 msgstr "Lägg till ett avtal"
@@ -1940,6 +1948,11 @@ msgstr "Lägga till en budget"
 #, c-format
 msgid "Adding a group"
 msgstr "Lägga till en grupp"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, fuzzy, c-format
+msgid "Adding a new alert"
+msgstr "Lägga till en ny budget"
 
 #: intranet-tmpl/prog/en/modules/help/admin/aqbudgetperiods.tt:13
 #, c-format
@@ -2599,19 +2612,6 @@ msgstr "Svar:"
 msgid "Any"
 msgstr "Alla"
 
-#: intranet-tmpl/prog/en/modules/help/mainpage.tt:24
-#, c-format
-msgid ""
-"As part of the upgrade process your online help will be overwritten with the "
-"new Help as part of the install. If you want to keep a copy of your online "
-"help, you should instruct your System Administrator to upgrade the Online "
-"Help directory in the Koha file tree."
-msgstr ""
-"Som en del av uppgraderingsprocessen kommer online-hjälpen att skrivas över "
-"med den nya Hjälpen som en del av installationen. Om du vill behålla en "
-"kopia av online-hjälpen måste du be din systemadministratör att uppgradera "
-"katalogen online-hjälp i filträdet för Koha."
-
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:196
 #, fuzzy, c-format
 msgid ""
@@ -2630,7 +2630,7 @@ msgstr ""
 "deras förfallodatum (och tid, om lånet är per timme), objekt som lånats ut "
 "idag visas längst upp."
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:9
 #, c-format
 msgid ""
 "At the top of a Vendor Information Page, you will see a 'New Contract' "
@@ -2748,6 +2748,13 @@ msgid ""
 msgstr ""
 "Som ett minimum ska följande fält fyllas i om ett nytt objekt ska lånas ut:"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#, c-format
+msgid ""
+"At this point, you can preview your sound by clicking the \"Play sound\" "
+"button"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/fieldmapping.tt:7
 #, c-format
 msgid "At this time the only keyword in use is 'subtitle.'"
@@ -2757,6 +2764,11 @@ msgstr "Just nu är det enda nyckelord som används 'Undertext'."
 #, c-format
 msgid "Audience"
 msgstr "Målgrupp"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:3
+#, c-format
+msgid "Audio alerts"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:69
 #, c-format
@@ -4161,6 +4173,11 @@ msgstr "Klicka på \"Betala\" bredvid den bot du vill delbetala"
 msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr "Klicka på \"Betala\" bredvid den bot du vill betala i sin helhet"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#, fuzzy, c-format
+msgid "Click \"Save alert\" and your done!"
+msgstr "Klicka på Spara för att spara ditt nya attribut"
+
 #: intranet-tmpl/prog/en/modules/help/members/pay.tt:43
 #: intranet-tmpl/prog/en/modules/help/members/paycollect.tt:43
 #, c-format
@@ -5096,6 +5113,11 @@ msgstr "Radera en uppsättning"
 msgid "Deleting Item Types"
 msgstr "Radera objekttyper"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#, fuzzy, c-format
+msgid "Deleting alerts"
+msgstr "Radera objekt"
+
 #: intranet-tmpl/prog/en/modules/help/cataloguing/additem.tt:67
 #, c-format
 msgid "Deleting items"
@@ -5568,6 +5590,21 @@ msgstr "Ange ett namn på listan och spara den."
 #, c-format
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "Ange en beskrivande version av kategorinamnet i fältet 'Beskrivning'."
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#, c-format
+msgid ""
+"Enter a selector in the \"selector\" input, you can see documentation on "
+"jQuery selectors "
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#, c-format
+msgid ""
+"Enter a sound to be played, you can either select a built-in Koha sound "
+"using the pulldown selector, or you can enter a full URL to a sound file on "
+"another server."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/pay.tt:36
 #: intranet-tmpl/prog/en/modules/help/members/paycollect.tt:36
@@ -7985,12 +8022,12 @@ msgstr ""
 "samma datum'"
 
 #: intranet-tmpl/prog/en/modules/help/mainpage.tt:5
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"If this is your first time logging into Koha, you should now got to Koha "
-"Administration and setup all system preferences, patron categories, item "
+"If this is your first time logging into Koha, you should now go to Koha "
+"Administration and set up all system preferences, patron categories, item "
 "types and libraries. You should also review the other settings found in "
-"administration."
+"Administration."
 msgstr ""
 "Om detta är första gången du loggat in till Koha, bör du nu gå till Koha-"
 "administration och konfigurera alla systemparametrar, låntagarkategorier, "
@@ -10045,7 +10082,7 @@ msgstr ""
 "Viktigt: utan en ägare kommer åtkomstbegränsningen inte att ha någon effekt, "
 "se till att du anger en ägare samt väljer en begränsning"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:13
 #, c-format
 msgid ""
 "Important: You cannot enter a contract retrospectively. The end date must "
@@ -10492,7 +10529,7 @@ msgstr ""
 "Den kommer också att visas på huvudskärmen för personal under modulen "
 "etiketter"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:17
 #, c-format
 msgid "It will also be an option when creating a basket."
 msgstr "Det kommer också att vara ett alternativ när en korg skapas."
@@ -11218,6 +11255,11 @@ msgstr "Lokala systeminställningar"
 #, c-format
 msgid "Local Use:"
 msgstr "Lokal användning:"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#, c-format
+msgid "Locate the \"Add new alert\" form."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/aqbudgetperiods.tt:26
 #, c-format
@@ -12276,7 +12318,7 @@ msgstr ""
 "När CSV-filen har lästs in i den tillfälliga redigeringstabellen kan du "
 "redigera citaten innan de sparas."
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:15
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:15
 #, c-format
 msgid "Once the contract is saved it will appear below the vendor information."
 msgstr "När kontraktet har sparats visas det under säljarens information."
@@ -12606,12 +12648,12 @@ msgstr ""
 "ramverk du vill att den sammanslagna posten ska använda."
 
 #: intranet-tmpl/prog/en/modules/help/mainpage.tt:7
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Once you have set up patron categories, you should create a new user in the "
-"Patrons module with superlibrarian permissions. Once that user is set you "
-"should use that user to log in rather than the root user set up as part of "
-"installation."
+"Patrons module with superlibrarian permissions. Once that user is created, "
+"you should log in as that user rather than the root user which is set up as "
+"part of installation."
 msgstr ""
 "När du skapat låntagarkategorier bör du skapa en ny användare i modulen "
 "Låntagare med rättigheter som superbibliotekarie. Använd sedan denna "
@@ -14274,7 +14316,7 @@ msgstr "Se den fullständiga dokumentationen för Slå samman auktoriteter i"
 msgid "See the full documentation for Moving Items in the "
 msgstr "Se den fullständiga dokumentationen för Flytta objekt i "
 
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #, c-format
 msgid "See the full documentation for News in the "
 msgstr "Se den fullständiga dokumentationen för Nyheter i "
@@ -14525,7 +14567,7 @@ msgstr ""
 "Se den fullständiga dokumentationen för Uppladdning av filen för offline-"
 "utlåning i "
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #, c-format
 msgid "See the full documentation for Vendor Contracts in the "
 msgstr "Se den fullständiga dokumentationen för Leverantörsavtal i "
@@ -15013,6 +15055,18 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/members/members-home.tt:52
 #, c-format
 msgid "Sort field 2 "
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#, c-format
+msgid "Sound precedence"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#, c-format
+msgid ""
+"Sounds will be played in order from top to bottom. That is, the first select "
+"that finds a match will have its sound played."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/classsources.tt:5
@@ -16179,7 +16233,7 @@ msgstr ""
 "låntagaren bestämt att biblioteket inte får behålla denna information så "
 "visar denna flik bara titlar som är utlånade just nu."
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:11
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:11
 #, c-format
 msgid ""
 "The contract form will ask for some very basic information about the "
@@ -16602,6 +16656,11 @@ msgid "The new value will appear in the list along with existing values"
 msgstr ""
 "Det nya värdet kommer att visas i listan tillsammans med befintliga värden"
 
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:23
+#, c-format
+msgid "The news item's author will be set to the currently logged in user."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:46
 #, c-format
 msgid "The next option for ordering is to order from a staged record. "
@@ -16889,6 +16948,13 @@ msgstr ""
 "Förslagssidan kommer automatiskt att begränsas till förslag för ditt "
 "bibliotek. För att se information om alla (eller något annat) bibliotek, "
 "klickar du på filtret 'Inköpsinformation' och byter bibliotek."
+
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:24
+#, c-format
+msgid ""
+"The system preference 'NewsAuthorDisplay' can be used to hide or show the "
+"author for news item."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/tools/scheduler.tt:5
 #, c-format
@@ -17636,6 +17702,13 @@ msgstr ""
 msgid "This section can be expanded"
 msgstr "Denna sektion kan expanderas"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:5
+#, c-format
+msgid ""
+"This section of Koha lets you specify a given sound to play when a given "
+"jQuery selector is matched."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/about.tt:5
 #, c-format
 msgid ""
@@ -18227,6 +18300,11 @@ msgstr ""
 "För att lägga till en ny attributtyp för låntagare klickar du på knappen 'Ny "
 "attributtyp för låntagare' längst upp i sidan"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#, fuzzy, c-format
+msgid "To add a new alert:"
+msgstr "För att lägga till ett nytt bibliotek:"
+
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities.tt:5
 #, c-format
 msgid ""
@@ -18413,6 +18491,13 @@ msgstr ""
 msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr "För att kunna beställa från en leverantör, måste du göra dem 'Aktiva'."
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#, c-format
+msgid ""
+"To change the precedence of a given alert, use the four arrows to move it "
+"up, down, or to the top or bottom of the list."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/circ/returns.tt:16
 #, c-format
 msgid ""
@@ -18516,6 +18601,15 @@ msgstr ""
 "bibliografiska poster visas länken 'Radera' till höger om posten i "
 "sökresultaten och som en knapp som visas när du klickat på sammanfattningen "
 "för auktoritetsposten."
+
+#. %1$s:  INCLUDE 'help-bottom.inc' 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#, c-format
+msgid ""
+"To delete one or more alerts, check the checkboxes for those alerts you wish "
+"to delete, then click the \"Delete selected alerts\" button and confirm you "
+"want to delete those alerts. %s "
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
 #, c-format
@@ -19634,7 +19728,7 @@ msgstr "VANCOUVER PUBLIC LIBRARY z3950.vpl.ca:210 Horizon"
 msgid "Values that are pre-configured in Koha are:"
 msgstr "Värden som är fördefinierade i Koha är:"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:3
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:3
 #, c-format
 msgid "Vendor Contracts"
 msgstr "Leverantörsavtal"
@@ -20660,7 +20754,7 @@ msgstr ""
 "åtgärder i OPAC om deras lånekort gått ut med nästa alternativ. Som standard "
 "följs reglerna som ställts in med BlockExpiredPatronOpacActions"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:5
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:5
 #, c-format
 msgid ""
 "You can define contracts (with a start and end date) and attach them to a "
@@ -21243,6 +21337,19 @@ msgstr ""
 msgid "Your new item type will now appear on the list"
 msgstr "Den nya objekttypen visas nu i listan"
 
+#: intranet-tmpl/prog/en/modules/help/mainpage.tt:24
+#, fuzzy, c-format
+msgid ""
+"Your online help will be overwritten by the new Help when there is an "
+"upgrade. If you want to keep a copy of your online help, you should instruct "
+"your System Administrator to upgrade the Online Help directory in the Koha "
+"file tree."
+msgstr ""
+"Som en del av uppgraderingsprocessen kommer online-hjälpen att skrivas över "
+"med den nya Hjälpen som en del av installationen. Om du vill behålla en "
+"kopia av online-hjälpen måste du be din systemadministratör att uppgradera "
+"katalogen online-hjälp i filträdet för Koha."
+
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:27
 #: intranet-tmpl/prog/en/modules/help/acqui/newordersubscription.tt:11
 #, c-format
@@ -21803,6 +21910,11 @@ msgstr "fic:1 Fiction"
 msgid "group_manage "
 msgstr "group_manage "
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#, c-format
+msgid "here"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/preferences.tt:19
 #, c-format
 msgid ""
@@ -22081,6 +22193,7 @@ msgstr "hantering "
 #: intranet-tmpl/prog/en/modules/help/serials/claims.tt:15
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
@@ -22193,7 +22306,6 @@ msgstr "hantering "
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:68
 #: intranet-tmpl/prog/en/modules/help/acqui/lateorders.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/uncertainprice.tt:7
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:12
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:122
 #: intranet-tmpl/prog/en/modules/help/acqui/invoice.tt:11
@@ -22233,7 +22345,7 @@ msgstr "hantering "
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:58
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:141
 #: intranet-tmpl/prog/en/modules/help/tools/tools-home.tt:7
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:41
 #: intranet-tmpl/prog/en/modules/help/tools/picture-upload.tt:23
 #: intranet-tmpl/prog/en/modules/help/tools/quotes-upload.tt:43

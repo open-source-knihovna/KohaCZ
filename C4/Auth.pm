@@ -107,7 +107,7 @@ C4::Auth - Authenticates Koha users
             query           => $query,
       type            => "opac",
       authnotrequired => 0,
-      flagsrequired   => {borrow => 1, catalogue => '*', tools => 'import_patrons' },
+      flagsrequired   => { catalogue => '*', tools => 'import_patrons' },
   }
     );
 
@@ -131,7 +131,7 @@ automatically. This gets loaded into the template.
          query           => $query,
          type            => "opac",
          authnotrequired => 0,
-         flagsrequired   => {borrow => 1, catalogue => '*', tools => 'import_patrons' },
+         flagsrequired   => { catalogue => '*', tools => 'import_patrons' },
        }
      );
 
@@ -178,6 +178,29 @@ sub get_template_and_user {
         );
     }
 
+
+    # If the user logged in is the SCO user and he tries to go out the SCO module, log the user out removing the CGISESSID cookie
+    if ( $in->{type} eq 'opac' and $in->{template_name} !~ m|sco/| ) {
+        if (  C4::Context->preference('AutoSelfCheckID') && $user eq C4::Context->preference('AutoSelfCheckID') ) {
+            $template = C4::Templates::gettemplate( 'opac-auth.tt', 'opac', $in->{query} );
+            my $cookie = $in->{query}->cookie(
+                -name     => 'CGISESSID',
+                -value    => '',
+                -expires  => '',
+                -HttpOnly => 1,
+            );
+
+            $template->param( loginprompt => 1 );
+            print $in->{query}->header(
+                -type    => 'text/html',
+                -charset => 'utf-8',
+                -cookie  => $cookie,
+              ),
+            $template->output;
+            safe_exit;
+        }
+    }
+
     my $borrowernumber;
     if ($user) {
         require C4::Members;
@@ -203,13 +226,21 @@ sub get_template_and_user {
         $template->param( sessionID          => $sessionID );
 
         if ( $in->{'type'} eq 'opac' ) {
-            require C4::VirtualShelves;
-            my ( $total, $pubshelves, $barshelves ) = C4::VirtualShelves::GetSomeShelfNames( $borrowernumber, 'MASTHEAD' );
+            require Koha::Virtualshelves;
+            my $some_private_shelves = Koha::Virtualshelves->get_some_shelves(
+                {
+                    borrowernumber => $borrowernumber,
+                    category       => 1,
+                }
+            );
+            my $some_public_shelves = Koha::Virtualshelves->get_some_shelves(
+                {
+                    category       => 2,
+                }
+            );
             $template->param(
-                pubshelves     => $total->{pubtotal},
-                pubshelvesloop => $pubshelves,
-                barshelves     => $total->{bartotal},
-                barshelvesloop => $barshelves,
+                some_private_shelves => $some_private_shelves,
+                some_public_shelves  => $some_public_shelves,
             );
         }
 
@@ -233,7 +264,6 @@ sub get_template_and_user {
             $template->param( CAN_user_borrowers        => 1 );
             $template->param( CAN_user_permissions      => 1 );
             $template->param( CAN_user_reserveforothers => 1 );
-            $template->param( CAN_user_borrow           => 1 );
             $template->param( CAN_user_editcatalogue    => 1 );
             $template->param( CAN_user_updatecharges    => 1 );
             $template->param( CAN_user_acquisition      => 1 );
@@ -255,7 +285,7 @@ sub get_template_and_user {
 
         if ($flags) {
             foreach my $module ( keys %$all_perms ) {
-                if ( $flags->{$module} == 1 ) {
+                if ( defined($flags->{$module}) && $flags->{$module} == 1 ) {
                     foreach my $subperm ( keys %{ $all_perms->{$module} } ) {
                         $template->param( "CAN_user_${module}_${subperm}" => 1 );
                     }
@@ -324,7 +354,7 @@ sub get_template_and_user {
     else {    # if this is an anonymous session, setup to display public lists...
 
         # If shibboleth is enabled, and we're in an anonymous session, we should allow
-        # the user to attemp login via shibboleth.
+        # the user to attempt login via shibboleth.
         if ($shib) {
             $template->param( shibbolethAuthentication => $shib,
                 shibbolethLoginUrl => login_shib_url( $in->{'query'} ),
@@ -341,11 +371,14 @@ sub get_template_and_user {
         $template->param( sessionID => $sessionID );
 
         if ( $in->{'type'} eq 'opac' ){
-            require C4::VirtualShelves;
-            my ( $total, $pubshelves ) = C4::VirtualShelves::GetSomeShelfNames( undef, 'MASTHEAD' );
+            require Koha::Virtualshelves;
+            my $some_public_shelves = Koha::Virtualshelves->get_some_shelves(
+                {
+                    category       => 2,
+                }
+            );
             $template->param(
-                pubshelves     => $total->{pubtotal},
-                pubshelvesloop => $pubshelves,
+                some_public_shelves  => $some_public_shelves,
             );
         }
     }
@@ -362,6 +395,8 @@ sub get_template_and_user {
     if ( C4::Context->preference('dateformat') ) {
         $template->param( dateformat => C4::Context->preference('dateformat') );
     }
+
+    $template->param(auth_forwarded_hash => $in->{'query'}->param('auth_forwarded_hash'));
 
     # these template parameters are set the same regardless of $in->{'type'}
 
@@ -399,7 +434,6 @@ sub get_template_and_user {
             AmazonCoverImages                                                          => C4::Context->preference("AmazonCoverImages"),
             AutoLocation                                                               => C4::Context->preference("AutoLocation"),
             "BiblioDefaultView" . C4::Context->preference("IntranetBiblioDefaultView") => 1,
-            CalendarFirstDayOfWeek                                                     => ( C4::Context->preference("CalendarFirstDayOfWeek") eq "Sunday" ) ? 0 : 1,
             CircAutocompl                                                              => C4::Context->preference("CircAutocompl"),
             FRBRizeEditions                                                            => C4::Context->preference("FRBRizeEditions"),
             IndependentBranches                                                        => C4::Context->preference("IndependentBranches"),
@@ -414,7 +448,7 @@ sub get_template_and_user {
             intranetreadinghistory                                                     => C4::Context->preference("intranetreadinghistory"),
             intranetstylesheet                                                         => C4::Context->preference("intranetstylesheet"),
             IntranetUserCSS                                                            => C4::Context->preference("IntranetUserCSS"),
-            intranetuserjs                                                             => C4::Context->preference("intranetuserjs"),
+            IntranetUserJS                                                             => C4::Context->preference("IntranetUserJS"),
             intranetbookbag                                                            => C4::Context->preference("intranetbookbag"),
             suggestion                                                                 => C4::Context->preference("suggestion"),
             virtualshelves                                                             => C4::Context->preference("virtualshelves"),
@@ -473,7 +507,6 @@ sub get_template_and_user {
             AuthorisedValueImages                 => C4::Context->preference("AuthorisedValueImages"),
             BranchesLoop                          => GetBranchesLoop($opac_name),
             BranchCategoriesLoop                  => GetBranchCategories( 'searchdomain', 1, $opac_name ),
-            CalendarFirstDayOfWeek                => ( C4::Context->preference("CalendarFirstDayOfWeek") eq "Sunday" ) ? 0 : 1,
             LibraryName                           => "" . C4::Context->preference("LibraryName"),
             LibraryNameTitle                      => "" . $LibraryNameTitle,
             LoginBranchname                       => C4::Context->userenv ? C4::Context->userenv->{"branchname"} : "",
@@ -510,7 +543,7 @@ sub get_template_and_user {
             opacheader                            => "" . C4::Context->preference("opacheader"),
             opaclanguagesdisplay                  => "" . C4::Context->preference("opaclanguagesdisplay"),
             opacreadinghistory                    => C4::Context->preference("opacreadinghistory"),
-            opacuserjs                            => C4::Context->preference("opacuserjs"),
+            OPACUserJS                            => C4::Context->preference("OPACUserJS"),
             opacuserlogin                         => "" . C4::Context->preference("opacuserlogin"),
             ShowReviewer                          => C4::Context->preference("ShowReviewer"),
             ShowReviewerPhoto                     => C4::Context->preference("ShowReviewerPhoto"),
@@ -640,7 +673,7 @@ sub _version_check {
     my $query = shift;
     my $version;
 
-    # If Version syspref is unavailable, it means Koha is beeing installed,
+    # If version syspref is unavailable, it means Koha is being installed,
     # and so we must redirect to OPAC maintenance page or to the WebInstaller
     # also, if OpacMaintenance is ON, OPAC should redirect to maintenance
     if ( C4::Context->preference('OpacMaintenance') && $type eq 'opac' ) {
@@ -717,7 +750,7 @@ sub checkauth {
     # state variables
     my $loggedin = 0;
     my %info;
-    my ( $userid, $cookie, $sessionID, $flags, $barshelves, $pubshelves );
+    my ( $userid, $cookie, $sessionID, $flags );
     my $logout = $query->param('logout.x');
 
     my $anon_search_history;
@@ -749,7 +782,7 @@ sub checkauth {
     }
     elsif ($persona) {
 
-        # we dont want to set a session because we are being called by a persona callback
+        # we don't want to set a session because we are being called by a persona callback
     }
     elsif ( $sessionID = $query->cookie("CGISESSID") )
     {    # assignment, not comparison
@@ -905,7 +938,7 @@ sub checkauth {
                 $info{'invalidShibLogin'} = 1 unless ($return);
             }
 
-            # If shib login and match were successfull, skip further login methods
+            # If shib login and match were successful, skip further login methods
             unless ($shibSuccess) {
                 if ( $cas && $query->param('ticket') ) {
                     my $retuserid;
@@ -1182,7 +1215,7 @@ sub checkauth {
         OpacFavicon                           => C4::Context->preference("OpacFavicon"),
         opacreadinghistory                    => C4::Context->preference("opacreadinghistory"),
         opaclanguagesdisplay                  => C4::Context->preference("opaclanguagesdisplay"),
-        opacuserjs                            => C4::Context->preference("opacuserjs"),
+        OPACUserJS                            => C4::Context->preference("OPACUserJS"),
         opacbookbag                           => "" . C4::Context->preference("opacbookbag"),
         OpacCloud                             => C4::Context->preference("OpacCloud"),
         OpacTopissue                          => C4::Context->preference("OpacTopissue"),
@@ -1196,7 +1229,8 @@ sub checkauth {
         intranetbookbag                       => C4::Context->preference("intranetbookbag"),
         IntranetNav                           => C4::Context->preference("IntranetNav"),
         IntranetFavicon                       => C4::Context->preference("IntranetFavicon"),
-        intranetuserjs                        => C4::Context->preference("intranetuserjs"),
+        IntranetUserCSS                       => C4::Context->preference("IntranetUserCSS"),
+        IntranetUserJS                        => C4::Context->preference("IntranetUserJS"),
         IndependentBranches                   => C4::Context->preference("IndependentBranches"),
         AutoLocation                          => C4::Context->preference("AutoLocation"),
         wrongip                               => $info{'wrongip'},
@@ -1210,11 +1244,14 @@ sub checkauth {
     $template->param( loginprompt => 1 ) unless $info{'nopermission'};
 
     if ( $type eq 'opac' ) {
-        require C4::VirtualShelves;
-        my ( $total, $pubshelves ) = C4::VirtualShelves::GetSomeShelfNames( undef, 'MASTHEAD' );
+        require Koha::Virtualshelves;
+        my $some_public_shelves = Koha::Virtualshelves->get_some_shelves(
+            {
+                category       => 2,
+            }
+        );
         $template->param(
-            pubshelves     => $total->{pubtotal},
-            pubshelvesloop => $pubshelves,
+            some_public_shelves  => $some_public_shelves,
         );
     }
 
@@ -1248,9 +1285,7 @@ sub checkauth {
         );
     }
 
-    my $self_url = $query->url( -absolute => 1 );
     $template->param(
-        url         => $self_url,
         LibraryName => C4::Context->preference("LibraryName"),
     );
     $template->param(%info);
@@ -1905,14 +1940,14 @@ of the subpermission.
 
 sub get_all_subpermissions {
     my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare( "SELECT flag, code, description
+    my $sth = $dbh->prepare( "SELECT flag, code
                              FROM permissions
                              JOIN userflags ON (module_bit = bit)" );
     $sth->execute();
 
     my $all_perms = {};
     while ( my $perm = $sth->fetchrow_hashref ) {
-        $all_perms->{ $perm->{'flag'} }->{ $perm->{'code'} } = $perm->{'description'};
+        $all_perms->{ $perm->{'flag'} }->{ $perm->{'code'} } = 1;
     }
     return $all_perms;
 }

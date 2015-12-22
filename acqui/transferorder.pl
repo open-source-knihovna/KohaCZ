@@ -27,8 +27,6 @@ use C4::Output;
 use C4::Context;
 use C4::Acquisition;
 use C4::Members;
-use C4::Dates qw/format_date_in_iso/;
-use Date::Calc qw/Today/;
 
 my $input = new CGI;
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
@@ -49,8 +47,10 @@ my $op              = $input->param('op');
 my $query           = $input->param('query');
 
 my $order = GetOrder($ordernumber);
+my $basketfromname = '';
 if($order) {
     my $basket = GetBasket($order->{basketno});
+    $basketfromname = $basket->{basketname};
     $bookselleridfrom = $basket->{booksellerid} if $basket;
 }
 
@@ -64,6 +64,7 @@ my $booksellertoname;
 if($booksellerto){
     $booksellertoname = $booksellerto->{name};
 }
+
 
 if( $basketno && $ordernumber) {
     # Transfer order and exit
@@ -132,6 +133,7 @@ $template->param(
     booksellertoname    => $booksellertoname,
     ordernumber         => $ordernumber,
     basketno            => $basketno,
+    basketfromname      => $basketfromname,
 );
 
 output_html_with_http_headers $input, $cookie, $template->output;

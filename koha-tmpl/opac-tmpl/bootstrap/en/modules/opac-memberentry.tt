@@ -44,10 +44,26 @@
                     [% UNLESS OPACPatronDetails %]
                         <div class="alert alert-info">To make changes to your record please contact the library.</div>
                     [% END %]
+                    [% IF nochanges %]
+                        <div class="alert alert-error">No changes were made.</div>
+                    [% END %]
                 [% END %]
 
                 [% IF empty_mandatory_fields %]
                     <div class="alert">You have not filled out all required fields. Please fill in all missing fields and resubmit.</div>
+                [% END %]
+
+                [%  IF invalid_form_fields %]
+                    <div class="alert alert-error"><strong>The following fields contain invalid information:</strong>
+                        <ul>
+                            [% FOREACH field IN invalid_form_fields %]
+                                [% IF field == "email" %]<li>Contact information: <a href="#borrower_email">primary email address</a></li>[% END %]
+                                [% IF field == "emailpro" %]<li>Contact information: <a href="#borrower_emailpro">secondary email address</a></li>[% END %]
+                                [% IF field == "B_email" %]<li>Alternate address information: <a href="#borrower_B_email">email address</a></li>[% END %]
+                            [% END %]
+                        </ul>
+                        Please correct the errors and resubmit.
+                    </div>
                 [% END %]
 
                 [% IF failed_captcha %]
@@ -228,7 +244,7 @@
                                                 <input type="radio" name="borrower_sex" id="sex-male" value="M" />
                                             [% END %]
 
-                                            <label for="sex-none" class="radio inline">N/A:</label>
+                                            <label for="sex-none" class="radio inline">None specified: </label>
                                             [% IF borrower.sex == '' %]
                                                 <input type="radio" name="borrower_sex" id="sex-none" value="" checked="checked" />
                                             [% ELSE %]
@@ -792,6 +808,7 @@
 
 [% INCLUDE 'opac-bottom.inc' %]
 [% BLOCK jsinclude %]
+    <script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/plugins/jquery.validate.min.js"></script>
     <script type="text/javascript">
         //<![CDATA[
         $(document).ready(function() {
@@ -805,6 +822,37 @@
             [% ELSE %]
                 $( "#borrower_dateofbirth" ).datepicker({ yearRange: "c-120:c" });
             [% END %]
+            $("#memberentry-form").validate({
+                rules: {
+                    borrower_email: {
+                        email: true
+                    },
+                    borrower_emailpro: {
+                        email: true
+                    },
+                    borrower_B_email: {
+                        email: true
+                    }
+                },
+                submitHandler: function(form) {
+                    if (form.beenSubmitted) {
+                        return false;
+                    }
+                    else {
+                        form.beenSubmitted = true;
+                        form.submit();
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    offset = element.offset();
+                    error.insertAfter(element)
+                    error.addClass('error');  // add a class to the wrapper
+                    error.css('position', 'absolute');
+                    error.css('left', offset.left + element.outerWidth() + 10);
+                    error.css('top', offset.top);
+                    error.css('width', 'auto');
+                }
+            });
         });
     //]]>
     </script>

@@ -1,5 +1,5 @@
     [% INCLUDE 'doc-head-open.inc' %]
-    <title>Koha &rsaquo; Tools &rsaquo; Labels</title>
+    <title>Koha &rsaquo; Tools &rsaquo; Label creator &rsaquo; Profiles &rsaquo; [% IF ( profile_id ) %]Edit ([% profile_id %])[% ELSE %]New[% END%]</title>
     [% INCLUDE 'doc-head-close.inc' %]
 	<script type="text/javascript">
         //<![CDATA[
@@ -42,15 +42,18 @@
     <div id="breadcrumbs">
         <a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo;
         <a href="/cgi-bin/koha/tools/tools-home.pl">Tools</a> &rsaquo;
-        <a href="/cgi-bin/koha/labels/label-home.pl">Labels</a> &rsaquo;
-        <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=profile">Printer profiles</a> &rsaquo;
-        Edit printer profile
+        <a href="/cgi-bin/koha/labels/label-home.pl">Label creator</a> &rsaquo;
+        <a href="/cgi-bin/koha/labels/label-manage.pl?label_element=profile">Profiles</a> &rsaquo;
+        [% IF ( profile_id ) %]Edit ([% profile_id %])[% ELSE %]New[% END%]
     </div>
     <div id="doc3" class="yui-t2">
         <div id="bd">
 	    <div id="yui-main">
 	        <div class="yui-b">
-                        <div class="yui-g">
+                    <div class="yui-g">
+                    [% INCLUDE 'labels-toolbar.inc' %]
+                    </div>
+                        <div class="yui-u first">
                             <h3>Edit printer profile</h3>
                                 <div class="yui-g first">
                     <form name="input" action="/cgi-bin/koha/labels/label-edit-profile.pl" method="get">
@@ -138,9 +141,6 @@
                                 </div>
                             </div>
                         </div>
-                </div>
-                <div class="yui-b">
-                    [% INCLUDE 'labels-menu.inc' %]
                 </div>
             </div>
             [% INCLUDE 'intranet-bottom.inc' %]

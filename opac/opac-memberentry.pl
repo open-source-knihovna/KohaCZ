@@ -28,6 +28,8 @@ use C4::Form::MessagingPreferences;
 use Koha::Borrower::Modifications;
 use C4::Branch qw(GetBranchesLoop);
 use C4::Scrubber;
+use Email::Valid;
+use Koha::DateUtils;
 
 my $cgi = new CGI;
 my $dbh = C4::Context->dbh;
@@ -76,10 +78,12 @@ if ( $action eq 'create' ) {
     %borrower = DelEmptyFields(%borrower);
 
     my @empty_mandatory_fields = CheckMandatoryFields( \%borrower, $action );
+    my $invalidformfields = CheckForInvalidFields(\%borrower);
 
-    if (@empty_mandatory_fields) {
+    if (@empty_mandatory_fields || @$invalidformfields) {
         $template->param(
             empty_mandatory_fields => \@empty_mandatory_fields,
+            invalid_form_fields    => $invalidformfields,
             borrower               => \%borrower
         );
     }
@@ -167,36 +171,46 @@ elsif ( $action eq 'update' ) {
     my %borrower_changes = DelEmptyFields(%borrower);
     my @empty_mandatory_fields =
       CheckMandatoryFields( \%borrower_changes, $action );
+    my $invalidformfields = CheckForInvalidFields(\%borrower);
 
-    if (@empty_mandatory_fields) {
+    if (@empty_mandatory_fields || @$invalidformfields) {
         $template->param(
             empty_mandatory_fields => \@empty_mandatory_fields,
+            invalid_form_fields    => $invalidformfields,
             borrower               => \%borrower
         );
 
         $template->param( action => 'edit' );
     }
     else {
-        ( $template, $borrowernumber, $cookie ) = get_template_and_user(
-            {
-                template_name   => "opac-memberentry-update-submitted.tt",
-                type            => "opac",
-                query           => $cgi,
-                authnotrequired => 1,
-            }
-        );
-
         my %borrower_changes = DelUnchangedFields( $borrowernumber, %borrower );
+        if (%borrower_changes) {
+            ( $template, $borrowernumber, $cookie ) = get_template_and_user(
+                {
+                    template_name   => "opac-memberentry-update-submitted.tt",
+                    type            => "opac",
+                    query           => $cgi,
+                    authnotrequired => 1,
+                }
+            );
 
-        my $m =
-          Koha::Borrower::Modifications->new(
-            borrowernumber => $borrowernumber );
+            my $m =
+              Koha::Borrower::Modifications->new(
+                borrowernumber => $borrowernumber );
 
-        $m->DelModifications;
-        $m->AddModifications(\%borrower_changes);
-        $template->param(
-            borrower => GetMember( borrowernumber => $borrowernumber ),
-        );
+            $m->DelModifications;
+            $m->AddModifications(\%borrower_changes);
+            $template->param(
+                borrower => GetMember( borrowernumber => $borrowernumber ),
+            );
+        }
+        else {
+            $template->param(
+                action => 'edit',
+                nochanges => 1,
+                borrower => GetMember( borrowernumber => $borrowernumber ),
+            );
+        }
     }
 }
 elsif ( $action eq 'edit' ) {    #Display logged in borrower's data
@@ -231,7 +245,7 @@ $template->param(
     captcha_digest => md5_base64($captcha)
 );
 
-output_html_with_http_headers $cgi, $cookie, $template->output;
+output_html_with_http_headers $cgi, $cookie, $template->output, undef, { force_no_caching => 1 };
 
 sub GetHiddenFields {
     my ($mandatory) = @_;
@@ -290,6 +304,21 @@ sub CheckMandatoryFields {
     return @empty_mandatory_fields;
 }
 
+sub CheckForInvalidFields {
+    my $borrower = shift;
+    my @invalidFields;
+    if ($borrower->{'email'}) {
+        push(@invalidFields, "email") if (!Email::Valid->address($borrower->{'email'}));
+    }
+    if ($borrower->{'emailpro'}) {
+        push(@invalidFields, "emailpro") if (!Email::Valid->address($borrower->{'emailpro'}));
+    }
+    if ($borrower->{'B_email'}) {
+        push(@invalidFields, "B_email") if (!Email::Valid->address($borrower->{'B_email'}));
+    }
+    return \@invalidFields;
+}
+
 sub ParseCgiForBorrower {
     my ($cgi) = @_;
 
@@ -303,9 +332,17 @@ sub ParseCgiForBorrower {
         }
     }
 
-    $borrower{'dateofbirth'} =
-      C4::Dates->new( $borrower{'dateofbirth'} )->output("iso")
-      if ( defined( $borrower{'dateofbirth'} ) );
+    my $dob_dt;
+    $dob_dt = eval { dt_from_string( $borrower{'dateofbirth'} ); }
+        if ( $borrower{'dateofbirth'} );
+
+    if ( $dob_dt ) {
+        $borrower{'dateofbirth'} = output_pref ( { dt => $dob_dt, dateonly => 1, dateformat => 'iso' } );
+    }
+    else {
+        # Trigger validation
+        $borrower{'dateofbirth'} = undef;
+    }
 
     return %borrower;
 }

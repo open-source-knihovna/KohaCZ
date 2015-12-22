@@ -31,8 +31,8 @@ use C4::Auth;
 use C4::Biblio;
 use C4::Items;
 use C4::Output;
-use C4::VirtualShelves;
 use Koha::Email;
+use Koha::Virtualshelves;
 
 my $query = new CGI;
 
@@ -70,15 +70,14 @@ if ($email) {
         }
     );
 
-    my @shelf = GetShelf($shelfid);
-    my ( $items, $totitems ) = GetShelfContents($shelfid);
+    my $shelf = Koha::Virtualshelves->find( $shelfid );
+    my $contents = $shelf->get_contents;
     my $marcflavour = C4::Context->preference('marcflavour');
     my $iso2709;
     my @results;
 
-    # retrieve biblios from shelf
-    foreach my $biblio (@$items) {
-        my $biblionumber     = $biblio->{biblionumber};
+    while ( my $content = $contents->next ) {
+        my $biblionumber     = $content->biblionumber->biblionumber;
         my $fw               = GetFrameworkCode($biblionumber);
         my $dat              = GetBiblioData($biblionumber);
         my $record           = GetMarcBiblio($biblionumber, 1);
@@ -89,12 +88,14 @@ if ($email) {
 
         my @items = GetItemsInfo($biblionumber);
 
+        $dat->{ISBN}           = GetMarcISBN($record, $marcflavour);
         $dat->{MARCNOTES}      = $marcnotesarray;
         $dat->{MARCSUBJCTS}    = $marcsubjctsarray;
         $dat->{MARCAUTHORS}    = $marcauthorsarray;
         $dat->{'biblionumber'} = $biblionumber;
         $dat->{ITEM_RESULTS}   = \@items;
         $dat->{subtitle}       = $subtitle;
+        $dat->{HASAUTHORS}     = $dat->{'author'} || @$marcauthorsarray;
 
         $iso2709 .= $record->as_usmarc();
 
@@ -104,7 +105,7 @@ if ($email) {
     $template2->param(
         BIBLIO_RESULTS => \@results,
         comment        => $comment,
-        shelfname      => $shelf[1],
+        shelfname      => $shelf->shelfname,
     );
 
     # Getting template result
@@ -168,7 +169,7 @@ END_OF_BODY
         $template->param( SENT => "1" );
     }
     else {
-        # do something if it doesnt work....
+        # do something if it doesn't work....
         carp "Error sending mail: $Mail::Sendmail::error \n";
         $template->param( error => 1 );
     }

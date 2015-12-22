@@ -98,8 +98,8 @@ If the object is new, it will be created.
 If the object previously existed, it will be updated.
 
 Returns:
-    1  if the store was a success
-    0  if the store failed
+    $self  if the store was a success
+    undef  if the store failed
 
 =cut
 
@@ -207,6 +207,18 @@ sub id {
     return $id;
 }
 
+=head3 $object->unblessed();
+
+Returns an unblessed representation of object.
+
+=cut
+
+sub unblessed {
+    my ($self) = @_;
+
+    return { $self->_result->get_columns };
+}
+
 =head3 $object->_result();
 
 Returns the internal DBIC Row object
@@ -255,7 +267,8 @@ sub AUTOLOAD {
     # Using direct setter/getter like $item->barcode() or $item->barcode($barcode);
     if ( grep {/^$method$/} @columns ) {
         if ( @_ ) {
-            return $self->_result()->set_column( $method, @_ );
+            $self->_result()->set_column( $method, @_ );
+            return $self;
         } else {
             my $value = $self->_result()->get_column( $method );
             return $value;

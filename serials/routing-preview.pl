@@ -23,7 +23,6 @@ use warnings;
 use CGI qw ( -utf8 );
 use C4::Koha;
 use C4::Auth;
-use C4::Dates;
 use C4::Output;
 use C4::Acquisition;
 use C4::Reserves;
@@ -79,7 +78,6 @@ if($ok){
 				$count--;
 			}
 		}
-		my $const = 'o';
 		my $notes;
 		my $title = $subs->{'bibliotitle'};
         for my $routing ( @routinglist ) {
@@ -95,7 +93,7 @@ if($ok){
                     branchcode     => $branch
                 });
             } else {
-                AddReserve($branch,$routing->{borrowernumber},$biblio,$const,\@bibitems,$routing->{ranking}, undef, undef, $notes,$title);
+                AddReserve($branch,$routing->{borrowernumber},$biblio,\@bibitems,$routing->{ranking}, undef, undef, $notes,$title);
         }
     }
 	}

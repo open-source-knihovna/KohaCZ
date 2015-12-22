@@ -42,7 +42,6 @@ use C4::Output;
 use C4::Members;
 use C4::Members::Attributes;
 use C4::Members::AttributeTypes;
-use C4::Dates;
 use C4::Reserves;
 use C4::Circulation;
 use C4::Koha;
@@ -130,15 +129,13 @@ my $category_type = $data->{'category_type'};
 
 $debug and printf STDERR "dates (enrolled,expiry,birthdate) raw: (%s, %s, %s)\n", map {$data->{$_}} qw(dateenrolled dateexpiry dateofbirth);
 foreach (qw(dateenrolled dateexpiry dateofbirth)) {
-		my $userdate = $data->{$_};
-		unless ($userdate) {
-			$debug and warn sprintf "Empty \$data{%12s}", $_;
-			$data->{$_} = '';
-			next;
-		}
-		$userdate = C4::Dates->new($userdate,'iso')->output('syspref');
-		$data->{$_} = $userdate || '';
-		$template->param( $_ => $userdate );
+    my $userdate = $data->{$_};
+    unless ($userdate) {
+        $debug and warn sprintf "Empty \$data{%12s}", $_;
+        $data->{$_} = '';
+        next;
+    }
+    $template->param( $_ => dt_from_string( $userdate ) );
 }
 $data->{'IS_ADULT'} = ( $data->{'categorycode'} ne 'I' );
 
@@ -150,12 +147,11 @@ if ( IsDebarred($borrowernumber) ) {
     $template->param( 'userdebarred' => 1, 'flagged' => 1 );
     my $debar = $data->{'debarred'};
     if ( $debar ne "9999-12-31" ) {
-        $template->param( 'userdebarreddate' => C4::Dates::format_date($debar) );
+        $template->param( 'userdebarreddate' => output_pref( { dt => dt_from_string( $debar ), dateonly => 1 } ) );
         $template->param( 'debarredcomment'  => $data->{debarredcomment} );
     }
 }
 
-$data->{'ethnicity'} = fixEthnicity( $data->{'ethnicity'} );
 $data->{ "sex_".$data->{'sex'}."_p" } = 1 if defined $data->{sex};
 
 my $catcode;
@@ -167,10 +163,6 @@ if ( $category_type eq 'C') {
    $template->param( 'catcode' =>    $catcodes->[0])  if $cnt == 1;
 }
 
-
-if ( $data->{'ethnicity'} || $data->{'ethnotes'} ) {
-    $template->param( printethnicityline => 1 );
-}
 my ( $count, $guarantees ) = GetGuarantees( $data->{'borrowernumber'} );
 if ( $count ) {
     $template->param( isguarantee => 1 );
@@ -349,7 +341,7 @@ $template->param(
     categoryname    => $data->{'description'},
     was_renewed     => $input->param('was_renewed') ? 1 : 0,
     branch          => $branch,
-    todaysdate      => C4::Dates->today(),
+    todaysdate      => output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }),
     totalprice      => sprintf("%.2f", $totalprice),
     totaldue        => sprintf("%.2f", $total),
     totaldue_raw    => $total,

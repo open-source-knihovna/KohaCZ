@@ -25,12 +25,11 @@ use C4::Context;
 use C4::Output;
 use C4::Branch; # GetBranchName
 use C4::Auth;
-use C4::Dates qw/format_date/;
 use C4::Circulation;
 use C4::Members;
 use C4::Biblio;
 use C4::Items;
-
+use Koha::DateUtils;
 use Date::Calc qw(
   Today
   Add_Delta_Days
@@ -47,6 +46,7 @@ my $fbr            = $input->param('fbr') || '';
 my $tbr            = $input->param('tbr') || '';
 my $all_branches   = $input->param('allbranches') || '';
 my $cancelall      = $input->param('cancelall');
+my $tab            = $input->param('tab');
 
 my $cancel;
 
@@ -76,7 +76,7 @@ if ($item) {
 if ( C4::Context->preference('IndependentBranches') ) {
     undef $all_branches;
 } else {
-    $template->param( all_branches_link => $input->url . '?allbranches=1' )
+    $template->param( all_branches_link => '/cgi-bin/koha/circ/waitingreserves.pl' . '?allbranches=1' )
       unless $all_branches;
 }
 $template->param( all_branches => 1 ) if $all_branches;
@@ -158,11 +158,13 @@ $template->param(
     reservecount => $reservcount,
     overloop    => \@overloop,
     overcount   => $overcount,
-    show_date   => format_date(C4::Dates->today('iso')),
+    show_date   => output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }),
     ReservesMaxPickUpDelay => C4::Context->preference('ReservesMaxPickUpDelay')
 );
 
-if ($cancelall) {
+if ($item && $tab eq 'holdsover') {
+    print $input->redirect("/cgi-bin/koha/circ/waitingreserves.pl#holdsover");
+} elsif ($cancelall) {
     print $input->redirect("/cgi-bin/koha/circ/waitingreserves.pl");
 } else {
     output_html_with_http_headers $input, $cookie, $template->output;

@@ -59,11 +59,13 @@ package C4::Ris;
 #
 #
 
-#use strict;
-#use warnings;
+use Modern::Perl;
 
 use List::MoreUtils qw/uniq/;
 use vars qw($VERSION @ISA @EXPORT);
+
+use C4::Biblio qw(GetMarcSubfieldStructureFromKohaField);
+use Koha::SimpleMARC qw(read_field);
 
 # set the version for version checking
 $VERSION = 3.07.00.049;
@@ -75,6 +77,11 @@ $VERSION = 3.07.00.049;
 @EXPORT = qw(
   &marc2ris
 );
+
+our $utf;
+our $intype;
+our $marcprint;
+our $protoyear;
 
 
 =head1 marc2bibtex - Convert from UNIMARC to RIS
@@ -92,34 +99,56 @@ sub marc2ris {
     my $output;
 
     my $marcflavour = C4::Context->preference("marcflavour");
-    my $intype = lc($marcflavour);
+    $intype = lc($marcflavour);
     my $marcprint = 0; # Debug flag;
 
     # Let's redirect stdout
     open my $oldout, ">&STDOUT";
     my $outvar;
     close STDOUT;
-    open STDOUT,'>', \$outvar;
+    open STDOUT,'>:encoding(utf8)', \$outvar;
 
+    ## First we should check the character encoding. This may be
+    ## MARC-8 or UTF-8. The former is indicated by a blank, the latter
+    ## by 'a' at position 09 (zero-based) of the leader
+    my $leader = $record->leader();
+    if ( $intype eq "marc21" ) {
+        if ( $leader =~ /^.{9}a/ ) {
+            print "<marc>---\r\n<marc>UTF-8 data\r\n" if $marcprint;
+            $utf = 1;
+        }
+        else {
+            print "<marc>---\r\n<marc>MARC-8 data\r\n" if $marcprint;
+        }
+    }
+    ## else: other MARC formats do not specify the character encoding
+    ## we assume it's *not* UTF-8
 
-	## First we should check the character encoding. This may be
-	## MARC-8 or UTF-8. The former is indicated by a blank, the latter
-	## by 'a' at position 09 (zero-based) of the leader
-	my $leader = $record->leader();
-	if ($intype eq "marc21") {
-	    if ($leader =~ /^.{9}a/) {
-		print "<marc>---\r\n<marc>UTF-8 data\r\n" if $marcprint;
-		$utf = 1;
-	    }
-	    else {
-		print "<marc>---\r\n<marc>MARC-8 data\r\n" if $marcprint;
-	    }
-	}
-	## else: other MARC formats do not specify the character encoding
-	## we assume it's *not* UTF-8
+    my $RisExportAdditionalFields = C4::Context->preference('RisExportAdditionalFields');
+    my $ris_additional_fields;
+    if ($RisExportAdditionalFields) {
+        $RisExportAdditionalFields = "$RisExportAdditionalFields\n\n";
+        $ris_additional_fields = eval { YAML::Load($RisExportAdditionalFields); };
+        if ($@) {
+            warn "Unable to parse RisExportAdditionalFields : $@";
+            $ris_additional_fields = undef;
+        }
+    }
 
-	## start RIS dataset
-	&print_typetag($leader);
+    ## start RIS dataset
+    if ( $ris_additional_fields && $ris_additional_fields->{TY} ) {
+        my ( $f, $sf ) = split( /\$/, $ris_additional_fields->{TY} );
+        my ( $type ) = read_field( { record => $record, field => $f, subfield => $sf, field_numbers => [1] } );
+        if ($type) {
+            print "TY  - $type\r\n";
+        }
+        else {
+            &print_typetag($leader);
+        }
+    }
+    else {
+        &print_typetag($leader);
+    }
 
 	## retrieve all author fields and collect them in a list
 	my @author_fields;
@@ -285,6 +314,25 @@ sub marc2ris {
         print_uri($record->field('856'));
     }
 
+    if ($ris_additional_fields) {
+        foreach my $ris_tag ( keys %$ris_additional_fields ) {
+            next if $ris_tag eq 'TY';
+
+            my @fields =
+              ref( $ris_additional_fields->{$ris_tag} ) eq 'ARRAY'
+              ? @{ $ris_additional_fields->{$ris_tag} }
+              : $ris_additional_fields->{$ris_tag};
+
+            for my $tag (@fields) {
+                my ( $f, $sf ) = split( /\$/, $tag );
+                my @values = read_field( { record => $record, field => $f, subfield => $sf } );
+                foreach my $v (@values) {
+                    print "$ris_tag  - $v\r\n";
+                }
+            }
+        }
+    }
+
 	## end RIS dataset
 	print "ER  - \r\n";
 
@@ -299,7 +347,7 @@ sub marc2ris {
 
 ##********************************************************************
 ## print_typetag(): prints the first line of a RIS dataset including
-## the preceeding newline
+## the preceding newline
 ## Argument: the leader of a MARC dataset
 ## Returns: the value at leader position 06 
 ##********************************************************************
@@ -409,7 +457,7 @@ sub normalize_author {
 
 	## we currently ignore subfield c until someone complains
 	if (length($rawauthorb) > 0) {
-	    return join ",", ($rawauthora, $rawauthorb);
+        return join ", ", ($rawauthora, $rawauthorb);
 	}
 	else {
 	    return $rawauthora;
@@ -448,7 +496,7 @@ sub get_author {
 	normalize_author($authorname, $authorfield->subfield('b'), $authorfield->subfield('c'), $authorfield->indicator("$indicator"));
     }
     else {
-	normalize_author($authorfield->subfield('a'), $authorfield->subfield('b'), $authorfield->subfield('c'), $authorfield->indicator("$indicator"));
+        normalize_author($authorfield->subfield('a') // '', $authorfield->subfield('b') // '', $authorfield->subfield('c') // '', $authorfield->indicator("$indicator"));
     }
 }
 
@@ -497,6 +545,7 @@ sub print_title {
 	my $clean_title = $titlefield->subfield('a');
 
 	my $clean_subtitle = $titlefield->subfield('b');
+$clean_subtitle ||= q{};
 	$clean_title =~ s% *[/:;.]$%%;
 	$clean_subtitle =~ s%^ *(.*) *[/:;.]$%$1%;
 
@@ -565,7 +614,7 @@ sub print_isbn {
 	    warn("truncated isbn") if $marcprint;
 	}
 
-	my $isbn = substr($isbnfield->subfield('a'), 0, 10);
+    my $isbn = $isbnfield->subfield('a');
 	print "SN  - ", &charconv($isbn), "\r\n";
     }
 }
@@ -713,7 +762,7 @@ sub print_pubinfo {
 		$protoyear =~ s% *[\.;:/]*$%%;
 
 		## isolate a four-digit year. We discard anything
-		## preceeding the year, but keep everything after
+        ## preceding the year, but keep everything after
 		## the year as other info.
 		$protoyear =~ s%\D*([0-9\-]{4})(.*)%$1///$2%;
 
@@ -768,36 +817,36 @@ sub get_keywords {
 
     ## loop over all 6XX fields
     foreach my $kwfield (@keywords) {
-	if ($kwfield != undef) {
-	    ## authornames get special treatment
-	    if ($fieldname eq "600") {
-		my $val = normalize_author($kwfield->subfield('a'), $kwfield->subfield('b'), $kwfield->subfield('c'), $kwfield->indicator('1'));
-        push @kw, $val;
-		print "<marc>Field $kwfield subfield a:", $kwfield->subfield('a'), "\r\n<marc>Field $kwfield subfield b:", $kwfield->subfield('b'), "\r\n<marc>Field $kwfield subfield c:", $kwfield->subfield('c'), "\r\n" if $marcprint;
-	    }
-	    else {
-		## retrieve all available subfields
-		@kwsubfields = $kwfield->subfields();
-		
-		## loop over all available subfield tuples
-        foreach my $kwtuple (@kwsubfields) {
-		    ## loop over all subfields to check
-            foreach my $subfield (@subfields) {
-			## [0] contains subfield code
-			if (@$kwtuple[0] eq $subfield) {
-			    ## [1] contains value, remove trailing separators
-			    @$kwtuple[1] =~ s% *[,;.:/]*$%%;
-			    if (length(@$kwtuple[1]) > 0) {
-                push @kw, @$kwtuple[1];
-				print "<marc>Field $fieldname subfield $subfield:", @$kwtuple[1], "\r\n" if $marcprint;
-			    }
-			    ## we can leave the subfields loop here
-			    last;
-			}
-		    }
-		}
-	    }
-	}
+        if ($kwfield != undef) {
+            ## authornames get special treatment
+            if ($fieldname eq "600") {
+                my $val = normalize_author($kwfield->subfield('a'), $kwfield->subfield('b'), $kwfield->subfield('c'), $kwfield->indicator('1'));
+                push @kw, $val;
+                print "<marc>Field $kwfield subfield a:", $kwfield->subfield('a'), "\r\n<marc>Field $kwfield subfield b:", $kwfield->subfield('b'), "\r\n<marc>Field $kwfield subfield c:", $kwfield->subfield('c'), "\r\n" if $marcprint;
+            }
+            else {
+                ## retrieve all available subfields
+                my @kwsubfields = $kwfield->subfields();
+
+                ## loop over all available subfield tuples
+                foreach my $kwtuple (@kwsubfields) {
+                    ## loop over all subfields to check
+                    foreach my $subfield (@subfields) {
+                        ## [0] contains subfield code
+                        if (@$kwtuple[0] eq $subfield) {
+                            ## [1] contains value, remove trailing separators
+                            @$kwtuple[1] =~ s% *[,;.:/]*$%%;
+                            if (length(@$kwtuple[1]) > 0) {
+                                push @kw, @$kwtuple[1];
+                                print "<marc>Field $fieldname subfield $subfield:", @$kwtuple[1], "\r\n" if $marcprint;
+                            }
+                            ## we can leave the subfields loop here
+                            last;
+                        }
+                    }
+                }
+            }
+        }
     }
     return @kw;
 }
@@ -891,28 +940,28 @@ sub pool_subx {
 
     ## loop over all notefields
     foreach my $notefield (@notefields) {
-	if ($notefield != undef) {
-	    ## retrieve all available subfield tuples
-	    @notesubfields = $notefield->subfields();
+        if (defined $notefield) {
+            ## retrieve all available subfield tuples
+            my @notesubfields = $notefield->subfields();
 
-	    ## loop over all subfield tuples
-        foreach my $notetuple (@notesubfields) {
-		## loop over all subfields to check
-        foreach my $subfield (@subfields) {
-		    ## [0] contains subfield code
-		    if (@$notetuple[0] eq $subfield) {
-			## [1] contains value, remove trailing separators
-			print "<marc>field $fieldname subfield $subfield: ", @$notetuple[1], "\r\n" if $marcprint;
-			@$notetuple[1] =~ s% *[,;.:/]*$%%;
-			if (length(@$notetuple[1]) > 0) {
-			    ## add to list
-			    push @{$aref}, @$notetuple[1];
-			}
-			last;
-		    }
-		}
-	    }
-	}
+            ## loop over all subfield tuples
+            foreach my $notetuple (@notesubfields) {
+                ## loop over all subfields to check
+                foreach my $subfield (@subfields) {
+                    ## [0] contains subfield code
+                    if (@$notetuple[0] eq $subfield) {
+                        ## [1] contains value, remove trailing separators
+                        print "<marc>field $fieldname subfield $subfield: ", @$notetuple[1], "\r\n" if $marcprint;
+                        @$notetuple[1] =~ s% *[,;.:/]*$%%;
+                        if (length(@$notetuple[1]) > 0) {
+                            ## add to list
+                            push @{$aref}, @$notetuple[1];
+                        }
+                        last;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -967,7 +1016,7 @@ sub charconv {
 	## return unaltered if already utf-8
 	return @_;
     }
-    elsif ($uniout eq "t") {
+    elsif (my $uniout eq "t") {
 	## convert to utf-8
 	return marc8_to_utf8("@_");
     }

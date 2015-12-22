@@ -51,22 +51,26 @@ my $db_rows = {};
 my $display_columns = { layout =>   [  # db column       => {col label                  is link?
                                         {layout_id       => {label => 'Layout ID',      link_field      => 0}},
                                         {layout_name     => {label => 'Layout',         link_field      => 0}},
+                                        {_action         => {label => 'Action',         link_field      => 0}},
                                         #{layout_xml      => {label => 'Layout XML',     link_field      => 0}},
                                         {select          => {label => 'Select',         value           => 'layout_id'}},
                                     ],
                         template => [   {template_id     => {label => 'Template ID',    link_field      => 0}},
                                         {template_code   => {label => 'Template Name',  link_field      => 0}},
                                         {template_desc   => {label => 'Description',    link_field      => 0}},
+                                        {_action         => {label => 'Action',         link_field      => 0}},
                                         {select          => {label => 'Select',         value           => 'template_id'}},
                                     ],
                         profile =>  [   {profile_id      => {label => 'Profile ID',     link_field      => 0}},
                                         {printer_name    => {label => 'Printer Name',   link_field      => 0}},
                                         {paper_bin       => {label => 'Paper Bin',      link_field      => 0}},
                                         {_template_code  => {label => 'Template Name',  link_field      => 0}},     # this display column does not have a corrisponding db column in the profile table, hence the underscore
+                                        {_action         => {label => 'Action',         link_field      => 0}},
                                         {select          => {label => 'Select',         value           => 'profile_id'}},
                                     ],
                         batch =>    [   {batch_id        => {label => 'Batch ID',       link_field      => 0}},
                                         {_item_count     => {label => 'Item Count',     link_field      => 0}},
+                                        {_action         => {label => 'Actions',        link_field      => 0}},
                                         {select          => {label => 'Select',         value           => 'batch_id'}},
                                     ],
 };
@@ -76,11 +80,14 @@ my $branch_code = ($card_element eq 'batch' ? C4::Context->userenv->{'branch'} :
 
 if ($op eq 'delete') {
     my $err = 0;
-    if          ($card_element eq 'layout')    {$err = C4::Patroncards::Layout::delete(layout_id => $element_id);}
-    elsif       ($card_element eq 'template')  {$err = C4::Patroncards::Template::delete(template_id => $element_id);}
-    elsif       ($card_element eq 'profile')   {$err = C4::Patroncards::Profile::delete(profile_id => $element_id);}
-    elsif       ($card_element eq 'batch')     {$err = C4::Labels::Batch::delete(batch_id => $element_id, branch_code => $branch_code);}
-    else                                       {warn sprintf("Unknown card element passed in for delete operation: %s.",$card_element); $errstr = 202;}
+    my @element_ids = split(/,/, $element_id);
+    foreach my $element_id (@element_ids) {
+        if          ($card_element eq 'layout')    {$err = C4::Patroncards::Layout::delete(layout_id => $element_id);}
+        elsif       ($card_element eq 'template')  {$err = C4::Patroncards::Template::delete(template_id => $element_id);}
+        elsif       ($card_element eq 'profile')   {$err = C4::Patroncards::Profile::delete(profile_id => $element_id);}
+        elsif       ($card_element eq 'batch')     {$err = C4::Labels::Batch::delete(batch_id => $element_id, branch_code => $branch_code);}
+        else                                       {warn sprintf("Unknown card element passed in for delete operation: %s.",$card_element); $errstr = 202;}
+    }
     print $cgi->redirect("manage.pl?card_element=$card_element" . ($err ? "&error=102" : ''));
     exit;
 }

@@ -1,58 +1,73 @@
 #!/usr/bin/perl
 
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
+
 use Modern::Perl;
-use DBI;
-use Test::More tests => 27;
-use Test::MockModule;
+
+use Test::More;
+use t::lib::Mocks;
+
+use Module::Load::Conditional qw/check_install/;
 
 BEGIN {
-    use_ok('C4::ItemType');
+    if ( check_install( module => 'Test::DBIx::Class' ) ) {
+        plan tests => 25;
+    } else {
+        plan skip_all => "Need Test::DBIx::Class"
+    }
 }
 
-my $module = new Test::MockModule('C4::Context');
-$module->mock(
-    '_new_dbh',
-    sub {
-        my $dbh = DBI->connect( 'DBI:Mock:', '', '' )
-          || die "Cannot create handle: $DBI::errstr\n";
-        return $dbh;
-    }
-);
+use_ok('C4::ItemType');
+
+use Test::DBIx::Class {
+    schema_class => 'Koha::Schema',
+    connect_info => ['dbi:SQLite:dbname=:memory:','',''],
+    connect_opts => { name_sep => '.', quote_char => '`', },
+    fixture_class => '::Populate',
+}, 'Itemtype' ;
+
+sub fixtures {
+    my ( $data ) = @_;
+    fixtures_ok [
+        Itemtype => [
+            [
+                'itemtype', 'description', 'rentalcharge', 'notforloan',
+                'imageurl', 'summary', 'checkinmsg'
+            ],
+            @$data,
+        ],
+    ], 'add fixtures';
+}
+
+my $db = Test::MockModule->new('Koha::Database');
+$db->mock( _new_schema => sub { return Schema(); } );
 
 # Mock data
 my $itemtypes = [
-    [
-        'itemtype', 'description', 'rentalcharge', 'notforloan',
-        'imageurl', 'summary', 'checkinmsg'
-    ],
     [ 'BK', 'Books', 0, 0, '', '', 'foo' ],
     [ 'CD', 'CDRom', 0, 0, '', '', 'bar' ]
 ];
 
-my $itemtypes_empty = [
-    [
-        'itemtype', 'description', 'rentalcharge', 'notforloan',
-        'imageurl', 'summary', 'checkinmsg'
-    ],
-];
-
-my $dbh = C4::Context->dbh();
-$dbh->{mock_add_resultset} = $itemtypes_empty;
-
 my @itemtypes = C4::ItemType->all();
 is( @itemtypes, 0, 'Testing all itemtypes is empty' );
 
-# This should run exactly one query so we can test
-my $history = $dbh->{mock_all_history};
-is( scalar( @{$history} ), 1, 'Correct number of statements executed' );
-
 # Now lets mock some data
-$dbh->{mock_add_resultset} = $itemtypes;
+fixtures($itemtypes);
 
 @itemtypes = C4::ItemType->all();
-
-$history = $dbh->{mock_all_history};
-is( scalar( @{$history} ), 2, 'Correct number of statements executed' );
 
 is( @itemtypes, 2, 'ItemType->all should return an array with 2 elements' );
 
@@ -82,14 +97,8 @@ is( $itemtypes[0]->checkinmsg, 'foo', 'first checkinmsg is foo' );
 
 is( $itemtypes[1]->checkinmsg, 'bar', 'second checkinmsg is bar' );
 
-# Mock the data again
-$dbh->{mock_add_resultset} = $itemtypes;
-
 # Test get(), which should return one itemtype
 my $itemtype = C4::ItemType->get( 'BK' );
-
-$history = $dbh->{mock_all_history};
-is( scalar( @{$history} ), 3, 'Correct number of statements executed' );
 
 is( $itemtype->fish, undef, 'Calling a bad descriptor gives undef' );
 
@@ -107,3 +116,5 @@ is( $itemtype->checkinmsg, 'foo', 'checkinmsg is foo' );
 
 $itemtype = C4::ItemType->get;
 is( $itemtype, undef, 'C4::ItemType->get should return unless if no parameter is given' );
+
+1;

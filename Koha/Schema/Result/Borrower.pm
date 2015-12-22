@@ -285,18 +285,6 @@ __PACKAGE__->table("borrowers");
   is_nullable: 1
   size: 100
 
-=head2 ethnicity
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 50
-
-=head2 ethnotes
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 255
-
 =head2 sex
 
   data_type: 'varchar'
@@ -534,10 +522,6 @@ __PACKAGE__->add_columns(
   { data_type => "mediumtext", is_nullable => 1 },
   "relationship",
   { data_type => "varchar", is_nullable => 1, size => 100 },
-  "ethnicity",
-  { data_type => "varchar", is_nullable => 1, size => 50 },
-  "ethnotes",
-  { data_type => "varchar", is_nullable => 1, size => 255 },
   "sex",
   { data_type => "varchar", is_nullable => 1, size => 1 },
   "password",
@@ -918,6 +902,21 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 opac_news
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::OpacNews>
+
+=cut
+
+__PACKAGE__->has_many(
+  "opac_news",
+  "Koha::Schema::Result::OpacNews",
+  { "foreign.borrowernumber" => "self.borrowernumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 patron_list_patrons
 
 Type: has_many
@@ -1154,8 +1153,8 @@ Composing rels: L</aqorder_users> -> ordernumber
 __PACKAGE__->many_to_many("ordernumbers", "aqorder_users", "ordernumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07039 @ 2015-04-27 16:08:40
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Z50zYBD3Hqlv5/EnoLnyZw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-10-21 19:50:05
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QafovaRBnm36nyoyQTGIgQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

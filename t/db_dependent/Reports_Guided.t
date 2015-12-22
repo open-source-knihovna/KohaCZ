@@ -19,8 +19,10 @@ use Modern::Perl;
 
 use Test::More tests => 18;
 use Test::Warn;
+use t::lib::TestBuilder;
 
 use C4::Context;
+use Koha::Database;
 
 BEGIN {
     use_ok('C4::Reports::Guided');
@@ -30,11 +32,11 @@ can_ok(
     qw(save_report delete_report execute_query)
 );
 
-#Start transaction
-my $dbh = C4::Context->dbh;
-$dbh->{RaiseError} = 1;
-$dbh->{AutoCommit} = 0;
+my $schema = Koha::Database->new->schema;
+$schema->storage->txn_begin;
+my $builder = t::lib::TestBuilder->new;
 
+my $dbh = C4::Context->dbh;
 $dbh->do(q|DELETE FROM saved_sql|);
 $dbh->do(q|DELETE FROM saved_reports|);
 
@@ -45,7 +47,8 @@ my $count = scalar( @{ get_saved_reports() } );
 is( $count, 0, "There is no report" );
 
 my @report_ids;
-for my $id ( 1 .. 3 ) {
+foreach ( 1..3 ) {
+    my $id = $builder->build({ source => 'Borrower' })->{ borrowernumber };
     push @report_ids, save_report({
         borrowernumber => $id,
         sql            => "SQL$id",
@@ -118,6 +121,4 @@ ok(
 is_deeply( get_report_areas(), [ 'CIRC', 'CAT', 'PAT', 'ACQ', 'ACC', 'SER' ],
     "get_report_areas returns the correct array of report areas");
 
-#End transaction
-$dbh->rollback;
-
+$schema->storage->txn_rollback;

@@ -20,10 +20,10 @@
 # You should have received a copy of the GNU General Public License
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-use warnings;
+use Modern::Perl;
 
 use CGI qw ( -utf8 );
+use List::MoreUtils qw/ any /;
 use LWP::Simple;
 use XML::Simple;
 use Config;
@@ -34,6 +34,8 @@ use C4::Context;
 use C4::Installer;
 
 use Koha;
+use Koha::Borrowers;
+use Koha::Config::SysPrefs;
 
 #use Smart::Comments '####';
 
@@ -63,6 +65,16 @@ $apacheVersion    = `httpd2 -v 2> /dev/null` unless $apacheVersion;
 $apacheVersion    = `httpd -v 2> /dev/null` unless $apacheVersion;
 my $zebraVersion = `zebraidx -V`;
 
+# Check running PSGI env
+if ( any { /(^psgi\.|^plack\.)/i } keys %ENV ) {
+    $template->param(
+        is_psgi => 1,
+        psgi_server => ($ENV{ PLACK_ENV }) ? "Plack ($ENV{PLACK_ENV})" :
+                       ($ENV{ MOD_PERL })  ? "mod_perl ($ENV{MOD_PERL})" :
+                                             'Unknown'
+    );
+}
+
 # Additional system information for warnings
 my $prefAutoCreateAuthorities = C4::Context->preference('AutoCreateAuthorities');
 my $prefBiblioAddsAuthorities = C4::Context->preference('BiblioAddsAuthorities');
@@ -75,6 +87,9 @@ my $warnPrefAnonymousPatron = (
     C4::Context->preference('OPACPrivacy')
         and not C4::Context->preference('AnonymousPatron')
 );
+
+my $anonymous_patron = Koha::Borrowers->find( C4::Context->preference('AnonymousPatron') );
+my $warnPrefAnonymousPatron_PatronDoesNotExist = ( not $anonymous_patron and Koha::Borrowers->search({ privacy => 2 })->count );
 
 my $errZebraConnection = C4::Context->Zconn("biblioserver",0)->errcode();
 
@@ -151,6 +166,25 @@ if ( (C4::Context->config('zebra_auth_index_mode') eq 'grs1') && ($context->{'se
     };
 }
 
+if ( ! defined C4::Context->config('log4perl_conf') ) {
+    push @xml_config_warnings, {
+        error => 'log4perl_entry_missing'
+    }
+}
+
+if ( ! defined C4::Context->config('upload_path') ) {
+    if ( Koha::Config::SysPrefs->find('OPACBaseURL')->value ) {
+        # OPACBaseURL seems to be set
+        push @xml_config_warnings, {
+            error => 'uploadpath_entry_missing'
+        }
+    } else {
+        push @xml_config_warnings, {
+            error => 'uploadpath_and_opacbaseurl_entry_missing'
+        }
+    }
+}
+
 # Test QueryParser configuration sanity
 if ( C4::Context->preference( 'UseQueryParser' ) ) {
     # Get the QueryParser configuration file name
@@ -193,6 +227,34 @@ if ( !defined C4::Context->config('use_zebra_facets') ) {
     }
 }
 
+# Sco Patron should not contain any other perms than circulate => self_checkout
+if (  C4::Context->preference('WebBasedSelfCheck')
+      and C4::Context->preference('AutoSelfCheckAllowed')
+) {
+    my $userid = C4::Context->preference('AutoSelfCheckID');
+    my $all_permissions = C4::Auth::get_user_subpermissions( $userid );
+    my ( $has_self_checkout_perm, $has_other_permissions );
+    while ( my ( $module, $permissions ) = each %$all_permissions ) {
+        if ( $module eq 'circulate' ) {
+            while ( my ( $permission, $flag ) = each %$permissions ) {
+                if ( $permission eq 'self_checkout' ) {
+                    $has_self_checkout_perm = 1;
+                } else {
+                    $has_other_permissions = 1;
+                }
+            }
+        } else {
+            $has_other_permissions = 1;
+        }
+    }
+    $template->param(
+        AutoSelfCheckPatronDoesNotHaveSelfCheckPerm => not ( $has_self_checkout_perm ),
+        AutoSelfCheckPatronHasTooManyPerm => $has_other_permissions,
+    );
+
+
+}
+
 $template->param(
     kohaVersion   => $kohaVersion,
     osVersion     => $osVersion,
@@ -207,6 +269,7 @@ $template->param(
     warnPrefBiblioAddsAuthorities => $warnPrefBiblioAddsAuthorities,
     warnPrefEasyAnalyticalRecords  => $warnPrefEasyAnalyticalRecords,
     warnPrefAnonymousPatron => $warnPrefAnonymousPatron,
+    warnPrefAnonymousPatron_PatronDoesNotExist => $warnPrefAnonymousPatron_PatronDoesNotExist,
     errZebraConnection => $errZebraConnection,
     warnIsRootUser => $warnIsRootUser,
     warnNoActiveCurrency => $warnNoActiveCurrency,

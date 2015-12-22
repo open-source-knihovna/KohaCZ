@@ -23,7 +23,6 @@ package C4::Members;
 use strict;
 #use warnings; FIXME - Bug 2505
 use C4::Context;
-use C4::Dates qw(format_date_in_iso format_date);
 use String::Random qw( random_string );
 use Date::Calc qw/Today Add_Delta_YM check_date Date_to_Days/;
 use C4::Log; # logaction
@@ -41,9 +40,10 @@ use Koha::Borrower::Debarments qw(IsDebarred);
 use Text::Unaccent qw( unac_string );
 use Koha::AuthUtils qw(hash_password);
 use Koha::Database;
-use Module::Load;
-if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preference('NorwegianPatronDBEnable') == 1 ) {
-    load Koha::NorwegianPatronDB, qw( NLUpdateHashedPIN NLEncryptPIN NLSync );
+
+use Module::Load::Conditional qw( can_load );
+if ( ! can_load( modules => { 'Koha::NorwegianPatronDB' => undef } ) ) {
+   warn "Unable to load Koha::NorwegianPatronDB";
 }
 
 our ($VERSION,@ISA,@EXPORT,@EXPORT_OK,$debug);
@@ -97,6 +97,7 @@ BEGIN {
         &GetBorrowersWithIssuesHistoryOlderThan
 
         &GetExpiryDate
+        &GetUpcomingMembershipExpires
 
         &AddMessage
         &DeleteMessage
@@ -107,6 +108,7 @@ BEGIN {
         GetBorrowersWithEmail
 
         HasOverdues
+        GetOverduesForPatron
     );
 
     #Modify data
@@ -135,8 +137,6 @@ BEGIN {
         &checkuserpassword
         &Check_Userid
         &Generate_Userid
-        &fixEthnicity
-        &ethnicitycategories
         &fixup_cardnumber
         &checkcardnumber
     );
@@ -651,7 +651,7 @@ sub ModMember {
         } else {
             if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preference('NorwegianPatronDBEnable') == 1 ) {
                 # Update the hashed PIN in borrower_sync.hashed_pin, before Koha hashes it
-                NLUpdateHashedPIN( $data{'borrowernumber'}, $data{password} );
+                Koha::NorwegianPatronDB::NLUpdateHashedPIN( $data{'borrowernumber'}, $data{password} );
             }
             $data{password} = hash_password($data{password});
         }
@@ -667,6 +667,7 @@ sub ModMember {
     $new_borrower->{dateofbirth}  ||= undef if exists $new_borrower->{dateofbirth};
     $new_borrower->{dateenrolled} ||= undef if exists $new_borrower->{dateenrolled};
     $new_borrower->{dateexpiry}   ||= undef if exists $new_borrower->{dateexpiry};
+    $new_borrower->{debarred}     ||= undef if exists $new_borrower->{debarred};
     my $rs = $schema->resultset('Borrower')->search({
         borrowernumber => $new_borrower->{borrowernumber},
      });
@@ -683,7 +684,9 @@ sub ModMember {
 
         # If the patron changes to a category with enrollment fee, we add a fee
         if ( $data{categorycode} and $data{categorycode} ne $old_categorycode ) {
-            AddEnrolmentFeeIfNeeded( $data{categorycode}, $data{borrowernumber} );
+            if ( C4::Context->preference('FeeOnChangePatronCategory') ) {
+                AddEnrolmentFeeIfNeeded( $data{categorycode}, $data{borrowernumber} );
+            }
         }
 
         # If NorwegianPatronDBEnable is enabled, we set syncstatus to something that a
@@ -702,7 +705,7 @@ sub ModMember {
             # Set the value of 'sync'
             $borrowersync->update( { 'sync' => $data{'sync'} } );
             # Try to do the live sync
-            NLSync({ 'borrowernumber' => $data{'borrowernumber'} });
+            Koha::NorwegianPatronDB::NLSync({ 'borrowernumber' => $data{'borrowernumber'} });
         }
 
         logaction("MEMBERS", "MODIFY", $data{'borrowernumber'}, "UPDATE (executed w/ arg: $data{'borrowernumber'})") if C4::Context->preference("BorrowersLog");
@@ -738,12 +741,12 @@ sub AddMember {
 
     # add expiration date if it isn't already there
     unless ( $data{'dateexpiry'} ) {
-        $data{'dateexpiry'} = GetExpiryDate( $data{'categorycode'}, C4::Dates->new()->output("iso") );
+        $data{'dateexpiry'} = GetExpiryDate( $data{'categorycode'}, output_pref( { dt => dt_from_string, dateonly => 1, dateformat => 'iso' } ) );
     }
 
     # add enrollment date if it isn't already there
     unless ( $data{'dateenrolled'} ) {
-        $data{'dateenrolled'} = C4::Dates->new()->output("iso");
+        $data{'dateenrolled'} = output_pref( { dt => dt_from_string, dateonly => 1, dateformat => 'iso' } );
     }
 
     my $patron_category = $schema->resultset('Category')->find( $data{'categorycode'} );
@@ -757,7 +760,10 @@ sub AddMember {
 
     # create a disabled account if no password provided
     $data{'password'} = ($data{'password'})? hash_password($data{'password'}) : '!';
+
+    # we don't want invalid dates in the db (mysql has a bad habit of inserting 0000-00-00
     $data{'dateofbirth'} = undef if( not $data{'dateofbirth'} );
+    $data{'debarred'} = undef if ( not $data{'debarred'} );
 
     # get only the columns of Borrower
     my @columns = $schema->source('Borrower')->columns;
@@ -775,7 +781,7 @@ sub AddMember {
             'synctype'       => 'norwegianpatrondb',
             'sync'           => 1,
             'syncstatus'     => 'new',
-            'hashed_pin'     => NLEncryptPIN( $plain_text_password ),
+            'hashed_pin'     => Koha::NorwegianPatronDB::NLEncryptPIN( $plain_text_password ),
         });
     }
 
@@ -1167,7 +1173,7 @@ sub GetMemberAccountRecords {
                         SELECT * 
                         FROM accountlines 
                         WHERE borrowernumber=?);
-    $strsth.=" ORDER BY date desc,timestamp DESC";
+    $strsth.=" ORDER BY accountlines_id desc";
     my $sth= $dbh->prepare( $strsth );
     $sth->execute( $borrowernumber );
 
@@ -1480,6 +1486,30 @@ sub GetExpiryDate {
     }
 }
 
+=head2 GetUpcomingMembershipExpires
+
+  my $upcoming_mem_expires = GetUpcomingMembershipExpires();
+
+=cut
+
+sub GetUpcomingMembershipExpires {
+    my $dbh = C4::Context->dbh;
+    my $days = C4::Context->preference("MembershipExpiryDaysNotice") || 0;
+    my $dateexpiry = output_pref({ dt => (dt_from_string()->add( days => $days)), dateformat => 'iso', dateonly => 1 });
+
+    my $query = "
+        SELECT borrowers.*, categories.description,
+        branches.branchname, branches.branchemail FROM borrowers
+        LEFT JOIN branches on borrowers.branchcode = branches.branchcode
+        LEFT JOIN categories on borrowers.categorycode = categories.categorycode
+        WHERE dateexpiry = ?;
+    ";
+    my $sth = $dbh->prepare($query);
+    $sth->execute($dateexpiry);
+    my $results = $sth->fetchall_arrayref({});
+    return $results;
+}
+
 =head2 GetborCatFromCatType
 
   ($codes_arrayref, $labels_hashref) = &GetborCatFromCatType();
@@ -1607,54 +1637,6 @@ sub GetBorrowercategoryList {
     $sth->finish;
     return $data;
 }    # sub getborrowercategory
-
-=head2 ethnicitycategories
-
-  ($codes_arrayref, $labels_hashref) = &ethnicitycategories();
-
-Looks up the different ethnic types in the database. Returns two
-elements: a reference-to-array, which lists the ethnicity codes, and a
-reference-to-hash, which maps the ethnicity codes to ethnicity
-descriptions.
-
-=cut
-
-#'
-
-sub ethnicitycategories {
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare("Select code,name from ethnicity order by name");
-    $sth->execute;
-    my %labels;
-    my @codes;
-    while ( my $data = $sth->fetchrow_hashref ) {
-        push @codes, $data->{'code'};
-        $labels{ $data->{'code'} } = $data->{'name'};
-    }
-    return ( \@codes, \%labels );
-}
-
-=head2 fixEthnicity
-
-  $ethn_name = &fixEthnicity($ethn_code);
-
-Takes an ethnicity code (e.g., "european" or "pi") and returns the
-corresponding descriptive name from the C<ethnicity> table in the
-Koha database ("European" or "Pacific Islander").
-
-=cut
-
-#'
-
-sub fixEthnicity {
-    my $ethnicity = shift;
-    return unless $ethnicity;
-    my $dbh       = C4::Context->dbh;
-    my $sth       = $dbh->prepare("Select name from ethnicity where code = ?");
-    $sth->execute($ethnicity);
-    my $data = $sth->fetchrow_hashref;
-    return $data->{'name'};
-}    # sub fixEthnicity
 
 =head2 GetAge
 
@@ -1834,6 +1816,40 @@ sub DelMember {
     return $sth->rows;
 }
 
+=head2 HandleDelBorrower
+
+     HandleDelBorrower($borrower);
+
+When a member is deleted (DelMember in Members.pm), you should call me first.
+This routine deletes/moves lists and entries for the deleted member/borrower.
+Lists owned by the borrower are deleted, but entries from the borrower to
+other lists are kept.
+
+=cut
+
+sub HandleDelBorrower {
+    my ($borrower)= @_;
+    my $query;
+    my $dbh = C4::Context->dbh;
+
+    #Delete all lists and all shares of this borrower
+    #Consistent with the approach Koha uses on deleting individual lists
+    #Note that entries in virtualshelfcontents added by this borrower to
+    #lists of others will be handled by a table constraint: the borrower
+    #is set to NULL in those entries.
+    $query="DELETE FROM virtualshelves WHERE owner=?";
+    $dbh->do($query,undef,($borrower));
+
+    #NOTE:
+    #We could handle the above deletes via a constraint too.
+    #But a new BZ report 11889 has been opened to discuss another approach.
+    #Instead of deleting we could also disown lists (based on a pref).
+    #In that way we could save shared and public lists.
+    #The current table constraints support that idea now.
+    #This pref should then govern the results of other routines/methods such as
+    #Koha::Virtualshelf->new->delete too.
+}
+
 =head2 ExtendMemberSubscriptionTo (OUEST-PROVENCE)
 
     $date = ExtendMemberSubscriptionTo($borrowerid, $date);
@@ -1849,8 +1865,9 @@ sub ExtendMemberSubscriptionTo {
     my $borrower = GetMember('borrowernumber'=>$borrowerid);
     unless ($date){
       $date = (C4::Context->preference('BorrowerRenewalPeriodBase') eq 'dateexpiry') ?
-                                        C4::Dates->new($borrower->{'dateexpiry'}, 'iso')->output("iso") :
-                                        C4::Dates->new()->output("iso");
+                                        eval { output_pref( { dt => dt_from_string( $borrower->{'dateexpiry'}  ), dateonly => 1, dateformat => 'iso' } ); }
+                                        :
+                                        output_pref( { dt => dt_from_string, dateonly => 1, dateformat => 'iso' } );
       $date = GetExpiryDate( $borrower->{'categorycode'}, $date );
     }
     my $sth = $dbh->do(<<EOF);
@@ -2248,8 +2265,7 @@ sub GetMessages {
     my @results;
 
     while ( my $data = $sth->fetchrow_hashref ) {
-        my $d = C4::Dates->new( $data->{message_date}, 'iso' );
-        $data->{message_date_formatted} = $d->output;
+        $data->{message_date_formatted} = output_pref( { dt => dt_from_string( $data->{message_date} ), dateonly => 1, dateformat => 'iso' } );
         push @results, $data;
     }
     return \@results;
@@ -2459,6 +2475,10 @@ sub GetBorrowersWithEmail {
     return @result;
 }
 
+=head2 AddMember_Opac
+
+=cut
+
 sub AddMember_Opac {
     my ( %borrower ) = @_;
 
@@ -2505,6 +2525,10 @@ sub AddEnrolmentFeeIfNeeded {
     }
 }
 
+=head2 HasOverdues
+
+=cut
+
 sub HasOverdues {
     my ( $borrowernumber ) = @_;
 
@@ -2514,6 +2538,72 @@ sub HasOverdues {
     my ( $count ) = $sth->fetchrow_array();
 
     return $count;
+}
+
+=head2 DeleteExpiredOpacRegistrations
+
+    Delete accounts that haven't been upgraded from the 'temporary' category
+    Returns the number of removed patrons
+
+=cut
+
+sub DeleteExpiredOpacRegistrations {
+
+    my $delay = C4::Context->preference('PatronSelfRegistrationExpireTemporaryAccountsDelay');
+    my $category_code = C4::Context->preference('PatronSelfRegistrationDefaultCategory');
+
+    return 0 if not $category_code or not defined $delay or $delay eq q||;
+
+    my $query = qq|
+SELECT borrowernumber
+FROM borrowers
+WHERE categorycode = ? AND DATEDIFF( NOW(), dateenrolled ) > ? |;
+
+    my $dbh = C4::Context->dbh;
+    my $sth = $dbh->prepare($query);
+    $sth->execute( $category_code, $delay );
+    my $cnt=0;
+    while ( my ($borrowernumber) = $sth->fetchrow_array() ) {
+        DelMember($borrowernumber);
+        $cnt++;
+    }
+    return $cnt;
+}
+
+=head2 DeleteUnverifiedOpacRegistrations
+
+    Delete all unverified self registrations in borrower_modifications,
+    older than the specified number of days.
+
+=cut
+
+sub DeleteUnverifiedOpacRegistrations {
+    my ( $days ) = @_;
+    my $dbh = C4::Context->dbh;
+    my $sql=qq|
+DELETE FROM borrower_modifications
+WHERE borrowernumber = 0 AND DATEDIFF( NOW(), timestamp ) > ?|;
+    my $cnt=$dbh->do($sql, undef, ($days) );
+    return $cnt eq '0E0'? 0: $cnt;
+}
+
+sub GetOverduesForPatron {
+    my ( $borrowernumber ) = @_;
+
+    my $sql = "
+        SELECT *
+        FROM issues, items, biblio, biblioitems
+        WHERE items.itemnumber=issues.itemnumber
+          AND biblio.biblionumber   = items.biblionumber
+          AND biblio.biblionumber   = biblioitems.biblionumber
+          AND issues.borrowernumber = ?
+          AND date_due < NOW()
+    ";
+
+    my $sth = C4::Context->dbh->prepare( $sql );
+    $sth->execute( $borrowernumber );
+
+    return $sth->fetchall_arrayref({});
 }
 
 END { }    # module clean-up code here (global destructor)

@@ -57,11 +57,7 @@
             is_confirmed = confirm(_("Are you sure you want to delete this record?"));
         }
         if (is_confirmed) {
-            if ( count > 0 || holdcount > 0 ){
-                return false;
-            } else {
                 window.location="/cgi-bin/koha/cataloguing/addbiblio.pl?op=delete&amp;biblionumber=[% biblionumber %]";
-            }
 	} else {
             return false;
 	}
@@ -136,7 +132,7 @@
 [% IF ( CAN_user_editcatalogue_edit_catalogue || CAN_user_editcatalogue_edit_items ||
 CAN_user_serials_create_subscription ) %]
     <div class="btn-group">
-    <button class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="icon-plus"></i> New <span class="caret"></span></button>
+    <button class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="fa fa-plus"></i> New <span class="caret"></span></button>
         <ul class="dropdown-menu">
             [% IF ( CAN_user_editcatalogue_edit_catalogue ) %]
              <li><a id="newbiblio" href="/cgi-bin/koha/cataloguing/addbiblio.pl">New record</a></li>
@@ -161,7 +157,7 @@ CAN_user_serials_create_subscription ) %]
 
 [% IF ( CAN_user_editcatalogue_edit_catalogue || CAN_user_editcatalogue_edit_items || CAN_user_tools_items_batchmod || CAN_user_tools_items_batchdel ) or ( frameworkcode == 'FA' and CAN_user_editcatalogue_fast_cataloging ) %]
     <div class="btn-group">
-    <button class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="icon-pencil"></i> Edit <span class="caret"></span></button>
+    <button class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="fa fa-pencil"></i> Edit <span class="caret"></span></button>
         <ul class="dropdown-menu">
             [% IF CAN_user_editcatalogue_edit_catalogue or ( frameworkcode == 'FA' and CAN_user_editcatalogue_fast_cataloging ) %]
             <li><a id="editbiblio" href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% biblionumber %]&amp;frameworkcode=[% current_framework %]&amp;op=">Edit record</a></li>
@@ -218,7 +214,7 @@ CAN_user_serials_create_subscription ) %]
 [% END %]
 
     <div class="btn-group">
-    <button class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="icon-download-alt"></i> Save <span class="caret"></span></button>
+    <button class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="fa fa-download"></i> Save <span class="caret"></span></button>
     <ul class="dropdown-menu">
         <li><a href="/cgi-bin/koha/catalogue/export.pl?format=bibtex&amp;op=export&amp;bib=[% biblionumber %]">BIBTEX</a></li>
         <li><a href="/cgi-bin/koha/catalogue/export.pl?format=dc&amp;op=export&amp;bib=[% biblionumber %]">Dublin Core (XML)</a></li>
@@ -240,19 +236,19 @@ CAN_user_serials_create_subscription ) %]
     </ul>
     </div>
 [% ELSIF ( virtualshelves ) %]
-    <div class="btn-group"><a id="addtoshelf" class="btn btn-small"><i class="icon-list"></i> Add to list</a> </div>
+    <div class="btn-group"><a id="addtoshelf" class="btn btn-small"><i class="fa fa-list"></i> Add to list</a> </div>
 [% ELSIF ( intranetbookbag ) %]
-    <div class="btn-group"><a id="addtocart" class="btn btn-small"><i class="icon-shopping-cart"></i> Add to cart</a> </div>
+    <div class="btn-group"><a id="addtocart" class="btn btn-small"><i class="fa fa-shopping-cart"></i> Add to cart</a> </div>
 [% END %]
 
-    <div class="btn-group"><a id="printbiblio" class="btn btn-small"><i class="icon-print"></i> Print</a></div>
+    <div class="btn-group"><a id="printbiblio" class="btn btn-small"><i class="fa fa-print"></i> Print</a></div>
 
 [% IF ( CAN_user_reserveforothers ) %]
     [% UNLESS ( norequests ) %]
         [% IF ( holdfor ) %]
             <div class="btn-group">
                 <button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
-                    <i class="icon-hold"></i>
+                    <i class="fa fa-sticky-note-o"></i>
                     Place hold
                     <span class="caret"></span>
                 </button>
@@ -262,7 +258,7 @@ CAN_user_serials_create_subscription ) %]
                 </ul>
             </div>
         [% ELSE %]
-            <div class="btn-group"><a id="placehold" class="btn btn-small" href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% biblionumber %]"><i class="icon-hold"></i> Place hold</a></div>
+            <div class="btn-group"><a id="placehold" class="btn btn-small" href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% biblionumber %]"><i class="fa fa-sticky-note-o"></i> Place hold</a></div>
         [% END %]
     [% END %]
 [% END %]

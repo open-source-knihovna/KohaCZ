@@ -38,15 +38,14 @@ use DateTime;
 use DateTime::Duration;
 
 use C4::Context;
-use C4::Dates qw/format_date/;
 use C4::Debug;
 use C4::Letters;
-use C4::Overdues qw(GetFine GetOverdueMessageTransportTypes);
+use C4::Overdues qw(GetFine GetOverdueMessageTransportTypes parse_overdues_letter);
 use C4::Budgets qw(GetCurrency);
+use C4::Log;
 use Koha::Borrower::Debarments qw(AddUniqueDebarment);
 use Koha::DateUtils;
 use Koha::Calendar;
-use C4::Log;
 
 =head1 NAME
 
@@ -119,7 +118,7 @@ overdues that could not be emailed are sent in CSV format to the admin.
 
 Produces html data. If patron does not have an email address or
 -n (no mail) flag is set, an HTML file is generated in the specified
-directory. This can be downloaded or futher processed by library staff.
+directory. This can be downloaded or further processed by library staff.
 The file will be called notices-YYYY-MM-DD.html and placed in the directory
 specified.
 
@@ -127,7 +126,7 @@ specified.
 
 Produces plain text data. If patron does not have an email address or
 -n (no mail) flag is set, a text file is generated in the specified
-directory. This can be downloaded or futher processed by library staff.
+directory. This can be downloaded or further processed by library staff.
 The file will be called notices-YYYY-MM-DD.txt and placed in the directory
 specified.
 
@@ -268,7 +267,7 @@ overdues in the last 2 weeks for the MAIN library.
 =head1 SEE ALSO
 
 The F<misc/cronjobs/advance_notices.pl> program allows you to send
-messages to patrons in advance of thier items becoming due, or to
+messages to patrons in advance of their items becoming due, or to
 alert them of items that have just become due.
 
 =cut
@@ -527,7 +526,7 @@ END_SQL
             my $borrowernumber;
             while ( my $data = $sth->fetchrow_hashref ) {
 
-                next unless ( DateTime->compare( $date_to_run,  dt_from_string($data->{date_due})) ) == 1;
+                next unless ( DateTime->compare( $date_to_run, dt_from_string($data->{date_due})) ) == 1;
 
                 # check the borrower has at least one item that matches
                 my $days_between;
@@ -536,12 +535,12 @@ END_SQL
                     my $calendar =
                       Koha::Calendar->new( branchcode => $branchcode );
                     $days_between =
-                      $calendar->days_between(  dt_from_string($data->{date_due}),
+                      $calendar->days_between( dt_from_string($data->{date_due}),
                         $date_to_run );
                 }
                 else {
                     $days_between =
-                      $date_to_run->delta_days(  dt_from_string($data->{date_due}) );
+                      $date_to_run->delta_days( dt_from_string($data->{date_due}) );
                 }
                 $days_between = $days_between->in_units('days');
                 if ($triggered) {
@@ -657,7 +656,10 @@ END_SQL
                       last;
                     }
                     $j++;
-                    my @item_info = map { $_ =~ /^date|date$/ ? format_date( $item_info->{$_} ) : $item_info->{$_} || '' } @item_content_fields;
+                    my @item_info = map { $_ =~ /^date|date$/ ?
+                                           eval { output_pref( { dt => dt_from_string( $item_info->{$_} ), dateonly => 1 } ); }
+                                           :
+                                           $item_info->{$_} || '' } @item_content_fields;
                     $titles .= join("\t", @item_info) . "\n";
                     $itemcount++;
                     push @items, $item_info;
@@ -672,7 +674,7 @@ END_SQL
                 my $print_sent = 0; # A print notice is not yet sent for this patron
                 for my $mtt ( @message_transport_types ) {
 
-                    my $letter = parse_letter(
+                    my $letter = parse_overdues_letter(
                         {   letter_code     => $overdue_rules->{"letter$i"},
                             borrowernumber  => $borrowernumber,
                             branchcode      => $branchcode,
@@ -828,75 +830,6 @@ if ( defined $htmlfilename ) {
 =head1 INTERNAL METHODS
 
 These methods are internal to the operation of overdue_notices.pl.
-
-=head2 parse_letter
-
-parses the letter template, replacing the placeholders with data
-specific to this patron, biblio, or item
-
-named parameters:
-  letter - required hashref
-  borrowernumber - required integer
-  substitute - optional hashref of other key/value pairs that should
-    be substituted in the letter content
-
-returns the C<letter> hashref, with the content updated to reflect the
-substituted keys and values.
-
-
-=cut
-
-sub parse_letter {
-    my $params = shift;
-    foreach my $required (qw( letter_code borrowernumber )) {
-        return unless ( exists $params->{$required} && $params->{$required} );
-    }
-
-    my $substitute = $params->{'substitute'} || {};
-    $substitute->{today} ||= C4::Dates->new()->output("syspref");
-
-    my %tables = ( 'borrowers' => $params->{'borrowernumber'} );
-    if ( my $p = $params->{'branchcode'} ) {
-        $tables{'branches'} = $p;
-    }
-
-    my $currencies = GetCurrency();
-    my $currency_format;
-    $currency_format = $currencies->{currency} if defined($currencies);
-
-    my @item_tables;
-    if ( my $i = $params->{'items'} ) {
-        my $item_format = '';
-        foreach my $item (@$i) {
-            my $fine = GetFine($item->{'itemnumber'}, $params->{'borrowernumber'});
-            if ( !$item_format and defined $params->{'letter'}->{'content'} ) {
-                $params->{'letter'}->{'content'} =~ m/(<item>.*<\/item>)/;
-                $item_format = $1;
-            }
-
-            $item->{'fine'} = currency_format($currency_format, "$fine", FMT_SYMBOL);
-            # if active currency isn't correct ISO code fallback to sprintf
-            $item->{'fine'} = sprintf('%.2f', $fine) unless $item->{'fine'};
-
-            push @item_tables, {
-                'biblio' => $item->{'biblionumber'},
-                'biblioitems' => $item->{'biblionumber'},
-                'items' => $item,
-                'issues' => $item->{'itemnumber'},
-            };
-        }
-    }
-
-    return C4::Letters::GetPreparedLetter (
-        module => 'circulation',
-        letter_code => $params->{'letter_code'},
-        branchcode => $params->{'branchcode'},
-        tables => \%tables,
-        substitute => $substitute,
-        repeat => { item => \@item_tables },
-        message_transport_type => $params->{message_transport_type},
-    );
-}
 
 =head2 prepare_letter_for_printing
 

@@ -67,9 +67,8 @@ if ( $input->param('borrowernumber') ) {
 
     # Generating discharge if needed
     if ( $input->param('discharge') and $can_be_discharged ) {
-        my $is_discharged = Koha::Borrower::Discharge::count({
+        my $is_discharged = Koha::Borrower::Discharge::is_discharged({
             borrowernumber => $borrowernumber,
-            validated      => 1,
         });
         unless ($is_discharged) {
             Koha::Borrower::Discharge::discharge({
@@ -78,7 +77,7 @@ if ( $input->param('borrowernumber') ) {
         }
         eval {
             my $pdf_path = Koha::Borrower::Discharge::generate_as_pdf(
-                { borrowernumber => $borrowernumber, } );
+                { borrowernumber => $borrowernumber, branchcode => $data->{'branchcode'} } );
 
             binmode(STDOUT);
             print $input->header(
@@ -97,6 +96,11 @@ if ( $input->param('borrowernumber') ) {
             $template->param( messages => [ {type => 'error', code => 'unable_to_generate_pdf'} ] );
         }
     }
+
+    # Already generated discharges
+    my $validated_discharges = Koha::Borrower::Discharge::get_validated({
+        borrowernumber => $borrowernumber,
+    });
 
     $template->param(
         borrowernumber    => $borrowernumber,
@@ -120,6 +124,7 @@ if ( $input->param('borrowernumber') ) {
         branchcode        => $data->{'branchcode'},
         has_reserves      => $has_reserves,
         can_be_discharged => $can_be_discharged,
+        validated_discharges => $validated_discharges,
     );
 }
 

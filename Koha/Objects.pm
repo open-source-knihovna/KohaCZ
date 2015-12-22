@@ -84,6 +84,8 @@ sub find {
 
     my $result = $self->_resultset()->find($id);
 
+    return unless $result;
+
     my $object = $self->object_class()->_new_from_dbic( $result );
 
     return $object;
@@ -122,6 +124,17 @@ sub count {
     my ( $self, $params ) = @_;
 
     return $self->_resultset()->count($params);
+}
+
+=head3 Koha::Objects->pager();
+
+my $pager = Koha::Objects->pager;
+
+=cut
+
+sub pager {
+    my ( $self ) = @_;
+    return $self->_resultset->pager;
 }
 
 =head3 Koha::Objects->next();
@@ -177,6 +190,18 @@ sub as_list {
     my @objects = $self->_wrap(@dbic_rows);
 
     return wantarray ? @objects : \@objects;
+}
+
+=head3 Koha::Objects->unblessed
+
+Returns an unblessed representation of objects.
+
+=cut
+
+sub unblessed {
+    my ($self) = @_;
+
+    return [ map { $_->unblessed } $self->as_list ];
 }
 
 =head3 Koha::Objects->_wrap

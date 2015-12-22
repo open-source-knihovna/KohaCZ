@@ -105,6 +105,25 @@
             redirect("just_save", tab);
             return false;
         });
+
+        $( '#switcheditor' ).click( function() {
+            var breedingid = [% breedingid || "null" %];
+
+            if ( !confirm( breedingid ? _("This record cannot be transferred to the advanced editor. Continue?") : _("Any changes will not be saved. Continue?") ) ) return false;
+
+            $.cookie( 'catalogue_editor_[% USER_INFO.0.borrowernumber %]', 'advanced', { expires: 365, path: '/' } );
+
+            var biblionumber = [% biblionumber || "null" %];
+
+            if ( biblionumber ) {
+                window.location = '/cgi-bin/koha/cataloguing/editor.pl#catalog/' + biblionumber;
+            } else {
+                window.location = '/cgi-bin/koha/cataloguing/editor.pl';
+            }
+
+            return false;
+        } );
+
     });
 
 function redirect(dest){
@@ -440,11 +459,11 @@ function Changefwk(FwkList) {
     [% IF CAN_user_editcatalogue_edit_items or ( frameworkcode == 'FA' and CAN_user_editcatalogue_fast_cataloging ) %]
         [% IF (circborrowernumber) %][%# fast cataloging must lead to items %]
             <!-- Action is under fast cataloging - Save button redirecting to items -->
-            <div class="btn-group"><a href="#" id="saveanditems" class="btn btn-small"><i class="icon-hdd"></i> Save</a></div>
+            <div class="btn-group"><a href="#" id="saveanditems" class="btn btn-small"><i class="fa fa-save"></i> Save</a></div>
         [% ELSE %]
             <!-- Not using fast cataloging - Display split menu -->
             <div class="btn-group">
-                <button class="btn btn-small" id="saverecord"><i class="icon-hdd"></i> Save</button>
+                <button class="btn btn-small" id="saverecord"><i class="fa fa-save"></i> Save</button>
                 <button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
                 <span class="caret"></span>
                 </button>
@@ -457,11 +476,14 @@ function Changefwk(FwkList) {
         [% END %]
     [% ELSE %]
         <!-- User cannot edit items - single button redirecting to view -->
-        <div class="btn-group"><a href="#" id="saveandview" class="btn btn-small"><i class="icon-hdd"></i> Save</a></div>
+        <div class="btn-group"><a href="#" id="saveandview" class="btn btn-small"><i class="fa fa-save"></i> Save</a></div>
     [% END %]
 
     [% UNLESS (circborrowernumber) %][%# Hide in fast cataloging %]
-        <div class="btn-group"><a class="btn btn-small" href="#" id="z3950search"><i class="icon-search"></i> Z39.50/SRU search</a></div>
+        <div class="btn-group"><a class="btn btn-small" href="#" id="z3950search"><i class="fa fa-search"></i> Z39.50/SRU search</a></div>
+        [% IF Koha.Preference( 'EnableAdvancedCatalogingEditor' ) == 1 %]
+            <div class="btn-group"><a href="#" id="switcheditor" class="btn btn-small">Switch to advanced editor</a></div>
+        [% END %]
         [% IF (biblionumber) %]
             [% IF ( BiblioDefaultViewmarc ) %]
                 <div class="btn-group">

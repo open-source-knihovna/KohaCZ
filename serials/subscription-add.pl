@@ -23,7 +23,6 @@ use Date::Calc qw(Today Day_of_Year Week_of_Year Add_Delta_Days Add_Delta_YM);
 use C4::Koha;
 use C4::Biblio;
 use C4::Auth;
-use C4::Dates qw/format_date format_date_in_iso/;
 use C4::Acquisition;
 use C4::Output;
 use C4::Context;
@@ -32,6 +31,8 @@ use C4::Serials;
 use C4::Serials::Frequency;
 use C4::Serials::Numberpattern;
 use C4::Letters;
+use Koha::AdditionalField;
+use Koha::DateUtils;
 use Carp;
 
 #use Smart::Comments;
@@ -151,6 +152,16 @@ my $locations_loop = GetAuthorisedValues("LOC",$subs->{'location'});
 $template->param(branchloop => $branchloop,
     locations_loop=>$locations_loop,
 );
+
+
+my $additional_fields = Koha::AdditionalField->all( { tablename => 'subscription' } );
+for my $field ( @$additional_fields ) {
+    if ( $field->{authorised_value_category} ) {
+        $field->{authorised_value_choices} = GetAuthorisedValues( $field->{authorised_value_category} );
+    }
+}
+$template->param( additional_fields_for_subscription => $additional_fields );
+
 # prepare template variables common to all $op conditions:
 if ($op!~/^mod/) {
     my $letters = get_letter_loop();
@@ -311,14 +322,16 @@ sub redirect_add_subscription {
     my $opacdisplaycount  = $query->param('opacdisplaycount');
     my $location          = $query->param('location');
     my $skip_serialseq    = $query->param('skip_serialseq');
-    my $startdate = format_date_in_iso( $query->param('startdate') );
-    my $enddate = format_date_in_iso( $query->param('enddate') );
-    my $firstacquidate  = format_date_in_iso($query->param('firstacquidate'));
+
+    my $startdate      = output_pref( { str => $query->param('startdate'),      dateonly => 1, dateformat => 'iso' } );
+    my $enddate        = output_pref( { str => $query->param('enddate'),        dateonly => 1, dateformat => 'iso' } );
+    my $firstacquidate = output_pref( { str => $query->param('firstacquidate'), dateonly => 1, dateformat => 'iso' } );
+
     if(!defined $enddate || $enddate eq '') {
         if($subtype eq "issues") {
-            $enddate = _guess_enddate($firstacquidate, $periodicity, $numberlength, $weeklength, $monthlength);
+            $enddate = _guess_enddate($firstacquidate, $periodicity, $numberlength, $weeklength, $monthlength)
         } else {
-            $enddate = _guess_enddate($startdate, $periodicity, $numberlength, $weeklength, $monthlength);
+            $enddate = _guess_enddate($startdate, $periodicity, $numberlength, $weeklength, $monthlength)
         }
     }
 
@@ -332,6 +345,9 @@ sub redirect_add_subscription {
         $staffdisplaycount, $opacdisplaycount, $graceperiod, $location, $enddate,
         $skip_serialseq
     );
+
+    my $additional_fields = Koha::AdditionalField->all( { tablename => 'subscription' } );
+    insert_additional_fields( $additional_fields, $biblionumber, $subscriptionid );
 
     print $query->redirect("/cgi-bin/koha/serials/subscription-detail.pl?subscriptionid=$subscriptionid");
     return;
@@ -347,12 +363,16 @@ sub redirect_mod_subscription {
     my $aqbooksellerid = $query->param('aqbooksellerid');
     my $biblionumber = $query->param('biblionumber');
     my $aqbudgetid = $query->param('aqbudgetid');
-    my $startdate = format_date_in_iso($query->param('startdate'));
-    my $firstacquidate = format_date_in_iso( $query->param('firstacquidate') );
-    my $nextacquidate = $query->param('nextacquidate') ?
-                            format_date_in_iso($query->param('nextacquidate')):
-                            $firstacquidate;
-    my $enddate = format_date_in_iso($query->param('enddate'));
+
+    my $startdate      = output_pref( { str => $query->param('startdate'),      dateonly => 1, dateformat => 'iso' } );
+    my $enddate        = output_pref( { str => $query->param('enddate'),        dateonly => 1, dateformat => 'iso' } );
+    my $firstacquidate = output_pref( { str => $query->param('firstacquidate'), dateonly => 1, dateformat => 'iso' } );
+
+    my $nextacquidate  = $query->param('nextacquidate');
+    $nextacquidate = $nextacquidate
+        ? output_pref( { str => $nextacquidate, dateonly => 1, dateformat => 'iso' } )
+        : $firstacquidate;
+
     my $periodicity = $query->param('frequency');
 
     my $subtype = $query->param('subtype');
@@ -408,6 +428,33 @@ sub redirect_mod_subscription {
         $skip_serialseq
     );
 
+    my $additional_fields = Koha::AdditionalField->all( { tablename => 'subscription' } );
+    insert_additional_fields( $additional_fields, $biblionumber, $subscriptionid );
+
     print $query->redirect("/cgi-bin/koha/serials/subscription-detail.pl?subscriptionid=$subscriptionid");
     return;
+}
+
+sub insert_additional_fields {
+    my ( $additional_fields, $biblionumber, $subscriptionid ) = @_;
+    my @additional_field_values;
+    my $record = GetMarcBiblio( $biblionumber, 1 );
+    for my $field ( @$additional_fields ) {
+        my $af = Koha::AdditionalField->new({ id => $field->{id} })->fetch;
+        if ( $af->{marcfield} ) {
+            my ( $field, $subfield ) = split /\$/, $af->{marcfield};
+            $af->{values} = undef;
+            if ( $field and $subfield ) {
+                my $value = $record->subfield( $field, $subfield );
+                $af->{values} = {
+                    $subscriptionid => $value
+                };
+            }
+        } else {
+            $af->{values} = {
+                $subscriptionid => $query->param('additional_field_' . $field->{id})
+            } if defined $query->param('additional_field_' . $field->{id});
+        }
+        $af->insert_values;
+    }
 }

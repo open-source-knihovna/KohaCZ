@@ -164,7 +164,7 @@ my $email   = 0;
 my $format  = "text";
 my $to      = "";
 my $from    = "";
-my $subject = 'Koha Saved Report';
+my $subject = "";
 my $separator = ',';
 my $quote = '"';
 
@@ -226,13 +226,16 @@ foreach my $report_id (@ARGV) {
     my $type        = $report->{type};
 
     $verbose and print "SQL: $sql\n\n";
-    if (defined($report_name) and $report_name ne "")
+    if ( $subject eq "" )
     {
-        $subject = $report_name ;
-    }
-    else
-    {
-        $subject = 'Koha Saved Report';
+        if ( defined($report_name) and $report_name ne "")
+        {
+            $subject = $report_name ;
+        }
+        else
+        {
+            $subject = 'Koha Saved Report';
+        }
     }
     # my $results = execute_query($sql, undef, 0, 99999, $format, $report_id);
     my ($sth) = execute_query($sql);
@@ -270,27 +273,14 @@ foreach my $report_id (@ARGV) {
         }
     }
     if ($email){
-        my $email = Koha::Email->new();
-        my %mail;
+        my $args = { to => $to, from => $from, subject => $subject };
         if ($format eq 'html') {
-                $message = "<html><head><style>tr:nth-child(2n+1) { background-color: #ccc;}</style></head><body>$message</body></html>";
-           %mail = $email->create_message_headers({
-              to      => $to,
-              from    => $from,
-              contenttype => 'text/html',
-              subject => encode('utf8', $subject ),
-              message => encode('utf8', $message )
-           }
-          );
-        } else {
-          %mail = $email->create_message_headers ({
-              to      => $to,
-              from    => $from,
-              subject => encode('utf8', $subject ),
-              message => encode('utf8', $message )
-          }
-          );
+            $message = "<html><head><style>tr:nth-child(2n+1) { background-color: #ccc;}</style></head><body>$message</body></html>";
+            $args->{contenttype} = 'text/html';
         }
+        $args->{message} = $message;
+        my $email = Koha::Email->new();
+        my %mail = $email->create_message_headers($args);
         $mail{'Auth'} = {user => $username, pass => $password, method => $method} if $username;
         sendmail(%mail) or carp 'mail not sent:' . $Mail::Sendmail::error;
     } else {

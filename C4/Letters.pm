@@ -35,6 +35,7 @@ use Date::Calc qw( Add_Delta_Days );
 use Encode;
 use Carp;
 use Koha::Email;
+use Koha::DateUtils qw( format_sqldatetime );
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
@@ -390,18 +391,27 @@ sub SendAlerts {
     if ( $type eq 'issue' ) {
 
         # prepare the letter...
-        # search the biblionumber
+        # search the subscriptionid
         my $sth =
           $dbh->prepare(
-            "SELECT biblionumber FROM subscription WHERE subscriptionid=?");
+            "SELECT subscriptionid FROM serial WHERE serialid=?");
         $sth->execute($externalid);
-        my ($biblionumber) = $sth->fetchrow
+        my ($subscriptionid) = $sth->fetchrow
           or warn( "No subscription for '$externalid'" ),
+             return;
+
+        # search the biblionumber
+        $sth =
+          $dbh->prepare(
+            "SELECT biblionumber FROM subscription WHERE subscriptionid=?");
+        $sth->execute($subscriptionid);
+        my ($biblionumber) = $sth->fetchrow
+          or warn( "No biblionumber for '$subscriptionid'" ),
              return;
 
         my %letter;
         # find the list of borrowers to alert
-        my $alerts = getalert( '', 'issue', $externalid );
+        my $alerts = getalert( '', 'issue', $subscriptionid );
         foreach (@$alerts) {
             my $borinfo = C4::Members::GetMember('borrowernumber' => $_->{'borrowernumber'});
             my $email = $borinfo->{email} or next;
@@ -418,6 +428,8 @@ sub SendAlerts {
                     'biblio'      => $biblionumber,
                     'biblioitems' => $biblionumber,
                     'borrowers'   => $borinfo,
+                    'subscription' => $subscriptionid,
+                    'serial' => $externalid,
                 },
                 want_librarian => 1,
             ) or return;
@@ -759,6 +771,8 @@ sub _parseletter_sth {
     ($table eq 'aqorders'     ) ? "SELECT * FROM $table WHERE    ordernumber = ?"                                  :
     ($table eq 'opac_news'    ) ? "SELECT * FROM $table WHERE          idnew = ?"                                  :
     ($table eq 'borrower_modifications') ? "SELECT * FROM $table WHERE verification_token = ?" :
+    ($table eq 'subscription') ? "SELECT * FROM $table WHERE subscriptionid = ?" :
+    ($table eq 'serial') ? "SELECT * FROM $table WHERE serialid = ?" :
     undef ;
     unless ($query) {
         warn "ERROR: No _parseletter_sth query for table '$table'";
@@ -785,15 +799,18 @@ sub _parseletter_sth {
 sub _parseletter {
     my ( $letter, $table, $values ) = @_;
 
+    if ( $table eq 'borrowers' && $values->{'dateexpiry'} ){
+        $values->{'dateexpiry'} = format_sqldatetime( $values->{'dateexpiry'} );
+    }
+
     if ( $table eq 'reserves' && $values->{'waitingdate'} ) {
         my @waitingdate = split /-/, $values->{'waitingdate'};
 
         $values->{'expirationdate'} = '';
-        if( C4::Context->preference('ExpireReservesMaxPickUpDelay') &&
-        C4::Context->preference('ReservesMaxPickUpDelay') ) {
+        if ( C4::Context->preference('ReservesMaxPickUpDelay') ) {
             my $dt = dt_from_string();
             $dt->add( days => C4::Context->preference('ReservesMaxPickUpDelay') );
-            $values->{'expirationdate'} = output_pref({ dt => $dt, dateonly => 1 });
+            $values->{'expirationdate'} = output_pref( { dt => $dt, dateonly => 1 } );
         }
 
         $values->{'waitingdate'} = output_pref({ dt => dt_from_string( $values->{'waitingdate'} ), dateonly => 1 });
@@ -806,14 +823,14 @@ sub _parseletter {
     }
 
     while ( my ($field, $val) = each %$values ) {
-        my $replacetablefield = "<<$table.$field>>";
-        my $replacefield = "<<$field>>";
         $val =~ s/\p{P}$// if $val && $table=~/biblio/;
             #BZ 9886: Assuming that we want to eliminate ISBD punctuation here
             #Therefore adding the test on biblio. This includes biblioitems,
             #but excludes items. Removed unneeded global and lookahead.
 
         $val = GetAuthorisedValueByCode ('ROADTYPE', $val, 0) if $table=~/^borrowers$/ && $field=~/^streettype$/;
+
+        # Dates replacement
         my $replacedby   = defined ($val) ? $val : '';
         if (    $replacedby
             and not $replacedby =~ m|0000-00-00|
@@ -822,19 +839,34 @@ sub _parseletter {
         {
             # If the value is XXXX-YY-ZZ[ AA:BB:CC] we assume it is a date
             my $dateonly = defined $1 ? 0 : 1; #$1 refers to the capture group wrapped in parentheses. In this case, that's the hours, minutes, seconds.
-            eval {
-                $replacedby = output_pref({ dt => dt_from_string( $replacedby ), dateonly => $dateonly });
-            };
-            warn "$replacedby seems to be a date but an error occurs on generating it ($@)" if $@;
+            my $re_dateonly_filter = qr{ $field( \s* \| \s* dateonly\s*)?>> }xms;
+
+            for my $letter_field ( qw( title content ) ) {
+                my $filter_string_used = q{};
+                if ( $letter->{ $letter_field } =~ $re_dateonly_filter ) {
+                    # We overwrite $dateonly if the filter exists and we have a time in the datetime
+                    $filter_string_used = $1 || q{};
+                    $dateonly = $1 unless $dateonly;
+                }
+                eval {
+                    $replacedby = output_pref({ dt => dt_from_string( $replacedby ), dateonly => $dateonly });
+                };
+
+                if ( $letter->{ $letter_field } ) {
+                    $letter->{ $letter_field } =~ s/\Q<<$table.$field$filter_string_used>>\E/$replacedby/g;
+                    $letter->{ $letter_field } =~ s/\Q<<$field$filter_string_used>>\E/$replacedby/g;
+                }
+            }
         }
-        ($letter->{title}  ) and do {
-            $letter->{title}   =~ s/$replacetablefield/$replacedby/g;
-            $letter->{title}   =~ s/$replacefield/$replacedby/g;
-        };
-        ($letter->{content}) and do {
-            $letter->{content} =~ s/$replacetablefield/$replacedby/g;
-            $letter->{content} =~ s/$replacefield/$replacedby/g;
-        };
+        # Other fields replacement
+        else {
+            for my $letter_field ( qw( title content ) ) {
+                if ( $letter->{ $letter_field } ) {
+                    $letter->{ $letter_field }   =~ s/<<$table.$field>>/$replacedby/g;
+                    $letter->{ $letter_field }   =~ s/<<$field>>/$replacedby/g;
+                }
+            }
+        }
     }
 
     if ($table eq 'borrowers' && $letter->{content}) {

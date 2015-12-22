@@ -31,7 +31,6 @@ use POSIX qw(strftime);
 use Module::Load::Conditional qw(can_load);
 
 use C4::Koha;
-use C4::Dates qw/format_date/;
 use C4::Log;    # logaction
 use C4::Budgets;
 use C4::ClassSource;
@@ -57,13 +56,14 @@ BEGIN {
 
     # to get something
     push @EXPORT, qw(
-      &GetBiblio
-      &GetBiblioData
-      &GetBiblioItemData
-      &GetBiblioItemInfosOf
-      &GetBiblioItemByBiblioNumber
-      &GetBiblioFromItemNumber
-      &GetBiblionumberFromItemnumber
+      GetBiblio
+      GetBiblioData
+      GetMarcBiblio
+      GetBiblioItemData
+      GetBiblioItemInfosOf
+      GetBiblioItemByBiblioNumber
+      GetBiblioFromItemNumber
+      GetBiblionumberFromItemnumber
 
       &GetRecordValue
       &GetFieldMapping
@@ -77,7 +77,6 @@ BEGIN {
       &GetMarcISBN
       &GetMarcISSN
       &GetMarcSubjects
-      &GetMarcBiblio
       &GetMarcAuthors
       &GetMarcSeries
       &GetMarcHosts
@@ -126,8 +125,8 @@ BEGIN {
 
     # Internal functions
     # those functions are exported but should not be used
-    # they are usefull is few circumstances, so are exported.
-    # but don't use them unless you're a core developer ;-)
+    # they are useful in a few circumstances, so they are exported,
+    # but don't use them unless you are a core developer ;-)
     push @EXPORT, qw(
       &ModBiblioMarc
     );
@@ -1249,18 +1248,40 @@ sub GetMarcSubfieldStructureFromKohaField {
 
 =head2 GetMarcBiblio
 
-  my $record = GetMarcBiblio($biblionumber, [$embeditems]);
+  my $record = GetMarcBiblio($biblionumber, [$embeditems], [$opac]);
 
-Returns MARC::Record representing bib identified by
-C<$biblionumber>.  If no bib exists, returns undef.
-C<$embeditems>.  If set to true, items data are included.
-The MARC record contains biblio data, and items data if $embeditems is set to true.
+Returns MARC::Record representing a biblio record, or C<undef> if the
+biblionumber doesn't exist.
+
+=over 4
+
+=item C<$biblionumber>
+
+the biblionumber
+
+=item C<$embeditems>
+
+set to true to include item information.
+
+=item C<$opac>
+
+set to true to make the result suited for OPAC view. This causes things like
+OpacHiddenItems to be applied.
+
+=back
 
 =cut
 
 sub GetMarcBiblio {
     my $biblionumber = shift;
     my $embeditems   = shift || 0;
+    my $opac         = shift || 0;
+
+    if (not defined $biblionumber) {
+        carp 'GetMarcBiblio called with undefined biblionumber';
+        return;
+    }
+
     my $dbh          = C4::Context->dbh;
     my $sth          = $dbh->prepare("SELECT biblioitemnumber, marcxml FROM biblioitems WHERE biblionumber=? ");
     $sth->execute($biblionumber);
@@ -1272,15 +1293,21 @@ sub GetMarcBiblio {
     my $record = MARC::Record->new();
 
     if ($marcxml) {
-        $record = eval { MARC::Record::new_from_xml( $marcxml, "utf8", C4::Context->preference('marcflavour') ) };
+        $record = eval {
+            MARC::Record::new_from_xml( $marcxml, "utf8",
+                C4::Context->preference('marcflavour') );
+        };
         if ($@) { warn " problem with :$biblionumber : $@ \n$marcxml"; }
         return unless $record;
 
-        C4::Biblio::_koha_marc_update_bib_ids($record, $frameworkcode, $biblionumber, $biblioitemnumber);
-        C4::Biblio::EmbedItemsInMarcBiblio($record, $biblionumber) if ($embeditems);
+        C4::Biblio::_koha_marc_update_bib_ids( $record, $frameworkcode, $biblionumber,
+            $biblioitemnumber );
+        C4::Biblio::EmbedItemsInMarcBiblio( $record, $biblionumber, undef, $opac )
+          if ($embeditems);
 
         return $record;
-    } else {
+    }
+    else {
         return;
     }
 }
@@ -1515,7 +1542,7 @@ sub MungeMarcPrice {
             (                          # start of capturing parenthesis
             (?:
             (?:[\p{Sc}\p{L}\/.]){1,4}  # any character from Currency signs or Letter Unicode categories or slash or dot                                              within 1 to 4 occurrences : call this whole block 'symbol block'
-            |(?:\d+[\p{P}\s]?){1,4}    # or else at least one digit followed or not by a punctuation sign or whitespace,                                             all theese within 1 to 4 occurrences : call this whole block 'digits block'
+            |(?:\d+[\p{P}\s]?){1,4}    # or else at least one digit followed or not by a punctuation sign or whitespace,                                             all these within 1 to 4 occurrences : call this whole block 'digits block'
             )
             \s?\p{Sc}?\s?              # followed or not by a whitespace. \p{Sc}?\s? are for cases like '25$ USD'
             (?:
@@ -1631,7 +1658,7 @@ sub GetAuthorisedValueDesc {
 
         #---- itemtypes
         if ( $tagslib->{$tag}->{$subfield}->{'authorised_value'} eq "itemtypes" ) {
-            return getitemtypeinfo($value)->{description};
+            return getitemtypeinfo($value)->{translated_description};
         }
 
         #---- "true" authorized value
@@ -2311,6 +2338,8 @@ $auth_type contains :
 
 sub TransformHtmlToXml {
     my ( $tags, $subfields, $values, $indicator, $ind_tag, $auth_type ) = @_;
+    # NOTE: The parameter $ind_tag is NOT USED -- BZ 11247
+
     my $xml = MARC::File::XML::header('UTF-8');
     $xml .= "<record>\n";
     $auth_type = C4::Context->preference('marcflavour') unless $auth_type;
@@ -2488,6 +2517,7 @@ sub TransformHtmlToMarc {
     my $record = MARC::Record->new();
     my $i      = 0;
     my @fields;
+    my ( $biblionumbertagfield, $biblionumbertagsubfield ) = &GetMarcFromKohaField( "biblio.biblionumber", '' );
 #FIXME This code assumes that the CGI params will be in the same order as the fields in the template; this is no absolute guarantee!
     while ( $params[$i] ) {    # browse all CGI params
         my $param    = $params[$i];
@@ -2495,7 +2525,6 @@ sub TransformHtmlToMarc {
 
         # if we are on biblionumber, store it in the MARC::Record (it may not be in the edited fields)
         if ( $param eq 'biblionumber' ) {
-            my ( $biblionumbertagfield, $biblionumbertagsubfield ) = &GetMarcFromKohaField( "biblio.biblionumber", '' );
             if ( $biblionumbertagfield < 10 ) {
                 $newfield = MARC::Field->new( $biblionumbertagfield, $cgi->param($param), );
             } else {
@@ -2512,6 +2541,7 @@ sub TransformHtmlToMarc {
 
             if ( $tag < 10 ) {                              # no code for theses fields
                                                             # in MARC editor, 000 contains the leader.
+                next if $tag == $biblionumbertagfield;
                 if ( $tag eq '000' ) {
                     # Force a fake leader even if not provided to avoid crashing
                     # during decoding MARC record containing UTF-8 characters
@@ -2531,6 +2561,7 @@ sub TransformHtmlToMarc {
                 # browse subfields for this tag (reason for _code_ match)
                 while(defined $params[$j] && $params[$j] =~ /_code_/) {
                     last unless defined $params[$j+1];
+                    $j += 2 and next if $tag == $biblionumbertagfield and $cgi->param($params[$j]) eq $biblionumbertagsubfield;
                     #if next param ne subfield, then it was probably empty
                     #try next param by incrementing j
                     if($params[$j+1]!~/_subfield_/) {$j++; next; }
@@ -2879,17 +2910,19 @@ sub ModZebra {
 
 =head2 EmbedItemsInMarcBiblio
 
-    EmbedItemsInMarcBiblio($marc, $biblionumber, $itemnumbers);
+    EmbedItemsInMarcBiblio($marc, $biblionumber, $itemnumbers, $opac);
 
 Given a MARC::Record object containing a bib record,
 modify it to include the items attached to it as 9XX
 per the bib's MARC framework.
-if $itemnumbers is defined, only specified itemnumbers are embedded
+if $itemnumbers is defined, only specified itemnumbers are embedded.
+
+If $opac is true, then opac-relevant suppressions are included.
 
 =cut
 
 sub EmbedItemsInMarcBiblio {
-    my ($marc, $biblionumber, $itemnumbers) = @_;
+    my ($marc, $biblionumber, $itemnumbers, $opac) = @_;
     if ( !$marc ) {
         carp 'EmbedItemsInMarcBiblio: No MARC record passed';
         return;
@@ -2906,10 +2939,24 @@ sub EmbedItemsInMarcBiblio {
     $sth->execute($biblionumber);
     my @item_fields;
     my ( $itemtag, $itemsubfield ) = GetMarcFromKohaField( "items.itemnumber", $frameworkcode );
-    while (my ($itemnumber) = $sth->fetchrow_array) {
+    my @items;
+    my $opachiddenitems = $opac
+      && ( C4::Context->preference('OpacHiddenItems') !~ /^\s*$/ );
+    require C4::Items;
+    while ( my ($itemnumber) = $sth->fetchrow_array ) {
         next if @$itemnumbers and not grep { $_ == $itemnumber } @$itemnumbers;
-        require C4::Items;
-        my $item_marc = C4::Items::GetMarcItem($biblionumber, $itemnumber);
+        my $i = $opachiddenitems ? C4::Items::GetItem($itemnumber) : undef;
+        push @items, { itemnumber => $itemnumber, item => $i };
+    }
+    my @hiddenitems =
+      $opachiddenitems
+      ? C4::Items::GetHiddenItemnumbers( map { $_->{item} } @items )
+      : ();
+    # Convert to a hash for quick searching
+    my %hiddenitems = map { $_ => 1 } @hiddenitems;
+    foreach my $itemnumber ( map { $_->{itemnumber} } @items ) {
+        next if $hiddenitems{$itemnumber};
+        my $item_marc = C4::Items::GetMarcItem( $biblionumber, $itemnumber );
         push @item_fields, $item_marc->field($itemtag);
     }
     $marc->append_fields(@item_fields);
@@ -3472,10 +3519,7 @@ sub get_biblio_authorised_values {
 
 =head2 CountBiblioInOrders
 
-=over 4
-$count = &CountBiblioInOrders( $biblionumber);
-
-=back
+    $count = &CountBiblioInOrders( $biblionumber);
 
 This function return count of biblios in orders with $biblionumber 
 
@@ -3495,10 +3539,7 @@ sub CountBiblioInOrders {
 
 =head2 GetSubscriptionsId
 
-=over 4
-$subscriptions = &GetSubscriptionsId($biblionumber);
-
-=back
+    $subscriptions = &GetSubscriptionsId($biblionumber);
 
 This function return an array of subscriptionid with $biblionumber
 
@@ -3518,10 +3559,7 @@ sub GetSubscriptionsId {
 
 =head2 GetHolds
 
-=over 4
-$holds = &GetHolds($biblionumber);
-
-=back
+    $holds = &GetHolds($biblionumber);
 
 This function return the count of holds with $biblionumber
 

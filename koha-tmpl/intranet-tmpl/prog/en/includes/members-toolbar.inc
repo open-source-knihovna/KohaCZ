@@ -1,4 +1,5 @@
 [% USE Koha %]
+[% USE Borrowers %]
 [% SET NorwegianPatronDBEnable = Koha.Preference( 'NorwegianPatronDBEnable' ) %]
 <script type="text/javascript">
 //<![CDATA[
@@ -58,6 +59,11 @@ $(document).ready(function(){
         $(".btn-group").removeClass("open");
         return false;
     });
+    $("#print_overdues").click(function(){
+        window.open("/cgi-bin/koha/members/print_overdues.pl?borrowernumber=[% borrowernumber %]", "printwindow");
+        $(".btn-group").removeClass("open");
+        return false;
+    });
     $("#searchtohold").click(function(){
         searchToHold();
         return false;
@@ -107,7 +113,7 @@ function update_child() {
 function confirm_reregistration() {
     var is_confirmed = window.confirm(_("Are you sure you want to renew this patron's registration?"));
     if (is_confirmed) {
-    window.location = '/cgi-bin/koha/members/setstatus.pl?borrowernumber=[% borrowernumber %]&amp;cardnumber=[% cardnumber %]&amp;desintation=[% destination %]&amp;reregistration=y';
+    window.location = '/cgi-bin/koha/members/setstatus.pl?borrowernumber=[% borrowernumber %]&amp;destination=[% destination %]&amp;reregistration=y';
     }
 }
 function export_barcodes() {
@@ -135,33 +141,36 @@ function searchToHold(){
         [% ELSE %]
             <a id="editpatron" class="btn btn-small" href="/cgi-bin/koha/members/memberentry.pl?op=modify&amp;destination=circ&amp;borrowernumber=[% borrowernumber %]&amp;categorycode=[% categorycode %]">
         [% END %]
-        <i class="icon-pencil"></i> Edit</a>
+        <i class="fa fa-pencil"></i> Edit</a>
     [% END %]
 
     [% IF ( CAN_user_borrowers ) %]
         [% IF ( adultborrower AND activeBorrowerRelationship ) %]
-            <a id="addchild" class="btn btn-small" href="/cgi-bin/koha/members/memberentry.pl?op=add&amp;guarantorid=[% borrowernumber %]"><i class="icon-plus"></i> Add child</a>
+            <a id="addchild" class="btn btn-small" href="/cgi-bin/koha/members/memberentry.pl?op=add&amp;guarantorid=[% borrowernumber %]"><i class="fa fa-plus"></i> Add child</a>
         [% END %]
         [% IF ( CAN_user_borrowers ) %]
-            <a id="changepassword" class="btn btn-small" href="/cgi-bin/koha/members/member-password.pl?member=[% borrowernumber %]"><i class="icon-lock"></i> Change password</a>
+            <a id="changepassword" class="btn btn-small" href="/cgi-bin/koha/members/member-password.pl?member=[% borrowernumber %]"><i class="fa fa-lock"></i> Change password</a>
         [% END %]
-        <a id="duplicate" class="btn btn-small" href="/cgi-bin/koha/members/memberentry.pl?op=duplicate&amp;borrowernumber=[% borrowernumber %]&amp;categorycode=[% categorycode %]"><i class="icon-copy"></i>Duplicate</a>
+        <a id="duplicate" class="btn btn-small" href="/cgi-bin/koha/members/memberentry.pl?op=duplicate&amp;borrowernumber=[% borrowernumber %]&amp;categorycode=[% categorycode %]"><i class="fa fa-copy"></i> Duplicate</a>
     [% END %]
 
     <div class="btn-group">
-        <button class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="icon-print"></i> Print <span class="caret"></span></button>
+        <button class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="fa fa-print"></i> Print <span class="caret"></span></button>
             <ul class="dropdown-menu">
                 [% IF ( CAN_user_borrowers ) %]<li><a id="printsummary" href="#">Print summary</a></li>[% END %]
                 <li><a id="printslip" href="#">Print slip</a></li>
                 <li><a id="printquickslip" href="#">Print quick slip</a></li>
+                [% IF Borrowers.HasOverdues( borrowernumber ) %]
+                    <li><a id="print_overdues" href="#">Print overdues</a></li>
+                [% END %]
             </ul>
     </div>
-    <a id="searchtohold" class="btn btn-small" href="#"><i class="icon-search"></i> Search to hold</a>
+    <a id="searchtohold" class="btn btn-small" href="#"><i class="fa fa-search"></i> Search to hold</a>
     <div class="btn-group">
         <button class="btn btn-small dropdown-toggle" data-toggle="dropdown">More <span class="caret"></span></button>
             <ul class="dropdown-menu">
                 [% IF ( CAN_user_borrowers ) %]
-                    <li><a id="renewpatron" href="/cgi-bin/koha/members/setstatus.pl?borrowernumber=[% borrowernumber %]&amp;cardnumber=[% cardnumber %]&amp;destination=[% destination %]&amp;reregistration=y">Renew patron</a></li>
+                    <li><a id="renewpatron" href="/cgi-bin/koha/members/setstatus.pl?borrowernumber=[% borrowernumber %]&amp;destination=[% destination %]&amp;reregistration=y">Renew patron</a></li>
                 [% ELSE %]
                     <li class="disabled"><a data-toggle="tooltip" data-placement="left" title="You are not authorized to renew patrons" id="renewpatron" href="#">Renew patron</a></li>
                 [% END %]

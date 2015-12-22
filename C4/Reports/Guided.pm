@@ -23,15 +23,16 @@ use Carp;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use C4::Context;
-use C4::Dates qw/format_date format_date_in_iso/;
 use C4::Templates qw/themelanguage/;
 use C4::Koha;
+use Koha::DateUtils;
 use C4::Output;
 use XML::Simple;
 use XML::Dumper;
 use C4::Debug;
 # use Smart::Comments;
 # use Data::Dumper;
+use C4::Log;
 
 BEGIN {
     # set the version for version checking
@@ -184,7 +185,7 @@ This will return a list of all columns for a report area
 
 sub get_columns {
 
-    # this calls the internal fucntion _get_columns
+    # this calls the internal function _get_columns
     my ( $area, $cgi ) = @_;
     my %table_areas = get_table_areas;
     my $tables = $table_areas{$area}
@@ -439,7 +440,7 @@ for the query.
 C<$offset>, and C<$limit> are required parameters.
 
 C<\@sql_params> is an optional list of parameter values to paste in.
-The caller is reponsible for making sure that C<$sql> has placeholders
+The caller is responsible for making sure that C<$sql> has placeholders
 and that the number placeholders matches the number of parameters.
 
 =cut
@@ -639,6 +640,10 @@ sub format_results {
 sub delete_report {
     my (@ids) = @_;
     return unless @ids;
+    foreach my $id (@ids) {
+        my $data = get_saved_report($id);
+        logaction( "REPORTS", "DELETE", $id, "$data->{'report_name'} | $data->{'savedsql'}  " ) if C4::Context->preference("ReportsLog");
+    }
     my $dbh = C4::Context->dbh;
     my $query = 'DELETE FROM saved_sql WHERE id IN (' . join( ',', ('?') x @ids ) . ')';
     my $sth = $dbh->prepare($query);
@@ -646,7 +651,6 @@ sub delete_report {
 }
 
 sub get_saved_reports_base_query {
-
     my $area_name_sql_snippet = get_area_name_sql_snippet;
     return <<EOQ;
 SELECT s.*, r.report, r.date_run, $area_name_sql_snippet, av_g.lib AS groupname, av_sg.lib AS subgroupname,
@@ -671,7 +675,7 @@ sub get_saved_reports {
     my (@cond,@args);
     if ($filter) {
         if (my $date = $filter->{date}) {
-            $date = format_date_in_iso($date);
+            $date = eval { output_pref( { dt => dt_from_string( $date ), dateonly => 1, dateformat => 'iso' }); };
             push @cond, "DATE(date_run) = ? OR
                          DATE(date_created) = ? OR
                          DATE(last_modified) = ? OR
@@ -779,7 +783,7 @@ sub get_column_type {
 	my $catalog;
 	my $schema;
 
-	# mysql doesnt support a column selection, set column to %
+    # mysql doesn't support a column selection, set column to %
 	my $tempcolumn='%';
 	my $sth = $dbh->column_info( $catalog, $schema, $table, $tempcolumn ) || die $dbh->errstr;
 	while (my $info = $sth->fetchrow_hashref()){
@@ -880,7 +884,7 @@ sub _get_column_defs {
     my ($theme, $lang, $availablethemes) = C4::Templates::themelanguage($htdocs, 'about.tt', $section, $cgi);
 
     my $full_path_to_columns_def_file="$htdocs/$theme/$lang/$columns_def_file";
-    open (my $fh, $full_path_to_columns_def_file);
+    open (my $fh, '<:encoding(utf-8)', $full_path_to_columns_def_file);
     while ( my $input = <$fh> ){
         chomp $input;
         if ( $input =~ m|<field name="(.*)">(.*)</field>| ) {

@@ -1,35 +1,68 @@
-#!/usr/bin/env perl
+#!/usr/bin/perl
 
-use strict;
-use warnings;
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
+
+use Modern::Perl;
+
+use Test::More;
+use Test::MockModule;
+
 use DateTime;
 use DateTime::Duration;
-use Test::More tests => 35;
-use Test::MockModule;
-use DBD::Mock;
+use Koha::Cache;
 use Koha::DateUtils;
 
-BEGIN {
-    use_ok('Koha::Calendar');
+use Module::Load::Conditional qw/check_install/;
 
-    # This was the only test C4 had
-    # Remove when no longer used
-    use_ok('C4::Calendar');
+BEGIN {
+    if ( check_install( module => 'Test::DBIx::Class' ) ) {
+        plan tests => 35;
+    } else {
+        plan skip_all => "Need Test::DBIx::Class"
+    }
 }
 
-my $module_context = new Test::MockModule('C4::Context');
-$module_context->mock(
-    '_new_dbh',
-    sub {
-        my $dbh = DBI->connect( 'DBI:Mock:', '', '' )
-          || die "Cannot create handle: $DBI::errstr\n";
-        return $dbh;
-    }
+use_ok('Koha::Calendar');
+
+use Test::DBIx::Class {
+    schema_class => 'Koha::Schema',
+    connect_info => ['dbi:SQLite:dbname=:memory:','',''],
+    connect_opts => { name_sep => '.', quote_char => '`', },
+    fixture_class => '::Populate',
+}, 'Biblio' ;
+
+sub fixtures {
+    my ( $data ) = @_;
+    fixtures_ok [
+        Biblio => [
+            [ qw/ biblionumber datecreated timestamp  / ],
+            @$data,
+        ],
+    ], 'add fixtures';
+}
+
+my $db = Test::MockModule->new('Koha::Database');
+$db->mock(
+    _new_schema => sub { return Schema(); }
 );
 
 # We need to mock the C4::Context->preference method for
 # simplicity and re-usability of the session definition. Any
 # syspref fits for syspref-agnostic tests.
+my $module_context = new Test::MockModule('C4::Context');
 $module_context->mock(
     'preference',
     sub {
@@ -37,54 +70,31 @@ $module_context->mock(
     }
 );
 
-SKIP: {
+fixtures_ok [
+    # weekly holidays
+    RepeatableHoliday => [
+        [ qw( branchcode day month weekday title description) ],
+        [ 'MPL', undef, undef, 0, '', '' ], # sundays
+        [ 'MPL', undef, undef, 6, '', '' ],# saturdays
+        [ 'MPL', 1, 1, undef, '', ''], # new year's day
+        [ 'MPL', 25, 12, undef, '', ''], # chrismas
+    ],
+    # exception holidays
+    SpecialHoliday => [
+        [qw( branchcode day month year title description isexception )],
+        [ 'MPL', 11, 11, 2012, '', '', 1 ],    # sunday exception
+        [ 'MPL', 1,  6,  2011, '', '', 0 ],
+        [ 'MPL', 4,  7,  2012, '', '', 0 ],
+      ],
+], "add fixtures";
 
-skip "DBD::Mock is too old", 33
-  unless $DBD::Mock::VERSION >= 1.45;
+my $cache = Koha::Cache->get_instance();
+$cache->clear_from_cache( 'single_holidays') ;
 
-my $holidays_session = DBD::Mock::Session->new('holidays_session' => (
-    { # weekly holidays
-        statement => "SELECT weekday FROM repeatable_holidays WHERE branchcode = ? AND weekday IS NOT NULL",
-        results   => [
-                        ['weekday'],
-                        [0],    # sundays
-                        [6]     # saturdays
-                     ]
-    },
-    { # day and month repeatable holidays
-        statement => "SELECT day, month FROM repeatable_holidays WHERE branchcode = ? AND weekday IS NULL",
-        results   => [
-                        [ 'month', 'day' ],
-                        [ 1, 1 ],   # new year's day
-                        [12,25]     # christmas
-                     ]
-    },
-    { # exception holidays
-        statement => "SELECT day, month, year FROM special_holidays WHERE branchcode = ? AND isexception = 1",
-        results   => [
-                        [ 'day', 'month', 'year' ],
-                        [ 11, 11, 2012 ] # sunday exception
-                     ]
-    },
-    { # single holidays
-        statement => "SELECT day, month, year FROM special_holidays WHERE branchcode = ? AND isexception = 0",
-        results   => [
-                        [ 'day', 'month', 'year' ],
-                        [ 1, 6, 2011 ],  # single holiday
-                        [ 4, 7, 2012 ]
-                     ]
-    }
-));
-
-# Initialize the global $dbh variable
-my $dbh = C4::Context->dbh();
-# Apply the mock session
-$dbh->{ mock_session } = $holidays_session;
 # 'MPL' branch is arbitrary, is not used at all but is needed for initialization
 my $cal = Koha::Calendar->new( branchcode => 'MPL' );
 
 isa_ok( $cal, 'Koha::Calendar', 'Calendar class returned' );
-
 
 my $saturday = DateTime->new(
     year      => 2012,
@@ -134,7 +144,6 @@ my $day_after_christmas = DateTime->new(
     day     => 26
 );  # for testing negative addDate
 
-
 {   # Syspref-agnostic tests
     is ( $saturday->day_of_week, 6, '\'$saturday\' is actually a saturday (6th day of week)');
     is ( $sunday->day_of_week, 7, '\'$sunday\' is actually a sunday (7th day of week)');
@@ -147,7 +156,6 @@ my $day_after_christmas = DateTime->new(
     is ( $cal->is_holiday($notspecial), 0, 'Fixed single date that is not a holiday test' );
     is ( $cal->is_holiday($sunday_exception), 0, 'Exception holiday is not a closed day test' );
 }
-
 
 {   # Bugzilla #8966 - is_holiday truncates referenced date
     my $later_dt = DateTime->new(    # Monday
@@ -164,7 +172,6 @@ my $day_after_christmas = DateTime->new(
     cmp_ok( $later_dt, 'eq', '2012-09-17T17:30:00', 'bz-8966 (2/2) Date should be the same after is_holiday' );
 }
 
-
 {   # Bugzilla #8800 - is_holiday should use truncated date for 'contains' call
     my $single_holiday_time = DateTime->new(
         year  => 2011,
@@ -179,12 +186,12 @@ my $day_after_christmas = DateTime->new(
         'bz-8800 is_holiday should truncate the date for holiday validation' );
 }
 
-
     my $one_day_dur = DateTime::Duration->new( days => 1 );
     my $two_day_dur = DateTime::Duration->new( days => 2 );
     my $seven_day_dur = DateTime::Duration->new( days => 7 );
 
-    my $dt = dt_from_string( '2012-07-03','iso' );
+    my $dt = dt_from_string( '2012-07-03','iso' ); #tuesday
+
     my $test_dt = DateTime->new(    # Monday
         year      => 2012,
         month     => 7,
@@ -202,7 +209,6 @@ my $day_after_christmas = DateTime->new(
         time_zone => 'Europe/London',
     );
 
-
 {    ## 'Datedue' tests
 
     $module_context->unmock('preference');
@@ -212,13 +218,10 @@ my $day_after_christmas = DateTime->new(
             return 'Datedue';
         }
     );
-    # rewind dbh session
-    $holidays_session->reset;
-
 
     $cal = Koha::Calendar->new( branchcode => 'MPL' );
 
-    is($cal->addDate( $dt, $one_day_dur, 'days' ),
+    is($cal->addDate( $dt, $one_day_dur, 'days' ), # tuesday
         dt_from_string('2012-07-05','iso'),
         'Single day add (Datedue, matches holiday, shift)' );
 
@@ -243,10 +246,7 @@ my $day_after_christmas = DateTime->new(
 
     cmp_ok( $cal->days_between( $later_dt, $test_dt )->in_units('days'),
                 '==', 40, 'Test parameter order not relevant (Days)' );
-
-
 }
-
 
 {   ## 'Calendar' tests'
 
@@ -257,8 +257,6 @@ my $day_after_christmas = DateTime->new(
             return 'Calendar';
         }
     );
-    # rewind dbh session
-    $holidays_session->reset;
 
     $cal = Koha::Calendar->new( branchcode => 'MPL' );
 
@@ -294,8 +292,6 @@ my $day_after_christmas = DateTime->new(
             return 'Days';
         }
     );
-    # rewind dbh session
-    $holidays_session->reset;
 
     $cal = Koha::Calendar->new( branchcode => 'MPL' );
 
@@ -325,4 +321,4 @@ my $day_after_christmas = DateTime->new(
 
 }
 
-} # End SKIP block
+1;

@@ -61,6 +61,9 @@ else {
 binmode STDOUT, ':encoding(UTF-8)';
 my $repository = C4::OAI::Repository->new();
 
+
+
+
 # __END__ Main Prog
 
 
@@ -99,8 +102,11 @@ sub new {
             my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday) = gmtime( time );
             $until = sprintf( "%.4d-%.2d-%.2d", $year+1900, $mon+1,$mday );
         }
+        #Add times to the arguments, when necessary, so they correctly match against the DB timestamps
+        $from .= 'T00:00:00Z' if length($from) == 10;
+        $until .= 'T23:59:59Z' if length($until) == 10;
         $offset = $args{ offset } || 0;
-        $set = $args{set};
+        $set = $args{set} || '';
     }
 
     $self->{ metadata_prefix } = $metadata_prefix;
@@ -108,12 +114,21 @@ sub new {
     $self->{ from            } = $from;
     $self->{ until           } = $until;
     $self->{ set             } = $set;
+    $self->{ from_arg        } = _strip_UTC_designators($from);
+    $self->{ until_arg       } = _strip_UTC_designators($until);
 
     $self->resumptionToken(
         join( '/', $metadata_prefix, $offset, $from, $until, $set ) );
     $self->cursor( $offset );
 
     return $self;
+}
+
+sub _strip_UTC_designators {
+    my ( $timestamp ) = @_;
+    $timestamp =~ s/T/ /g;
+    $timestamp =~ s/Z//g;
+    return $timestamp;
 }
 
 # __END__ C4::OAI::ResumptionToken
@@ -140,7 +155,7 @@ sub new {
         MaxCount            => C4::Context->preference("OAI-PMH:MaxCount"),
         granularity         => 'YYYY-MM-DD',
         earliestDatestamp   => '0001-01-01',
-        deletedRecord       => 'no',
+        deletedRecord       => C4::Context->preference("OAI-PMH:DeletedRecord") || 'no',
     );
 
     # FIXME - alas, the description element is not so simple; to validate
@@ -240,6 +255,35 @@ sub new {
 
 # __END__ C4::OAI::Record
 
+package C4::OAI::DeletedRecord;
+
+use Modern::Perl;
+use HTTP::OAI;
+use HTTP::OAI::Metadata::OAI_DC;
+
+use base ("HTTP::OAI::Record");
+
+sub new {
+    my ($class, $timestamp, $setSpecs, %args) = @_;
+
+    my $self = $class->SUPER::new(%args);
+
+    $timestamp =~ s/ /T/, $timestamp .= 'Z';
+    $self->header( new HTTP::OAI::Header(
+        status      => 'deleted',
+        identifier  => $args{identifier},
+        datestamp   => $timestamp,
+    ) );
+
+    foreach my $setSpec (@$setSpecs) {
+        $self->header->setSpec($setSpec);
+    }
+
+    return $self;
+}
+
+# __END__ C4::OAI::DeletedRecord
+
 
 
 package C4::OAI::GetRecord;
@@ -247,7 +291,9 @@ package C4::OAI::GetRecord;
 use strict;
 use warnings;
 use HTTP::OAI;
+use C4::Biblio;
 use C4::OAI::Sets;
+use MARC::File::XML;
 
 use base ("HTTP::OAI::GetRecord");
 
@@ -259,23 +305,37 @@ sub new {
 
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare("
-        SELECT marcxml, timestamp
+        SELECT timestamp
         FROM   biblioitems
         WHERE  biblionumber=? " );
     my $prefix = $repository->{koha_identifier} . ':';
     my ($biblionumber) = $args{identifier} =~ /^$prefix(.*)/;
     $sth->execute( $biblionumber );
-    my ($marcxml, $timestamp);
-    unless ( ($marcxml, $timestamp) = $sth->fetchrow ) {
-        return HTTP::OAI::Response->new(
-            requestURL  => $repository->self_url(),
-            errors      => [ new HTTP::OAI::Error(
+    my ($timestamp, $deleted);
+    unless ( ($timestamp) = $sth->fetchrow ) {
+        unless ( ($timestamp) = $dbh->selectrow_array(q/
+            SELECT timestamp
+            FROM deletedbiblio
+            WHERE biblionumber=? /, undef, $biblionumber ))
+        {
+            return HTTP::OAI::Response->new(
+             requestURL  => $repository->self_url(),
+             errors      => [ new HTTP::OAI::Error(
                 code    => 'idDoesNotExist',
                 message => "There is no biblio record with this identifier",
-                ) ] ,
-        );
+                ) ],
+            );
+        }
+        else {
+            $deleted = 1;
+        }
     }
 
+    # We fetch it using this method, rather than the database directly,
+    # so it'll include the item data
+    my $marcxml;
+    $marcxml = $repository->get_biblio_marcxml($biblionumber, $args{metadataPrefix})
+        unless $deleted;
     my $oai_sets = GetOAISetsBiblio($biblionumber);
     my @setSpecs;
     foreach (@$oai_sets) {
@@ -283,9 +343,11 @@ sub new {
     }
 
     #$self->header( HTTP::OAI::Header->new( identifier  => $args{identifier} ) );
-    $self->record( C4::OAI::Record->new(
-        $repository, $marcxml, $timestamp, \@setSpecs, %args ) );
-
+    $self->record(
+        $deleted
+        ? C4::OAI::DeletedRecord->new($timestamp, \@setSpecs, %args)
+        : C4::OAI::Record->new($repository, $marcxml, $timestamp, \@setSpecs, %args)
+    );
     return $self;
 }
 
@@ -316,18 +378,26 @@ sub new {
     }
     my $max = $repository->{koha_max_count};
     my $sql = "
-        SELECT biblioitems.biblionumber, biblioitems.timestamp
+        (SELECT biblioitems.biblionumber, biblioitems.timestamp
         FROM biblioitems
     ";
     $sql .= " JOIN oai_sets_biblios ON biblioitems.biblionumber = oai_sets_biblios.biblionumber " if defined $set;
+    $sql .= " WHERE timestamp >= ? AND timestamp <= ? ";
+    $sql .= " AND oai_sets_biblios.set_id = ? " if defined $set;
+    $sql .= ") UNION
+        (SELECT deletedbiblio.biblionumber, timestamp FROM deletedbiblio";
+    $sql .= " JOIN oai_sets_biblios ON deletedbiblio.biblionumber = oai_sets_biblios.biblionumber " if defined $set;
     $sql .= " WHERE DATE(timestamp) >= ? AND DATE(timestamp) <= ? ";
     $sql .= " AND oai_sets_biblios.set_id = ? " if defined $set;
-    $sql .= "
+
+    $sql .= ") ORDER BY biblionumber
         LIMIT " . ($max+1) . "
         OFFSET $token->{offset}
     ";
     my $sth = $dbh->prepare( $sql );
-    my @bind_params = ($token->{'from'}, $token->{'until'});
+    my @bind_params = ($token->{'from_arg'}, $token->{'until_arg'});
+    push @bind_params, $set->{'id'} if defined $set;
+    push @bind_params, ($token->{'from'}, $token->{'until'});
     push @bind_params, $set->{'id'} if defined $set;
     $sth->execute( @bind_params );
 
@@ -351,6 +421,14 @@ sub new {
             identifier => $repository->{ koha_identifier} . ':' . $biblionumber,
             datestamp  => $timestamp,
         ) );
+    }
+
+    # Return error if no results
+    unless ($count) {
+        return HTTP::OAI::Response->new(
+            requestURL => $repository->self_url(),
+            errors     => [ new HTTP::OAI::Error( code => 'noRecordsMatch' ) ],
+        );
     }
 
     return $self;
@@ -454,8 +532,10 @@ package C4::OAI::ListRecords;
 
 use strict;
 use warnings;
+use C4::Biblio;
 use HTTP::OAI;
 use C4::OAI::Sets;
+use MARC::File::XML;
 
 use base ("HTTP::OAI::ListRecords");
 
@@ -473,24 +553,32 @@ sub new {
     }
     my $max = $repository->{koha_max_count};
     my $sql = "
-        SELECT biblioitems.biblionumber, biblioitems.marcxml, biblioitems.timestamp
+        (SELECT biblioitems.biblionumber, biblioitems.timestamp, marcxml
         FROM biblioitems
     ";
     $sql .= " JOIN oai_sets_biblios ON biblioitems.biblionumber = oai_sets_biblios.biblionumber " if defined $set;
+    $sql .= " WHERE timestamp >= ? AND timestamp <= ? ";
+    $sql .= " AND oai_sets_biblios.set_id = ? " if defined $set;
+    $sql .= ") UNION
+        (SELECT deletedbiblio.biblionumber, null as marcxml, timestamp FROM deletedbiblio";
+    $sql .= " JOIN oai_sets_biblios ON deletedbiblio.biblionumber = oai_sets_biblios.biblionumber " if defined $set;
     $sql .= " WHERE DATE(timestamp) >= ? AND DATE(timestamp) <= ? ";
     $sql .= " AND oai_sets_biblios.set_id = ? " if defined $set;
-    $sql .= "
+
+    $sql .= ") ORDER BY biblionumber
         LIMIT " . ($max + 1) . "
         OFFSET $token->{offset}
     ";
-
     my $sth = $dbh->prepare( $sql );
-    my @bind_params = ($token->{'from'}, $token->{'until'});
+    my @bind_params = ($token->{'from_arg'}, $token->{'until_arg'});
+    push @bind_params, $set->{'id'} if defined $set;
+    push @bind_params, ($token->{'from'}, $token->{'until'});
     push @bind_params, $set->{'id'} if defined $set;
     $sth->execute( @bind_params );
 
     my $count = 0;
-    while ( my ($biblionumber, $marcxml, $timestamp) = $sth->fetchrow ) {
+    my $format = $args{metadataPrefix} || $token->{metadata_prefix};
+    while ( my ($biblionumber, $timestamp) = $sth->fetchrow ) {
         $count++;
         if ( $count > $max ) {
             $self->resumptionToken(
@@ -504,16 +592,30 @@ sub new {
             );
             last;
         }
+        my $marcxml = $repository->get_biblio_marcxml($biblionumber, $format);
         my $oai_sets = GetOAISetsBiblio($biblionumber);
         my @setSpecs;
         foreach (@$oai_sets) {
             push @setSpecs, $_->{spec};
         }
-        $self->record( C4::OAI::Record->new(
-            $repository, $marcxml, $timestamp, \@setSpecs,
-            identifier      => $repository->{ koha_identifier } . ':' . $biblionumber,
-            metadataPrefix  => $token->{metadata_prefix}
-        ) );
+        if ($marcxml) {
+          $self->record( C4::OAI::Record->new(
+              $repository, $marcxml, $timestamp, \@setSpecs,
+              identifier      => $repository->{ koha_identifier } . ':' . $biblionumber,
+              metadataPrefix  => $token->{metadata_prefix}
+          ) );
+        } else {
+          $self->record( C4::OAI::DeletedRecord->new(
+          $timestamp, \@setSpecs, identifier => $repository->{ koha_identifier } . ':' . $biblionumber ) );
+        }
+    }
+
+    # Return error if no results
+    unless ($count) {
+        return HTTP::OAI::Response->new(
+            requestURL => $repository->self_url(),
+            errors     => [ new HTTP::OAI::Error( code => 'noRecordsMatch' ) ],
+        );
     }
 
     return $self;
@@ -606,6 +708,17 @@ sub new {
 
     bless $self, $class;
     return $self;
+}
+
+
+sub get_biblio_marcxml {
+    my ($self, $biblionumber, $format) = @_;
+    my $with_items = 0;
+    if ( my $conf = $self->{conf} ) {
+        $with_items = $conf->{format}->{$format}->{include_items};
+    }
+    my $record = GetMarcBiblio($biblionumber, $with_items, 1);
+    $record ? $record->as_xml() : undef;
 }
 
 

@@ -117,12 +117,24 @@
     <target_index>ISBN:w</target_index>
     <target_index>Identifier-standard:w</target_index>
   </index_subfields>
+  <index_subfields tag="020" subfields="z">
+    <target_index>ISBN:w</target_index>
+    <target_index>Identifier-standard:w</target_index>
+  </index_subfields>
   <!--record.abs line 55: melm 020        Identifier-standard-->
   <index_data_field tag="020">
     <target_index>Identifier-standard:w</target_index>
   </index_data_field>
   <!--record.abs line 56: melm 022$a      ISSN:w,Identifier-standard:w-->
   <index_subfields tag="022" subfields="a">
+    <target_index>ISSN:w</target_index>
+    <target_index>Identifier-standard:w</target_index>
+  </index_subfields>
+  <index_subfields tag="022" subfields="y">
+    <target_index>ISSN:w</target_index>
+    <target_index>Identifier-standard:w</target_index>
+  </index_subfields>
+  <index_subfields tag="022" subfields="z">
     <target_index>ISSN:w</target_index>
     <target_index>Identifier-standard:w</target_index>
   </index_subfields>
@@ -430,6 +442,11 @@
   <!--record.abs line 122: melm 260        pl-->
   <index_data_field tag="260">
     <target_index>pl:w</target_index>
+    <target_index>Provider:w</target_index>
+  </index_data_field>
+  <!--Index for RDA 264 field-->
+  <index_data_field tag="264">
+    <target_index>Provider:w</target_index>
   </index_data_field>
   <!--record.abs line 123: melm 300        Extent:w,Extent:p-->
   <index_data_field tag="300">
@@ -529,6 +546,8 @@
   <!--record.abs line 147: melm 502        Material-type-->
   <index_data_field tag="502">
     <target_index>Material-type:w</target_index>
+    <target_index>Dissertation-information:p</target_index>
+    <target_index>Dissertation-information:w</target_index>
   </index_data_field>
   <!--record.abs line 148: melm 505$r      Author-->
   <index_subfields tag="505" subfields="r">

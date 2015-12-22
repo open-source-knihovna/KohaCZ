@@ -18,24 +18,32 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Test::More tests => 41;
+
+use Test::More tests => 42;
+
+use Koha::Database;
 
 BEGIN {
     use_ok('t::lib::TestBuilder');
 }
 
+my $schema  = Koha::Database->new->schema;
+$schema->storage->txn_begin;
 
 my $builder = t::lib::TestBuilder->new();
 
 is( $builder->build(), undef, 'build without arguments returns undef' );
 
 my @sources    = $builder->schema->sources;
-my $nb_failure = 0;
+my @source_in_failure;
 for my $source (@sources) {
     eval { $builder->build( { source => $source } ); };
-    $nb_failure++ if ($@);
+    push @source_in_failure, $source if $@;
 }
-is( $nb_failure, 0, 'TestBuilder can create a entry for every sources' );
+is( @source_in_failure, 0, 'TestBuilder should be able to create an object for every sources' );
+if ( @source_in_failure ) {
+    diag ("The following sources have not been generated correctly: " . join ', ', @source_in_failure)
+}
 
 my $my_overduerules_transport_type = {
     message_transport_type => {
@@ -248,3 +256,30 @@ $bookseller = $builder->build({
 delete $bookseller->{_fk};
 $bookseller_from_db = $rs_aqbookseller->find($bookseller);
 is( $bookseller_from_db->in_storage, 1, 'build with only_fk = 0 stores the entry correctly' );
+
+subtest 'Auto-increment values tests' => sub {
+
+    plan tests => 2;
+
+    # Pick a table with AI PK
+    my $source  = 'Biblio'; # table
+    my $column  = 'biblionumber'; # ai column
+
+    my $col_info = $schema->source( $source )->column_info( $column );
+    is( $col_info->{is_auto_increment}, 1, "biblio.biblionumber is detected as autoincrement");
+
+    # Create a biblio
+    my $biblio_1 = $builder->build({ source => $source });
+    # Get the AI value
+    my $ai_value = $biblio_1->{ biblionumber };
+    # Create a biblio
+    my $biblio_2 = $builder->build({ source => $source });
+    # Get the next AI value
+    my $next_ai_value = $biblio_2->{ biblionumber };
+    is( $ai_value + 1, $next_ai_value, "AI values are consecutive");
+
+};
+
+$schema->storage->txn_rollback;
+
+1;

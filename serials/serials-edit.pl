@@ -66,7 +66,6 @@ use warnings;
 use CGI qw ( -utf8 );
 use Encode qw( decode is_utf8 );
 use C4::Auth;
-use C4::Dates qw/format_date format_date_in_iso/;
 use C4::Biblio;
 use C4::Items;
 use C4::Koha;
@@ -74,6 +73,8 @@ use C4::Output;
 use C4::Context;
 use C4::Serials;
 use C4::Search qw/enabled_staff_search_views/;
+use Koha::DateUtils;
+
 use List::MoreUtils qw/uniq/;
 
 my $query           = CGI->new();
@@ -82,6 +83,7 @@ my @serialids       = $query->param('serialid');
 my @serialseqs      = $query->param('serialseq');
 my @planneddates    = $query->param('planneddate');
 my @publisheddates  = $query->param('publisheddate');
+my @publisheddatetexts = $query->param('publisheddatetext');
 my @status          = $query->param('status');
 my @notes           = $query->param('notes');
 my @subscriptionids = $query->param('subscriptionid');
@@ -126,7 +128,8 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 my @serialdatalist;
 my %processedserialid;
 
-my $today = C4::Dates->new();
+my $today = output_pref( { dt => dt_from_string, dateonly => 1 } );
+
 foreach my $serialid (@serialids) {
 
     #filtering serialid for duplication
@@ -142,10 +145,10 @@ foreach my $serialid (@serialids) {
                 $serinfo->{$d} = q{};
             }
             else {
-                $serinfo->{$d} = format_date( $serinfo->{$d} );
+                $serinfo->{$d} = output_pref( { dt => dt_from_string( $serinfo->{$d} ), dateonly => 1 } );
             }
         }
-        $serinfo->{arriveddate}=$today->output('syspref');
+        $serinfo->{arriveddate} = $today;
 
         $serinfo->{'editdisable'} = (
             (
@@ -186,7 +189,7 @@ foreach my $subscriptionid (@subscriptionids) {
         $cell->{'itemid'}         = 'NNEW';
         $cell->{'serialid'}       = 'NEW';
         $cell->{'issuesatonce'}   = 1;
-        $cell->{arriveddate}=$today->output('syspref');
+        $cell->{arriveddate}      = $today;
 
         push @newserialloop, $cell;
         push @subscriptionloop,
@@ -213,10 +216,10 @@ if ( $op and $op eq 'serialchangestatus' ) {
         my ($plan_date, $pub_date);
 
         if (defined $planneddates[$i] && $planneddates[$i] ne 'XXX') {
-            $plan_date = format_date_in_iso( $planneddates[$i] );
+            $plan_date = eval { output_pref( { dt => dt_from_string( $planneddates[$i] ), dateonly => 1, dateformat => 'iso' } ); };
         }
         if (defined $publisheddates[$i] && $publisheddates[$i] ne 'XXX') {
-            $pub_date = format_date_in_iso( $publisheddates[$i] );
+            $pub_date = eval { output_pref( { dt => dt_from_string( $publisheddates[$i] ), dateonly => 1, dateformat => 'iso' } ); };
         }
 
         if ( $serialids[$i] && $serialids[$i] eq 'NEW' ) {
@@ -231,6 +234,7 @@ if ( $op and $op eq 'serialchangestatus' ) {
                     $status[$i],
                     $plan_date,
                     $pub_date,
+                    $publisheddatetexts[$i],
                     $notes[$i]
                 );
             }
@@ -241,6 +245,7 @@ if ( $op and $op eq 'serialchangestatus' ) {
                 $serialseqs[$i],
                 $plan_date,
                 $pub_date,
+                $publisheddatetexts[$i],
                 $status[$i],
                 $notes[$i]
             );

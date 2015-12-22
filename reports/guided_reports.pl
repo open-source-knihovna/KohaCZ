@@ -27,7 +27,6 @@ use File::Basename qw( dirname );
 use C4::Reports::Guided;
 use C4::Auth qw/:DEFAULT get_session/;
 use C4::Output;
-use C4::Dates qw/format_date/;
 use C4::Debug;
 use C4::Branch; # XXX subfield_is_koha_internal_p
 use C4::Koha qw/IsAuthorisedValueCategory GetFrameworksLoop/;
@@ -78,7 +77,7 @@ if ( $input->param("filter_set") ) {
     $session->param('report_filter', $filter) if $session;
     $template->param( 'filter_set' => 1 );
 }
-elsif ($session) {
+elsif ($session and not $input->param('clear_filters')) {
     $filter = $session->param('report_filter');
 }
 
@@ -234,12 +233,14 @@ elsif ( $phase eq 'Update SQL'){
                     subgroup => $subgroup,
                     notes => $notes,
                     public => $public,
+                    cache_expiry => $cache_expiry,
                 } );
             $template->param(
                 'save_successful'       => 1,
                 'reportname'            => $reportname,
                 'id'                    => $id,
             );
+            logaction( "REPORTS", "MODIFY", $id, "$reportname | $sql" ) if C4::Context->preference("ReportsLog");
         }
         if ( $usecache ) {
             $template->param(
@@ -356,9 +357,13 @@ elsif ( $phase eq 'Choose these criteria' ) {
             my $tovalue   = $input->param( "to_"   . $crit . "_value" );
 
             # If the range values are dates
-            if ($fromvalue =~ C4::Dates->regexp('syspref') && $tovalue =~ C4::Dates->regexp('syspref')) {
-                $fromvalue = C4::Dates->new($fromvalue)->output("iso");
-                $tovalue = C4::Dates->new($tovalue)->output("iso");
+            my $fromvalue_dt;
+            $fromvalue_dt = eval { dt_from_string( $fromvalue ); } if ( $fromvalue );
+            my $tovalue_dt;
+            $tovalue_dt = eval { dt_from_string( $tovalue ); } if ($tovalue);
+            if ( $fromvalue_dt && $tovalue_dt ) {
+                $fromvalue = output_pref( { dt => dt_from_string( $fromvalue_dt ), dateonly => 1, dateformat => 'iso' } );
+                $tovalue   = output_pref( { dt => dt_from_string( $tovalue_dt ), dateonly => 1, dateformat => 'iso' } );
             }
 
             if ($fromvalue && $tovalue) {
@@ -368,8 +373,10 @@ elsif ( $phase eq 'Choose these criteria' ) {
         } else {
 
             # If value is a date
-            if ($value =~ C4::Dates->regexp('syspref')) {
-                $value = C4::Dates->new($value)->output("iso");
+            my $value_dt;
+            $value_dt  =  eval { dt_from_string( $value ); } if ( $value );
+            if ( $value_dt ) {
+                $value = output_pref( { dt => dt_from_string( $value_dt ), dateonly => 1, dateformat => 'iso' } );
             }
             # don't escape runtime parameters, they'll be at runtime
             if ($value =~ /<<.*>>/) {
@@ -597,6 +604,7 @@ elsif ( $phase eq 'Save Report' ) {
                     cache_expiry   => $cache_expiry,
                     public         => $public,
                 } );
+                logaction( "REPORTS", "ADD", $id, "$name | $sql" ) if C4::Context->preference("ReportsLog");
             $template->param(
                 'save_successful' => 1,
                 'reportname'      => $name,
@@ -763,7 +771,7 @@ elsif ($phase eq 'Run this report'){
             unless ($sth) {
                 die "execute_query failed to return sth for report $report_id: $sql";
             } else {
-                my $headers= header_cell_loop($sth);
+                my $headers = header_cell_loop($sth);
                 $template->param(header_row => $headers);
                 while (my $row = $sth->fetchrow_arrayref()) {
                     my @cells = map { +{ cell => $_ } } @$row;
@@ -808,6 +816,7 @@ elsif ($phase eq 'Export'){
         if ($format eq 'tab') {
             $type = 'application/octet-stream';
             $content .= join("\t", header_cell_values($sth)) . "\n";
+            $content = Encode::decode('UTF-8', $content);
             while (my $row = $sth->fetchrow_arrayref()) {
                 $content .= join("\t", @$row) . "\n";
             }
@@ -815,10 +824,10 @@ elsif ($phase eq 'Export'){
             my $delimiter = C4::Context->preference('delimiter') || ',';
             if ( $format eq 'csv' ) {
                 $type = 'application/csv';
-                my $csv = Text::CSV::Encoded->new({ encoding_out => 'utf8', sep_char => $delimiter});
+                my $csv = Text::CSV::Encoded->new({ encoding_out => 'UTF-8', sep_char => $delimiter});
                 $csv or die "Text::CSV::Encoded->new({binary => 1}) FAILED: " . Text::CSV::Encoded->error_diag();
                 if ($csv->combine(header_cell_values($sth))) {
-                    $content .= $csv->string(). "\n";
+                    $content .= Encode::decode('UTF-8', $csv->string()) . "\n";
                 } else {
                     push @$q_errors, { combine => 'HEADER ROW: ' . $csv->error_diag() } ;
                 }
@@ -940,7 +949,7 @@ sub header_cell_values {
 
 # pass $sth, get back a TMPL_LOOP-able set of names for the column headers
 sub header_cell_loop {
-    my @headers = map { +{ cell => $_ } } header_cell_values (shift);
+    my @headers = map { +{ cell => decode('UTF-8',$_) } } header_cell_values (shift);
     return \@headers;
 }
 

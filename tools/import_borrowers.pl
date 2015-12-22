@@ -27,7 +27,7 @@
 # alternate streetnumber, alternate streettype, alternate address line 1, alternate city,
 # alternate zipcode, alternate country, alternate email, alternate phone, date of birth, branchcode,
 # categorycode, enrollment date, expiry date, noaddress, lost, debarred, contact surname,
-# contact firstname, contact title, borrower notes, contact relationship, ethnicity, ethnicity notes
+# contact firstname, contact title, borrower notes, contact relationship
 # gender, username, opac note, contact note, password, sort one, sort two
 #
 # any fields except cardnumber can be blank but the number of fields must match
@@ -39,7 +39,6 @@ use warnings;
 
 use C4::Auth;
 use C4::Output;
-use C4::Dates qw(format_date_in_iso);
 use C4::Context;
 use C4::Branch qw/GetBranchesLoop GetBranchName/;
 use C4::Members;
@@ -49,6 +48,7 @@ use C4::Members::Messaging;
 use C4::Reports::Guided;
 use C4::Templates;
 use Koha::Borrower::Debarments;
+use Koha::DateUtils;
 
 use Text::CSV;
 # Text::CSV::Unicode, even in binary mode, fails to parse lines with these diacriticals:
@@ -97,7 +97,7 @@ if ($input->param('sample')) {
     );
     $csv->combine(@columnkeys);
     print $csv->string, "\n";
-    exit 1;
+    exit 0;
 }
 my $uploadborrowers = $input->param('uploadborrowers');
 my $matchpoint      = $input->param('matchpoint');
@@ -106,7 +106,7 @@ if ($matchpoint) {
 }
 my $overwrite_cardnumber = $input->param('overwrite_cardnumber');
 
-$template->param( SCRIPT_NAME => $ENV{'SCRIPT_NAME'} );
+$template->param( SCRIPT_NAME => '/cgi-bin/koha/tools/import_borrowers.pl' );
 
 if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
     push @feedback, {feedback=>1, name=>'filename', value=>$uploadborrowers, filename=>$uploadborrowers};
@@ -141,11 +141,9 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
     }
 
     push @feedback, {feedback=>1, name=>'headerrow', value=>join(', ', @csvcolumns)};
-    my $today_iso = C4::Dates->new()->output('iso');
+    my $today_iso = output_pref( { dt => dt_from_string, dateonly => 1, dateformat => 'iso' });
     my @criticals = qw(surname branchcode categorycode);    # there probably should be others
     my @bad_dates;  # I've had a few.
-    my $date_re = C4::Dates->new->regexp('syspref');
-    my  $iso_re = C4::Dates->new->regexp('iso');
     LINE: while ( my $borrowerline = <$handle> ) {
         my %borrower;
         my @missing_criticals;
@@ -211,9 +209,8 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
 	# Popular spreadsheet applications make it difficult to force date outputs to be zero-padded, but we require it.
         foreach (qw(dateofbirth dateenrolled dateexpiry)) {
             my $tempdate = $borrower{$_} or next;
-            if ($tempdate =~ /$date_re/) {
-                $borrower{$_} = format_date_in_iso($tempdate);
-            } elsif ($tempdate =~ /$iso_re/) {
+            $tempdate = eval { output_pref( { dt => dt_from_string( $tempdate ), dateonly => 1, dateformat => 'iso' } ); };
+            if ($tempdate) {
                 $borrower{$_} = $tempdate;
             } else {
                 $borrower{$_} = '';
@@ -278,12 +275,14 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
             }
             unless (ModMember(%borrower)) {
                 $invalid++;
-                # untill we have better error trapping, we have no way of knowing why ModMember errored out...
+                # until we have better error trapping, we have no way of knowing why ModMember errored out...
                 push @errors, {unknown_error => 1};
                 $template->param('lastinvalid'=>$borrower{'surname'}.' / '.$borrowernumber);
                 next LINE;
             }
-            if ( $borrower{debarred} ) {
+
+            # Don't add a new restriction if the existing 'combined' restriction matches this one
+            if ( $borrower{debarred} && ( ( $borrower{debarred} ne $member->{debarred} ) || ( $borrower{debarredcomment} ne $member->{debarredcomment} ) ) ) {
                 # Check to see if this debarment already exists
                 my $debarrments = GetDebarments(
                     {
@@ -303,6 +302,7 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
                     );
                 }
             }
+
             if ($extended) {
                 if ($ext_preserve) {
                     my $old_attributes = GetBorrowerAttributes($borrowernumber);

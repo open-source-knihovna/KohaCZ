@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2015-08-17 17:30-0300\n"
-"PO-Revision-Date: 2015-07-28 12:35+0000\n"
+"POT-Creation-Date: 2015-11-19 23:51-0300\n"
+"PO-Revision-Date: 2015-11-24 11:59+0000\n"
 "Last-Translator: tigran <tigran@flib.sci.am>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
 "Language: hy\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Pootle 2.5.1.1\n"
 "X-Poedit-Bookmarks: 1755,-1,-1,-1,-1,-1,-1,-1,-1,-1\n"
-"X-POOTLE-MTIME: 1438086913.000000\n"
+"X-POOTLE-MTIME: 1448366348.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -783,6 +783,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/serials/claims.tt:15
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
@@ -896,7 +897,6 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:68
 #: intranet-tmpl/prog/en/modules/help/acqui/lateorders.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/uncertainprice.tt:7
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:12
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:122
 #: intranet-tmpl/prog/en/modules/help/acqui/invoice.tt:11
@@ -936,7 +936,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:58
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:141
 #: intranet-tmpl/prog/en/modules/help/tools/tools-home.tt:7
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:41
 #: intranet-tmpl/prog/en/modules/help/tools/picture-upload.tt:23
 #: intranet-tmpl/prog/en/modules/help/tools/quotes-upload.tt:43
@@ -1008,6 +1008,17 @@ msgstr "-8 =&gt; Դրոշակ"
 #, c-format
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Ապագա օգտագործում"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#, c-format
+msgid ""
+". For example, if you use the selector \"#circ_impossible\" your selected "
+"sound will be triggered when a checkout for a patron is not possible (such "
+"as the barcode not being found). "
+msgstr ""
+". Օրինակ, եթե օգտագործես ընտրիչը \"#circ_impossible\" քո ընտրած ձայնը "
+"կտարածվի եթե ընթերցողի համար դուրս տրումը հնարավոր չէ (ասենք երբ շտրիխ կոդը "
+"չի գտնվում)։ "
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:35
 #, c-format
@@ -1831,7 +1842,7 @@ msgstr "Ավելացրու մեջբերում"
 msgid "Add a Batch"
 msgstr "Ավելացրու Փաթեթ"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:7
 #, c-format
 msgid "Add a Contract"
 msgstr "Ավելացրու Կոնտրակտ"
@@ -1978,6 +1989,11 @@ msgstr "Բյուջեի ավելացում"
 #, c-format
 msgid "Adding a group"
 msgstr "Ավելացնել խումբ"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Adding a new alert"
+msgstr "Նոր ահազանգի ավելացում"
 
 #: intranet-tmpl/prog/en/modules/help/admin/aqbudgetperiods.tt:13
 #, c-format
@@ -2669,18 +2685,13 @@ msgstr "Պատասխան։"
 msgid "Any"
 msgstr "Ինչ որ"
 
-#: intranet-tmpl/prog/en/modules/help/mainpage.tt:24
+#: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:196
 #, c-format
 msgid ""
-"As part of the upgrade process your online help will be overwritten with the "
-"new Help as part of the install. If you want to keep a copy of your online "
-"help, you should instruct your System Administrator to upgrade the Online "
-"Help directory in the Koha file tree."
+"As your file is uploaded you will see an image that will confirm that the "
+"system is working."
 msgstr ""
-"Որպես բարելավման մաս կարգաբերման ընթացքում քո առցանց օգնությունը կվերագրվի "
-"նորով։ Եթե ցանկանում ես պահպանել քո առցանց օգնության պատճեն, պետք է "
-"հրահանգես քո համակարգային կարգաբերիչին թարմացնելու առցանց օգնությունը "
-"ուղղակիորեն Կոհայի ֆայլում։"
+"Հենց ֆայլը բեռնավորվի կտեսնես պատկերիկ որը կհաստատի որ համակարգը աշխատում է։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:196
 #, c-format
@@ -2701,7 +2712,7 @@ msgstr ""
 "վերադարձի ամսաթվերով (և ժամը, եթե նյութը մեկ ժամվա համար է տրված)։ Այսօր "
 "վերցրած նյութերը կհայտնվեն ցուցակի վերին մասում։"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:9
 #, c-format
 msgid ""
 "At the top of a Vendor Information Page, you will see a 'New Contract' "
@@ -2821,6 +2832,14 @@ msgstr ""
 "Ամենավերջում, եթե նախատեսում ես նյութի տարածում, հետևյալ դաշտերը պետք է "
 "մուտքագրվեն նոր նյութի համար։"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#, c-format
+msgid ""
+"At this point, you can preview your sound by clicking the \"Play sound\" "
+"button"
+msgstr ""
+"Այս կետից կարող ես նախապես լսել քո ձայնը կտտացնելով \"Play sound\" կոճակի վրա"
+
 #: intranet-tmpl/prog/en/modules/help/admin/fieldmapping.tt:7
 #, c-format
 msgid "At this time the only keyword in use is 'subtitle.'"
@@ -2830,6 +2849,11 @@ msgstr "Այս պահին օգտագործման մեջ եղած միակ բան
 #, c-format
 msgid "Audience"
 msgstr "Լսարան"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:3
+#, c-format
+msgid "Audio alerts"
+msgstr "Ձայնային ահազանգեր"
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:69
 #, c-format
@@ -4259,6 +4283,11 @@ msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr ""
 "Սեղմիր 'Վճարիր' որը հաջորդում է տուգանքին եթե ցանկանում ես ամբողջովին վճարել"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#, c-format
+msgid "Click \"Save alert\" and your done!"
+msgstr "Սեղմիր \"Հիշիր ահազանգը\", և կատարել ես։"
+
 #: intranet-tmpl/prog/en/modules/help/members/pay.tt:43
 #: intranet-tmpl/prog/en/modules/help/members/paycollect.tt:43
 #, c-format
@@ -5198,6 +5227,11 @@ msgstr "Ջնջել հանրային ցուցակները"
 msgid "Deleting Item Types"
 msgstr "Նյութի տեսակների ջնջում"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#, c-format
+msgid "Deleting alerts"
+msgstr "Ահազանգերի ջնջում"
+
 #: intranet-tmpl/prog/en/modules/help/cataloguing/additem.tt:67
 #, c-format
 msgid "Deleting items"
@@ -5673,6 +5707,26 @@ msgstr "Մուտք արա ցուցակի անունը և հիշիր ցուցակ
 #, c-format
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "'Նկարագրություն' դաշտում մուտք արա դասի ազատ տեքստային տարբերակը։"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#, c-format
+msgid ""
+"Enter a selector in the \"selector\" input, you can see documentation on "
+"jQuery selectors "
+msgstr ""
+"Մուտք արա ընտրիչը \"Ընտրիչ\" մուտքում, և կտեսնես jQuery ընտրիչների "
+"վերաբերյալ փաստաթղթերը "
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#, c-format
+msgid ""
+"Enter a sound to be played, you can either select a built-in Koha sound "
+"using the pulldown selector, or you can enter a full URL to a sound file on "
+"another server."
+msgstr ""
+"Մուտք արա նվագելու ձայնը, կամ օգտագործելով բացվող ընտրիչը կարող ես ընտրել "
+"Կոհայում ներդրված ձայնը, կամ էլ կարող ես մուտք անել այլ կայանում առկա "
+"ձայնային ֆայլի ամբողջական URL-ը։"
 
 #: intranet-tmpl/prog/en/modules/help/members/pay.tt:36
 #: intranet-tmpl/prog/en/modules/help/members/paycollect.tt:36
@@ -6662,7 +6716,7 @@ msgstr ""
 "համար արված պահումը։"
 
 #: intranet-tmpl/prog/en/modules/help/tools/stage-marc-import.tt:28
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "From here you can choose to always add items regardless of matching status, "
 "add them only if a matching bib was found, add items only if there was no "
@@ -8111,10 +8165,10 @@ msgstr "Եթե սա ամենամյա տոն է ընտրիր 'Տոնը ամենա
 #: intranet-tmpl/prog/en/modules/help/mainpage.tt:5
 #, c-format
 msgid ""
-"If this is your first time logging into Koha, you should now got to Koha "
-"Administration and setup all system preferences, patron categories, item "
+"If this is your first time logging into Koha, you should now go to Koha "
+"Administration and set up all system preferences, patron categories, item "
 "types and libraries. You should also review the other settings found in "
-"administration."
+"Administration."
 msgstr ""
 "Եթե սա քո առաջին մուտքն է Կոհա, դու պետք է գնաս Կոհա ադմինիստրացիա, և "
 "կարգաբերես համակարգային բոլոր պարամետրերը, ընթերցողական դասերը, նյութի "
@@ -9508,14 +9562,14 @@ msgstr ""
 "subscription'"
 
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:24
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "If you're using the Serials module you can link your subscription order "
 "information to acquisitions by choosing to order 'From a subscription' "
 msgstr ""
 "Եթե օգտագործում ես պարբերականների ճյուղը, ապա կարող ես կապել քո "
-"բաժանորդագրության պատվերի տեղեկատվությունը համալրմանը ընտրելով պատվերը 'From "
-"a susbscription' "
+"բաժանորդագրության պատվերի տեղեկատվությունը համալրմանը ընտրելով պատվիրելը "
+"'From a subscription' "
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:32
 #, c-format
@@ -10203,7 +10257,7 @@ msgstr ""
 "Կարևոր է։ Առանց տնօրինողի մոսւտքի արգելանքը կանտեսվի։ Եղիր վստահ, մուտք անել "
 "ինչպես տնօրինողին այնպես էլ ընտրել արգելանքը։"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:13
 #, c-format
 msgid ""
 "Important: You cannot enter a contract retrospectively. The end date must "
@@ -10654,7 +10708,7 @@ msgstr ""
 msgid "It will also appear on the main staff dashboard under the module labels"
 msgstr "Սա նաև կհայտնվի աշխատակազմի հիմնական սեղանին, մոդուլներi պիտակի ներքո"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:17
 #, c-format
 msgid "It will also be an option when creating a basket."
 msgstr "այն կարող է լինել նաև ընտրություն զամբյուղ ստեղծելիս։"
@@ -11388,6 +11442,11 @@ msgstr "Տեղային օգտագործման համակարգային նախա�
 #, c-format
 msgid "Local Use:"
 msgstr "Տեղային օգտագործում։"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#, c-format
+msgid "Locate the \"Add new alert\" form."
+msgstr "Որոշիր \"Ավելացրու նոր ահազանգ\" ձևի տեղը։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/aqbudgetperiods.tt:26
 #, c-format
@@ -12477,7 +12536,7 @@ msgstr ""
 "Երբ CSV ֆայլը կբեռնավորվի խմբագրման ժամանակավոր աղյուսակ, դու կարող ես "
 "խմբագրել մեջբերումները մինչ հիշելը"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:15
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:15
 #, c-format
 msgid "Once the contract is saved it will appear below the vendor information."
 msgstr "Հենց պայմանագիրը հիշվի այն կհայտնվի մատակարարի տեղեկատվության ներքո։"
@@ -12810,14 +12869,14 @@ msgstr ""
 #, c-format
 msgid ""
 "Once you have set up patron categories, you should create a new user in the "
-"Patrons module with superlibrarian permissions. Once that user is set you "
-"should use that user to log in rather than the root user set up as part of "
-"installation."
+"Patrons module with superlibrarian permissions. Once that user is created, "
+"you should log in as that user rather than the root user which is set up as "
+"part of installation."
 msgstr ""
 "Երբ տեղադրել ես ընթերցողական դասերը, դու պետք է գերգրադարանավար "
 "իրավասությամբ ստեղծես նոր օգտվող Հաճախորդներ մոդուլում։ Երբ օգտվողը "
-"կարգաբերված է, դու պետք է  օգտագործես այդ օգտվողին մուտք լինելու համար, քանց "
-"թե որպես արմատ օգտվող, ով ստեղծվել է կարգաբերման ժամանակ։"
+"կարգաբերված է, դու պետք է  մուտք գործես որպես այդ օգտվող, քանց թե որպես "
+"արմատ օգտվող, ով ստեղծվել է կարգաբերման ժամանակ։"
 
 #: intranet-tmpl/prog/en/modules/help/tools/manage-marc-import.tt:5
 #, c-format
@@ -12876,9 +12935,9 @@ msgstr ""
 "ուղարկվել է մատակարարին։"
 
 #: intranet-tmpl/prog/en/modules/help/tools/batch_record_modification.tt:20
-#, fuzzy, c-format
+#, c-format
 msgid "Once you've entered your criteria click 'Continue'"
-msgstr "Հենց որ մուտք անեսլ քո չափորոշիչները սեղմիր 'Շարունակել'"
+msgstr "Հենց որ մուտք անեսլ քո չափորոշիչը սեղմիր 'Շարունակել'"
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbiblio.tt:64
 #, c-format
@@ -14495,7 +14554,7 @@ msgstr "Տես լրիվ փաստաթղթերը Հեղինակավորների Ձ
 msgid "See the full documentation for Moving Items in the "
 msgstr "Տես լրիվ փաստաթղթերը Նյութերի տեղաշարժի համար "
 
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #, c-format
 msgid "See the full documentation for News in the "
 msgstr "Տես լրիվ փաստաթղթերը Նորությունների համար "
@@ -14741,7 +14800,7 @@ msgid ""
 msgstr ""
 "Տես ամբողջական փաստաթուղթը ցանցից անջատված Տացքի ֆայլի բեռնավորման համար "
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #, c-format
 msgid "See the full documentation for Vendor Contracts in the "
 msgstr "Տես լրիվ փաստաթղթերը Մատակարարի կոնտրակտների համար "
@@ -15226,6 +15285,20 @@ msgstr "Sort field 1 "
 #, c-format
 msgid "Sort field 2 "
 msgstr "Sort field 2 "
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#, c-format
+msgid "Sound precedence"
+msgstr "Ձայնի նախապատվություններ"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#, c-format
+msgid ""
+"Sounds will be played in order from top to bottom. That is, the first select "
+"that finds a match will have its sound played."
+msgstr ""
+"Ձայները կնվագվեն վերից դեպի վար հաջորդականությամբ։ Այն է, առաջին համընկնումը "
+"կհնչեցնի ձայնը։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/classsources.tt:5
 #, c-format
@@ -16414,7 +16487,7 @@ msgstr ""
 "չպետք է պահի այս տեղեկատվությունը այս տաբը միայն ցույց կտա այս պահին դուրս "
 "տրված նյութերը։"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:11
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:11
 #, c-format
 msgid ""
 "The contract form will ask for some very basic information about the "
@@ -16844,6 +16917,12 @@ msgstr ""
 msgid "The new value will appear in the list along with existing values"
 msgstr "Նոր արժեքը կհայտնվի ցուցակում առկա արժեքների հետ միասին։"
 
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:23
+#, c-format
+msgid "The news item's author will be set to the currently logged in user."
+msgstr ""
+"Նոր ստացումների հեղինակը կկարգաբերվի որպես այս պահին մուտք գործած օգտատեր։"
+
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:46
 #, c-format
 msgid "The next option for ordering is to order from a staged record. "
@@ -17134,6 +17213,15 @@ msgstr ""
 "Առաջարկների էջը ավտոմատ կսահմանափակվի քո գրադարանի առաջարկներով։ Բոլոր "
 "գրադարանների (կամ ուրիշների) վերաբերյալ տեղեկատվությունը տեսնելու համար "
 "սեղմիր ՛Համալրման տեղեկատվություն՛ զտիչը և փոխիր գրադարանը։"
+
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:24
+#, c-format
+msgid ""
+"The system preference 'NewsAuthorDisplay' can be used to hide or show the "
+"author for news item."
+msgstr ""
+"Համակարգային նախապատվությունը 'NewsAuthorDisplay' թաքցնելու կամ ցուցադրելու "
+"համար նոր ստացումների հեղինակին։"
 
 #: intranet-tmpl/prog/en/modules/help/tools/scheduler.tt:5
 #, c-format
@@ -17905,6 +17993,15 @@ msgstr ""
 msgid "This section can be expanded"
 msgstr "Այս բաժինը կարող է ընդլայնվել"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:5
+#, c-format
+msgid ""
+"This section of Koha lets you specify a given sound to play when a given "
+"jQuery selector is matched."
+msgstr ""
+"Կոհայի այս բաժինը թույլ է տալիս մասնավորեցնել նվագելու ենթական ձայնը երբ "
+"տրված jQuery ընտրիչը համընկնում է։"
+
 #: intranet-tmpl/prog/en/modules/help/about.tt:5
 #, c-format
 msgid ""
@@ -18508,6 +18605,11 @@ msgstr ""
 "Նոր Ընթերցողական Բնութագրիչի Տեսակի ավելացման համար էջի վերին մասում սեղմիր "
 "'Նոր Ընթերցողական Բնութագրիչի Տեսակ'-ի վրա"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#, c-format
+msgid "To add a new alert:"
+msgstr "Նոր ահազանգ ավելացնելու համար."
+
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities.tt:5
 #, c-format
 msgid ""
@@ -18695,6 +18797,13 @@ msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr ""
 "Որպեսզի կարողանաս պատվիրել Մատակարարից, դու պետք է դրանք սարքես 'Ակտիվ'։"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#, c-format
+msgid ""
+"To change the precedence of a given alert, use the four arrows to move it "
+"up, down, or to the top or bottom of the list."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/circ/returns.tt:16
 #, c-format
 msgid ""
@@ -18796,6 +18905,18 @@ msgstr ""
 "չէ որևէ մատենագիտական գրառման հետ։ Եթե ոչ մի կապ չկա փնտրման արդյունքների "
 "ձախ մասում 'Ջնջել' հղումը կհայտնվի որպես արդյունք հեղինակավոր գրառման "
 "համառոտագրության կապի վրա սեղմելուց։"
+
+#. %1$s:  INCLUDE 'help-bottom.inc' 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#, c-format
+msgid ""
+"To delete one or more alerts, check the checkboxes for those alerts you wish "
+"to delete, then click the \"Delete selected alerts\" button and confirm you "
+"want to delete those alerts. %s "
+msgstr ""
+"Մեկ կամ ավելի ահազանգեր ջնջելու համար, ընտրիր այն ահազանգերի ընտրավանդակները "
+"որոնց ցանկանում ես ջնջել, ապա սեղմիր \"Ջնջիր ընտրված ահազանգերը\" կոճակը և և "
+"հաստատիր որ ցանկանում ես ջնջել այդ ահազանգերը։ %s "
 
 #: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
 #, c-format
@@ -19918,7 +20039,7 @@ msgstr "VANCOUVER PUBLIC LIBRARY z3950.vpl.ca:210 Horizon"
 msgid "Values that are pre-configured in Koha are:"
 msgstr "Կոհայում նախապես կարգաբերված տվյալներն են։"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:3
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:3
 #, c-format
 msgid "Vendor Contracts"
 msgstr "Մատակարարի կոնտրակտներ"
@@ -20971,7 +21092,7 @@ msgstr ""
 "այն կհետևի BlockExpiredPatronOpacActions նախապատվությունում կարգաբերված "
 "օրենքին։"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:5
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:5
 #, c-format
 msgid ""
 "You can define contracts (with a start and end date) and attach them to a "
@@ -21576,6 +21697,19 @@ msgstr ""
 msgid "Your new item type will now appear on the list"
 msgstr "Քո նյութի նոր տսակը կհայտնվի ցուցակում"
 
+#: intranet-tmpl/prog/en/modules/help/mainpage.tt:24
+#, c-format
+msgid ""
+"Your online help will be overwritten by the new Help when there is an "
+"upgrade. If you want to keep a copy of your online help, you should instruct "
+"your System Administrator to upgrade the Online Help directory in the Koha "
+"file tree."
+msgstr ""
+"Եթե առկա է թարմացում քո առցանց օգնությունը կվերագրվի նորով։ Եթե ցանկանում ես "
+"պահպանել քո առցանց օգնության պատճեն, պետք է հրահանգես քո համակարգային "
+"կարգաբերիչին թարմացնելու առցանց օգնության թղթապանակը ուղղակիորեն Կոհայի "
+"ֆայլում։"
+
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:27
 #: intranet-tmpl/prog/en/modules/help/acqui/newordersubscription.tt:11
 #, c-format
@@ -22145,6 +22279,11 @@ msgstr "fic:1 Գեղարվեստական գրականություն"
 msgid "group_manage "
 msgstr "խմբի_կառավարում "
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#, c-format
+msgid "here"
+msgstr "այստեղ"
+
 #: intranet-tmpl/prog/en/modules/help/admin/preferences.tt:19
 #, c-format
 msgid ""
@@ -22429,6 +22568,7 @@ msgstr "Կառավարում "
 #: intranet-tmpl/prog/en/modules/help/serials/claims.tt:15
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
@@ -22541,7 +22681,6 @@ msgstr "Կառավարում "
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:68
 #: intranet-tmpl/prog/en/modules/help/acqui/lateorders.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/uncertainprice.tt:7
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:12
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:122
 #: intranet-tmpl/prog/en/modules/help/acqui/invoice.tt:11
@@ -22581,7 +22720,7 @@ msgstr "Կառավարում "
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:58
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:141
 #: intranet-tmpl/prog/en/modules/help/tools/tools-home.tt:7
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:41
 #: intranet-tmpl/prog/en/modules/help/tools/picture-upload.tt:23
 #: intranet-tmpl/prog/en/modules/help/tools/quotes-upload.tt:43

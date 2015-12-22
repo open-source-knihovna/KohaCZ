@@ -25,10 +25,12 @@ use warnings;
 use CGI qw ( -utf8 );
 use C4::Auth;
 use C4::Context;
+use C4::Languages;
 use C4::Search;
 use C4::Output;
 use C4::Koha;
 use C4::Branch;
+use C4::Circulation;
 use Date::Manip;
 
 =head1 NAME
@@ -72,107 +74,32 @@ if (!$do_it && C4::Context->userenv && C4::Context->userenv->{'branch'} ) {
 my $itemtype = $input->param('itemtype') || '';
 my $timeLimit = $input->param('timeLimit') || 3;
 my $advanced_search_types = C4::Context->preference('AdvancedSearchTypes');
+my @advanced_search_types = split /\|/, $advanced_search_types;
 
-my $whereclause = '';
-$whereclause .= ' AND items.homebranch='.$dbh->quote($branch) if ($branch);
-$whereclause .= ' AND TO_DAYS(NOW()) - TO_DAYS(biblio.datecreated) <= '.($timeLimit*30) if $timeLimit < 999;
-$whereclause =~ s/ AND $// if $whereclause;
-my $query;
+my $params = {
+    count => $limit,
+    branch => $branch,
+    newness => $timeLimit < 999 ? $timeLimit * 30 : undef,
+};
 
-if($advanced_search_types eq 'ccode'){
-    $whereclause .= ' AND authorised_values.authorised_value='.$dbh->quote($itemtype) if $itemtype;
-    $query = "SELECT datecreated, biblio.biblionumber, title,
-                    author, sum( items.issues ) AS tot, biblioitems.itemtype,
-                    biblioitems.publishercode, biblioitems.place, biblioitems.publicationyear, biblio.copyrightdate,
-                    authorised_values.lib as description, biblioitems.pages, biblioitems.size
-                    FROM biblio
-                    LEFT JOIN items USING (biblionumber)
-                    LEFT JOIN biblioitems USING (biblionumber)
-                    LEFT JOIN authorised_values ON items.ccode = authorised_values.authorised_value
-                    WHERE 1
-                    $whereclause
-                    AND authorised_values.category = 'ccode' 
-                    GROUP BY biblio.biblionumber
-                    HAVING tot >0
-                    ORDER BY tot DESC
-                    LIMIT ?
-                    ";
-    $template->param(ccodesearch => 1);
-}else{
-    if ($itemtype){
-	if (C4::Context->preference('item-level_itypes')){
-	    $whereclause .= ' AND items.itype = ' . $dbh->quote($itemtype);
-	}
-	else {
-	    $whereclause .= ' AND biblioitems.itemtype='.$dbh->quote($itemtype);
-        }
+@advanced_search_types = grep /^(ccode|itemtypes)$/, @advanced_search_types;
+foreach my $type (@advanced_search_types) {
+    if ($type eq 'itemtypes') {
+        $type = 'itemtype';
     }
-    $query = "SELECT datecreated, biblio.biblionumber, title,
-                    author, sum( items.issues ) AS tot, biblioitems.itemtype,
-                    biblioitems.publishercode, biblioitems.place, biblioitems.publicationyear, biblio.copyrightdate,
-                    itemtypes.description, biblioitems.pages, biblioitems.size
-                    FROM biblio
-                    LEFT JOIN items USING (biblionumber)
-                    LEFT JOIN biblioitems USING (biblionumber)
-                    LEFT JOIN itemtypes ON itemtypes.itemtype = biblioitems.itemtype
-                    WHERE 1
-                    $whereclause
-                    GROUP BY biblio.biblionumber
-                    HAVING tot >0
-                    ORDER BY tot DESC
-                    LIMIT ?
-                    ";
-     $template->param(itemtypesearch => 1);
+    $params->{$type} = $input->param($type);
+    $template->param('selected_' . $type => $input->param($type));
 }
 
-my $sth = $dbh->prepare($query);
-$sth->execute($limit);
-my @results;
-while (my $line= $sth->fetchrow_hashref) {
-    push @results, $line;
-}
-
-my $timeLimitFinite = $timeLimit;
-if($timeLimit eq 999){ $timeLimitFinite = 0 };
-
-$template->param(do_it => 1,
-                limit => $limit,
-                branch => $branches->{$branch}->{branchname},
-                itemtype => $itemtypes->{$itemtype}->{description},
-                timeLimit => $timeLimit,
-                timeLimitFinite => $timeLimitFinite,
-                results_loop => \@results,
-                );
-
-$template->param( branchloop => GetBranchesLoop($branch));
-
-# the index parameter is different for item-level itemtypes
-my $itype_or_itemtype = (C4::Context->preference("item-level_itypes"))?'itype':'itemtype';
-$itemtypes = GetItemTypes;
-my @itemtypesloop;
-if (!$advanced_search_types or $advanced_search_types eq 'itemtypes') {
-        foreach my $thisitemtype ( sort {$itemtypes->{$a}->{'description'} cmp $itemtypes->{$b}->{'description'} } keys %$itemtypes ) {
-        my %row =( value => $thisitemtype,
-                   description => $itemtypes->{$thisitemtype}->{'description'},
-                   selected    => $thisitemtype eq $itemtype,
-            );
-        push @itemtypesloop, \%row;
-        }
-} else {
-    my $advsearchtypes = GetAuthorisedValues($advanced_search_types, '', 'opac');
-        for my $thisitemtype (@$advsearchtypes) {
-                my $selected;
-            $selected = 1 if $thisitemtype->{authorised_value} eq $itemtype;
-                my %row =( value => $thisitemtype->{authorised_value},
-                selected    => $thisitemtype eq $itemtype,
-                description => $thisitemtype->{'lib'},
-            );
-                push @itemtypesloop, \%row;
-        }
-}
+my @results = GetTopIssues($params);
 
 $template->param(
-                 itemtypeloop =>\@itemtypesloop,
-                );
-output_html_with_http_headers $input, $cookie, $template->output;
+    limit => $limit,
+    branch => $branches->{$branch}->{branchname},
+    timeLimit => $timeLimit,
+    results => \@results,
+);
 
+$template->param(branchloop => GetBranchesLoop($branch));
+
+output_html_with_http_headers $input, $cookie, $template->output;

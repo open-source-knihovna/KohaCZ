@@ -1,5 +1,5 @@
 use Modern::Perl;
-use Test::More tests => 120;
+use Test::More tests => 122;
 
 BEGIN {
     use_ok('C4::Budgets')
@@ -8,24 +8,30 @@ use C4::Context;
 use C4::Biblio;
 use C4::Bookseller;
 use C4::Acquisition;
-use C4::Dates;
 use C4::Members qw( AddMember );
 
 use Koha::Acquisition::Order;
 
-use YAML;
-my $dbh = C4::Context->dbh;
-$dbh->{AutoCommit} = 0;
-$dbh->{RaiseError} = 1;
+use t::lib::TestBuilder;
 
+use YAML;
+
+my $schema  = Koha::Database->new->schema;
+$schema->storage->txn_begin;
+my $builder = t::lib::TestBuilder->new;
+my $dbh = C4::Context->dbh;
 $dbh->do(q|DELETE FROM aqbudgetperiods|);
 $dbh->do(q|DELETE FROM aqbudgets|);
+
+my $library = $builder->build({
+    source => 'Branch',
+});
 
 # Mock userenv
 local $SIG{__WARN__} = sub { warn $_[0] unless $_[0] =~ /redefined/ };
 my $userenv;
 *C4::Context::userenv = \&Mock_userenv;
-$userenv = { flags => 1, id => 'my_userid', branch => 'CPL' };
+$userenv = { flags => 1, id => 'my_userid', branch => $library->{branchcode} };
 
 #
 # Budget Periods :
@@ -226,15 +232,6 @@ my $budget_id2 = AddBudget(
         budget_amount    => $budget_2_total,
     }
 );
-my $budget_id11 = AddBudget(
-    {
-        budget_code      => 'budget_11',
-        budget_name      => 'budget_11',
-        budget_period_id => $budget_period_id,
-        budget_parent_id => $budget_id1,
-        budget_amount    => $budget_11_total,
-    }
-);
 my $budget_id12 = AddBudget(
     {
         budget_code      => 'budget_12',
@@ -242,6 +239,15 @@ my $budget_id12 = AddBudget(
         budget_period_id => $budget_period_id,
         budget_parent_id => $budget_id1,
         budget_amount    => $budget_12_total,
+    }
+);
+my $budget_id11 = AddBudget(
+    {
+        budget_code      => 'budget_11',
+        budget_name      => 'budget_11',
+        budget_period_id => $budget_period_id,
+        budget_parent_id => $budget_id1,
+        budget_amount    => $budget_11_total,
     }
 );
 my $budget_id111 = AddBudget(
@@ -425,6 +431,10 @@ $budget_period_id_cloned = C4::Budgets::CloneBudgetPeriod(
 );
 
 $budget_hierarchy        = GetBudgetHierarchy($budget_period_id);
+is( $budget_hierarchy->[0]->{children}->[0]->{budget_name}, 'budget_11', 'GetBudgetHierarchy should return budgets ordered by name, first child is budget_11' );
+is( $budget_hierarchy->[0]->{children}->[1]->{budget_name}, 'budget_12', 'GetBudgetHierarchy should return budgets ordered by name, second child is budget_12' );
+
+$budget_hierarchy        = GetBudgetHierarchy($budget_period_id);
 $budget_hierarchy_cloned = GetBudgetHierarchy($budget_period_id_cloned);
 
 is( scalar(@$budget_hierarchy_cloned), scalar(@$budget_hierarchy),
@@ -528,7 +538,7 @@ for my $new_budget ( @new_budgets ) {
 # Test SetOwnerToFundHierarchy
 
 my $categorycode = 'S';
-my $branchcode = 'CPL';
+my $branchcode = $library->{branchcode};
 my $john_doe = C4::Members::AddMember(
     cardnumber   => '123456',
     firstname    => 'John',

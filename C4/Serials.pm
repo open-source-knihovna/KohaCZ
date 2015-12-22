@@ -22,7 +22,6 @@ use Modern::Perl;
 
 use C4::Auth qw(haspermission);
 use C4::Context;
-use C4::Dates qw(format_date format_date_in_iso);
 use DateTime;
 use Date::Calc qw(:all);
 use POSIX qw(strftime);
@@ -31,6 +30,8 @@ use C4::Log;    # logaction
 use C4::Debug;
 use C4::Serials::Frequency;
 use C4::Serials::Numberpattern;
+use Koha::AdditionalField;
+use Koha::DateUtils;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
@@ -68,7 +69,7 @@ BEGIN {
       &HasSubscriptionStrictlyExpired &HasSubscriptionExpired &GetExpirationDate &abouttoexpire
       &GetSubscriptionHistoryFromSubscriptionId
 
-      &GetNextSeq &GetSeq &NewIssue           &ItemizeSerials    &GetSerials
+      &GetNextSeq &GetSeq &NewIssue           &GetSerials
       &GetLatestSerials   &ModSerialStatus    &GetNextDate       &GetSerials2
       &ReNewSubscription  &GetLateOrMissingIssues
       &GetSerialInformation                   &AddItem2Serial
@@ -316,7 +317,16 @@ sub GetSubscription {
     my $sth = $dbh->prepare($query);
     $sth->execute($subscriptionid);
     my $subscription = $sth->fetchrow_hashref;
+
     $subscription->{cannotedit} = not can_edit_subscription( $subscription );
+
+    # Add additional fields to the subscription into a new key "additional_fields"
+    my $additional_field_values = Koha::AdditionalField->fetch_all_values({
+            tablename => 'subscription',
+            record_id => $subscriptionid,
+    });
+    $subscription->{additional_fields} = $additional_field_values->{$subscriptionid};
+
     return $subscription;
 }
 
@@ -338,6 +348,7 @@ sub GetFullSubscription {
             serial.serialseq,
             serial.planneddate, 
             serial.publisheddate, 
+            serial.publisheddatetext,
             serial.status, 
             serial.notes as notes,
             year(IF(serial.publisheddate="00-00-0000",serial.planneddate,serial.publisheddate)) as year,
@@ -456,9 +467,9 @@ sub GetSubscriptionsFromBiblionumber {
     $sth->execute($biblionumber);
     my @res;
     while ( my $subs = $sth->fetchrow_hashref ) {
-        $subs->{startdate}     = format_date( $subs->{startdate} );
-        $subs->{histstartdate} = format_date( $subs->{histstartdate} );
-        $subs->{histenddate}   = format_date( $subs->{histenddate} );
+        $subs->{startdate}     = output_pref( { dt => dt_from_string( $subs->{startdate} ),     dateonly => 1 } );
+        $subs->{histstartdate} = output_pref( { dt => dt_from_string( $subs->{histstartdate} ), dateonly => 1 } );
+        $subs->{histenddate}   = output_pref( { dt => dt_from_string( $subs->{histenddate} ),   dateonly => 1 } );
         $subs->{opacnote}     =~ s/\n/\<br\/\>/g;
         $subs->{missinglist}  =~ s/\n/\<br\/\>/g;
         $subs->{recievedlist} =~ s/\n/\<br\/\>/g;
@@ -469,7 +480,7 @@ sub GetSubscriptionsFromBiblionumber {
         if ( $subs->{enddate} eq '0000-00-00' ) {
             $subs->{enddate} = '';
         } else {
-            $subs->{enddate} = format_date( $subs->{enddate} );
+            $subs->{enddate} = output_pref( { dt => dt_from_string( $subs->{enddate}), dateonly => 1 } );
         }
         $subs->{'abouttoexpire'}       = abouttoexpire( $subs->{'subscriptionid'} );
         $subs->{'subscriptionexpired'} = HasSubscriptionExpired( $subs->{'subscriptionid'} );
@@ -494,6 +505,7 @@ sub GetFullSubscriptionsFromBiblionumber {
             serial.serialseq,
             serial.planneddate, 
             serial.publisheddate, 
+            serial.publisheddatetext,
             serial.status, 
             serial.notes as notes,
             year(IF(serial.publisheddate="00-00-0000",serial.planneddate,serial.publisheddate)) as year,
@@ -548,7 +560,18 @@ subscription expiration date.
 sub SearchSubscriptions {
     my ( $args ) = @_;
 
-    my $query = q{
+    my $additional_fields = $args->{additional_fields} // [];
+    my $matching_record_ids_for_additional_fields = [];
+    if ( @$additional_fields ) {
+        $matching_record_ids_for_additional_fields = Koha::AdditionalField->get_matching_record_ids({
+                fields => $additional_fields,
+                tablename => 'subscription',
+                exact_match => 0,
+        });
+        return () unless @$matching_record_ids_for_additional_fields;
+    }
+
+    my $query = q|
         SELECT
             subscription.notes AS publicnotes,
             subscriptionhistory.*,
@@ -563,13 +586,15 @@ sub SearchSubscriptions {
             LEFT JOIN biblio ON biblio.biblionumber = subscription.biblionumber
             LEFT JOIN biblioitems ON biblioitems.biblionumber = subscription.biblionumber
             LEFT JOIN aqbooksellers ON subscription.aqbooksellerid = aqbooksellers.id
-    };
+    |;
+    $query .= q| WHERE 1|;
     my @where_strs;
     my @where_args;
     if( $args->{biblionumber} ) {
         push @where_strs, "biblio.biblionumber = ?";
         push @where_args, $args->{biblionumber};
     }
+
     if( $args->{title} ){
         my @words = split / /, $args->{title};
         my (@strs, @args);
@@ -618,8 +643,14 @@ sub SearchSubscriptions {
         push @where_strs, "subscription.closed = ?";
         push @where_args, "$args->{closed}";
     }
+
     if(@where_strs){
-        $query .= " WHERE " . join(" AND ", @where_strs);
+        $query .= ' AND ' . join(' AND ', @where_strs);
+    }
+    if ( @$additional_fields ) {
+        $query .= ' AND subscriptionid IN ('
+            . join( ', ', @$matching_record_ids_for_additional_fields )
+        . ')';
     }
 
     $query .= " ORDER BY " . $args->{orderby} if $args->{orderby};
@@ -627,12 +658,17 @@ sub SearchSubscriptions {
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare($query);
     $sth->execute(@where_args);
-    my $results = $sth->fetchall_arrayref( {} );
-    $sth->finish;
+    my $results =  $sth->fetchall_arrayref( {} );
 
     for my $subscription ( @$results ) {
         $subscription->{cannotedit} = not can_edit_subscription( $subscription );
         $subscription->{cannotdisplay} = not can_show_subscription( $subscription );
+
+        my $additional_field_values = Koha::AdditionalField->fetch_all_values({
+            record_id => $subscription->{subscriptionid},
+            tablename => 'subscription'
+        });
+        $subscription->{additional_fields} = $additional_field_values->{$subscription->{subscriptionid}};
     }
 
     return @$results;
@@ -662,7 +698,8 @@ sub GetSerials {
     $count = 5 unless ($count);
     my @serials;
     my $statuses = join( ',', ( ARRIVED, MISSING_STATUSES, NOT_ISSUED ) );
-    my $query = "SELECT serialid,serialseq, status, publisheddate, planneddate,notes, routingnotes
+    my $query = "SELECT serialid,serialseq, status, publisheddate,
+        publisheddatetext, planneddate,notes, routingnotes
                         FROM   serial
                         WHERE  subscriptionid = ? AND status NOT IN ( $statuses )
                         ORDER BY IF(publisheddate<>'0000-00-00',publisheddate,planneddate) DESC";
@@ -673,7 +710,7 @@ sub GetSerials {
         $line->{ "status" . $line->{status} } = 1;                                         # fills a "statusX" value, used for template status select list
         for my $datefield ( qw( planneddate publisheddate) ) {
             if ($line->{$datefield} && $line->{$datefield}!~m/^00/) {
-                $line->{$datefield} = format_date( $line->{$datefield});
+                $line->{$datefield} =  output_pref( { dt => dt_from_string( $line->{$datefield} ), dateonly => 1 } );
             } else {
                 $line->{$datefield} = q{};
             }
@@ -682,7 +719,8 @@ sub GetSerials {
     }
 
     # OK, now add the last 5 issues arrives/missing
-    $query = "SELECT   serialid,serialseq, status, planneddate, publisheddate,notes, routingnotes
+    $query = "SELECT   serialid,serialseq, status, planneddate, publisheddate,
+        publisheddatetext, notes, routingnotes
        FROM     serial
        WHERE    subscriptionid = ?
        AND      status IN ( $statuses )
@@ -695,7 +733,7 @@ sub GetSerials {
         $line->{ "status" . $line->{status} } = 1;                                         # fills a "statusX" value, used for template status select list
         for my $datefield ( qw( planneddate publisheddate) ) {
             if ($line->{$datefield} && $line->{$datefield}!~m/^00/) {
-                $line->{$datefield} = format_date( $line->{$datefield});
+                $line->{$datefield} = output_pref( { dt => dt_from_string( $line->{$datefield} ), dateonly => 1 } );
             } else {
                 $line->{$datefield} = q{};
             }
@@ -731,7 +769,8 @@ sub GetSerials2 {
 
     my $dbh   = C4::Context->dbh;
     my $query = qq|
-                 SELECT   serialid,serialseq, status, planneddate, publisheddate,notes, routingnotes
+                 SELECT serialid,serialseq, status, planneddate, publisheddate,
+                    publisheddatetext, notes, routingnotes
                  FROM     serial 
                  WHERE    subscriptionid=$subscription AND status IN ($statuses_string)
                  ORDER BY publisheddate,serialid DESC
@@ -749,7 +788,7 @@ sub GetSerials2 {
                 $line->{$datefield} = q{};
             }
             else {
-                $line->{$datefield} = format_date( $line->{$datefield} );
+                $line->{$datefield} = output_pref( { dt => dt_from_string( $line->{$datefield} ), dateonly => 1 } );
             }
         }
         push @serials, $line;
@@ -785,8 +824,8 @@ sub GetLatestSerials {
     my @serials;
     while ( my $line = $sth->fetchrow_hashref ) {
         $line->{ "status" . $line->{status} } = 1;                        # fills a "statusX" value, used for template status select list
-        $line->{"planneddate"} = format_date( $line->{"planneddate"} );
-        $line->{"publisheddate"} = format_date( $line->{"publisheddate"} );
+        $line->{planneddate}   = output_pref( { dt => dt_from_string( $line->{planneddate} ),   dateonly => 1 } );
+        $line->{publisheddate} = output_pref( { dt => dt_from_string( $line->{publisheddate} ), dateonly => 1 } );
         push @serials, $line;
     }
 
@@ -824,7 +863,7 @@ $subscription is a hashref containing all the attributes of the table
 'subscription'.
 $pattern is a hashref containing all the attributes of the table
 'subscription_numberpatterns'.
-$planneddate is a C4::Dates object.
+$planneddate is a date string in iso format.
 This function get the next issue for the subscription given on input arg
 
 =cut
@@ -1059,7 +1098,8 @@ sub ModSubscriptionHistory {
 
 =head2 ModSerialStatus
 
-ModSerialStatus($serialid,$serialseq, $planneddate,$publisheddate,$status,$notes)
+    ModSerialStatus($serialid, $serialseq, $planneddate, $publisheddate,
+        $publisheddatetext, $status, $notes);
 
 This function modify the serial status. Serial status is a number.(eg 2 is "arrived")
 Note : if we change from "waited" to something else,then we will have to create a new "waited" entry
@@ -1067,7 +1107,8 @@ Note : if we change from "waited" to something else,then we will have to create 
 =cut
 
 sub ModSerialStatus {
-    my ( $serialid, $serialseq, $planneddate, $publisheddate, $status, $notes ) = @_;
+    my ($serialid, $serialseq, $planneddate, $publisheddate, $publisheddatetext,
+        $status, $notes) = @_;
 
     return unless ($serialid);
 
@@ -1089,9 +1130,15 @@ sub ModSerialStatus {
         DelIssue( { 'serialid' => $serialid, 'subscriptionid' => $subscriptionid, 'serialseq' => $serialseq } );
     } else {
 
-        my $query = 'UPDATE serial SET serialseq=?,publisheddate=?,planneddate=?,status=?,notes=? WHERE  serialid = ?';
+        my $query = '
+            UPDATE serial
+            SET serialseq = ?, publisheddate = ?, publisheddatetext = ?,
+                planneddate = ?, status = ?, notes = ?
+            WHERE  serialid = ?
+        ';
         $sth = $dbh->prepare($query);
-        $sth->execute( $serialseq, $publisheddate, $planneddate, $status, $notes, $serialid );
+        $sth->execute( $serialseq, $publisheddate, $publisheddatetext,
+            $planneddate, $status, $notes, $serialid );
         $query = "SELECT * FROM   subscription WHERE  subscriptionid = ?";
         $sth   = $dbh->prepare($query);
         $sth->execute($subscriptionid);
@@ -1149,7 +1196,7 @@ sub ModSerialStatus {
         # check if an alert must be sent... (= a letter is defined & status became "arrived"
         if ( $subscription->{letter} && $status == ARRIVED && $oldstatus != ARRIVED ) {
             require C4::Letters;
-            C4::Letters::SendAlerts( 'issue', $subscription->{subscriptionid}, $subscription->{letter} );
+            C4::Letters::SendAlerts( 'issue', $serialid, $subscription->{letter} );
         }
     }
 
@@ -1495,19 +1542,21 @@ returns the serial id
 =cut
 
 sub NewIssue {
-    my ( $serialseq, $subscriptionid, $biblionumber, $status, $planneddate, $publisheddate, $notes ) = @_;
+    my ( $serialseq, $subscriptionid, $biblionumber, $status, $planneddate,
+        $publisheddate, $publisheddatetext, $notes ) = @_;
     ### FIXME biblionumber CAN be provided by subscriptionid. So Do we STILL NEED IT ?
 
     return unless ($subscriptionid);
 
     my $dbh   = C4::Context->dbh;
     my $query = qq|
-        INSERT INTO serial
-            (serialseq,subscriptionid,biblionumber,status,publisheddate,planneddate,notes)
-        VALUES (?,?,?,?,?,?,?)
+        INSERT INTO serial (serialseq, subscriptionid, biblionumber, status,
+            publisheddate, publisheddatetext, planneddate, notes)
+        VALUES (?,?,?,?,?,?,?,?)
     |;
     my $sth = $dbh->prepare($query);
-    $sth->execute( $serialseq, $subscriptionid, $biblionumber, $status, $publisheddate, $planneddate, $notes );
+    $sth->execute( $serialseq, $subscriptionid, $biblionumber, $status,
+        $publisheddate, $publisheddatetext, $planneddate, $notes );
     my $serialid = $dbh->{'mysql_insertid'};
     $query = qq|
         SELECT missinglist,recievedlist
@@ -1537,141 +1586,6 @@ sub NewIssue {
     $missinglist  =~ s/^; //;
     $sth->execute( $recievedlist, $missinglist, $subscriptionid );
     return $serialid;
-}
-
-=head2 ItemizeSerials
-
-ItemizeSerials($serialid, $info);
-$info is a hashref containing  barcode branch, itemcallnumber, status, location
-$serialid the serialid
-return :
-1 if the itemize is a succes.
-0 and @error otherwise. @error containts the list of errors found.
-
-=cut
-
-sub ItemizeSerials {
-    my ( $serialid, $info ) = @_;
-
-    return unless ($serialid);
-
-    my $now = POSIX::strftime( "%Y-%m-%d", localtime );
-
-    my $dbh   = C4::Context->dbh;
-    my $query = qq|
-        SELECT *
-        FROM   serial
-        WHERE  serialid=?
-    |;
-    my $sth = $dbh->prepare($query);
-    $sth->execute($serialid);
-    my $data = $sth->fetchrow_hashref;
-    if ( C4::Context->preference("RoutingSerials") ) {
-
-        # check for existing biblioitem relating to serial issue
-        my ( $count, @results ) = GetBiblioItemByBiblioNumber( $data->{'biblionumber'} );
-        my $bibitemno = 0;
-        for ( my $i = 0 ; $i < $count ; $i++ ) {
-            if ( $results[$i]->{'volumeddesc'} eq $data->{'serialseq'} . ' (' . $data->{'planneddate'} . ')' ) {
-                $bibitemno = $results[$i]->{'biblioitemnumber'};
-                last;
-            }
-        }
-        if ( $bibitemno == 0 ) {
-            my $sth = $dbh->prepare( "SELECT * FROM biblioitems WHERE biblionumber = ? ORDER BY biblioitemnumber DESC" );
-            $sth->execute( $data->{'biblionumber'} );
-            my $biblioitem = $sth->fetchrow_hashref;
-            $biblioitem->{'volumedate'}  = $data->{planneddate};
-            $biblioitem->{'volumeddesc'} = $data->{serialseq} . ' (' . format_date( $data->{'planneddate'} ) . ')';
-            $biblioitem->{'dewey'}       = $info->{itemcallnumber};
-        }
-    }
-
-    my $fwk = GetFrameworkCode( $data->{'biblionumber'} );
-    if ( $info->{barcode} ) {
-        my @errors;
-        if ( is_barcode_in_use( $info->{barcode} ) ) {
-            push @errors, 'barcode_not_unique';
-        } else {
-            my $marcrecord = MARC::Record->new();
-            my ( $tag, $subfield ) = GetMarcFromKohaField( "items.barcode", $fwk );
-            my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{barcode} );
-            $marcrecord->insert_fields_ordered($newField);
-            if ( $info->{branch} ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.homebranch", $fwk );
-
-                #warn "items.homebranch : $tag , $subfield";
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{branch} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{branch} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-                ( $tag, $subfield ) = GetMarcFromKohaField( "items.holdingbranch", $fwk );
-
-                #warn "items.holdingbranch : $tag , $subfield";
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{branch} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{branch} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            if ( $info->{itemcallnumber} ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.itemcallnumber", $fwk );
-
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{itemcallnumber} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{itemcallnumber} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            if ( $info->{notes} ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.itemnotes", $fwk );
-
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{notes} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{notes} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            if ( $info->{location} ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.location", $fwk );
-
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{location} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{location} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            if ( $info->{status} ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.notforloan", $fwk );
-
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $info->{status} );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $info->{status} );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            if ( C4::Context->preference("RoutingSerials") ) {
-                my ( $tag, $subfield ) = GetMarcFromKohaField( "items.dateaccessioned", $fwk );
-                if ( $marcrecord->field($tag) ) {
-                    $marcrecord->field($tag)->add_subfields( "$subfield" => $now );
-                } else {
-                    my $newField = MARC::Field->new( "$tag", '', '', "$subfield" => $now );
-                    $marcrecord->insert_fields_ordered($newField);
-                }
-            }
-            require C4::Items;
-            C4::Items::AddItemFromMarc( $marcrecord, $data->{'biblionumber'} );
-            return 1;
-        }
-        return ( 0, @errors );
-    }
 }
 
 =head2 HasSubscriptionStrictlyExpired
@@ -1805,10 +1719,14 @@ this function deletes subscription which has $subscriptionid as id.
 sub DelSubscription {
     my ($subscriptionid) = @_;
     my $dbh = C4::Context->dbh;
-    $subscriptionid = $dbh->quote($subscriptionid);
-    $dbh->do("DELETE FROM subscription WHERE subscriptionid=$subscriptionid");
-    $dbh->do("DELETE FROM subscriptionhistory WHERE subscriptionid=$subscriptionid");
-    $dbh->do("DELETE FROM serial WHERE subscriptionid=$subscriptionid");
+    $dbh->do("DELETE FROM subscription WHERE subscriptionid=?", undef, $subscriptionid);
+    $dbh->do("DELETE FROM subscriptionhistory WHERE subscriptionid=?", undef, $subscriptionid);
+    $dbh->do("DELETE FROM serial WHERE subscriptionid=?", undef, $subscriptionid);
+
+    my $afs = Koha::AdditionalField->all({tablename => 'subscription'});
+    foreach my $af (@$afs) {
+        $af->delete_values({record_id => $subscriptionid});
+    }
 
     logaction( "SERIAL", "DELETE", $subscriptionid, "" ) if C4::Context->preference("SubscriptionLog");
 }
@@ -1877,6 +1795,7 @@ sub GetLateOrMissingIssues {
     return unless ( $supplierid or $serialid );
 
     my $dbh = C4::Context->dbh;
+
     my $sth;
     my $byserial = '';
     if ($serialid) {
@@ -1929,13 +1848,20 @@ sub GetLateOrMissingIssues {
 
         if ($line->{planneddate} && $line->{planneddate} !~/^0+\-/) {
             $line->{planneddateISO} = $line->{planneddate};
-            $line->{planneddate} = format_date( $line->{planneddate} );
+            $line->{planneddate} = output_pref( { dt => dt_from_string( $line->{"planneddate"} ), dateonly => 1 } );
         }
         if ($line->{claimdate} && $line->{claimdate} !~/^0+\-/) {
             $line->{claimdateISO} = $line->{claimdate};
-            $line->{claimdate}   = format_date( $line->{claimdate} );
+            $line->{claimdate}   = output_pref( { dt => dt_from_string( $line->{"claimdate"} ), dateonly => 1 } );
         }
         $line->{"status".$line->{status}}   = 1;
+
+        my $additional_field_values = Koha::AdditionalField->fetch_all_values({
+            record_id => $line->{subscriptionid},
+            tablename => 'subscription'
+        });
+        %$line = ( %$line, additional_fields => $additional_field_values->{$line->{subscriptionid}} );
+
         push @issuelist, $line;
     }
     return @issuelist;
@@ -2584,7 +2510,7 @@ sub _numeration {
 
 =head2 is_barcode_in_use
 
-Returns number of occurence of the barcode in the items table
+Returns number of occurrences of the barcode in the items table
 Can be used as a boolean test of whether the barcode has
 been deployed as yet
 
@@ -2593,13 +2519,13 @@ been deployed as yet
 sub is_barcode_in_use {
     my $barcode = shift;
     my $dbh       = C4::Context->dbh;
-    my $occurences = $dbh->selectall_arrayref(
+    my $occurrences = $dbh->selectall_arrayref(
         'SELECT itemnumber from items where barcode = ?',
         {}, $barcode
 
     );
 
-    return @{$occurences};
+    return @{$occurrences};
 }
 
 =head2 CloseSubscription
@@ -2670,6 +2596,19 @@ sub subscriptionCurrentlyOnOrder {
     my $sth = $dbh->prepare( $query );
     $sth->execute($subscriptionid);
     return $sth->fetchrow_array;
+}
+
+=head2 can_claim_subscription
+
+    $can = can_claim_subscription( $subscriptionid[, $userid] );
+
+Return 1 if the subscription can be claimed by the current logged user (or a given $userid), else 0.
+
+=cut
+
+sub can_claim_subscription {
+    my ( $subscription, $userid ) = @_;
+    return _can_do_on_subscription( $subscription, $userid, 'claim_serials' );
 }
 
 =head2 can_edit_subscription

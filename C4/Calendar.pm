@@ -23,8 +23,10 @@ use Carp;
 use Date::Calc qw( Date_to_Days Today);
 
 use C4::Context;
+use Koha::Cache;
 
 use constant ISO_DATE_FORMAT => "%04d-%02d-%02d";
+
 =head1 NAME
 
 C4::Calendar::Calendar - Koha module dealing with holidays.
@@ -165,7 +167,7 @@ sub get_exception_holidays {
     $single_holidays = $calendar->get_single_holidays();
 
 Returns a hash reference to single holidays. This kind of holidays are those which
-happend just one time.
+happened just one time.
 
 =cut
 
@@ -262,7 +264,6 @@ C<$description> Is the description to store for the holiday formed by $year/$mon
 sub insert_single_holiday {
     my $self = shift @_;
     my %options = @_;
-    
     @options{qw(year month day)} = ( $options{date} =~ m/(\d+)-(\d+)-(\d+)/o )
       if $options{date} && !$options{day};
 
@@ -272,7 +273,14 @@ sub insert_single_holiday {
 	$insertHoliday->execute( $self->{branchcode}, $options{day},$options{month},$options{year}, $isexception, $options{title}, $options{description});
     $self->{'single_holidays'}->{"$options{year}/$options{month}/$options{day}"}{title} = $options{title};
     $self->{'single_holidays'}->{"$options{year}/$options{month}/$options{day}"}{description} = $options{description};
+
+
+    # changed the 'single_holidays' table, lets force/reset its cache
+    my $cache = Koha::Cache->get_instance();
+    $cache->clear_from_cache( 'single_holidays') ;
+
     return $self;
+
 }
 
 =head2 insert_exception_holiday
@@ -310,6 +318,11 @@ sub insert_exception_holiday {
 	$insertException->execute( $self->{branchcode}, $options{day},$options{month},$options{year}, $isexception, $options{title}, $options{description});
     $self->{'exception_holidays'}->{"$options{year}/$options{month}/$options{day}"}{title} = $options{title};
     $self->{'exception_holidays'}->{"$options{year}/$options{month}/$options{day}"}{description} = $options{description};
+
+    # changed the 'single_holidays' table, lets force/reset its cache
+    my $cache = Koha::Cache->get_instance();
+    $cache->clear_from_cache( 'single_holidays') ;
+
     return $self;
 }
 
@@ -398,10 +411,18 @@ sub ModSingleholiday {
 
     my $dbh = C4::Context->dbh();
     my $isexception = 0;
-    my $updateHoliday = $dbh->prepare("UPDATE special_holidays SET title = ?, description = ? WHERE day = ? AND month = ? AND year = ? AND branchcode = ? AND isexception = ?");
+
+    my $updateHoliday = $dbh->prepare("
+UPDATE special_holidays SET title = ?, description = ?
+    WHERE day = ? AND month = ? AND year = ? AND branchcode = ? AND isexception = ?");
       $updateHoliday->execute($options{title},$options{description},$options{day},$options{month},$options{year},$self->{branchcode},$isexception);    
     $self->{'single_holidays'}->{"$options{year}/$options{month}/$options{day}"}{title} = $options{title};
     $self->{'single_holidays'}->{"$options{year}/$options{month}/$options{day}"}{description} = $options{description};
+
+    # changed the 'single_holidays' table, lets force/reset its cache
+    my $cache = Koha::Cache->get_instance();
+    $cache->clear_from_cache( 'single_holidays') ;
+
     return $self;
 }
 
@@ -433,10 +454,17 @@ sub ModExceptionholiday {
 
     my $dbh = C4::Context->dbh();
     my $isexception = 1;
-    my $updateHoliday = $dbh->prepare("UPDATE special_holidays SET title = ?, description = ? WHERE day = ? AND month = ? AND year = ? AND branchcode = ? AND isexception = ?");
-    $updateHoliday->execute($options{title},$options{description},$options{day},$options{month},$options{year},$self->{branchcode},$isexception);    
+    my $updateHoliday = $dbh->prepare("
+UPDATE special_holidays SET title = ?, description = ?
+    WHERE day = ? AND month = ? AND year = ? AND branchcode = ? AND isexception = ?");
+    $updateHoliday->execute($options{title},$options{description},$options{day},$options{month},$options{year},$self->{branchcode},$isexception);
     $self->{'exception_holidays'}->{"$options{year}/$options{month}/$options{day}"}{title} = $options{title};
     $self->{'exception_holidays'}->{"$options{year}/$options{month}/$options{day}"}{description} = $options{description};
+
+    # changed the 'single_holidays' table, lets force/reset its cache
+    my $cache = Koha::Cache->get_instance();
+    $cache->clear_from_cache( 'single_holidays') ;
+
     return $self;
 }
 
@@ -465,7 +493,7 @@ sub delete_holiday {
 
     # Verify what kind of holiday that day is. For example, if it is
     # a repeatable holiday, this should check if there are some exception
-	# for that holiday rule. Otherwise, if it is a regular holiday, it´s 
+    # for that holiday rule. Otherwise, if it is a regular holiday, it´s
     # ok just deleting it.
 
     my $dbh = C4::Context->dbh();
@@ -512,6 +540,11 @@ sub delete_holiday {
             }
         }
     }
+
+    # changed the 'single_holidays' table, lets force/reset its cache
+    my $cache = Koha::Cache->get_instance();
+    $cache->clear_from_cache( 'single_holidays') ;
+
     return $self;
 }
 =head2 delete_holiday_range
@@ -537,6 +570,11 @@ sub delete_holiday_range {
     my $dbh = C4::Context->dbh();
     my $sth = $dbh->prepare("DELETE FROM special_holidays WHERE (branchcode = ?) AND (day = ?) AND (month = ?) AND (year = ?)");
     $sth->execute($self->{branchcode}, $options{day}, $options{month}, $options{year});
+
+    # changed the 'single_holidays' table, lets force/reset its cache
+    my $cache = Koha::Cache->get_instance();
+    $cache->clear_from_cache( 'single_holidays') ;
+
 }
 
 =head2 delete_holiday_range_repeatable
@@ -585,6 +623,10 @@ sub delete_exception_holiday_range {
     my $dbh = C4::Context->dbh();
     my $sth = $dbh->prepare("DELETE FROM special_holidays WHERE (branchcode = ?) AND (isexception = 1) AND (day = ?) AND (month = ?) AND (year = ?)");
     $sth->execute($self->{branchcode}, $options{day}, $options{month}, $options{year});
+
+    # changed the 'single_holidays' table, lets force/reset its cache
+    my $cache = Koha::Cache->get_instance();
+    $cache->clear_from_cache( 'single_holidays') ;
 }
 
 =head2 isHoliday
@@ -602,11 +644,10 @@ C<$year> Is the year to check whether if is a holiday or not.
 sub isHoliday {
     my ($self, $day, $month, $year) = @_;
 	# FIXME - date strings are stored in non-padded metric format. should change to iso.
-	# FIXME - should change arguments to accept C4::Dates object
 	$month=$month+0;
 	$year=$year+0;
 	$day=$day+0;
-    my $weekday = &Date::Calc::Day_of_Week($year, $month, $day) % 7; 
+    my $weekday = &Date::Calc::Day_of_Week($year, $month, $day) % 7;
     my $weekDays   = $self->get_week_days_holidays();
     my $dayMonths  = $self->get_day_month_holidays();
     my $exceptions = $self->get_exception_holidays();
@@ -617,7 +658,7 @@ sub isHoliday {
         if ((exists($weekDays->{$weekday})) ||
             (exists($dayMonths->{"$month/$day"})) ||
             (exists($singles->{"$year/$month/$day"}))) {
-		 	return 1;
+            return 1;
         } else {
             return 0;
         }
@@ -652,74 +693,6 @@ sub copy_to_branch {
       foreach grep { $_->{date} gt $today } values %{ $self->get_single_holidays };
 
     return 1;
-}
-
-=head2 addDate
-
-    my ($day, $month, $year) = $calendar->addDate($date, $offset)
-
-C<$date> is a C4::Dates object representing the starting date of the interval.
-
-C<$offset> Is the number of days that this function has to count from $date.
-
-=cut
-
-sub addDate {
-    my ($self, $startdate, $offset) = @_;
-    my ($year,$month,$day) = split("-",$startdate->output('iso'));
-	my $daystep = 1;
-	if ($offset < 0) { # In case $offset is negative
-       # $offset = $offset*(-1);
-		$daystep = -1;
-    }
-	my $daysMode = C4::Context->preference('useDaysMode');
-    if ($daysMode eq 'Datedue') {
-        ($year, $month, $day) = &Date::Calc::Add_Delta_Days($year, $month, $day, $offset );
-	 	while ($self->isHoliday($day, $month, $year)) {
-            ($year, $month, $day) = &Date::Calc::Add_Delta_Days($year, $month, $day, $daystep);
-        }
-    } elsif($daysMode eq 'Calendar') {
-        while ($offset !=  0) {
-            ($year, $month, $day) = &Date::Calc::Add_Delta_Days($year, $month, $day, $daystep);
-            if (!($self->isHoliday($day, $month, $year))) {
-                $offset = $offset - $daystep;
-			}
-        }
-	} else { ## ($daysMode eq 'Days') 
-        ($year, $month, $day) = &Date::Calc::Add_Delta_Days($year, $month, $day, $offset );
-    }
-    return(C4::Dates->new( sprintf(ISO_DATE_FORMAT,$year,$month,$day),'iso'));
-}
-
-=head2 daysBetween
-
-    my $daysBetween = $calendar->daysBetween($startdate, $enddate)
-
-C<$startdate> and C<$enddate> are C4::Dates objects that define the interval.
-
-Returns the number of non-holiday days in the interval.
-useDaysMode syspref has no effect here.
-=cut
-
-sub daysBetween {
-    my $self      = shift or return;
-    my $startdate = shift or return;
-    my $enddate   = shift or return;
-    my ($yearFrom,$monthFrom,$dayFrom) = split("-",$startdate->output('iso'));
-    my ($yearTo,  $monthTo,  $dayTo  ) = split("-",  $enddate->output('iso'));
-    if (Date_to_Days($yearFrom,$monthFrom,$dayFrom) > Date_to_Days($yearTo,$monthTo,$dayTo)) {
-        return 0;
-        # we don't go backwards  ( FIXME - handle this error better )
-    }
-    my $count = 0;
-    while (1) {
-        ($yearFrom != $yearTo or $monthFrom != $monthTo or $dayFrom != $dayTo) or last; # if they all match, it's the last day
-        unless ($self->isHoliday($dayFrom, $monthFrom, $yearFrom)) {
-            $count++;
-        }
-        ($yearFrom, $monthFrom, $dayFrom) = &Date::Calc::Add_Delta_Days($yearFrom, $monthFrom, $dayFrom, 1);
-    }
-    return($count);
 }
 
 1;

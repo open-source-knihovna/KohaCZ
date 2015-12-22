@@ -1,5 +1,5 @@
     [% INCLUDE 'doc-head-open.inc' %]
-    <title>Koha &rsaquo; Tools &rsaquo; Patron card creator</title>
+    <title>Koha &rsaquo; Tools &rsaquo; Patron card creator &rsaquo; Layout &rsaquo; [% IF ( layout_id ) %]Edit ([% layout_id %])[% ELSE %]New[% END %]</title>
     [% INCLUDE 'doc-head-close.inc' %]
     <script type="text/JavaScript" language="JavaScript">
         //<![CDATA[
@@ -113,19 +113,26 @@
         <a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo;
         <a href="/cgi-bin/koha/tools/tools-home.pl">Tools</a> &rsaquo;
         <a href="/cgi-bin/koha/patroncards/home.pl">Patron card creator</a> &rsaquo;
-        <a href="/cgi-bin/koha/patroncards/manage.pl?card_element=layout">Manage patron card layouts</a> &rsaquo;
-        [% IF ( layout_id ) %]Edit[% ELSE %]Create[% END %] patron card layout
+        <a href="/cgi-bin/koha/patroncards/manage.pl?card_element=layout">Layouts</a> &rsaquo;
+        [% IF ( layout_id ) %]Edit ([% layout_id %])[% ELSE %]New[% END %]
     </div>
     <div id="doc3" class="yui-t2">
         <div id="bd">
             <div id="yui-main">
                 <div class="yui-b">
+                    <div class="yui-g">
+                    [% INCLUDE 'patroncards-toolbar.inc' %]
+                        <div class="yui-u first">
+
+                        </div>
+                    </div>
+
                 <!-- NOTE: The order of the elements on this form is crictical to correct processing. You've been warned...  -->
                 <form name="input" action="/cgi-bin/koha/patroncards/edit-layout.pl" method="get">
                 <div class="yui-g">
                 <div class="yui-g first">
                         <fieldset class="rows">
-                            <legend>[% IF ( layout_id ) %]Edit[% ELSE %]Create[% END %] Patron card text layout</legend>
+                            <legend>[% IF ( layout_id ) %]Edit[% ELSE %]Create[% END %] patron card text layout</legend>
                             <ol>
                                 <li>
                                 <fieldset>
@@ -346,7 +353,7 @@
                 </div>
                 <div class="yui-g">
                     <fieldset class="rows">
-                    <legend>[% IF ( layout_id ) %]Edit[% ELSE %]Create[% END %] Patron card graphic layout</legend>
+                    <legend>[% IF ( layout_id ) %]Edit[% ELSE %]Create[% END %] patron card graphic layout</legend>
                     <ol>
 <!--
                             <li>
@@ -382,6 +389,14 @@
                                 <li>
                                     <label for="barcode_lly">Lower left Y coordinate: </label>
                                     <input type="text" name="barcode_lly" id="barcode_lly" size="2" value="[% barcode_lly |html %]" />
+                                </li>
+                                <li>
+                                    <label for="barcode_height_scale">Scale height (relative to card): </label>
+                                    <input type="text" name="barcode_height_scale" id="barcode_height_scale" size="2" value="[% barcode_height_scale |html %]" />
+                                </li>
+                                <li>
+                                    <label for="barcode_width_scale">Scale width (relative to card): </label>
+                                    <input type="text" name="barcode_width_scale" id="barcode_width_scale" size="2" value="[% barcode_width_scale |html %]" />
                                 </li>
                                 <li>
                                     <label for="barcode_type">Barcode type: </label>
@@ -531,16 +546,13 @@
                 </div>
                 </div>
                     <fieldset class="action">
-                        <input type="submit" value="Save" />
+                        <input class="btn btn-default" type="submit" value="Save" />
                         <a class="cancel" href="/cgi-bin/koha/patroncards/manage.pl?card_element=layout">Cancel</a>
                         <input type="hidden" name="op" value="save" />
                         <input type="hidden" name="layout_id" value="[% layout_id %]" />
                     </fieldset>
                 </form>
                 </div>
-            </div>
-            <div class="yui-b">
-                [% INCLUDE 'patroncards-menu.inc' %]
             </div>
         </div>
         [% INCLUDE 'intranet-bottom.inc' %]

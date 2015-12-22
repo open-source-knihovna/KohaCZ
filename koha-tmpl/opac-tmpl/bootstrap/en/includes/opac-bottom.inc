@@ -1,4 +1,5 @@
 [% UNLESS ( is_popup ) %]
+    [% SET OpacLangSelectorMode = Koha.Preference('OpacLangSelectorMode') %]
     [% IF ( opaccredits ) %]
         <div class="container-fluid">
             <div class="row-fluid">
@@ -29,7 +30,7 @@
     [% END # / OpacKohaUrl %]
 
 </div> <!-- / #wrap in masthead.inc -->
-
+[% IF OpacLangSelectorMode == 'both' || OpacLangSelectorMode == 'footer' %]
     [% IF ( opaclanguagesdisplay ) %]
         [% IF ( languages_loop && opaclanguagesdisplay ) %]
             [% UNLESS ( one_language_enabled ) %]
@@ -37,7 +38,7 @@
                     <div class="navbar-inner">
                         <ul id="i18nMenu" class="nav">
                             <li><p class="lang navbar-text"><strong>Languages:&nbsp;</strong></p></li>
-                            [% FOREACH languages_loo IN languages_loop %]
+                            [% FOREACH languages_loo IN languages_loop.sort('rfc4646_subtag') %]
                                 [% IF ( languages_loo.group_enabled ) %]
                                     [% IF ( languages_loo.plural ) %]
                                         <li class="dropdown">
@@ -71,6 +72,7 @@
             [% END # / UNLESS ( one_language_enabled ) %]
         [% END # / IF ( languages_loop && opaclanguagesdisplay ) %]
     [% END # / IF opaclanguagesdisplay %]
+[% END %]
 [% END # / UNLESS is_popup %]
 
 
@@ -262,10 +264,10 @@ $(document).ready(function() {
 </script>
 [% PROCESS jsinclude %]
 
-[% IF ( opacuserjs ) %]
+[% IF ( OPACUserJS ) %]
     <script type="text/javascript">
         //<![CDATA[
-        [% opacuserjs %]
+        [% OPACUserJS %]
         //]]>
     </script>
 [% END %]

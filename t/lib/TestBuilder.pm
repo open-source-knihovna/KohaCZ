@@ -72,8 +72,8 @@ sub new {
     bless( $self, $class );
 
     $self->schema( Koha::Database->new()->schema );
-    $self->schema->txn_begin();
     $self->schema->storage->sql_maker->quote_char('`');
+
     return $self;
 }
 
@@ -353,13 +353,6 @@ sub _gen_blob {
     my ($self, $params) = @_;;
     return 'b';
 }
-
-
-sub DESTROY {
-    my $self = shift;
-    $self->schema->txn_rollback();
-}
-
 
 =head1 NAME
 

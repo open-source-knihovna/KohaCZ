@@ -222,7 +222,7 @@ if (scalar keys %params > 0) {
 
     if ($format eq 'html') {
         # Build pagination bar
-        my $url = $cgi->url(-absolute => 1);
+        my $url = '/cgi-bin/koha/catalogue/itemsearch.pl';
         my @params;
         foreach my $p (keys %params) {
             my @v = $cgi->param($p);
@@ -258,7 +258,7 @@ if ($format eq 'html') {
     my @itemtypes = C4::ItemType->all();
     foreach my $itemtype (@itemtypes) {
         $itemtype->{value} = $itemtype->{itemtype};
-        $itemtype->{label} = $itemtype->{description};
+        $itemtype->{label} = $itemtype->{translated_description};
     }
     my $ccode_avcode = GetAuthValCode('items.ccode') || 'CCODE';
     my $ccodes = GetAuthorisedValues($ccode_avcode);

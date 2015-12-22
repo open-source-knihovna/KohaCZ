@@ -30,6 +30,9 @@ script to execute returns of books
 use strict;
 use warnings;
 
+use Carp 'verbose';
+$SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
+
 use CGI qw ( -utf8 );
 use DateTime;
 use C4::Context;
@@ -84,6 +87,7 @@ my $printers = GetPrinters();
 my $userenv = C4::Context->userenv;
 my $userenv_branch = $userenv->{'branch'} // '';
 my $printer = $userenv->{'branchprinter'} // '';
+my $forgivemanualholdsexpire = $query->param('forgivemanualholdsexpire');
 
 my $overduecharges = (C4::Context->preference('finesMode') && C4::Context->preference('finesMode') ne 'off');
 #
@@ -144,12 +148,18 @@ if ( $query->param('resbarcode') ) {
     my $resbarcode     = $query->param('resbarcode');
     my $diffBranchReturned = $query->param('diffBranch');
     my $iteminfo   = GetBiblioFromItemNumber($item);
+    my $cancel_reserve = $query->param('cancel_reserve');
     # fix up item type for display
     $iteminfo->{'itemtype'} = C4::Context->preference('item-level_itypes') ? $iteminfo->{'itype'} : $iteminfo->{'itemtype'};
-    my $diffBranchSend = ($userenv_branch ne $diffBranchReturned) ? $diffBranchReturned : undef;
-# diffBranchSend tells ModReserveAffect whether document is expected in this library or not,
-# i.e., whether to apply waiting status
-    ModReserveAffect( $item, $borrowernumber, $diffBranchSend);
+
+    if ( $cancel_reserve ) {
+        CancelReserve({ borrowernumber => $borrowernumber, itemnumber => $item, charge_cancel_fee => !$forgivemanualholdsexpire });
+    } else {
+        my $diffBranchSend = ($userenv_branch ne $diffBranchReturned) ? $diffBranchReturned : undef;
+        # diffBranchSend tells ModReserveAffect whether document is expected in this library or not,
+        # i.e., whether to apply waiting status
+        ModReserveAffect( $item, $borrowernumber, $diffBranchSend);
+    }
 #   check if we have other reserves for this document, if we have a return send the message of transfer
     my ( $messages, $nextreservinfo ) = GetOtherReserves($item);
 
@@ -201,9 +211,8 @@ my $return_date_override_remember =
   $query->param('return_date_override_remember');
 if ($return_date_override) {
     if ( C4::Context->preference('SpecifyReturnDate') ) {
-        # FIXME we really need to stop adding more uses of C4::Dates
-        if ( $return_date_override =~ C4::Dates->regexp('syspref') ) {
-
+        my $return_date_override_dt = eval {dt_from_string( $return_date_override ) };
+        if ( $return_date_override_dt ) {
             # note that we've overriden the return date
             $template->param( return_date_was_overriden => 1);
             # Save the original format if we are remembering for this series
@@ -212,9 +221,8 @@ if ($return_date_override) {
                 return_date_override_remember => 1
             ) if ($return_date_override_remember);
 
-            my $dt = dt_from_string($return_date_override);
             $return_date_override =
-              DateTime::Format::MySQL->format_datetime($dt);
+              DateTime::Format::MySQL->format_datetime( $return_date_override_dt );
         }
     }
     else {
@@ -249,10 +257,6 @@ if ($barcode) {
 #
 # save the return
 #
-    ( $returned, $messages, $issueinformation, $borrower ) =
-      AddReturn( $barcode, $userenv_branch, $exemptfine, $dropboxmode, $return_date_override, $dropboxdate );
-    my $homeorholdingbranchreturn = C4::Context->preference('HomeOrHoldingBranchReturn');
-    $homeorholdingbranchreturn ||= 'homebranch';
 
     # get biblio description
     my $biblio = GetBiblioFromItemNumber($itemnumber);
@@ -269,10 +273,14 @@ if ($barcode) {
         );
     }
 
+    # make sure return branch respects home branch circulation rules, default to homebranch
+    my $hbr = GetBranchItemRule($biblio->{'homebranch'}, $itemtype->{itemtype})->{'returnbranch'} || "homebranch";
+    my $returnbranch = $biblio->{$hbr} ;
+
     $template->param(
         title            => $biblio->{'title'},
         homebranch       => $biblio->{'homebranch'},
-        homebranchname   => GetBranchName( $biblio->{$homeorholdingbranchreturn} ),
+        returnbranch     => $returnbranch,
         author           => $biblio->{'author'},
         itembarcode      => $biblio->{'barcode'},
         itemtype         => $biblio->{'itemtype'},
@@ -288,6 +296,10 @@ if ($barcode) {
         first   => 1,
         barcode => $barcode,
     );
+
+    # do the return
+    ( $returned, $messages, $issueinformation, $borrower ) =
+      AddReturn( $barcode, $userenv_branch, $exemptfine, $dropboxmode, $return_date_override, $dropboxdate );
 
     if ($returned) {
         my $time_now = DateTime->now( time_zone => C4::Context->tz )->truncate( to => 'minute');
@@ -331,12 +343,7 @@ if ($barcode) {
             }
         }
     }
-    elsif ( !$messages->{'BadBarcode'} ) {
-        $input{duedate}   = 0;
-        $returneditems{0} = $barcode;
-        $riduedate{0}     = 0;
-        push( @inputloop, \%input );
-    }
+    $template->param( privacy => $borrower->{privacy} );
 }
 $template->param( inputloop => \@inputloop );
 
@@ -358,7 +365,7 @@ if ( $messages->{'WasTransfered'} ) {
 if ( $messages->{'NeedsTransfer'} ){
     $template->param(
         found          => 1,
-        needstransfer  => 1,
+        needstransfer  => $messages->{'NeedsTransfer'},
         itemnumber     => $itemnumber,
     );
 }
@@ -570,17 +577,18 @@ foreach ( sort { $a <=> $b } keys %returneditems ) {
         my $item   = GetItem( GetItemnumberFromBarcode($bar_code) );
         # fix up item type for display
         $biblio->{'itemtype'} = C4::Context->preference('item-level_itypes') ? $biblio->{'itype'} : $biblio->{'itemtype'};
-        $ri{itembiblionumber} = $biblio->{'biblionumber'};
-        $ri{itemtitle}        = $biblio->{'title'};
-        $ri{itemauthor}       = $biblio->{'author'};
-        $ri{itemcallnumber}   = $biblio->{'itemcallnumber'};
-        $ri{itemtype}         = $biblio->{'itemtype'};
-        $ri{itemnote}         = $biblio->{'itemnotes'};
-        $ri{ccode}            = $biblio->{'ccode'};
-        $ri{itemnumber}       = $biblio->{'itemnumber'};
-        $ri{barcode}          = $bar_code;
-        $ri{homebranch}       = $item->{'homebranch'};
-        $ri{holdingbranch}    = $item->{'holdingbranch'};
+        $ri{itembiblionumber}    = $biblio->{'biblionumber'};
+        $ri{itemtitle}           = $biblio->{'title'};
+        $ri{itemauthor}          = $biblio->{'author'};
+        $ri{itemcallnumber}      = $biblio->{'itemcallnumber'};
+        $ri{itemtype}            = $biblio->{'itemtype'};
+        $ri{itemnote}            = $biblio->{'itemnotes'};
+        $ri{itemnotes_nonpublic} = $item->{'itemnotes_nonpublic'};
+        $ri{ccode}               = $biblio->{'ccode'};
+        $ri{itemnumber}          = $biblio->{'itemnumber'};
+        $ri{barcode}             = $bar_code;
+        $ri{homebranch}          = $item->{'homebranch'};
+        $ri{holdingbranch}       = $item->{'holdingbranch'};
 
         $ri{location}         = $biblio->{'location'};
         my $shelfcode = $ri{'location'};
@@ -609,8 +617,9 @@ $template->param(
     exemptfine     => $exemptfine,
     dropboxmode    => $dropboxmode,
     dropboxdate    => output_pref($dropboxdate),
+    forgivemanualholdsexpire => $forgivemanualholdsexpire,
     overduecharges => $overduecharges,
-    soundon        => C4::Context->preference("SoundOn"),
+    AudioAlerts        => C4::Context->preference("AudioAlerts"),
     BlockReturnOfWithdrawnItems => C4::Context->preference("BlockReturnOfWithdrawnItems"),
 );
 

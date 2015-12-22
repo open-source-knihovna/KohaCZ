@@ -35,7 +35,7 @@ use C4::Biblio;
 use C4::Items;
 use C4::Koha;                  # GetItemTypes
 use C4::Branch; # GetBranches
-use C4::Dates qw/format_date/;
+use Koha::DateUtils;
 
 my $query = new CGI;
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
@@ -68,8 +68,10 @@ if ( $get_items ) {
 
     my $items = GetLostItems( \%where );
     foreach my $it (@$items) {
-        $it->{'datelastseen'} = format_date($it->{'datelastseen'});
+        $it->{'datelastseen'} = eval { output_pref( { dt => dt_from_string( $it->{'datelastseen'} ), dateonly => 1 }); }
+                   if ( $it->{'datelastseen'} );
     }
+
     $template->param(
                      total       => scalar @$items,
                      itemsloop   => $items,
@@ -85,10 +87,10 @@ if ( $get_items ) {
 # getting all itemtypes
 my $itemtypes = &GetItemTypes();
 my @itemtypesloop;
-foreach my $thisitemtype ( sort {$itemtypes->{$a}->{description} cmp $itemtypes->{$b}->{description}} keys %$itemtypes ) {
+foreach my $thisitemtype ( sort {$itemtypes->{$a}->{translated_description} cmp $itemtypes->{$b}->{translated_description}} keys %$itemtypes ) {
     my %row = (
         value       => $thisitemtype,
-        description => $itemtypes->{$thisitemtype}->{'description'},
+        description => $itemtypes->{$thisitemtype}->{'translated_description'},
     );
     push @itemtypesloop, \%row;
 }

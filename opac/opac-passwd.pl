@@ -40,7 +40,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
         query           => $query,
         type            => "opac",
         authnotrequired => 0,
-        flagsrequired   => { borrow => 1 },
         debug           => 1,
     }
 );
@@ -55,7 +54,13 @@ if ( C4::Context->preference("OpacPasswordChange") ) {
         && $query->param('Confirm') )
     {
         if ( goodkey( $dbh, $borrowernumber, $query->param('Oldkey') ) ) {
-            if ( $query->param('Newkey') eq $query->param('Confirm')
+            if ( $query->param('Newkey') =~ m|^\s+| or $query->param('Newkey') =~ m|\s+$| ) {
+                $template->param(
+                    Error_messages => 1,
+                    PasswordContainsTrailingSpaces => 1,
+                );
+            }
+            elsif ( $query->param('Newkey') eq $query->param('Confirm')
                 && length( $query->param('Confirm') ) >= $minpasslen )
             {    # Record password
                 my $clave = hash_password( $query->param('Newkey') );
@@ -105,7 +110,7 @@ $template->param(firstname => $borr->{'firstname'},
 							passwdview => 1,
 );
 
-output_html_with_http_headers $query, $cookie, $template->output;
+output_html_with_http_headers $query, $cookie, $template->output, undef, { force_no_caching => 1 };
 
 sub goodkey {
     my ( $dbh, $borrowernumber, $key ) = @_;

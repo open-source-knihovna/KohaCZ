@@ -12,12 +12,14 @@ use C4::Context;
 
 use Data::Dumper;
 
-use Test::More tests => 21;
-
+use Test::More tests => 23;
 
 use C4::Branch;
 use C4::ItemType;
 use C4::Members;
+use Koha::Database;
+
+use t::lib::TestBuilder;
 
 BEGIN {
     use FindBin;
@@ -26,29 +28,38 @@ BEGIN {
     use_ok('C4::HoldsQueue');
 }
 
-# Start transaction
+my $schema = Koha::Database->schema;
+$schema->storage->txn_begin;
 my $dbh = C4::Context->dbh;
-$dbh->{AutoCommit} = 0;
-$dbh->{RaiseError} = 1;
+
+my $builder = t::lib::TestBuilder->new;
+
+my $library1 = $builder->build({
+    source => 'Branch',
+});
+my $library2 = $builder->build({
+    source => 'Branch',
+});
+my $library3 = $builder->build({
+    source => 'Branch',
+});
 
 my $TITLE = "Test Holds Queue XXX";
 
-my %data = (
-    cardnumber => 'CARDNUMBER42',
-    firstname =>  'my firstname',
-    surname => 'my surname',
-    categorycode => 'S',
-    branchcode => 'CPL',
-);
+my $borrower = $builder->build({
+    source => 'Borrower',
+    value => {
+        categorycode => 'S',
+        branchcode => $library1->{branchcode},
+    }
+});
 
-my $borrowernumber = AddMember(%data);
-my $borrower = GetMember( borrowernumber => $borrowernumber );
+my $borrowernumber = $borrower->{borrowernumber};
 # Set special (for this test) branches
 my $borrower_branchcode = $borrower->{branchcode};
-my $branches = C4::Branch::GetBranches;
-my @other_branches = grep { $_ ne $borrower_branchcode } keys %$branches;
-my $least_cost_branch_code = pop @other_branches
-  or BAIL_OUT("No point testing only one branch...");
+my @branchcodes = ( $library1->{branchcode}, $library2->{branchcode}, $library3->{branchcode} );
+my @other_branches = ( $library2->{branchcode}, $library3->{branchcode} );
+my $least_cost_branch_code = pop @other_branches;
 my @item_types = C4::ItemType->all;
 my $itemtype = grep { $_->{notforloan} == 1 } @item_types
   or BAIL_OUT("No adequate itemtype");
@@ -95,11 +106,10 @@ foreach ( $borrower_branchcode, $least_cost_branch_code, @other_branches ) {
 
 # Remove existing reserves, makes debugging easier
 $dbh->do("DELETE FROM reserves");
-my $constraint = undef;
 my $bibitems = undef;
 my $priority = 1;
 # Make a reserve
-AddReserve ( $borrower_branchcode, $borrowernumber, $biblionumber, $constraint, $bibitems,  $priority );
+AddReserve ( $borrower_branchcode, $borrowernumber, $biblionumber, $bibitems,  $priority );
 #                           $resdate, $expdate, $notes, $title, $checkitem, $found
 $dbh->do("UPDATE reserves SET reservedate = DATE_SUB( reservedate, INTERVAL 1 DAY )");
 
@@ -156,8 +166,8 @@ ok(
 # XXX All this tests are for borrower branch pick-up.
 # Maybe needs expanding to homebranch or holdingbranch pick-up.
 
-# Cleanup
-$dbh->rollback;
+$schema->txn_rollback;
+$schema->txn_begin;
 
 ### Test holds queue builder does not violate holds policy ###
 
@@ -168,39 +178,40 @@ $dbh->do("DELETE FROM default_circ_rules");
 
 C4::Context->set_preference('UseTransportCostMatrix', 0);
 
-my @branchcodes = keys %$branches;
 ( $itemtype ) = @{ $dbh->selectrow_arrayref("SELECT itemtype FROM itemtypes LIMIT 1") };
 
-my $borrowernumber1 = AddMember(
-    (
-        cardnumber   => 'CARDNUMBER1',
-        firstname    => 'Firstname',
-        surname      => 'Surname',
+$library1 = $builder->build({
+    source => 'Branch',
+});
+$library2 = $builder->build({
+    source => 'Branch',
+});
+$library3 = $builder->build({
+    source => 'Branch',
+});
+@branchcodes = ( $library1->{branchcode}, $library2->{branchcode}, $library3->{branchcode} );
+
+my $borrower1 = $builder->build({
+    source => 'Borrower',
+    value => {
         categorycode => 'S',
-        branchcode   => $branchcodes[0],
-    )
-);
-my $borrowernumber2 = AddMember(
-    (
-        cardnumber   => 'CARDNUMBER2',
-        firstname    => 'Firstname',
-        surname      => 'Surname',
+        branchcode => $branchcodes[0],
+    },
+});
+my $borrower2 = $builder->build({
+    source => 'Borrower',
+    value => {
         categorycode => 'S',
-        branchcode   => $branchcodes[1],
-    )
-);
-my $borrowernumber3 = AddMember(
-    (
-        cardnumber   => 'CARDNUMBER3',
-        firstname    => 'Firstname',
-        surname      => 'Surname',
+        branchcode => $branchcodes[1],
+    },
+});
+my $borrower3 = $builder->build({
+    source => 'Borrower',
+    value => {
         categorycode => 'S',
-        branchcode   => $branchcodes[2],
-    )
-);
-my $borrower1 = GetMember( borrowernumber => $borrowernumber1 );
-my $borrower2 = GetMember( borrowernumber => $borrowernumber2 );
-my $borrower3 = GetMember( borrowernumber => $borrowernumber3 );
+        branchcode => $branchcodes[2],
+    },
+});
 
 $dbh->do(qq{
     INSERT INTO biblio (
@@ -278,8 +289,6 @@ my $sth = $dbh->prepare(q{
 $sth->execute( $borrower1->{borrowernumber}, $biblionumber, $branchcodes[0], 1 );
 $sth->execute( $borrower2->{borrowernumber}, $biblionumber, $branchcodes[0], 2 );
 $sth->execute( $borrower3->{borrowernumber}, $biblionumber, $branchcodes[0], 3 );
-#warn "RESERVES" . Data::Dumper::Dumper( $dbh->selectall_arrayref("SELECT * FROM reserves", { Slice => {} }) );
-#warn "ITEMS: " . Data::Dumper::Dumper( $dbh->selectall_arrayref("SELECT * FROM items WHERE biblionumber = $biblionumber", { Slice => {} }) );
 
 my $holds_queue;
 
@@ -287,19 +296,124 @@ $dbh->do("DELETE FROM default_circ_rules");
 $dbh->do("INSERT INTO default_circ_rules ( holdallowed ) VALUES ( 1 )");
 C4::HoldsQueue::CreateQueue();
 $holds_queue = $dbh->selectall_arrayref("SELECT * FROM tmp_holdsqueue", { Slice => {} });
-ok( @$holds_queue == 2, "Holds queue filling correct number for default holds policy 'from home library'" );
-ok( $holds_queue->[0]->{cardnumber} eq 'CARDNUMBER1', "Holds queue filling 1st correct hold for default holds policy 'from home library'");
-ok( $holds_queue->[1]->{cardnumber} eq 'CARDNUMBER2', "Holds queue filling 2nd correct hold for default holds policy 'from home library'");
+is( @$holds_queue, 2, "Holds queue filling correct number for default holds policy 'from home library'" );
+is( $holds_queue->[0]->{cardnumber}, $borrower1->{cardnumber}, "Holds queue filling 1st correct hold for default holds policy 'from home library'");
+is( $holds_queue->[1]->{cardnumber}, $borrower2->{cardnumber}, "Holds queue filling 2nd correct hold for default holds policy 'from home library'");
 
 $dbh->do("DELETE FROM default_circ_rules");
 $dbh->do("INSERT INTO default_circ_rules ( holdallowed ) VALUES ( 2 )");
 C4::HoldsQueue::CreateQueue();
 $holds_queue = $dbh->selectall_arrayref("SELECT * FROM tmp_holdsqueue", { Slice => {} });
-ok( @$holds_queue == 3, "Holds queue filling correct number for holds for default holds policy 'from any library'" );
+is( @$holds_queue, 3, "Holds queue filling correct number for holds for default holds policy 'from any library'" );
 #warn "HOLDS QUEUE: " . Data::Dumper::Dumper( $holds_queue );
 
+# Bug 14297
+$itemtype = $item_types[0]->{itemtype};
+$borrowernumber = $borrower3->{borrowernumber};
+my $library_A = $library1->{branchcode};
+my $library_B = $library2->{branchcode};
+my $library_C = $borrower3->{branchcode};
+$dbh->do("DELETE FROM reserves");
+$dbh->do("DELETE FROM issues");
+$dbh->do("DELETE FROM items");
+$dbh->do("DELETE FROM biblio");
+$dbh->do("DELETE FROM biblioitems");
+$dbh->do("DELETE FROM transport_cost");
+$dbh->do("DELETE FROM tmp_holdsqueue");
+$dbh->do("DELETE FROM hold_fill_targets");
+$dbh->do("DELETE FROM default_branch_circ_rules");
+$dbh->do("DELETE FROM default_branch_item_rules");
+$dbh->do("DELETE FROM default_circ_rules");
+$dbh->do("DELETE FROM branch_item_rules");
+
+$dbh->do("
+    INSERT INTO biblio (frameworkcode, author, title, datecreated) VALUES ('', 'Koha test', '$TITLE', '2011-02-01')
+");
+
+$biblionumber = $dbh->selectrow_array("SELECT biblionumber FROM biblio WHERE title = '$TITLE'")
+  or BAIL_OUT("Cannot find newly created biblio record");
+
+$dbh->do("INSERT INTO biblioitems (biblionumber, marcxml, itemtype) VALUES ($biblionumber, '', '$itemtype')");
+
+$biblioitemnumber =
+  $dbh->selectrow_array("SELECT biblioitemnumber FROM biblioitems WHERE biblionumber = $biblionumber")
+  or BAIL_OUT("Cannot find newly created biblioitems record");
+
+$dbh->do("
+    INSERT INTO items (biblionumber, biblioitemnumber, homebranch, holdingbranch, notforloan, damaged, itemlost, withdrawn, onloan, itype)
+    VALUES ($biblionumber, $biblioitemnumber, '$library_A', '$library_A', 0, 0, 0, 0, NULL, '$itemtype')
+");
+
+$dbh->do("
+    INSERT INTO items (biblionumber, biblioitemnumber, homebranch, holdingbranch, notforloan, damaged, itemlost, withdrawn, onloan, itype)
+    VALUES ($biblionumber, $biblioitemnumber, '$library_B', '$library_B', 0, 0, 0, 0, NULL, '$itemtype')
+");
+
+$dbh->do("
+    INSERT INTO branch_item_rules ( branchcode, itemtype, holdallowed, returnbranch ) VALUES
+    ( '$library_A', '$itemtype', 2, 'homebranch' ), ( '$library_B', '$itemtype', 1, 'homebranch' );
+");
+
+$dbh->do( "UPDATE systempreferences SET value = ? WHERE variable = 'StaticHoldsQueueWeight'",
+    undef, join( ',', $library_B, $library_A, $library_C ) );
+$dbh->do( "UPDATE systempreferences SET value = 0 WHERE variable = 'RandomizeHoldsQueueWeight'" );
+
+my $reserve_id = AddReserve ( $library_C, $borrowernumber, $biblionumber, '', 1 );
+C4::HoldsQueue::CreateQueue();
+$holds_queue = $dbh->selectall_arrayref("SELECT * FROM tmp_holdsqueue", { Slice => {} });
+is( @$holds_queue, 1, "Bug 14297 - Holds Queue building ignoring holds where pickup & home branch don't match and item is not from le");
+# End Bug 14297
+
+# Bug 15062
+$itemtype = $item_types[0]->{itemtype};
+$borrowernumber = $borrower2->{borrowernumber};
+$library_A = $library1->{branchcode};
+$library_B = $library2->{branchcode};
+$dbh->do("DELETE FROM reserves");
+$dbh->do("DELETE FROM issues");
+$dbh->do("DELETE FROM items");
+$dbh->do("DELETE FROM biblio");
+$dbh->do("DELETE FROM biblioitems");
+$dbh->do("DELETE FROM transport_cost");
+$dbh->do("DELETE FROM tmp_holdsqueue");
+$dbh->do("DELETE FROM hold_fill_targets");
+$dbh->do("DELETE FROM default_branch_circ_rules");
+$dbh->do("DELETE FROM default_branch_item_rules");
+$dbh->do("DELETE FROM default_circ_rules");
+$dbh->do("DELETE FROM branch_item_rules");
+
+C4::Context->set_preference("UseTransportCostMatrix",1);
+
+my $tc_rs = $schema->resultset('TransportCost');
+$tc_rs->create({ frombranch => $library_A, tobranch => $library_B, cost => 0, disable_transfer => 1 });
+$tc_rs->create({ frombranch => $library_B, tobranch => $library_A, cost => 0, disable_transfer => 1 });
+
+$dbh->do("
+    INSERT INTO biblio (frameworkcode, author, title, datecreated) VALUES ('', 'Koha test', '$TITLE', '2011-02-01')
+");
+
+$biblionumber = $dbh->selectrow_array("SELECT biblionumber FROM biblio WHERE title = '$TITLE'")
+  or BAIL_OUT("Cannot find newly created biblio record");
+
+$dbh->do("INSERT INTO biblioitems (biblionumber, marcxml, itemtype) VALUES ($biblionumber, '', '$itemtype')");
+
+$biblioitemnumber =
+  $dbh->selectrow_array("SELECT biblioitemnumber FROM biblioitems WHERE biblionumber = $biblionumber")
+  or BAIL_OUT("Cannot find newly created biblioitems record");
+
+$dbh->do("
+    INSERT INTO items (biblionumber, biblioitemnumber, homebranch, holdingbranch, notforloan, damaged, itemlost, withdrawn, onloan, itype)
+    VALUES ($biblionumber, $biblioitemnumber, '$library_A', '$library_A', 0, 0, 0, 0, NULL, '$itemtype')
+");
+
+$reserve_id = AddReserve ( $library_B, $borrowernumber, $biblionumber, '', 1 );
+C4::HoldsQueue::CreateQueue();
+$holds_queue = $dbh->selectall_arrayref("SELECT * FROM tmp_holdsqueue", { Slice => {} });
+is( @$holds_queue, 0, "Bug 15062 - Holds queue with Transport Cost Matrix will transfer item even if transfers disabled");
+# End Bug 15062
+
 # Cleanup
-$dbh->rollback;
+$schema->storage->txn_rollback;
 
 ### END Test holds queue builder does not violate holds policy ###
 

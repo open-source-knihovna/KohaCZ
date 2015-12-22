@@ -87,6 +87,13 @@ Administration:
                   yes: Prevent
                   no: "Don't prevent"
             - staff (but not superlibrarians) from modifying objects (holds, items, patrons, etc.) belonging to other libraries.
+        -
+            - pref: IndependentBranchesPatronModifications
+              default: 0
+              choices:
+                  yes: Prevent
+                  no: "Don't prevent"
+            - staff (but not superlibrarians) from viewing and approving/denying patron modification requests for patrons belonging to other libraries.
     CAS Authentication:
         -
             - pref: casAuthentication
@@ -129,7 +136,7 @@ Administration:
               choices:
                   yes: Share
                   no: "Don't share"
-            - anonymous Koha usage data with the Koha community. You can see the data on the <a href="http://hea.koha-community.org">Hea Koha community website</a>.
+            - anonymous Koha usage data with the Koha community. You can see the data on the <a href="http://hea.koha-community.org">Hea Koha community website</a>. You have to run misc/cronjobs/share_usage_with_koha_community.pl in a cronjob.
         -
             - The library name
             - pref: UsageStatsLibraryName

@@ -21,10 +21,10 @@ require Exporter;
 use C4::Context;
 use C4::Biblio;    # GetMarcFromKohaField, GetBiblioData
 use C4::Koha;      # getFacets
+use Koha::DateUtils;
 use Lingua::Stem;
 use C4::Search::PazPar2;
 use XML::Simple;
-use C4::Dates qw(format_date);
 use C4::Members qw(GetHideLostItemsPreference);
 use C4::XSLT;
 use C4::Branch;
@@ -69,7 +69,6 @@ This module provides searching functions for Koha's bibliographic databases
   &buildQuery
   &GetDistinctValues
   &enabled_staff_search_views
-  &PurgeSearchHistory
 );
 
 # make all your functions, whether exported or not;
@@ -171,7 +170,7 @@ This function provides a simple search API on the bibliographic catalog
 
     * $query can be a simple keyword or a complete CCL query
     * @servers is optional. Defaults to biblioserver as found in koha-conf.xml
-    * $offset - If present, represents the number of records at the beggining to omit. Defaults to 0
+    * $offset - If present, represents the number of records at the beginning to omit. Defaults to 0
     * $max_results - if present, determines the maximum number of records to fetch. undef is All. defaults to undef.
 
 
@@ -571,7 +570,7 @@ sub getRecords {
                                     {
                                         $facet_label_value =
                                           $itemtypes->{$one_facet}
-                                          ->{'description'};
+                                          ->{translated_description};
                                     }
                                 }
 
@@ -922,7 +921,7 @@ sub _remove_stopwords {
 
 # remove stopwords from operand : parse all stopwords & remove them (case insensitive)
 #       we use IsAlpha unicode definition, to deal correctly with diacritics.
-#       otherwise, a French word like "leçon" woudl be split into "le" "çon", "le"
+#       otherwise, a French word like "leçon" would be split into "le" "çon", "le"
 #       is a stopword, we'd get "çon" and wouldn't find anything...
 #
 		foreach ( keys %{ C4::Context->stopwords } ) {
@@ -1133,6 +1132,7 @@ sub getIndexes{
                     'Date-of-publication',
                     'Dewey-classification',
                     'Dissertation-information',
+                    'diss',
                     'EAN',
                     'extent',
                     'fic',
@@ -1198,6 +1198,8 @@ sub getIndexes{
                     'popularity',
                     'pubdate',
                     'Publisher',
+                    'Provider',
+                    'pv',
                     'Record-control-number',
                     'rcn',
                     'Record-type',
@@ -1870,28 +1872,16 @@ sub searchResults {
     # get notforloan authorised value list (see $shelflocations  FIXME)
     my $notforloan_authorised_value = GetAuthValCode('items.notforloan','');
 
-    #Build itemtype hash
-    #find itemtype & itemtype image
-    my %itemtypes;
-    $bsth =
-      $dbh->prepare(
-        "SELECT itemtype,description,imageurl,summary,notforloan FROM itemtypes"
-      );
-    $bsth->execute();
-    while ( my $bdata = $bsth->fetchrow_hashref ) {
-		foreach (qw(description imageurl summary notforloan)) {
-        	$itemtypes{ $bdata->{'itemtype'} }->{$_} = $bdata->{$_};
-		}
-    }
+    #Get itemtype hash
+    my %itemtypes = %{ GetItemTypes() };
 
     #search item field code
     my ($itemtag, undef) = &GetMarcFromKohaField( "items.itemnumber", "" );
 
     ## find column names of items related to MARC
-    my $sth2 = $dbh->prepare("SHOW COLUMNS FROM items");
-    $sth2->execute;
     my %subfieldstosearch;
-    while ( ( my $column ) = $sth2->fetchrow ) {
+    my @columns = Koha::Database->new()->schema()->resultset('Item')->result_source->columns;
+    for my $column ( @columns ) {
         my ( $tagfield, $tagsubfield ) =
           &GetMarcFromKohaField( "items." . $column, "" );
         if ( defined $tagsubfield ) {
@@ -1955,7 +1945,7 @@ sub searchResults {
 
 		# edition information, if any
         $oldbiblio->{edition} = $oldbiblio->{editionstatement};
-		$oldbiblio->{description} = $itemtypes{ $oldbiblio->{itemtype} }->{description};
+        $oldbiblio->{description} = $itemtypes{ $oldbiblio->{itemtype} }->{translated_description};
  # Build summary if there is one (the summary is defined in the itemtypes table)
  # FIXME: is this used anywhere, I think it can be commented out? -- JF
         if ( $itemtypes{ $oldbiblio->{itemtype} }->{summary} ) {
@@ -2067,7 +2057,7 @@ sub searchResults {
             foreach my $code ( keys %subfieldstosearch ) {
                 $item->{$code} = $field->subfield( $subfieldstosearch{$code} );
             }
-            $item->{description} = $itemtypes{ $item->{itype} }{description};
+            $item->{description} = $itemtypes{ $item->{itype} }{translated_description};
 
 	        # OPAC hidden items
             if ($is_opac) {
@@ -2104,7 +2094,7 @@ sub searchResults {
             {
                 $onloan_count++;
                 my $key = $prefix . $item->{onloan} . $item->{barcode};
-                $onloan_items->{$key}->{due_date} = format_date( $item->{onloan} );
+                $onloan_items->{$key}->{due_date} = output_pref( { dt => dt_from_string( $item->{onloan} ), dateonly => 1 } );
                 $onloan_items->{$key}->{count}++ if $item->{$hbranch};
                 $onloan_items->{$key}->{branchname}     = $item->{branchname};
                 $onloan_items->{$key}->{location}       = $shelflocations->{ $item->{location} };
@@ -2125,6 +2115,8 @@ sub searchResults {
 
          # items not on loan, but still unavailable ( lost, withdrawn, damaged )
             else {
+
+                $item->{notforloan}=1 if !$item->{notforloan}  && $itemtypes{ C4::Context->preference("item-level_itypes")? $item->{itype}: $oldbiblio->{itemtype} }->{notforloan};
 
                 # item is on order
                 if ( $item->{notforloan} < 0 ) {
@@ -2423,13 +2415,6 @@ sub enabled_staff_search_views
 		can_view_ISBD			=> C4::Context->preference('viewISBD'),			# 1 if the staff search allows the ISBD view
 		can_view_labeledMARC	=> C4::Context->preference('viewLabeledMARC'),	# 1 if the staff search allows the Labeled MARC view
 	);
-}
-
-sub PurgeSearchHistory{
-    my ($pSearchhistory)=@_;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare("DELETE FROM search_history WHERE time < DATE_SUB( NOW(), INTERVAL ? DAY )");
-    $sth->execute($pSearchhistory) or die $dbh->errstr;
 }
 
 =head2 z3950_search_args

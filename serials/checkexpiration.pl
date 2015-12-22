@@ -47,14 +47,16 @@ use warnings;
 use CGI qw ( -utf8 );
 use C4::Auth;
 use C4::Serials; # GetExpirationDate
+use C4::Branch;
 use C4::Output;
 use C4::Context;
-use C4::Dates qw/format_date format_date_in_iso/;
-use Date::Calc qw/Today Date_to_Days/;
+use Koha::DateUtils;
+
+use DateTime;
 
 my $query = new CGI;
 
-my ( $template, $loggedinuser, $cookie ) = get_template_and_user (
+my ( $template, $loggedinuser, $cookie, $flags ) = get_template_and_user (
     {
         template_name   => "serials/checkexpiration.tt",
         query           => $query,
@@ -67,7 +69,9 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user (
 
 my $title = $query->param('title');
 my $issn  = $query->param('issn');
-my $date  = format_date_in_iso($query->param('date'));
+my $branch = $query->param('branch');
+my $date = $query->param('date');
+$date = eval { dt_from_string( $query->param('date') ) } if $date;
 
 if ($date) {
     my @subscriptions = SearchSubscriptions({ title => $title, issn => $issn, orderby => 'title' });
@@ -78,12 +82,23 @@ if ($date) {
         my $expirationdate = GetExpirationDate($subscriptionid);
 
         $subscription->{expirationdate} = $expirationdate;
+
         next if $expirationdate !~ /\d{4}-\d{2}-\d{2}/; # next if not in ISO format.
+
         next if $subscription->{closed};
-        if ( Date_to_Days(split "-",$expirationdate) < Date_to_Days(split "-",$date) &&
-			 Date_to_Days(split "-",$expirationdate) > Date_to_Days(&Today) ) {
-            $subscription->{expirationdate}=format_date($subscription->{expirationdate});
-            push @subscriptions_loop,$subscription;
+        if (   !C4::Context->preference("IndependentBranches")
+            or C4::Context->IsSuperLibrarian()
+            or ( ref $flags->{serials} and $flags->{serials}->{superserials} )
+            or ( !ref $flags->{serials} and $flags->{serials} == 1 ) )
+        {
+            $subscription->{cannotedit} = 0;
+        }
+        next if $subscription->{cannotedit};
+
+        my $expirationdate_dt = dt_from_string( $expirationdate, 'iso' );
+        if (   DateTime->compare( $date, $expirationdate_dt ) == 1
+            && ( !$branch || ( $subscription->{'branchcode'} eq $branch ) ) ) {
+            push @subscriptions_loop, $subscription;
         }
     }
 
@@ -91,12 +106,26 @@ if ($date) {
         title           => $title,
         issn            => $issn,
         numsubscription => scalar @subscriptions_loop,
-        date => format_date($date),
+        date => $date,
         subscriptions_loop => \@subscriptions_loop,
         "BiblioDefaultView".C4::Context->preference("BiblioDefaultView") => 1,
+        searched => 1,
     );
 }
+
+my $branchname;
+my $branches_loop;
+if (  !C4::Context->preference("IndependentBranches")
+    or C4::Context->IsSuperLibrarian()
+    or ( ref $flags->{serials}  and $flags->{serials}->{superserials} )
+    or ( !ref $flags->{serials} and $flags->{serials} == 1 ) )
+{
+    $branches_loop = C4::Branch::GetBranchesLoop( $branch );
+}
+
 $template->param (
-    (uc(C4::Context->preference("marcflavour"))) => 1
+    (uc(C4::Context->preference("marcflavour"))) => 1,
+    branches_loop   => $branches_loop,
 );
+
 output_html_with_http_headers $query, $cookie, $template->output;

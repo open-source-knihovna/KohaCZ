@@ -132,7 +132,7 @@
         [% ELSE %]
             <td>
         [% END %]
-        <a href="/cgi-bin/koha/admin/aqbudgets.pl?op=add_form&amp;budget_id=[% budget_line.budget_id %]&amp;budget_period_id=[% budget_line.budget_period_id %]">[% budget_line.budget_name_indent %]</a></td>
+        <a href="/cgi-bin/koha/admin/aqbudgets.pl?op=add_form&amp;budget_id=[% budget_line.budget_id %]&amp;budget_period_id=[% budget_period_id %]">[% budget_line.budget_name %]</a></td>
         <td><span id="[% budget_line.budget_amount %]">[% budget_line.budget_amount | $Price %]&nbsp;</span>
 
 
@@ -225,6 +225,8 @@
 
 </form>
 
+        [% ELSIF not budget_period_id %]
+<div class="dialog alert">That budget does not exist! Please select a budget to continue.</div>
         [% ELSE %]
 <div class="dialog message">No funds to display for this search criteria</div>
         [% END %]
@@ -235,6 +237,7 @@
 <div class="yui-b">
 
 <form method="post" action="/cgi-bin/koha/admin/aqplan.pl">
+    <input type="hidden" name="budget_period_id" value="[% budget_period_id %]" />
 <fieldset class="brief">
 <h4>Filter</h4>
 [% BLOCK planning_types %]
@@ -285,8 +288,10 @@
         <label for="show_actual">Show actual/estimated values</label>
     </li>
     </ol>
-<fieldset class="action">
-        <input type="submit" name="option_submit" value="Submit" /></fieldset>
+    <fieldset class="action">
+        <input type="submit" name="option_submit" value="Submit" />
+        <input type="hidden" name="budget_period_id" value="[% budget_period_id %]" />
+    </fieldset>
 </fieldset>
 </form>
 [% IF ( budget_lines ) %]
@@ -309,8 +314,11 @@
         </li>
     </ol>
     <fieldset class="action">    <input type="submit" value="Submit"/>
+    <input type="hidden" name="budget_period_id" value="[% budget_period_id %]" />
     <input type="hidden" name="report_name" value="[% report_name %]" />
     <input type="hidden" name="output" value="file" /></fieldset>
+    <input type="hidden" name="budget_period_id" value="[% budget_period_id %]" />
+    <input type="hidden" name="authcat" value="[% authcat %]" />
     </fieldset>
 </form>
 [% END %]

@@ -31,9 +31,9 @@ use C4::Auth;
 use C4::Biblio;
 use C4::Items;
 use C4::Output;
-use C4::VirtualShelves;
 use C4::Members;
 use Koha::Email;
+use Koha::Virtualshelves;
 
 my $query = new CGI;
 
@@ -43,7 +43,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user (
         query           => $query,
         type            => "opac",
         authnotrequired => 0,
-        flagsrequired   => { borrow => 1 },
     }
 );
 
@@ -52,7 +51,8 @@ my $email   = $query->param('email');
 
 my $dbh          = C4::Context->dbh;
 
-if ( ShelfPossibleAction( (defined($borrowernumber) ? $borrowernumber : -1), $shelfid, 'view' ) ) {
+my $shelf = Koha::Virtualshelves->find( $shelfid );
+if ( $shelf and $shelf->can_be_viewed( $borrowernumber ) ) {
 
 if ( $email ) {
     my $message = Koha::Email->new();
@@ -70,19 +70,17 @@ if ( $email ) {
             query           => $query,
             type            => "opac",
             authnotrequired => 1,
-            flagsrequired   => { borrow => 1 },
         }
     );
 
-    my @shelf               = GetShelf($shelfid);
-    my ($items, $totitems)  = GetShelfContents($shelfid);
+    my $shelf = Koha::Virtualshelves->find( $shelfid );
+    my $contents = $shelf->get_contents;
     my $marcflavour         = C4::Context->preference('marcflavour');
     my $iso2709;
     my @results;
 
-    # retrieve biblios from shelf
-    foreach my $biblio (@$items) {
-        my $biblionumber = $biblio->{biblionumber};
+    while ( my $content = $contents->next ) {
+        my $biblionumber = $content->biblionumber->biblionumber;
         my $fw               = GetFrameworkCode($biblionumber);
         my $dat              = GetBiblioData($biblionumber);
         my $record           = GetMarcBiblio($biblionumber, 1);
@@ -112,7 +110,7 @@ if ( $email ) {
     $template2->param(
         BIBLIO_RESULTS => \@results,
         comment        => $comment,
-        shelfname      => $shelf[1],
+        shelfname      => $shelf->shelfname,
         firstname      => $user->{firstname},
         surname        => $user->{surname},
     );
@@ -184,7 +182,10 @@ END_OF_BODY
         $template->param( error => 1 );
     }
 
-    $template->param( email => $email );
+    $template->param(
+        shelfid => $shelfid,
+        email => $email,
+    );
     output_html_with_http_headers $query, $cookie, $template->output;
 
 

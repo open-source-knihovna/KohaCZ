@@ -26,7 +26,6 @@ use CGI qw ( -utf8 );
 use List::Util qw/min/;
 use Date::Calc qw/Delta_YMD Easter_Sunday Today Decode_Date_EU/;
 use Date::Manip qw/ ParseDate UnixDate DateCalc/;
-use C4::Dates qw/format_date format_date_in_iso/;
 use Text::CSV_XS;
 
 use C4::Acquisition;
@@ -35,7 +34,6 @@ use C4::Context;
 use C4::Output;
 use C4::Koha;
 use C4::Auth;
-use C4::Input;
 use C4::Debug;
 
 my $input = new CGI;
@@ -211,7 +209,7 @@ if ( $authcat =~ m/^Asort/ ) {
     $sth->finish;
     @authvals = sort { $a <=> $b } @authvals;
 }
-elsif ( $authcat eq 'MONTHS' ) {
+elsif ( $authcat eq 'MONTHS' && $budget_period_startdate && $budget_period_enddate ) {
 
     # build months
     my @start_date = UnixDate( $budget_period_startdate, ( '%Y', '%m', '%d' ) );
@@ -330,7 +328,7 @@ foreach my $budget (@budgets) {
         or  $authcat eq 'BRANCHES'
         or  $authcat eq 'MONTHS' ) {
 
-        # but skip budgets that dont match the current auth-category
+        # but skip budgets that don't match the current auth-category
         next if ( $budget->{'sort1_authcat'} ne $authcat
             && $budget->{'sort2_authcat'} ne $authcat );
     }
@@ -373,7 +371,7 @@ foreach my $budget (@budgets) {
 
     %budget_line = (
         lines                   => \@cells_line,
-        budget_name_indent      => $budget->{budget_name_indent},
+        budget_name             => $budget->{budget_name},
         budget_amount           => $budget->{budget_amount},
         budget_alloc            => $budget->{budget_alloc},
         budget_act_remain       => sprintf( "%.2f", $budget_act_remain ),
@@ -449,8 +447,7 @@ sub _print_to_csv {
     print "$str\n";
 
     foreach my $row (@$results) {
-        $row->{'budget_name_indent'} =~ s/&nbsp;/ /g;
-        my @col = ( $row->{'budget_name_indent'}, $row->{'budget_amount'} );
+        my @col = ( $row->{'budget_name'}, $row->{'budget_amount'} );
         my $l = $row->{'lines'};
         foreach my $line (@$l) {
             push @col, $line->{'estimated_amount'};

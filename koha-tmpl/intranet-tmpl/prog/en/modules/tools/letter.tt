@@ -30,6 +30,7 @@ $(document).ready(function() {
     $("#submit_form").click( function(event) {
         event.preventDefault();
         var at_least_one_exists = 0;
+        var are_valid = 1;
         $("fieldset.mtt").each( function(){
             var title = $(this).find('input[name="title"]').val();
             var content = $(this).find('textarea[name="content"]').val();
@@ -41,14 +42,17 @@ $(document).ready(function() {
                 var msg = _("Please specify title and content for %s");
                 msg = msg.replace( "%s", mtt );
                 at_least_one_exists = 1;
-                alert(msg)
-                return false;
+                alert(msg);
+                return are_valid = false;
             } else if ( title.length > 0 && content.length > 0 ) {
                 at_least_one_exists = 1;
             }
         } );
         if ( ! at_least_one_exists ) {
             alert( _("Please fill at least one template.") );
+            return false;
+        }
+        if ( ! are_valid ) {
             return false;
         }
 
@@ -170,7 +174,7 @@ $(document).ready(function() {
       </p>
     [% END %]
       <div id="toolbar" class="btn-toolbar">
-          <button type="submit" class="btn btn-small" id="newnotice"><i class="icon-plus"></i> New notice</button>
+          <button type="submit" class="btn btn-small" id="newnotice"><i class="fa fa-plus"></i> New notice</button>
         <input type="hidden" id="op" name="op" />
       </div>
     </form>
@@ -267,19 +271,25 @@ $(document).ready(function() {
 		[% END %]
 		<fieldset class="rows">
             <input type="hidden" name="oldbranchcode" value="[% oldbranchcode %]" />
+            <ol>
             [% IF independant_branch %]
                 <input type="hidden" name="branchcode" value="[% independant_branch %]" />
             [% ELSE %]
-		<ol>
-			<li>
-				<label for="branch">Library:</label>
-                <select name="branchcode" id="branch" style="width:20em;">
-                    <option value="">All libraries</option>
-                [% FOREACH branchloo IN branchloop %]
-                    [% IF ( branchloo.selected ) %]<option value="[% branchloo.value %]" selected="selected">[% branchloo.branchname %]</option>[% ELSE %]<option value="[% branchloo.value %]">[% branchloo.branchname %]</option>[% END %]
+            <li>
+
+                <label for="branch">Library:</label>
+                [% IF adding %]
+                    <select name="branchcode" id="branch" style="width:20em;">
+                        <option value="">All libraries</option>
+                    [% FOREACH branchloo IN branchloop %]
+                        [% IF ( branchloo.selected ) %]<option value="[% branchloo.value %]" selected="selected">[% branchloo.branchname %]</option>[% ELSE %]<option value="[% branchloo.value %]">[% branchloo.branchname %]</option>[% END %]
+                    [% END %]
+                    </select>
+                [% ELSE %]
+                    <input type="hidden" id="branch" name="branchcode" value="[% branchcode %]" />
+                    [% Branches.GetName( branchcode ) %]
                 [% END %]
-                </select>
-			</li>
+            </li>
             [% END %]
 			<li>
 				<label for="module">Koha module:</label>
@@ -444,7 +454,7 @@ $(document).ready(function() {
             </tr>
             </thead>
             <tr>
-                <td>[% Branches.GetName( letter.branchcode ) %]</td>
+                <td>[% IF letter.branchcode %][% Branches.GetName( letter.branchcode ) %][% ELSE %](All libraries)[% END %]</td>
                 <td>[% letter.module %]</td>
                 <td>[% letter.code %]</td>
                 <td>[% letter.name %]</td>

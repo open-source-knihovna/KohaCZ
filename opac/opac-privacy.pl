@@ -24,7 +24,6 @@ use C4::Context;
 use C4::Circulation;
 use C4::Members;
 use C4::Output;
-use C4::Dates;
 
 my $query = new CGI;
 
@@ -42,7 +41,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
         query           => $query,
         type            => "opac",
         authnotrequired => 0,
-        flagsrequired   => { borrow => 1 },
         debug           => 1,
     }
 );
@@ -77,4 +75,4 @@ $template->param( 'Ask_data'       => '1',
                     'privacyview' => 1,
 );
 
-output_html_with_http_headers $query, $cookie, $template->output;
+output_html_with_http_headers $query, $cookie, $template->output, undef, { force_no_caching => 1 };

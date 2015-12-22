@@ -1,3 +1,4 @@
+[% USE Koha %]
 [% USE KohaDates %]
 [% INCLUDE 'doc-head-open.inc' %]
 [% UNLESS ( multi_hold ) %]
@@ -297,30 +298,31 @@ function checkMultiHold() {
     </form>
   [% ELSE %]
 
-[% IF ( maxreserves || alreadyreserved || none_available || alreadypossession || ageRestricted ) %]
+[% IF ( exceeded_maxreserves || alreadyreserved || none_available || alreadypossession || ageRestricted ) %]
     <div class="dialog alert">
 
     [% UNLESS ( multi_hold ) %]
       <h3>Cannot place hold</h3>
-  	  <ul>
-        [% IF ( maxreserves ) %]
+      <ul>
+        [% IF ( exceeded_maxreserves ) %]
+          <li><strong>Too many holds: </strong> <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %] </a> can only place a maximum of [% maxreserves %] total holds.</li>
+        [% ELSIF ( alreadypossession ) %]
+          <li> <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %]</a> <strong>is already in possession</strong> of one item</li>
+        [% ELSIF ( alreadyreserved ) %]
+          <li><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %]</a> <strong>already has a hold</strong> on this item </li>
+        [% ELSIF ( ageRestricted ) %]
+          <li><strong>Age restricted</strong></li>
+        [% ELSIF ( none_available ) %]
+          <li> <strong>No items are available</strong> to be placed on hold</li>
+        [% ELSIF ( maxreserves ) %]
           <li><strong>Too many holds: </strong> <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %] </a> has too many holds.</li>
         [% END %]
-        [% IF ( ageRestricted ) %]
-          <li><strong>Age restricted</strong></li>
-        [% END %]
-        [% IF ( alreadyreserved ) %]
-          <li><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %]</a> <strong>already has a hold</strong> on this item </li>
-        [% END %]
-        [% IF ( none_available ) %]
-          <li> <strong>No items are available</strong> to be placed on hold</li>
-        [% END %]
-        [% IF ( alreadypossession ) %]
-          <li> <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %]</a> <strong>is already in possession</strong> of one item</li>
-        [% END %]
-	  </ul>
+      </ul>
     [% ELSE %]
-      <h3>Cannot place hold on some items</h3>
+        <h3>Cannot place hold on some items</h3>
+        [% IF ( exceeded_maxreserves ) %]
+          <li><strong>Too many holds: </strong> <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %] </a> can place [% new_reserves_allowed %] of the requested [% new_reserves_count %] holds for a maximum of [% maxreserves %] total holds.</li>
+        [% END %]
     [% END %]
 
     </div>
@@ -330,6 +332,14 @@ function checkMultiHold() {
 <div class="dialog message"><ul>
     [% IF ( expiry ) %]
     <li><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %]</a>'s <strong>account has expired</strong></li>
+    [% END %]
+
+    [% IF restricted %]
+    <li><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]#reldebarments">[% borrowerfirstname %] [% borrowersurname %]</a> <strong>has restrictions</strong></li>
+    [% END %]
+
+    [% IF amount_outstanding && Koha.Preference('maxoutstanding') && amount_outstanding > Koha.Preference('maxoutstanding') %]
+    <li><a href="/cgi-bin/koha/members/pay.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %]</a> <strong>owes [% amount_outstanding | format('%.2f') %]</strong></li>
     [% END %]
 
     [% IF ( diffbranch ) %]
@@ -378,7 +388,7 @@ function checkMultiHold() {
         </li>
         [% UNLESS ( multi_hold ) %]
           <li>
-              <span class="label">Priority:</span>
+              <span class="label">Estimated priority:</span>
               <strong>[% fixedRank %]</strong>
           </li>
         [% END %]
@@ -769,7 +779,6 @@ function checkMultiHold() {
                 [% END %]
           </a>
     [% ELSE %]
-      [% IF ( reserveloo.constrainttypea ) %]
             [% IF ( reserveloo.item_level_hold ) %]
                 <i>Only item
                 <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% reserveloo.biblionumber %]">
@@ -785,11 +794,6 @@ function checkMultiHold() {
                 <i>Next available</i>
                  <input type="hidden" name="itemnumber" value="" />
             [% END %]
-      [% ELSE %]
-        [% IF ( reserveloo.constrainttypeo ) %]
-          only this type :<b>[% reserveloo.volumeddesc %] [% reserveloo.itemtype %]</b>
-        [% END %]
-      [% END %]
     [% END %]
         </td>
 
@@ -802,7 +806,7 @@ function checkMultiHold() {
                         <img src="[% interface %]/[% theme %]/img/go-down.png" border="0" alt="Set to lowest priority" />
 		        [% END %]
 		</a>
-	</td> 
+	</td>
     [% END %]
 
 	<td>

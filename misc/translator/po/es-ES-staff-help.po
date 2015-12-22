@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Koha 3.14 staff\n"
-"POT-Creation-Date: 2015-08-17 17:15-0300\n"
-"PO-Revision-Date: 2015-08-17 20:55+0000\n"
+"POT-Creation-Date: 2015-11-19 23:20-0300\n"
+"PO-Revision-Date: 2015-11-23 18:01+0000\n"
 "Last-Translator: Héctor <hector.hecaxmmx@gmail.com>\n"
 "Language-Team: Koha Translation Team <koha-translate@lists.koha-"
 "community.org>\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-POOTLE-MTIME: 1439844906.000000\n"
+"X-POOTLE-MTIME: 1448301717.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -792,6 +792,7 @@ msgstr "( ! significa 'no visible' o en el caso de'colapsado 'no colapsado')"
 #: intranet-tmpl/prog/en/modules/help/serials/claims.tt:15
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
@@ -905,7 +906,6 @@ msgstr "( ! significa 'no visible' o en el caso de'colapsado 'no colapsado')"
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:68
 #: intranet-tmpl/prog/en/modules/help/acqui/lateorders.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/uncertainprice.tt:7
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:12
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:122
 #: intranet-tmpl/prog/en/modules/help/acqui/invoice.tt:11
@@ -945,7 +945,7 @@ msgstr "( ! significa 'no visible' o en el caso de'colapsado 'no colapsado')"
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:58
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:141
 #: intranet-tmpl/prog/en/modules/help/tools/tools-home.tt:7
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:41
 #: intranet-tmpl/prog/en/modules/help/tools/picture-upload.tt:23
 #: intranet-tmpl/prog/en/modules/help/tools/quotes-upload.tt:43
@@ -1019,6 +1019,17 @@ msgstr "-8 =&gt; Marca"
 #, c-format
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Uso futuro"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#, c-format
+msgid ""
+". For example, if you use the selector \"#circ_impossible\" your selected "
+"sound will be triggered when a checkout for a patron is not possible (such "
+"as the barcode not being found). "
+msgstr ""
+". Por ejemplo, si utiliza el selector \"#circ_impossible\" el sonido "
+"seleccionado se disparará cuando no sea posible un préstamo para un usuario ("
+"tal como código de barra no encontrado). "
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:35
 #, c-format
@@ -1854,7 +1865,7 @@ msgstr "Agregar cotización"
 msgid "Add a Batch"
 msgstr "Agregar un lote"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:7
 #, c-format
 msgid "Add a Contract"
 msgstr "Agregar un contrato"
@@ -2001,6 +2012,11 @@ msgstr "Agregando un presupuesto"
 #, c-format
 msgid "Adding a group"
 msgstr "Agregando un grupo"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Adding a new alert"
+msgstr "Agregando una nueva alerta"
 
 #: intranet-tmpl/prog/en/modules/help/admin/aqbudgetperiods.tt:13
 #, c-format
@@ -2708,18 +2724,14 @@ msgstr "Respuesta:"
 msgid "Any"
 msgstr "Cualquiera"
 
-#: intranet-tmpl/prog/en/modules/help/mainpage.tt:24
+#: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:196
 #, c-format
 msgid ""
-"As part of the upgrade process your online help will be overwritten with the "
-"new Help as part of the install. If you want to keep a copy of your online "
-"help, you should instruct your System Administrator to upgrade the Online "
-"Help directory in the Koha file tree."
+"As your file is uploaded you will see an image that will confirm that the "
+"system is working."
 msgstr ""
-"Como parte del proceso de actualización su ayuda en línea será sobreescrita "
-"con la nueva ayuda de la instalación. Si desea mantener una copia de su "
-"ayuda en línea, debe indicar a su Administrador de Sistema que actualice el "
-"directorio de ayuda en linea, en el árbol de archivos de Koha."
+"A medida que su archivo se cargará verá una imagen que confirma que el "
+"sistema está funcionando."
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:196
 #, c-format
@@ -2741,7 +2753,7 @@ msgstr ""
 "del usuario junto con la fecha de vencimiento (y la hora si el ítem fue "
 "prestado por hora), los prestamos del día aparecerán al principio."
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:9
 #, c-format
 msgid ""
 "At the top of a Vendor Information Page, you will see a 'New Contract' "
@@ -2786,17 +2798,17 @@ msgid ""
 "Patron Card Creator by clicking the online help link at the upper left-hand "
 "corner of every page."
 msgstr ""
-"En la parte superior de cada pantalla Creador de Carnés de Usuarios, usted "
-"verá una barra de herramientas que permite el acceso rápido a las funciones "
-"pertinentes. El menú a la izquierda de cada una de estas pantallas también "
-"permite un fácil acceso a las diferentes secciones del 'Creador de Carnés de "
-"Usuarios'. La ruta de navegación en la parte superior de cada pantalla dará "
-"indicación específica sobre dónde se encuentra dentro del módulo de 'Creador "
-"de Carnés de Usuarios' y permitirá la navegación rápida a las secciones "
-"previamente visitadas. Por último, se puede encontrar información más "
-"detallada sobre cada sección del 'Creador de Carnés de Usuarios' haciendo "
-"clic en el enlace de ayuda en línea en la esquina superior izquierda de cada "
-"página."
+"En la parte superior de cada pantalla dentro del Creador de carnés de "
+"usuarios, usted verá una barra de herramientas que permite el acceso rápido "
+"a las funciones pertinentes. El menú a la izquierda de cada una de estas "
+"pantallas también permite un fácil acceso a las diferentes secciones del "
+"'Creador de carnés de usuarios'. La ruta de navegación en la parte superior "
+"de cada pantalla dará indicación específica sobre dónde se encuentra dentro "
+"del módulo de 'Creador de carnés de usuarios' y permitirá la navegación "
+"rápida a las secciones previamente visitadas. Por último, se puede encontrar "
+"información más detallada sobre cada sección del 'Creador de carnés de "
+"usuarios' haciendo clic en el enlace de ayuda en línea en la esquina "
+"superior izquierda de cada página."
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:9
 #, c-format
@@ -2869,6 +2881,15 @@ msgstr ""
 "Como mínimo, si Usted planea prestar el ítem, los siguientes campos deben "
 "ser ingresados para nuevos ítems:"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#, c-format
+msgid ""
+"At this point, you can preview your sound by clicking the \"Play sound\" "
+"button"
+msgstr ""
+"En este punto, puede escuchar su sonido haciendo clic en el botón \""
+"Escuchar\""
+
 #: intranet-tmpl/prog/en/modules/help/admin/fieldmapping.tt:7
 #, c-format
 msgid "At this time the only keyword in use is 'subtitle.'"
@@ -2878,6 +2899,11 @@ msgstr "En este momento la única palabra clave en uso es 'subtítulo.'"
 #, c-format
 msgid "Audience"
 msgstr "Audiencia"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:3
+#, c-format
+msgid "Audio alerts"
+msgstr "Alertas audibles"
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:69
 #, c-format
@@ -3067,7 +3093,7 @@ msgid ""
 "Label Batch' link on the 'Staged MARC Management' page"
 msgstr ""
 "Las tareas por lotes pueden crearse de dos maneras. La primera es hacer clic "
-"en 'Crear lote de marbetes' en la página 'Administración de registros MARC "
+"en 'Crear lote de etiquetas' en la página 'Administración de registros MARC "
 "preparados'"
 
 #: intranet-tmpl/prog/en/modules/help/tools/holidays.tt:22
@@ -4327,6 +4353,11 @@ msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr ""
 "Haga clic en \"Pagar\" al lado de la multa que desea pagar completamente"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#, c-format
+msgid "Click \"Save alert\" and your done!"
+msgstr "Haga clic en \"Guardar alerta\" y listo!"
+
 #: intranet-tmpl/prog/en/modules/help/members/pay.tt:43
 #: intranet-tmpl/prog/en/modules/help/members/paycollect.tt:43
 #, c-format
@@ -5274,6 +5305,11 @@ msgstr "Eliminar listas públicas"
 msgid "Deleting Item Types"
 msgstr "Eliminando tipos de ítem"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#, c-format
+msgid "Deleting alerts"
+msgstr "Eliminando alertas"
+
 #: intranet-tmpl/prog/en/modules/help/cataloguing/additem.tt:67
 #, c-format
 msgid "Deleting items"
@@ -5757,6 +5793,26 @@ msgstr "Ingrese un nombre de lista y guarde la lista."
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr ""
 "Ingrese una versión de texto de la categoría en el campo 'Descripción'."
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#, c-format
+msgid ""
+"Enter a selector in the \"selector\" input, you can see documentation on "
+"jQuery selectors "
+msgstr ""
+"Ingrese un \"selector\" en el campo correspondiente, puede ver la "
+"documentación de selectores JQuery "
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#, c-format
+msgid ""
+"Enter a sound to be played, you can either select a built-in Koha sound "
+"using the pulldown selector, or you can enter a full URL to a sound file on "
+"another server."
+msgstr ""
+"Ingrese un sonido a ejecutar, puede seleccionar uno de los sonidos propios "
+"de Koha utilizando el desplegable o puede ingresar una URL completa de un "
+"sonido en otro servidor."
 
 #: intranet-tmpl/prog/en/modules/help/members/pay.tt:36
 #: intranet-tmpl/prog/en/modules/help/members/paycollect.tt:36
@@ -6820,7 +6876,8 @@ msgstr ""
 "Desde aquí usted puede planear su gasto presupuestario introduciendo "
 "manualmente los valores o haciendo clic en el botón 'Auto-completar fila'. "
 "Si opta por auto-completar el formulario, el sistema tratará de dividir el "
-"monto correspondientemente,deberá editar para dividir mas precisamente."
+"monto correspondientemente, deberá realizar algunas ediciones para dividir "
+"más precisamente."
 
 #: intranet-tmpl/prog/en/modules/help/members/purchase-suggestions.tt:7
 #: intranet-tmpl/prog/en/modules/help/members/moremember.tt:69
@@ -7396,27 +7453,27 @@ msgstr "Ir a la Herramienta de Carga de imágenes de usuarios"
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:236
 #, c-format
 msgid "Granular Acquisitions Permissions"
-msgstr "Permisos de Adquisiciones granulares"
+msgstr "Permisos granulares de adquisiciones"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:199
 #, c-format
 msgid "Granular Cataloging Permissions"
-msgstr "Permisos de catalogación granulares"
+msgstr "Permisos granulares de catalogación"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:137
 #, c-format
 msgid "Granular Circulate Permissions"
-msgstr "Permisos de circulación granulares"
+msgstr "Permisos granulares de circulación"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:181
 #, c-format
 msgid "Granular Holds Permissions"
-msgstr "Permisos de reservas granulares"
+msgstr "Permisos granulares de reservas"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:516
 #, c-format
 msgid "Granular Lists Permissions"
-msgstr "Permisos detallados de las listas"
+msgstr "Permisos granulares de listas"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:162
 #, c-format
@@ -8113,7 +8170,7 @@ msgid ""
 "restriction temporarily"
 msgstr ""
 "Si los miembros del personal/staff tienen los permisos correctos, ellos "
-"pueden sobre-escribir la restricción temporalmente"
+"pueden anular la restricción temporalmente"
 
 #: intranet-tmpl/prog/en/modules/help/members/memberentry.tt:81
 #, c-format
@@ -8232,10 +8289,10 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/mainpage.tt:5
 #, c-format
 msgid ""
-"If this is your first time logging into Koha, you should now got to Koha "
-"Administration and setup all system preferences, patron categories, item "
+"If this is your first time logging into Koha, you should now go to Koha "
+"Administration and set up all system preferences, patron categories, item "
 "types and libraries. You should also review the other settings found in "
-"administration."
+"Administration."
 msgstr ""
 "Si es la primera vez que ingresa a Koha, deberá ir a Administración de Koha "
 "y configurar todos los parámetros del sistema, especialmente las categorías "
@@ -10348,7 +10405,7 @@ msgstr ""
 "Importante: Sin un propietario, la restricción de acceso será ignorada, "
 "asegúrese de introducir un propietario, así como elegir una restricción"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:13
 #, c-format
 msgid ""
 "Important: You cannot enter a contract retrospectively. The end date must "
@@ -10815,7 +10872,7 @@ msgid "It will also appear on the main staff dashboard under the module labels"
 msgstr ""
 "También aparecerán en el panel administrativo bajo las etiquetas de módulos"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:17
 #, c-format
 msgid "It will also be an option when creating a basket."
 msgstr "También será una opción cuando se cree una cesta."
@@ -11558,6 +11615,11 @@ msgstr "Preferencias del sistema de uso local"
 msgid "Local Use:"
 msgstr "De uso local:"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#, c-format
+msgid "Locate the \"Add new alert\" form."
+msgstr "Ubique el formulario \"Agregar una nueva alerta\"."
+
 #: intranet-tmpl/prog/en/modules/help/admin/aqbudgetperiods.tt:26
 #, c-format
 msgid ""
@@ -11666,8 +11728,7 @@ msgstr "Administrar Imágenes"
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:47
 #, c-format
 msgid "Manage Koha system settings (Administration panel)"
-msgstr ""
-"Gestionar las configuraciones de sistema de Koha (Panel de administración)"
+msgstr "Administrar ajustes del sistema Koha (Panel de Administración)"
 
 #: intranet-tmpl/prog/en/modules/help/tools/manage-marc-import.tt:3
 #, c-format
@@ -11735,7 +11796,7 @@ msgstr "Administrar listas de circulación"
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:111
 #, c-format
 msgid "Manage serial subscriptions"
-msgstr "Administrar suscripciones a series"
+msgstr "Administrar suscripciones de publicaciones seriadas"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:353
 #, c-format
@@ -12668,7 +12729,7 @@ msgstr ""
 "Una vez que el archivo CSV haya sido cargado en la tabla de edición "
 "temporal, podrá editar las citas antes de guardarlas."
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:15
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:15
 #, c-format
 msgid "Once the contract is saved it will appear below the vendor information."
 msgstr ""
@@ -13014,9 +13075,9 @@ msgstr ""
 #, c-format
 msgid ""
 "Once you have set up patron categories, you should create a new user in the "
-"Patrons module with superlibrarian permissions. Once that user is set you "
-"should use that user to log in rather than the root user set up as part of "
-"installation."
+"Patrons module with superlibrarian permissions. Once that user is created, "
+"you should log in as that user rather than the root user which is set up as "
+"part of installation."
 msgstr ""
 "Una vez que se haya creado categorías de usuarios, usted debe crear un nuevo "
 "usuario en el módulo Usuarios con permisos de superbibliotecario. Una vez "
@@ -13421,7 +13482,7 @@ msgstr "Tipos de Atributo de Usuario"
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:3
 #, c-format
 msgid "Patron Card Creator"
-msgstr "Creador de Carnés de Usuarios"
+msgstr "Creador de carnés de usuarios"
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:3
 #, c-format
@@ -13714,7 +13775,7 @@ msgstr "Préstamos in situ pendientes"
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:419
 #, c-format
 msgid "Perform batch deletion of items"
-msgstr "Realizar eliminación de ejemplares por lotes"
+msgstr "Realizar eliminación de ítems por lotes"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:467
 #, c-format
@@ -13724,7 +13785,7 @@ msgstr "Realizar eliminación de registros en lote (bibliográfico o autoridad)"
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:425
 #, c-format
 msgid "Perform batch modification of items"
-msgstr "Realizar modificación de ejemplares por lotes"
+msgstr "Realizar modificación ítems en lote"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:413
 #, c-format
@@ -13937,7 +13998,7 @@ msgstr "Actualizaciones de estado de Ítem rápido"
 #: intranet-tmpl/prog/en/modules/help/labels/spinelabel-home.tt:3
 #, c-format
 msgid "Quick Spine Label Creator"
-msgstr "Creador rápido de etiquetas en columnas"
+msgstr "Creador rápido de etiqueta de marbete"
 
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:3
 #, c-format
@@ -14721,7 +14782,7 @@ msgstr "Vea la documentación completa para Combinar autoridades en el "
 msgid "See the full documentation for Moving Items in the "
 msgstr "Vea la documentación completa para Moviendo ítems en el "
 
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #, c-format
 msgid "See the full documentation for News in the "
 msgstr "Vea la documentación completa para Novedades en el "
@@ -14842,7 +14903,9 @@ msgstr "Vea la documentación completa para Sugerencias de compra en el "
 #: intranet-tmpl/prog/en/modules/help/labels/spinelabel-home.tt:14
 #, c-format
 msgid "See the full documentation for Quick Spine Label Creator in the "
-msgstr "Vea la documentación completa para Creador rápido de etiquetas en el "
+msgstr ""
+"Vea la documentación completa para Creador rápido de etiqueta de marbete en "
+"el "
 
 #: intranet-tmpl/prog/en/modules/help/acqui/parcel.tt:21
 #: intranet-tmpl/prog/en/modules/help/acqui/orderreceive.tt:21
@@ -14976,7 +15039,7 @@ msgstr ""
 "Vea la documentación completa de Cargado de archivo de circulación fuera de "
 "línea en el "
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #, c-format
 msgid "See the full documentation for Vendor Contracts in the "
 msgstr "Vea la documentación completa para Contratos de proveedores en el "
@@ -15106,7 +15169,7 @@ msgstr "Vea la documentación completa para Lotes de Carnés de Usuarios en el "
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
 #, c-format
 msgid "See the full documentation for the Patron Card Creator in the "
-msgstr "Vea la documentación completa del Creador de Carnés de Usuarios en el "
+msgstr "Vea la documentación completa del Creador de carnés de usuarios en el "
 
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #, c-format
@@ -15261,7 +15324,7 @@ msgstr "Series"
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:336
 #, c-format
 msgid "Serials receiving"
-msgstr "Recepción de seriadas"
+msgstr "Recepción de publicaciones seriadas"
 
 #: intranet-tmpl/prog/en/modules/help/reports/serials_stats.tt:3
 #, c-format
@@ -15335,6 +15398,14 @@ msgid ""
 "Simply enter the barcode for the item you want to move and click 'Select'"
 msgstr ""
 "Ingrese el código de barras del ítem a ser movido y haga clic en 'Elegir'"
+
+#: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:29
+#, c-format
+msgid ""
+"Since values can contain spaces, additional doubled-quotes may be required: "
+msgstr ""
+"Dado que los valores pueden contener espacios, comillas dobles adicionales, "
+"puede ser necesario: "
 
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:29
 #, c-format
@@ -15482,6 +15553,20 @@ msgstr "Campo orden 1 "
 #, c-format
 msgid "Sort field 2 "
 msgstr "Campo orden 2 "
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#, c-format
+msgid "Sound precedence"
+msgstr "Precedencia de sonido"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#, c-format
+msgid ""
+"Sounds will be played in order from top to bottom. That is, the first select "
+"that finds a match will have its sound played."
+msgstr ""
+"Los sonidos serán ejecutados en orden de arriba a abajo. Esto es, se "
+"ejecutará el sonido para la primer coincidencia encontrada."
 
 #: intranet-tmpl/prog/en/modules/help/admin/classsources.tt:5
 #, c-format
@@ -16346,10 +16431,10 @@ msgid ""
 "design to print a nearly unlimited variety of patron cards including "
 "barcodes. Here are some of the features of the Patron Card Creator module:"
 msgstr ""
-"El Creador de Carnés de Usuarios le permite utilizar diseños y plantillas "
+"El Creador de carnés de usuarios le permite utilizar diseños y plantillas "
 "hechas por usted para imprimir una variedad casi ilimitada de carnés de "
 "usuario incluyendo códigos de barras. Éstas son algunas de las "
-"características del módulo Creador de Carnés de Usuarios:"
+"características del módulo Creador de carnés de usuarios:"
 
 #: intranet-tmpl/prog/en/modules/help/members/members-home.tt:5
 #, c-format
@@ -16675,7 +16760,7 @@ msgstr ""
 "usuario ha decidido que la biblioteca no puede guardar esta información, "
 "esta pestaña sólo mostrará los ítems actualmente prestados."
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:11
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:11
 #, c-format
 msgid ""
 "The contract form will ask for some very basic information about the "
@@ -16777,7 +16862,7 @@ msgid ""
 "extremely useful tool. You are encouraged to submit any enhancement requests "
 "as well as any bugs via Koha Project Bugzilla."
 msgstr ""
-"Los desarrolladores del módulo de Creador de Carnés de Usuarios esperan que "
+"Los desarrolladores del módulo de Creador de carnés de usuarios esperan que "
 "lo encuentre útil en su trabajo de catalogación. Le animamos a presentar "
 "solicitudes de mejora, así como cualquier error a través del Koha Project "
 "Bugzilla."
@@ -17111,6 +17196,11 @@ msgstr ""
 msgid "The new value will appear in the list along with existing values"
 msgstr "El nuevo valor aparecerá en la lista junto a los valores existentes"
 
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:23
+#, c-format
+msgid "The news item's author will be set to the currently logged in user."
+msgstr "El autor de la novedad se fijará al usuario actual del sistema."
+
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:46
 #, c-format
 msgid "The next option for ordering is to order from a staged record. "
@@ -17146,8 +17236,8 @@ msgid ""
 "uploaded using the 'Manage Images' module of the Patron Card Creator Tool."
 msgstr ""
 "La otra imagen puede ser algo así como un logotipo o símbolo de la "
-"biblioteca que has subido usando el módulo de 'Gestión de las imágenes' de "
-"la herramienta de Patrona creador de la tarjeta de herramientas."
+"biblioteca que se ha subido usando el módulo de 'Administración de las "
+"imágenes' de la herramienta Creador de carnés de usuarios."
 
 #: intranet-tmpl/prog/en/modules/help/labels/label-edit-batch.tt:11
 #, c-format
@@ -17409,6 +17499,15 @@ msgstr ""
 "La página de sugerencias se limitará automáticamente a sugerencias para su "
 "biblioteca. Para ver información de todas (u otras) bibliotecas haga clic en "
 "el filtro 'Información de adquisición' y cambie la biblioteca."
+
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:24
+#, c-format
+msgid ""
+"The system preference 'NewsAuthorDisplay' can be used to hide or show the "
+"author for news item."
+msgstr ""
+"La preferencia del sistema 'NewsAuthorDisplay' puede ser utilizada para "
+"ocultar o mostrar al autor de la novedad."
 
 #: intranet-tmpl/prog/en/modules/help/tools/scheduler.tt:5
 #, c-format
@@ -18170,6 +18269,15 @@ msgstr ""
 msgid "This section can be expanded"
 msgstr "Esta sección se puede ampliar"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:5
+#, c-format
+msgid ""
+"This section of Koha lets you specify a given sound to play when a given "
+"jQuery selector is matched."
+msgstr ""
+"Esta sección de Koha le permite especificar que un determinado sonido se "
+"ejecute cuando coincida un determinado selector JQuery."
+
 #: intranet-tmpl/prog/en/modules/help/about.tt:5
 #, c-format
 msgid ""
@@ -18794,6 +18902,11 @@ msgstr ""
 "Para agregar un nuevo 'Tipo de Atributo de Usuario', haga clic en 'Nuevo "
 "Tipo de Atributo de Usuario' en el tope de la página"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#, c-format
+msgid "To add a new alert:"
+msgstr "Para agregar una nueva alerta:"
+
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities.tt:5
 #, c-format
 msgid ""
@@ -18983,6 +19096,15 @@ msgstr ""
 msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr "Para poder hacer un pedido a un proveedor, debe hacerlo 'Activo.'"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#, c-format
+msgid ""
+"To change the precedence of a given alert, use the four arrows to move it "
+"up, down, or to the top or bottom of the list."
+msgstr ""
+"Para cambiar la precedencia de una dada alerta, utilice las cuatro flechas "
+"para moverla arriba, abajo, al tope o al fondo de la lista."
+
 #: intranet-tmpl/prog/en/modules/help/circ/returns.tt:16
 #, c-format
 msgid ""
@@ -19088,6 +19210,18 @@ msgstr ""
 "registros bibliográficos aparecerá el enlace 'Eliminar\" a la derecha del "
 "registro en los resultados de búsqueda y como un botón que aparece después "
 "de hacer clic en el resumen del registro de autoridad."
+
+#. %1$s:  INCLUDE 'help-bottom.inc' 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#, c-format
+msgid ""
+"To delete one or more alerts, check the checkboxes for those alerts you wish "
+"to delete, then click the \"Delete selected alerts\" button and confirm you "
+"want to delete those alerts. %s "
+msgstr ""
+"Para eliminar una o más alertas, marque las cajas para aquellas alertas que "
+"desee eliminar, luego haga clic en el botón 'Eliminar alertas seleccionadas' "
+"y confirme que desee eliminarlas. %s "
 
 #: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
 #, c-format
@@ -20223,7 +20357,7 @@ msgstr "VANCOUVER PUBLIC LIBRARY z3950.vpl.ca:210 Horizon"
 msgid "Values that are pre-configured in Koha are:"
 msgstr "Los valores pre-configurados en Koha son:"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:3
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:3
 #, c-format
 msgid "Vendor Contracts"
 msgstr "Contratos del proveedor"
@@ -21285,7 +21419,7 @@ msgstr ""
 "opción. Por defecto se seguirá la regla establecida en la preferencia "
 "BlockExpiredPatronOpacActions"
 
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:5
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:5
 #, c-format
 msgid ""
 "You can define contracts (with a start and end date) and attach them to a "
@@ -21900,6 +22034,19 @@ msgstr ""
 msgid "Your new item type will now appear on the list"
 msgstr "Su nuevo tipo de ítem aparecerá ahora en la lista"
 
+#: intranet-tmpl/prog/en/modules/help/mainpage.tt:24
+#, c-format
+msgid ""
+"Your online help will be overwritten by the new Help when there is an "
+"upgrade. If you want to keep a copy of your online help, you should instruct "
+"your System Administrator to upgrade the Online Help directory in the Koha "
+"file tree."
+msgstr ""
+"Su ayuda en línea será sobre-escrita por la nueva ayuda cuando exista una "
+"actualización. Si desea mantener una copia de su ayuda en línea, debe "
+"indicar a su Administrador de Sistema que actualice el directorio de ayuda "
+"en línea, en el árbol de archivos de Koha."
+
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:27
 #: intranet-tmpl/prog/en/modules/help/acqui/newordersubscription.tt:11
 #, c-format
@@ -22471,6 +22618,11 @@ msgstr "fic:1 Ficción"
 msgid "group_manage "
 msgstr "group_manage "
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#, c-format
+msgid "here"
+msgstr "aquí"
+
 #: intranet-tmpl/prog/en/modules/help/admin/preferences.tt:19
 #, c-format
 msgid ""
@@ -22754,6 +22906,7 @@ msgstr "administración "
 #: intranet-tmpl/prog/en/modules/help/serials/claims.tt:15
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
+#: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
@@ -22866,7 +23019,6 @@ msgstr "administración "
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:68
 #: intranet-tmpl/prog/en/modules/help/acqui/lateorders.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/uncertainprice.tt:7
-#: intranet-tmpl/prog/en/modules/help/acqui/acqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:12
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:122
 #: intranet-tmpl/prog/en/modules/help/acqui/invoice.tt:11
@@ -22906,7 +23058,7 @@ msgstr "administración "
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:58
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:141
 #: intranet-tmpl/prog/en/modules/help/tools/tools-home.tt:7
-#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:25
+#: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:27
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:41
 #: intranet-tmpl/prog/en/modules/help/tools/picture-upload.tt:23
 #: intranet-tmpl/prog/en/modules/help/tools/quotes-upload.tt:43

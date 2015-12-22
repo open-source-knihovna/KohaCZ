@@ -40,7 +40,6 @@ use C4::External::Syndetics qw(get_syndetics_index get_syndetics_summary get_syn
 use C4::Review;
 use C4::Ratings;
 use C4::Members;
-use C4::VirtualShelves;
 use C4::XSLT;
 use C4::ShelfBrowser;
 use C4::Reserves;
@@ -52,6 +51,8 @@ use C4::Images;
 use Koha::DateUtils;
 use C4::HTML5Media;
 use C4::CourseReserves qw(GetItemCourseReservesInfo);
+
+use Koha::Virtualshelves;
 
 BEGIN {
 	if (C4::Context->preference('BakerTaylorEnabled')) {
@@ -67,7 +68,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
         query           => $query,
         type            => "opac",
         authnotrequired => ( C4::Context->preference("OpacPublic") ? 1 : 0 ),
-        flagsrequired   => { borrow => 1 },
     }
 );
 
@@ -522,7 +522,7 @@ my $itemtypes = GetItemTypes();
 my $itemtype = $dat->{'itemtype'};
 if ( $itemtype ) {
     $dat->{'imageurl'}    = getitemtypeimagelocation( 'opac', $itemtypes->{$itemtype}->{'imageurl'} );
-    $dat->{'description'} = $itemtypes->{$itemtype}->{'description'};
+    $dat->{'description'} = $itemtypes->{$itemtype}->{translated_description};
 }
 my $shelflocations =GetKohaAuthorisedValues('items.location',$dat->{'frameworkcode'}, 'opac');
 my $collections =  GetKohaAuthorisedValues('items.ccode',$dat->{'frameworkcode'}, 'opac');
@@ -648,7 +648,7 @@ if ( not $viewallitems and @items > $max_items_to_display ) {
     }
     if (exists $itm->{itype} && defined($itm->{itype}) && exists $itemtypes->{ $itm->{itype} }) {
         $itm->{'imageurl'}    = getitemtypeimagelocation( 'opac', $itemtypes->{ $itm->{itype} }->{'imageurl'} );
-        $itm->{'description'} = $itemtypes->{ $itm->{itype} }->{'description'};
+        $itm->{'description'} = $itemtypes->{ $itm->{itype} }->{translated_description};
     }
     foreach (qw(ccode enumchron copynumber itemnotes uri)) {
         $itemfields{$_} = 1 if ($itm->{$_});
@@ -845,11 +845,18 @@ $template->param(
 );
 
 # Lists
-
 if (C4::Context->preference("virtualshelves") ) {
-   $template->param( 'GetShelves' => GetBibliosShelves( $biblionumber ) );
+    my $shelves = Koha::Virtualshelves->search(
+        {
+            biblionumber => $biblionumber,
+            category => 2,
+        },
+        {
+            join => 'virtualshelfcontents',
+        }
+    );
+    $template->param( shelves => $shelves );
 }
-
 
 # XISBN Stuff
 if (C4::Context->preference("OPACFRBRizeEditions")==1) {

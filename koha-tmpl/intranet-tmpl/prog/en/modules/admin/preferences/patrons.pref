@@ -84,6 +84,11 @@ Patrons:
            class: integer
          - days beforehand.
      -
+         - Send an account expiration notice when a patron's card will expire in.
+         - pref: MembershipExpiryDaysNotice
+           class: integer
+         - days.
+     -
          - pref: patronimages
            choices:
                yes: Allow
@@ -98,6 +103,10 @@ Patrons:
          - "Use the SMS::Send::"
          - pref: SMSSendDriver
          - driver to send SMS messages.
+         - "Define a username/login"
+         - pref: SMSSendUsername
+         - "and a password"
+         - pref: SMSSendPassword
      -
          - pref: uppercasesurnames
            choices:
@@ -138,6 +147,12 @@ Patrons:
                yes: Allow
                no: "Don't allow"
          - librarians to discharge borrowers and borrowers to request a discharge.
+     -
+         - pref: FeeOnChangePatronCategory
+           choices:
+               yes: Do
+               no: "Don't"
+         - charge a fee when a patron changes to a category with an enrollment fee.
     "Norwegian patron database":
      -
          - pref: NorwegianPatronDBEnable

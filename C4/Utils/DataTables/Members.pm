@@ -1,10 +1,11 @@
 package C4::Utils::DataTables::Members;
 
+use Modern::Perl;
 use C4::Branch qw/onlymine/;
 use C4::Context;
 use C4::Members qw/GetMemberIssuesAndFines/;
 use C4::Utils::DataTables;
-use Modern::Perl;
+use Koha::DateUtils;
 
 sub search {
     my ( $params ) = @_;
@@ -22,7 +23,7 @@ sub search {
 
     my ($iTotalRecords, $iTotalDisplayRecords);
 
-    # If branches are independant and user is not superlibrarian
+    # If branches are independent and user is not superlibrarian
     # The search has to be only on the user branch
     if ( C4::Branch::onlymine ) {
         my $userenv = C4::Context->userenv;
@@ -61,9 +62,10 @@ sub search {
     # split on coma
     $searchmember =~ s/,/ /g if $searchmember;
     my $searchfields = {
-        standard => 'surname,firstname,othernames,cardnumber',
+        standard => 'surname,firstname,othernames,cardnumber,userid',
         email => 'email,emailpro,B_email',
         borrowernumber => 'borrowernumber',
+        userid => 'userid',
         phone => 'phone,phonepro,B_phone,altcontactphone,mobile',
         address => 'streettype,address,address2,city,state,zipcode,country',
         dateofbirth => 'dateofbirth',
@@ -141,7 +143,7 @@ sub search {
         ($patron->{overdues}, $patron->{issues}, $patron->{fines}) =
             GetMemberIssuesAndFines($patron->{borrowernumber});
         if($patron->{dateexpiry} and $patron->{dateexpiry} ne '0000-00-00') {
-            $patron->{dateexpiry} = C4::Dates->new($patron->{dateexpiry}, "iso")->output();
+            $patron->{dateexpiry} = output_pref( { dt => dt_from_string( $patron->{dateexpiry}, 'iso'), dateonly => 1} );
         } else {
             $patron->{dateexpiry} = '';
         }

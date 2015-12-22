@@ -28,7 +28,6 @@ use C4::Reserves;
 use C4::Biblio;
 use C4::Items;
 use C4::Output;
-use C4::Dates qw/format_date/;
 use C4::Context;
 use C4::Members;
 use C4::Branch; # GetBranches
@@ -55,7 +54,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
         query           => $query,
         type            => "opac",
         authnotrequired => 0,
-        flagsrequired   => { borrow => 1 },
         debug           => 1,
     }
 );
@@ -222,6 +220,7 @@ if ( $query->param('place_reserve') ) {
         &get_out($query, $cookie, $template->output);
     }
 
+    my $failed_holds = 0;
     while (@selectedItems) {
         my $biblioNum = shift(@selectedItems);
         my $itemNum   = shift(@selectedItems);
@@ -284,19 +283,20 @@ if ( $query->param('place_reserve') ) {
 
         # Here we actually do the reserveration. Stage 3.
         if ($canreserve) {
-            AddReserve(
+            my $reserve_id = AddReserve(
                 $branch,      $borrowernumber,
-                $biblioNum,   'a',
+                $biblioNum,
                 [$biblioNum], $rank,
                 $startdate,   $expiration_date,
                 $notes,       $biblioData->{title},
                 $itemNum,     $found
             );
+            $failed_holds++ unless $reserve_id;
             ++$reserve_cnt;
         }
     }
 
-    print $query->redirect("/cgi-bin/koha/opac-user.pl#opac-user-holds");
+    print $query->redirect("/cgi-bin/koha/opac-user.pl?" . ( $failed_holds ? "failed_holds=$failed_holds" : q|| ) . "#opac-user-holds");
     exit;
 }
 
@@ -406,20 +406,13 @@ foreach my $biblioNum (@biblionumbers) {
     $biblioLoopIter{mandatorynotes}=0; #FIXME: For future use
 
     if (!$itemLevelTypes && $biblioData->{itemtype}) {
-        $biblioLoopIter{description} = $itemTypes->{$biblioData->{itemtype}}{description};
+        $biblioLoopIter{translated_description} = $itemTypes->{$biblioData->{itemtype}}{translated_description};
         $biblioLoopIter{imageurl} = getitemtypeimagesrc() . "/". $itemTypes->{$biblioData->{itemtype}}{imageurl};
     }
 
     foreach my $itemInfo (@{$biblioData->{itemInfos}}) {
-        $debug and warn $itemInfo->{'notforloan'};
-
-        # Get reserve fee.
-        my $fee = GetReserveFee(undef, $borrowernumber, $itemInfo->{'biblionumber'}, 'a',
-                                ( $itemInfo->{'biblioitemnumber'} ) );
-        $itemInfo->{'reservefee'} = sprintf "%.02f", ($fee ? $fee : 0.0);
-
         if ($itemLevelTypes && $itemInfo->{itype}) {
-            $itemInfo->{description} = $itemTypes->{$itemInfo->{itype}}{description};
+            $itemInfo->{translated_description} = $itemTypes->{$itemInfo->{itype}}{translated_description};
             $itemInfo->{imageurl} = getitemtypeimagesrc() . "/". $itemTypes->{$itemInfo->{itype}}{imageurl};
         }
 
@@ -442,7 +435,7 @@ foreach my $biblioNum (@biblionumbers) {
         $itemLoopIter->{enumchron} = $itemInfo->{enumchron};
         $itemLoopIter->{copynumber} = $itemInfo->{copynumber};
         if ($itemLevelTypes) {
-            $itemLoopIter->{description} = $itemInfo->{description};
+            $itemLoopIter->{translated_description} = $itemInfo->{translated_description};
             $itemLoopIter->{imageurl} = $itemInfo->{imageurl};
         }
 
@@ -473,7 +466,7 @@ foreach my $biblioNum (@biblionumbers) {
 
         if ( defined $reservedate ) {
             $itemLoopIter->{backgroundcolor} = 'reserved';
-            $itemLoopIter->{reservedate}     = format_date($reservedate);
+            $itemLoopIter->{reservedate}     = output_pref({ dt => dt_from_string($reservedate), dateonly => 1 });
             $itemLoopIter->{ReservedForBorrowernumber} = $reservedfor;
             $itemLoopIter->{ReservedForSurname}        = $ItemBorrowerReserveInfo->{'surname'};
             $itemLoopIter->{ReservedForFirstname}      = $ItemBorrowerReserveInfo->{'firstname'};
@@ -507,7 +500,7 @@ foreach my $biblioNum (@biblionumbers) {
         my ( $transfertwhen, $transfertfrom, $transfertto ) =
           GetTransfers($itemNum);
         if ( $transfertwhen && ($transfertwhen ne '') ) {
-            $itemLoopIter->{transfertwhen} = format_date($transfertwhen);
+            $itemLoopIter->{transfertwhen} = output_pref({ dt => dt_from_string($transfertwhen), dateonly => 1 });
             $itemLoopIter->{transfertfrom} =
               $branches->{$transfertfrom}{branchname};
             $itemLoopIter->{transfertto} = $branches->{$transfertto}{branchname};
@@ -592,5 +585,4 @@ if (
     );
 }
 
-output_html_with_http_headers $query, $cookie, $template->output;
-
+output_html_with_http_headers $query, $cookie, $template->output, undef, { force_no_caching => 1 };

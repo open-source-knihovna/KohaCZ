@@ -25,7 +25,7 @@ use Carp;
 use C4::Context;
 use C4::Koha;
 use C4::Biblio;
-use C4::Dates qw/format_date format_date_in_iso/;
+use Koha::DateUtils;
 use MARC::Record;
 use C4::ClassSource;
 use C4::Log;
@@ -432,7 +432,7 @@ other purposes, C<ModItem> should be used.
 
 This function uses the hash %default_values_for_mod_from_marc,
 which contains default values for item fields to
-apply when modifying an item.  This is needed beccause
+apply when modifying an item.  This is needed because
 if an item field's value is cleared, TransformMarcToKoha
 does not include the column in the
 hash that's passed to ModItem, which without
@@ -648,8 +648,8 @@ C<$itemnum> is the item number
 sub ModDateLastSeen {
     my ($itemnumber) = @_;
     
-    my $today = C4::Dates->new();    
-    ModItem({ itemlost => 0, datelastseen => $today->output("iso") }, undef, $itemnumber);
+    my $today = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
+    ModItem({ itemlost => 0, datelastseen => $today }, undef, $itemnumber);
 }
 
 =head2 DelItem
@@ -791,7 +791,7 @@ C<items.notforloan> field.
 NOTE: does B<not> return an individual item's
 status.
 
-Can be MARC dependant.
+Can be MARC dependent.
 fwkcode is optional.
 But basically could be can be loan or not
 Create a status selector with the following code
@@ -1035,7 +1035,7 @@ sub GetLostItems {
   branch       => $branch,
   offset       => $offset,
   size         => $size,
-  stautshash   => $statushash
+  statushash   => $statushash,
   interface    => $interface,
 } );
 
@@ -1101,7 +1101,7 @@ sub GetItemsForInventory {
     }
 
     if ($datelastseen) {
-        $datelastseen = format_date_in_iso($datelastseen);  
+        $datelastseen = output_pref({ str => $datelastseen, dateformat => 'iso', dateonly => 1 });
         push @where_strings, '(datelastseen < ? OR datelastseen IS NULL)';
         push @bind_params, $datelastseen;
     }
@@ -1301,6 +1301,8 @@ sub GetItemsInfo {
     my ( $biblionumber ) = @_;
     my $dbh   = C4::Context->dbh;
     # note biblioitems.* must be avoided to prevent large marc and marcxml fields from killing performance.
+    require C4::Languages;
+    my $language = C4::Languages::getlanguage();
     my $query = "
     SELECT items.*,
            biblio.*,
@@ -1326,6 +1328,7 @@ sub GetItemsInfo {
            serial.serialseq,
            serial.publisheddate,
            itemtypes.description,
+           COALESCE( localization.translation, itemtypes.description ) AS translated_description,
            itemtypes.notforloan as notforloan_per_itemtype,
            holding.branchurl,
            holding.branchname,
@@ -1344,9 +1347,15 @@ sub GetItemsInfo {
      LEFT JOIN serial USING (serialid)
      LEFT JOIN itemtypes   ON   itemtypes.itemtype         = "
      . (C4::Context->preference('item-level_itypes') ? 'items.itype' : 'biblioitems.itemtype');
+    $query .= q|
+    LEFT JOIN localization ON itemtypes.itemtype = localization.code
+        AND localization.entity = 'itemtypes'
+        AND localization.lang = ?
+    |;
+
     $query .= " WHERE items.biblionumber = ? ORDER BY home.branchname, items.enumchron, LPAD( items.copynumber, 8, '0' ), items.dateaccessioned DESC" ;
     my $sth = $dbh->prepare($query);
-    $sth->execute($biblionumber);
+    $sth->execute($language, $biblionumber);
     my $i = 0;
     my @results;
     my $serial;
@@ -2048,7 +2057,11 @@ sub _do_column_fixes_for_mod {
         (not defined $item->{'withdrawn'} or $item->{'withdrawn'} eq '')) {
         $item->{'withdrawn'} = 0;
     }
-    if (exists $item->{'location'} && !$item->{'permanent_location'}) {
+    if (exists $item->{location}
+        and $item->{location} ne 'CART'
+        and $item->{location} ne 'PROC'
+        and not $item->{permanent_location}
+    ) {
         $item->{'permanent_location'} = $item->{'location'};
     }
     if (exists $item->{'timestamp'}) {
@@ -2128,7 +2141,7 @@ C<items.withdrawn>
 
 sub _set_defaults_for_add {
     my $item = shift;
-    $item->{dateaccessioned} ||= C4::Dates->new->output('iso');
+    $item->{dateaccessioned} ||= output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
     $item->{$_} ||= 0 for (qw( notforloan damaged itemlost withdrawn));
 }
 
@@ -2144,6 +2157,7 @@ sub _koha_new_item {
     my ( $item, $barcode ) = @_;
     my $dbh=C4::Context->dbh;  
     my $error;
+    $item->{permanent_location} //= $item->{location};
     my $query =
            "INSERT INTO items SET
             biblionumber        = ?,
@@ -2161,7 +2175,7 @@ sub _koha_new_item {
             notforloan          = ?,
             damaged             = ?,
             itemlost            = ?,
-            withdrawn            = ?,
+            withdrawn           = ?,
             itemcallnumber      = ?,
             coded_location_qualifier = ?,
             restricted          = ?,
@@ -2170,7 +2184,7 @@ sub _koha_new_item {
             holdingbranch       = ?,
             paidfor             = ?,
             location            = ?,
-            permanent_location            = ?,
+            permanent_location  = ?,
             onloan              = ?,
             issues              = ?,
             renewals            = ?,
@@ -2180,14 +2194,14 @@ sub _koha_new_item {
             ccode               = ?,
             itype               = ?,
             materials           = ?,
-            uri = ?,
+            uri                 = ?,
             enumchron           = ?,
             more_subfields_xml  = ?,
             copynumber          = ?,
             stocknumber         = ?
           ";
     my $sth = $dbh->prepare($query);
-    my $today = C4::Dates->today('iso');
+    my $today = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
    $sth->execute(
             $item->{'biblionumber'},
             $item->{'biblioitemnumber'},
@@ -2254,11 +2268,18 @@ Returns undef if the move failed or the biblionumber of the destination record o
 sub MoveItemFromBiblio {
     my ($itemnumber, $frombiblio, $tobiblio) = @_;
     my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare("SELECT biblioitemnumber FROM biblioitems WHERE biblionumber = ?");
-    $sth->execute( $tobiblio );
-    my ( $tobiblioitem ) = $sth->fetchrow();
-    $sth = $dbh->prepare("UPDATE items SET biblioitemnumber = ?, biblionumber = ? WHERE itemnumber = ? AND biblionumber = ?");
-    my $return = $sth->execute($tobiblioitem, $tobiblio, $itemnumber, $frombiblio);
+    my ( $tobiblioitem ) = $dbh->selectrow_array(q|
+        SELECT biblioitemnumber
+        FROM biblioitems
+        WHERE biblionumber = ?
+    |, undef, $tobiblio );
+    my $return = $dbh->do(q|
+        UPDATE items
+        SET biblioitemnumber = ?,
+            biblionumber = ?
+        WHERE itemnumber = ?
+            AND biblionumber = ?
+    |, undef, $tobiblioitem, $tobiblio, $itemnumber, $frombiblio );
     if ($return == 1) {
         ModZebra( $tobiblio, "specialUpdate", "biblioserver" );
         ModZebra( $frombiblio, "specialUpdate", "biblioserver" );
@@ -2270,6 +2291,15 @@ sub MoveItemFromBiblio {
 		    $order->{'biblionumber'} = $tobiblio;
 	        C4::Acquisition::ModOrder($order);
 	    }
+
+        # Update reserves, hold_fill_targets, tmp_holdsqueue and linktracker tables
+        for my $table_name ( qw( reserves hold_fill_targets tmp_holdsqueue linktracker ) ) {
+            $dbh->do( qq|
+                UPDATE $table_name
+                SET biblionumber = ?
+                WHERE itemnumber = ?
+            |, undef, $tobiblio, $itemnumber );
+        }
         return $tobiblio;
 	}
     return;
@@ -2310,7 +2340,7 @@ sub DelItemCheck {
         $error = "not_same_branch";
     }
 	else{
-        # check it doesnt have a waiting reserve
+        # check it doesn't have a waiting reserve
         $sth = $dbh->prepare(q{
             SELECT COUNT(*) FROM reserves
             WHERE (found = 'W' OR found = 'T')
@@ -3006,13 +3036,12 @@ sub PrepareItemrecordDisplay {
 
                         #----- itemtypes
                     } elsif ( $tagslib->{$tag}->{$subfield}->{authorised_value} eq "itemtypes" ) {
-                        my $sth = $dbh->prepare( "SELECT itemtype,description FROM itemtypes ORDER BY description" );
-                        $sth->execute;
+                        my $itemtypes = GetItemTypes( style => 'array' );
                         push @authorised_values, ""
                           unless ( $tagslib->{$tag}->{$subfield}->{mandatory} );
-                        while ( my ( $itemtype, $description ) = $sth->fetchrow_array ) {
-                            push @authorised_values, $itemtype;
-                            $authorised_lib{$itemtype} = $description;
+                        for my $itemtype ( @$itemtypes ) {
+                            push @authorised_values, $itemtype->{itemtype};
+                            $authorised_lib{$itemtype->{itemtype}} = $itemtype->{translated_description};
                         }
                         #---- class_sources
                     } elsif ( $tagslib->{$tag}->{$subfield}->{authorised_value} eq "cn_source" ) {

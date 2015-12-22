@@ -18,8 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-use warnings;
+use Modern::Perl;
+
 use vars qw($debug);
 
 use CGI qw ( -utf8 );
@@ -49,22 +49,26 @@ my $display_columns = { layout =>   [  # db column       => {col label          
                                         {barcode_type    => {label => 'Barcode Type',   link_field      => 0}},
                                         {printing_type   => {label => 'Print Type',     link_field      => 0}},
                                         {format_string   => {label => 'Fields to Print',link_field      => 0}},
-                                        {select          => {label => 'Select',         value           => 'layout_id'}},
+                                        {select         => {label => 'Actions',         value           => 'layout_id'}},
                                     ],
-                        template => [   {template_id     => {label => 'Template ID',    link_field      => 0}},
+                        template => [
+                                        {template_id     => {label => 'Template ID',    link_field      => 0}},
                                         {template_code   => {label => 'Template Name',  link_field      => 0}},
                                         {template_desc   => {label => 'Description',    link_field      => 0}},
-                                        {select          => {label => 'Select',         value           => 'template_id'}},
+                                        {select         => {label => 'Actions',         value           => 'template_id'}},
                                     ],
-                        profile =>  [   {profile_id      => {label => 'Profile ID',     link_field      => 0}},
+                        profile =>  [
+                                        {profile_id      => {label => 'Profile ID',     link_field      => 0}},
                                         {printer_name    => {label => 'Printer Name',   link_field      => 0}},
                                         {paper_bin       => {label => 'Paper Bin',      link_field      => 0}},
                                         {_template_code  => {label => 'Template Name',  link_field      => 0}},     # this display column does not have a corrisponding db column in the profile table, hence the underscore
-                                        {select          => {label => 'Select',         value           => 'profile_id'}},
+                                        {select          => {label => 'Actions',         value           => 'profile_id'}},
                                     ],
-                        batch =>    [   {batch_id        => {label => 'Batch ID',       link_field      => 0}},
+                        batch =>    [
+                                        {batch_id        => {label => 'Batch ID',       link_field      => 0}},
                                         {_item_count     => {label => 'Item Count',     link_field      => 0}},
-                                        {select          => {label => 'Select',         value           => 'batch_id'}},
+                                        {select          => {label => 'Actions',         value           => 'batch_id'}},
+                                        {select1         => {label => ' ',           link_field       => 'batch_id'}},
                                     ],
 };
 
@@ -94,10 +98,16 @@ my $table = html_table($display_columns->{$label_element}, $db_rows);
 $template->param(error => $error) if ($error) && ($error ne 0);
 $template->param(print => 1) if ($label_element eq 'batch');
 $template->param(
-                op              => $op,
-                element_id      => $element_id,
-                table_loop      => $table,
-                label_element   => $label_element,
+    op              => $op,
+    element_id      => $element_id,
+    table_loop      => $table,
+    label_element   => $label_element,
+    label_element_title => (
+        $label_element eq 'layout'   ? 'Layouts' :
+        $label_element eq 'template' ? 'Templates' :
+        $label_element eq 'profile'  ? 'Profiles' :
+        $label_element eq 'batch'    ? 'Batches' :
+        '' )
 );
 
 output_html_with_http_headers $cgi, $cookie, $template->output;

@@ -52,24 +52,14 @@ use C4::Context;
 use C4::Auth;
 use C4::Output;
 
-sub StringSearch {
-    my ( $searchstring, $type ) = @_;
-    my $dbh = C4::Context->dbh;
-    $searchstring =~ s/\'/\\\'/g;
-    my @data = split( ' ', $searchstring );
-    my $sth = $dbh->prepare(
-        "SELECT * FROM itemtypes WHERE (description LIKE ?) ORDER BY itemtype"
-	);
-    $sth->execute("$data[0]%");
-    return $sth->fetchall_arrayref({});		# return ref-to-array of ref-to-hashes
-								# like [ fetchrow_hashref(), fetchrow_hashref() ... ]
-}
+use Koha::Localizations;
 
 my $input       = new CGI;
 my $searchfield = $input->param('description');
 my $script_name = "/cgi-bin/koha/admin/itemtypes.pl";
 my $itemtype    = $input->param('itemtype');
-my $op          = $input->param('op');
+my $op          = $input->param('op') // 'list';
+my @messages;
 $searchfield =~ s/\,//g;
 my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
     {
@@ -85,8 +75,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
 $template->param(script_name => $script_name);
 if ($op) {
 	$template->param($op  => 1); # we show only the TMPL_VAR names $op
-} else {
-    $template->param(else => 1);
 }
 
 my $dbh = C4::Context->dbh;
@@ -100,8 +88,28 @@ if ( $op eq 'add_form' ) {
     #---- if primkey exists, it's a modify action, so read values to modify...
     my $data;
     if ($itemtype) {
-        my $sth = $dbh->prepare("select * from itemtypes where itemtype=?");
-        $sth->execute($itemtype);
+        my $sth = $dbh->prepare(q|
+            SELECT
+                   itemtypes.itemtype,
+                   itemtypes.description,
+                   itemtypes.rentalcharge,
+                   itemtypes.notforloan,
+                   itemtypes.imageurl,
+                   itemtypes.summary,
+                   itemtypes.checkinmsg,
+                   itemtypes.checkinmsgtype,
+                   itemtypes.sip_media_type,
+                   itemtypes.hideinopac,
+                   itemtypes.searchcategory,
+                   COALESCE( localization.translation, itemtypes.description ) AS translated_description
+            FROM   itemtypes
+            LEFT JOIN localization ON itemtypes.itemtype = localization.code
+                AND localization.entity='itemtypes'
+                AND localization.lang = ?
+            WHERE itemtype = ?
+        |);
+        my $language = C4::Languages::getlanguage();
+        $sth->execute($language, $itemtype);
         $data = $sth->fetchrow_hashref;
     }
 
@@ -111,6 +119,8 @@ if ( $op eq 'add_form' ) {
     if ( defined $data->{imageurl} and $data->{imageurl} =~ /^http/i ) {
         $remote_image = $data->{imageurl};
     }
+
+    my $searchcategory = GetAuthorisedValues("ITEMTYPECAT", $data->{'searchcategory'});
 
     $template->param(
         itemtype        => $itemtype,
@@ -125,6 +135,8 @@ if ( $op eq 'add_form' ) {
         imagesets       => $imagesets,
         remote_image    => $remote_image,
         sip_media_type  => $data->{sip_media_type},
+        hideinopac      => $data->{'hideinopac'},
+        searchcategory  => $searchcategory,
     );
 
     # END $OP eq ADD_FORM
@@ -132,14 +144,13 @@ if ( $op eq 'add_form' ) {
     # called by add_form, used to insert/modify data in DB
 }
 elsif ( $op eq 'add_validate' ) {
-    my $query = "
+    my $is_a_modif = $input->param('is_a_modif');
+    my ( $already_exists ) = $dbh->selectrow_array(q|
         SELECT itemtype
         FROM   itemtypes
         WHERE  itemtype = ?
-    ";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($itemtype);
-    if ( $sth->fetchrow ) {		# it's a modification
+    |, undef, $itemtype );
+    if ( $already_exists and $is_a_modif ) { # it's a modification
         my $query2 = '
             UPDATE itemtypes
             SET    description = ?
@@ -150,9 +161,11 @@ elsif ( $op eq 'add_validate' ) {
                  , checkinmsg = ?
                  , checkinmsgtype = ?
                  , sip_media_type = ?
+                 , hideinopac = ?
+                 , searchcategory = ?
             WHERE itemtype = ?
         ';
-        $sth = $dbh->prepare($query2);
+        my $sth = $dbh->prepare($query2);
         $sth->execute(
             $input->param('description'),
             $input->param('rentalcharge'),
@@ -168,15 +181,17 @@ elsif ( $op eq 'add_validate' ) {
             $input->param('checkinmsg'),
             $input->param('checkinmsgtype'),
             $sip_media_type,
+            $input->param('hideinopac') ? 1 : 0,
+            $input->param('searchcategory'),
             $input->param('itemtype')
         );
     }
-    else {    # add a new itemtype & not modif an old
+    elsif ( not $already_exists and not $is_a_modif ) {
         my $query = "
             INSERT INTO itemtypes
-                (itemtype,description,rentalcharge, notforloan, imageurl, summary, checkinmsg, checkinmsgtype, sip_media_type)
+                (itemtype,description,rentalcharge, notforloan, imageurl, summary, checkinmsg, checkinmsgtype, sip_media_type, hideinopac, searchcategory)
             VALUES
-                (?,?,?,?,?,?,?,?,?);
+                (?,?,?,?,?,?,?,?,?,?,?);
             ";
         my $sth = $dbh->prepare($query);
 		my $image = $input->param('image');
@@ -192,12 +207,19 @@ elsif ( $op eq 'add_validate' ) {
             $input->param('checkinmsg'),
             $input->param('checkinmsgtype'),
             $sip_media_type,
+            $input->param('hideinopac') ? 1 : 0,
+            $input->param('searchcategory'),
         );
     }
+    else {
+        push @messages, {
+            type => 'error',
+            code => 'already_exists',
+        };
+    }
 
-    print $input->redirect('itemtypes.pl');
-    exit;
-
+    $searchfield = '';
+    $op = 'list';
     # END $OP eq ADD_VALIDATE
 ################## DELETE_CONFIRM ##################################
     # called by default form, used to confirm deletion of data in DB
@@ -244,18 +266,34 @@ elsif ( $op eq 'delete_confirmed' ) {
     # END $OP eq DELETE_CONFIRMED
 ################## DEFAULT ##################################
 }
-else {    # DEFAULT
-    my ($results) = StringSearch( $searchfield, 'web' );
+
+if ( $op eq 'list' ) {
+    my $results = C4::Koha::GetItemTypes( style => 'array' );
     my @loop;
     foreach my $itemtype ( @{$results} ) {
         $itemtype->{imageurl} = getitemtypeimagelocation( 'intranet', $itemtype->{imageurl} );
         $itemtype->{rentalcharge} = sprintf( '%.2f', $itemtype->{rentalcharge} );
+
+        my @translated_descriptions = Koha::Localizations->search(
+            {   entity => 'itemtypes',
+                code   => $itemtype->{itemtype},
+            }
+        );
+        $itemtype->{translated_descriptions} = [ map {
+            {
+                lang => $_->lang,
+                translation => $_->translation,
+            }
+        } @translated_descriptions ];
+
         push( @loop, $itemtype );
     }
 
     $template->param(
-        loop           => \@loop,
+        loop     => \@loop,
+        else     => 1,
+        messages => \@messages,
     );
-}    #---- END $OP eq DEFAULT
+}
 
 output_html_with_http_headers $input, $cookie, $template->output;

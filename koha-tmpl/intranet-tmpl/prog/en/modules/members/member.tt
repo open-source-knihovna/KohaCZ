@@ -226,9 +226,9 @@ $(document).ready(function() {
         'bFilter': false,
         'bAutoWidth': false,
         [% IF CAN_user_tools_manage_patron_lists %]
-            'aaSorting': [[1, 'asc']],
+            'aaSorting': [[2, 'asc']],
         [% ELSE %]
-            'aaSorting': [[0, 'asc']],
+            'aaSorting': [[1, 'asc']],
         [% END %]
         "aLengthMenu": [aLengthMenu, aLengthMenuLabel],
         'sPaginationType': 'full_numbers',
@@ -428,6 +428,11 @@ function filterByFirstLetterSurname(letter) {
                   <option selected="selected" value='borrowernumber'>Borrower number</option>
                 [% ELSE %]
                   <option value='borrowernumber'>Borrower number</option>
+                [% END %]
+                [% IF searchfieldstype == "userid" %]
+                  <option selected="selected" value='userid'>Username</option>
+                [% ELSE %]
+                  <option value='userid'>Username</option>
                 [% END %]
                 [% IF searchfieldstype == "phone" %]
                   <option selected="selected" value='phone'>Phone number</option>

@@ -35,6 +35,7 @@ sub _check_params {
         'barcode_type',
         'printing_type',
         'guidebox',
+        'oblique_title',
         'font',
         'font_size',
         'callnum_split',
@@ -115,7 +116,7 @@ sub _get_text_fields {
     my $csv = Text::CSV_XS->new({allow_whitespace => 1});
     my $status = $csv->parse($format_string);
     my @sorted_fields = map {{ 'code' => $_, desc => $_ }} 
-                        map { $_ eq 'callnumber' ? 'itemcallnumber' : $_ } # see bug 5653
+                        map { $_ && $_ eq 'callnumber' ? 'itemcallnumber' : $_ } # see bug 5653
                         $csv->fields();
     my $error = $csv->error_input();
     warn sprintf('Text field sort failed with this error: %s', $error) if $error;
@@ -129,10 +130,11 @@ sub _split_lccn {
     # lccn examples: 'HE8700.7 .P6T44 1983', 'BS2545.E8 H39 1996';
     my @parts = Library::CallNumber::LC->new($lccn)->components();
     unless (scalar @parts && defined $parts[0])  {
-        warn sprintf('regexp failed to match string: %s', $_);
+        $debug and warn sprintf('regexp failed to match string: %s', $_);
         @parts = $_;     # if no match, just use the whole string.
     }
-    push @parts, split /\s+/, pop @parts;   # split the last piece into an arbitrary number of pieces at spaces
+    my $LastPiece = pop @parts;
+    push @parts, split /\s+/, $LastPiece if $LastPiece;   # split the last piece into an arbitrary number of pieces at spaces
     $debug and warn "split_lccn array: ", join(" | ", @parts), "\n";
     return @parts;
 }
@@ -325,6 +327,7 @@ sub new {
         barcode_type            => $params{'barcode_type'},
         printing_type           => $params{'printing_type'},
         guidebox                => $params{'guidebox'},
+        oblique_title           => $params{'oblique_title'},
         font                    => $params{'font'},
         font_size               => $params{'font_size'},
         callnum_split           => $params{'callnum_split'},
@@ -407,8 +410,18 @@ sub draw_label_text {
         else {
             $field->{'data'} = _get_barcode_data($field->{'code'},$item,$record);
         }
-        #FIXME: We should not force the title to oblique; this should be selectible in the layout configuration
-        ($field->{'code'} eq 'title') ? (($font =~ /T/) ? ($font = 'TI') : ($font = ($font . 'O'))) : ($font = $font);
+        # Find apropriate font it oblique title selected, except main font is oblique
+        if ( ( $field->{'code'} eq 'title' ) and ( $self->{'oblique_title'} == 1 ) ) {
+            if ( $font =~ /^TB$/ ) {
+                $font .= 'I';
+            }
+            elsif ( $font =~ /^TR$/ ) {
+                $font = 'TI';
+            }
+            elsif ( $font !~ /^T/ and $font !~ /O$/ ) {
+                $font .= 'O';
+            }
+        }
         my $field_data = $field->{'data'};
         if ($field_data) {
             $field_data =~ s/\n//g;
@@ -455,9 +468,8 @@ sub draw_label_text {
         LABEL_LINES:    # generate lines of label text for current field
         foreach my $line (@label_lines) {
             next LABEL_LINES if $line eq '';
-            my $fontName = C4::Creators::PDF->Font($font);
             $line = log2vis( $line );
-            my $string_width = C4::Creators::PDF->StrWidth($line, $fontName, $self->{'font_size'});
+            my $string_width = C4::Creators::PDF->StrWidth($line, $font, $self->{'font_size'});
             if ($self->{'justify'} eq 'R') {
                 $text_llx = $params{'llx'} + $self->{'width'} - ($self->{'left_text_margin'} + $string_width);
             }
@@ -535,7 +547,7 @@ sub barcode {
             PDF::Reuse::Barcode::COOP2of5(
                 x                   => $params{'llx'},
                 y                   => $params{'lly'},
-                value               => "*$params{barcode_data}*",
+                value               => $params{barcode_data},
                 xSize               => $x_scale_factor,
                 ySize               => $params{'y_scale_factor'},
                 mode                    => 'graphic',
@@ -553,7 +565,7 @@ sub barcode {
             PDF::Reuse::Barcode::Industrial2of5(
                 x                   => $params{'llx'},
                 y                   => $params{'lly'},
-                value               => "*$params{barcode_data}*",
+                value               => $params{barcode_data},
                 xSize               => $x_scale_factor,
                 ySize               => $params{'y_scale_factor'},
                 mode                    => 'graphic',
@@ -635,7 +647,7 @@ This module provides methods for creating, and otherwise manipulating single lab
             CODE39MOD10     = Code 3 of 9 with modulo 10 checksum
 
 =item .
-            COOP2OF5        = A varient of 2 of 5 barcode based on NEC's "Process 8000" code
+            COOP2OF5        = A variant of 2 of 5 barcode based on NEC's "Process 8000" code
 
 =item .
             INDUSTRIAL2OF5  = The standard 2 of 5 barcode (a binary level bar code developed by Identicon Corp. and Computer Identics Corp. in 1970)

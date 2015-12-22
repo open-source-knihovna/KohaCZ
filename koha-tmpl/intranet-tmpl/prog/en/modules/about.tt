@@ -48,6 +48,9 @@
             </td></tr>
             <tr><th scope="row">MySQL version: </th><td>[% mysqlVersion |html %]</td></tr>
             <tr><th scope="row">Apache version: </th><td>[% apacheVersion |html %]</td></tr>
+          [% IF (is_psgi) %]
+            <tr><th scope="row">PSGI: </th><td>[% psgi_server |html %]</td></tr>
+          [% END %]
             <tr><th scope="row">Zebra version: </th><td>[% zebraVersion |html %]</td></tr>
             [% IF (errZebraConnection == 10000) %]
             <tr><th scope="row"><b>Error</b> </th><td>Zebra server seems not to be available. Is it started?</td></tr>
@@ -101,7 +104,7 @@
 
         <div id="sysinfo">
     [% IF warnPrefBiblioAddsAuthorities || warnPrefEasyAnalyticalRecords || warnPrefAnonymousPatron ||
-          warnNoActiveCurrency || QueryParserError || warnIsRootUser || xml_config_warnings.size %]
+          warnNoActiveCurrency || QueryParserError || warnIsRootUser || xml_config_warnings.size || AutoSelfCheckPatronDoesNotHaveSelfCheckPerm || AutoSelfCheckPatronHasTooManyPerm %]
         [% IF (warnIsRootUser) %]
             <h2>Warning regarding current user</h2>
             <p>You are logged in as the database administrative user. This is not recommended because some parts of Koha will not function as expected when using this account.</p>
@@ -109,7 +112,7 @@
         [% END %]
 
         [% IF warnPrefBiblioAddsAuthorities || warnPrefEasyAnalyticalRecords || warnPrefAnonymousPatron ||
-              warnNoActiveCurrency || QueryParserError %]
+              warnNoActiveCurrency || QueryParserError || AutoSelfCheckPatronDoesNotHaveSelfCheckPerm || AutoSelfCheckPatronHasTooManyPerm %]
             <h2>Warnings regarding the system configuration</h2>
             <table>
                 <caption>Preferences and parameters</caption>
@@ -121,6 +124,9 @@
                 [% END %]
                 [% IF warnPrefAnonymousPatron %]
                     <tr><th scope="row"><b>Warning</b> </th><td>System preference 'OPACPrivacy' set, but AnonymousPatron preference is set to '0'. Set it to a valid borrower number if you want that this feature works correctly.</td></tr>
+                [% END %]
+                [% IF warnPrefAnonymousPatron_PatronDoesNotExist %]
+                    <tr><th scope="row"><b>Warning</b> </th><td>Some patrons have requested a privacy on returning item but the AnonymousPatron pref is not set correctly. Set it to a valid borrower number if you want that this feature works correctly.</td></tr>
                 [% END %]
                 [% IF warnNoActiveCurrency %]
                     <tr><th scope="row"><b>Warning</b> </th><td>No active currency is defined. Please go to <a href="/cgi-bin/koha/admin/currency.pl">Administration &gt; Currencies and exchange rates</a> and mark one currency as active.</td></tr>
@@ -136,6 +142,16 @@
                     [% END %]
                         </td>
                     </tr>
+                [% END %]
+                [% IF AutoSelfCheckPatronDoesNotHaveSelfCheckPerm %]
+                    <tr><th scope="row"><b>Warning</b> </th><td>
+                    The patron used for the self checkout module at the OPAC does not have the circulate => self_checkout permission.
+                    </td></tr>
+                [% END %]
+                [% IF AutoSelfCheckPatronHasTooManyPerm %]
+                    <tr><th scope="row"><b>Warning</b> </th><td>
+                    The patron used for the self checkout module at the OPAC has too many permissions. They should only have circulate => self_checkout.
+                    </td></tr>
                 [% END %]
             </table>
         [% END %]
@@ -229,6 +245,28 @@
                         to legacy facet calculation.
                     </td>
                 </tr>
+                [% ELSIF config_entry.error == 'log4perl_entry_missing' %]
+                <tr>
+                    <th scope="row"><b>Warning</b></th>
+                    <td>You are missing the &lt;log4perl_conf&gt; entry in your koha-conf.xml file. Please
+                        add it, pointing to the log4perl.conf file for your Koha instance.
+                    </td>
+                </tr>
+                [% ELSIF config_entry.error == 'uploadpath_entry_missing' %]
+                <tr>
+                    <th scope="row"><b>Warning</b></th>
+                    <td>You are missing the <strong>&lt;upload_path&gt;</strong> entry in your koha-conf.xml file. Please
+                        add it, pointing to the configured file upload directory for your Koha instance.
+                    </td>
+                </tr>
+                [% ELSIF config_entry.error == 'uploadpath_and_opacbaseurl_entry_missing' %]
+                <tr>
+                    <th scope="row"><b>Warning</b></th>
+                    <td>You are missing the <strong>&lt;upload_path&gt;</strong> entry in your koha-conf.xml file. Please
+                        add it, pointing to the configured file upload directory for your Koha instance.
+                        Also note that you need to properly set the <strong>OPACBaseURL</strong> preference for the file upload plugin to work.
+                    </td>
+                </tr>
                 [% END %]
             [% END %]
             </table>
@@ -254,7 +292,7 @@
                 <li><a href="http://www.ashs.school.nz/">Albany Senior High School</a>, Auckland, New Zealand (OPAC 'star-ratings' sponsorship)</li>
             </ul>
 
-            <h2>Koha 3.20 release team</h2>
+            <h2>Koha 3.22 release team</h2>
             <ul>
                 <li><strong>Release manager:</strong>
                     <a href="https://www.openhub.net/p/koha/contributors/6618544730094">Tomás Cohen Arazi</a></li>
@@ -266,7 +304,6 @@
                     <a href="https://www.openhub.net/p/koha/contributors/6618544839606">Bernardo González Kriegel</a></li>
                 <li><strong>Quality assurance team:</strong>
                     <ul>
-                        <li>Christopher Brannon</li>
                         <li><a href="https://www.openhub.net/p/koha/contributors/6618545125093">Jonathan Druart</a></li>
                         <li><a href="https://www.openhub.net/p/koha/contributors/6618544661344">Brendan Gallagher</a></li>
                         <li><a href="https://www.openhub.net/p/koha/contributors/6620692261494">Kyle Hall</a></li>
@@ -277,7 +314,8 @@
                 </li>
                 <li><strong>Release maintainers:</strong>
                     <ul>
-                        <li><a href="https://www.openhub.net/p/koha/contributors/6618544609030">Chris Cormack</a> (3.18)</li>
+                        <li><a href="https://www.openhub.net/p/koha/contributors/6618544609030">Chris Cormack</a> (3.20)</li>
+                        <li><a href="https://www.openhub.net/p/koha/contributors/6618544650708">Liz Rea</a> (3.18)</li>
                         <li><a href="https://www.openhub.net/p/koha/contributors/6618544618401">Mason James</a> (3.16)</li>
                         <li><a href="https://www.openhub.net/p/koha/contributors/6620692831733">Fridolin Somers</a> (3.14)</li>
                     </ul>
@@ -285,8 +323,16 @@
                 <li><strong>Packaging manager:</strong>
                     <a href="https://www.openhub.net/p/koha/contributors/6618544619438">Robin Sheat</a>
                 </li>
-                <li><strong>Bug wrangler:</strong>
-                    <a href="https://www.openhub.net/p/koha/contributors/6618544677502">Magnus Enger</a>
+                <li><strong>Bug wranglers:</strong>
+                    <ul>
+                        <li>Indranil Das Gupta</li>
+                        <li><a href="https://www.openhub.net/p/koha/contributors/6618544677502">Magnus Enger</a></li>
+                        <li>Amit Gupta</li>
+                        <li>Eivin Giske Skaaren</li>
+                        <li>Zeno Tajoli</li>
+                        <li>Mirko Tietgen</li>
+                        <li>Marc Veron</li>
+                    </ul>
                 </li>
             </ul>
 
@@ -304,7 +350,7 @@
                 <li>Richard Anderson</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692181851">Nahuel Angelinetti</a></li>
                 <li>Nuño López Ansótegui</li>
-                <li><a href="https://www.openhub.net/p/koha/contributors/6618544730094">Tomás Cohen Arazi (3.18 Release Manager; 3.12 Release Maintainer)</a></li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6618544730094">Tomás Cohen Arazi (3.18 and 3.20 Release Manager; 3.12 Release Maintainer)</a></li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692124662">Andrew Arensburger (the small and great C4::Context module)</a></li>
                 <li>Alex Arnaud</li>
                 <li>Petter Goksoyr Asen</li>
@@ -328,6 +374,7 @@
                 <li>Florian Bischof</li>
                 <li>Gaetan Boisson</li>
                 <li>Danny Bouman</li>
+                <li>Christopher Brannon (3.20 QA Team Member)</li>
                 <li>Stan Brinkerhoff</li>
                 <li>Isaac Brodsky</li>
                 <li>Ivan Brown</li>
@@ -345,12 +392,13 @@
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544614260">Galen Charlton (3.2, 3.14, and 3.16 Release Manager; 3.16 Release Maintainer; 3.18 QA Team Member)</a></li>
                 <li>Evonne Cheung</li>
                 <li>Andrew Chilton</li>
+                <li>Barton Chittenden</li>
                 <li>Koha SAB CINECA</li>
                 <li>Nick Clemens</li>
                 <li>Garry Collum</li>
                 <li>David Cook</li>
                 <li>John Copeland</li>
-                <li><a href="https://www.openhub.net/p/koha/contributors/6618544609030">Chris Cormack (1.x, 3.4, and 3.6 Release Manager; 3.8 and 3.10 Release Maintainer; 3.2 Translation Manager; 3.14 QA Team Member)</a></li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6618544609030">Chris Cormack (1.x, 3.4, and 3.6 Release Manager; 3.8, 3.10 and 3.18 Release Maintainer; 3.2 Translation Manager; 3.14 QA Team Member)</a></li>
                 <li>Jeremy Crabtree</li>
                 <li>Samuel Crosby</li>
                 <li>Christophe Croullebois</li>
@@ -365,7 +413,7 @@
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692210484">Frédéric Demians (3.4 - 3.10 Translation Manager)</a></li>
                 <li>Connor Dewar</li>
                 <li>Srikanth Dhondi</li>
-                <li><a href="https://www.openhub.net/p/koha/contributors/6618545125093">Jonathan Druart (3.8 - 3.18 QA Team Member)</a></li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6618545125093">Jonathan Druart (3.8 - 3.20 QA Team Member)</a></li>
                 <li>Serhij Dubyk</li>
                 <li>Yohann Dufour</li>
                 <li>Thomas Dukleth (MARC Frameworks Maintenance)</li>
@@ -387,7 +435,7 @@
                 <li>Vitor Fernandes</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544609053">Joshua Ferraro (3.0 Release Manager and Translation Manager)</a></li>
                 <li>Julian Fiol</li>
-                <li><a href="https://www.openhub.net/p/koha/contributors/6618544670742">Katrin Fischer (3.12 - 3.18 QA Manager)</a></li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6618544670742">Katrin Fischer (3.12 - 3.20 QA Manager)</a></li>
                 <li>Connor Fraser</li>
                 <li>Clay Fouts</li>
                 <li>Brendon Ford</li>
@@ -395,18 +443,19 @@
                 <li>Corey Fuimaono</li>
                 <li>Marco Gaiarin</li>
                 <li>Pierrick Le Gall</li>
-                <li><a href="https://www.openhub.net/p/koha/contributors/6618544661344">Brendan A. Gallagher (3.14 - 3.18 QA Team Member)</a></li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6618544661344">Brendan A. Gallagher (3.14 - 3.20 QA Team Member)</a></li>
                 <li>Tumer Garip</li>
                 <li>Russel Garlick</li>
                 <li>Mark Gavillet</li>
                 <li>Daniel Kahn Gillmor</li>
                 <li>David Goldfein</li>
-                <li><a href="https://www.openhub.net/p/koha/contributors/6618544839606">Bernardo González Kriegel (3.14 - 3.18 Translation Manager; 3.10 Release Maintainer)</a></li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6618544839606">Bernardo González Kriegel (3.14 - 3.20 Translation Manager; 3.10 Release Maintainer)</a></li>
                 <li>Daniel Grobani</li>
                 <li>Amit Gupta</li>
+                <li>Indranil Das Gupta</li>
                 <li>Michael Hafen</li>
                 <li>Christopher Hall (3.8 Release Maintainer)</li>
-                <li><a href="https://www.openhub.net/p/koha/contributors/6620692261494">Kyle Hall (3.8 Release Maintainer; 3.14 - 3.18 QA Team Member)</a></li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6620692261494">Kyle Hall (3.8 Release Maintainer; 3.14 - 3.20 QA Team Member)</a></li>
                 <li>Sean Hamlin</li>
                 <li>Tim Hannah</li>
                 <li>Mike Hansen</li>
@@ -434,7 +483,7 @@
                 <li>Cory Jaeger</li>
                 <li>Srdjan Jankovic</li>
                 <li>Philippe Jaillon</li>
-                <li><a href="https://www.openhub.net/accounts/kohaaloha">Mason James (3.10 - 3.14 QA Team Member)</a></li>
+                <li><a href="https://www.openhub.net/accounts/kohaaloha">Mason James (3.10 - 3.14 QA Team Member, 3.16 Release Maintainer)</a></li>
                 <li>Mike Johnson</li>
                 <li>Donovan Jones</li>
                 <li>Bart Jorgensen</li>
@@ -443,10 +492,12 @@
                 <li>Pasi Kallinen</li>
                 <li>Peter Crellan Kelly</li>
                 <li>Jorgia Kelsey</li>
+                <li>Olli-Antti Kivilahti</li>
                 <li>Attila Kinali</li>
                 <li>Ulrich Kleiber</li>
                 <li>Rafal Kopaczka</li>
                 <li>Piotr Kowalski</li>
+                <li>Joonas Kylmälä</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544614275">Henri-Damien Laurent (3.0 Release Maintainer)</a></li>
                 <li>Arnaud Laurin</li>
                 <li>Nicolas Legrand</li>
@@ -462,6 +513,7 @@
                 <li>Frère Sébastien Marie</li>
                 <li>Ricardo Dias Marques</li>
                 <li>Julian Maurice (3.18 QA Team Member)</li>
+                <li>Remi Mayrand-Provencher</li>
                 <li>Brig C. McCoy</li>
                 <li>Dorian Meid (German translation)</li>
                 <li>Meenakshi. R</li>
@@ -489,22 +541,26 @@
                 <li>Dobrica Pavlinusic</li>
                 <li>Maxime Pelletier</li>
                 <li>Shari Perkins</li>
+                <li>Martin Persson</li>
                 <li>Fred Pierre</li>
+                <li>Genevieve Plantin</li>
                 <li>Polytechnic University</li>
-                <li><a href="https://www.openhub.net/p/koha/contributors/6618544612249">Paul Poulain (2.0, 2.2, 3.8, 3.10 Release Manager; 2.2 Release Maintainer; 3.12 - 3.18 QA Team Member)</a></li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6618544612249">Paul Poulain (2.0, 2.2, 3.8, 3.10 Release Manager; 2.2 Release Maintainer; 3.12 - 3.20 QA Team Member)</a></li>
                 <li>Karam Qubsi</li>
                 <li>Romina Racca</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692116417">MJ Ray (2.0 Release Maintainer)</a></li>
-                <li>Liz Rea (3.6 Release Maintainer)</li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6618544650708">Liz Rea</a> (3.6 Release Maintainer)</li>
                 <li>Thatcher Rea</li>
                 <li>Allen Reinmeyer</li>
                 <li>Serge Renaux</li>
-                <li><a href="https://www.openhub.net/p/koha/contributors/6618544785220">Martin Renvoize (3.16, 3.18 QA Team Member)</a></li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6618544785220">Martin Renvoize (3.16 - 3.20 QA Team Member)</a></li>
                 <li>Abby Robertson</li>
                 <li>Waylon Robertson</li>
-                <li><a href="https://www.openhub.net/p/koha/contributors/6618544727712">Marcel de Rooy (3.8 - 3.18 QA Team Member)</a></li>
+                <li>Benjamin Rokseth</li>
+                <li><a href="https://www.openhub.net/p/koha/contributors/6618544727712">Marcel de Rooy (3.8 - 3.20 QA Team Member)</a></li>
                 <li>Salvador Zaragoza Rubio</li>
                 <li>Mathieu Saby</li>
+                <li>Eivin Giske Skaaren</li>
                 <li>Brice Sanchez</li>
                 <li>Sam Sanders</li>
                 <li>Viktor Sarge</li>
@@ -522,6 +578,7 @@
                 <li>Pawel Skuza (Polish for 1.2)</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692831733">Fridolin Somers (3.14 Release Maintainer)</a></li>
                 <li>Southeastern University</li>
+                <li>Martin Stenberg</li>
                 <li>Glen Stewart</li>
                 <li>Will Stokes</li>
                 <li>Simon Story</li>
@@ -529,6 +586,8 @@
                 <li>Ed Summers (Some code and Perl packages like MARC::Record)</li>
                 <li>Daniel Sweeney</li>
                 <li>Zeno Tajoli</li>
+                <li>Lari Taskula</li>
+                <li>Samanta Tello</li>
                 <li>Adam Thick</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544609107">Finlay Thompson</a></li>
                 <li>Peggy Thrasher</li>
@@ -551,6 +610,7 @@
                 <li><a href="https://www.openhub.net/accounts/janewagner">Jane Wagner</a></li>
                 <li>Ward van Wanrooij</li>
                 <li><a href="https://www.openhub.net/accounts/pianohacker">Jesse Weaver</a></li>
+                <li>Stefan Weil</li>
                 <li>Aaron Wells</li>
                 <li>Rick Welykochy</li>
                 <li>Piotr Wejman</li>
@@ -681,6 +741,23 @@
             <h2>Javascript Diff Algorithm</h2>
             <p>The <a href="http://ejohn.org/projects/javascript-diff-algorithm/">Javascript Diff Algorithm</a> plugin by John Resig is licensed under the <a href="http://opensource.org/licenses/mit-license.php">MIT License</a>.</p>
 
+            <h2>jQuery Validation Plugin</h2>
+            <p>The <a href="http://jqueryvalidation.org/">jQuery Validation Plugin</a> written and maintained by Jörn Zaefferer is licensed under the <a href="http://opensource.org/licenses/mit-license.php">MIT License</a>.</p>
+
+            <h2>TinyMCE WYSIWYG editor</h2>
+            <p>The <a href="http://www.tinymce.com/">TinyMCE WYSIWYG editor v3.5.8 </a> by Moxiecode (Ephox) is licensed under the <a href="http://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt">LGPL v2.1</a>.</p>
+
+            <h2>Font Awesome</h2>
+            <p><a href="http://fontawesome.io">Font Awesome</a> by Dave Gandy is licensed under the <a href="http://scripts.sil.org/OFL">SIL OFL 1.1</a> and the <a href="http://opensource.org/licenses/mit-license.html">MIT License</a>.</p>
+
+            <h2>CodeMirror editing library</h2>
+            <p>The <a href="http://codemirror.net/">CodeMirror editing library</a> by Marijn Haverbeke is licensed under an <a href="http://codemirror.net/LICENSE">MIT license</a>.</p>
+
+            <h2>FileSaver library</h2>
+            <p>The <a href="https://github.com/eligrey/FileSaver.js/">FileSaver library</a> by Eli Grey is licensed under an <a href="https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md">MIT license</a>.</p>
+
+            <h2>Require.js JS module system</h2>
+            <p>The <a href="http://requirejs.org/">Require.js JS module system</a> by The Dojo Foundation is licensed under an <a href="https://github.com/jrburke/requirejs/blob/master/LICENSE">MIT license</a>.</p>
         </div>
 
         <div id="translations">

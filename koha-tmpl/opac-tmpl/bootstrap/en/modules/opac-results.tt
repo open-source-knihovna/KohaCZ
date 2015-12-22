@@ -288,8 +288,9 @@
                                                         [% END %]
 
                                                         [% IF ( BakerTaylorEnabled && !BakerTaylorBookstoreURL ) %]
-                                                            [% IF ( SEARCH_RESULT.normalized_isbn ) %]
-                                                                <img alt="See Baker &amp; Taylor" src="[% BakerTaylorImageURL |html %][% SEARCH_RESULT.normalized_isbn %]" />
+                                                            [% bt_id = ( SEARCH_RESULT.normalized_upc || SEARCH_RESULT.normalized_isbn ) %]
+                                                            [% IF ( bt_id ) %]
+                                                                <img alt="See Baker &amp; Taylor" src="[% BakerTaylorImageURL |html %][% bt_id %]" />
                                                             [% ELSE %]
                                                                 <span class="no-image">No cover image available</span>
                                                             [% END %]
@@ -297,9 +298,10 @@
                                                     </a>
 
                                                     [% IF ( BakerTaylorEnabled && BakerTaylorBookstoreURL ) %]
-                                                        [% IF ( SEARCH_RESULT.normalized_isbn ) %]
-                                                            <a href="https://[% BakerTaylorBookstoreURL |html %][% SEARCH_RESULT.normalized_isbn %]">
-                                                                <img alt="See Baker &amp; Taylor" src="[% BakerTaylorImageURL |html %][% SEARCH_RESULT.normalized_isbn %]" />
+                                                        [% bt_id = ( SEARCH_RESULT.normalized_upc || SEARCH_RESULT.normalized_isbn ) %]
+                                                        [% IF ( bt_id ) %]
+                                                            <a href="https://[% BakerTaylorBookstoreURL |html %][% bt_id %]">
+                                                                <img alt="See Baker &amp; Taylor" src="[% BakerTaylorImageURL |html %][% bt_id %]" />
                                                             </a>
                                                         [% ELSE %]
                                                             <span class="no-image">No cover image available</span>
@@ -711,7 +713,7 @@ $(document).ready(function(){
             if ($.browser.msie && parseInt($.browser.version, 10) >= 8 && window.XDomainRequest) {
             // Use Microsoft XDR for IE version 8 or above
                 var xdr = new XDomainRequest();
-                xdr.open("get", "http://idreambooks.com/newbooks/api.json?q="+encodeURIComponent(isbn)+"&key=8bf66516232d1b72f3e47df939653e1e");
+                xdr.open("get", "https://idreambooks.com/newbooks/api.json?q="+encodeURIComponent(isbn)+"&key=8bf66516232d1b72f3e47df939653e1e");
                 xdr.onload = function() {
                     json = 'json = '+xdr.responseText; // the string now looks like..  json = { ... };
                     eval(json); // json is now a regular JSON object
@@ -724,7 +726,7 @@ $(document).ready(function(){
                 }
                 xdr.send();
             } else {
-                $.getJSON("http://idreambooks.com/newbooks/api.json?q="+encodeURIComponent(isbn)+"&key=8bf66516232d1b72f3e47df939653e1e", function(json){
+                $.getJSON("https://idreambooks.com/newbooks/api.json?q="+encodeURIComponent(isbn)+"&key=8bf66516232d1b72f3e47df939653e1e", function(json){
                     if(json.total_results > 0 && json.book.rating > 0){
                         $(element).children('a').html("<img src='"+json.book.to_read_or_not_small+"' alt='"+json.book.title+_(" by ")+json.book.author+"' title='"+_("Rating based on reviews of ")+json.book.title+"'>"+json.book.rating+"%");
                         $(element).show();
@@ -741,37 +743,43 @@ $(document).ready(function(){
     param1 += "<span id=\"selections\">"+_("Select titles to: ")+"</span>";
     [% END %]
 
-[% IF Koha.Preference( 'opacbookbag' ) == 1 %]
-    [% IF Koha.Preference( 'virtualshelves' ) == 1 %]
+[% IF Koha.Preference( 'opacbookbag' ) == 1 OR Koha.Preference('virtualshelves') %]
     param1 += "<select class=\"disabled\" name=\"addto\" id=\"addto\"><option>"+_("Add to...")+"</option>";
-    [% IF Koha.Preference( 'opacbookbag' ) == 1 %]    param1 += "<option value=\"addtocart\">"+_("Cart")+"<\/option>";
-    [% END %][% IF Koha.Preference( 'virtualshelves' ) == 1 %][% IF ( loggedinusername ) %][% IF ( addbarshelves ) %]
-    param1 += "<optgroup label=\""+_("Your lists:")+"\">";[% FOREACH addbarshelvesloo IN addbarshelvesloop %]
-    param1 += "<option id=\"s[% addbarshelvesloo.shelfnumber %]\" value=\"addtolist\">[% addbarshelvesloo.shelfname |html %]<\/option>";[% END %]
-    param1 += "<\/optgroup>";[% END %]
-    [% IF ( addpubshelves ) %]param1 += "<optgroup label=\""+_("Public lists:")+"\">"[% FOREACH addpubshelvesloo IN addpubshelvesloop %]+"<option id=\"s[% addpubshelvesloo.shelfnumber %]\" value=\"addtolist\">[% addpubshelvesloo.shelfname |html %]<\/option>"[% END %];
-    param1 += "<\/optgroup>";[% END %]
-    [% IF (( addbarshelvesloop && addbarshelvesloop.size>9) || (addpubshelvesloop && addpubshelvesloop.size>9 )) %]
-        param1 += "<option value=\"morelists\">[ "+_("More lists")+" ]<\/option>";
+
+    [% IF Koha.Preference( 'opacbookbag' ) == 1 %]
+        param1 += "<option value=\"addtocart\">"+_("Cart")+"<\/option>";
     [% END %]
-    param1 += "<option value=\"newlist\">[ "+_("New list")+" ]<\/option>";
-    [% END %]
+    [% IF Koha.Preference('virtualshelves') %]
+        [% IF loggedinusername AND add_to_some_private_shelves.count %]
+            param1 += "<optgroup label=\""+_("Your lists:")+"\">";
+            [% SET number_of_private_shelves = 0 %]
+            [% FOREACH s IN add_to_some_private_shelves %]
+                [% IF shelfnumber != s.shelfnumber %]
+                    param1 += "<option id=\"s[% s.shelfnumber %]\" value=\"addtolist\">[% s.shelfname |html %]<\/option>";
+                    [% SET number_of_private_shelves = number_of_private_shelves + 1 %]
+                    [% IF number_of_private_shelves == 10 %][% LAST %][% END %]
+                [% END %]
+            [% END %]
+            param1 += "<\/optgroup>";
+        [% END %]
+        [% IF add_to_some_public_shelves.count %]
+            param1 += "<optgroup label=\""+_("Public lists:")+"\">";
+            [% SET number_of_public_shelves = 0 %]
+            [% FOREACH s IN add_to_some_public_shelves %]
+                [% IF shelfnumber != s.shelfnumber %]
+                    param1 += "<option id=\"s[% s.shelfnumber %]\" value=\"addtolist\">[% s.shelfname |html %]<\/option>";
+                    [% SET number_of_public_shelves = number_of_public_shelves + 1 %]
+                    [% IF number_of_public_shelves == 10 %][% LAST %][% END %]
+                [% END %]
+            [% END %]
+            param1 += "<\/optgroup>";
+        [% END %]
+        [% IF add_to_some_private_shelves.count > 10 or add_to_some_public_shelves.count > 10 %]
+            param1 += "<option value=\"morelists\">[ "+_("More lists")+" ]<\/option>";
+        [% END %]
+        param1 +="<option value=\"newlist\">"+_("[ New list ]")+"<\/option>"
     [% END %]
     param1 += "<\/select> <input type=\"submit\" class=\"btn btn-small\" value=\""+_("Save")+"\" />";
-    [% ELSE %]
-        param1 += "<a id=\"addto\" class=\"addtocart\" href=\"#\">" + _("Add to cart") + "<\/a>";
-    [% END %]
-[% ELSE %]
-        param1 += "<select name=\"addto\" id=\"addto\"><option value=\"\">"+_("Add to list: ")+"<\/option>";
-[% IF Koha.Preference( 'virtualshelves' ) == 1 %][% IF ( loggedinusername ) %][% IF ( addbarshelves ) %]
-    param1 += "<optgroup label=\""+_("Your lists:")+"\">";[% FOREACH addbarshelvesloo IN addbarshelvesloop %]
-    param1 += "<option id=\"s[% addbarshelvesloo.shelfnumber %]\" value=\"addtolist\">[% addbarshelvesloo.shelfname |html %]<\/option>";[% END %]
-    param1 += "<\/optgroup>";[% END %]
-    [% IF ( addpubshelves ) %]param1 += "<optgroup label=\""+_("Public lists:")+"\">"[% FOREACH addpubshelvesloo IN addpubshelvesloop %]+"<option id=\"s[% addpubshelvesloo.shelfnumber %]\" value=\"addtolist\">[% addpubshelvesloo.shelfname |html %]<\/option>"[% END %][% END %]
-    param1 +="<\/optgroup><option value=\"newlist\">[ "+_("New list")+" ]<\/option>"
-    [% END %]
-    [% END %]
-    param1 += "<\/select> <input type=\"submit\" class=\"btn btn-small disabled\" value=\""+_("Save")+"\" />";
 [% END %]
 
     $('#sortsubmit').hide();

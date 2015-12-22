@@ -106,6 +106,10 @@ $(document).ready(function() {
                         content += TOO_MANY_RENEWALS;
                     } else if ( data.error == "on_reserve" ) {
                         content += ON_RESERVE;
+                    } else if ( data.error == "restriction" ) {
+                        content += NOT_RENEWABLE_RESTRICTION;
+                    } else if ( data.error == "overdue" ) {
+                        content += NOT_RENEWABLE_OVERDUE;
                     } else if ( data.error ) {
                         content += data.error;
                     } else {
@@ -237,6 +241,14 @@ $(document).ready(function() {
                             title += " - <span class='" + span_class + "'>" + oObj.itemnotes + "</span>"
                         }
 
+                        if ( oObj.itemnotes_nonpublic ) {
+                            var span_class = "";
+                            if ( $.datepicker.formatDate('yy-mm-dd', new Date(oObj.issuedate) ) == ymd ) {
+                                span_class = "circ-hlt";
+                            }
+                            title += " - <span class='" + span_class + "'>" + oObj.itemnotes_nonpublic + "</span>"
+                        }
+
                         var onsite_checkout = '';
                         if ( oObj.onsite_checkout == 1 ) {
                             onsite_checkout += " <span class='onsite_checkout'>(" + INHOUSE_USE + ")</span>";
@@ -307,6 +319,20 @@ $(document).ready(function() {
 
                             span_style = "display: none";
                             span_class = "renewals-allowed";
+                        } else if ( oObj.can_renew_error == "restriction" ) {
+                            content += "<span class='renewals-disabled'>"
+                                    + NOT_RENEWABLE_RESTRICTION
+                                    + "</span>";
+
+                            span_style = "display: none";
+                            span_class = "renewals-allowed";
+                        } else if ( oObj.can_renew_error == "overdue" ) {
+                            content += "<span class='renewals-disabled'>"
+                                    + NOT_RENEWABLE_OVERDUE
+                                    + "</span>";
+
+                            span_style = "display: none";
+                            span_class = "renewals-allowed";
                         } else if ( oObj.can_renew_error == "too_soon" ) {
                             content += "<span class='renewals-disabled'>"
                                     + NOT_RENEWABLE_TOO_SOON.format( oObj.can_renew_date )
@@ -328,6 +354,8 @@ $(document).ready(function() {
 
                             span_style = "display: none";
                             span_class = "renewals-allowed";
+                        } else if ( oObj.can_renew_error == "onsite_checkout" ) {
+                            // Don't display something if it's an onsite checkout
                         } else {
                             content += "<span class='renewals-disabled'>"
                                     + oObj.can_renew_error
@@ -339,20 +367,18 @@ $(document).ready(function() {
 
                         var can_force_renew = ( oObj.onsite_checkout == 0 ) && ( oObj.can_renew_error != "on_reserve" );
                         var can_renew = ( oObj.renewals_remaining > 0  && !oObj.can_renew_error );
-                        if ( oObj.onsite_checkout == 0 ) {
-                            if ( can_renew || can_force_renew ) {
-                                content += "<span class='" + span_class + "' style='" + span_style + "'>"
-                                        +  "<input type='checkbox' ";
-                                if ( oObj.date_due_overdue && can_renew ) {
-                                    content += "checked='checked' ";
-                                }
-                                content += "class='renew' id='renew_" + oObj.itemnumber + "' name='renew' value='" + oObj.itemnumber +"'/>"
-                                        +  "</span>";
-
-                                content += "<span class='renewals'>("
-                                        + RENEWALS_REMAINING.format( oObj.renewals_remaining, oObj.renewals_allowed )
-                                        + ")</span>";
+                        if ( can_renew || can_force_renew ) {
+                            content += "<span class='" + span_class + "' style='" + span_style + "'>"
+                                    +  "<input type='checkbox' ";
+                            if ( oObj.date_due_overdue && can_renew ) {
+                                content += "checked='checked' ";
                             }
+                            content += "class='renew' id='renew_" + oObj.itemnumber + "' name='renew' value='" + oObj.itemnumber +"'/>"
+                                    +  "</span>";
+
+                            content += "<span class='renewals'>("
+                                    + RENEWALS_REMAINING.format( oObj.renewals_remaining, oObj.renewals_allowed )
+                                    + ")</span>";
                         }
 
                         content += "</span>";
@@ -374,7 +400,10 @@ $(document).ready(function() {
                     "bVisible": exports_enabled ? true : false,
                     "bSortable": false,
                     "mDataProp": function ( oObj ) {
-                        return "<input type='checkbox' class='export' id='export_" + oObj.biblionumber + "' name='biblionumbers' value='" + oObj.biblionumber + "' />";
+                        var s = "<input type='checkbox' name='itemnumbers' value='" + oObj.itemnumber + "' style='visibility:hidden;' />";
+
+                        s += "<input type='checkbox' class='export' id='export_" + oObj.biblionumber + "' name='biblionumbers' value='" + oObj.biblionumber + "' />";
+                        return s;
                     }
                 }
             ],
@@ -480,6 +509,14 @@ $(document).ready(function() {
                                     span_class = "circ-hlt";
                                 }
                                 title += " - <span class='" + span_class + "'>" + oObj.itemnotes + "</span>"
+                            }
+
+                            if ( oObj.itemnotes_nonpublic ) {
+                                var span_class = "";
+                                if ( $.datepicker.formatDate('yy-mm-dd', new Date(oObj.issuedate) ) == ymd ) {
+                                    span_class = "circ-hlt";
+                                }
+                                title += " - <span class='" + span_class + "'>" + oObj.itemnotes_nonpublic + "</span>"
                             }
 
                             var onsite_checkout = '';

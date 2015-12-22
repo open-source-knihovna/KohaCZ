@@ -12,10 +12,15 @@
         [% SET tables = module %]
         [% IF tables.$pagename.keys and tables.$pagename.keys.size > 0 %]
           [% FOR tablename IN tables.$pagename.keys.sort %]
+            [% IF pagename == 'additem' AND tablename == 'itemst' %]
+              <div class="alert">Changes made below will only apply to item subfields that are <a href="/cgi-bin/koha/admin/koha2marclinks.pl?tablename=items">mapped</a> to the <code>items</code> table.</div>
+            [% END %]
             <table>
               <caption>
                 [% IF tablename == 'currencies-table' %]
                   Currency
+                [% ELSIF pagename == 'additem' AND tablename == 'itemst' %]
+                  Items Editor
                 [% END %]
                 (id=[% tablename %])
               </caption>

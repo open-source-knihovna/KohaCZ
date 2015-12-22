@@ -29,9 +29,8 @@ use Koha::Cache;
 use Koha::DateUtils qw(dt_from_string);
 use DateTime::Format::MySQL;
 use Business::ISBN;
-use autouse 'Data::Dumper' => qw(Dumper);
+use autouse 'Data::cselectall_arrayref' => qw(Dumper);
 use DBI qw(:sql_types);
-
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $DEBUG);
 
 BEGIN {
@@ -43,6 +42,7 @@ BEGIN {
 		&subfield_is_koha_internal_p
 		&GetPrinters &GetPrinter
 		&GetItemTypes &getitemtypeinfo
+                &GetItemTypesCategorized &GetItemTypesByCategory
 		&GetSupportName &GetSupportList
 		&get_itemtypeinfos_of
 		&getframeworks &getframeworkinfo
@@ -194,14 +194,7 @@ build a HTML select with the following code :
 sub GetSupportList{
 	my $advanced_search_types = C4::Context->preference("AdvancedSearchTypes");
     if (!$advanced_search_types or $advanced_search_types =~ /itemtypes/) {
-		my $query = qq|
-			SELECT *
-			FROM   itemtypes
-			order by description
-		|;
-		my $sth = C4::Context->dbh->prepare($query);
-		$sth->execute;
-		return $sth->fetchall_arrayref({});
+        return GetItemTypes( style => 'array' );
 	} else {
 		my $advsearchtypes = GetAuthorisedValues($advanced_search_types);
 		my @results= map {{itemtype=>$$_{authorised_value},description=>$$_{lib},imageurl=>$$_{imageurl}}} @$advsearchtypes;
@@ -254,15 +247,33 @@ sub GetItemTypes {
     my ( %params ) = @_;
     my $style = defined( $params{'style'} ) ? $params{'style'} : 'hash';
 
+    require C4::Languages;
+    my $language = C4::Languages::getlanguage();
     # returns a reference to a hash of references to itemtypes...
     my %itemtypes;
     my $dbh   = C4::Context->dbh;
-    my $query = qq|
-        SELECT *
+    my $query = q|
+        SELECT
+               itemtypes.itemtype,
+               itemtypes.description,
+               itemtypes.rentalcharge,
+               itemtypes.notforloan,
+               itemtypes.imageurl,
+               itemtypes.summary,
+               itemtypes.checkinmsg,
+               itemtypes.checkinmsgtype,
+               itemtypes.sip_media_type,
+               itemtypes.hideinopac,
+               itemtypes.searchcategory,
+               COALESCE( localization.translation, itemtypes.description ) AS translated_description
         FROM   itemtypes
+        LEFT JOIN localization ON itemtypes.itemtype = localization.code
+            AND localization.entity = 'itemtypes'
+            AND localization.lang = ?
+        ORDER BY itemtype
     |;
     my $sth = $dbh->prepare($query);
-    $sth->execute;
+    $sth->execute( $language );
 
     if ( $style eq 'hash' ) {
         while ( my $IT = $sth->fetchrow_hashref ) {
@@ -272,6 +283,60 @@ sub GetItemTypes {
     } else {
         return $sth->fetchall_arrayref({});
     }
+}
+
+=head2 GetItemTypesCategorized
+
+    $categories = GetItemTypesCategorized();
+
+Returns a hashref containing search categories.
+A search category will be put in the hash if at least one of its itemtypes is visible in OPAC.
+The categories must be part of Authorized Values (ITEMTYPECAT)
+
+=cut
+
+sub GetItemTypesCategorized {
+    my $dbh   = C4::Context->dbh;
+    # Order is important, so that partially hidden (some items are not visible in OPAC) search
+    # categories will be visible. hideinopac=0 must be last.
+    my $query = q|
+        SELECT itemtype, description, imageurl, hideinopac, 0 as 'iscat' FROM itemtypes WHERE ISNULL(searchcategory) or length(searchcategory) = 0
+        UNION
+        SELECT DISTINCT searchcategory AS `itemtype`,
+                        authorised_values.lib_opac AS description,
+                        authorised_values.imageurl AS imageurl,
+                        hideinopac, 1 as 'iscat'
+        FROM itemtypes
+        LEFT JOIN authorised_values ON searchcategory = authorised_value
+        WHERE searchcategory > '' and hideinopac=1
+        UNION
+        SELECT DISTINCT searchcategory AS `itemtype`,
+                        authorised_values.lib_opac AS description,
+                        authorised_values.imageurl AS imageurl,
+                        hideinopac, 1 as 'iscat'
+        FROM itemtypes
+        LEFT JOIN authorised_values ON searchcategory = authorised_value
+        WHERE searchcategory > '' and hideinopac=0
+        |;
+return ($dbh->selectall_hashref($query,'itemtype'));
+}
+
+=head2 GetItemTypesByCategory
+
+    @results = GetItemTypesByCategory( $searchcategory );
+
+Returns the itemtype code of all itemtypes included in a searchcategory.
+
+=cut
+
+sub GetItemTypesByCategory {
+    my ($category) = @_;
+    my $count = 0;
+    my @results;
+    my $dbh = C4::Context->dbh;
+    my $query = qq|SELECT itemtype FROM itemtypes WHERE searchcategory=?|;
+    my $tmp=$dbh->selectcol_arrayref($query,undef,$category);
+    return @$tmp;
 }
 
 sub get_itemtypeinfos_of {
@@ -486,14 +551,31 @@ Defaults to intranet.
 
 sub getitemtypeinfo {
     my ($itemtype, $interface) = @_;
-    my $dbh        = C4::Context->dbh;
-    my $sth        = $dbh->prepare("select * from itemtypes where itemtype=?");
-    $sth->execute($itemtype);
-    my $res = $sth->fetchrow_hashref;
+    my $dbh      = C4::Context->dbh;
+    require C4::Languages;
+    my $language = C4::Languages::getlanguage();
+    my $it = $dbh->selectrow_hashref(q|
+        SELECT
+               itemtypes.itemtype,
+               itemtypes.description,
+               itemtypes.rentalcharge,
+               itemtypes.notforloan,
+               itemtypes.imageurl,
+               itemtypes.summary,
+               itemtypes.checkinmsg,
+               itemtypes.checkinmsgtype,
+               itemtypes.sip_media_type,
+               COALESCE( localization.translation, itemtypes.description ) AS translated_description
+        FROM   itemtypes
+        LEFT JOIN localization ON itemtypes.itemtype = localization.code
+            AND localization.entity = 'itemtypes'
+            AND localization.lang = ?
+        WHERE itemtypes.itemtype = ?
+    |, undef, $language, $itemtype );
 
-    $res->{imageurl} = getitemtypeimagelocation( ( ( defined $interface && $interface eq 'opac' ) ? 'opac' : 'intranet' ), $res->{imageurl} );
+    $it->{imageurl} = getitemtypeimagelocation( ( ( defined $interface && $interface eq 'opac' ) ? 'opac' : 'intranet' ), $it->{imageurl} );
 
-    return $res;
+    return $it;
 }
 
 =head2 getitemtypeimagedir
@@ -1237,7 +1319,7 @@ sub IsAuthorisedValueCategory {
     my $query = '
         SELECT category
         FROM authorised_values
-        WHERE BINARY category=?
+        WHERE category=?
         LIMIT 1
     ';
     my $sth = C4::Context->dbh->prepare($query);
@@ -1741,7 +1823,7 @@ sub NormalizeISBN {
 
   my @isbns = GetVariationsOfISBN( $isbn );
 
-  Returns a list of varations of the given isbn in
+  Returns a list of variations of the given isbn in
   both ISBN-10 and ISBN-13 formats, with and without
   hyphens.
 
@@ -1773,7 +1855,7 @@ sub GetVariationsOfISBN {
 
   my @isbns = GetVariationsOfISBNs( @isbns );
 
-  Returns a list of varations of the given isbns in
+  Returns a list of variations of the given isbns in
   both ISBN-10 and ISBN-13 formats, with and without
   hyphens.
 

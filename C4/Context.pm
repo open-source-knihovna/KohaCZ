@@ -97,17 +97,18 @@ BEGIN {
     $VERSION = '3.07.00.049';
 }
 
-use DBIx::Connector;
 use Encode;
 use ZOOM;
 use XML::Simple;
-use C4::Boolean;
-use C4::Debug;
-use Koha;
 use POSIX ();
 use DateTime::TimeZone;
 use Module::Load::Conditional qw(can_load);
 use Carp;
+
+use C4::Boolean;
+use C4::Debug;
+use Koha;
+use Koha::Config::SysPrefs;
 
 =head1 NAME
 
@@ -286,7 +287,7 @@ sub import {
     # the first time the module is called
     # (a config file can be optionaly passed)
 
-    # default context allready exists? 
+    # default context already exists?
     return if $context;
 
     # no ? so load it!
@@ -348,7 +349,7 @@ sub new {
     }
     
     if ($ismemcached) {
-        # retreive from memcached
+        # retrieve from memcached
         $self = $memcached->get('kohaconf');
         if (not defined $self) {
             # not in memcached yet
@@ -363,7 +364,6 @@ sub new {
     warn "read_config_file($conf_fname) returned undef" if !defined($self->{"config"});
     return if !defined($self->{"config"});
 
-    $self->{"dbh"} = undef;        # Database handle
     $self->{"Zconn"} = undef;    # Zebra Connections
     $self->{"stopwords"} = undef; # stopwords list
     $self->{"marcfromkohafield"} = undef; # the hash with relations between koha table fields and MARC field/subfield
@@ -525,14 +525,9 @@ sub preference {
     if ( defined $ENV{"OVERRIDE_SYSPREF_$var"} ) {
         $value = $ENV{"OVERRIDE_SYSPREF_$var"};
     } else {
-        # Look up systempreferences.variable==$var
-        my $sql = q{
-            SELECT  value
-            FROM    systempreferences
-            WHERE   variable = ?
-            LIMIT   1
-        };
-        $value = $dbh->selectrow_array( $sql, {}, lc $var );
+        my $syspref;
+        eval { $syspref = Koha::Config::SysPrefs->find( lc $var ) };
+        $value = $syspref ? $syspref->value() : undef;
     }
 
     $sysprefs{lc $var} = $value;
@@ -603,9 +598,8 @@ sub set_preference {
     my $var = lc(shift);
     my $value = shift;
 
-    my $dbh = C4::Context->dbh or return 0;
-
-    my $type = $dbh->selectrow_array( "SELECT type FROM systempreferences WHERE variable = ?", {}, $var );
+    my $syspref = Koha::Config::SysPrefs->find( $var );
+    my $type = $syspref ? $syspref->type() : undef;
 
     $value = 0 if ( $type && $type eq 'YesNo' && $value eq '' );
 
@@ -614,35 +608,16 @@ sub set_preference {
         $value = 'http://' . $value;
     }
 
-    my $sth = $dbh->prepare( "
-      INSERT INTO systempreferences
-        ( variable, value )
-        VALUES( ?, ? )
-        ON DUPLICATE KEY UPDATE value = VALUES(value)
-    " );
+    if ($syspref) {
+        $syspref = $syspref->set( { value => $value } )->store();
+    }
+    else {
+        $syspref = Koha::Config::SysPref->new( { variable => $var, value => $value } )->store();
+    }
 
-    if($sth->execute( $var, $value )) {
+    if ($syspref) {
         $sysprefs{$var} = $value;
     }
-    $sth->finish;
-}
-
-# AUTOLOAD
-# This implements C4::Config->foo, and simply returns
-# C4::Context->config("foo"), as described in the documentation for
-# &config, above.
-
-# FIXME - Perhaps this should be extended to check &config first, and
-# then &preference if that fails. OTOH, AUTOLOAD could lead to crappy
-# code, so it'd probably be best to delete it altogether so as not to
-# encourage people to use it.
-sub AUTOLOAD
-{
-    my $self = shift;
-
-    $AUTOLOAD =~ s/.*:://;        # Chop off the package name,
-                    # leaving only the function name.
-    return $self->config($AUTOLOAD);
 }
 
 =head2 Zconn
@@ -749,55 +724,7 @@ sub _new_Zconn {
 sub _new_dbh
 {
 
-    ## $context
-    ## correct name for db_scheme
-    my $db_driver = $context->{db_driver};
-
-    my $db_name   = $context->config("database");
-    my $db_host   = $context->config("hostname");
-    my $db_port   = $context->config("port") || '';
-    my $db_user   = $context->config("user");
-    my $db_passwd = $context->config("pass");
-    # MJR added or die here, as we can't work without dbh
-    my $dbh = DBIx::Connector->connect(
-        "dbi:$db_driver:dbname=$db_name;host=$db_host;port=$db_port",
-        $db_user, $db_passwd,
-        {
-            'RaiseError' => $ENV{DEBUG} ? 1 : 0
-        }
-    );
-
-    # Check for the existence of a systempreference table; if we don't have this, we don't
-    # have a valid database and should not set RaiseError in order to allow the installer
-    # to run; installer will not run otherwise since we raise all db errors
-
-    eval {
-                local $dbh->{PrintError} = 0;
-                local $dbh->{RaiseError} = 1;
-                $dbh->do(qq{SELECT * FROM systempreferences WHERE 1 = 0 });
-    };
-
-    if ($@) {
-        $dbh->{RaiseError} = 0;
-    }
-
-    if ( $db_driver eq 'mysql' ) {
-        $dbh->{mysql_auto_reconnect} = 1;
-    }
-
-	my $tz = $ENV{TZ};
-    if ( $db_driver eq 'mysql' ) { 
-        # Koha 3.0 is utf-8, so force utf8 communication between mySQL and koha, whatever the mysql default config.
-        # this is better than modifying my.cnf (and forcing all communications to be in utf8)
-        $dbh->{'mysql_enable_utf8'}=1; #enable
-        $dbh->do("set NAMES 'utf8'");
-        ($tz) and $dbh->do(qq(SET time_zone = "$tz"));
-    }
-    elsif ( $db_driver eq 'Pg' ) {
-	    $dbh->do( "set client_encoding = 'UTF8';" );
-        ($tz) and $dbh->do(qq(SET TIME ZONE = "$tz"));
-    }
-    return $dbh;
+    Koha::Database->schema({ new => 1 })->storage->dbh;
 }
 
 =head2 dbh
@@ -823,17 +750,10 @@ sub dbh
     my $sth;
 
     unless ( $params->{new} ) {
-        if ( defined($context->{db_driver}) && $context->{db_driver} eq 'mysql' && $context->{"dbh"} ) {
-            return $context->{"dbh"};
-        } elsif ( defined($context->{"dbh"}) && $context->{"dbh"}->ping() ) {
-            return $context->{"dbh"};
-        }
+        return Koha::Database->schema->storage->dbh;
     }
 
-    # No database handle or it died . Create one.
-    $context->{"dbh"} = &_new_dbh();
-
-    return $context->{"dbh"};
+    return Koha::Database->schema({ new => 1 })->storage->dbh;
 }
 
 =head2 new_dbh
@@ -854,7 +774,7 @@ sub new_dbh
 {
     my $self = shift;
 
-    return &_new_dbh();
+    return &dbh({ new => 1 });
 }
 
 =head2 set_dbh

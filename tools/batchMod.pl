@@ -31,11 +31,11 @@ use C4::Koha; # XXX subfield_is_koha_internal_p
 use C4::Branch; # XXX subfield_is_koha_internal_p
 use C4::BackgroundJob;
 use C4::ClassSource;
-use C4::Dates;
 use C4::Debug;
 use C4::Members;
 use MARC::File::XML;
 use List::MoreUtils qw/uniq/;
+use Koha::DateUtils;
 
 my $input = new CGI;
 my $dbh = C4::Context->dbh;
@@ -81,8 +81,6 @@ my $restrictededition = $uid ? haspermission($uid,  {'tools' => 'items_batchmod_
 # In case user is a superlibrarian, edition is not restricted
 $restrictededition = 0 if ($restrictededition != 0 && C4::Context->IsSuperLibrarian());
 
-my $today_iso = C4::Dates->today('iso');
-$template->param(today_iso => $today_iso);
 $template->param(del       => $del);
 $template->param(withdrawal=> $withdrawal);
 
@@ -96,7 +94,7 @@ my $itemrecord;
 my $nextop="";
 my @errors; # store errors found while checking data BEFORE saving item.
 my $items_display_hashref;
-my $tagslib = &GetMarcStructure(1);
+our $tagslib = &GetMarcStructure(1);
 
 my $deleted_items = 0;     # Number of deleted items
 my $withdrawn_items = 0;     # Number of deleted items
@@ -234,7 +232,7 @@ if ($op eq "action") {
                 if ( $modified ) {
                     eval {
                         if ( my $item = ModItemFromMarc( $localmarcitem, $itemdata->{biblionumber}, $itemnumber ) ) {
-                            LostItem($itemnumber, 'MARK RETURNED') if $item->{itemlost};
+                            LostItem($itemnumber, 'MARK RETURNED') if $item->{itemlost} and not $itemdata->{itemlost};
                         }
                     };
                 }
@@ -370,10 +368,13 @@ foreach my $tag (sort keys %{$tagslib}) {
    if ( !$value && $use_default_values) {
 	    $value = $tagslib->{$tag}->{$subfield}->{defaultvalue};
 	    # get today date & replace YYYY, MM, DD if provided in the default value
-	    my ( $year, $month, $day ) = split ',', $today_iso;     # FIXME: iso dates don't have commas!
-	    $value =~ s/YYYY/$year/g;
-	    $value =~ s/MM/$month/g;
-	    $value =~ s/DD/$day/g;
+            my $today = dt_from_string;
+            my $year  = $today->year;
+            my $month = $today->month;
+            my $day   = $today->day;
+            $value =~ s/YYYY/$year/g;
+            $value =~ s/MM/$month/g;
+            $value =~ s/DD/$day/g;
 	}
 	$subfield_data{visibility} = "display:none;" if (($tagslib->{$tag}->{$subfield}->{hidden} > 4) || ($tagslib->{$tag}->{$subfield}->{hidden} < -4));
     # testing branch value if IndependentBranches.
@@ -390,14 +391,13 @@ foreach my $tag (sort keys %{$tagslib}) {
 	    }
         $value = "";
 	}
-	elsif ( $tagslib->{$tag}->{$subfield}->{authorised_value} eq "itemtypes" ) {
-	    push @authorised_values, "";
-	    my $sth = $dbh->prepare("select itemtype,description from itemtypes order by description");
-	    $sth->execute;
-	    while ( my ( $itemtype, $description ) = $sth->fetchrow_array ) {
-		push @authorised_values, $itemtype;
-		$authorised_lib{$itemtype} = $description;
-	    }
+    elsif ( $tagslib->{$tag}->{$subfield}->{authorised_value} eq "itemtypes" ) {
+        push @authorised_values, "";
+        my $itemtypes = GetItemTypes( style => 'array' );
+        for my $itemtype ( @$itemtypes ) {
+            push @authorised_values, $itemtype->{itemtype};
+            $authorised_lib{$itemtype->{itemtype}} = $itemtype->{translated_description};
+        }
         $value = "";
 
           #---- class_sources
@@ -707,7 +707,7 @@ sub add_saved_job_results_to_template {
 sub put_in_background {
     my $job_size = shift;
 
-    my $job = C4::BackgroundJob->new($sessionID, "test", $ENV{'SCRIPT_NAME'}, $job_size);
+    my $job = C4::BackgroundJob->new($sessionID, "test", '/cgi-bin/koha/tools/batchMod.pl', $job_size);
     my $jobID = $job->id();
 
     # fork off
@@ -732,7 +732,7 @@ sub put_in_background {
         close STDERR;
     } else {
         # fork failed, so exit immediately
-        warn "fork failed while attempting to run $ENV{'SCRIPT_NAME'} as a background job";
+        warn "fork failed while attempting to run tools/batchMod.pl as a background job";
         exit 0;
     }
     return $job;

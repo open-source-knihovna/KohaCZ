@@ -22,7 +22,6 @@ use warnings;
 use CGI qw ( -utf8 );
 use C4::Acquisition qw( GetHistory );
 use C4::Auth;
-use C4::Dates qw/format_date/;
 use C4::Koha;
 use C4::Serials;    #uses getsubscriptionfrom biblionumber
 use C4::Output;
@@ -37,13 +36,14 @@ use C4::XISBN qw(get_xisbns get_biblionumber_from_isbn);
 use C4::External::Amazon;
 use C4::Search;		# enabled_staff_search_views
 use C4::Tags qw(get_tags);
-use C4::VirtualShelves;
 use C4::XSLT;
 use C4::Images;
 use Koha::DateUtils;
 use C4::HTML5Media;
 use C4::CourseReserves qw(GetItemCourseReservesInfo);
 use C4::Acquisition qw(GetOrdersByBiblionumber);
+
+use Koha::Virtualshelves;
 
 my $query = CGI->new();
 
@@ -199,7 +199,6 @@ if ($currentbranch and C4::Context->preference('SeparateHoldings')) {
 my $separatebranch = C4::Context->preference('SeparateHoldingsBranch') || 'homebranch';
 foreach my $item (@items) {
     my $itembranchcode = $item->{$separatebranch};
-    $item->{homebranch}        = GetBranchName($item->{homebranch});
 
     # can place holds defaults to yes
     $norequests = 0 unless ( ( $item->{'notforloan'} > 0 ) || ( $item->{'itemnotforloan'} > 0 ) );
@@ -207,9 +206,6 @@ foreach my $item (@items) {
     $item->{imageurl} = defined $item->{itype} ? getitemtypeimagelocation('intranet', $itemtypes->{ $item->{itype} }{imageurl})
                                                : '';
 
-	foreach (qw(datelastseen onloan)) {
-		$item->{$_} = format_date($item->{$_});
-    }
     $item->{datedue} = format_sqldatetime($item->{datedue});
     # item damaged, lost, withdrawn loops
     $item->{itemlostloop} = GetAuthorisedValues($authvalcode_items_itemlost, $item->{itemlost}) if $authvalcode_items_itemlost;
@@ -238,7 +234,7 @@ foreach my $item (@items) {
 
     if ( defined $reservedate ) {
         $item->{backgroundcolor} = 'reserved';
-        $item->{reservedate}     = format_date($reservedate);
+        $item->{reservedate}     = $reservedate;
         $item->{ReservedForBorrowernumber}     = $reservedfor;
         $item->{ReservedForSurname}     = $ItemBorrowerReserveInfo->{'surname'};
         $item->{ReservedForFirstname}   = $ItemBorrowerReserveInfo->{'firstname'};
@@ -252,7 +248,7 @@ foreach my $item (@items) {
 	# Check the transit status
     my ( $transfertwhen, $transfertfrom, $transfertto ) = GetTransfers($item->{itemnumber});
     if ( defined( $transfertwhen ) && ( $transfertwhen ne '' ) ) {
-        $item->{transfertwhen} = format_date($transfertwhen);
+        $item->{transfertwhen} = $transfertwhen;
         $item->{transfertfrom} = $branches->{$transfertfrom}{branchname};
         $item->{transfertto}   = $branches->{$transfertto}{branchname};
         $item->{nocancel} = 1;
@@ -277,6 +273,14 @@ foreach my $item (@items) {
 
     if ( C4::Context->preference('UseCourseReserves') ) {
         $item->{'course_reserves'} = GetItemCourseReservesInfo( itemnumber => $item->{'itemnumber'} );
+    }
+
+    if ( C4::Context->preference('IndependentBranches') ) {
+        my $userenv = C4::Context->userenv();
+        if ( not C4::Context->IsSuperLibrarian()
+            and $userenv->{branch} ne $item->{homebranch} ) {
+            $item->{cannot_be_edited} = 1;
+        }
     }
 
     if ($currentbranch and $currentbranch ne "NO_LIBRARY_SET"
@@ -374,7 +378,16 @@ $template->param(
 # Lists
 
 if (C4::Context->preference("virtualshelves") ) {
-   $template->param( 'GetShelves' => GetBibliosShelves( $biblionumber ) );
+    my $shelves = Koha::Virtualshelves->search(
+        {
+            biblionumber => $biblionumber,
+            category => 2,
+        },
+        {
+            join => 'virtualshelfcontents',
+        }
+    );
+    $template->param( 'shelves' => $shelves );
 }
 
 # XISBN Stuff

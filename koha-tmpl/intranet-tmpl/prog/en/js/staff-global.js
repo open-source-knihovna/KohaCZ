@@ -18,7 +18,7 @@ function formatstr(str, col) {
 
 // http://stackoverflow.com/questions/14859281/select-tab-by-name-in-jquery-ui-1-10-0/16550804#16550804
 $.fn.tabIndex = function () {
-    return $(this).parent().find(this).index() - 1;
+    return $(this).parent().children('div').index(this);
 };
 $.fn.selectTabByID = function (tabID) {
     $(this).tabs("option", "active", $(tabID).tabIndex());
@@ -119,4 +119,11 @@ function toUC(f) {
 
 function confirmDelete(message) {
     return (confirm(message) ? true : false);
+}
+
+function playSound( sound ) {
+    if ( ! ( sound.indexOf('http://') == 0 || sound.indexOf('https://') == 0  ) ) {
+        sound = AUDIO_ALERT_PATH + sound;
+    }
+    document.getElementById("audio-alert").innerHTML = '<audio src="' + sound + '" autoplay="autoplay" autobuffer="autobuffer"></audio>';
 }

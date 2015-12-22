@@ -28,6 +28,7 @@ use C4::Charset;
 use C4::AuthoritiesMarc;
 use C4::MarcModificationTemplates;
 use Koha::Plugins::Handler;
+use Koha::Logger;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
@@ -81,6 +82,8 @@ BEGIN {
     SetImportRecordMatches
 	);
 }
+
+our $logger = Koha::Logger->get( { category => 'C4.ImportBatch' } );
 
 =head1 NAME
 
@@ -812,6 +815,8 @@ sub BatchCommitItems {
 sub BatchRevertRecords {
     my $batch_id = shift;
 
+    $logger->trace("C4::ImportBatch::BatchRevertRecords( $batch_id )");
+
     my $record_type;
     my $num_deleted = 0;
     my $num_errors = 0;
@@ -867,6 +872,10 @@ sub BatchRevertRecords {
             if ($record_type eq 'biblio') {
                 my $biblionumber = $rowref->{'matched_biblionumber'};
                 my $oldbiblio = GetBiblio($biblionumber);
+
+                $logger->info("C4::ImportBatch::BatchRevertRecords: Biblio record $biblionumber does not exist, restoration of this record was skipped") unless $oldbiblio;
+                next unless $oldbiblio; # Record has since been deleted. Deleted records should stay deleted.
+
                 $num_items_deleted += BatchRevertItems($rowref->{'import_record_id'}, $rowref->{'matched_biblionumber'});
                 ModBiblio($old_record, $biblionumber, $oldbiblio->{'frameworkcode'});
             } else {

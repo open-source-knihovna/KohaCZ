@@ -161,6 +161,7 @@ sub _get_template_file {
     my $is_intranet = $interface eq 'intranet';
     my $htdocs = C4::Context->config($is_intranet ? 'intrahtdocs' : 'opachtdocs');
     my ($theme, $lang, $availablethemes) = themelanguage($htdocs, $tmplbase, $interface, $query);
+    $lang //= 'en';
     my $filename = "$htdocs/$theme/$lang/modules/$tmplbase";
 
     return ($htdocs, $theme, $lang, $filename);
@@ -331,7 +332,7 @@ sub GetColumnDefs {
     # Build columns.def path
     my $path = "$htdocs/$theme/$lang/$columns_file";
     my $fh;
-    if ( ! open ( $fh, q{<}, $path ) )  {
+    if ( ! open ( $fh, q{<:encoding(utf-8)}, $path ) )  {
         carp "Error opening $path. Check your templates.";
         return;
     }

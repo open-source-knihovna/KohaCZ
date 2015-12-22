@@ -28,7 +28,6 @@ use YAML qw/Load/;
 
 use C4::Context;
 use C4::Auth;
-use C4::Input;
 use C4::Output;
 use C4::ImportBatch;
 use C4::Matcher;
@@ -60,6 +59,7 @@ my ($template, $loggedinuser, $cookie, $userflags) = get_template_and_user({
 my $cgiparams = $input->Vars;
 my $op = $cgiparams->{'op'} || '';
 my $booksellerid  = $input->param('booksellerid');
+my $allmatch = $input->param('allmatch');
 my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
 my $data;
 
@@ -85,7 +85,7 @@ if ($op eq ""){
 #display batches
     import_batches_list($template);
 #
-# 2nd step = display the content of the choosen file
+# 2nd step = display the content of the chosen file
 #
 } elsif ($op eq "batch_details"){
 #display lines inside the selected batch
@@ -123,6 +123,7 @@ if ($op eq ""){
     $template->param("batch_details" => 1,
                      "basketno"      => $cgiparams->{'basketno'},
                      loop_currencies  => \@loop_currency,
+                     "allmatch" => $allmatch,
                      );
     import_biblios_list($template, $cgiparams->{'import_batch_id'});
     if ( C4::Context->preference('AcqCreateItem') eq 'ordering' ) {
@@ -157,6 +158,8 @@ if ($op eq ""){
     # retrieve the file you want to import
     my $import_batch_id = $cgiparams->{'import_batch_id'};
     my $biblios = GetImportRecordsRange($import_batch_id);
+    my $duplinbatch;
+    my $imported = 0;
     my @import_record_id_selected = $input->param("import_record_id");
     my @quantities = $input->param('quantity');
     my @prices = $input->param('price');
@@ -181,6 +184,7 @@ if ($op eq ""){
 
         # 1st insert the biblio, or find it through matcher
         unless ( $biblionumber ) {
+            $duplinbatch=$import_batch_id and next if FindDuplicate($marcrecord);
             # add the biblio
             my $bibitemnum;
 
@@ -275,7 +279,7 @@ if ($op eq ""){
             push @{ $item->{field_values} }, $field_values[0];
             push @{ $item->{ind_tag} },      $ind_tag[0];
             push @{ $item->{indicator} },    $indicator[0];
-            my $xml = TransformHtmlToXml( \@tags, \@subfields, \@field_values, \@ind_tag, \@indicator );
+            my $xml = TransformHtmlToXml( \@tags, \@subfields, \@field_values, \@indicator, \@ind_tag );
             my $record = MARC::Record::new_from_xml( $xml, 'UTF-8' );
             for (my $qtyloop=1;$qtyloop <= $c_quantity;$qtyloop++) {
                 my ( $biblionumber, $bibitemnum, $itemnumber ) = AddItemFromMarc( $record, $biblionumber );
@@ -284,9 +288,14 @@ if ($op eq ""){
         } else {
             SetImportRecordStatus( $biblio->{'import_record_id'}, 'imported' );
         }
+        $imported++;
     }
     # go to basket page
-    print $input->redirect("/cgi-bin/koha/acqui/basket.pl?basketno=".$cgiparams->{'basketno'});
+    if ( $imported ) {
+        print $input->redirect("/cgi-bin/koha/acqui/basket.pl?basketno=".$cgiparams->{'basketno'}."&amp;duplinbatch=$duplinbatch");
+    } else {
+        print $input->redirect("/cgi-bin/koha/acqui/addorderiso2709.pl?import_batch_id=$import_batch_id&amp;basketno=".$cgiparams->{'basketno'}."&amp;booksellerid=$booksellerid&amp;allmatch=1");
+    }
     exit;
 }
 
@@ -329,7 +338,7 @@ sub import_batches_list {
 
     my @list = ();
     foreach my $batch (@$batches) {
-        if ( $batch->{'import_status'} =~ /^staged$|^reverted$/ ) {
+        if ( $batch->{'import_status'} =~ /^staged$|^reverted$/ && $batch->{'record_type'} eq 'biblio') {
             # check if there is at least 1 line still staged
             my $stagedList=GetImportRecordsRange($batch->{'import_batch_id'}, undef, 1, $batch->{import_status}, { order_by_direction => 'ASC' });
             if (scalar @$stagedList) {

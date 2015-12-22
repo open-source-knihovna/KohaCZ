@@ -19,7 +19,7 @@ use Data::Dumper;
 use CGI qw ( -utf8 );
 use C4::Auth qw(&check_api_auth);
 
-use UNIVERSAL qw(can);	# make sure this is *after* C4 modules.
+use UNIVERSAL::can;
 
 use vars qw(@ISA $VERSION @EXPORT_OK);
 
@@ -643,7 +643,7 @@ sub handle_checkin {
         syslog("LOG_WARNING", "received no-block checkin from terminal '%s'", $account->{id});
         $status = $ils->checkin_no_block($item_id, $trans_date, $return_date, $item_props, $cancel);
     } else {
-        $status = $ils->checkin($item_id, $trans_date, $return_date, $my_branch, $item_props, $cancel);
+        $status = $ils->checkin($item_id, $trans_date, $return_date, $my_branch, $item_props, $cancel, $account->{checked_in_ok});
     }
 
     $patron = $status->patron;
@@ -836,7 +836,7 @@ sub login_core  {
 			#
 			my $module = $server->{config}->{institutions}->{$inst}->{implementation};
 			syslog("LOG_DEBUG", 'login_core: ' . Dumper($module));
-            # Suspect this is always ILS but so we dont break any eccentic install (for now)
+            # Suspect this is always ILS but so we don't break any eccentic install (for now)
             if ($module eq 'ILS') {
                 $module = 'C4::SIP::ILS';
             }
@@ -885,7 +885,7 @@ sub handle_login {
 #
 # Build the detailed summary information for the Patron
 # Information Response message based on the first 'Y' that appears
-# in the 'summary' field of the Patron Information reqest.  The
+# in the 'summary' field of the Patron Information request.  The
 # specification says that only one 'Y' can appear in that field,
 # and we're going to believe it.
 #
@@ -1343,7 +1343,7 @@ sub handle_renew {
 
     if ($no_block eq 'Y') {
 	syslog("LOG_WARNING",
-	       "handle_renew: recieved 'no block' renewal from terminal '%s'",
+            "handle_renew: received 'no block' renewal from terminal '%s'",
 	       $server->{account}->{id});
     }
 
@@ -1391,7 +1391,7 @@ sub handle_renew {
 	$resp .= '0NUN';
 	$resp .= timestamp;
 	# If we found the patron or the item, the return the ILS
-	# information, otherwise echo back the infomation we received
+    # information, otherwise echo back the information we received
 	# from the terminal
 	$resp .= add_field(FID_PATRON_ID, $patron ? $patron->id     : $patron_id);
 	$resp .= add_field(FID_ITEM_ID,     $item ? $item->id       : $item_id  );

@@ -205,6 +205,8 @@ $(document).ready(function() {
 [% END %]
                 <th class="title-string">Date published
                 </th>
+                <th class="title-string">Date published (text)
+                </th>
                 <th class="title-string">Date received
                 </th>
                 <th>Number
@@ -251,6 +253,13 @@ $(document).ready(function() {
                     </span>
                 </td>
                 <td>
+                   [% IF serial.publisheddatetext %]
+                      <span title="[% serial.publisheddatetext %]">
+                        [% serial.publisheddatetext %]
+                      </span>
+                   [% END %]
+                </td>
+                <td>
                     <span title="[% serial.planneddate %]">
                       [% IF serial.planneddate %]
                         [% serial.planneddate | $KohaDates %]
@@ -294,7 +303,7 @@ $(document).ready(function() {
                 </td>
                 [% IF ( routing ) %]
                 <td>
-                    <a href="" onclick="print_slip([% serial.subscriptionid |html %], '[% serial.serialseq |html %] ([% serial.publisheddate | $KohaDates %])'); return false" >Print list</a>
+                    <a href="" onclick="print_slip([% serial.subscriptionid |html %], '[% serial.serialseq.replace("'", "\\'") |html %] ([% serial.publisheddate | $KohaDates %])'); return false" >Print list</a>
                 </td>
                 [% END %]
             </tr>

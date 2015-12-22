@@ -1,4 +1,7 @@
 [% USE KohaDates %]
+[% USE AuthorisedValues %]
+[%- USE Branches -%]
+[%- USE ItemTypes -%]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Circulation &rsaquo; Holds to pull</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -82,7 +85,7 @@ $(document).ready(function() {
     <div id="yui-main">
     <div class="yui-b">
 
-<h2>Holds to pull[% IF ( run_report ) %] placed between [% from %] and [% to %][% END %]</h2>
+<h2>Holds to pull[% IF ( run_report ) %] placed between [% from | $KohaDates %] and [% to | $KohaDates %][% END %]</h2>
 [% IF ( run_report ) %]
 <h3>Reported on [% todaysdate | $KohaDates %]</h3>
 <p>The following holds have not been filled. Please retrieve them and check them in.</p>
@@ -123,14 +126,14 @@ $(document).ready(function() {
             <td>"</td>
             <td>"</td>
         [% END %]
-        <td>[% reserveloo.holdingbranch %]</td>
+        <td>[% Branches.GetName ( reserveloo.holdingbranch ) %]</td>
         <td><p>[% reserveloo.itemcallnumber %]</p></td>
         <td><p>[% reserveloo.copyno %]</p></td>
         <td><p>[% reserveloo.enumchron %]</p></td>
-        <td>[% reserveloo.itype %]</td>
-        <td>[% reserveloo.location %]</td>
+        <td>[% ItemTypes.GetDescription( reserveloo.itype ) %]</td>
+        <td>[% AuthorisedValues.GetByCode('LOC', reserveloo.location) %]</td>
         <td>
-            <span title="[% reserveloo.reservedate %]">[% reserveloo.reservedate | $KohaDates %] in [% reserveloo.branch %]</span>
+            <span title="[% reserveloo.reservedate %]">[% reserveloo.reservedate | $KohaDates %] in [% Branches.GetName ( reserveloo.branch ) %]</span>
             [% IF ( reserveloo.statusw ) %]<p>Waiting</p>[% END %][% IF ( reserveloo.statusf ) %]<p>Fullfilled</p>[% END %]
         </td>
         </tr>
@@ -171,12 +174,12 @@ $(document).ready(function() {
 <label for="from">
     Start date:
 </label>
-<input type="text" size="10" id="from" name="from" value="[% from %]" class="datepickerfrom" />
+<input type="text" size="10" id="from" name="from" value="[% from | $KohaDates %]" class="datepickerfrom" />
 </li>
 <li><label for="to">
     End date:
 </label>
-<input type="text" size="10" id="to" name="to" value="[% to %]" class="datepickerto" />
+<input type="text" size="10" id="to" name="to" value="[% to | $KohaDates %]" class="datepickerto" />
 </li>
 </ol>
 <p><i>(Inclusive, default is [% HoldsToPullStartDate %] days ago to [% IF ( HoldsToPullEndDate ) %][% HoldsToPullEndDate %] days ahead[% ELSE %]today[% END %], set other date ranges as needed. )</i></p>

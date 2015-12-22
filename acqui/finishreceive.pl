@@ -48,10 +48,10 @@ my $origquantityrec  = $input->param('origquantityrec');
 my $quantityrec      = $input->param('quantityrec');
 my $quantity         = $input->param('quantity');
 my $unitprice        = $input->param('cost');
+my $datereceived     = $input->param('datereceived'),
 my $invoiceid        = $input->param('invoiceid');
 my $invoice          = GetInvoice($invoiceid);
 my $invoiceno        = $invoice->{invoicenumber};
-my $datereceived     = $invoice->{shipmentdate};
 my $booksellerid     = $input->param('booksellerid');
 my $cnt              = 0;
 my $ecost            = $input->param('ecost');
@@ -149,8 +149,9 @@ if ($quantityrec > $origquantityrec ) {
             my $xml = TransformHtmlToXml( $itemhash{$item}->{'tags'},
                                           $itemhash{$item}->{'subfields'},
                                           $itemhash{$item}->{'field_values'},
+                                          $itemhash{$item}->{'indicator'},
                                           $itemhash{$item}->{'ind_tag'},
-                                          $itemhash{$item}->{'indicator'},'ITEM');
+                                          'ITEM' );
             my $record=MARC::Record::new_from_xml($xml, 'UTF-8');
             my (undef,$bibitemnum,$itemnumber) = AddItemFromMarc($record,$biblionumber);
             $order->add_item( $itemnumber );
