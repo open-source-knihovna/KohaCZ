@@ -5,6 +5,8 @@
         SRU
     [% ELSIF (server.servertype||type) == 'zed' %]
         Z39.50
+    [% ELSIF (server.servertype||type) == 'zed_update' %]
+        Z39.50 Update
     [% END %]
 [% END %]
 
@@ -134,13 +136,17 @@
         </li>
         <li><label for="password">Password: </label> <input type="text" name="password" id="password" value="[% server.password %]" />
         </li>
-        <li><label for="checked">Preselected (searched by default): </label>
-        [% IF ( server.checked ) %]
-            <input type="checkbox" name="checked" id="checked" value="1" checked="checked" />
+        [% IF (server.servertype||type) == 'zed_update' %]
+            <input type="hidden" hidden="hidden" name="checked" id="checked" value="0" />
         [% ELSE %]
-            <input type="checkbox" name="checked" id="checked" value="1" />
+            <li><label for="checked">Preselected (searched by default): </label>
+            [% IF ( server.checked ) %]
+                <input type="checkbox" name="checked" id="checked" value="1" checked="checked" />
+            [% ELSE %]
+                <input type="checkbox" name="checked" id="checked" value="1" />
+            [% END %]
+            </li>
         [% END %]
-        </li>
         <li><label for="rank">Rank (display order): </label> <input type="text" name="rank" id="rank" size="4" value="[% server.rank %]" />
         </li>
 
@@ -199,7 +205,38 @@
         <input type="text" name="add_xslt" id="add_xslt" size="100" value="[% server.add_xslt %]"/>
         <div class="hint">Separate multiple filenames by commas.</span>
         </li>
-
+        [% IF (server.servertype||type) == 'zed_update' %]
+            <li>
+            <label for="zedu_omit_fields">MARC fields not to send to update server: </label>
+            <input type="text" name="zedu_omit_fields" id="zedu_omit_fields" size="100" value="[% server.zedu_omit_fields %]" />
+            <div class="hint">Separate multiple fields/subfields by commas. Example: 200$7, 005, 900$a</span>
+            </li>
+            <li>
+            <label for="zedu_authoritative_id_field">MARC authoritative id field: </label>
+            <input type="text" name="zedu_authoritative_id_field" id="zedu_authoritative_id_field" size="8" value="[% server.zedu_authoritative_id_field %]" />
+            <div class="hint">Example: 100$7</span>
+            </li>
+            <li>
+            <label for="zedu_msg_field">MARC field where to put your message: </label>
+            <input type="text" name="zedu_msg_field" id="zedu_msg_field" size="8" value="[% server.zedu_msg_field %]" />
+            <div class="hint">Example: 900$a</span>
+            </li>
+            <li>
+            <label for="zedu_msg_oncreate">Message sent when create takes place: </label>
+            <input type="text" name="zedu_msg_oncreate" id="zedu_msg_oncreate" size="100" value="[% server.zedu_msg_oncreate %]" />
+            </li>
+            <li>
+            <label for="zedu_msg_onupdate">Message sent when update takes place: </label>
+            <input type="text" name="zedu_msg_onupdate" id="zedu_msg_onupdate" size="100" value="[% server.zedu_msg_onupdate %]" />
+            </li>
+            <input type="hidden" hidden="hidden" name="add_xslt" id="add_xslt" value=""/>
+        [% ELSE %]
+            <input type="hidden" hidden="hidden" name="zedu_omit_fields" id="zedu_omit_fields" value=""/>
+            <input type="hidden" hidden="hidden" name="zedu_authoritative_id_field" id="zedu_authoritative_id_field" value=""/>
+            <input type="hidden" hidden="hidden" name="zedu_msg_field" id="zedu_msg_field" value=""/>
+            <input type="hidden" hidden="hidden" name="zedu_msg_field_oncreate" id="zedu_msg_field_oncreate" value=""/>
+            <input type="hidden" hidden="hidden" name="zedu_msg_field_onupdate" id="zedu_msg_field_onupdate" value=""/>
+        [% END %]
         </ol>
         </fieldset>
 
@@ -211,6 +248,7 @@
     <div id="toolbar" class="btn-toolbar">
         <a id="newserver" class="btn btn-small" href="/cgi-bin/koha/admin/z3950servers.pl?op=add&type=zed"><i class="fa fa-plus"></i> New Z39.50 server</a>
         <a id="newserver" class="btn btn-small" href="/cgi-bin/koha/admin/z3950servers.pl?op=add&type=sru"><i class="fa fa-plus"></i> New SRU server</a>
+        <a id="newserver" class="btn btn-small" href="/cgi-bin/koha/admin/z3950servers.pl?op=add&type=zed_update"><i class="fa fa-plus"></i> New Z39.50 Update server</a>
     </div>
     <h3>Z39.50/SRU servers administration</h3>
     [% IF id %]
@@ -219,10 +257,19 @@
         You searched for [% searchfield %]
     [% END %]
     <table id="serverst">
-        <thead><tr><th>Target</th><th>Hostname/Port</th><th>Database</th><th>Userid</th><th>Password</th><th>Preselected</th><th>Rank</th><th>Syntax</th><th>Encoding</th><th>Timeout</th><th>Record type</th><th>Options</th>
+        <thead><tr><th>Target</th><th>Hostname/Port</th><th>Database</th><th>Userid</th><th>Password</th><th>Preselected</th><th>Rank</th><th>Syntax</th><th>Encoding</th><th>Timeout</th><th>Record type</th><th>Options</th><th>Server type</th>
         </tr></thead>
         <tbody>
         [% FOREACH loo IN loop %]
+            [% BLOCK LoopServerType %]
+                [% IF (loo.servertype) == 'sru' %]
+                    SRU
+                [% ELSIF (loo.servertype) == 'zed' %]
+                    Z39.50
+                [% ELSIF (loo.servertype) == 'zed_update' %]
+                    Z39.50 Update
+                [% END %]
+            [% END %]
             <tr>
             <td><a href="[% loo.script_name %]?op=edit&amp;id=[% loo.id %]">[% loo.servername %]</a></td><td>[% loo.host %]:[% loo.port %]</td><td>[% loo.db %]</td><td>[% loo.userid %]</td><td>[% IF loo.password %]########[% END %]</td><td>[% IF ( loo.checked ) %]Yes[% ELSE %]No[% END %]</td><td>[% loo.rank %]</td>
             <td>[% loo.syntax %]</td><td>[% loo.encoding %]</td><td>[% loo.timeout %]</td>
@@ -233,6 +280,7 @@
                 [% END %]
             </td>
             <td><a href="[% loo.script_name %]?op=edit&amp;id=[% loo.id %]">Edit</a> <a href="[% loo.script_name %]?op=add&amp;id=[% loo.id %]">Copy</a> <a href="javascript:void(0);" onclick="ConfirmDelete('[% loo.servername | replace("['\"]","") %]','[% loo.id %]');">Delete</a></td>
+            <td>[% PROCESS LoopServerType %]</td>
             </tr>
         [% END %]
         </tbody>
