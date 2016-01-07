@@ -21,6 +21,8 @@ use Modern::Perl;
 
 use Carp;
 
+use C4::Biblio qw( GetRecordValue GetMarcBiblio GetFrameworkCode );
+
 use Koha::Database;
 
 use base qw(Koha::Object);
@@ -34,6 +36,23 @@ Koha::Biblio - Koha Biblio Object class
 =head2 Class Methods
 
 =cut
+
+=head3 subtitles
+
+my @subtitles = $biblio->subtitles();
+
+Returns list of subtitles for a record.
+
+Keyword to MARC mapping for subtitle must be set for this method to return any possible values.
+
+=cut
+
+sub subtitles {
+    my ( $self ) = @_;
+
+    return map { $_->{subfield} } @{ GetRecordValue( 'subtitle', GetMarcBiblio( $self->id ), $self->frameworkcode ) };
+}
+
 
 =head3 type
 

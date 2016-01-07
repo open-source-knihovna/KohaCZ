@@ -106,7 +106,6 @@ elsif ( $request eq 'KillReserved' ) {
 
 # collect the stack of books already transfered so they can printed...
 my @trsfitemloop;
-my %transfereditems;
 my $transfered;
 my $barcode = $query->param('barcode');
 # strip whitespace
@@ -188,15 +187,6 @@ if ($found) {
     }
 }
 
-#####################
-
-# Used for branch transfer limits error messages.
-my $codeTypeDescription = 'Collection Code';
-my $codeType = C4::Context->preference("BranchTransferLimitsType");
-if ( $codeType eq 'itemtype' ) {   
-    $codeTypeDescription = 'Item Type';
-}
-
 my @errmsgloop;
 foreach my $code ( keys %$messages ) {
     if ( $code ne 'WasTransfered' ) {
@@ -212,7 +202,6 @@ foreach my $code ( keys %$messages ) {
             my ( $tbr, $typecode ) = split( /::/,  $messages->{'NotAllowed'} );
             $err{tbr}      = $branches->{ $tbr }->{'branchname'};
             $err{code}     = $typecode;
-            $err{codeType} = $codeTypeDescription;
         }
         elsif ( $code eq 'IsPermanent' ) {
             $err{errispermanent} = 1;

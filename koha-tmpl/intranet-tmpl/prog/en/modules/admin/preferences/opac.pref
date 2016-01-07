@@ -571,6 +571,13 @@ OPAC:
 
     Privacy:
         -
+            - pref: StoreLastBorrower
+              default: 0
+              choices:
+                  yes: Store
+                  no: "Don't store"
+            - the last patron to return an item. This setting is independent of opacreadinghistory/AnonymousPatron.
+        -
             - pref: AnonSuggestions
               choices:
                   yes: Allow
@@ -596,6 +603,13 @@ OPAC:
                   yes: Allow
                   no: "Don't allow"
             - patrons to choose their own privacy settings for their reading history.  This requires opacreadinghistory and AnonymousPatron
+        -
+            - pref: AllowPatronToSetCheckoutsVisibilityForGuarantor
+              default: 0
+              choices:
+                  yes: Allow
+                  no: "Don't allow"
+            - patrons to choose their own privacy settings for showing the patron's checkouts to the patron's guarantor".
         -
             - Use borrowernumber
             - pref: AnonymousPatron
@@ -624,7 +638,6 @@ OPAC:
             - pref: RestrictedPageTitle
               class: long
             - "as title of your restricted page (appears in the breadcrumb and on the top of the restricted page)"
-
     Shelf Browser:
         -
             - pref: OPACShelfBrowser
@@ -713,3 +726,33 @@ OPAC:
                 subtype: Subtypes
                 sorting: Sorting
                 location: Location and availability
+    Payments:
+        -
+            - pref: EnablePayPalOpacPayments
+              default: 1
+              choices:
+                  yes: Allow
+                  no: "Don't allow"
+            - "patrons to make payments from the OPAC via PayPal in"
+            - pref: PayPalSandboxMode
+              default: 1
+              choices:
+                  yes: "Sandbox"
+                  no: "Production"
+            - "mode."
+        -
+            - "The email address to receive PayPal payments is "
+            - pref: PayPalUser
+              class: long
+        -
+            - "The password for the PayPal account to receive payments is "
+            - pref: PayPalPwd
+              class: long
+        -
+            - "The signature for the PayPal account to receive payments is "
+            - pref: PayPalSignature
+              class: long
+        -
+            - "The patron should see the charge description as "
+            - pref: PayPalChargeDescription
+              class: long

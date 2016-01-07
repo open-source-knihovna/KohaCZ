@@ -6,7 +6,13 @@
         if ( url.match(/\?(.+)$/) ) {
             params = "?" + RegExp.$1;
         }
-        $('#navmenulist a[href$="/' + path + params + '"]').css('font-weight','bold');
+        if (path.indexOf("labels") >= 0 && path.indexOf("spine") < 0 ) {
+          $('#navmenulist a[href$="/cgi-bin/koha/labels/label-home.pl"]').css('font-weight','bold');
+        } else if (path.indexOf("patroncards") >= 0 ) {
+          $('#navmenulist a[href$="/cgi-bin/koha/patroncards/home.pl"]').css('font-weight','bold');
+        } else {
+          $('#navmenulist a[href$="/' + path + params + '"]').css('font-weight','bold');
+        }
     });
 //]]>
 </script>

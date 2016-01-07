@@ -33,6 +33,7 @@ var theme = "[% theme %]";
 var borrowernumber = "[% borrowernumber %]";
 var branchcode = "[% branch %]";
 var exports_enabled = "[% exports_enabled %]";
+var AllowCirculate = [% (CAN_user_circulate_circulate_remaining_permissions)? 1 : 0 %]
 var AllowRenewalLimitOverride = [% (CAN_user_circulate_override_renewals && AllowRenewalLimitOverride)? 1: 0 %];
 var script = "moremember";
 var relatives_borrowernumbers = new Array();
@@ -354,6 +355,16 @@ function validate1(date) {
          [% IF ( privacy1 ) %]Default[% END %]
          [% IF ( privacy2 ) %]Never[% END %]
     </li>[% END %]
+
+    <li>
+        <span class="label">Show checkouts to guarantor</span>
+        [% IF privacy_guarantor_checkouts %]
+            Yes
+        [% ELSE %]
+            No
+        [% END %]
+    </li>
+
     [% IF ( sort1 ) %]<li><span class="label">Sort field 1:</span>[% lib1 %]</li>[% END %]
     [% IF ( sort2 ) %]<li><span class="label">Sort field 2:</span>[% lib2 %]</li>[% END %]
     <li><span class="label">Username: </span>[% userid %]</li>
@@ -396,7 +407,7 @@ function validate1(date) {
       <li><span class="label">Address 2: </span>[% B_address2 %]</li>
       <li><span class="label">City: </span>[% B_city %]</li>
       [% IF ( B_state ) %]<li><span class="label">State: </span>[% B_state %]</li>[% END %]
-      <li><span class="label">Zip/Postal code: </span>[% B_zipcode %]</li>
+      <li><span class="label">ZIP/Postal code: </span>[% B_zipcode %]</li>
       [% IF ( B_country ) %]<li><span class="label">Country: </span>[% B_country %]</li>[% END %]
       [% IF ( B_phone ) %]<li><span class="label">Phone: </span>[% B_phone %]</li>[% END %]
       [% IF ( B_email ) %]<li><span class="label">Email: </span><a href="mailto:[% B_email %]">[% B_email %]</a></li>[% END %]
@@ -415,7 +426,7 @@ function validate1(date) {
     <li><span class="label">Address 2: </span>[% altcontactaddress2 %]</li>
 	<li><span class="label">City: </span>[% altcontactaddress3 %]</li>
     [% IF ( altcontactstate ) %]<li><span class="label">State: </span>[% altcontactstate %]</li>[% END %]
-    <li><span class="label">Zip/Postal code: </span>[% altcontactzipcode %]</li>
+    <li><span class="label">ZIP/Postal code: </span>[% altcontactzipcode %]</li>
 	[% IF ( altcontactcountry ) %]<li><span class="label">Country: </span>[% altcontactcountry %]</li>[% END %]
     [% IF ( altcontactphone ) %]<li><span class="label">Phone: </span>[% altcontactphone %]</li>[% END %]
     </ol></div>

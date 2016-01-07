@@ -45,6 +45,7 @@ my $input_file = "";
 my $batch_comment = "";
 my $want_help = 0;
 my $no_replace ;
+my $no_create;
 my $item_action = 'always_add';
 
 my $result = GetOptions(
@@ -54,6 +55,7 @@ my $result = GetOptions(
     'add-items'     => \$add_items,
     'item-action:s' => \$item_action,
     'no-replace'    => \$no_replace,
+    'no-create'     => \$no_create,
     'comment:s'     => \$batch_comment,
     'authorities'   => \$authorities,
     'h|help'        => \$want_help
@@ -119,7 +121,7 @@ sub process_batch {
         }
         # set default record overlay behavior
         SetImportBatchOverlayAction($batch_id, ($no_replace) ? 'ignore' : 'replace');
-        SetImportBatchNoMatchAction($batch_id, 'create_new');
+        SetImportBatchNoMatchAction($batch_id, ($no_create) ? 'ignore' : 'create_new');
         SetImportBatchItemAction($batch_id, $item_action);
         print "... looking for matches with records already in database\n";
         $num_with_matches = BatchFindDuplicates($batch_id, $matcher, 10, 100, \&print_progress_and_commit);
@@ -195,6 +197,8 @@ Parameters:
                             'ignore', or 'replace'
     --no-replace            overlay action for record: default is to
                             replace extant with the imported record.
+    --no-create             nomatch action for record: default is to
+                            create new record with imported record.
     --comment <comment>     optional comment to describe
                             the record batch; if the comment
                             has spaces in it, surround the

@@ -59,20 +59,31 @@ sub blank_row {
     return 1;
 }
 
-my $type=$input->param('type');
+my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
+    {
+        template_name   => "tools/overduerules.tt",
+        query           => $input,
+        type            => "intranet",
+        authnotrequired => 0,
+        flagsrequired   => { tools => 'edit_notice_status_triggers' },
+        debug           => 1,
+    }
+);
+
+my $type = $input->param('type');
+
 my $branch = $input->param('branch');
+$branch =
+    defined $branch                                                    ? $branch
+  : C4::Context->preference('DefaultToLoggedInLibraryOverdueTriggers') ? C4::Branch::mybranch()
+  : GetBranchesCount() == 1                                            ? undef
+  :                                                                      undef;
 $branch ||= q{};
+$branch = q{} if $branch eq 'NO_LIBRARY_SET';
+
 my $op = $input->param('op');
 $op ||= q{};
 
-my ($template, $loggedinuser, $cookie)
-    = get_template_and_user({template_name => "tools/overduerules.tt",
-                            query => $input,
-                            type => "intranet",
-                            authnotrequired => 0,
-                            flagsrequired => { tools => 'edit_notice_status_triggers'},
-                            debug => 1,
-                            });
 my $err=0;
 
 # save the values entered into tables
@@ -87,14 +98,14 @@ if ($op eq 'save') {
     my $sth_delete=$dbh->prepare("DELETE FROM overduerules WHERE branchcode=? AND categorycode=?");
     my $sth_insert_mtt = $dbh->prepare("
         INSERT INTO overduerules_transport_types(
-            branchcode, categorycode, letternumber, message_transport_type
+            overduerules_id, letternumber, message_transport_type
         ) VALUES (
-            ?, ?, ?, ?
+            (SELECT overduerules_id FROM overduerules WHERE branchcode = ? AND categorycode = ?), ?, ?
         )
     ");
     my $sth_delete_mtt = $dbh->prepare("
         DELETE FROM overduerules_transport_types
-        WHERE branchcode = ? AND categorycode = ?
+        WHERE overduerules_id = (SELECT overduerules_id FROM overduerules WHERE branchcode = ? AND categorycode = ?)
     ");
 
     foreach my $key (@names){

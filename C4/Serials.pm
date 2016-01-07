@@ -32,6 +32,9 @@ use C4::Serials::Frequency;
 use C4::Serials::Numberpattern;
 use Koha::AdditionalField;
 use Koha::DateUtils;
+use Koha::Serial;
+use Koha::Subscriptions;
+use Koha::Subscription::Histories;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
@@ -1187,11 +1190,12 @@ sub ModSerialStatus {
         # next date (calculated from actual date & frequency parameters)
         my $nextpublisheddate = GetNextDate($subscription, $publisheddate, 1);
         my $nextpubdate = $nextpublisheddate;
-        NewIssue( $newserialseq, $subscriptionid, $subscription->{'biblionumber'}, 1, $nextpubdate, $nextpubdate );
         $query = "UPDATE subscription SET lastvalue1=?, lastvalue2=?, lastvalue3=?, innerloop1=?, innerloop2=?, innerloop3=?
                     WHERE  subscriptionid = ?";
         $sth = $dbh->prepare($query);
         $sth->execute( $newlastvalue1, $newlastvalue2, $newlastvalue3, $newinnerloop1, $newinnerloop2, $newinnerloop3, $subscriptionid );
+
+        NewIssue( $newserialseq, $subscriptionid, $subscription->{'biblionumber'}, 1, $nextpubdate, $nextpubdate );
 
         # check if an alert must be sent... (= a letter is defined & status became "arrived"
         if ( $subscription->{letter} && $status == ARRIVED && $oldstatus != ARRIVED ) {
@@ -1444,13 +1448,20 @@ sub NewSubscription {
 
     # calculate issue number
     my $serialseq = GetSeq($subscription, $pattern) || q{};
-    $query = qq|
-        INSERT INTO serial
-            (serialseq,subscriptionid,biblionumber,status, planneddate, publisheddate)
-        VALUES (?,?,?,?,?,?)
-    |;
-    $sth = $dbh->prepare($query);
-    $sth->execute( $serialseq, $subscriptionid, $biblionumber, EXPECTED, $firstacquidate, $firstacquidate );
+
+    Koha::Serial->new(
+        {
+            serialseq      => $serialseq,
+            serialseq_x    => $subscription->{'lastvalue1'},
+            serialseq_y    => $subscription->{'lastvalue2'},
+            serialseq_z    => $subscription->{'lastvalue3'},
+            subscriptionid => $subscriptionid,
+            biblionumber   => $biblionumber,
+            status         => EXPECTED,
+            planneddate    => $firstacquidate,
+            publisheddate  => $firstacquidate,
+        }
+    )->store();
 
     logaction( "SERIAL", "ADD", $subscriptionid, "" ) if C4::Context->preference("SubscriptionLog");
 
@@ -1548,43 +1559,49 @@ sub NewIssue {
 
     return unless ($subscriptionid);
 
-    my $dbh   = C4::Context->dbh;
-    my $query = qq|
-        INSERT INTO serial (serialseq, subscriptionid, biblionumber, status,
-            publisheddate, publisheddatetext, planneddate, notes)
-        VALUES (?,?,?,?,?,?,?,?)
-    |;
-    my $sth = $dbh->prepare($query);
-    $sth->execute( $serialseq, $subscriptionid, $biblionumber, $status,
-        $publisheddate, $publisheddatetext, $planneddate, $notes );
-    my $serialid = $dbh->{'mysql_insertid'};
-    $query = qq|
-        SELECT missinglist,recievedlist
-        FROM   subscriptionhistory
-        WHERE  subscriptionid=?
-    |;
-    $sth = $dbh->prepare($query);
-    $sth->execute($subscriptionid);
-    my ( $missinglist, $recievedlist ) = $sth->fetchrow;
+    my $schema = Koha::Database->new()->schema();
+
+    my $subscription = Koha::Subscriptions->find( $subscriptionid );
+
+    my $serial = Koha::Serial->new(
+        {
+            serialseq         => $serialseq,
+            serialseq_x       => $subscription->lastvalue1(),
+            serialseq_y       => $subscription->lastvalue2(),
+            serialseq_z       => $subscription->lastvalue3(),
+            subscriptionid    => $subscriptionid,
+            biblionumber      => $biblionumber,
+            status            => $status,
+            planneddate       => $planneddate,
+            publisheddate     => $publisheddate,
+            publisheddatetext => $publisheddatetext,
+            notes             => $notes,
+        }
+    )->store();
+
+    my $serialid = $serial->id();
+
+    my $subscription_history = Koha::Subscription::Histories->find($subscriptionid);
+    my $missinglist = $subscription_history->missinglist();
+    my $recievedlist = $subscription_history->recievedlist();
 
     if ( $status == ARRIVED ) {
-      ### TODO Add a feature that improves recognition and description.
-      ### As such count (serialseq) i.e. : N18,2(N19),N20
-      ### Would use substr and index But be careful to previous presence of ()
-        $recievedlist .= "; $serialseq" unless (index($recievedlist,$serialseq)>0);
+        ### TODO Add a feature that improves recognition and description.
+        ### As such count (serialseq) i.e. : N18,2(N19),N20
+        ### Would use substr and index But be careful to previous presence of ()
+        $recievedlist .= "; $serialseq" unless ( index( $recievedlist, $serialseq ) > 0 );
     }
-    if ( grep {/^$status$/} ( MISSING_STATUSES ) ) {
-        $missinglist .= "; $serialseq" unless (index($missinglist,$serialseq)>0);
+    if ( grep { /^$status$/ } (MISSING_STATUSES) ) {
+        $missinglist .= "; $serialseq" unless ( index( $missinglist, $serialseq ) > 0 );
     }
-    $query = qq|
-        UPDATE subscriptionhistory
-        SET    recievedlist=?, missinglist=?
-        WHERE  subscriptionid=?
-    |;
-    $sth = $dbh->prepare($query);
+
     $recievedlist =~ s/^; //;
     $missinglist  =~ s/^; //;
-    $sth->execute( $recievedlist, $missinglist, $subscriptionid );
+
+    $subscription_history->recievedlist($recievedlist);
+    $subscription_history->missinglist($missinglist);
+    $subscription_history->update();
+
     return $serialid;
 }
 

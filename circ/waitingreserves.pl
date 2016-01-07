@@ -48,8 +48,6 @@ my $all_branches   = $input->param('allbranches') || '';
 my $cancelall      = $input->param('cancelall');
 my $tab            = $input->param('tab');
 
-my $cancel;
-
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     {
         template_name   => "circ/waitingreserves.tt",
@@ -188,7 +186,7 @@ sub cancel {
     # if we have a result
     if ($nextreservinfo) {
         my %res;
-        my $borrowerinfo = GetMemberDetails( $nextreservinfo );
+        my $borrowerinfo = C4::Members::GetMember( borrowernumber => $nextreservinfo );
         my $iteminfo = GetBiblioFromItemNumber($item);
         if ( $messages->{'transfert'} ) {
             $res{messagetransfert} = $messages->{'transfert'};

@@ -42,7 +42,7 @@ my ($template, $loggedinuser, $cookie)
                             });
 my $use_transport_cost_matrix = C4::Context->preference("UseTransportCostMatrix");
 
-my $update = $input->param('op') eq 'set-cost-matrix';
+my $update = ( $input->param('op') // '' ) eq 'set-cost-matrix';
 
 my ($cost_matrix, $have_matrix);
 unless ($update) {
@@ -55,7 +55,7 @@ my @branchloop = map { code => $_,
                        name => $branches->{$_}->{'branchname'} },
                  sort { $branches->{$a}->{branchname} cmp $branches->{$b}->{branchname} }
                  keys %$branches;
-my (@branchfromloop, @cost, @errors);
+my (@branchfromloop, @errors);
 foreach my $branchfrom ( @branchloop ) {
     my $fromcode = $branchfrom->{code};
 

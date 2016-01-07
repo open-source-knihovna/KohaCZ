@@ -9755,7 +9755,7 @@ if ( CheckVersion($DBversion) ) {
     } else {
         print "Upgrade to $DBversion done (Bug 12905: Check budget integrity: OK)\n";
     }
-    SetVersion($DBversion);
+    SetVersion ($DBversion);
 }
 
 $DBversion = "3.19.00.008";
@@ -9893,7 +9893,7 @@ if ( CheckVersion($DBversion) ) {
         ALTER TABLE search_history ADD COLUMN id INT(11) NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY(id);
     |);
     print "Upgrade to $DBversion done (Bug 11430: Add primary key for search_history)\n";
-    SetVersion($DBversion);
+    SetVersion ($DBversion);
 }
 
 $DBversion = "3.19.00.016";
@@ -11388,6 +11388,285 @@ $DBversion = "3.23.00.000";
 if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (The year of the monkey will be here soon.)\n";
     SetVersion ($DBversion);
+}
+
+$DBversion = "3.23.00.001";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+        VALUES (
+            'DefaultToLoggedInLibraryCircRules',  '0', NULL ,  'If enabled, circ rules editor will default to the logged in library''s rules, rather than the ''all libraries'' rules.',  'YesNo'
+        ), (
+            'DefaultToLoggedInLibraryNoticesSlips',  '0', NULL ,  'If enabled,slips and notices editor will default to the logged in library''s rules, rather than the ''all libraries'' rules.',  'YesNo'
+        )
+    });
+
+    print "Upgrade to $DBversion done (Bug 11625 - Add pref DefaultToLoggedInLibraryCircRules and DefaultToLoggedInLibraryNoticesSlips)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.002";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+        VALUES ('DefaultToLoggedInLibraryOverdueTriggers',  '0', NULL,  'If enabled, overdue status triggers editor will default to the logged in library''s rules, rather than the ''default'' rules.',  'YesNo')
+    });
+
+    print "Upgrade to $DBversion done (Bug 11747 - add pref DefaultToLoggedInLibraryOverdueTriggers)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.003";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        UPDATE letter SET name = "Hold Slip" WHERE name = "Reserve Slip"
+    });
+    $dbh->do(q{
+        UPDATE letter SET title = "Hold Slip" WHERE title = "Reserve Slip";
+    });
+
+    print "Upgrade to $DBversion done (Bug 8085 - Rename 'Reserve slip' to 'Hold slip')\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.004";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        DROP TABLE IF EXISTS `stopwords`;
+    });
+    print "Upgrade to $DBversion done (Bug 9819 - stopwords related code should be removed)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.005";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE permissions SET description = 'Manage circulation rules' WHERE description = 'manage circulation rules'
+    });
+    $dbh->do(q{
+        UPDATE permissions SET description = 'Manage staged MARC records, including completing and reversing imports' WHERE description = 'Managed staged MARC records, including completing and reversing imports'
+    });
+    print "Upgrade to $DBversion done (Bug 11569 - Typo in userpermissions.sql)\n";
+    SetVersion($DBversion);
+}
+$DBversion = "3.23.00.006";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+   $dbh->do("
+       ALTER TABLE serial
+        ADD serialseq_x VARCHAR( 100 ) NULL DEFAULT NULL AFTER serialseq,
+        ADD serialseq_y VARCHAR( 100 ) NULL DEFAULT NULL AFTER serialseq_x,
+        ADD serialseq_z VARCHAR( 100 ) NULL DEFAULT NULL AFTER serialseq_y
+   ");
+
+    my $schema        = Koha::Database->new()->schema();
+    my @subscriptions = $schema->resultset('Subscription')->all();
+
+    foreach my $subscription (@subscriptions) {
+        my $number_pattern = $subscription->numberpattern();
+
+        my $numbering_method = $number_pattern->numberingmethod();
+        # Get all the data between the enumeration values, we need
+        # to split each enumeration string based on these values.
+        my @splits = split( /\{[XYZ]\}/, $numbering_method );
+        # Get the order in which the X Y and Z values are used
+        my %indexes;
+        foreach my $i (qw(X Y Z)) {
+            $indexes{$i} = index( $numbering_method, "{$i}" );
+            delete $indexes{$i} if $indexes{$i} == -1;
+        }
+        my @indexes = sort { $indexes{$a} <=> $indexes{$b} } keys(%indexes);
+
+        my @serials =
+          $schema->resultset('Serial')
+          ->search( { subscriptionid => $subscription->subscriptionid() } );
+
+        foreach my $serial (@serials) {
+            my $serialseq = $serial->serialseq();
+            my %enumeration_data;
+
+            ## We cannot split on multiple values at once,
+            ## so let's replace each of those values with __SPLIT__
+            if (@splits) {
+                map( $serialseq =~ s/$_/__SPLIT__/, @splits );
+                (
+                    undef,
+                    $enumeration_data{ $indexes[0] // q{} },
+                    $enumeration_data{ $indexes[1] // q{} },
+                    $enumeration_data{ $indexes[2] // q{} }
+                ) = split( /__SPLIT__/, $serialseq );
+            }
+            else
+            {    ## Nothing to split on means the only thing in serialseq is a single placeholder e.g. {X}
+                $enumeration_data{ $indexes[0] } = $serialseq;
+            }
+
+            $serial->update(
+                {
+                    serialseq_x => $enumeration_data{'X'},
+                    serialseq_y => $enumeration_data{'Y'},
+                    serialseq_z => $enumeration_data{'Z'},
+                }
+            );
+        }
+    }
+
+    print "Upgrade to $DBversion done ( Bug 8956 - Split serials enumeration data into separate fields )\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.007";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do("SET FOREIGN_KEY_CHECKS=0");
+    $dbh->do("ALTER TABLE overduerules RENAME old_overduerules");
+    $dbh->do("CREATE TABLE overduerules (
+        `overduerules_id` int(11) NOT NULL AUTO_INCREMENT,
+        `branchcode` varchar(10) NOT NULL DEFAULT '',
+        `categorycode` varchar(10) NOT NULL DEFAULT '',
+        `delay1` int(4) DEFAULT NULL,
+        `letter1` varchar(20) DEFAULT NULL,
+        `debarred1` varchar(1) DEFAULT '0',
+        `delay2` int(4) DEFAULT NULL,
+        `debarred2` varchar(1) DEFAULT '0',
+        `letter2` varchar(20) DEFAULT NULL,
+        `delay3` int(4) DEFAULT NULL,
+        `letter3` varchar(20) DEFAULT NULL,
+        `debarred3` int(1) DEFAULT '0',
+        PRIMARY KEY (`overduerules_id`),
+        UNIQUE KEY `overduerules_branch_cat` (`branchcode`,`categorycode`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+    $dbh->do("INSERT INTO overduerules(branchcode, categorycode, delay1, letter1, debarred1, delay2, debarred2, letter2, delay3, letter3, debarred3) SELECT * FROM old_overduerules");
+    $dbh->do("DROP TABLE old_overduerules");
+    $dbh->do("ALTER TABLE overduerules_transport_types
+              ADD COLUMN overduerules_id int(11) NOT NULL");
+    my $mtts = $dbh->selectall_arrayref("SELECT * FROM overduerules_transport_types", { Slice => {} });
+    $dbh->do("DELETE FROM overduerules_transport_types");
+    $dbh->do("ALTER TABLE overduerules_transport_types
+              DROP FOREIGN KEY overduerules_fk,
+              ADD FOREIGN KEY overduerules_transport_types_fk (overduerules_id) REFERENCES overduerules (overduerules_id) ON DELETE CASCADE ON UPDATE CASCADE,
+              DROP COLUMN branchcode,
+              DROP COLUMN categorycode");
+    my $s = $dbh->prepare("INSERT INTO overduerules_transport_types (overduerules_id, id, letternumber, message_transport_type) "
+                         ." VALUES((SELECT overduerules_id FROM overduerules WHERE branchcode = ? AND categorycode = ?),?,?,?)");
+    foreach my $mtt(@$mtts){
+        $s->execute($mtt->{branchcode}, $mtt->{categorycode}, $mtt->{id}, $mtt->{letternumber}, $mtt->{message_transport_type} );
+    }
+    $dbh->do("SET FOREIGN_KEY_CHECKS=1");
+
+    print "Upgrade to $DBversion done (Bug 13624 - Remove columns branchcode, categorytype from table overduerules_transport_types)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.008";
+if ( CheckVersion($DBversion) ) {
+
+    $dbh->do(q{ALTER TABLE borrowers ADD privacy_guarantor_checkouts BOOLEAN NOT NULL DEFAULT '0' AFTER privacy});
+
+    $dbh->do(q{ALTER TABLE deletedborrowers ADD privacy_guarantor_checkouts BOOLEAN NOT NULL DEFAULT '0' AFTER privacy});
+
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable, value, options, explanation, type )
+        VALUES (
+            'AllowStaffToSetCheckoutsVisibilityForGuarantor',  '0', NULL,
+            'If enabled, library staff can set a patron''s checkouts to be visible to linked patrons from the opac.',  'YesNo'
+        ), (
+            'AllowPatronToSetCheckoutsVisibilityForGuarantor',  '0', NULL,
+            'If enabled, the patron can set checkouts to be visible to  his or her guarantor',  'YesNo'
+        )
+    });
+
+    print "Upgrade to $DBversion done (Bug 9303 - relative's checkouts in the opac)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.009";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable, value, options, explanation, type ) VALUES
+        ( 'EnablePayPalOpacPayments',  '0', NULL ,  'Enables the ability to pay fees and fines from  the OPAC via PayPal',  'YesNo' ),
+        ( 'PayPalChargeDescription',  'Koha fee payment', NULL ,  'This preference defines what the user will see the charge listed as in PayPal',  'Free' ),
+        ( 'PayPalPwd',  '', NULL ,  'Your PayPal API password',  'Free' ),
+        ( 'PayPalSandboxMode',  '1', NULL ,  'If enabled, the system will use PayPal''s sandbox server for testing, rather than the production server.',  'YesNo' ),
+        ( 'PayPalSignature',  '', NULL ,  'Your PayPal API signature',  'Free' ),
+        ( 'PayPalUser',  '', NULL ,  'Your PayPal API username ( email address )',  'Free' )
+    });
+
+    print "Upgrade to $DBversion done (Bug 11622 - Add ability to pay fees and fines from OPAC via PayPal)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.010";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE issuingrules ADD cap_fine_to_replacement_price BOOLEAN NOT NULL DEFAULT '0' AFTER overduefinescap
+    });
+
+    print "Upgrade to $DBversion done (Bug 9129 - Add the ability to set the maximum fine for an item to its replacement price)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.011";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('HoldFeeMode','not_always','always|not_always','Set the hold fee mode','Choice')
+    });
+
+    print "Upgrade to $DBversion done (Bug 13592 - Hold fee not being applied on placing a hold)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.012";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+	INSERT IGNORE INTO systempreferences ( `variable`, `value`, `explanation`, `options`, `type` ) VALUES('MaxSearchResultsItemsPerRecordStatusCheck','20','Max number of items per record for which to check transit and hold status','','Integer')
+    });
+
+    print "Upgrade to $DBversion done (Bug 15380 - Move the authority types related code to Koha::Authority::Type[s] - part 1)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.013";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+	INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('StoreLastBorrower','0','','If ON, the last borrower to return an item will be stored in items.last_returned_by','YesNo')
+    });
+    $dbh->do(q{
+	CREATE TABLE IF NOT EXISTS `items_last_borrower` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `itemnumber` int(11) NOT NULL,
+  `borrowernumber` int(11) NOT NULL,
+  `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `itemnumber` (`itemnumber`),
+  KEY `borrowernumber` (`borrowernumber`),
+  CONSTRAINT `items_last_borrower_ibfk_2` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `items_last_borrower_ibfk_1` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    });
+
+    print "Upgrade to $DBversion done (Bug 14945 - Add the ability to store the last patron to return an item)\n";
+    SetVersion($DBversion);
+
+}
+
+$DBversion = "3.23.00.014";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` )
+VALUES ('ClaimsBccCopy','0','','Bcc the ClaimAcquisition and ClaimIssues alerts','YesNo')
+    });
+
+    print "Upgrade to $DBversion done (Bug 10076 - Add Bcc syspref for claimacquisition and clamissues)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.015";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE letter SET code = "HOLD_SLIP" WHERE code = "RESERVESLIP";
+    });
+
+    print "Upgrade to $DBversion done (Bug 15443 - Re-code RESERVESLIP as HOLD_SLIP)\n";
+    SetVersion($DBversion);
 }
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory

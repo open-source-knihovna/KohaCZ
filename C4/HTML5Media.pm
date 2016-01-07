@@ -1,6 +1,6 @@
 package C4::HTML5Media;
 
-# Copyright 2012 Mirko Tietgen
+# Copyright 2012/2015 Mirko Tietgen
 #
 # This file is part of Koha.
 #
@@ -22,7 +22,7 @@ use warnings;
 
 use C4::Context;
 use MARC::Field;
-
+use Koha::Upload;
 
 =head1 HTML5Media
 
@@ -109,7 +109,19 @@ sub gethtml5media {
             next; # no file to play
         }
         # extension
-        $HTML5Media{extension} = ($HTML5Media{srcblock} =~ m/([^.]+)$/)[0];
+        # check uploaded files
+        if ( $HTML5Media{srcblock} =~ /\Qopac-retrieve-file.pl\E/ ) {
+            my ( undef, $id ) = split /id=/, $HTML5Media{srcblock};
+            next if !$id;
+            my $public = ( ( caller )[1] =~ /opac/ ) ? { public => 1 }: {};
+            my $upl = Koha::Upload->new( $public )->get({ hashvalue => $id });
+            next if !$upl || $upl->{name} !~ /\./;
+            $HTML5Media{extension} = ( $upl->{name} =~ m/([^.]+)$/ )[0];
+        }
+        # check remote files
+        else {
+            $HTML5Media{extension} = ($HTML5Media{srcblock} =~ m/([^.]+)$/)[0];
+        }
         if ( !grep /\Q$HTML5Media{extension}\E/, @HTML5MediaExtensions ) {
             next; # not a specified media file
         }

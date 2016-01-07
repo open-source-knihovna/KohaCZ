@@ -33,7 +33,7 @@
                 update_category_code( category_code );
             }
         [% END %]
-        $("#dateofbirth").datepicker({ maxDate: "-1D" });
+        $("#dateofbirth").datepicker({ maxDate: "-1D", yearRange: "c-120:" });
         $("#entryform").validate({
             rules: {
                 email: {
@@ -186,8 +186,8 @@
     [% END %]
 
 	[% IF ( no_add ) %]<div class="dialog alert"><h3>Cannot add patron</h3>
-		[% IF ( no_branches ) %]<p>There are <strong>no libraries defined</strong>. [% IF ( CAN_user_parameters ) %]Please <a href="/cgi-bin/koha/admin/branches.pl">add a library</a>.[% ELSE %]An administrator must define at least one library.[% END %]</p>[% END %]
-		[% IF ( no_categories ) %]<p>There are <strong>no patron categories defined</strong>. [% IF ( CAN_user_parameters ) %]Please <a href="/cgi-bin/koha/admin/categorie.pl">add a patron category</a>.[% ELSE %]An administrator must define at least one patron category.</p>[% END %][% END %]</div>[% END %]
+            [% IF ( no_branches ) %]<p><strong>There are no libraries defined.</strong> [% IF ( CAN_user_parameters ) %]<a href="/cgi-bin/koha/admin/branches.pl">Please add a library.</a>[% ELSE %]An administrator must define at least one library.[% END %]</p>[% END %]
+            [% IF ( no_categories ) %]<p><strong>There are no patron categories defined.</strong> [% IF ( CAN_user_parameters ) %]<a href="/cgi-bin/koha/admin/categories.pl">Please add a patron category.</a>[% ELSE %]An administrator must define at least one patron category.</p>[% END %][% END %]</div>[% END %]
 
 	[% UNLESS ( no_add ) %]
     <h1>[% IF ( opadd ) %]Add[% ELSIF ( opduplicate ) %]Duplicate[% ELSE %] Modify[% END %] patron [% IF (firstname) %][% firstname %] [% END %][% IF (surname) %][% surname %] [% END %]([%IF ( categoryname ) %][% categoryname %][% ELSE %][% IF ( I ) %]Organization[% END %][% IF ( A ) %]Adult[% END %][% IF ( C ) %]Child[% END %][% IF ( P ) %]Professional[% END %][% IF ( S ) %]Staff[% END %][% END %])</h1>
@@ -490,6 +490,21 @@
             [% END %]
             <input id="guarantordelete" type="button" value="Delete" />
         </li>
+    [% IF guarantorid && Koha.Preference('AllowStaffToSetCheckoutsVisibilityForGuarantor') %]
+        <li>
+            <label for="privacy_guarantor_checkouts">Show checkouts to guarantor</label>
+            <select name="privacy_guarantor_checkouts" id="privacy_guarantor_checkouts">
+                [% IF privacy_guarantor_checkouts %]
+                    <option value="0">No</option>
+                    <option value="1" selected>Yes</option>
+                [% ELSE %]
+                    <option value="0" selected>No</option>
+                    <option value="1">Yes</option>
+                [% END %]
+            </select>
+            <div class="hint">Allow guarantor of this patron to view this patron's checkouts from the OPAC</div>
+        </li>
+    [% END %]
         </ol>
     </fieldset>
 

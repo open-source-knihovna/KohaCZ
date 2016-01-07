@@ -278,23 +278,24 @@ $(document).ready(function() {
                 {
                     "mDataProp": function ( oObj ) {
                         if ( ! oObj.charge ) oObj.charge = 0;
-                        return parseFloat(oObj.charge).toFixed(2);
+                        return '<span style="text-align: right; display: block;">' + parseFloat(oObj.charge).toFixed(2) + '<span>';
                     }
                 },
                 {
                     "mDataProp": function ( oObj ) {
                         if ( ! oObj.fine ) oObj.fine = 0;
-                        return parseFloat(oObj.fine).toFixed(2);
+                        return '<span style="text-align: right; display: block;">' + parseFloat(oObj.fine).toFixed(2)  + '<span>';
                     }
                 },
                 {
                     "mDataProp": function ( oObj ) {
                         if ( ! oObj.price ) oObj.price = 0;
-                        return parseFloat(oObj.price).toFixed(2);
+                        return '<span style="text-align: right; display: block;">' + parseFloat(oObj.price).toFixed(2) + '<span>';
                     }
                 },
                 {
                     "bSortable": false,
+                    "bVisible": AllowCirculate ? true : false,
                     "mDataProp": function ( oObj ) {
                         var content = "";
                         var span_style = "";
@@ -388,6 +389,7 @@ $(document).ready(function() {
                 },
                 {
                     "bSortable": false,
+                    "bVisible": AllowCirculate ? true : false,
                     "mDataProp": function ( oObj ) {
                         if ( oObj.can_renew_error == "on_reserve" ) {
                             return "<a href='/cgi-bin/koha/reserve/request.pl?biblionumber=" + oObj.biblionumber + "'>" + ON_HOLD + "</a>";

@@ -152,6 +152,16 @@ BEGIN {
 
     AddReserve($branch,$borrowernumber,$biblionumber,$bibitems,$priority,$resdate,$expdate,$notes,$title,$checkitem,$found)
 
+Adds reserve and generates HOLDPLACED message.
+
+The following tables are available witin the HOLDPLACED message:
+
+    branches
+    borrowers
+    biblio
+    biblioitems
+    items
+
 =cut
 
 sub AddReserve {
@@ -218,10 +228,11 @@ sub AddReserve {
             letter_code => 'HOLDPLACED',
             branchcode => $branch,
             tables => {
-                'branches'  => $branch_details,
-                'borrowers' => $borrower,
-                'biblio'    => $biblionumber,
-                'items'     => $checkitem,
+                'branches'    => $branch_details,
+                'borrowers'   => $borrower,
+                'biblio'      => $biblionumber,
+                'biblioitems' => $biblionumber,
+                'items'       => $checkitem,
             },
         ) ) {
 
@@ -253,6 +264,7 @@ sub GetReserve {
     my ($reserve_id) = @_;
 
     my $dbh = C4::Context->dbh;
+
     my $query = "SELECT * FROM reserves WHERE reserve_id = ?";
     my $sth = $dbh->prepare( $query );
     $sth->execute( $reserve_id );
@@ -723,7 +735,8 @@ SELECT COUNT(*) FROM reserves WHERE biblionumber=? AND borrowernumber<>?
 
     my $dbh = C4::Context->dbh;
     my ( $fee ) = $dbh->selectrow_array( $borquery, undef, ($borrowernumber) );
-    if( $fee && $fee > 0 ) {
+    my $hold_fee_mode = C4::Context->preference('HoldFeeMode') || 'not_always';
+    if( $fee and $fee > 0 and $hold_fee_mode ne 'always' ) {
         # This is a reconstruction of the old code:
         # Compare number of items with items issued, and optionally check holds
         # If not all items are issued and there are no holds: charge no fee
@@ -1984,6 +1997,25 @@ sub _Findgroupreserve {
 Sends a notification to the patron that their hold has been filled (through
 ModReserveAffect, _not_ ModReserveFill)
 
+The letter code for this notice may be found using the following query:
+
+    select distinct letter_code
+    from message_transports
+    inner join message_attributes using (message_attribute_id)
+    where message_name = 'Hold_Filled'
+
+This will probably sipmly be 'HOLD', but because it is defined in the database,
+it is subject to addition or change.
+
+The following tables are availalbe witin the notice:
+
+    branches
+    borrowers
+    biblio
+    biblioitems
+    reserves
+    items
+
 =cut
 
 sub _koha_notify_reserve {
@@ -2016,10 +2048,11 @@ sub _koha_notify_reserve {
         module => 'reserves',
         branchcode => $reserve->{branchcode},
         tables => {
-            'branches'  => $branch_details,
-            'borrowers' => $borrower,
-            'biblio'    => $biblionumber,
-            'reserves'  => $reserve,
+            'branches'       => $branch_details,
+            'borrowers'      => $borrower,
+            'biblio'         => $biblionumber,
+            'biblioitems'    => $biblionumber,
+            'reserves'       => $reserve,
             'items', $reserve->{'itemnumber'},
         },
         substitute => { today => output_pref( { dt => dt_from_string, dateonly => 1 } ) },
@@ -2353,7 +2386,17 @@ sub GetReserveId {
 
   ReserveSlip($branchcode, $borrowernumber, $biblionumber)
 
-  Returns letter hash ( see C4::Letters::GetPreparedLetter ) or undef
+Returns letter hash ( see C4::Letters::GetPreparedLetter ) or undef
+
+The letter code will be HOLD_SLIP, and the following tables are
+available within the slip:
+
+    reserves
+    branches
+    borrowers
+    biblio
+    biblioitems
+    items
 
 =cut
 
@@ -2370,13 +2413,14 @@ sub ReserveSlip {
 
     return  C4::Letters::GetPreparedLetter (
         module => 'circulation',
-        letter_code => 'RESERVESLIP',
+        letter_code => 'HOLD_SLIP',
         branchcode => $branch,
         tables => {
             'reserves'    => $reserve,
             'branches'    => $reserve->{branchcode},
             'borrowers'   => $reserve->{borrowernumber},
             'biblio'      => $reserve->{biblionumber},
+            'biblioitems' => $reserve->{biblionumber},
             'items'       => $reserve->{itemnumber},
         },
     );

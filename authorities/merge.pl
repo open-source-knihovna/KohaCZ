@@ -23,7 +23,7 @@ use CGI qw ( -utf8 );
 use C4::Output;
 use C4::Auth;
 use C4::AuthoritiesMarc;
-use Koha::Authority;
+use Koha::MetadataRecord::Authority;
 use C4::Koha;
 use C4::Biblio;
 
@@ -92,24 +92,24 @@ else {
         push @errors, { code => "WRONG_COUNT", value => scalar(@authid) };
     }
     else {
-        my $recordObj1 = Koha::Authority->get_from_authid($authid[0]) || Koha::Authority->new();
+        my $recordObj1 = Koha::MetadataRecord::Authority->get_from_authid($authid[0]) || Koha::MetadataRecord::Authority->new();
         my $recordObj2;
 
         if (defined $mergereference && $mergereference eq 'breeding') {
-            $recordObj2 =  Koha::Authority->get_from_breeding($authid[1]) || Koha::Authority->new();
+            $recordObj2 =  Koha::MetadataRecord::Authority->get_from_breeding($authid[1]) || Koha::MetadataRecord::Authority->new();
         } else {
-            $recordObj2 =  Koha::Authority->get_from_authid($authid[1]) || Koha::Authority->new();
+            $recordObj2 =  Koha::MetadataRecord::Authority->get_from_authid($authid[1]) || Koha::MetadataRecord::Authority->new();
         }
 
         if ($mergereference) {
 
             my $framework;
-            if ( $recordObj1->authtype ne $recordObj2->authtype && $mergereference ne 'breeding' ) {
+            if ( $recordObj1->authtypecode ne $recordObj2->authtypecode && $mergereference ne 'breeding' ) {
                 $framework = $input->param('frameworkcode')
                   or push @errors, { code => 'FRAMEWORK_NOT_SELECTED' };
             }
             else {
-                $framework = $recordObj1->authtype;
+                $framework = $recordObj1->authtypecode;
             }
             if ($mergereference eq 'breeding') {
                 $mergereference = $authid[0];
@@ -155,48 +155,30 @@ else {
                 title1          => $recordObj1->authorized_heading,
                 title2          => $recordObj2->authorized_heading,
             );
-            if ( $recordObj1->authtype ne $recordObj2->authtype ) {
-                my $frameworks = getauthtypes;
+            if ( $recordObj1->authtypecode ne $recordObj2->authtypecode ) {
+                my $authority_types = Koha::Authority::Types->search( {}, { order_by => ['authtypecode'] } );
                 my @frameworkselect;
-                foreach my $thisframeworkcode ( keys %$frameworks ) {
+                while ( my $authority_type = $authority_types->next ) {
                     my %row = (
-                        value => $thisframeworkcode,
-                        frameworktext =>
-                          $frameworks->{$thisframeworkcode}->{'authtypetext'},
+                        value => $authority_type->authtypecode,
+                        frameworktext => $authority_type->authtypetext,
                     );
-                    if ( $recordObj1->authtype eq $thisframeworkcode ) {
-                        $row{'selected'} = 1;
-                    }
                     push @frameworkselect, \%row;
                 }
                 $template->param(
                     frameworkselect => \@frameworkselect,
-                    frameworkcode1  => $recordObj1->authtype,
-                    frameworkcode2  => $recordObj2->authtype,
-                    frameworklabel1 => $frameworks->{$recordObj1->authtype}->{'authtypetext'},
-                    frameworklabel2 => $frameworks->{$recordObj2->authtype}->{'authtypetext'},
+                    frameworkcode1  => $recordObj1->authtypecode,
+                    frameworkcode2  => $recordObj2->authtypecode,
+                    frameworklabel1 => $recordObj1->authtypetext,
+                    frameworklabel2 => $recordObj2->authtypetext,
                 );
             }
         }
     }
 }
 
-my $authtypes = getauthtypes;
-my @authtypesloop;
-foreach my $thisauthtype (
-    sort {
-        $authtypes->{$a}{'authtypetext'} cmp $authtypes->{$b}{'authtypetext'}
-    }
-    keys %$authtypes
-  )
-{
-    my %row = (
-        value        => $thisauthtype,
-        authtypetext => $authtypes->{$thisauthtype}{'authtypetext'},
-    );
-    push @authtypesloop, \%row;
-}
-$template->{VARS}->{authtypesloop} = \@authtypesloop;
+my $authority_types = Koha::Authority::Types->search({}, { order_by => ['authtypetext']});
+$template->param( authority_types => $authority_types );
 
 if (@errors) {
 

@@ -117,7 +117,7 @@ CREATE TABLE `authorised_values` ( -- stores values for authorized values catego
 DROP TABLE IF EXISTS `biblio`;
 CREATE TABLE `biblio` ( -- table that stores bibliographic information
   `biblionumber` int(11) NOT NULL auto_increment, -- unique identifier assigned to each bibliographic record
-  `frameworkcode` varchar(4) NOT NULL default '', -- foriegn key from the biblio_framework table to identify which framework was used in cataloging this record
+  `frameworkcode` varchar(4) NOT NULL default '', -- foreign key from the biblio_framework table to identify which framework was used in cataloging this record
   `author` mediumtext, -- statement of responsibility from MARC record (100$a in MARC21)
   `title` mediumtext, -- title (without the subtitle) from the MARC record (245$a in MARC21)
   `unititle` mediumtext, -- uniform title (without the subtitle) from the MARC record (240$a in MARC21)
@@ -265,6 +265,7 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `smsalertnumber` varchar(50) default NULL, -- the mobile phone number where the patron/borrower would like to receive notices (if SNS turned on)
   `privacy` integer(11) DEFAULT '1' NOT NULL, -- patron/borrower's privacy settings related to their reading history
   `checkprevissue` varchar(7) NOT NULL default 'inherit', -- produce a warning for this borrower if this item has previously been issued to this borrower if 'yes', not if 'no', defer to category setting if 'inherit'.
+  `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
   UNIQUE KEY `cardnumber` (`cardnumber`),
   PRIMARY KEY `borrowernumber` (`borrowernumber`),
   KEY `categorycode` (`categorycode`),
@@ -900,6 +901,7 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `altcontactphone` varchar(50) default NULL, -- the phone number for the alternate contact for the patron/borrower
   `smsalertnumber` varchar(50) default NULL, -- the mobile phone number where the patron/borrower would like to receive notices (if SNS turned on)
   `privacy` integer(11) DEFAULT '1' NOT NULL, -- patron/borrower's privacy settings related to their reading history  KEY `borrowernumber` (`borrowernumber`),
+  `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
   KEY borrowernumber (borrowernumber),
   KEY `cardnumber` (`cardnumber`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1193,6 +1195,7 @@ CREATE TABLE `issuingrules` ( -- circulation and fine rules
   `reservesallowed` smallint(6) NOT NULL default "0", -- how many holds are allowed
   `branchcode` varchar(10) NOT NULL default '', -- the branch this rule is for (branches.branchcode)
   overduefinescap decimal(28,6) default NULL, -- the maximum amount of an overdue fine
+  cap_fine_to_replacement_price BOOLEAN NOT NULL DEFAULT  '0', -- cap the fine based on item's replacement price
   onshelfholds tinyint(1) NOT NULL default 0, -- allow holds for items that are on shelf
   opacitemholds char(1) NOT NULL default 'N', -- allow opac users to place specific items on hold
   PRIMARY KEY  (`branchcode`,`categorycode`,`itemtype`),
@@ -1265,6 +1268,22 @@ CREATE TABLE `items` ( -- holdings/item information
   CONSTRAINT `items_ibfk_1` FOREIGN KEY (`biblioitemnumber`) REFERENCES `biblioitems` (`biblioitemnumber`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `items_ibfk_2` FOREIGN KEY (`homebranch`) REFERENCES `branches` (`branchcode`) ON UPDATE CASCADE,
   CONSTRAINT `items_ibfk_3` FOREIGN KEY (`holdingbranch`) REFERENCES `branches` (`branchcode`) ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table `items_last_borrower`
+--
+
+CREATE TABLE IF NOT EXISTS `items_last_borrower` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `itemnumber` int(11) NOT NULL,
+  `borrowernumber` int(11) NOT NULL,
+  `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `itemnumber` (`itemnumber`),
+  KEY `borrowernumber` (`borrowernumber`),
+  CONSTRAINT `items_last_borrower_ibfk_2` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `items_last_borrower_ibfk_1` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -1709,6 +1728,7 @@ CREATE TABLE `opac_news` ( -- data from the news tool
 
 DROP TABLE IF EXISTS `overduerules`;
 CREATE TABLE `overduerules` ( -- overdue notice status and triggers
+  `overduerules_id` int(11) NOT NULL AUTO_INCREMENT, -- unique identifier for the overduerules
   `branchcode` varchar(10) NOT NULL default '', -- foreign key from the branches table to define which branch this rule is for (if blank it's all libraries)
   `categorycode` varchar(10) NOT NULL default '', -- foreign key from the categories table to define which patron category this rule is for
   `delay1` int(4) default NULL, -- number of days after the item is overdue that the first notice is sent
@@ -1720,7 +1740,8 @@ CREATE TABLE `overduerules` ( -- overdue notice status and triggers
   `delay3` int(4) default NULL, -- number of days after the item is overdue that the third notice is sent
   `letter3` varchar(20) default NULL, -- foreign key from the letter table to define which notice should be sent as the third notice
   `debarred3` int(1) default 0, -- is the patron restricted when the third notice is sent (1 for yes, 0 for no)
-  PRIMARY KEY  (`branchcode`,`categorycode`)
+  PRIMARY KEY  (`overduerules_id`),
+  UNIQUE KEY `overduerules_branch_cat` (`branchcode`,`categorycode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -1943,6 +1964,9 @@ CREATE TABLE `serial` ( -- issues related to subscriptions
   `biblionumber` varchar(100) NOT NULL default '', -- foreign key for the biblio.biblionumber that this issue is attached to
   `subscriptionid` varchar(100) NOT NULL default '', -- foreign key to the subscription.subscriptionid that this issue is part of
   `serialseq` varchar(100) NOT NULL default '', -- issue information (volume, number, etc)
+  `serialseq_x` varchar( 100 ) NULL DEFAULT NULL, -- first part of issue information
+  `serialseq_y` varchar( 100 ) NULL DEFAULT NULL, -- second part of issue information
+  `serialseq_z` varchar( 100 ) NULL DEFAULT NULL, -- third part of issue information
   `status` tinyint(4) NOT NULL default 0, -- status code for this issue (see manual for full descriptions)
   `planneddate` date default NULL, -- date expected
   `notes` text, -- notes
@@ -2010,15 +2034,6 @@ CREATE TABLE `statistics` ( -- information related to transactions (circulation 
   KEY `borrowernumber_idx` (`borrowernumber`),
   KEY `associatedborrower_idx` (`associatedborrower`),
   KEY `ccode_idx` (`ccode`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Table structure for table `stopwords`
---
-
-DROP TABLE IF EXISTS `stopwords`;
-  CREATE TABLE `stopwords` (
-  `word` varchar(255) default NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -2582,12 +2597,10 @@ CREATE TABLE `message_transport_types` (
 DROP TABLE IF EXISTS `overduerules_transport_types`;
 CREATE TABLE overduerules_transport_types(
     `id` INT(11) NOT NULL AUTO_INCREMENT,
-    `branchcode` varchar(10) NOT NULL DEFAULT '',
-    `categorycode` VARCHAR(10) NOT NULL DEFAULT '',
-    `letternumber` INT(1) NOT NULL DEFAULT 1,
     `message_transport_type` VARCHAR(20) NOT NULL DEFAULT 'email',
+    `overduerules_id` INT(11) NOT NULL,
     PRIMARY KEY (id),
-    CONSTRAINT overduerules_fk FOREIGN KEY (branchcode, categorycode) REFERENCES overduerules (branchcode, categorycode) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT overduerules_fk FOREIGN KEY (overduerules_id) REFERENCES overduerules (overduerules_id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT mtt_fk FOREIGN KEY (message_transport_type) REFERENCES message_transport_types (message_transport_type) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

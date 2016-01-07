@@ -68,7 +68,7 @@
       [% END %]
       City: </label>
         <input type="text" id="city" name="city" size="20" value="[% city %]" />
-        [% IF ( city_cgipopup ) %]or <strong>choose</strong>
+        [% IF ( city_cgipopup ) %]or choose
         <select id="select_city" name="select_city">
         [% FOREACH city_loo IN city_loop %]
             [% IF ( city_loo.selected ) %]
@@ -103,7 +103,7 @@
       [% ELSE %]
         <label for="zipcode">
       [% END %]
-      Zip/Postal code: </label>
+      ZIP/Postal code: </label>
             <input type="text" name="zipcode" id="zipcode" size="10" value="[% zipcode %]" />
       [% IF ( mandatoryzipcode ) %]<span class="required">Required</span>[% END %]
     </li>

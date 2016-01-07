@@ -41,6 +41,7 @@ use JSON qw /to_json/;
 
 use Koha::Acquisition::Bookseller;
 use Koha::DateUtils;
+use Koha::Items;
 
 my $query=new CGI;
 
@@ -138,6 +139,7 @@ foreach ( keys %{$data} ) {
 
 ($itemnumber) and @items = (grep {$_->{'itemnumber'} == $itemnumber} @items);
 foreach my $item (@items){
+    $item->{object} = Koha::Items->find( $item->{itemnumber} );
     $item->{itemlostloop}= GetAuthorisedValues(GetAuthValCode('items.itemlost',$fw),$item->{itemlost}) if GetAuthValCode('items.itemlost',$fw);
     $item->{itemdamagedloop}= GetAuthorisedValues(GetAuthValCode('items.damaged',$fw),$item->{damaged}) if GetAuthValCode('items.damaged',$fw);
     $item->{'collection'}              = $ccodes->{ $item->{ccode} } if ($ccodes);

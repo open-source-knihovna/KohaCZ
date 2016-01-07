@@ -9,10 +9,10 @@
         $("#z3950submit").click(function(){
             [% IF ( authid ) %]
                 if (confirm(_("Please note that this Z39.50 search could replace the current record."))){
-                    window.open("/cgi-bin/koha/cataloguing/z3950_auth_search.pl?authid=[% authid %]","z3950search",'width=740,height=450,location=yes,toolbar=no,scrollbars=yes,resize=yes');
+                    window.open("/cgi-bin/koha/cataloguing/z3950_auth_search.pl?authid=[% authid %]","z3950search",'width=800,height=500,location=yes,toolbar=no,scrollbars=yes,resize=yes');
                 }
             [% ELSE %]
-                window.open("/cgi-bin/koha/cataloguing/z3950_auth_search.pl","z3950search",'width=740,height=450,location=yes,toolbar=no,scrollbars=yes,resize=yes');
+                window.open("/cgi-bin/koha/cataloguing/z3950_auth_search.pl","z3950search",'width=800,height=500,location=yes,toolbar=no,scrollbars=yes,resize=yes');
             [% END %]
             return false;
         });
@@ -54,8 +54,8 @@
         <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
-            [% FOREACH authtypesloo IN authtypesloop %]
-            <li><a href="/cgi-bin/koha/authorities/authorities.pl?authtypecode=[% authtypesloo.value %]">[% authtypesloo.authtypetext %]</a></li>
+            [% FOREACH authority_type IN authority_types %]
+                <li><a href="/cgi-bin/koha/authorities/authorities.pl?authtypecode=[% authority_type.authtypecode %]">[% authority_type.authtypetext %]</a></li>
             [% END %]
         </ul>
     </div>

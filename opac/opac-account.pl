@@ -22,7 +22,6 @@
 use strict;
 use CGI qw ( -utf8 );
 use C4::Members;
-use C4::Circulation;
 use C4::Auth;
 use C4::Output;
 use warnings;
@@ -38,12 +37,8 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
     }
 );
 
-# get borrower information ....
-my $borr = GetMemberDetails( $borrowernumber );
-my @bordat;
-$bordat[0] = $borr;
-
-$template->param( BORROWER_INFO => \@bordat );
+my $borrower = C4::Members::GetMember( borrowernumber => $borrowernumber );
+$template->param( BORROWER_INFO => $borrower );
 
 #get account details
 my ( $total , $accts, $numaccts) = GetMemberAccountRecords( $borrowernumber );
@@ -68,10 +63,14 @@ foreach my $row (@$accts) {
     $num++;
 }
 
-$template->param (
+$template->param(
     ACCOUNT_LINES => $accts,
-    total => sprintf( "%.2f", $total ),
-	accountview => 1
+    total         => sprintf( "%.2f", $total ),
+    accountview   => 1,
+    message       => $query->param('message') || q{},
+    message_value => $query->param('message_value') || q{},
+    payment       => $query->param('payment') || q{},
+    payment_error => $query->param('payment-error') || q{},
 );
 
 output_html_with_http_headers $query, $cookie, $template->output, undef, { force_no_caching => 1 };

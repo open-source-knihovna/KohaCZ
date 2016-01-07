@@ -28,6 +28,8 @@ use C4::Debug;
 use C4::Branch; # GetBranches
 use Koha::DateUtils;
 use Koha::Database;
+use Koha::IssuingRule;
+use Koha::IssuingRules;
 
 my $input = CGI->new;
 my $dbh = C4::Context->dbh;
@@ -44,7 +46,16 @@ my ($template, $loggedinuser, $cookie)
                             });
 
 my $type=$input->param('type');
-my $branch = $input->param('branch') || ( C4::Branch::onlymine() ? ( C4::Branch::mybranch() || '*' ) : '*' );
+
+my $branch;
+if ( C4::Context->preference('DefaultToLoggedInLibraryCircRules') ) {
+    $branch = $input->param('branch') || GetBranchesCount() == 1 ? undef : C4::Branch::mybranch();
+}
+else {
+    $branch = $input->param('branch') || ( C4::Branch::onlymine() ? ( C4::Branch::mybranch() || '*' ) : '*' );
+}
+$branch = '*' if $branch eq 'NO_LIBRARY_SET';
+
 my $op = $input->param('op') || q{};
 my $language = C4::Languages::getlanguage();
 
@@ -134,39 +145,43 @@ elsif ($op eq 'add') {
     my $rentaldiscount = $input->param('rentaldiscount');
     my $opacitemholds = $input->param('opacitemholds') || 0;
     my $overduefinescap = $input->param('overduefinescap') || undef;
-    $debug and warn "Adding $br, $bor, $itemtype, $fine, $maxissueqty, $maxonsiteissueqty";
-
-    my $schema = Koha::Database->new()->schema();
-    my $rs = $schema->resultset('Issuingrule');
+    my $cap_fine_to_replacement_price = $input->param('cap_fine_to_replacement_price') eq 'on';
+    $debug and warn "Adding $br, $bor, $itemtype, $fine, $maxissueqty, $maxonsiteissueqty, $cap_fine_to_replacement_price";
 
     my $params = {
-        branchcode             => $br,
-        categorycode           => $bor,
-        itemtype               => $itemtype,
-        fine                   => $fine,
-        finedays               => $finedays,
-        maxsuspensiondays      => $maxsuspensiondays,
-        firstremind            => $firstremind,
-        chargeperiod           => $chargeperiod,
-        chargeperiod_charge_at => $chargeperiod_charge_at,
-        maxissueqty            => $maxissueqty,
-        maxonsiteissueqty      => $maxonsiteissueqty,
-        renewalsallowed        => $renewalsallowed,
-        renewalperiod          => $renewalperiod,
-        norenewalbefore        => $norenewalbefore,
-        auto_renew             => $auto_renew,
-        reservesallowed        => $reservesallowed,
-        issuelength            => $issuelength,
-        lengthunit             => $lengthunit,
-        hardduedate            => $hardduedate,
-        hardduedatecompare     => $hardduedatecompare,
-        rentaldiscount         => $rentaldiscount,
-        onshelfholds           => $onshelfholds,
-        opacitemholds          => $opacitemholds,
-        overduefinescap        => $overduefinescap,
+        branchcode                    => $br,
+        categorycode                  => $bor,
+        itemtype                      => $itemtype,
+        fine                          => $fine,
+        finedays                      => $finedays,
+        maxsuspensiondays             => $maxsuspensiondays,
+        firstremind                   => $firstremind,
+        chargeperiod                  => $chargeperiod,
+        chargeperiod_charge_at        => $chargeperiod_charge_at,
+        maxissueqty                   => $maxissueqty,
+        maxonsiteissueqty             => $maxonsiteissueqty,
+        renewalsallowed               => $renewalsallowed,
+        renewalperiod                 => $renewalperiod,
+        norenewalbefore               => $norenewalbefore,
+        auto_renew                    => $auto_renew,
+        reservesallowed               => $reservesallowed,
+        issuelength                   => $issuelength,
+        lengthunit                    => $lengthunit,
+        hardduedate                   => $hardduedate,
+        hardduedatecompare            => $hardduedatecompare,
+        rentaldiscount                => $rentaldiscount,
+        onshelfholds                  => $onshelfholds,
+        opacitemholds                 => $opacitemholds,
+        overduefinescap               => $overduefinescap,
+        cap_fine_to_replacement_price => $cap_fine_to_replacement_price,
     };
 
-    $rs->update_or_create($params);
+    my $issuingrule = Koha::IssuingRules->find({categorycode => $bor, itemtype => $itemtype, branchcode => $br});
+    if ($issuingrule) {
+        $issuingrule->set($params)->store();
+    } else {
+        Koha::IssuingRule->new()->set($params)->store();
+    }
 
 }
 elsif ($op eq "set-branch-defaults") {

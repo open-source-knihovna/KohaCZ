@@ -18,7 +18,7 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Test::More tests => 68;
+use Test::More tests => 69;
 use Test::MockModule;
 use Test::Warn;
 
@@ -331,6 +331,13 @@ is( $prepared_letter->{content}, q|This one only contains the date: | . output_p
 
 $dbh->do(q{INSERT INTO letter (module, code, name, title, content) VALUES ('claimacquisition','TESTACQCLAIM','Acquisition Claim','Item Not Received','<<aqbooksellers.name>>|<<aqcontacts.name>>|<order>Ordernumber <<aqorders.ordernumber>> (<<biblio.title>>) (<<aqorders.quantity>> ordered)</order>');});
 
+# Test that _parseletter doesn't modify its parameters bug 15429
+{
+    my $values = { dateexpiry => '2015-12-13', };
+    C4::Letters::_parseletter($prepared_letter, 'borrowers', $values);
+    is( $values->{dateexpiry}, '2015-12-13', "_parseletter doesn't modify its parameters" );
+}
+
 my $booksellerid = C4::Bookseller::AddBookseller(
     {
         name => "my vendor",
@@ -385,6 +392,9 @@ my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
 $bookseller->contacts->[0]->email('testemail@mydomain.com');
 C4::Bookseller::ModBookseller($bookseller);
 $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
+
+# Ensure that the preference 'LetterLog' is set to logging
+C4::Context->set_preference( 'LetterLog', 'on' );
 
 {
 warning_is {
