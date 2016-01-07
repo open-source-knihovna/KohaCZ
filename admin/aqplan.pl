@@ -82,10 +82,9 @@ $template->param(
 
 # ------- get periods stuff ------------------
 
-my $borrower_id         = $template->{VARS}->{'USER_INFO'}[0]->{'borrowernumber'};
-my $borrower_branchcode = $template->{VARS}->{'USER_INFO'}[0]->{'branchcode'};
+my $borrower_id         = $template->{VARS}->{'USER_INFO'}->{'borrowernumber'};
+my $borrower_branchcode = $template->{VARS}->{'USER_INFO'}->{'branchcode'};
 
-my $periods;
 my $authcat      = $input->param('authcat');
 my $show_active  = $input->param('show_active');
 my $show_actual  = $input->param('show_actual');
@@ -107,9 +106,7 @@ $authcat = 'Asort1' if  not defined $authcat; # defaults to Asort if no authcat 
 my $budget_id = $input->param('budget_id');
 my $op        = $input->param("op");
 
-my $budget_branchcode;
-
-my $budgets_ref = GetBudgetHierarchy( $budget_period_id, $show_mine?$template->{VARS}->{'USER_INFO'}[0]->{'branchcode'}:'', $show_mine?$template->{VARS}->{'USER_INFO'}[0]->{'borrowernumber'}:'' );
+my $budgets_ref = GetBudgetHierarchy( $budget_period_id, $show_mine?$template->{VARS}->{'USER_INFO'}->{'branchcode'}:'', $show_mine?$template->{VARS}->{'USER_INFO'}->{'borrowernumber'}:'' );
 
 # build categories list
 my $sth = $dbh->prepare("select distinct category from authorised_values where category like 'A%' ");
@@ -140,7 +137,6 @@ $template->param( authcat_dropbox => {
     });
 
 my @budgets = @$budgets_ref;
-my $CGISort;
 my @authvals;
 my %labels;
 
@@ -160,7 +156,6 @@ if ( $op eq 'save' ) {
     my %seen;
     @buds        = grep { !$seen{$_}++ } @buds;
     @auth_values = grep { !$seen{$_}++ } @auth_values;
-    my @budget_ids;
     my @budget_lines;
 
     foreach my $budget (@buds) {

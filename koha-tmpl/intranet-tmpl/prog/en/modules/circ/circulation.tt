@@ -38,6 +38,7 @@ var borrowernumber = "[% borrowernumber %]";
 var branchcode = "[% branch %]";
 var exports_enabled = "[% exports_enabled %]";
 var AllowRenewalLimitOverride = [% (CAN_user_circulate_override_renewals && AllowRenewalLimitOverride)? 1: 0 %];
+var AllowCirculate = [% (CAN_user_circulate_circulate_remaining_permissions)? 1 : 0 %];
 var script = "circulation";
 var relatives_borrowernumbers = new Array();
 [% FOREACH b IN relatives_borrowernumbers %]
@@ -203,7 +204,7 @@ $(document).ready(function() {
 [% END %]
 
 [% IF ( alert.OTHER_CHARGES ) %]
-    <div class="dialog message">The patron has unpaid charges for reserves, rentals etc of [% alert.OTHER_CHARGES %]</div>
+    <div class="dialog message">The patron has unpaid charges for holds, rentals etc of [% alert.OTHER_CHARGES %]</div>
 [% END %]
 
 [% IF ( NEEDSCONFIRMATION ) %]
@@ -261,7 +262,7 @@ $(document).ready(function() {
 [% END %]
 
 [% IF ( BORRNOTSAMEBRANCH ) %]
-    <li>This patrons is from a different library ([% BORRNOTSAMEBRANCH %])</li>
+    <li>This patron is from a different library ([% BORRNOTSAMEBRANCH %])</li>
 [% END %]
 
 [% IF ( PATRON_CANT ) %]
@@ -801,7 +802,7 @@ No patron matched <span class="ex">[% message %]</span>
 			</ul>
         </div>
 
-            [% IF ( WaitingHolds ) %]
+            [% IF WaitingHolds.count %]
                 <div id="holdswaiting" class="circmessage">
                     <h4>Holds waiting:</h4>
                     [% FOREACH w IN WaitingHolds %]

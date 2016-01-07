@@ -208,9 +208,10 @@ sub get_template_and_user {
         # It's possible for $user to be the borrowernumber if they don't have a
         # userid defined (and are logging in through some other method, such
         # as SSL certs against an email address)
+        my $borrower;
         $borrowernumber = getborrowernumber($user) if defined($user);
         if ( !defined($borrowernumber) && defined($user) ) {
-            my $borrower = C4::Members::GetMember( borrowernumber => $user );
+            $borrower = C4::Members::GetMember( borrowernumber => $user );
             if ($borrower) {
                 $borrowernumber = $user;
 
@@ -218,6 +219,8 @@ sub get_template_and_user {
                 # to do it.
                 $user = $borrower->{firstname} . ' ' . $borrower->{surname};
             }
+        } else {
+            $borrower = C4::Members::GetMember( borrowernumber => $borrowernumber );
         }
 
         # user info
@@ -244,10 +247,7 @@ sub get_template_and_user {
             );
         }
 
-        my ($borr) = C4::Members::GetMemberDetails($borrowernumber);
-        my @bordat;
-        $bordat[0] = $borr;
-        $template->param( "USER_INFO" => \@bordat );
+        $template->param( "USER_INFO" => $borrower );
 
         my $all_perms = get_all_subpermissions();
 
@@ -810,7 +810,9 @@ sub checkauth {
             $sessiontype = $session->param('sessiontype') || '';
         }
         if ( ( $query->param('koha_login_context') && ( $q_userid ne $s_userid ) )
-            || ( $cas && $query->param('ticket') && !C4::Context->userenv->{'id'} ) || ( $shib && $shib_login && !$logout ) ) {
+            || ( $cas && $query->param('ticket') && !C4::Context->userenv->{'id'} )
+            || ( $shib && $shib_login && !$logout && !C4::Context->userenv->{'id'} )
+        ) {
 
             #if a user enters an id ne to the id in the current session, we need to log them in...
             #first we need to clear the anonymous session...
