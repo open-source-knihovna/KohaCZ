@@ -5,7 +5,7 @@
 
                 [% IF ( colId ) %]
                     <div class="btn-group">
-                        <a class="btn btn-small" href="/cgi-bin/koha/rotating_collections/transferCollection.pl?colId=[% colId %]">Transfer</a>
+                        <a class="btn btn-small" href="/cgi-bin/koha/rotating_collections/transferCollection.pl?colId=[% colId %]"><i class="fa fa-exchange"></i> Transfer</a>
                     </div>
                     <div class="btn-group">
                         <a class="btn btn-small" href="/cgi-bin/koha/rotating_collections/editCollections.pl?action=edit&amp;colId=[% colId %]"><i class="fa fa-pencil"></i> Edit</a>
