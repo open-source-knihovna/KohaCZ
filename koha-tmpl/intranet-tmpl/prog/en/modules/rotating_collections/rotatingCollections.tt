@@ -3,6 +3,13 @@
 <title>Koha &rsaquo; Tools &rsaquo; Rotating collections</title>
 [% INCLUDE 'doc-head-close.inc' %]
 <script type="text/javascript">
+    //<![CDATA[
+        $( document ).ready(function() {
+            $("#barcode").focus();
+        });
+    //]]>
+</script>
+<script type="text/javascript">
     $(document).ready(function(){
         $(".confirmdelete").click(function(){
             $(this).parents('tr').addClass("warn");
@@ -30,6 +37,35 @@
                 [% INCLUDE 'rotating-collections-toolbar.inc' %]
 
                 <h1>Rotating collections</h1>
+                [% IF ( removeSuccess ) %]
+                    <div class="dialog message">
+                        <p>Item with barcode '[% barcode %]' was removed from a collection and returned to homebranch.</p>
+                    </div>
+                [% END %]
+                [% IF ( removeFailure ) %]
+                    <div class="dialog alert">
+                        <p>Item with barcode '[% barcode %]' was not removed from collection:</p>
+                        <p>[% failureMessage %]
+                    </div>
+                [% END %]
+                <div>
+                    <form action="rotatingCollections.pl" method="post">
+                      <fieldset class="brief">
+                        <legend>Remove item</legend>
+                        <p>Insert barcode and given item will be immediately remove from any collection and returned back to home library</p>
+                        <ol>
+                            <li>
+                                <label for="barcode">Barcode: </label>
+                                <input type="text" id="barcode" name="barcode" />
+                            </li>
+                        </ol>
+                        <p>
+                            <input type="hidden" name="action" value="removeItem" />
+                            <input type="submit" value="Submit" />
+                        </p>
+                      </fieldset>
+                    </form>
+                </div>
                 <div>
                     [% IF ( collectionsLoop ) %]
                         <table>
