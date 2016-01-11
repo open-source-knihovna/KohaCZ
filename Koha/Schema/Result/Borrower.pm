@@ -395,6 +395,13 @@ __PACKAGE__->table("borrowers");
   default_value: 1
   is_nullable: 0
 
+=head2 checkprevissue
+
+  data_type: 'varchar'
+  default_value: 'inherit'
+  is_nullable: 0
+  size: 7
+
 =head2 privacy_guarantor_checkouts
 
   data_type: 'tinyint'
@@ -566,6 +573,13 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 50 },
   "privacy",
   { data_type => "integer", default_value => 1, is_nullable => 0 },
+  "checkprevissue",
+  {
+    data_type => "varchar",
+    default_value => "inherit",
+    is_nullable => 0,
+    size => 7,
+  },
   "privacy_guarantor_checkouts",
   { data_type => "tinyint", default_value => 0, is_nullable => 0 },
 );
@@ -861,6 +875,21 @@ Related object: L<Koha::Schema::Result::Issue>
 __PACKAGE__->has_many(
   "issues",
   "Koha::Schema::Result::Issue",
+  { "foreign.borrowernumber" => "self.borrowernumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 items_last_borrowers
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::ItemsLastBorrower>
+
+=cut
+
+__PACKAGE__->has_many(
+  "items_last_borrowers",
+  "Koha::Schema::Result::ItemsLastBorrower",
   { "foreign.borrowernumber" => "self.borrowernumber" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -1161,8 +1190,8 @@ Composing rels: L</aqorder_users> -> ordernumber
 __PACKAGE__->many_to_many("ordernumbers", "aqorder_users", "ordernumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-10-21 19:50:05
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QafovaRBnm36nyoyQTGIgQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-01-11 10:41:34
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0bnISjage98LxgvhKdgYDQ
 
 __PACKAGE__->belongs_to(
     "guarantor",

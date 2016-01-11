@@ -137,6 +137,18 @@ __PACKAGE__->table("items");
   datetime_undef_if_invalid: 1
   is_nullable: 1
 
+=head2 withdrawn_permanent
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
+=head2 withdrawn_categorycode
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 10
+
 =head2 itemcallnumber
 
   data_type: 'varchar'
@@ -327,6 +339,10 @@ __PACKAGE__->add_columns(
     datetime_undef_if_invalid => 1,
     is_nullable => 1,
   },
+  "withdrawn_permanent",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
+  "withdrawn_categorycode",
+  { data_type => "varchar", is_nullable => 1, size => 10 },
   "itemcallnumber",
   { data_type => "varchar", is_nullable => 1, size => 255 },
   "coded_location_qualifier",
@@ -555,6 +571,21 @@ __PACKAGE__->might_have(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 items_last_borrower
+
+Type: might_have
+
+Related object: L<Koha::Schema::Result::ItemsLastBorrower>
+
+=cut
+
+__PACKAGE__->might_have(
+  "items_last_borrower",
+  "Koha::Schema::Result::ItemsLastBorrower",
+  { "foreign.itemnumber" => "self.itemnumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 old_issues
 
 Type: has_many
@@ -616,8 +647,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07039 @ 2015-11-04 12:00:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jkgJfulDrGaUpQ6jC40vpQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-01-11 10:42:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:CZ5BY4xbixcqTSIrg4CKig
 
 __PACKAGE__->belongs_to( biblioitem => "Koha::Schema::Result::Biblioitem", "biblioitemnumber" );
 

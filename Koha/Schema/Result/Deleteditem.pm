@@ -135,6 +135,18 @@ __PACKAGE__->table("deleteditems");
   datetime_undef_if_invalid: 1
   is_nullable: 1
 
+=head2 withdrawn_permanent
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
+=head2 withdrawn_categorycode
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 10
+
 =head2 itemcallnumber
 
   data_type: 'varchar'
@@ -319,6 +331,10 @@ __PACKAGE__->add_columns(
     datetime_undef_if_invalid => 1,
     is_nullable => 1,
   },
+  "withdrawn_permanent",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
+  "withdrawn_categorycode",
+  { data_type => "varchar", is_nullable => 1, size => 10 },
   "itemcallnumber",
   { data_type => "varchar", is_nullable => 1, size => 255 },
   "coded_location_qualifier",
@@ -387,8 +403,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("itemnumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07039 @ 2015-04-23 12:42:12
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:+aDMnEj1EvLQTQPAEl1ocg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-01-11 10:42:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:akmOZfV4EHojo1UVu2m06w
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
