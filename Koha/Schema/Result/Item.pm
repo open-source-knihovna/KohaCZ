@@ -137,6 +137,18 @@ __PACKAGE__->table("items");
   datetime_undef_if_invalid: 1
   is_nullable: 1
 
+=head2 withdrawn_permanent
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
+=head2 withdrawn_categorycode
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 10
+
 =head2 itemcallnumber
 
   data_type: 'varchar'
@@ -327,6 +339,10 @@ __PACKAGE__->add_columns(
     datetime_undef_if_invalid => 1,
     is_nullable => 1,
   },
+  "withdrawn_permanent",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
+  "withdrawn_categorycode",
+  { data_type => "varchar", is_nullable => 1, size => 10 },
   "itemcallnumber",
   { data_type => "varchar", is_nullable => 1, size => 255 },
   "coded_location_qualifier",
@@ -616,8 +632,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07039 @ 2015-11-04 12:00:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jkgJfulDrGaUpQ6jC40vpQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-01-11 13:20:18
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:hp64qtXvyltU9oOnBFDu3Q
 
 __PACKAGE__->belongs_to( biblioitem => "Koha::Schema::Result::Biblioitem", "biblioitemnumber" );
 

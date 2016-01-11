@@ -89,7 +89,7 @@ __PACKAGE__->table("z3950servers");
 
   data_type: 'enum'
   default_value: 'zed'
-  extra: {list => ["zed","sru"]}
+  extra: {list => ["zed","sru","zed_update"]}
   is_nullable: 0
 
 =head2 encoding
@@ -219,8 +219,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07039 @ 2014-09-01 10:16:04
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:q0y03nGYIt0eDIVui0UUdw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-01-11 13:46:53
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:FD0r9cM6JbO0awGRgvz7Rw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
