@@ -63,7 +63,7 @@ type_fees['[% invoice_types_loo.authorised_value %]'] = "[% invoice_types_loo.li
           <option value="N">New card</option>
           <option value="M">Sundry</option>
           [% FOREACH invoice_types_loo IN invoice_types_loop %]
-            <option value="[% invoice_types_loo.authorised_value %]">[% invoice_types_loo.authorised_value %]</option>
+            <option value="[% invoice_types_loo.authorised_value %]">[% invoice_types_loo.lib %]</option>
           [% END %]
         </select>
       </li>
