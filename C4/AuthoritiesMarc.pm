@@ -1728,7 +1728,7 @@ sub PushAuthToZ3950 {
 
     my $msgFieldDef = $z3950server->{zedu_msg_field};
     
-    my $isMsgFieldDefined = defined $msgFieldDef and not $msgFieldDef == '';
+    my $isMsgFieldDefined = defined $msgFieldDef && ($msgFieldDef ne '');
 
     # Decide if we will create or update an authority (based on presence of the authoritativeId)
     my ( $action, $msg );
