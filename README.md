@@ -24,7 +24,7 @@ Po úspěšném otestování nového kódu se vydá nový [Release](https://gith
 4. Do *Release title* se napíše stručný popis změn
 5. Do *Describe this release* se napíše podrobný popis změn včetně výhod a nevýhod zavedení do produkce, pokud tedy nějaké jsou
 
-Všechny naše patche je nakonec přenést do Bugzilly a nechat projít stadardní cestou schvalování na kvalitu. [Podrobnosti k vývoji na wiki Koha] (http://wiki.koha-community.org/wiki/Category:Development).
+Všechny naše patche po otestování naším týmem postupně přidáváme do oficiální Bugzilly a necháváme projít stadardní cestou schvalování na kvalitu. [Podrobnosti k vývoji na wiki Koha] (http://wiki.koha-community.org/wiki/Category:Development).
 
 [Seznam](https://github.com/open-source-knihovna/KohaCZ/wiki/Zm%C4%9Bny-v-KohaCZ-oproti-standardn%C3%AD-instalaci) změn v KohaCZ oproti standardní instalaci.
 
