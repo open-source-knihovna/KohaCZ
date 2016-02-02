@@ -38,11 +38,13 @@
                     <a id="format" class="dropdown-toggle" data-toggle="dropdown" href="#">Save record <b class="caret"></b></a>
                         <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="format">
                             [% FOREACH option IN export_options %]
+                                [% IF option == 'dc' %]
+                                    <li><a role="menuitem" href="#" data-toggle="modal" data-target="#exportModal_">Dublin Core</a></li>
+                                [% ELSE %]
                                 <li>
                                     <a role="menuitem" href="/cgi-bin/koha/opac-export.pl?op=export&amp;bib=[% biblionumber %]&amp;format=[% option %]">
                                         [% SWITCH option %]
                                             [% CASE 'bibtex' %]BIBTEX
-                                            [% CASE 'dc' %]Dublin Core (XML)
                                             [% CASE 'endnote' %]EndNote
                                             [% CASE 'marcxml' %]MARCXML
                                             [% CASE 'marc8' %]MARC (non-Unicode/MARC-8)
@@ -54,6 +56,7 @@
                                         [% END %]
                                     </a>
                                 </li>
+                                [% END %]
                             [% END %]
                         </ul>
                 </div>
@@ -75,3 +78,32 @@
         </li>
     [% END %]
 </ul>
+
+<!-- Dublin Core Modal Form -->
+<div class="modal hide" id="exportModal_" tabindex="-1" role="dialog" aria-labelledby="exportLabelexportModal_" aria-hidden="true">
+    <div class="modal-header">
+        <button type="button" class="closebtn" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 class="modal-title" id="exportModalLabel">Exporting to Dublin Core...</h3>
+    </div>
+    <form method="get" action="/cgi-bin/koha/opac-export.pl">
+    <div class="modal-body">
+        <fieldset id="dc_fieldset">
+                <input id="input-simple" type="radio" name="format" value="rdfdc">
+                <label class="label_dc" for="input-simple">Simple DC-RDF</label>
+                <br>
+                <input id="input-oai" type="radio" name="format" value="oaidc" checked>
+                <label class="label_dc" for="input-oai">OAI-DC</label>
+                <br>
+                <input id="input-srw" type="radio" name="format" value="srwdc">
+                <label class="label_dc" for="input-srw">SRW-DC</label>
+                <br>
+        <input type="hidden" name="op" value="export">
+        <input type="hidden" name="bib" value="[% biblionumber %]">
+        </fieldset>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn">Export</button>
+        <button class="btn btn-link" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    </div>
+    </form>
+</div>

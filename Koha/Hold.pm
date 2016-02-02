@@ -22,12 +22,12 @@ use Modern::Perl;
 use Carp;
 
 use C4::Context qw(preference);
-use Koha::DateUtils qw(dt_from_string);
 
+use Koha::DateUtils qw(dt_from_string);
 use Koha::Borrowers;
 use Koha::Biblios;
-use Koha::Branches;
 use Koha::Items;
+use Koha::Libraries;
 
 use base qw(Koha::Object);
 
@@ -40,6 +40,47 @@ Koha::Hold - Koha Hold object class
 =head2 Class Methods
 
 =cut
+
+=head3 suspend_hold
+
+my $hold = $hold->suspend_hold( $suspend_until_dt );
+
+=cut
+
+sub suspend_hold {
+    my ( $self, $dt ) = @_;
+
+    $dt = $dt ? $dt->clone()->truncate( to => 'day' ) : undef;
+
+    if ( $self->is_waiting ) {    # We can't suspend waiting holds
+        carp "Unable to suspend waiting hold!";
+        return $self;
+    }
+
+    $self->suspend(1);
+    $self->suspend_until( $dt );
+
+    $self->store();
+
+    return $self;
+}
+
+=head3 resume
+
+my $hold = $hold->resume();
+
+=cut
+
+sub resume {
+    my ( $self ) = @_;
+
+    $self->suspend(0);
+    $self->suspend_until( undef );
+
+    $self->store();
+
+    return $self;
+}
 
 =head3 waiting_expires_on
 
@@ -168,14 +209,14 @@ sub item {
 
 =head3 branch
 
-Returns the related Koha::Branch object for this Hold
+Returns the related Koha::Library object for this Hold
 
 =cut
 
 sub branch {
     my ($self) = @_;
 
-    $self->{_branch} ||= Koha::Branches->find( $self->branchcode() );
+    $self->{_branch} ||= Koha::Libraries->find( $self->branchcode() );
 
     return $self->{_branch};
 }
@@ -192,6 +233,18 @@ sub borrower {
     $self->{_borrower} ||= Koha::Borrowers->find( $self->borrowernumber() );
 
     return $self->{_borrower};
+}
+
+=head3 is_suspended
+
+my $bool = $hold->is_suspended();
+
+=cut
+
+sub is_suspended {
+    my ( $self ) = @_;
+
+    return $self->suspend();
 }
 
 =head3 type

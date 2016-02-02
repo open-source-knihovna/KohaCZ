@@ -75,21 +75,24 @@ my $branches = GetBranches();
 
 #   barcode export
 if ( $op eq 'export_barcodes' ) {
-    my $today = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
-    my @barcodes =
-      map { $_->{barcode} } grep { $_->{returndate} =~ m/^$today/o } @{$issues};
-    my $borrowercardnumber =
-      GetMember( borrowernumber => $borrowernumber )->{'cardnumber'};
-    my $delimiter = "\n";
-    binmode( STDOUT, ":encoding(UTF-8)" );
-    print $input->header(
-        -type       => 'application/octet-stream',
-        -charset    => 'utf-8',
-        -attachment => "$today-$borrowercardnumber-checkinexport.txt"
-    );
-    my $content = join $delimiter, uniq(@barcodes);
-    print $content;
-    exit;
+    if ( $data->{'privacy'} < 2) {
+        my $today = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
+        my @barcodes =
+          map { $_->{barcode} } grep { $_->{returndate} =~ m/^$today/o } @{$issues};
+        my $borrowercardnumber =
+          GetMember( borrowernumber => $borrowernumber )->{'cardnumber'};
+        my $delimiter = "\n";
+        binmode( STDOUT, ":encoding(UTF-8)" );
+        print $input->header(
+            -type       => 'application/octet-stream',
+            -charset    => 'utf-8',
+            -attachment => "$today-$borrowercardnumber-checkinexport.txt"
+        );
+
+        my $content = join $delimiter, uniq(@barcodes);
+        print $content;
+        exit;
+    }
 }
 
 if ( $data->{'category_type'} eq 'C') {
@@ -117,14 +120,13 @@ if (C4::Context->preference('ExtendedPatronAttributes')) {
 }
 
 
-my $roadtype = C4::Koha::GetAuthorisedValueByCode( 'ROADTYPE', $data->{streettype} );
 $template->param(%$data);
 
 $template->param(
     readingrecordview => 1,
     borrowernumber    => $borrowernumber,
+    privacy           => $data->{'privacy'},
     categoryname      => $data->{description},
-    roadtype          => $roadtype,
     is_child          => ( $data->{category_type} eq 'C' ),
     branchname        => $branches->{ $data->{branchcode} }->{branchname},
     loop_reading      => $issues,

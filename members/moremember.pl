@@ -248,11 +248,15 @@ my $relatives_issues_count =
   Koha::Database->new()->schema()->resultset('Issue')
   ->count( { borrowernumber => \@relatives } );
 
-my $roadtype = C4::Koha::GetAuthorisedValueByCode( 'ROADTYPE', $data->{streettype} );
 my $today       = DateTime->now( time_zone => C4::Context->tz);
 $today->truncate(to => 'day');
 my $overdues_exist = 0;
 my $totalprice = 0;
+
+# Calculate and display patron's age
+my $dateofbirth = $data->{ 'dateofbirth' };
+my $age = GetAge($dateofbirth);
+$template->param( age => $age );
 
 ### ###############################################################################
 # BUILD HTML
@@ -333,7 +337,6 @@ $template->param( $data->{'categorycode'} => 1 );
 $template->param(
     detailview => 1,
     AllowRenewalLimitOverride => C4::Context->preference("AllowRenewalLimitOverride"),
-    roadtype        => $roadtype,
     borrowernumber  => $borrowernumber,
     othernames      => $data->{'othernames'},
     categoryname    => $data->{'description'},

@@ -24,9 +24,10 @@ use strict;
 #use warnings; FIXME - Bug 2505
 
 use C4::Context;
-use C4::Branch qw(GetBranchesCount);
+use C4::Branch; # Can be removed?
 use Koha::Cache;
 use Koha::DateUtils qw(dt_from_string);
+use Koha::Libraries;
 use DateTime::Format::MySQL;
 use Business::ISBN;
 use autouse 'Data::cselectall_arrayref' => qw(Dumper);
@@ -249,7 +250,6 @@ sub GetItemTypes {
     require C4::Languages;
     my $language = C4::Languages::getlanguage();
     # returns a reference to a hash of references to itemtypes...
-    my %itemtypes;
     my $dbh   = C4::Context->dbh;
     my $query = q|
         SELECT
@@ -275,12 +275,13 @@ sub GetItemTypes {
     $sth->execute( $language );
 
     if ( $style eq 'hash' ) {
+        my %itemtypes;
         while ( my $IT = $sth->fetchrow_hashref ) {
             $itemtypes{ $IT->{'itemtype'} } = $IT;
         }
         return ( \%itemtypes );
     } else {
-        return $sth->fetchall_arrayref({});
+        return [ sort { lc $a->{translated_description} cmp lc $b->{translated_description} } @{ $sth->fetchall_arrayref( {} ) } ];
     }
 }
 
@@ -794,7 +795,7 @@ sub getFacets {
             ];
 
             unless ( C4::Context->preference("singleBranchMode")
-                || GetBranchesCount() == 1 )
+                || Koha::Libraries->search->count == 1 )
             {
                 my $DisplayLibraryFacets = C4::Context->preference('DisplayLibraryFacets');
                 if (   $DisplayLibraryFacets eq 'both'
@@ -876,7 +877,7 @@ sub getFacets {
             ];
 
             unless ( C4::Context->preference("singleBranchMode")
-                || GetBranchesCount() == 1 )
+                || Koha::Libraries->search->count == 1 )
             {
                 my $DisplayLibraryFacets = C4::Context->preference('DisplayLibraryFacets');
                 if (   $DisplayLibraryFacets eq 'both'
@@ -1465,7 +1466,7 @@ MARC field, replacing any blanks with '#'.
 sub display_marc_indicators {
     my $field = shift;
     my $indicators = '';
-    if ($field->tag() >= 10) {
+    if ($field && $field->tag() >= 10) {
         $indicators = $field->indicator(1) . $field->indicator(2);
         $indicators =~ s/ /#/g;
     }
@@ -1473,25 +1474,25 @@ sub display_marc_indicators {
 }
 
 sub GetNormalizedUPC {
- my ($record,$marcflavour) = @_;
-    my (@fields,$upc);
+    my ($marcrecord,$marcflavour) = @_;
 
+    return unless $marcrecord;
     if ($marcflavour eq 'UNIMARC') {
-        @fields = $record->field('072');
+        my @fields = $marcrecord->field('072');
         foreach my $field (@fields) {
             my $upc = _normalize_match_point($field->subfield('a'));
-            if ($upc ne '') {
+            if ($upc) {
                 return $upc;
             }
         }
 
     }
     else { # assume marc21 if not unimarc
-        @fields = $record->field('024');
+        my @fields = $marcrecord->field('024');
         foreach my $field (@fields) {
             my $indicator = $field->indicator(1);
             my $upc = _normalize_match_point($field->subfield('a'));
-            if ($indicator == 1 and $upc ne '') {
+            if ($upc && $indicator == 1 ) {
                 return $upc;
             }
         }
@@ -1501,83 +1502,79 @@ sub GetNormalizedUPC {
 # Normalizes and returns the first valid ISBN found in the record
 # ISBN13 are converted into ISBN10. This is required to get some book cover images.
 sub GetNormalizedISBN {
-    my ($isbn,$record,$marcflavour) = @_;
-    my @fields;
+    my ($isbn,$marcrecord,$marcflavour) = @_;
     if ($isbn) {
         # Koha attempts to store multiple ISBNs in biblioitems.isbn, separated by " | "
         # anything after " | " should be removed, along with the delimiter
         ($isbn) = split(/\|/, $isbn );
         return _isbn_cleanup($isbn);
     }
-    return unless $record;
+
+    return unless $marcrecord;
 
     if ($marcflavour eq 'UNIMARC') {
-        @fields = $record->field('010');
+        my @fields = $marcrecord->field('010');
         foreach my $field (@fields) {
             my $isbn = $field->subfield('a');
             if ($isbn) {
                 return _isbn_cleanup($isbn);
-            } else {
-                return;
             }
         }
     }
     else { # assume marc21 if not unimarc
-        @fields = $record->field('020');
+        my @fields = $marcrecord->field('020');
         foreach my $field (@fields) {
             $isbn = $field->subfield('a');
             if ($isbn) {
                 return _isbn_cleanup($isbn);
-            } else {
-                return;
             }
         }
     }
 }
 
 sub GetNormalizedEAN {
-    my ($record,$marcflavour) = @_;
-    my (@fields,$ean);
+    my ($marcrecord,$marcflavour) = @_;
+
+    return unless $marcrecord;
 
     if ($marcflavour eq 'UNIMARC') {
-        @fields = $record->field('073');
+        my @fields = $marcrecord->field('073');
         foreach my $field (@fields) {
-            $ean = _normalize_match_point($field->subfield('a'));
-            if ($ean ne '') {
+            my $ean = _normalize_match_point($field->subfield('a'));
+            if ( $ean ) {
                 return $ean;
             }
         }
     }
     else { # assume marc21 if not unimarc
-        @fields = $record->field('024');
+        my @fields = $marcrecord->field('024');
         foreach my $field (@fields) {
             my $indicator = $field->indicator(1);
-            $ean = _normalize_match_point($field->subfield('a'));
-            if ($indicator == 3 and $ean ne '') {
+            my $ean = _normalize_match_point($field->subfield('a'));
+            if ( $ean && $indicator == 3  ) {
                 return $ean;
             }
         }
     }
 }
-sub GetNormalizedOCLCNumber {
-    my ($record,$marcflavour) = @_;
-    my (@fields,$oclc);
 
-    if ($marcflavour eq 'UNIMARC') {
-        # TODO: add UNIMARC fields
-    }
-    else { # assume marc21 if not unimarc
-        @fields = $record->field('035');
+sub GetNormalizedOCLCNumber {
+    my ($marcrecord,$marcflavour) = @_;
+    return unless $marcrecord;
+
+    if ($marcflavour ne 'UNIMARC' ) {
+        my @fields = $marcrecord->field('035');
         foreach my $field (@fields) {
-            $oclc = $field->subfield('a');
+            my $oclc = $field->subfield('a');
             if ($oclc =~ /OCoLC/) {
                 $oclc =~ s/\(OCoLC\)//;
                 return $oclc;
-            } else {
-                return;
             }
         }
+    } else {
+        # TODO for UNIMARC
     }
+    return
 }
 
 sub GetAuthvalueDropbox {

@@ -20,6 +20,7 @@ package C4::Auth;
 use strict;
 use warnings;
 use Digest::MD5 qw(md5_base64);
+use File::Spec;
 use JSON qw/encode_json/;
 use URI::Escape;
 use CGI::Session;
@@ -32,6 +33,7 @@ use C4::Branch;       # GetBranches
 use C4::Search::History;
 use Koha;
 use Koha::AuthUtils qw(hash_password);
+use Koha::LibraryCategories;
 use POSIX qw/strftime/;
 use List::MoreUtils qw/ any /;
 use Encode qw( encode is_utf8);
@@ -501,12 +503,14 @@ sub get_template_and_user {
             $opac_name = C4::Context->userenv->{'branch'};
         }
 
+        my $library_categories = Koha::LibraryCategories->search({categorytype => 'searchdomain', show_in_pulldown => 1}, { order_by => ['categorytype', 'categorycode']});
         $template->param(
             OpacAdditionalStylesheet                   => C4::Context->preference("OpacAdditionalStylesheet"),
             AnonSuggestions                       => "" . C4::Context->preference("AnonSuggestions"),
             AuthorisedValueImages                 => C4::Context->preference("AuthorisedValueImages"),
             BranchesLoop                          => GetBranchesLoop($opac_name),
-            BranchCategoriesLoop                  => GetBranchCategories( 'searchdomain', 1, $opac_name ),
+            BranchCategoriesLoop                  => $library_categories,
+            opac_name                             => $opac_name,
             LibraryName                           => "" . C4::Context->preference("LibraryName"),
             LibraryNameTitle                      => "" . $LibraryNameTitle,
             LoginBranchname                       => C4::Context->userenv ? C4::Context->userenv->{"branchname"} : "",
@@ -1710,7 +1714,9 @@ sub get_session {
     }
     else {
         # catch all defaults to tmp should work on all systems
-        $session = new CGI::Session( "driver:File;serializer:yaml;id:md5", $sessionID, { Directory => '/tmp' } );
+        my $dir = File::Spec->tmpdir;
+        my $instance = C4::Context->config( 'database' ); #actually for packages not exactly the instance name, but generally safer to leave it as it is
+        $session = new CGI::Session( "driver:File;serializer:yaml;id:md5", $sessionID, { Directory => "$dir/cgisess_$instance" } );
     }
     return $session;
 }

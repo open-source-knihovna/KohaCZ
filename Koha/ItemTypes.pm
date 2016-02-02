@@ -1,7 +1,5 @@
-package Koha::Branch;
+package Koha::ItemTypes;
 
-# Copyright ByWater Solutions 2014
-#
 # This file is part of Koha.
 #
 # Koha is free software; you can redistribute it and/or modify it under the
@@ -23,11 +21,13 @@ use Carp;
 
 use Koha::Database;
 
-use base qw(Koha::Object);
+use Koha::ItemType;
+
+use base qw(Koha::Objects);
 
 =head1 NAME
 
-Koha::Branch - Koha Branch object class
+Koha::ItemTypes - Koha ItemType Object set class
 
 =head1 API
 
@@ -40,13 +40,11 @@ Koha::Branch - Koha Branch object class
 =cut
 
 sub type {
-    return 'Branch';
+    return 'Itemtype';
 }
 
-=head1 AUTHOR
-
-Kyle M Hall <kyle@bywatersolutions.com>
-
-=cut
+sub object_class {
+    return 'Koha::ItemType';
+}
 
 1;

@@ -25,7 +25,7 @@
             [% IF shelf and not shelf.allow_delete_own %]<option value="0" selected="selected">Do not allow</option>[% ELSE %]<option value="0">Do not allow</option>[% END %]
             [% IF not shelf or shelf.allow_delete_own %]<option value="1" selected="selected">Allow</option>[% ELSE %]<option value="1">Allow</option>[% END %]
         </select>
-        &nbsp;<span>anyone to remove his own contributed entries.</span>
+        &nbsp;<span>anyone to remove their own contributed entries.</span>
     </li>
     <li>
         <label>&nbsp;</label>
@@ -105,21 +105,21 @@
                     [% END %]
                     [% SWITCH m.code %]
                     [% CASE 'error_on_update' %]
-                        <span>An error occurred when updating this list. Perhaps the value already exists.</span>
+                        <span>An error occurred when updating this list.</span>
                     [% CASE 'error_on_insert' %]
-                        <span>An error occurred when inserting this list. Perhaps the name already exists.</span>
+                        <span>An error occurred when creating this list.</span>
                     [% CASE 'error_on_delete' %]
-                        <span>An error occurred when deleting this list. Check the logs.</span>
+                        <span>An error occurred when deleting this list.</span>
                     [% CASE 'error_on_add_biblio' %]
-                        <span>The item has not been added to the list. Please check it's not in this list yet.</span>
+                        <span>The item has not been added to the list. Please check it's not already in the list.</span>
                     [% CASE 'error_on_remove_share' %]
                         <span>The share has not been removed.</span>
                     [% CASE 'success_on_update' %]
-                        <span>List updated with success.</span>
+                        <span>List updated.</span>
                     [% CASE 'success_on_insert' %]
-                        <span>List inserted with success.</span>
+                        <span>List created.</span>
                     [% CASE 'success_on_delete' %]
-                        <span>List deleted with success.</span>
+                        <span>List deleted.</span>
                     [% CASE 'success_on_add_biblio' %]
                         <span>The item has been added to the list.</span>
                     [% CASE 'success_on_remove_biblios' %]
@@ -133,17 +133,17 @@
                     [% CASE 'unauthorized_on_view' %]
                         <span>You do not have permission to view this list.</span>
                     [% CASE 'unauthorized_on_insert' %]
-                        <span>You do not have permission to insert a new list.</span>
+                        <span>You do not have permission to create a new list.</span>
                     [% CASE 'unauthorized_on_update' %]
                         <span>You do not have permission to update this list.</span>
                     [% CASE 'unauthorized_on_delete' %]
                         <span>You do not have permission to delete this list.</span>
                     [% CASE 'unauthorized_on_add_biblio' %]
-                        <span>You do not have permission to add a biblio to this list.</span>
+                        <span>You do not have permission to add a record to this list.</span>
                     [% CASE 'no_biblio_removed' %]
-                        <span>No biblio has been removed.</span>
+                        <span>No record was removed.</span>
                     [% CASE 'Koha::Exceptions::Virtualshelves::DuplicateObject' %]
-                        <span>An error occurred when inserting this list. The name [% shelfname %] already exists.</span>
+                        <span>An error occurred when creating the list. The name [% shelfname %] already exists.</span>
                     [% CASE 'DBIx::Class::Exception' %]
                         [% m.msg %]
                     [% CASE %]
@@ -177,6 +177,7 @@
                                         <span class="sep">|</span>
                                         <form method="get" action="/cgi-bin/koha/opac-shelves.pl" class="form-inline">
                                             <input type="hidden" name="op" value="edit_form" />
+                                            <input type="hidden" name="referer" value="view" />
                                             <input type='hidden' name='category' value='[% category %]' />
                                             <input type="hidden" name="shelfnumber" value="[% shelf.shelfnumber | html %]" />
                                             <input type="submit" class="editshelf" value="Edit list" />
@@ -184,6 +185,7 @@
 
                                         <form method="post" action="/cgi-bin/koha/opac-shelves.pl" class="form-inline">
                                             <input type="hidden" name="op" value="delete" />
+                                            <input type="hidden" name="referer" value="list" />
                                             <input type='hidden' name='category' value='[% category %]' />
                                             <input type="hidden" name="shelfnumber" value="[% shelf.shelfnumber | html %]" />
                                             <input type="submit" class="deleteshelf" value="Delete list" onclick="return confirmDelete(MSG_CONFIRM_DELETE_LIST);"/>
@@ -194,6 +196,7 @@
                                     [% ELSIF category == PRIVATE # not manageshelf and private means shared %]
                                         <form action="/cgi-bin/koha/opac-shelves.pl" method="post" class="form-inline">
                                             <input type="hidden" name="op" value="remove_share" />
+                                            <input type="hidden" name="referer" value="list" />
                                             <input type='hidden' name='category' value='[% category %]' />
                                             <input type="hidden" name="shelfnumber" value="[% shelf.shelfnumber | html %]" />
                                             <input type="submit" class="deleteshelf" onclick="return confirmDelete(MSG_CONFIRM_REMOVE_SHARE);" value="Remove share" />
@@ -305,7 +308,7 @@
 
                                                             [% IF ( OPACAmazonCoverImages ) %]
                                                                 [% IF ( itemsloo.normalized_isbn ) %]
-                                                                    <span title="[% SEARCH_RESULT.biblionumber %]" id="amazon-thumbnail[% loop.count %]"><img src="http://images.amazon.com/images/P/[% itemsloo.normalized_isbn %].01.TZZZZZZZ.jpg" alt="" /></span>
+                                                                    <span title="[% SEARCH_RESULT.biblionumber %]" id="amazon-thumbnail[% loop.count %]"><img src="https://images-na.ssl-images-amazon.com/images/P/[% itemsloo.normalized_isbn %].01.TZZZZZZZ.jpg" alt="" /></span>
                                                                 [% ELSE %]
                                                                     <span class="no-image">No cover image available</span>
                                                                 [% END %]
@@ -545,7 +548,7 @@
                                 [% ELSE %]
                                     <legend>Editing <em>[% shelf.shelfname |html %]</em></legend>
                                     <input type="hidden" name="op" value="edit" />
-                                    <input type="hidden" name="referer" value="view" />
+                                    <input type="hidden" name="referer" value="[% referer %]" />
                                     <input type="hidden" name="shelfnumber" value="[% shelf.shelfnumber | html %]" />
                                 [% END %]
                                 <input type="hidden" name="owner" id="owner" value="[% loggedinusernumber %]" />
@@ -838,7 +841,7 @@ $(function() {
         });
     [% END %]
 
-    // If JS is enabled add paramter to download link
+    // If JS is enabled add parameter to download link
     var dialoglink = $(".download").attr("href");
     dialoglink += "&context=modal";
     $(".download").attr("href",dialoglink);

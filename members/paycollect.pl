@@ -183,17 +183,13 @@ sub borrower_add_additional_fields {
     } elsif ( $b_ref->{category_type} eq 'A' ) {
         $b_ref->{adultborrower} = 1;
     }
-    my ( $picture, $dberror ) = GetPatronImage( $b_ref->{borrowernumber} );
-    if ($picture) {
-        $b_ref->{has_picture} = 1;
-    }
+
+    my ($picture, $dberror) = GetPatronImage($borrower->{'borrowernumber'});
+    $template->param( picture => 1 ) if $picture;
 
     if (C4::Context->preference('ExtendedPatronAttributes')) {
         $b_ref->{extendedattributes} = GetBorrowerAttributes($borrowernumber);
     }
-
-    my $roadtype = C4::Koha::GetAuthorisedValueByCode( 'ROADTYPE', $borrower->{streettype} );
-    $b_ref->{roadtype} = $roadtype;
 
     $b_ref->{branchname} = GetBranchName( $b_ref->{branchcode} );
     return;

@@ -37,6 +37,8 @@ $(document).ready(function(){
         var type = [% PRIVATE %];
     [% END %]
     var dtListResults = $("#listresultst").dataTable($.extend(true, {}, dataTablesDefaults, {
+
+	"aaSorting": [[ 5, "asc" ]],
         'bServerSide': true,
         'sAjaxSource': "/cgi-bin/koha/svc/virtualshelves/search",
         'fnServerData': function(sSource, aoData, fnCallback) {
@@ -322,19 +324,19 @@ function placeHold () {
     <div class="dialog [% m.type %]">
         [% SWITCH m.code %]
         [% CASE 'error_on_update' %]
-            <span>An error occurred when updating this list. Perhaps the value already exists.</span>
+            <span>An error occurred when updating this list.</span>
         [% CASE 'error_on_insert' %]
-            <span>An error occurred when inserting this list. Perhaps the name already exists.</span>
+            <span>An error occurred when creating this list./span>
         [% CASE 'error_on_delete' %]
-            <span>An error occurred when deleting this list. Check the logs.</span>
+            <span>An error occurred when deleting this list.</span>
         [% CASE 'error_on_add_biblio' %]
-           <span>The item has not been added to the list. Please check it's not in this list yet.</span>
+           <span>The item has not been added to the list. Please verify it is not already in the list.</span>
         [% CASE 'success_on_update' %]
-            <span>List updated with success.</span>
+            <span>List updated.</span>
         [% CASE 'success_on_insert' %]
-            <span>List inserted with success.</span>
+            <span>List created.</span>
         [% CASE 'success_on_delete' %]
-            <span>List deleted with success.</span>
+            <span>List deleted.</span>
         [% CASE 'success_on_add_biblio' %]
             <span>The item has been added to the list.</span>
         [% CASE 'success_on_remove_biblios' %]
@@ -350,11 +352,11 @@ function placeHold () {
         [% CASE 'unauthorized_on_delete' %]
            <span>You do not have permission to delete this list.</span>
         [% CASE 'unauthorized_on_add_biblio' %]
-            <span>You do not have permission to add a biblio to this list.</span>
+            <span>You do not have permission to add a record to this list.</span>
         [% CASE 'no_biblio_removed' %]
-            <span>No biblio has been removed.</span>
+            <span>No record was removed.</span>
         [% CASE 'Koha::Exceptions::Virtualshelves::DuplicateObject' %]
-            <span>An error occurred when inserting this list. The name [% shelfname %] already exists.</span>
+            <span>An error occurred when creating this list. The name [% shelfname %] already exists.</span>
         [% CASE 'Koha::Exceptions::Virtualshelves::UseDbAdminAccount' %]
             <span>List could not be created. (Do not use the database administrator account.)</span>
         [% CASE 'DBIx::Class::Exception' %]
@@ -499,7 +501,7 @@ function placeHold () {
 <div class="yui-g">
 <form action="/cgi-bin/koha/virtualshelves/shelves.pl" method="post">
  <fieldset class="brief noprint">
-    <legend>Add an item to <i>[% shelfname | html %]</i></legend>
+    <legend>Add an item to <i>[% shelf.shelfname | html %]</i></legend>
         <ol>
             <li>
                 <label for="barcode">Barcode:</label>
@@ -582,7 +584,7 @@ function placeHold () {
                     [% IF shelf and not shelf.allow_delete_own %]<option value="0" selected="selected">Do not allow</option>[% ELSE %]<option value="0">Do not allow</option>[% END %]
                     [% IF not shelf or shelf.allow_delete_own %]<option value="1" selected="selected">Allow</option>[% ELSE %]<option value="1">Allow</option>[% END %]
                 </select>
-                &nbsp;<span>anyone to remove his own contributed entries.</span>
+                &nbsp;<span>anyone to remove their own contributed entries.</span>
             </li>
             <li>
                 <label>&nbsp;</label>

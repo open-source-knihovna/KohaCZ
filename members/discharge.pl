@@ -102,6 +102,9 @@ if ( $input->param('borrowernumber') ) {
         borrowernumber => $borrowernumber,
     });
 
+    my ($picture, $dberror) = GetPatronImage($borrowernumber);
+    $template->param( picture => 1 ) if $picture;
+
     $template->param(
         borrowernumber    => $borrowernumber,
         biblionumber      => $data->{'biblionumber'},
@@ -115,6 +118,8 @@ if ( $input->param('borrowernumber') ) {
         category_type     => $data->{'category_type'},
         categoryname      => $data->{'description'},
         address           => $data->{'address'},
+        streetnumber      => $data->{streetnumber},
+        streettype        => $data->{streettype},
         address2          => $data->{'address2'},
         city              => $data->{'city'},
         zipcode           => $data->{'zipcode'},

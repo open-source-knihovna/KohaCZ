@@ -8,11 +8,12 @@ $(document).ready(function() {
     if ( $("#holds-tab").parent().hasClass('ui-state-active') ) { load_holds_table() }
 
     function load_holds_table() {
+        var holds = new Array();
         if ( ! holdsTable ) {
             holdsTable = $("#holds-table").dataTable({
                 "bAutoWidth": false,
                 "sDom": "rt",
-                "aoColumns": [
+                "columns": [
                     {
                         "mDataProp": "reservedate_formatted"
                     },
@@ -119,19 +120,58 @@ $(document).ready(function() {
                                  + "<input type='hidden' name='borrowernumber' value='" + borrowernumber + "'>"
                                  + "<input type='hidden' name='reserve_id' value='" + oObj.reserve_id + "'>";
                         }
+                    },
+                    {
+                        "bSortable": false,
+                        "mDataProp": function( oObj ) {
+                            holds[oObj.reserve_id] = oObj; //Store holds for later use
+
+                            if ( oObj.found ) {
+                                return "";
+                            } else if ( oObj.suspend == 1 ) {
+                                return "<a class='hold-resume btn btn-link' id='resume" + oObj.reserve_id + "' style='display: inline; white-space: nowrap;'>"
+                                     + "<i class='icon-play'></i> " + RESUME + "</a>";
+                            } else {
+                                return "<a class='hold-suspend btn btn-link' id='suspend" + oObj.reserve_id + "' style='display: inline; white-space: nowrap;'>"
+                                     + "<i class='icon-pause'></i> " + SUSPEND + "</a>";
+                            }
+                        }
                     }
                 ],
                 "bPaginate": false,
                 "bProcessing": true,
                 "bServerSide": false,
-                "sAjaxSource": '/cgi-bin/koha/svc/holds',
-                "fnServerData": function ( sSource, aoData, fnCallback ) {
-                    aoData.push( { "name": "borrowernumber", "value": borrowernumber } );
-
-                    $.getJSON( sSource, aoData, function (json) {
-                        fnCallback(json)
-                    } );
+                "ajax": {
+                    "url": '/cgi-bin/koha/svc/holds',
+                    "data": function ( d ) {
+                        d.borrowernumber = borrowernumber;
+                    }
                 },
+            });
+
+            $('#holds-table').on( 'draw.dt', function () {
+                $(".hold-suspend").on( "click", function() {
+                    var id = $(this).attr("id").replace("suspend", "");
+                    var hold = holds[id];
+                    $("#suspend-modal-title").html( hold.title );
+                    $("#suspend-modal-reserve_id").val( hold.reserve_id );
+                    $('#suspend-modal').modal('show');
+                });
+
+                $(".hold-resume").on( "click", function() {
+                    var id = $(this).attr("id").replace("resume", "");
+                    var hold = holds[id];
+                    $.post('/cgi-bin/koha/svc/hold/resume', { "reserve_id": hold.reserve_id }, function( data ){
+                      if ( data.success ) {
+                          holdsTable.api().ajax.reload();
+                      } else {
+                        if ( data.error == "HOLD_NOT_FOUND" ) {
+                            alert ( RESUME_HOLD_ERROR_NOT_FOUND );
+                            holdsTable.api().ajax.reload();
+                        }
+                      }
+                    });
+                });
             });
 
             if ( $("#holds-table").length ) {
@@ -142,4 +182,52 @@ $(document).ready(function() {
             }
         }
     }
+
+    $("body").append("\
+        <div id='suspend-modal' class='modal hide fade' tabindex='-1' role='dialog' aria-hidden='true'>\
+            <form id='suspend-modal-form' class='form-inline'>\
+                <div class='modal-header'>\
+                    <button type='button' class='closebtn' data-dismiss='modal' aria-hidden='true'>×</button>\
+                    <h3 id='suspend-modal-label'>" + SUSPEND_HOLD_ON + " <i><span id='suspend-modal-title'></span></i></h3>\
+                </div>\
+\
+                <div class='modal-body'>\
+                    <input type='hidden' id='suspend-modal-reserve_id' name='reserve_id' />\
+\
+                    <label for='suspend-modal-until'>Suspend until:</label>\
+                    <input name='suspend_until' id='suspend-modal-until' class='suspend-until' size='10' />\
+\
+                    <p/><a class='btn btn-link' id='suspend-modal-clear-date' >" + CLEAR_DATE_TO_SUSPEND_INDEFINITELY + "</a></p>\
+\
+                </div>\
+\
+                <div class='modal-footer'>\
+                    <button id='suspend-modal-submit' class='btn btn-primary' type='submit' name='submit'>" + SUSPEND + "</button>\
+                    <a href='#' data-dismiss='modal' aria-hidden='true' class='cancel'>" + CANCEL + "</a>\
+                </div>\
+            </form>\
+        </div>\
+    ");
+
+    $("#suspend-modal-until").datepicker({ minDate: 1 }); // Require that "until date" be in the future
+    $("#suspend-modal-clear-date").on( "click", function() { $("#suspend-modal-until").val(""); } );
+
+    $("#suspend-modal-submit").on( "click", function( e ) {
+        e.preventDefault();
+        $.post('/cgi-bin/koha/svc/hold/suspend', $('#suspend-modal-form').serialize(), function( data ){
+          $('#suspend-modal').modal('hide');
+          if ( data.success ) {
+              holdsTable.api().ajax.reload();
+          } else {
+            if ( data.error == "INVALID_DATE" ) {
+                alert( SUSPEND_HOLD_ERROR_DATE );
+            }
+            else if ( data.error == "HOLD_NOT_FOUND" ) {
+                alert ( SUSPEND_HOLD_ERROR_NOT_FOUND );
+                holdsTable.api().ajax.reload();
+            }
+          }
+        });
+    });
+
 });

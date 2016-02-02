@@ -21,9 +21,11 @@ use Modern::Perl;
 use C4::Context;
 use Data::Dumper;
 
-use Test::More tests => 36;
+use Test::More tests => 23;
 
 use C4::Branch;
+use Koha::Libraries;
+use Koha::LibraryCategories;
 
 BEGIN {
     use FindBin;
@@ -32,25 +34,16 @@ BEGIN {
 }
 can_ok(
     'C4::Branch', qw(
-      GetBranchCategory
       GetBranchName
       GetBranch
       GetBranches
       GetBranchesLoop
       GetBranchDetail
-      get_branchinfos_of
       ModBranch
-      CheckBranchCategorycode
       GetBranchInfo
-      GetCategoryTypes
-      GetBranchCategories
       GetBranchesInCategory
-      ModBranchCategoryInfo
-      DelBranch
-      DelBranchCategory
-      CheckCategoryUnique
       mybranch
-      GetBranchesCount)
+      )
 );
 
 
@@ -64,7 +57,7 @@ $dbh->do('DELETE FROM branchcategories');
 
 # Start test
 
-my $count = GetBranchesCount();
+my $count = Koha::Libraries->search->count;
 like( $count, '/^\d+$/', "the count is a number" );
 
 #add 2 branches
@@ -116,12 +109,10 @@ is( ModBranch($b2), undef, 'the field add is missing' );
 
 $b2->{add} = 1;
 ModBranch($b2);
-is( GetBranchesCount(), $count + 2, "two branches added" );
+is( Koha::Libraries->search->count, $count + 2, "two branches added" );
 
-#Test DelBranch
-
-is( DelBranch( $b2->{branchcode} ), 1,          "One row affected" );
-is( GetBranchesCount(),             $count + 1, "branch BRB deleted" );
+is( Koha::Libraries->find( $b2->{branchcode} )->delete, 1,          "One row affected" );
+is( Koha::Libraries->search->count,             $count + 1, "branch BRB deleted" );
 
 #Test GetBranchName
 is( GetBranchName( $b1->{branchcode} ),
@@ -136,7 +127,7 @@ is_deeply( $branchdetail, $b1, 'branchdetail is right' );
 #Test Getbranches
 my $branches = GetBranches();
 is( scalar( keys %$branches ),
-    GetBranchesCount(), "GetBranches returns the right number of branches" );
+    Koha::Libraries->search->count, "GetBranches returns the right number of branches" );
 
 #Test ModBranch
 
@@ -163,18 +154,16 @@ $b1 = {
 };
 
 ModBranch($b1);
-is( GetBranchesCount(), $count + 1,
+is( Koha::Libraries->search->count, $count + 1,
     "A branch has been modified, no new branch added" );
 $branchdetail = GetBranchDetail( $b1->{branchcode} );
 $b1->{issuing} = undef;
 is_deeply( $branchdetail, $b1 , "GetBranchDetail gives the details of BRA");
 
 #Test categories
-my $categories = GetBranchCategories();
-my $count_cat  = scalar( @$categories );
+my $count_cat  = Koha::LibraryCategories->search->count;
 
 my $cat1 = {
-    add              => 1,
     categorycode     => 'CAT1',
     categoryname     => 'catname1',
     codedescription  => 'catdesc1',
@@ -182,7 +171,6 @@ my $cat1 = {
     show_in_pulldown => 1
 };
 my $cat2 = {
-    add              => 1,
     categorycode     => 'CAT2',
     categoryname     => 'catname2',
     categorytype     => 'catype2',
@@ -198,54 +186,21 @@ my %new_category = (
     show_in_pulldown => 1,
 );
 
-ModBranchCategoryInfo({
-    add => 1,
-    %new_category,
-});
+Koha::LibraryCategory->new(\%new_category)->store;
+Koha::LibraryCategory->new($cat1)->store;
+Koha::LibraryCategory->new($cat2)->store;
 
-ModBranchCategoryInfo($cat1);
-ModBranchCategoryInfo($cat2);
+my $categories = Koha::LibraryCategories->search;
+is( $categories->count, $count_cat + 3, "Two categories added" );
 
-$categories = GetBranchCategories();
-is( scalar( @$categories ), $count_cat + 3, "Two categories added" );
-delete $cat1->{add};
-delete $cat2->{add};
-delete $new_category{add};
-is_deeply($categories, [ $cat1,$cat2,\%new_category ], 'retrieve all expected library categories (bug 10515)');
-
-#test GetBranchCategory
-my $cat1detail = GetBranchCategory( $cat1->{categorycode} );
-delete $cat1->{add};
-is_deeply( $cat1detail, $cat1, 'CAT1 details are right' );
-my $category = GetBranchCategory('LIBCATCODE');
-is_deeply($category, \%new_category, 'fetched newly added library category');
-
-#Test DelBranchCategory
-my $del = DelBranchCategory( $cat2->{categorycode} );
+my $del = Koha::LibraryCategories->find( $cat2->{categorycode} )->delete;
 is( $del, 1, 'One row affected' );
 
-$categories = GetBranchCategories();
-is( scalar( @$categories ), $count_cat + 2, "Category  CAT2 deleted" );
-
-my $cat2detail = GetBranchCategory( $cat2->{categorycode} );
-is( $cat2detail, undef, 'CAT2 doesnt exist' );
-
-$category = GetBranchCategory();
-is($category, undef, 'retrieve library category only if code is supplied (bug 10515)');
-
-#Test CheckBranchCategoryCode
-my $check1 = CheckBranchCategorycode( $cat1->{categorycode} );
-my $check2 = CheckBranchCategorycode( $cat2->{categorycode} );
-like( $check1, '/^\d+$/', "CheckBranchCategorycode returns a number" );
+is( Koha::LibraryCategories->search->count, $count_cat + 2, "Category CAT 2 deleted" );
 
 $b2->{CAT1} = 1;
 ModBranch($b2);
-is( GetBranchesCount(), $count + 2, 'BRB added' );
-is(
-    CheckBranchCategorycode( $cat1->{categorycode} ),
-    $check1 + 1,
-    'BRB added to CAT1'
-);
+is( Koha::Libraries->search->count, $count + 2, 'BRB added' );
 
 #Test GetBranchInfo
 my $b1info = GetBranchInfo( $b1->{branchcode} );
@@ -260,9 +215,8 @@ $b2->{issuing}    = undef;
 $b2->{categories} = \@cat;
 is_deeply( @$b2info[0], $b2, 'BRB has the category CAT1' );
 
-ModBranchCategoryInfo({add => 1,%$cat2});
-$categories = GetBranchCategories();
-is( scalar( @$categories ), $count_cat + 3, "Two categories added" );
+Koha::LibraryCategory->new($cat2)->store;
+is( Koha::LibraryCategories->search->count, $count_cat + 3, "Two categories added" );
 $b2 = {
     branchcode     => 'BRB',
     branchname     => 'BranchB',
@@ -288,11 +242,6 @@ $b2 = {
 };
 ModBranch($b2);
 $b2info = GetBranchInfo( $b2->{branchcode} );
-is(
-    CheckBranchCategorycode( $cat2->{categorycode} ),
-    $check2 + 1,
-    'BRB added to CAT2'
-);
 push( @cat, $cat2->{categorycode} );
 delete $b2->{CAT1};
 delete $b2->{CAT2};
@@ -331,29 +280,13 @@ ModBranch($b3);
 $brCat1 = GetBranchesInCategory( $cat1->{categorycode} );
 push( @b, $b3->{branchcode} );
 is_deeply( $brCat1, \@b, 'CAT1 has branch BRB and BRC' );
-is(
-    CheckBranchCategorycode( $cat1->{categorycode} ),
-    $check1 + 2,
-    'BRC has been added to CAT1'
-);
-
-#Test CheckCategoryUnique
-is( CheckCategoryUnique('CAT2'),          0, 'CAT2 exists' );
-is( CheckCategoryUnique('CAT_NO_EXISTS'), 1, 'CAT_NO_EXISTS doesnt exist' );
-
-#Test GetCategoryTypes
-my @category_types = GetCategoryTypes();
-is_deeply(\@category_types, [ 'searchdomain', 'properties' ], 'received expected library category types');
-
-$categories = GetBranchCategories(undef, undef, 'LIBCATCODE');
-is_deeply($categories, [ {%$cat1}, {%$cat2},{ %new_category, selected => 1 } ], 'retrieve expected, eselected library category (bug 10515)');
 
 #TODO later: test mybranchine and onlymine
 # Actually we cannot mock C4::Context->userenv in unit tests
 
 #Test GetBranchesLoop
 my $loop = GetBranchesLoop;
-is( scalar(@$loop), GetBranchesCount(), 'There is the right number of branches' );
+is( scalar(@$loop), Koha::Libraries->search->count, 'There is the right number of branches' );
 
 # End transaction
 $dbh->rollback;

@@ -20,6 +20,7 @@ use strict;
 #use warnings; FIXME - Bug 2505
 require Exporter;
 use C4::Context;
+use Koha::LibraryCategories;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
@@ -28,25 +29,15 @@ BEGIN {
     $VERSION = 3.07.00.049;
 	@ISA    = qw(Exporter);
 	@EXPORT = qw(
-		&GetBranchCategory
 		&GetBranchName
 		&GetBranch
 		&GetBranches
 		&GetBranchesLoop
 		&GetBranchDetail
-		&get_branchinfos_of
 		&ModBranch
-		&CheckBranchCategorycode
 		&GetBranchInfo
-		&GetCategoryTypes
-		&GetBranchCategories
 		&GetBranchesInCategory
-		&ModBranchCategoryInfo
-		&DelBranch
-		&DelBranchCategory
-	        &CheckCategoryUnique
 		&mybranch
-		&GetBranchesCount
 	);
     @EXPORT_OK = qw( &onlymine &mybranch );
 }
@@ -248,9 +239,9 @@ sub ModBranch {
     }
     # sort out the categories....
     my @checkedcats;
-    my $cats = GetBranchCategories();
-    foreach my $cat (@$cats) {
-        my $code = $cat->{'categorycode'};
+    my @cats = Koha::LibraryCategories->search;
+    foreach my $cat (@cats) {
+        my $code = $cat->categorycode;
         if ( $data->{$code} ) {
             push( @checkedcats, $code );
         }
@@ -286,90 +277,6 @@ sub ModBranch {
           );
         $sth->execute( $branchcode, $cat );
     }
-}
-
-=head2 GetBranchCategory
-
-$results = GetBranchCategory($categorycode);
-
-C<$results> is an hashref
-
-=cut
-
-sub GetBranchCategory {
-    my ($catcode) = @_;
-    return unless $catcode;
-
-    my $dbh = C4::Context->dbh;
-    my $sth;
-
-    $sth = $dbh->prepare(q{
-        SELECT *
-        FROM branchcategories
-        WHERE categorycode = ?
-    });
-    $sth->execute( $catcode );
-    return $sth->fetchrow_hashref;
-}
-
-=head2 GetBranchCategories
-
-  my $categories = GetBranchCategories($categorytype,$show_in_pulldown,$selected_in_pulldown);
-
-Returns a list ref of anon hashrefs with keys eq columns of branchcategories table,
-i.e. categorydescription, categorytype, categoryname.
-
-=cut
-
-sub GetBranchCategories {
-    my ( $categorytype, $show_in_pulldown, $selected_in_pulldown ) = @_;
-    my $dbh = C4::Context->dbh();
-
-    my $query = "SELECT * FROM branchcategories ";
-
-    my ( @where, @bind );
-    if ( $categorytype ) {
-        push @where, " categorytype = ? ";
-        push @bind, $categorytype;
-    }
-
-    if ( defined( $show_in_pulldown ) ) {
-        push( @where, " show_in_pulldown = ? " );
-        push( @bind, $show_in_pulldown );
-    }
-
-    $query .= " WHERE " . join(" AND ", @where) if(@where);
-    $query .= " ORDER BY categorytype, categorycode";
-    my $sth=$dbh->prepare( $query);
-    $sth->execute(@bind);
-
-    my $branchcats = $sth->fetchall_arrayref({});
-
-    if ( $selected_in_pulldown ) {
-        foreach my $bc ( @$branchcats ) {
-            $bc->{selected} = 1 if $bc->{categorycode} eq $selected_in_pulldown;
-        }
-    }
-
-    return $branchcats;
-}
-
-=head2 GetCategoryTypes
-
-$categorytypes = GetCategoryTypes;
-returns a list of category types.
-Currently these types are HARDCODED.
-type: 'searchdomain' defines a group of agencies that the calling library may search in.
-Other usage of agency categories falls under type: 'properties'.
-	to allow for other uses of categories.
-The searchdomain bit may be better implemented as a separate module, but
-the categories were already here, and minimally used.
-
-=cut
-
-	#TODO  manage category types.  rename possibly to 'agency domains' ? as borrowergroups are called categories.
-sub GetCategoryTypes {
-	return ( 'searchdomain','properties');
 }
 
 =head2 GetBranch
@@ -470,104 +377,6 @@ sub GetBranchInfo {
         push( @results, $data );
     }
     return \@results;
-}
-
-=head2 DelBranch
-
-&DelBranch($branchcode);
-
-=cut
-
-sub DelBranch {
-    my ($branchcode) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare("delete from branches where branchcode = ?");
-    $sth->execute($branchcode);
-}
-
-=head2 ModBranchCategoryInfo
-
-&ModBranchCategoryInfo($data);
-sets the data from the editbranch form, and writes to the database...
-
-=cut
-
-sub ModBranchCategoryInfo {
-    my ($data) = @_;
-    my $dbh    = C4::Context->dbh;
-    if ($data->{'add'}){
-	# we are doing an insert
-  my $sth   = $dbh->prepare("INSERT INTO branchcategories (categorycode,categoryname,codedescription,categorytype,show_in_pulldown) VALUES (?,?,?,?,?)");
-        $sth->execute(uc( $data->{'categorycode'} ),$data->{'categoryname'}, $data->{'codedescription'},$data->{'categorytype'},$data->{'show_in_pulldown'} );
-    }
-    else {
-	# modifying
-        my $sth = $dbh->prepare("UPDATE branchcategories SET categoryname=?,codedescription=?,categorytype=?,show_in_pulldown=? WHERE categorycode=?");
-        $sth->execute($data->{'categoryname'}, $data->{'codedescription'},$data->{'categorytype'},$data->{'show_in_pulldown'},uc( $data->{'categorycode'} ) );
-    }
-}
-
-=head2 CheckCategoryUnique
-
-if (CheckCategoryUnique($categorycode)){
-  # do something
-}
-
-=cut
-
-sub CheckCategoryUnique {
-    my $categorycode = shift;
-    my $dbh    = C4::Context->dbh;
-    my $sth = $dbh->prepare("SELECT categorycode FROM branchcategories WHERE categorycode = ?");
-    $sth->execute(uc( $categorycode) );
-    if (my $data = $sth->fetchrow_hashref){
-	return 0;
-    }
-    else {
-	return 1;
-    }
-}
-
-    
-=head2 DeleteBranchCategory
-
-DeleteBranchCategory($categorycode);
-
-=cut
-
-sub DelBranchCategory {
-    my ($categorycode) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare("delete from branchcategories where categorycode = ?");
-    $sth->execute($categorycode);
-}
-
-=head2 CheckBranchCategorycode
-
-$number_rows_affected = CheckBranchCategorycode($categorycode);
-
-=cut
-
-sub CheckBranchCategorycode {
-
-    # check to see if the branchcode is being used in the database somewhere....
-    my ($categorycode) = @_;
-    my $dbh            = C4::Context->dbh;
-    my $sth            =
-      $dbh->prepare(
-        "select count(*) from branchrelations where categorycode=?");
-    $sth->execute($categorycode);
-    my ($total) = $sth->fetchrow_array;
-    return $total;
-}
-
-sub GetBranchesCount {
-    my $dbh = C4::Context->dbh();
-    my $query = "SELECT COUNT(*) AS branches_count FROM branches";
-    my $sth = $dbh->prepare( $query );
-    $sth->execute();
-    my $row = $sth->fetchrow_hashref();
-    return $row->{'branches_count'};
 }
 
 1;

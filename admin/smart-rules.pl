@@ -30,6 +30,7 @@ use Koha::DateUtils;
 use Koha::Database;
 use Koha::IssuingRule;
 use Koha::IssuingRules;
+use Koha::Libraries;
 
 my $input = CGI->new;
 my $dbh = C4::Context->dbh;
@@ -47,12 +48,14 @@ my ($template, $loggedinuser, $cookie)
 
 my $type=$input->param('type');
 
-my $branch;
-if ( C4::Context->preference('DefaultToLoggedInLibraryCircRules') ) {
-    $branch = $input->param('branch') || GetBranchesCount() == 1 ? undef : C4::Branch::mybranch();
-}
-else {
-    $branch = $input->param('branch') || ( C4::Branch::onlymine() ? ( C4::Branch::mybranch() || '*' ) : '*' );
+my $branch = $input->param('branch');
+unless ( $branch ) {
+    if ( C4::Context->preference('DefaultToLoggedInLibraryCircRules') ) {
+        $branch = Koha::Libraries->search->count() == 1 ? undef : C4::Branch::mybranch();
+    }
+    else {
+        $branch = C4::Branch::onlymine() ? ( C4::Branch::mybranch() || '*' ) : '*';
+    }
 }
 $branch = '*' if $branch eq 'NO_LIBRARY_SET';
 
@@ -437,6 +440,7 @@ while (my $data=$sth->fetchrow_hashref){
 $sth->finish;
 my @row_loop;
 my @itemtypes = @{ GetItemTypes( style => 'array' ) };
+@itemtypes = sort { lc $a->{translated_description} cmp lc $b->{translated_description} } @itemtypes;
 
 my $sth2 = $dbh->prepare("
     SELECT  issuingrules.*,
@@ -457,8 +461,8 @@ $sth2->execute($language, $branch);
 
 while (my $row = $sth2->fetchrow_hashref) {
     $row->{'current_branch'} ||= $row->{'branchcode'};
-    $row->{'humanitemtype'} ||= $row->{'itemtype'};
-    $row->{'default_humanitemtype'} = 1 if $row->{'humanitemtype'} eq '*';
+    $row->{translated_description} ||= $row->{translated_description};
+    $row->{default_translated_description} = 1 if $row->{humanitemtype} eq '*';
     $row->{'humancategorycode'} ||= $row->{'categorycode'};
     $row->{'default_humancategorycode'} = 1 if $row->{'humancategorycode'} eq '*';
     $row->{'fine'} = sprintf('%.2f', $row->{'fine'});
@@ -513,26 +517,34 @@ foreach my $entry (@sorted_branch_cat_rules, @sorted_row_loop) {
 my $sth_branch_item;
 if ($branch eq "*") {
     $sth_branch_item = $dbh->prepare("
-        SELECT default_branch_item_rules.*, itemtypes.description AS humanitemtype
+        SELECT default_branch_item_rules.*,
+            COALESCE( localization.translation, itemtypes.description ) AS translated_description
         FROM default_branch_item_rules
         JOIN itemtypes USING (itemtype)
+        LEFT JOIN localization ON itemtypes.itemtype = localization.code
+            AND localization.entity = 'itemtypes'
+            AND localization.lang = ?
     ");
-    $sth_branch_item->execute();
+    $sth_branch_item->execute($language);
 } else {
     $sth_branch_item = $dbh->prepare("
-        SELECT branch_item_rules.*, itemtypes.description AS humanitemtype
+        SELECT branch_item_rules.*,
+            COALESCE( localization.translation, itemtypes.description ) AS translated_description
         FROM branch_item_rules
         JOIN itemtypes USING (itemtype)
+        LEFT JOIN localization ON itemtypes.itemtype = localization.code
+            AND localization.entity = 'itemtypes'
+            AND localization.lang = ?
         WHERE branch_item_rules.branchcode = ?
     ");
-    $sth_branch_item->execute($branch);
+    $sth_branch_item->execute($language, $branch);
 }
 
 my @branch_item_rules = ();
 while (my $row = $sth_branch_item->fetchrow_hashref) {
     push @branch_item_rules, $row;
 }
-my @sorted_branch_item_rules = sort { $a->{'humanitemtype'} cmp $b->{'humanitemtype'} } @branch_item_rules;
+my @sorted_branch_item_rules = sort { lc $a->{translated_description} cmp lc $b->{translated_description} } @branch_item_rules;
 
 # note undef holdallowed so that template can deal with them
 foreach my $entry (@sorted_branch_item_rules) {
@@ -606,11 +618,11 @@ sub by_category {
 
 sub by_itemtype {
     my ($a, $b) = @_;
-    if ($a->{'default_humanitemtype'}) {
-        return ($b->{'default_humanitemtype'} ? 0 : 1);
-    } elsif ($b->{'default_humanitemtype'}) {
+    if ($a->{default_translated_description}) {
+        return ($b->{'default_translated_description'} ? 0 : 1);
+    } elsif ($b->{'default_translated_description'}) {
         return -1;
     } else {
-        return $a->{'humanitemtype'} cmp $b->{'humanitemtype'};
+        return lc $a->{'translated_description'} cmp lc $b->{'translated_description'};
     }
 }

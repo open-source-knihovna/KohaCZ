@@ -159,12 +159,12 @@
                     <xsl:with-param name="basetags">100,110,111,700,710,711</xsl:with-param>
                     <xsl:with-param name="codes">abc</xsl:with-param>
                     <xsl:with-param name="index">au</xsl:with-param>
-                    <!-- do not use label 'by ' here, it would be repeated for every occurence of 100,110,111,700,710,711 -->
+                    <!-- do not use label 'by ' here, it would be repeated for every occurrence of 100,110,111,700,710,711 -->
                 </xsl:call-template>
             </h5>
         </xsl:if>
 
-        <!--#13382 Added Author Statement to seperate Authors and Contributors -->
+        <!--#13382 Added Author Statement to separate Authors and Contributors -->
         <xsl:call-template name="showAuthor">
             <xsl:with-param name="authorfield" select="marc:datafield[(@tag=100 or @tag=110 or @tag=111)]"/>
             <xsl:with-param name="UseAuthoritiesForTracings" select="$UseAuthoritiesForTracings"/>
@@ -947,6 +947,7 @@
                         <xsl:call-template name="subfieldSelectSpan">
                             <xsl:with-param name="codes">a</xsl:with-param>
                         </xsl:call-template>
+                        <xsl:if test="position()!=last()"><span class="separator"><xsl:text> | </xsl:text></span></xsl:if>
                     </xsl:for-each>
                 </div>
             </xsl:if>
@@ -1291,8 +1292,8 @@
                                     <xsl:with-param name="codes">
                                         <xsl:choose>
                                             <!-- #13383 include subfield e for field 111  -->
-                                            <xsl:when test="@tag=111">abcdeqt</xsl:when>
-                                            <xsl:otherwise>abcdjqt</xsl:otherwise>
+                                            <xsl:when test="@tag=111">abceqt</xsl:when>
+                                            <xsl:otherwise>abcjqt</xsl:otherwise>
                                         </xsl:choose>
                                     </xsl:with-param>
                                 </xsl:call-template>
@@ -1303,11 +1304,11 @@
                         </xsl:call-template>
                     </xsl:when>
                     <!-- #13382 excludes 700$i and ind2=2, displayed as Related Works -->
-                    <!--#13382 Added all relevant subfields 4, e, are handled separately -->
+                    <!--#13382 Added all relevant subfields 4, e, and d are handled separately -->
                     <xsl:when test="@tag=700 or @tag=710 or @tag=711">
                         <xsl:variable name="str">
                             <xsl:call-template name="subfieldSelect">
-                                <xsl:with-param name="codes">abcdfghiklmnoprstux</xsl:with-param>
+                                <xsl:with-param name="codes">abcfghiklmnoprstux</xsl:with-param>
                             </xsl:call-template>
                         </xsl:variable>
                         <xsl:call-template name="chopPunctuation">
@@ -1321,6 +1322,12 @@
                     </xsl:when>
                 </xsl:choose>
                 </span></span></span>
+                <xsl:if test="marc:subfield[@code='d']">
+                    <span class="authordates">
+                        <xsl:text> </xsl:text>
+                        <xsl:value-of select="marc:subfield[@code='d']"/>
+                    </span>
+                </xsl:if>
                 <!-- #13383 include relator code j for field 111 -->
                 <xsl:if test="marc:subfield[@code='4' or @code='e'][not(parent::*[@tag=111])] or (self::*[@tag=111] and marc:subfield[@code='4' or @code='j'][. != ''])">
                     <span class="relatorcode">
