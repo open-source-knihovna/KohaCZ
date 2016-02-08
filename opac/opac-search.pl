@@ -526,7 +526,8 @@ my @results;
 
 sub _input_cgi_parse {
     my @elements;
-    for my $this_cgi ( split('&',shift) ) {
+    my $query_cgi = shift or return @elements;
+    for my $this_cgi ( split('&',$query_cgi) ) {
         next unless $this_cgi;
         $this_cgi =~ /(.*?)=(.*)/;
         push @elements, { input_name => $1, input_value => Encode::decode_utf8( uri_unescape($2) ) };
@@ -970,7 +971,7 @@ $template->param(
 
 my $content_type = ($format eq 'rss' or $format eq 'atom') ? $format : 'html';
 
-# If GoogleIndicTransliteration system preference is On Set paramter to load Google's javascript in OPAC search screens 
+# If GoogleIndicTransliteration system preference is On Set parameter to load Google's javascript in OPAC search screens
 if (C4::Context->preference('GoogleIndicTransliteration')) {
         $template->param('GoogleIndicTransliteration' => 1);
 }

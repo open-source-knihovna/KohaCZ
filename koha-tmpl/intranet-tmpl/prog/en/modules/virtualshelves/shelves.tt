@@ -499,7 +499,7 @@ function placeHold () {
 <div class="yui-g">
 <form action="/cgi-bin/koha/virtualshelves/shelves.pl" method="post">
  <fieldset class="brief noprint">
-    <legend>Add an item to <i>[% shelfname | html %]</i></legend>
+    <legend>Add an item to <i>[% shelf.shelfname | html %]</i></legend>
         <ol>
             <li>
                 <label for="barcode">Barcode:</label>
@@ -582,7 +582,7 @@ function placeHold () {
                     [% IF shelf and not shelf.allow_delete_own %]<option value="0" selected="selected">Do not allow</option>[% ELSE %]<option value="0">Do not allow</option>[% END %]
                     [% IF not shelf or shelf.allow_delete_own %]<option value="1" selected="selected">Allow</option>[% ELSE %]<option value="1">Allow</option>[% END %]
                 </select>
-                &nbsp;<span>anyone to remove his own contributed entries.</span>
+                &nbsp;<span>anyone to remove their own contributed entries.</span>
             </li>
             <li>
                 <label>&nbsp;</label>

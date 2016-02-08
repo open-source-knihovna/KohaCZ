@@ -43,6 +43,9 @@ use Koha::DateUtils;
 use MARC::Record;
 use MARC::File::XML ( BinaryEncoding => 'utf8' );
 
+use File::Path qw(remove_tree);
+use File::Spec;
+
 # FIXME - The user might be installing a new database, so can't rely
 # on /etc/koha.conf anyway.
 
@@ -11406,6 +11409,32 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "3.22.02.000";
 if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Koha 3.22.2)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.02.001";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        DELETE FROM uploaded_files
+        WHERE COALESCE(permanent,0)=0 AND dir='koha_upload'
+    });
+
+    my $tmp = File::Spec->tmpdir . '/koha_upload';
+    remove_tree( $tmp ) if -d $tmp;
+
+    print "Upgrade to $DBversion done (Bug 14893 - Separate temporary storage per instance in Upload.pm)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.02.002";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE permissions SET description = 'Manage circulation rules' WHERE description = 'manage circulation rules'
+    });
+    $dbh->do(q{
+        UPDATE permissions SET description = 'Manage staged MARC records, including completing and reversing imports' WHERE description = 'Managed staged MARC records, including completing and reversing imports'
+    });
+    print "Upgrade to $DBversion done (Bug 11569 - Typo in userpermissions.sql)\n";
     SetVersion($DBversion);
 }
 

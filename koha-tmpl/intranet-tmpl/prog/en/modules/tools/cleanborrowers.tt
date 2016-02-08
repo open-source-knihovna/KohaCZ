@@ -19,7 +19,7 @@
               }
               if((form.checkbox[1].checked)){
                   if(!(form.date2.value)){
-                      alert(_("please enter a date !"));
+                      alert(_("please enter a date!"));
                       return false;
                   }
               }
@@ -82,7 +82,7 @@
                     <select id="borrower_categorycode" name="borrower_categorycode">
                         <option value="" selected="selected">Any</option>
                         [% FOREACH bc IN borrower_categorycodes %]
-                            [% UNLESS ( bc.categorycode == 'S' || bc.category_type == 'S' ) %]
+                            [% UNLESS bc.category_type == 'S' %]
                                 <option value="[% bc.categorycode %]">[% bc.description %]</option>
                             [% END %]
                         [% END %]
@@ -175,7 +175,7 @@
             [% END %]
         [% END %]
         [% IF ( do_anonym ) %]
-            <h4>All patrons with checkouts older than [% last_issue_date | $KohaDates %] have been anonymized</h4>
+            <h4>All checkouts older than [% last_issue_date | $KohaDates %] have been anonymized</h4>
         [% ELSE %]
             <h4>No patron records have been anonymized</h4>
         [% END %]
