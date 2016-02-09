@@ -81,6 +81,26 @@ WHERE borrowers.borrowernumber = ?
     return ${$sth->fetchrow_arrayref()}[0];
 }
 
+=head2 IsSerialIssue
+
+    ($IsSerial) = IsSerialIssue( $frameworkcode );
+
+Return 1 if $frameworkcode is a serial one, 0 otherwise.
+
+=cut
+
+sub IsSerialIssue {
+    my ( $frameworkcode ) = @_;
+    my $dbh   = C4::Context->dbh;
+    my @codes = split('|', (C4::Context->preference('CheckPrevIssueSerialFrameworks') ? C4::Context->preference('CheckPrevIssueSerialFrameworks') : 'PE'));
+    foreach my $code ( @codes ) {
+        if ($code eq $frameworkcode) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 =head2 CheckPrevIssue
 
     ($PrevIssue) = CheckPrevIssue( $borrowernumber, $biblionumber );
@@ -107,7 +127,7 @@ sub CheckPrevIssue {
     my $query_issues = 'select issuedate from old_issues where borrowernumber=? and itemnumber=? order by issuedate desc limit 1';
     my $sth_issues   = $dbh->prepare($query_issues);
 
-    if ( $frameworkcode eq 'PE' ) {
+    if ( IsSerialIssue($frameworkcode) ) {
         $sth_issues->execute( $borrowernumber, $itemnumber );
         while ( my @matches = $sth_issues->fetchrow_array() ) {
                 $previssue = 1;
@@ -140,3 +160,4 @@ sub CheckPrevIssue {
 Alex Sassmannshausen <alex.sassmannshausen@ptfs-europe.com>
 
 =cut
+
