@@ -50,6 +50,11 @@ Patrons:
                no: "Unless overridden, do not"
          - " check borrower loan history to see if the current item has been loaned before."
      -
+         - "The following frameworks are considered serials while checking for already loaned items:"
+         - pref: CheckPrevIssueSerialFrameworks
+           class: multi
+         - (separate columns with |)
+     -
          - pref: checkdigit
            choices:
                none: "Don't"

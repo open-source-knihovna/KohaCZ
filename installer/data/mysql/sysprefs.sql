@@ -91,6 +91,7 @@ INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `
 ('CataloguingLog','1',NULL,'If ON, log edit/create/delete actions on bibliographic data. WARNING: this feature is very resource consuming.','YesNo'),
 ('checkdigit','none','none|katipo','If ON, enable checks on patron cardnumber: none or \"Katipo\" style checks','Choice'),
 ('CheckPrevIssue','0','','By default, for every item issued, should we warn if the patron has borrowed that item in the past?','YesNo'),
+('CheckPrevIssueSerialFrameworks','PE','','List of serial frameworks codes (separated by |)','free'),
 ('CircAutocompl','1',NULL,'If ON, autocompletion is enabled for the Circulation input','YesNo'),
 ('CircAutoPrintQuickSlip','qslip',NULL,'Choose what should happen when an empty barcode field is submitted in circulation: Display a print quick slip window, Display a print slip window or Clear the screen.','Choice'),
 ('CircControl','ItemHomeLibrary','PickupLibrary|PatronLibrary|ItemHomeLibrary','Specify the agency that controls the circulation and fines policy','Choice'),
