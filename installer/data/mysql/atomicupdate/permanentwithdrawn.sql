@@ -5,7 +5,7 @@ ALTER IGNORE TABLE items ADD withdrawn_categorycode VARCHAR(10) AFTER withdrawn_
 CREATE TABLE IF NOT EXISTS default_permanent_withdrawal_reason(
         categorycode VARCHAR(10) DEFAULT NULL,
         description VARCHAR(250) DEFAULT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT IGNORE INTO default_permanent_withdrawal_reason
 	(categorycode, description)
