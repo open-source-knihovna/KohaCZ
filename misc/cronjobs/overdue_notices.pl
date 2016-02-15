@@ -18,8 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-use warnings;
+use Modern::Perl;
 
 BEGIN {
 
@@ -32,16 +31,12 @@ BEGIN {
 use Getopt::Long;
 use Pod::Usage;
 use Text::CSV_XS;
-use Locale::Currency::Format 1.28;
-use Encode;
 use DateTime;
 use DateTime::Duration;
 
 use C4::Context;
-use C4::Debug;
 use C4::Letters;
 use C4::Overdues qw(GetFine GetOverdueMessageTransportTypes parse_overdues_letter);
-use C4::Budgets qw(GetCurrency);
 use C4::Log;
 use Koha::Borrower::Debarments qw(AddUniqueDebarment);
 use Koha::DateUtils;
@@ -61,6 +56,7 @@ overdue_notices.pl
  Options:
    -help                          brief help message
    -man                           full documentation
+   -v                             verbose
    -n                             No email will be sent
    -max          <days>           maximum days overdue to deal with
    -library      <branchname>     only deal with overdues from this library (repeatable : several libraries can be given)
@@ -70,6 +66,9 @@ overdue_notices.pl
    -itemscontent <list of fields> item information in templates
    -borcat       <categorycode>   category code that must be included
    -borcatout    <categorycode>   category code that must be excluded
+   -t                             only include triggered overdues
+   -list-all                      list all overdues
+   -date         <yyyy-mm-dd>     emulate overdues run for this date
    -email        <email_type>     type of email that will be used. Can be 'email', 'emailpro' or 'B_email'. Repeatable.
 
 =head1 OPTIONS
@@ -141,11 +140,11 @@ issues tables.
 
 =item B<-borcat>
 
-Repetable field, that permit to select only few of patrons categories.
+Repeatable field, that permits to select only some patron categories.
 
 =item B<-borcatout>
 
-Repetable field, permis to exclude some patrons categories.
+Repeatable field, that permits to exclude some patron categories.
 
 =item B<-t> | B<--triggered>
 
@@ -250,7 +249,7 @@ administrator email address.
 =head1 USAGE EXAMPLES
 
 C<overdue_notices.pl> - In this most basic usage, with no command line
-arguments, all libraries are procesed individually, and notices are
+arguments, all libraries are processed individually, and notices are
 prepared for all patrons with overdue items for whom we have email
 addresses. Messages for those patrons for whom we have no email
 address are sent in a single attachment to the library administrator's
@@ -447,13 +446,14 @@ foreach my $branchcode (@branches) {
     $verbose and warn sprintf "branchcode : '%s' using %s\n", $branchcode, $admin_email_address;
 
     my $sth2 = $dbh->prepare( <<"END_SQL" );
-SELECT biblio.*, items.*, issues.*, biblioitems.itemtype, TO_DAYS($date)-TO_DAYS(date_due) AS days_overdue, branchname
+SELECT biblio.*, items.*, issues.*, biblioitems.itemtype, branchname
   FROM issues,items,biblio, biblioitems, branches b
   WHERE items.itemnumber=issues.itemnumber
     AND biblio.biblionumber   = items.biblionumber
     AND b.branchcode = items.homebranch
     AND biblio.biblionumber   = biblioitems.biblionumber
     AND issues.borrowernumber = ?
+    AND TO_DAYS($date)-TO_DAYS(issues.date_due) >= 0
 END_SQL
 
     my $query = "SELECT * FROM overduerules WHERE delay1 IS NOT NULL AND branchcode = ? ";
@@ -499,15 +499,14 @@ END_SQL
 	    # itemcount is interpreted here as the number of items in the overdue range defined by the current notice or all overdues < max if(-list-all).
             # <date> <itemcount> <firstname> <lastname> <address1> <address2> <address3> <city> <postcode> <country>
 
-            my $borrower_sql = <<'END_SQL';
-SELECT issues.borrowernumber, firstname, surname, address, address2, city, zipcode, country, email, emailpro, B_email, smsalertnumber, phone, cardnumber,
-TO_DAYS(?)-TO_DAYS(date_due) as difference, date_due
+            my $borrower_sql = <<"END_SQL";
+SELECT issues.borrowernumber, firstname, surname, address, address2, city, zipcode, country, email, emailpro, B_email, smsalertnumber, phone, cardnumber, date_due
 FROM   issues,borrowers,categories
 WHERE  issues.borrowernumber=borrowers.borrowernumber
 AND    borrowers.categorycode=categories.categorycode
+AND    TO_DAYS($date)-TO_DAYS(issues.date_due) >= 0
 END_SQL
             my @borrower_parameters;
-            push @borrower_parameters, $date_to_run->datetime();
             if ($branchcode) {
                 $borrower_sql .= ' AND issues.branchcode=? ';
                 push @borrower_parameters, $branchcode;
@@ -525,8 +524,6 @@ END_SQL
             $verbose and warn $borrower_sql . "\n $branchcode | " . $overdue_rules->{'categorycode'} . "\n ($mindays, $maxdays, ".  $date_to_run->datetime() .")\nreturns " . $sth->rows . " rows";
             my $borrowernumber;
             while ( my $data = $sth->fetchrow_hashref ) {
-
-                next unless ( DateTime->compare( $date_to_run, dt_from_string($data->{date_due})) ) == 1;
 
                 # check the borrower has at least one item that matches
                 my $days_between;
@@ -616,8 +613,6 @@ END_SQL
                 my $j = 0;
                 my $exceededPrintNoticesMaxLines = 0;
                 while ( my $item_info = $sth2->fetchrow_hashref() ) {
-                    next unless ( DateTime->compare( $date_to_run,  dt_from_string($item_info->{date_due})) ) == 1;
-
                     if ( C4::Context->preference('OverdueNoticeCalendar') ) {
                         my $calendar =
                           Koha::Calendar->new( branchcode => $branchcode );
