@@ -23,6 +23,7 @@ use C4::Auth;
 use C4::Context;
 use C4::RotatingCollections;
 use C4::Items;
+use C4::Biblio;
 
 use CGI qw ( -utf8 );
 
@@ -45,10 +46,12 @@ if ( $query->param('action') eq 'addItem' ) {
     my $barcode    = $query->param('barcode');
     my $removeItem = $query->param('removeItem');
     my $itemnumber = GetItemnumberFromBarcode($barcode);
+    my $itemInfo = &GetBiblioFromItemNumber($itemnumber, undef);
 
     my ( $success, $errorCode, $errorMessage );
 
     $template->param( barcode => $barcode );
+    $template->param( itemInfo => $itemInfo );
 
     if ( !$removeItem ) {
         ( $success, $errorCode, $errorMessage ) =

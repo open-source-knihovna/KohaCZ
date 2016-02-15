@@ -31,10 +31,17 @@
 
               [% IF ( previousActionAdd ) %]
                 [% IF ( addSuccess ) %]
-                  <div class="dialog message">Item with barcode '[% barcode %]' added successfully</div>
+                  <div class="dialog message">Item with barcode '[% barcode %]' added successfully.<br/>
+                  Author: [% itemInfo.author %]<br />
+                  Title: [% itemInfo.title %]</div>
                 [% ELSE %]
                   <div class="dialog alert">
                     <p>Failed to add item with barcode <i>[% barcode %]</i>:
+                    [% IF ( itemInfo ) %]
+                      <br/>
+                      Author: [% itemInfo.author %]<br />
+                      Title: [% itemInfo.title %]
+                    [% END %]
                     <p>
                         [% IF failureMessage == "NO_ITEM" %]
                             No item with matching barcode found
@@ -52,10 +59,17 @@
 
               [% IF ( previousActionRemove ) %]
                 [% IF ( removeSuccess ) %]
-                  <div class="dialog message">Item with barcode <i>[% barcode %]</i> removed successfully</div>
+                  <div class="dialog message">Item with barcode <i>[% barcode %]</i> removed successfully<br/>
+                  Author: [% itemInfo.author %]<br />
+                  Title: [% itemInfo.title %]</div>
                 [% ELSE %]
                   <div class="dialog alert">
                     Failed to remove item with barcode <i>[% barcode %]</i>:
+                    [% IF ( itemInfo ) %]
+                      <br/>           
+                      Author: [% itemInfo.author %]<br />
+                      Title: [% itemInfo.title %]
+                    [% END %]
                     <p>
                         [% IF failureMessage == "NO_ITEM" %]
                             No item with matching barcode found
