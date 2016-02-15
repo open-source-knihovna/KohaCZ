@@ -395,6 +395,13 @@ __PACKAGE__->table("borrowers");
   default_value: 1
   is_nullable: 0
 
+=head2 checkprevissue
+
+  data_type: 'varchar'
+  default_value: 'inherit'
+  is_nullable: 0
+  size: 7
+
 =head2 privacy_guarantor_checkouts
 
   data_type: 'tinyint'
@@ -566,6 +573,13 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 50 },
   "privacy",
   { data_type => "integer", default_value => 1, is_nullable => 0 },
+  "checkprevissue",
+  {
+    data_type => "varchar",
+    default_value => "inherit",
+    is_nullable => 0,
+    size => 7,
+  },
   "privacy_guarantor_checkouts",
   { data_type => "tinyint", default_value => 0, is_nullable => 0 },
 );
@@ -1176,8 +1190,8 @@ Composing rels: L</aqorder_users> -> ordernumber
 __PACKAGE__->many_to_many("ordernumbers", "aqorder_users", "ordernumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-01-06 11:59:52
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0nIBbkzhb+Yfp6qpSLo51A
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-02-15 09:10:53
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:t7m6bfxoos1BtxFeoTzeRA
 
 __PACKAGE__->belongs_to(
     "guarantor",
