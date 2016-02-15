@@ -33,6 +33,12 @@ my $query = new CGI;
 
 my $template_name = $query->param('rss') ? "opac-shelves-rss.tt" : "opac-shelves.tt";
 
+# if virtualshelves is disabled, leave immediately
+if ( ! C4::Context->preference('virtualshelves') ) {
+    print $query->redirect("/cgi-bin/koha/errors/404.pl");
+    exit;
+}
+
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user({
         template_name   => $template_name,
         query           => $query,
@@ -217,6 +223,7 @@ if ( $op eq 'view' ) {
             $category = $shelf->category;
             my $sortfield = $query->param('sortfield') || $shelf->sortfield;    # Passed in sorting overrides default sorting
             my $direction = $query->param('direction') || 'asc';
+            $direction = 'asc' if $direction ne 'asc' and $direction ne 'desc';
             my ( $page, $rows );
             unless ( $query->param('print') or $query->param('rss') ) {
                 $rows = C4::Context->preference('OPACnumSearchResults') || 20;
@@ -229,7 +236,7 @@ if ( $op eq 'view' ) {
                     prefetch => [ { 'biblionumber' => { 'biblioitems' => 'items' } } ],
                     page     => $page,
                     rows     => $rows,
-                    order_by => "$order_by $direction",
+                    order_by => { "-$direction" => $order_by },
                 }
             );
 
