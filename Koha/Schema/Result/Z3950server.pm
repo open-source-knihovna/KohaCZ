@@ -89,7 +89,7 @@ __PACKAGE__->table("z3950servers");
 
   data_type: 'enum'
   default_value: 'zed'
-  extra: {list => ["zed","sru"]}
+  extra: {list => ["zed","sru","zed_update"]}
   is_nullable: 0
 
 =head2 encoding
@@ -116,6 +116,33 @@ __PACKAGE__->table("z3950servers");
   is_nullable: 1
 
 =head2 add_xslt
+
+  data_type: 'mediumtext'
+  is_nullable: 1
+
+=head2 zedu_omit_fields
+
+  data_type: 'mediumtext'
+  is_nullable: 1
+
+=head2 zedu_authoritative_id_field
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 8
+
+=head2 zedu_msg_field
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 8
+
+=head2 zedu_msg_oncreate
+
+  data_type: 'mediumtext'
+  is_nullable: 1
+
+=head2 zedu_msg_onupdate
 
   data_type: 'mediumtext'
   is_nullable: 1
@@ -149,7 +176,7 @@ __PACKAGE__->add_columns(
   {
     data_type => "enum",
     default_value => "zed",
-    extra => { list => ["zed", "sru"] },
+    extra => { list => ["zed", "sru", "zed_update"] },
     is_nullable => 0,
   },
   "encoding",
@@ -167,6 +194,16 @@ __PACKAGE__->add_columns(
   { data_type => "mediumtext", is_nullable => 1 },
   "add_xslt",
   { data_type => "mediumtext", is_nullable => 1 },
+  "zedu_omit_fields",
+  { data_type => "mediumtext", is_nullable => 1 },
+  "zedu_authoritative_id_field",
+  { data_type => "varchar", is_nullable => 1, size => 8 },
+  "zedu_msg_field",
+  { data_type => "varchar", is_nullable => 1, size => 8 },
+  "zedu_msg_oncreate",
+  { data_type => "mediumtext", is_nullable => 1 },
+  "zedu_msg_onupdate",
+  { data_type => "mediumtext", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -182,8 +219,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-01-11 10:42:28
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:yOhNfpTbZ6flUpE+UNFGMg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-02-16 08:51:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:IO5HUbSNSXBsLoWV7OXAew
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
