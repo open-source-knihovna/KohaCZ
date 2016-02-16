@@ -2366,12 +2366,17 @@ CREATE TABLE `z3950servers` ( -- connection information for the Z39.50 targets u
   `rank` int(11) default NULL, -- where this target appears in the list of targets
   `syntax` varchar(80) default NULL, -- marc format provided by this target
   `timeout` int(11) NOT NULL DEFAULT '0', -- number of seconds before Koha stops trying to access this server
-  `servertype` enum('zed','sru') NOT NULL default 'zed', -- zed means z39.50 server
+  `servertype` enum('zed','sru','zed_update') NOT NULL default 'zed', -- zed means z39.50 server
   `encoding` text default NULL, -- characters encoding provided by this target
   `recordtype` enum('authority','biblio') NOT NULL default 'biblio', -- server contains bibliographic or authority records
   `sru_options` varchar(255) default NULL, -- options like sru=get, sru_version=1.1; will be passed to the server via ZOOM
   `sru_fields` mediumtext default NULL, -- contains the mapping between the Z3950 search fields and the specific SRU server indexes
   `add_xslt` mediumtext default NULL, -- zero or more paths to XSLT files to be processed on the search results
+  zedu_omit_fields MEDIUMTEXT NULL,
+  zedu_authoritative_id_field VARCHAR(8) NULL,
+  zedu_msg_field VARCHAR(8) NULL,
+  zedu_msg_oncreate MEDIUMTEXT NULL,
+  zedu_msg_onupdate MEDIUMTEXT NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
