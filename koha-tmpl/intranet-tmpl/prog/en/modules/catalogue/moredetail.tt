@@ -170,13 +170,14 @@
                     <input type="hidden" name="itemnumber" value="[% ITEM_DAT.itemnumber %]" />
                     <input type="hidden" name="itemlost" value="[% ITEM_DAT.itemlost %]" />
                     <input type="hidden" name="damaged" value="[% ITEM_DAT.damaged %]" />
-            [% IF ( ITEM_DAT.withdrawn ) %]
-                    <input type="hidden" name="withdrawn" value="0" />[% ELSE %]<input type="hidden" name="withdrawn" value="1" />
-            [% END %]
-            [% IF ( ITEM_DAT.withdrawn ) %]
-                    <input type="submit" name="submit" class="submit" value="Restore" />[% ELSE %]<input type="submit" name="submit" class="submit" value="Withdraw" />
-            [% END %]
+                    [% IF ( ITEM_DAT.withdrawn ) %]
+                        <input type="hidden" name="withdrawn" value="0" />[% ELSE %]<input type="hidden" name="withdrawn" value="1" />
+                    [% END %]
+                    [% IF ( ITEM_DAT.withdrawn ) %]
+                        <input type="submit" name="submit" class="submit" value="Restore" />[% ELSE %]<input type="submit" name="submit" class="submit" value="Withdraw" />
+                    [% END %]
                     </form>
+                [% END %]
             </li>
                 [% IF ITEM_DAT.withdrawn != "" && ITEM_DAT.withdrawn_on %]
                     <li><span class="label">Withdrawn on:</span>[% ITEM_DAT.withdrawn_on | $KohaDates %] &nbsp;</li>
