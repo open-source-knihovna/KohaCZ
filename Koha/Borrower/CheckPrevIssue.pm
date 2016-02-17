@@ -92,7 +92,7 @@ Return 1 if $frameworkcode is a serial one, 0 otherwise.
 sub IsSerialIssue {
     my ( $frameworkcode ) = @_;
     my $dbh   = C4::Context->dbh;
-    my @codes = split('|', (C4::Context->preference('CheckPrevIssueSerialFrameworks') ? C4::Context->preference('CheckPrevIssueSerialFrameworks') : 'PE'));
+    my @codes = split('\|', (C4::Context->preference('CheckPrevIssueSerialFrameworks') ? C4::Context->preference('CheckPrevIssueSerialFrameworks') : 'PE'));
     foreach my $code ( @codes ) {
         if ($code eq $frameworkcode) {
             return 1;
