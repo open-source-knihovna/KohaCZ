@@ -25,6 +25,7 @@ use C4::Auth;
 use C4::Context;
 use C4::RotatingCollections;
 use C4::Items;
+use C4::Biblio;
 
 my $query = new CGI;
 
@@ -43,8 +44,10 @@ if ( $query->param('action') eq 'removeItem' ) {
 
   my $barcode = $query->param('barcode');
   my $itemnumber = GetItemnumberFromBarcode($barcode);
+  my $itemInfo = &GetBiblioFromItemNumber($itemnumber, undef);
 
   $template->param( barcode => $barcode );
+  $template->param( itemInfo => $itemInfo );
 
   my ( $success, $errorcode, $errormessage ) = RemoveItemFromAnyCollection($itemnumber);
 
