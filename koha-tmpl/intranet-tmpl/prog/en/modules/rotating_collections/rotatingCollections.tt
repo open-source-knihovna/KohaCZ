@@ -48,12 +48,20 @@
                 <h1>Rotating collections</h1>
                 [% IF ( removeSuccess ) %]
                     <div class="dialog message">
-                        <p>Item with barcode '[% barcode %]' was removed from a collection and returned to homebranch.</p>
+                        <p>Item with barcode '[% barcode %]' was removed from a collection and returned to homebranch.<br/>
+                        Author: [% itemInfo.author %]<br />
+                        Title: [% itemInfo.title %]
+"                       </p>
                     </div>
                 [% END %]
                 [% IF ( removeFailure ) %]
                     <div class="dialog alert">
-                        <p>Item with barcode '[% barcode %]' was not removed from collection:</p>
+                        <p>Item with barcode '[% barcode %]' was not removed from collection:
+                        [% IF ( itemInfo ) %]
+                          <br/>
+                          Author: [% itemInfo.author %]<br />
+                          Title: [% itemInfo.title %]
+                        [% END %]
                         <p>[% failureMessage %]
                     </div>
                 [% END %]
