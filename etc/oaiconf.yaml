@@ -1,0 +1,22 @@
+format:
+  marcxml:
+    metadataPrefix: marcxml
+    metadataNamespace: http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim
+    schema: http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd
+  marccpk:
+    metadataPrefix: marccpk
+    metadataNamespace: http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim
+    schema: http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd
+    xsl_file: /etc/koha/xslt/ModifyMARCforCPK.xsl
+    include_items: 1
+  marc21:
+    metadataPrefix: marc21
+    metadataNamespace: http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim
+    schema: http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd
+    xsl_file: /etc/koha/xslt/ModifyMARC.xsl
+  oai_dc:
+    metadataPrefix: oai_dc
+    metadataNamespace: http://www.openarchives.org/OAI/2.0/oai_dc/
+    schema: http://www.openarchives.org/OAI/2.0/oai_dc.xsd
+    xsl_file: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/cs-CZ/xslt/MARC21slim2OAIDC.xsl
+~                                                                                                      
