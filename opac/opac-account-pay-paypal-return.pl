@@ -93,10 +93,10 @@ if ( $response->is_success ) {
     if ( $params{ACK} eq "Success" ) {
         $amount = $params{PAYMENTINFO_0_AMT};
 
-        my $accountlines_rs = Koha::Database->new()->schema()->resultset('Accountline');
-        foreach my $accountlines_id ( @accountlines ) {
-            my $accountline = $accountlines_rs->find( $accountlines_id );
-            makepayment( $accountlines_id, $borrowernumber, undef, $accountline->amountoutstanding, undef, undef, 'PayPal' );
+        my $account = Koha::Account->new( { patron_id => $borrowernumber } );
+        foreach my $accountlines_id (@accountlines) {
+            my $line = Koha::Account::Lines->find($accountlines_id);
+            $account->pay( { lines => [$line], note => 'PayPal' } );
         }
     }
     else {
