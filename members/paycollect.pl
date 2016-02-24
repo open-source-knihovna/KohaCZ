@@ -30,7 +30,6 @@ use C4::Accounts;
 use C4::Koha;
 use Koha::Patron::Images;
 use Koha::Account;
-
 use Koha::Patron::Categories;
 
 my $input = CGI->new();
