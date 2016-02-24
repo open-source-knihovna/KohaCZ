@@ -64,6 +64,7 @@ Koha::Account->new( { patron_id => $borrowernumber } )->pay(
         note       => $note,
         id         => $accountlines_id,
         library_id => $branchcode,
+        lines      => $lines, # Arrayref of Koha::Account::Line objects to pay
     }
 );
 
@@ -75,8 +76,8 @@ sub pay {
     my $amount          = $params->{amount};
     my $sip             = $params->{sip};
     my $note            = $params->{note} || q{};
-    my $accountlines_id = $params->{accountlines_id};
     my $library_id      = $params->{library_id};
+    my $lines           = $params->{lines},
 
     my $userenv = C4::Context->userenv;
 
@@ -99,9 +100,7 @@ sub pay {
     $balance_remaining ||= 0;
 
     # We were passed a specific line to pay
-    if ( $accountlines_id ) {
-        my $fine = Koha::Account::Lines->find( $accountlines_id );
-
+    foreach my $fine ( @$lines ) {
         # If accountline id is passed but no amount, we pay that line in full
         $amount = $fine->amountoutstanding unless defined($amount);
 
