@@ -94,7 +94,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
   </xslo:template>
   <xslo:template mode="index_subfields" match="marc:datafield[@tag='100']">
     <xslo:for-each select="marc:subfield">
-      <xslo:if test="contains('abcdefghjklmnopqrstvxyz', @code)">
+      <xslo:if test="contains('abcdefghjklmnopqrstvxyz7', @code)">
         <z:index name="Personal-name:w Personal-name:p Personal-name:s">
           <xslo:value-of select="."/>
         </z:index>
@@ -103,7 +103,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
   </xslo:template>
   <xslo:template mode="index_subfields" match="marc:datafield[@tag='110']">
     <xslo:for-each select="marc:subfield">
-      <xslo:if test="contains('abcdefghklmnoprstvxyz', @code)">
+      <xslo:if test="contains('abcdefghklmnoprstvxyz7', @code)">
         <z:index name="Corporate-name:w Corporate-name:p">
           <xslo:value-of select="."/>
         </z:index>
@@ -112,7 +112,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
   </xslo:template>
   <xslo:template mode="index_subfields" match="marc:datafield[@tag='111']">
     <xslo:for-each select="marc:subfield">
-      <xslo:if test="contains('acdefghjklnpqstvxyz', @code)">
+      <xslo:if test="contains('acdefghjklnpqstvxyz7', @code)">
         <z:index name="Meeting-name:w Meeting-name:p">
           <xslo:value-of select="."/>
         </z:index>
@@ -121,7 +121,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
   </xslo:template>
   <xslo:template mode="index_subfields" match="marc:datafield[@tag='130']">
     <xslo:for-each select="marc:subfield">
-      <xslo:if test="contains('adfghklmnoprstvxyz', @code)">
+      <xslo:if test="contains('adfghklmnoprstvxyz7', @code)">
         <z:index name="Title-uniform:w Title-uniform:p">
           <xslo:value-of select="."/>
         </z:index>
@@ -130,7 +130,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
   </xslo:template>
   <xslo:template mode="index_subfields" match="marc:datafield[@tag='148']">
     <xslo:for-each select="marc:subfield">
-      <xslo:if test="contains('avxyz', @code)">
+      <xslo:if test="contains('avxyz7', @code)">
         <z:index name="Chronological-term:w Chronological-term:p">
           <xslo:value-of select="."/>
         </z:index>
@@ -139,7 +139,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
   </xslo:template>
   <xslo:template mode="index_subfields" match="marc:datafield[@tag='150']">
     <xslo:for-each select="marc:subfield">
-      <xslo:if test="contains('abvxyz', @code)">
+      <xslo:if test="contains('abvxyz7', @code)">
         <z:index name="Subject-topical:w Subject-topical:p">
           <xslo:value-of select="."/>
         </z:index>
@@ -148,7 +148,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
   </xslo:template>
   <xslo:template mode="index_subfields" match="marc:datafield[@tag='151']">
     <xslo:for-each select="marc:subfield">
-      <xslo:if test="contains('avxyz', @code)">
+      <xslo:if test="contains('avxyz7', @code)">
         <z:index name="Name-geographic:w Name-geographic:p">
           <xslo:value-of select="."/>
         </z:index>
@@ -157,7 +157,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
   </xslo:template>
   <xslo:template mode="index_subfields" match="marc:datafield[@tag='155']">
     <xslo:for-each select="marc:subfield">
-      <xslo:if test="contains('avxyz', @code)">
+      <xslo:if test="contains('avxyz7', @code)">
         <z:index name="Term-genre-form:w Term-genre-form:p">
           <xslo:value-of select="."/>
         </z:index>
@@ -177,7 +177,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Personal-name-heading:w Personal-name-heading:p Personal-name-heading:s Heading:w Heading:p Heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abcdefghjklmnopqrstvxyz', @code)" name="Personal-name-heading:w Personal-name-heading:p Personal-name-heading:s Heading:w Heading:p Heading:s">
+          <xslo:if test="contains('abcdefghjklmnopqrstvxyz7', @code)" name="Personal-name-heading:w Personal-name-heading:p Personal-name-heading:s Heading:w Heading:p Heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -241,7 +241,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Personal-name-see-also-from:w Personal-name-see-also-from:p Personal-name-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abcdefghjklmnopqrstvxyz', @code)" name="Personal-name-see-also-from:w Personal-name-see-also-from:p Personal-name-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
+          <xslo:if test="contains('abcdefghjklmnopqrstvxyz7', @code)" name="Personal-name-see-also-from:w Personal-name-see-also-from:p Personal-name-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -263,7 +263,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Corporate-name-heading:w Corporate-name-heading:p Corporate-name-heading:s Heading:w Heading:p Heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abcdefghklmnoprstvxyz', @code)" name="Corporate-name-heading:w Corporate-name-heading:p Corporate-name-heading:s Heading:w Heading:p Heading:s">
+          <xslo:if test="contains('abcdefghklmnoprstvxyz7', @code)" name="Corporate-name-heading:w Corporate-name-heading:p Corporate-name-heading:s Heading:w Heading:p Heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -327,7 +327,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Corporate-name-see-also-from:w Corporate-name-see-also-from:p Corporate-name-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abcdefghklmnoprstvxyz', @code)" name="Corporate-name-see-also-from:w Corporate-name-see-also-from:p Corporate-name-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
+          <xslo:if test="contains('abcdefghklmnoprstvxyz7', @code)" name="Corporate-name-see-also-from:w Corporate-name-see-also-from:p Corporate-name-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -349,7 +349,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Meeting-name-heading:w Meeting-name-heading:p Meeting-name-heading:s Heading:w Heading:p Heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('acdefghjklnpqstvxyz', @code)" name="Meeting-name-heading:w Meeting-name-heading:p Meeting-name-heading:s Heading:w Heading:p Heading:s">
+          <xslo:if test="contains('acdefghjklnpqstvxyz7', @code)" name="Meeting-name-heading:w Meeting-name-heading:p Meeting-name-heading:s Heading:w Heading:p Heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -413,7 +413,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Meeting-name-see-also-from:w Meeting-name-see-also-from:p Meeting-name-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('acdefghjklnpqstvxyz', @code)" name="Meeting-name-see-also-from:w Meeting-name-see-also-from:p Meeting-name-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
+          <xslo:if test="contains('acdefghjklnpqstvxyz7', @code)" name="Meeting-name-see-also-from:w Meeting-name-see-also-from:p Meeting-name-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -435,7 +435,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Title-uniform-heading:w Title-uniform-heading:p Title-uniform-heading:s Heading:w Heading:p Heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('adfghklmnoprstvxyz', @code)" name="Title-uniform-heading:w Title-uniform-heading:p Title-uniform-heading:s Heading:w Heading:p Heading:s">
+          <xslo:if test="contains('adfghklmnoprstvxyz7', @code)" name="Title-uniform-heading:w Title-uniform-heading:p Title-uniform-heading:s Heading:w Heading:p Heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -499,7 +499,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Title-uniform-see-also-from:w Title-uniform-see-also-from:p Title-uniform-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('adfghklmnoprstvxyz', @code)" name="Title-uniform-see-also-from:w Title-uniform-see-also-from:p Title-uniform-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
+          <xslo:if test="contains('adfghklmnoprstvxyz7', @code)" name="Title-uniform-see-also-from:w Title-uniform-see-also-from:p Title-uniform-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -521,7 +521,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Chronological-term-heading:w Chronological-term-heading:p Chronological-term-heading:s Heading:w Heading:p Heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Chronological-term-heading:w Chronological-term-heading:p Chronological-term-heading:s Heading:w Heading:p Heading:s">
+          <xslo:if test="contains('avxyz7', @code)" name="Chronological-term-heading:w Chronological-term-heading:p Chronological-term-heading:s Heading:w Heading:p Heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -585,7 +585,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Chronological-term-see-also-from:w Chronological-term-see-also-from:p Chronological-term-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Chronological-term-see-also-from:w Chronological-term-see-also-from:p Chronological-term-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
+          <xslo:if test="contains('avxyz7', @code)" name="Chronological-term-see-also-from:w Chronological-term-see-also-from:p Chronological-term-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -607,7 +607,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Subject-topical-heading:w Subject-topical-heading:p Subject-topical-heading:s Heading:w Heading:p Heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abvxyz', @code)" name="Subject-topical-heading:w Subject-topical-heading:p Subject-topical-heading:s Heading:w Heading:p Heading:s">
+          <xslo:if test="contains('abvxyz7', @code)" name="Subject-topical-heading:w Subject-topical-heading:p Subject-topical-heading:s Heading:w Heading:p Heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -671,7 +671,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Subject-topical-see-also-from:w Subject-topical-see-also-from:p Subject-topical-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abvxyz', @code)" name="Subject-topical-see-also-from:w Subject-topical-see-also-from:p Subject-topical-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
+          <xslo:if test="contains('abvxyz7', @code)" name="Subject-topical-see-also-from:w Subject-topical-see-also-from:p Subject-topical-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -693,7 +693,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Name-geographic-heading:w Name-geographic-heading:p Name-geographic-heading:s Heading:w Heading:p Heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Name-geographic-heading:w Name-geographic-heading:p Name-geographic-heading:s Heading:w Heading:p Heading:s">
+          <xslo:if test="contains('avxyz7', @code)" name="Name-geographic-heading:w Name-geographic-heading:p Name-geographic-heading:s Heading:w Heading:p Heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -757,7 +757,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Name-geographic-see-also-from:w Name-geographic-see-also-from:p Name-geographic-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Name-geographic-see-also-from:w Name-geographic-see-also-from:p Name-geographic-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
+          <xslo:if test="contains('avxyz7', @code)" name="Name-geographic-see-also-from:w Name-geographic-see-also-from:p Name-geographic-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -779,7 +779,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Term-genre-form-heading:w Term-genre-form-heading:p Term-genre-form-heading:s Heading:w Heading:p Heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Term-genre-form-heading:w Term-genre-form-heading:p Term-genre-form-heading:s Heading:w Heading:p Heading:s">
+          <xslo:if test="contains('avxyz7', @code)" name="Term-genre-form-heading:w Term-genre-form-heading:p Term-genre-form-heading:s Heading:w Heading:p Heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -843,7 +843,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Term-genre-form-see-also-from:w Term-genre-form-see-also-from:p Term-genre-form-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Term-genre-form-see-also-from:w Term-genre-form-see-also-from:p Term-genre-form-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
+          <xslo:if test="contains('avxyz7', @code)" name="Term-genre-form-see-also-from:w Term-genre-form-see-also-from:p Term-genre-form-see-also-from:s See-also-from:w See-also-from:p See-also-from:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1153,7 +1153,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p Match-heading:p Match-heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abcdefghjklmnopqrstvxyz', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
+          <xslo:if test="contains('abcdefghjklmnopqrstvxyz7', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1231,7 +1231,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abcdefghjklmnopqrstvxyz', @code)" name="Match:w Match:p">
+          <xslo:if test="contains('abcdefghjklmnopqrstvxyz7', @code)" name="Match:w Match:p">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1270,7 +1270,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p Match-heading:p Match-heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abcdefghklmnoprstvxyz', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
+          <xslo:if test="contains('abcdefghklmnoprstvxyz7', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1348,7 +1348,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abcdefghklmnoprstvxyz', @code)" name="Match:w Match:p">
+          <xslo:if test="contains('abcdefghklmnoprstvxyz7', @code)" name="Match:w Match:p">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1387,7 +1387,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p Match-heading:p Match-heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('acdefghjklnpqstvxyz', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
+          <xslo:if test="contains('acdefghjklnpqstvxyz7', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1465,7 +1465,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('acdefghjklnpqstvxyz', @code)" name="Match:w Match:p">
+          <xslo:if test="contains('acdefghjklnpqstvxyz7', @code)" name="Match:w Match:p">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1504,7 +1504,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p Match-heading:p Match-heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('adfghklmnoprstvxyz', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
+          <xslo:if test="contains('adfghklmnoprstvxyz7', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1582,7 +1582,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('adfghklmnoprstvxyz', @code)" name="Match:w Match:p">
+          <xslo:if test="contains('adfghklmnoprstvxyz7', @code)" name="Match:w Match:p">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1621,7 +1621,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p Match-heading:p Match-heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
+          <xslo:if test="contains('avxyz7', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1699,7 +1699,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Match:w Match:p">
+          <xslo:if test="contains('avxyz7', @code)" name="Match:w Match:p">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1738,7 +1738,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p Match-heading:p Match-heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abvxyz', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
+          <xslo:if test="contains('abvxyz7', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1816,7 +1816,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('abvxyz', @code)" name="Match:w Match:p">
+          <xslo:if test="contains('abvxyz7', @code)" name="Match:w Match:p">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1855,7 +1855,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p Match-heading:p Match-heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
+          <xslo:if test="contains('avxyz7', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1933,7 +1933,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Match:w Match:p">
+          <xslo:if test="contains('avxyz7', @code)" name="Match:w Match:p">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -1972,7 +1972,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p Match-heading:p Match-heading:s">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
+          <xslo:if test="contains('avxyz7', @code)" name="Match:w Match:p Match-heading:p Match-heading:s">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">
@@ -2050,7 +2050,7 @@ definition file (probably something like {biblio,authority}-koha-indexdefs.xml) 
     <z:index name="Match:w Match:p">
       <xslo:variable name="raw_heading">
         <xslo:for-each select="marc:subfield">
-          <xslo:if test="contains('avxyz', @code)" name="Match:w Match:p">
+          <xslo:if test="contains('avxyz7', @code)" name="Match:w Match:p">
             <xslo:if test="position() &gt; 1">
               <xslo:choose>
                 <xslo:when test="contains('vxyz', @code)">

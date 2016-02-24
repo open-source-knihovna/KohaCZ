@@ -62,12 +62,12 @@ authority-zebra-indexdefs.xsl`
 
   
   <!-- Personal name headings -->
-  <kohaidx:index_subfields tag="100" subfields="abcdefghjklmnopqrstvxyz">
+  <kohaidx:index_subfields tag="100" subfields="abcdefghjklmnopqrstvxyz7">
     <kohaidx:target_index>Personal-name:w</kohaidx:target_index>
     <kohaidx:target_index>Personal-name:p</kohaidx:target_index>
     <kohaidx:target_index>Personal-name:s</kohaidx:target_index>
   </kohaidx:index_subfields>
-  <kohaidx:index_heading tag="100" subfields="abcdefghjklmnopqrstvxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="100" subfields="abcdefghjklmnopqrstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Personal-name-heading:w</kohaidx:target_index>
     <kohaidx:target_index>Personal-name-heading:p</kohaidx:target_index>
     <kohaidx:target_index>Personal-name-heading:s</kohaidx:target_index>
@@ -80,7 +80,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Heading-Main:p</kohaidx:target_index>
     <kohaidx:target_index>Heading-Main:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="100" subfields="abcdefghjklmnopqrstvxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="100" subfields="abcdefghjklmnopqrstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
     <kohaidx:target_index>Match-heading:p</kohaidx:target_index>
@@ -102,7 +102,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Match-heading-see-from:s</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
-  <kohaidx:index_heading tag="500" subfields="abcdefghjklmnopqrstvxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="500" subfields="abcdefghjklmnopqrstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Personal-name-see-also-from:w</kohaidx:target_index>
     <kohaidx:target_index>Personal-name-see-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>Personal-name-see-also-from:s</kohaidx:target_index>
@@ -110,17 +110,17 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>See-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>See-also-from:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="500" subfields="abcdefghjklmnopqrstvxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="500" subfields="abcdefghjklmnopqrstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
   <!-- Corporate name headings -->
-  <kohaidx:index_subfields tag="110" subfields="abcdefghklmnoprstvxyz">
+  <kohaidx:index_subfields tag="110" subfields="abcdefghklmnoprstvxyz7">
     <kohaidx:target_index>Corporate-name:w</kohaidx:target_index>
     <kohaidx:target_index>Corporate-name:p</kohaidx:target_index>
   </kohaidx:index_subfields>
-  <kohaidx:index_heading tag="110" subfields="abcdefghklmnoprstvxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="110" subfields="abcdefghklmnoprstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Corporate-name-heading:w</kohaidx:target_index>
     <kohaidx:target_index>Corporate-name-heading:p</kohaidx:target_index>
     <kohaidx:target_index>Corporate-name-heading:s</kohaidx:target_index>
@@ -133,7 +133,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Heading-Main:p</kohaidx:target_index>
     <kohaidx:target_index>Heading-Main:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="110" subfields="abcdefghklmnoprstvxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="110" subfields="abcdefghklmnoprstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
     <kohaidx:target_index>Match-heading:p</kohaidx:target_index>
@@ -155,7 +155,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Match-heading-see-from:s</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
-  <kohaidx:index_heading tag="510" subfields="abcdefghklmnoprstvxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="510" subfields="abcdefghklmnoprstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Corporate-name-see-also-from:w</kohaidx:target_index>
     <kohaidx:target_index>Corporate-name-see-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>Corporate-name-see-also-from:s</kohaidx:target_index>
@@ -163,17 +163,17 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>See-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>See-also-from:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="510" subfields="abcdefghklmnoprstvxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="510" subfields="abcdefghklmnoprstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
   <!-- Meeting name -->
-  <kohaidx:index_subfields tag="111" subfields="acdefghjklnpqstvxyz">
+  <kohaidx:index_subfields tag="111" subfields="acdefghjklnpqstvxyz7">
     <kohaidx:target_index>Meeting-name:w</kohaidx:target_index>
     <kohaidx:target_index>Meeting-name:p</kohaidx:target_index>
   </kohaidx:index_subfields>
-  <kohaidx:index_heading tag="111" subfields="acdefghjklnpqstvxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="111" subfields="acdefghjklnpqstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Meeting-name-heading:w</kohaidx:target_index>
     <kohaidx:target_index>Meeting-name-heading:p</kohaidx:target_index>
     <kohaidx:target_index>Meeting-name-heading:s</kohaidx:target_index>
@@ -186,7 +186,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Heading-Main:p</kohaidx:target_index>
     <kohaidx:target_index>Heading-Main:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="111" subfields="acdefghjklnpqstvxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="111" subfields="acdefghjklnpqstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
     <kohaidx:target_index>Match-heading:p</kohaidx:target_index>
@@ -208,7 +208,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Match-heading-see-from:s</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
-  <kohaidx:index_heading tag="511" subfields="acdefghjklnpqstvxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="511" subfields="acdefghjklnpqstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Meeting-name-see-also-from:w</kohaidx:target_index>
     <kohaidx:target_index>Meeting-name-see-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>Meeting-name-see-also-from:s</kohaidx:target_index>
@@ -216,17 +216,17 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>See-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>See-also-from:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="511" subfields="acdefghjklnpqstvxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="511" subfields="acdefghjklnpqstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
   <!-- Uniform title -->
-  <kohaidx:index_subfields tag="130" subfields="adfghklmnoprstvxyz">
+  <kohaidx:index_subfields tag="130" subfields="adfghklmnoprstvxyz7">
     <kohaidx:target_index>Title-uniform:w</kohaidx:target_index>
     <kohaidx:target_index>Title-uniform:p</kohaidx:target_index>
   </kohaidx:index_subfields>
-  <kohaidx:index_heading tag="130" subfields="adfghklmnoprstvxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="130" subfields="adfghklmnoprstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Title-uniform-heading:w</kohaidx:target_index>
     <kohaidx:target_index>Title-uniform-heading:p</kohaidx:target_index>
     <kohaidx:target_index>Title-uniform-heading:s</kohaidx:target_index>
@@ -239,7 +239,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Heading-Main:p</kohaidx:target_index>
     <kohaidx:target_index>Heading-Main:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="130" subfields="adfghklmnoprstvxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="130" subfields="adfghklmnoprstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
     <kohaidx:target_index>Match-heading:p</kohaidx:target_index>
@@ -261,7 +261,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Match-heading-see-from:s</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
-  <kohaidx:index_heading tag="530" subfields="adfghklmnoprstvxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="530" subfields="adfghklmnoprstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Title-uniform-see-also-from:w</kohaidx:target_index>
     <kohaidx:target_index>Title-uniform-see-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>Title-uniform-see-also-from:s</kohaidx:target_index>
@@ -269,17 +269,17 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>See-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>See-also-from:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="530" subfields="adfghklmnoprstvxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="530" subfields="adfghklmnoprstvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
   <!-- Chronological term -->
-  <kohaidx:index_subfields tag="148" subfields="avxyz">
+  <kohaidx:index_subfields tag="148" subfields="avxyz7">
     <kohaidx:target_index>Chronological-term:w</kohaidx:target_index>
     <kohaidx:target_index>Chronological-term:p</kohaidx:target_index>
   </kohaidx:index_subfields>
-  <kohaidx:index_heading tag="148" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="148" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Chronological-term-heading:w</kohaidx:target_index>
     <kohaidx:target_index>Chronological-term-heading:p</kohaidx:target_index>
     <kohaidx:target_index>Chronological-term-heading:s</kohaidx:target_index>
@@ -292,7 +292,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Heading-Main:p</kohaidx:target_index>
     <kohaidx:target_index>Heading-Main:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="148" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="148" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
     <kohaidx:target_index>Match-heading:p</kohaidx:target_index>
@@ -314,7 +314,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Match-heading-see-from:s</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
-  <kohaidx:index_heading tag="548" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="548" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Chronological-term-see-also-from:w</kohaidx:target_index>
     <kohaidx:target_index>Chronological-term-see-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>Chronological-term-see-also-from:s</kohaidx:target_index>
@@ -322,18 +322,18 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>See-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>See-also-from:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="548" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="548" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
   
   <!-- Topical term -->
-  <kohaidx:index_subfields tag="150" subfields="abvxyz">
+  <kohaidx:index_subfields tag="150" subfields="abvxyz7">
     <kohaidx:target_index>Subject-topical:w</kohaidx:target_index>
     <kohaidx:target_index>Subject-topical:p</kohaidx:target_index>
   </kohaidx:index_subfields>
-  <kohaidx:index_heading tag="150" subfields="abvxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="150" subfields="abvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Subject-topical-heading:w</kohaidx:target_index>
     <kohaidx:target_index>Subject-topical-heading:p</kohaidx:target_index>
     <kohaidx:target_index>Subject-topical-heading:s</kohaidx:target_index>
@@ -346,7 +346,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Heading-Main:p</kohaidx:target_index>
     <kohaidx:target_index>Heading-Main:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="150" subfields="abvxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="150" subfields="abvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
     <kohaidx:target_index>Match-heading:p</kohaidx:target_index>
@@ -371,7 +371,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Match-heading-see-from:s</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
-  <kohaidx:index_heading tag="550" subfields="abvxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="550" subfields="abvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Subject-topical-see-also-from:w</kohaidx:target_index>
     <kohaidx:target_index>Subject-topical-see-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>Subject-topical-see-also-from:s</kohaidx:target_index>
@@ -379,17 +379,17 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>See-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>See-also-from:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="550" subfields="abvxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="550" subfields="abvxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
   <!-- Geographic name -->
-  <kohaidx:index_subfields tag="151" subfields="avxyz">
+  <kohaidx:index_subfields tag="151" subfields="avxyz7">
     <kohaidx:target_index>Name-geographic:w</kohaidx:target_index>
     <kohaidx:target_index>Name-geographic:p</kohaidx:target_index>
   </kohaidx:index_subfields>
-  <kohaidx:index_heading tag="151" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="151" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Name-geographic-heading:w</kohaidx:target_index>
     <kohaidx:target_index>Name-geographic-heading:p</kohaidx:target_index>
     <kohaidx:target_index>Name-geographic-heading:s</kohaidx:target_index>
@@ -402,7 +402,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Heading-Main:p</kohaidx:target_index>
     <kohaidx:target_index>Heading-Main:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="151" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="151" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
     <kohaidx:target_index>Match-heading:p</kohaidx:target_index>
@@ -424,7 +424,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Match-heading-see-from:s</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
-  <kohaidx:index_heading tag="551" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="551" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Name-geographic-see-also-from:w</kohaidx:target_index>
     <kohaidx:target_index>Name-geographic-see-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>Name-geographic-see-also-from:s</kohaidx:target_index>
@@ -432,17 +432,17 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>See-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>See-also-from:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="551" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="551" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
   <!-- Genre/form term -->
-  <kohaidx:index_subfields tag="155" subfields="avxyz">
+  <kohaidx:index_subfields tag="155" subfields="avxyz7">
     <kohaidx:target_index>Term-genre-form:w</kohaidx:target_index>
     <kohaidx:target_index>Term-genre-form:p</kohaidx:target_index>
   </kohaidx:index_subfields>
-  <kohaidx:index_heading tag="155" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="155" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Term-genre-form-heading:w</kohaidx:target_index>
     <kohaidx:target_index>Term-genre-form-heading:p</kohaidx:target_index>
     <kohaidx:target_index>Term-genre-form-heading:s</kohaidx:target_index>
@@ -455,7 +455,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Heading-Main:p</kohaidx:target_index>
     <kohaidx:target_index>Heading-Main:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="155" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="155" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
     <kohaidx:target_index>Match-heading:p</kohaidx:target_index>
@@ -477,7 +477,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>Match-heading-see-from:s</kohaidx:target_index>
   </kohaidx:index_match_heading>
   
-  <kohaidx:index_heading tag="555" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_heading tag="555" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Term-genre-form-see-also-from:w</kohaidx:target_index>
     <kohaidx:target_index>Term-genre-form-see-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>Term-genre-form-see-also-from:s</kohaidx:target_index>
@@ -485,7 +485,7 @@ authority-zebra-indexdefs.xsl`
     <kohaidx:target_index>See-also-from:p</kohaidx:target_index>
     <kohaidx:target_index>See-also-from:s</kohaidx:target_index>
   </kohaidx:index_heading>
-  <kohaidx:index_match_heading tag="555" subfields="avxyz" subdivisions="vxyz">
+  <kohaidx:index_match_heading tag="555" subfields="avxyz7" subdivisions="vxyz">
     <kohaidx:target_index>Match:w</kohaidx:target_index>
     <kohaidx:target_index>Match:p</kohaidx:target_index>
   </kohaidx:index_match_heading>
