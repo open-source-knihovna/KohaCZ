@@ -45,7 +45,6 @@ can_ok( 'C4::Accounts',
         getcredits
         getrefunds
         ReversePayment
-        makepartialpayment
         WriteOffFee
         purge_zero_balance_fees )
 );
@@ -308,7 +307,7 @@ subtest "More Koha::Account::pay tests" => sub {
     }
 };
 
-subtest "makepartialpayment() tests" => sub {
+subtest "Even more Koha::Account::pay tests" => sub {
 
     plan tests => 6;
 
@@ -336,13 +335,10 @@ subtest "makepartialpayment() tests" => sub {
 
     is( $rs->count(), 1, 'Accountline created' );
 
+    my $account = Koha::Account->new( { patron_id => $borrowernumber } );
+    my $line = Koha::Account::Lines->find( $accountline->{ accountlines_id } );
     # make the full payment
-    makepartialpayment(
-        $accountline->{ accountlines_id }, $borrowernumber,
-        $accountline->{ accountno },       $partialamount,
-        $borrowernumber, $branch, 'A payment note' );
-
-    # TODO: someone should write actual tests for makepartialpayment()
+    $account->pay({ lines => [$line], amount => $partialamount, library_id => $branch, note => 'A payment note' });
 
     my $stat = $schema->resultset('Statistic')->search({
         branch  => $branch,
