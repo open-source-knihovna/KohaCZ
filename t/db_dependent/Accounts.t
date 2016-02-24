@@ -45,7 +45,6 @@ can_ok( 'C4::Accounts',
         getcredits
         getrefunds
         ReversePayment
-        recordpayment_selectaccts
         makepartialpayment
         WriteOffFee
         purge_zero_balance_fees )
