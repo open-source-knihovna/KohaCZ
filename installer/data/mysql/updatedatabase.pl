@@ -11733,6 +11733,84 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
+$DBversion = "3.23.00.0191";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER IGNORE TABLE borrowers ADD COLUMN `checkprevissue` varchar(7) NOT NULL default 'inherit' AFTER privacy
+    });
+    $dbh->do(q{
+        ALTER IGNORE TABLE deletedborrowers ADD COLUMN `checkprevissue` varchar(7) NOT NULL default 'inherit' AFTER privacy
+    });
+    $dbh->do(q{
+        ALTER IGNORE TABLE categories ADD COLUMN `checkprevissue` varchar(7) NOT NULL default 'inherit'
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('CheckPrevIssue','1','','By default, for every item issued, should we warn if the patron has borrowed that item in the past?','YesNo')
+    });
+    print "Upgrade to $DBversion done (Check previous issues)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.0192";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('UsePermanentWithdrawal','0','','Use permanent withdrawal mode for withdrawing items. This generates an unique withdrawal number.','YesNo')
+    });
+    $dbh->do(q{
+        ALTER IGNORE TABLE items ADD withdrawn_permanent VARCHAR(32) AFTER withdrawn_on
+    });
+    $dbh->do(q{
+        ALTER IGNORE TABLE items ADD withdrawn_categorycode VARCHAR(10) AFTER withdrawn_on
+    });
+    $dbh->do(q{
+        ALTER IGNORE TABLE deleteditems ADD withdrawn_permanent VARCHAR(32) AFTER withdrawn_on
+    });
+    $dbh->do(q{
+        ALTER IGNORE TABLE deleteditems ADD withdrawn_categorycode VARCHAR(10) AFTER withdrawn_on
+    });
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS default_permanent_withdrawal_reason(
+            categorycode VARCHAR(10) DEFAULT NULL,
+            description VARCHAR(250) DEFAULT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO default_permanent_withdrawal_reason
+            (categorycode, description)
+        VALUES
+            ('focus', 'does not match the focus of the library'),
+            ('multi', 'multiplicates document'),
+            ('damaged', 'worn or damaged'),
+            ('lost', 'lost by reader')
+    });
+
+    print "Upgrade to $DBversion done (Permanent withdrawal)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.0193";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER IGNORE TABLE z3950servers
+            ADD zedu_omit_fields MEDIUMTEXT NULL,
+            ADD zedu_authoritative_id_field VARCHAR(8) NULL,
+            ADD zedu_msg_field VARCHAR(8) NULL,
+            ADD zedu_msg_oncreate MEDIUMTEXT NULL,
+            ADD zedu_msg_onupdate MEDIUMTEXT NULL,
+            MODIFY COLUMN servertype enum('zed', 'sru', 'zed_update') NOT NULL DEFAULT 'zed'
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('EnablePushingToAuthorityServer','0','','Enables pushing to authority server as an update or create action ','YesNo')
+    });
+
+    print "Upgrade to $DBversion done (Z39.50 update)\n";
+    SetVersion($DBversion);
+}
+
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.
