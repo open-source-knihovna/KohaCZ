@@ -4,7 +4,7 @@ if ( KOHA === undefined ) var KOHA = {};
 function _(s) { return s; } // dummy function for gettext
 
 // http://stackoverflow.com/questions/1038746/equivalent-of-string-format-in-jquery/5341855#5341855
-String.prototype.format = function() { return formatstr(this, arguments) }
+String.prototype.format = function() { return formatstr(this, arguments); };
 function formatstr(str, col) {
     col = typeof col === 'object' ? col : Array.prototype.slice.call(arguments, 1);
     var idx = 0;
@@ -13,7 +13,7 @@ function formatstr(str, col) {
         if (m == "%s") { return col[idx++]; }
         return col[n];
     });
-};
+}
 
 
 // http://stackoverflow.com/questions/14859281/select-tab-by-name-in-jquery-ui-1-10-0/16550804#16550804
@@ -32,6 +32,7 @@ $.fn.selectTabByID = function (tabID) {
     if($("#header_search #checkin_search").length > 0){ shortcut.add('Alt+r',function (){ $("#header_search").selectTabByID("#checkin_search"); $("#ret_barcode").focus(); }); } else { shortcut.add('Alt+r',function (){ location.href="/cgi-bin/koha/circ/returns.pl"; }); }
     if($("#header_search #circ_search").length > 0){ shortcut.add('Alt+u',function (){ $("#header_search").selectTabByID("#circ_search"); $("#findborrower").focus(); }); } else { shortcut.add('Alt+u',function(){ location.href="/cgi-bin/koha/circ/circulation.pl"; }); }
     if($("#header_search #catalog_search").length > 0){ shortcut.add('Alt+q',function (){ $("#header_search").selectTabByID("#catalog_search"); $("#search-form").focus(); }); } else { shortcut.add('Alt+q',function(){ location.href="/cgi-bin/koha/catalogue/search.pl"; }); }
+    if($("#header_search #renew_search").length > 0){ shortcut.add('Alt+y',function (){ $("#header_search").selectTabByID("#renew_search"); $("#ren_barcode").focus(); }); } else { shortcut.add('Alt+y',function(){ location.href="/cgi-bin/koha/circ/renew.pl"; }); }
 
     $(".focus").focus();
     $(".validated").each(function() {
@@ -96,11 +97,12 @@ function openWindow(link,name,width,height) {
     name = (typeof name == "undefined")?'popup':name;
     width = (typeof width == "undefined")?'600':width;
     height = (typeof height == "undefined")?'400':height;
+    var newwin;
     //IE <= 9 can't handle a "name" with whitespace
     try {
-        var newin=window.open(link,name,'width='+width+',height='+height+',resizable=yes,toolbar=false,scrollbars=yes,top');
+        newin=window.open(link,name,'width='+width+',height='+height+',resizable=yes,toolbar=false,scrollbars=yes,top');
     } catch(e) {
-        var newin=window.open(link,null,'width='+width+',height='+height+',resizable=yes,toolbar=false,scrollbars=yes,top');
+        newin=window.open(link,null,'width='+width+',height='+height+',resizable=yes,toolbar=false,scrollbars=yes,top');
     }
 }
 
@@ -122,7 +124,7 @@ function confirmDelete(message) {
 }
 
 function playSound( sound ) {
-    if ( ! ( sound.indexOf('http://') == 0 || sound.indexOf('https://') == 0  ) ) {
+    if ( ! ( sound.indexOf('http://') === 0 || sound.indexOf('https://') === 0  ) ) {
         sound = AUDIO_ALERT_PATH + sound;
     }
     document.getElementById("audio-alert").innerHTML = '<audio src="' + sound + '" autoplay="autoplay" autobuffer="autobuffer"></audio>';

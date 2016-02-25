@@ -21,9 +21,11 @@ use Modern::Perl;
 use C4::Context;
 use Data::Dumper;
 
-use Test::More tests => 23;
+use Test::More tests => 17;
 
 use C4::Branch;
+use Koha::Database;
+use Koha::Library;
 use Koha::Libraries;
 use Koha::LibraryCategories;
 
@@ -38,19 +40,14 @@ can_ok(
       GetBranch
       GetBranches
       GetBranchesLoop
-      GetBranchDetail
-      ModBranch
-      GetBranchInfo
-      GetBranchesInCategory
       mybranch
       )
 );
 
+my $schema = Koha::Database->new->schema;
+$schema->storage->txn_begin;
 
-# Start transaction
 my $dbh = C4::Context->dbh;
-$dbh->{AutoCommit} = 0;
-$dbh->{RaiseError} = 1;
 
 # clear the slate
 $dbh->do('DELETE FROM branchcategories');
@@ -62,7 +59,6 @@ like( $count, '/^\d+$/', "the count is a number" );
 
 #add 2 branches
 my $b1 = {
-    add            => 1,
     branchcode     => 'BRA',
     branchname     => 'BranchA',
     branchaddress1 => 'adr1A',
@@ -81,7 +77,8 @@ my $b1 = {
     branchip       => 'ipA',
     branchprinter  => undef,
     branchnotes    => 'noteA',
-    opac_info      => 'opacA'
+    opac_info      => 'opacA',
+    issuing        => undef,
 };
 my $b2 = {
     branchcode     => 'BRB',
@@ -103,12 +100,11 @@ my $b2 = {
     branchprinter  => undef,
     branchnotes    => 'noteB',
     opac_info      => 'opacB',
+    issuing        => undef,
 };
-ModBranch($b1);
-is( ModBranch($b2), undef, 'the field add is missing' );
+Koha::Library->new($b1)->store;
+Koha::Library->new($b2)->store;
 
-$b2->{add} = 1;
-ModBranch($b2);
 is( Koha::Libraries->search->count, $count + 2, "two branches added" );
 
 is( Koha::Libraries->find( $b2->{branchcode} )->delete, 1,          "One row affected" );
@@ -118,18 +114,12 @@ is( Koha::Libraries->search->count,             $count + 1, "branch BRB deleted"
 is( GetBranchName( $b1->{branchcode} ),
     $b1->{branchname}, "GetBranchName returns the right name" );
 
-#Test GetBranchDetail
-my $branchdetail = GetBranchDetail( $b1->{branchcode} );
-$branchdetail->{add} = 1;
-$b1->{issuing}       = undef;    # Not used in DB
-is_deeply( $branchdetail, $b1, 'branchdetail is right' );
-
 #Test Getbranches
 my $branches = GetBranches();
 is( scalar( keys %$branches ),
     Koha::Libraries->search->count, "GetBranches returns the right number of branches" );
 
-#Test ModBranch
+#Test modify a library
 
 $b1 = {
     branchcode     => 'BRA',
@@ -150,15 +140,13 @@ $b1 = {
     branchip       => 'ipA modified',
     branchprinter  => undef,
     branchnotes    => 'notesA modified',
-    opac_info      => 'opacA modified'
+    opac_info      => 'opacA modified',
+    issuing        => undef,
 };
 
-ModBranch($b1);
+Koha::Libraries->find($b1->{branchcode})->set($b1)->store;
 is( Koha::Libraries->search->count, $count + 1,
     "A branch has been modified, no new branch added" );
-$branchdetail = GetBranchDetail( $b1->{branchcode} );
-$b1->{issuing} = undef;
-is_deeply( $branchdetail, $b1 , "GetBranchDetail gives the details of BRA");
 
 #Test categories
 my $count_cat  = Koha::LibraryCategories->search->count;
@@ -198,88 +186,19 @@ is( $del, 1, 'One row affected' );
 
 is( Koha::LibraryCategories->search->count, $count_cat + 2, "Category CAT 2 deleted" );
 
-$b2->{CAT1} = 1;
-ModBranch($b2);
+my $b2_stored = Koha::Library->new($b2)->store;
+my $CAT1 = Koha::LibraryCategories->find('CAT1');
+$b2_stored->add_to_categories([$CAT1]);
 is( Koha::Libraries->search->count, $count + 2, 'BRB added' );
 
-#Test GetBranchInfo
-my $b1info = GetBranchInfo( $b1->{branchcode} );
-$b1->{categories} = [];
-is_deeply( @$b1info[0], $b1, 'BRA has no categories' );
+my $b1info = Koha::Libraries->find( $b1->{branchcode} );
+is_deeply( $b1info->get_categories->count, 0, 'BRA has no categories' );
 
-my $b2info = GetBranchInfo( $b2->{branchcode} );
-my @cat    = ( $cat1->{categorycode} );
-delete $b2->{add};
-delete $b2->{CAT1};
-$b2->{issuing}    = undef;
-$b2->{categories} = \@cat;
-is_deeply( @$b2info[0], $b2, 'BRB has the category CAT1' );
+my $b2info = Koha::Libraries->find( $b2->{branchcode} );
+is_deeply( $b2info->get_categories->count, 1, 'BRB has the category CAT1' );
 
 Koha::LibraryCategory->new($cat2)->store;
 is( Koha::LibraryCategories->search->count, $count_cat + 3, "Two categories added" );
-$b2 = {
-    branchcode     => 'BRB',
-    branchname     => 'BranchB',
-    branchaddress1 => 'adr1B',
-    branchaddress2 => 'adr2B',
-    branchaddress3 => 'adr3B',
-    branchzip      => 'zipB',
-    branchcity     => 'cityB',
-    branchstate    => 'stateB',
-    branchcountry  => 'countryB',
-    branchphone    => 'phoneB',
-    branchfax      => 'faxB',
-    branchemail    => 'emailB',
-    branchreplyto  => 'emailreply',
-    branchreturnpath => 'branchreturn',
-    branchurl      => 'urlB',
-    branchip       => 'ipB',
-    branchprinter  => undef,
-    branchnotes    => 'noteB',
-    opac_info      => 'opacB',
-    CAT1           => 1,
-    CAT2           => 1
-};
-ModBranch($b2);
-$b2info = GetBranchInfo( $b2->{branchcode} );
-push( @cat, $cat2->{categorycode} );
-delete $b2->{CAT1};
-delete $b2->{CAT2};
-$b2->{issuing}    = undef;
-$b2->{categories} = \@cat;
-is_deeply( @$b2info[0], $b2, 'BRB has the category CAT1 and CAT2' );
-
-#Test GetBranchesInCategory
-my $brCat1 = GetBranchesInCategory( $cat1->{categorycode} );
-my @b      = ( $b2->{branchcode} );
-is_deeply( $brCat1, \@b, 'CAT1 has branch BRB' );
-
-my $b3 = {
-    add            => 1,
-    branchcode     => 'BRC',
-    branchname     => 'BranchC',
-    branchaddress1 => 'adr1C',
-    branchaddress2 => 'adr2C',
-    branchaddress3 => 'adr3C',
-    branchzip      => 'zipC',
-    branchcity     => 'cityC',
-    branchstate    => 'stateC',
-    branchcountry  => 'countryC',
-    branchphone    => 'phoneC',
-    branchfax      => 'faxC',
-    branchemail    => 'emailC',
-    branchurl      => 'urlC',
-    branchip       => 'ipC',
-    branchprinter  => undef,
-    branchnotes    => 'noteC',
-    opac_info      => 'opacC',
-    CAT1           => 1,
-    CAT2           => 1
-};
-ModBranch($b3);
-$brCat1 = GetBranchesInCategory( $cat1->{categorycode} );
-push( @b, $b3->{branchcode} );
-is_deeply( $brCat1, \@b, 'CAT1 has branch BRB and BRC' );
 
 #TODO later: test mybranchine and onlymine
 # Actually we cannot mock C4::Context->userenv in unit tests
@@ -288,6 +207,4 @@ is_deeply( $brCat1, \@b, 'CAT1 has branch BRB and BRC' );
 my $loop = GetBranchesLoop;
 is( scalar(@$loop), Koha::Libraries->search->count, 'There is the right number of branches' );
 
-# End transaction
-$dbh->rollback;
-
+$schema->storage->txn_rollback;

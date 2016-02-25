@@ -1,4 +1,3 @@
- 
 Pravidla vývoje KohaCZ
 =
 [![Gitter](https://badges.gitter.im/open-source-knihovna/KohaCZ.svg)](https://gitter.im/open-source-knihovna/KohaCZ?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -30,3 +29,4 @@ Všechny naše patche po otestování naším týmem postupně přidáváme do o
 
 Pokud budete mít jakékoli dotazy k vývoji pište na info@knihovni-system-koha.cz 
 
+![Koha Logo](https://wiki.koha-community.org/w/images/KohaILS.png)

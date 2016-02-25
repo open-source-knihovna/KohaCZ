@@ -1,5 +1,6 @@
 [% USE Koha %]
 [% USE KohaDates %]
+[% USE Branches %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Catalog &rsaquo; Checkout history for [% title |html %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -38,7 +39,8 @@ $(document).ready(function() {
         <h4>Checked out [% total %] times</h4>
         <table id="table_issues">
             <thead><tr>
-            [% IF Koha.Preference('intranetreadinghistory') %]
+            [% IF Koha.Preference('intranetreadinghistory')
+              AND CAN_user_circulate_circulate_remaining_permissions %]
             <th>Patron</th>
             [% END %]
             <th>Barcode</th>
@@ -51,7 +53,8 @@ $(document).ready(function() {
             <tbody>
         [% FOREACH issue IN issues %]
             <tr>
-                [% IF Koha.Preference('intranetreadinghistory') %]
+                [% IF Koha.Preference('intranetreadinghistory')
+                  AND CAN_user_circulate_circulate_remaining_permissions %]
                 <td><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% issue.borrowernumber %]">[% IF HidePatronName %][% issue.cardnumber %][% ELSE %][% issue.surname %][% IF ( issue.firstname ) %], [% issue.firstname %][% END %][% END %]</a></td>
                 [% END %]
                 <td>[% IF ( issue.barcode ) %]
@@ -60,7 +63,7 @@ $(document).ready(function() {
                         &nbsp;
                     [% END %]</td>
                 <td>[% IF ( issue.branchcode ) %]
-                        [% issue.branchcode %]
+                        [% Branches.GetName( issue.branchcode ) %]
                     [% ELSE %]
                         &nbsp;
                     [% END %]</td>

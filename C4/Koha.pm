@@ -39,13 +39,11 @@ BEGIN {
 	require Exporter;
 	@ISA    = qw(Exporter);
 	@EXPORT = qw(
-		&slashifyDate
 		&subfield_is_koha_internal_p
 		&GetPrinters &GetPrinter
 		&GetItemTypes &getitemtypeinfo
                 &GetItemTypesCategorized &GetItemTypesByCategory
 		&GetSupportName &GetSupportList
-		&get_itemtypeinfos_of
 		&getframeworks &getframeworkinfo
         &GetFrameworksLoop
 		&getallthemes
@@ -65,9 +63,7 @@ BEGIN {
     &GetKohaAuthorisedValuesMapping
     &GetKohaAuthorisedValueLib
     &GetAuthorisedValueByCode
-    &GetKohaImageurlFromAuthorisedValues
 		&GetAuthValCode
-        &AddAuthorisedValue
 		&GetNormalizedUPC
 		&GetNormalizedISBN
 		&GetNormalizedEAN
@@ -99,23 +95,6 @@ Koha.pm provides many functions for Koha scripts.
 =head1 FUNCTIONS
 
 =cut
-
-=head2 slashifyDate
-
-  $slash_date = &slashifyDate($dash_date);
-
-Takes a string of the form "DD-MM-YYYY" (or anything separated by
-dashes), converts it to the form "YYYY/MM/DD", and returns the result.
-
-=cut
-
-sub slashifyDate {
-
-    # accepts a date of the form xx-xx-xx[xx] and returns it in the
-    # form xx/xx/xx[xx]
-    my @dateOut = split( '-', shift );
-    return ("$dateOut[2]/$dateOut[1]/$dateOut[0]");
-}
 
 # FIXME.. this should be moved to a MARC-specific module
 sub subfield_is_koha_internal_p {
@@ -337,22 +316,6 @@ sub GetItemTypesByCategory {
     my $query = qq|SELECT itemtype FROM itemtypes WHERE searchcategory=?|;
     my $tmp=$dbh->selectcol_arrayref($query,undef,$category);
     return @$tmp;
-}
-
-sub get_itemtypeinfos_of {
-    my @itemtypes = @_;
-
-    my $placeholders = join( ', ', map { '?' } @itemtypes );
-    my $query = <<"END_SQL";
-SELECT itemtype,
-       description,
-       imageurl,
-       notforloan
-  FROM itemtypes
-  WHERE itemtype IN ( $placeholders )
-END_SQL
-
-    return get_infos_of( $query, 'itemtype', undef, \@itemtypes );
 }
 
 =head2 getframework
@@ -1077,25 +1040,6 @@ sub displayServers {
     return \@primaryserverloop;
 }
 
-
-=head2 GetKohaImageurlFromAuthorisedValues
-
-$authhorised_value = GetKohaImageurlFromAuthorisedValues( $category, $authvalcode );
-
-Return the first url of the authorised value image represented by $lib.
-
-=cut
-
-sub GetKohaImageurlFromAuthorisedValues {
-    my ( $category, $lib ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare("SELECT imageurl FROM authorised_values WHERE category=? AND lib =?");
-    $sth->execute( $category, $lib );
-    while ( my $data = $sth->fetchrow_hashref ) {
-        return $data->{'imageurl'};
-    }
-}
-
 =head2 GetAuthValCode
 
   $authvalcode = GetAuthValCode($kohafield,$frameworkcode);
@@ -1430,26 +1374,6 @@ sub GetKohaAuthorisedValueLib {
   my $data = $sth->fetchrow_hashref;
   $value = ($opac && $$data{'lib_opac'}) ? $$data{'lib_opac'} : $$data{'lib'};
   return $value;
-}
-
-=head2 AddAuthorisedValue
-
-    AddAuthorisedValue($category, $authorised_value, $lib, $lib_opac, $imageurl);
-
-Create a new authorised value.
-
-=cut
-
-sub AddAuthorisedValue {
-    my ($category, $authorised_value, $lib, $lib_opac, $imageurl) = @_;
-
-    my $dbh = C4::Context->dbh;
-    my $query = qq{
-        INSERT INTO authorised_values (category, authorised_value, lib, lib_opac, imageurl)
-        VALUES (?,?,?,?,?)
-    };
-    my $sth = $dbh->prepare($query);
-    $sth->execute($category, $authorised_value, $lib, $lib_opac, $imageurl);
 }
 
 =head2 display_marc_indicators

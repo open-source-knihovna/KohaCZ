@@ -398,7 +398,7 @@ sub get_template_and_user {
         $template->param( dateformat => C4::Context->preference('dateformat') );
     }
 
-    $template->param(auth_forwarded_hash => $in->{'query'}->param('auth_forwarded_hash'));
+    $template->param(auth_forwarded_hash => scalar $in->{'query'}->param('auth_forwarded_hash'));
 
     # these template parameters are set the same regardless of $in->{'type'}
 
@@ -549,6 +549,7 @@ sub get_template_and_user {
             opacreadinghistory                    => C4::Context->preference("opacreadinghistory"),
             OPACUserJS                            => C4::Context->preference("OPACUserJS"),
             opacuserlogin                         => "" . C4::Context->preference("opacuserlogin"),
+            OpenLibrarySearch                     => C4::Context->preference("OpenLibrarySearch"),
             ShowReviewer                          => C4::Context->preference("ShowReviewer"),
             ShowReviewerPhoto                     => C4::Context->preference("ShowReviewerPhoto"),
             suggestion                            => "" . C4::Context->preference("suggestion"),

@@ -31,6 +31,7 @@ use C4::Members;
 use C4::Members::Messaging;
 use C4::Branch;
 use C4::Form::MessagingPreferences;
+use Koha::SMS::Providers;
 
 my $query = CGI->new();
 
@@ -49,9 +50,14 @@ my $messaging_options = C4::Members::Messaging::GetMessagingOptions();
 
 if ( defined $query->param('modify') && $query->param('modify') eq 'yes' ) {
     my $sms = $query->param('SMSnumber');
-    if ( defined $sms && ( $borrower->{'smsalertnumber'} // '' ) ne $sms ) {
-        ModMember( borrowernumber => $borrowernumber,
-                   smsalertnumber => $sms );
+    my $sms_provider_id = $query->param('sms_provider_id');
+    if ( defined $sms && ( $borrower->{'smsalertnumber'} // '' ) ne $sms
+            or ( $borrower->{sms_provider_id} // '' ) ne $sms_provider_id ) {
+        ModMember(
+            borrowernumber  => $borrowernumber,
+            smsalertnumber  => $sms,
+            sms_provider_id => $sms_provider_id,
+        );
         $borrower = C4::Members::GetMember( borrowernumber => $borrowernumber );
     }
 
@@ -65,5 +71,10 @@ $template->param( BORROWER_INFO         => $borrower,
                   SMSnumber => $borrower->{'smsalertnumber'},
                   SMSSendDriver                =>  C4::Context->preference("SMSSendDriver"),
                   TalkingTechItivaPhone        =>  C4::Context->preference("TalkingTechItivaPhoneNotification") );
+
+if ( C4::Context->preference("SMSSendDriver") eq 'Email' ) {
+    my @providers = Koha::SMS::Providers->search();
+    $template->param( sms_providers => \@providers, sms_provider_id => $borrower->{'sms_provider_id'} );
+}
 
 output_html_with_http_headers $query, $cookie, $template->output, undef, { force_no_caching => 1 };

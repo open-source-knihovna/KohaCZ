@@ -46,6 +46,7 @@ use C4::Search;		# enabled_staff_search_views
 use Koha::DateUtils;
 use Koha::Borrower::Debarments qw(IsDebarred);
 use Koha::Holds;
+use Koha::Libraries;
 
 my $dbh = C4::Context->dbh;
 my $input = new CGI;
@@ -506,7 +507,6 @@ foreach my $biblionumber (@biblionumbers) {
         }
 
         if ( $res->is_found() ) {
-            $reserve{'wait'}          = 1;
             $reserve{'holdingbranch'} = $res->item()->holdingbranch();
             $reserve{'biblionumber'}  = $res->item()->biblionumber();
             $reserve{'barcodenumber'} = $res->item()->barcode();
@@ -551,7 +551,6 @@ foreach my $biblionumber (@biblionumbers) {
         $reserve{'firstname'}      = $res->borrower()->firstname();
         $reserve{'surname'}        = $res->borrower()->surname();
         $reserve{'notes'}          = $res->reservenotes();
-        $reserve{'wait'}           = $res->is_waiting();
         $reserve{'waiting_date'}   = $res->waitingdate();
         $reserve{'waiting_until'}  = $res->is_waiting() ? $res->waiting_expires_on() : undef;
         $reserve{'ccode'}          = $res->item() ? $res->item()->ccode() : undef;
@@ -564,7 +563,7 @@ foreach my $biblionumber (@biblionumbers) {
         $reserve{'reserve_id'}     = $res->reserve_id();
 
         if ( C4::Context->preference('IndependentBranches') && $flags->{'superlibrarian'} != 1 ) {
-            $reserve{'branchloop'} = [ GetBranchDetail( $res->branchcode() ) ];
+            $reserve{'branchloop'} = [ Koha::Libraries->find( $res->branchcode() ) ];
         }
         else {
             $reserve{'branchloop'} = GetBranchesLoop( $res->branchcode() );

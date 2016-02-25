@@ -114,7 +114,7 @@
 </div>
     [% INCLUDE 'patron-search-box.inc' %]
 
-    [% IF ( CAN_user_circulate ) %]
+    [% IF ( CAN_user_circulate_circulate_remaining_permissions ) %]
     <div id="checkin_search" class="residentsearch">
     <p class="tip">Scan a barcode to check in:</p>
     <form method="post" action="/cgi-bin/koha/circ/returns.pl" autocomplete="off">
@@ -122,6 +122,13 @@
     <input value="Submit" class="submit" type="submit" />
     </form>
     </div>
+        <div id="renew_search" class="residentsearch">
+        <p class="tip">Scan a barcode to renew:</p>
+            <form method="post" action="/cgi-bin/koha/circ/renew.pl" autocomplete="off">
+                <input class="head-searchbox" name="barcode" id="ren_barcode" size="40" />
+                <input value="Submit" class="submit" type="submit" />
+            </form>
+        </div>
     [% END %]
 
     [% IF ( CAN_user_catalogue ) %]
@@ -135,9 +142,10 @@
 
     <ul>
         <li><a onclick="keep_text(0)" href="#patron_search">Search patrons</a></li>
-        [% IF ( CAN_user_circulate ) %]<li><a onclick="keep_text(1)" href="#circ_search">Check out</a></li>[% END %]
-        [% IF ( CAN_user_circulate ) %]<li><a onclick="keep_text(2)" href="#checkin_search">Check in</a></li>[% END %]
-        [% IF ( CAN_user_catalogue ) %]<li><a onclick="keep_text(3)" href="#catalog_search">Search the catalog</a></li>[% END %]
+        [% IF ( CAN_user_circulate_circulate_remaining_permissions ) %]<li><a onclick="keep_text(1)" href="#circ_search">Check out</a></li>[% END %]
+        [% IF ( CAN_user_circulate_circulate_remaining_permissions ) %]<li><a onclick="keep_text(2)" href="#checkin_search">Check in</a></li>[% END %]
+        [% IF ( CAN_user_circulate_circulate_remaining_permissions ) %]<li><a onclick="keep_text(3)" href="#renew_search">Renew</a></li>[% END %]
+        [% IF ( CAN_user_catalogue ) %]<li><a onclick="keep_text(4)" href="#catalog_search">Search the catalog</a></li>[% END %]
     </ul>
 </div><!-- /header_search -->
 </div><!-- /gradient -->

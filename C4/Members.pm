@@ -41,12 +41,13 @@ use Text::Unaccent qw( unac_string );
 use Koha::AuthUtils qw(hash_password);
 use Koha::Database;
 
+our ($VERSION,@ISA,@EXPORT,@EXPORT_OK,$debug);
+
 use Module::Load::Conditional qw( can_load );
 if ( ! can_load( modules => { 'Koha::NorwegianPatronDB' => undef } ) ) {
-   warn "Unable to load Koha::NorwegianPatronDB";
+   $debug && warn "Unable to load Koha::NorwegianPatronDB";
 }
 
-our ($VERSION,@ISA,@EXPORT,@EXPORT_OK,$debug);
 
 BEGIN {
     $VERSION = 3.07.00.049;
@@ -66,14 +67,10 @@ BEGIN {
         &GetPendingIssues
         &GetAllIssues
 
-        &getzipnamecity
-        &getidcity
-
         &GetFirstValidEmailAddress
         &GetNoticeEmailAddress
 
         &GetAge
-        &GetCities
         &GetSortDetails
         &GetTitles
 
@@ -645,6 +642,7 @@ sub ModMember {
             $data{password} = hash_password($data{password});
         }
     }
+
     my $old_categorycode = GetBorrowerCategorycode( $data{borrowernumber} );
 
     # get only the columns of a borrower
@@ -653,15 +651,19 @@ sub ModMember {
     my $new_borrower = { map { join(' ', @columns) =~ /$_/ ? ( $_ => $data{$_} ) : () } keys(%data) };
     delete $new_borrower->{flags};
 
-    $new_borrower->{dateofbirth}  ||= undef if exists $new_borrower->{dateofbirth};
-    $new_borrower->{dateenrolled} ||= undef if exists $new_borrower->{dateenrolled};
-    $new_borrower->{dateexpiry}   ||= undef if exists $new_borrower->{dateexpiry};
-    $new_borrower->{debarred}     ||= undef if exists $new_borrower->{debarred};
+    $new_borrower->{dateofbirth}     ||= undef if exists $new_borrower->{dateofbirth};
+    $new_borrower->{dateenrolled}    ||= undef if exists $new_borrower->{dateenrolled};
+    $new_borrower->{dateexpiry}      ||= undef if exists $new_borrower->{dateexpiry};
+    $new_borrower->{debarred}        ||= undef if exists $new_borrower->{debarred};
+    $new_borrower->{sms_provider_id} ||= undef if exists $new_borrower->{sms_provider_id};
+
     my $rs = $schema->resultset('Borrower')->search({
         borrowernumber => $new_borrower->{borrowernumber},
      });
+
     my $execute_success = $rs->update($new_borrower);
     if ($execute_success ne '0E0') { # only proceed if the update was a success
+
         # ok if its an adult (type) it may have borrowers that depend on it as a guarantor
         # so when we update information for an adult we should check for guarantees and update the relevant part
         # of their records, ie addresses and phone numbers
@@ -1357,40 +1359,6 @@ sub get_cardnumber_length {
     return ( $min, $max );
 }
 
-=head2 getzipnamecity (OUEST-PROVENCE)
-
-take all info from table city for the fields city and  zip
-check for the name and the zip code of the city selected
-
-=cut
-
-sub getzipnamecity {
-    my ($cityid) = @_;
-    my $dbh      = C4::Context->dbh;
-    my $sth      =
-      $dbh->prepare(
-        "select city_name,city_state,city_zipcode,city_country from cities where cityid=? ");
-    $sth->execute($cityid);
-    my @data = $sth->fetchrow;
-    return $data[0], $data[1], $data[2], $data[3];
-}
-
-
-=head2 getdcity (OUEST-PROVENCE)
-
-recover cityid  with city_name condition
-
-=cut
-
-sub getidcity {
-    my ($city_name) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare("select cityid from cities where city_name=? ");
-    $sth->execute($city_name);
-    my $data = $sth->fetchrow;
-    return $data;
-}
-
 =head2 GetFirstValidEmailAddress
 
   $email = GetFirstValidEmailAddress($borrowernumber);
@@ -1696,35 +1664,6 @@ sub SetAge{
 
     return $borrower;
 }    # sub SetAge
-
-=head2 GetCities
-
-  $cityarrayref = GetCities();
-
-  Returns an array_ref of the entries in the cities table
-  If there are entries in the table an empty row is returned
-  This is currently only used to populate a popup in memberentry
-
-=cut
-
-sub GetCities {
-
-    my $dbh   = C4::Context->dbh;
-    my $city_arr = $dbh->selectall_arrayref(
-        q|SELECT cityid,city_zipcode,city_name,city_state,city_country FROM cities ORDER BY city_name|,
-        { Slice => {} });
-    if ( @{$city_arr} ) {
-        unshift @{$city_arr}, {
-            city_zipcode => q{},
-            city_name    => q{},
-            cityid       => q{},
-            city_state   => q{},
-            city_country => q{},
-        };
-    }
-
-    return  $city_arr;
-}
 
 =head2 GetSortDetails (OUEST-PROVENCE)
 
@@ -2472,17 +2411,18 @@ sub AddMember_Opac {
     my ( %borrower ) = @_;
 
     $borrower{'categorycode'} = C4::Context->preference('PatronSelfRegistrationDefaultCategory');
-
-    my $sr = new String::Random;
-    $sr->{'A'} = [ 'A'..'Z', 'a'..'z' ];
-    my $password = $sr->randpattern("AAAAAAAAAA");
-    $borrower{'password'} = $password;
+    if (not defined $borrower{'password'}){
+        my $sr = new String::Random;
+        $sr->{'A'} = [ 'A'..'Z', 'a'..'z' ];
+        my $password = $sr->randpattern("AAAAAAAAAA");
+        $borrower{'password'} = $password;
+    }
 
     $borrower{'cardnumber'} = fixup_cardnumber();
 
     my $borrowernumber = AddMember(%borrower);
 
-    return ( $borrowernumber, $password );
+    return ( $borrowernumber, $borrower{'password'} );
 }
 
 =head2 AddEnrolmentFeeIfNeeded

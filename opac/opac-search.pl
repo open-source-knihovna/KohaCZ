@@ -480,7 +480,9 @@ if (@searchCategories > 0) {
 @limits = map { uri_unescape($_) } @limits;
 
 if($params->{'multibranchlimit'}) {
-    my $multibranch = '('.join( " or ", map { "branch: $_ " } @{ GetBranchesInCategory( $params->{'multibranchlimit'} ) } ).')';
+    my $library_category = Koha::LibraryCategories->find( $params->{multibranchlimit} );
+    my @libraries = $library_category->libraries;
+    my $multibranch = '('.join( " or ", map { 'branch: ' . $_->id } @libraries ) .')';
     push @limits, $multibranch if ($multibranch ne  '()');
 }
 
@@ -890,7 +892,6 @@ for (my $i=0;$i<@servers;$i++) {
             if ($nohits and $nohits=~/{QUERY_KW}/){
                 # extracting keywords in case of relaunching search
                 (my $query_kw=$query_desc)=~s/ and|or / /g;
-                $query_kw = Encode::decode_utf8($query_kw);
                 my @query_kw=($query_kw=~ /([-\w]+\b)(?:[^,:]|$)/g);
                 $query_kw=join('+',@query_kw);
                 $nohits=~s/{QUERY_KW}/$query_kw/g;

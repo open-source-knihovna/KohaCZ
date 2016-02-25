@@ -52,6 +52,7 @@ use Koha::Borrowers;
 use Koha::Borrower::Debarments;
 use Koha::Borrower::CheckPrevIssue qw( WantsCheckPrevIssue CheckPrevIssue );
 use Koha::Database;
+use Koha::Libraries;
 use Carp;
 use List::MoreUtils qw( uniq );
 use Date::Calc qw(
@@ -813,14 +814,16 @@ sub CanBookBeIssued {
         ModDateLastSeen( $item->{'itemnumber'} );
         return( { STATS => 1 }, {});
     }
-    if ( $borrower->{flags}->{GNA} ) {
-        $issuingimpossible{GNA} = 1;
-    }
-    if ( $borrower->{flags}->{'LOST'} ) {
-        $issuingimpossible{CARD_LOST} = 1;
-    }
-    if ( $borrower->{flags}->{'DBARRED'} ) {
-        $issuingimpossible{DEBARRED} = 1;
+    if ( ref $borrower->{flags} ) {
+        if ( $borrower->{flags}->{GNA} ) {
+            $issuingimpossible{GNA} = 1;
+        }
+        if ( $borrower->{flags}->{'LOST'} ) {
+            $issuingimpossible{CARD_LOST} = 1;
+        }
+        if ( $borrower->{flags}->{'DBARRED'} ) {
+            $issuingimpossible{DEBARRED} = 1;
+        }
     }
     if ( !defined $borrower->{dateexpiry} || $borrower->{'dateexpiry'} eq '0000-00-00') {
         $issuingimpossible{EXPIRED} = 1;
@@ -1815,7 +1818,7 @@ patron who last borrowed the book.
 sub AddReturn {
     my ( $barcode, $branch, $exemptfine, $dropbox, $return_date, $dropboxdate ) = @_;
 
-    if ($branch and not GetBranchDetail($branch)) {
+    if ($branch and not Koha::Libraries->find($branch)) {
         warn "AddReturn error: branch '$branch' not found.  Reverting to " . C4::Context->userenv->{'branch'};
         undef $branch;
     }
@@ -3959,7 +3962,6 @@ sub GetAgeRestriction {
     return ($restriction_year);
 }
 
-1;
 
 =head2 GetPendingOnSiteCheckouts
 
@@ -4052,6 +4054,7 @@ sub GetTopIssues {
     return @$rows;
 }
 
+1;
 __END__
 
 =head1 AUTHOR

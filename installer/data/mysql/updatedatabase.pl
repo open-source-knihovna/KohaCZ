@@ -11810,6 +11810,98 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
+$DBversion = "3.23.00.020";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        CREATE TABLE  sms_providers (
+           id INT( 11 ) NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+           name VARCHAR( 255 ) NOT NULL ,
+           domain VARCHAR( 255 ) NOT NULL ,
+           UNIQUE (
+               name
+           )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+
+    $dbh->do(q{
+        ALTER TABLE borrowers ADD sms_provider_id INT( 11 ) NULL DEFAULT NULL AFTER smsalertnumber;
+    });
+    $dbh->do(q{
+        ALTER TABLE borrowers ADD FOREIGN KEY ( sms_provider_id ) REFERENCES sms_providers ( id ) ON UPDATE CASCADE ON DELETE SET NULL;
+    });
+    $dbh->do(q{
+        ALTER TABLE deletedborrowers ADD sms_provider_id INT( 11 ) NULL DEFAULT NULL AFTER smsalertnumber;
+    });
+    $dbh->do(q{
+        ALTER TABLE deletedborrowers ADD FOREIGN KEY ( sms_provider_id ) REFERENCES sms_providers ( id ) ON UPDATE CASCADE ON DELETE SET NULL;
+    });
+
+    print "Upgrade to $DBversion done (Bug 9021 - Add SMS via email as an alternative to SMS services via SMS::Send drivers)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.021";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('ShowAllCheckins', '0', '', 'Show all checkins', 'YesNo');
+    });
+
+    print "Upgrade to $DBversion done (Bug 15736 - Add a preference to control whether all items should be shown in checked-in items list)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.022";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{ ALTER TABLE tags_all MODIFY COLUMN borrowernumber INT(11) });
+    $dbh->do(q{ ALTER TABLE tags_all drop FOREIGN KEY tags_borrowers_fk_1 });
+    $dbh->do(q{ ALTER TABLE tags_all ADD CONSTRAINT `tags_borrowers_fk_1` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE });
+    $dbh->do(q{ ALTER TABLE tags_approval DROP FOREIGN KEY tags_approval_borrowers_fk_1 });
+    $dbh->do(q{ ALTER TABLE tags_approval ADD CONSTRAINT `tags_approval_borrowers_fk_1` FOREIGN KEY (`approved_by`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE });
+
+    print "Upgrade to $DBversion done (Bug 13534 - Deleting staff patron will delete tags approved by this patron)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.023";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+    INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+VALUES('OpenLibrarySearch','0','If Yes Open Library search results will show in OPAC',NULL,'YesNo');
+});
+
+    print "Upgrade to $DBversion done (Bug 6624 - Allow Koha to use the new read API from OpenLibrary)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.024";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+    ALTER TABLE deletedborrowers MODIFY COLUMN userid VARCHAR(75) DEFAULT NULL;
+});
+    $dbh->do(q{
+    ALTER TABLE deletedborrowers MODIFY COLUMN password VARCHAR(60) DEFAULT NULL;
+});
+    print "Upgrade to $DBversion done (Bug 15517 - Tables borrowers and deletedborrowers differ again)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.025";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+    DROP TABLE nozebra;
+});
+
+    print "Upgrade to $DBversion done (Bug 15526 - Drop nozebra database table)\n";
+    SetVersion($DBversion);
+
+$DBversion = "3.23.00.026";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+    UPDATE systempreferences SET value = CONCAT_WS('|', IF(value='', NULL, value), "password") WHERE variable="PatronSelfRegistrationBorrowerUnwantedField" AND value NOT LIKE "%password%";
+});
+
+    print "Upgrade to $DBversion done (Bug 15343 - Allow patrons to choose their own password on self registration)\n";
+    SetVersion($DBversion);
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068

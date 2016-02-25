@@ -20,10 +20,11 @@ use Modern::Perl;
 use C4::Context;
 use C4::Members;
 use C4::Letters;
-use C4::Branch;
 use C4::Budgets qw( AddBudgetPeriod AddBudget );
 
 use Koha::DateUtils qw( dt_from_string );
+use Koha::Library;
+use Koha::Libraries;
 
 use DateTime::Duration;
 use Test::More tests => 105;
@@ -62,8 +63,8 @@ $dbh->do(q|DELETE FROM message_queue|);
 $dbh->do(q|INSERT INTO letter(module, code, content) VALUES ('suggestions', 'CHECKED', 'my content')|);
 
 # Add CPL if missing.
-if (not defined GetBranchDetail('CPL')) {
-    ModBranch({add => 1, branchcode => 'CPL', branchname => 'Centerville'});
+if (not defined Koha::Libraries->find('CPL')) {
+    Koha::Library->new({ branchcode => 'CPL', branchname => 'Centerville' })->store;
 }
 
 my $sth = $dbh->prepare("SELECT * FROM categories WHERE categorycode='S';");

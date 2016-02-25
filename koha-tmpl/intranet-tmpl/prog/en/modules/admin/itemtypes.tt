@@ -140,7 +140,9 @@ Item types administration
                 <li>
                     <label for="description" class="required">Description: </label>
                     <input type="text" id="description" name="description" size="48" value="[% itemtype.description |html %]" required="required" /> <span class="required">Required</span>
-                    <a href="/cgi-bin/koha/admin/localization.pl?entity=itemtypes&code=[% itemtype.itemtype %]" title="Translate item type [% itemtype.itemtype %]" rel="gb_page_center[600,500]"><i class="icon-edit"></i> Translate into other languages</a>
+                    [% IF can_be_translated %]
+                        <a href="/cgi-bin/koha/admin/localization.pl?entity=itemtypes&code=[% itemtype.itemtype %]" title="Translate item type [% itemtype.itemtype %]" rel="gb_page_center[600,500]"><i class="icon-edit"></i> Translate into other languages</a>
+                    [% END %]
                 </li>
                 <li>
                     <span class="label">Search category</span>
@@ -302,7 +304,7 @@ Item types administration
 [% END %]
 
 [% IF op == 'delete_confirm' %]
-    <div class="dialog message">
+    <div class="dialog alert">
         <h3>Delete item type '[% itemtype.itemtype %]'?</h3>
         <table>
             <tr>
@@ -322,9 +324,11 @@ Item types administration
         </table>
         <form action="/cgi-bin/koha/admin/itemtypes.pl" method="post">
             <input type="hidden" name="op" value="delete_confirmed" /><input type="hidden" name="itemtype" value="[% itemtype.itemtype %]" />
-            <input type="submit" class="approve" value="Delete this Item Type" />
+            <button type="submit" class="approve"><i class="fa fa-fw fa-check"></i> Yes, delete this item type</button>
         </form>
-        <form action="/cgi-bin/koha/admin/itemtypes.pl" method="post"><input type="submit" class="deny" value="Do Not Delete" /></form>
+        <form action="/cgi-bin/koha/admin/itemtypes.pl" method="post">
+            <button type="submit" class="deny"><i class="fa fa-fw fa-remove"></i> No, do not delete</button>
+        </form>
     </div>
 [% END %]
 

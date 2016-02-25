@@ -49,7 +49,6 @@ use Koha::Database;
 
 use Date::Calc qw(
   Today
-  Add_Delta_YM
   Add_Delta_Days
   Date_to_Days
 );
@@ -279,13 +278,6 @@ if ($borrowernumber) {
     my (  $today_year,   $today_month,   $today_day) = Today();
     my ($warning_year, $warning_month, $warning_day) = split /-/, $borrower->{'dateexpiry'};
     my (  $enrol_year,   $enrol_month,   $enrol_day) = split /-/, $borrower->{'dateenrolled'};
-    # Renew day is calculated by adding the enrolment period to today
-    my (  $renew_year,   $renew_month,   $renew_day);
-    if ($enrol_year*$enrol_month*$enrol_day>0) {
-        (  $renew_year,   $renew_month,   $renew_day) =
-        Add_Delta_YM( $enrol_year, $enrol_month, $enrol_day,
-            0 , $borrower->{'enrolmentperiod'});
-    }
     # if the expiry date is before today ie they have expired
     if ( !$borrower->{'dateexpiry'} || $warning_year*$warning_month*$warning_day==0
         || Date_to_Days($today_year,     $today_month, $today_day  ) 
@@ -297,7 +289,6 @@ if ($borrowernumber) {
             noissues => ($force_allow_issue) ? 0 : "1",
             forceallow => $force_allow_issue,
             expired => "1",
-            renewaldate => "$renew_year-$renew_month-$renew_day",
         );
     }
     # check for NotifyBorrowerDeparture
@@ -645,7 +636,6 @@ $template->param(
     debt_confirmed            => $debt_confirmed,
     SpecifyDueDate            => $duedatespec_allow,
     CircAutocompl             => C4::Context->preference("CircAutocompl"),
-    AllowRenewalLimitOverride => C4::Context->preference("AllowRenewalLimitOverride"),
     canned_bor_notes_loop     => $canned_notes,
     debarments                => GetDebarments({ borrowernumber => $borrowernumber }),
     todaysdate                => output_pref( { dt => dt_from_string()->set(hour => 23)->set(minute => 59), dateformat => 'sql' } ),

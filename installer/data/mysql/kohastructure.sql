@@ -263,6 +263,7 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `altcontactcountry` text default NULL, -- the country for the alternate contact for the patron/borrower
   `altcontactphone` varchar(50) default NULL, -- the phone number for the alternate contact for the patron/borrower
   `smsalertnumber` varchar(50) default NULL, -- the mobile phone number where the patron/borrower would like to receive notices (if SNS turned on)
+  `sms_provider_id` int(11) DEFAULT NULL, -- the provider of the mobile phone number defined in smsalertnumber
   `privacy` integer(11) DEFAULT '1' NOT NULL, -- patron/borrower's privacy settings related to their reading history
   `checkprevissue` varchar(7) NOT NULL default 'inherit', -- produce a warning for this borrower if this item has previously been issued to this borrower if 'yes', not if 'no', defer to category setting if 'inherit'.
   `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
@@ -275,8 +276,10 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   KEY `surname_idx` (`surname`(255)),
   KEY `firstname_idx` (`firstname`(255)),
   KEY `othernames_idx` (`othernames`(255)),
+  KEY `sms_provider_id` (`sms_provider_id`),
   CONSTRAINT `borrowers_ibfk_1` FOREIGN KEY (`categorycode`) REFERENCES `categories` (`categorycode`),
-  CONSTRAINT `borrowers_ibfk_2` FOREIGN KEY (`branchcode`) REFERENCES `branches` (`branchcode`)
+  CONSTRAINT `borrowers_ibfk_2` FOREIGN KEY (`branchcode`) REFERENCES `branches` (`branchcode`),
+  CONSTRAINT `borrowers_ibfk_3` FOREIGN KEY (`sms_provider_id`) REFERENCES `sms_providers` (`id`) ON UPDATE CASCADE ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -896,9 +899,9 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `borrowernotes` mediumtext, -- a note on the patron/borrower's account that is only visible in the staff client
   `relationship` varchar(100) default NULL, -- used for children to include the relationship to their guarentor
   `sex` varchar(1) default NULL, -- patron/borrower's gender
-  `password` varchar(30) default NULL, -- patron/borrower's encrypted password
+  `password` varchar(60) default NULL, -- patron/borrower's encrypted password
   `flags` int(11) default NULL, -- will include a number associated with the staff member's permissions
-  `userid` varchar(30) default NULL, -- patron/borrower's opac and/or staff client log in
+  `userid` varchar(75) default NULL, -- patron/borrower's opac and/or staff client log in
   `opacnote` mediumtext, -- a note on the patron/borrower's account that is visible in the OPAC and staff client
   `contactnote` varchar(255) default NULL, -- a note related to the patron/borrower's alternate address
   `sort1` varchar(80) default NULL, -- a field that can be used for any information unique to the library
@@ -913,11 +916,13 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `altcontactcountry` text default NULL, -- the country for the alternate contact for the patron/borrower
   `altcontactphone` varchar(50) default NULL, -- the phone number for the alternate contact for the patron/borrower
   `smsalertnumber` varchar(50) default NULL, -- the mobile phone number where the patron/borrower would like to receive notices (if SNS turned on)
+  `sms_provider_id` int(11) DEFAULT NULL, -- the provider of the mobile phone number defined in smsalertnumber
   `privacy` integer(11) DEFAULT '1' NOT NULL, -- patron/borrower's privacy settings related to their reading history  KEY `borrowernumber` (`borrowernumber`),
   `checkprevissue` varchar(7) NOT NULL default 'inherit', -- produce a warning for this borrower if this item has previously been issued to this borrower if 'yes', not if 'no', defer to category setting if 'inherit'.
   `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
   KEY borrowernumber (borrowernumber),
-  KEY `cardnumber` (`cardnumber`)
+  KEY `cardnumber` (`cardnumber`),
+  KEY `sms_provider_id` (`sms_provider_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -2004,6 +2009,19 @@ CREATE TABLE sessions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
+-- Table structure for table `sms_providers`
+--
+
+DROP TABLE IF EXISTS sms_providers;
+CREATE TABLE `sms_providers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `domain` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
 -- Table structure for table `special_holidays`
 --
 
@@ -2262,7 +2280,7 @@ CREATE TABLE `tags` (
 DROP TABLE IF EXISTS `tags_all`;
 CREATE TABLE `tags_all` ( -- all of the tags
   `tag_id`         int(11) NOT NULL auto_increment, -- unique id and primary key
-  `borrowernumber` int(11) NOT NULL, -- the patron who added the tag (borrowers.borrowernumber)
+  `borrowernumber` int(11) DEFAULT NULL, -- the patron who added the tag (borrowers.borrowernumber)
   `biblionumber`   int(11) NOT NULL, -- the bib record this tag was left on (biblio.biblionumber)
   `term`      varchar(255) NOT NULL, -- the tag
   `language`       int(4) default NULL, -- the language the tag was left in
@@ -2271,7 +2289,7 @@ CREATE TABLE `tags_all` ( -- all of the tags
   KEY `tags_borrowers_fk_1` (`borrowernumber`),
   KEY `tags_biblionumber_fk_1` (`biblionumber`),
   CONSTRAINT `tags_borrowers_fk_1` FOREIGN KEY (`borrowernumber`)
-        REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE,
+        REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `tags_biblionumber_fk_1` FOREIGN KEY (`biblionumber`)
         REFERENCES `biblio`     (`biblionumber`)  ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -2290,7 +2308,7 @@ CREATE TABLE `tags_approval` ( -- approved tags
   PRIMARY KEY  (`term`),
   KEY `tags_approval_borrowers_fk_1` (`approved_by`),
   CONSTRAINT `tags_approval_borrowers_fk_1` FOREIGN KEY (`approved_by`)
-        REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE
+        REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
