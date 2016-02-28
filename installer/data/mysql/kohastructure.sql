@@ -882,9 +882,9 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `borrowernotes` mediumtext, -- a note on the patron/borrower's account that is only visible in the staff client
   `relationship` varchar(100) default NULL, -- used for children to include the relationship to their guarentor
   `sex` varchar(1) default NULL, -- patron/borrower's gender
-  `password` varchar(30) default NULL, -- patron/borrower's encrypted password
+  `password` varchar(60) default NULL, -- patron/borrower's encrypted password
   `flags` int(11) default NULL, -- will include a number associated with the staff member's permissions
-  `userid` varchar(30) default NULL, -- patron/borrower's opac and/or staff client log in
+  `userid` varchar(75) default NULL, -- patron/borrower's opac and/or staff client log in
   `opacnote` mediumtext, -- a note on the patron/borrower's account that is visible in the OPAC and staff client
   `contactnote` varchar(255) default NULL, -- a note related to the patron/borrower's alternate address
   `sort1` varchar(80) default NULL, -- a field that can be used for any information unique to the library
@@ -2235,7 +2235,7 @@ CREATE TABLE `tags` (
 DROP TABLE IF EXISTS `tags_all`;
 CREATE TABLE `tags_all` ( -- all of the tags
   `tag_id`         int(11) NOT NULL auto_increment, -- unique id and primary key
-  `borrowernumber` int(11) NOT NULL, -- the patron who added the tag (borrowers.borrowernumber)
+  `borrowernumber` int(11) DEFAULT NULL, -- the patron who added the tag (borrowers.borrowernumber)
   `biblionumber`   int(11) NOT NULL, -- the bib record this tag was left on (biblio.biblionumber)
   `term`      varchar(255) NOT NULL, -- the tag
   `language`       int(4) default NULL, -- the language the tag was left in
@@ -2244,7 +2244,7 @@ CREATE TABLE `tags_all` ( -- all of the tags
   KEY `tags_borrowers_fk_1` (`borrowernumber`),
   KEY `tags_biblionumber_fk_1` (`biblionumber`),
   CONSTRAINT `tags_borrowers_fk_1` FOREIGN KEY (`borrowernumber`)
-        REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE,
+        REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `tags_biblionumber_fk_1` FOREIGN KEY (`biblionumber`)
         REFERENCES `biblio`     (`biblionumber`)  ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -2263,7 +2263,7 @@ CREATE TABLE `tags_approval` ( -- approved tags
   PRIMARY KEY  (`term`),
   KEY `tags_approval_borrowers_fk_1` (`approved_by`),
   CONSTRAINT `tags_approval_borrowers_fk_1` FOREIGN KEY (`approved_by`)
-        REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE
+        REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --

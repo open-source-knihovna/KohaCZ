@@ -11444,7 +11444,7 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
-$DBversion = "3.22.03.001kohacz";
+$DBversion = "3.22.03.0001";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
         ALTER IGNORE TABLE borrowers ADD COLUMN `checkprevissue` varchar(7) NOT NULL default 'inherit' AFTER privacy
@@ -11463,7 +11463,7 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
-$DBversion = "3.22.03.002kohacz";
+$DBversion = "3.22.03.0002";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
         INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
@@ -11501,7 +11501,7 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
-$DBversion = "3.22.03.003kohacz";
+$DBversion = "3.22.03.0003";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
         ALTER IGNORE TABLE z3950servers
@@ -11521,6 +11521,45 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
+$DBversion = "3.22.03.001";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE `authorised_values` SET `lib`='Non-fiction' WHERE `lib`='Non Fiction';
+    });
+
+    print "Upgrade to $DBversion done (Bug 15411 - Change Non Fiction to Non-fiction in authorised_values)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.03.002";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{ ALTER TABLE tags_all MODIFY COLUMN borrowernumber INT(11) });
+    $dbh->do(q{ ALTER TABLE tags_all drop FOREIGN KEY tags_borrowers_fk_1 });
+    $dbh->do(q{ ALTER TABLE tags_all ADD CONSTRAINT `tags_borrowers_fk_1` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE });
+    $dbh->do(q{ ALTER TABLE tags_approval DROP FOREIGN KEY tags_approval_borrowers_fk_1 });
+    $dbh->do(q{ ALTER TABLE tags_approval ADD CONSTRAINT `tags_approval_borrowers_fk_1` FOREIGN KEY (`approved_by`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE });
+
+    print "Upgrade to $DBversion done (Bug 13534 - Deleting staff patron will delete tags approved by this patron)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.03.003";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE deletedborrowers MODIFY COLUMN userid VARCHAR(75) DEFAULT NULL;
+    });
+    $dbh->do(q{
+        ALTER TABLE deletedborrowers MODIFY COLUMN password VARCHAR(60) DEFAULT NULL;
+    });
+    print "Upgrade to $DBversion done (Bug 15517 - Tables borrowers and deletedborrowers differ again)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.04.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 3.22.4)\n";
+    SetVersion($DBversion);
+}
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068

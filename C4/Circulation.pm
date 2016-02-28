@@ -3951,7 +3951,6 @@ sub GetAgeRestriction {
     return ($restriction_year);
 }
 
-1;
 
 =head2 GetPendingOnSiteCheckouts
 
@@ -4044,6 +4043,7 @@ sub GetTopIssues {
     return @$rows;
 }
 
+1;
 __END__
 
 =head1 AUTHOR
