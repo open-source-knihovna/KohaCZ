@@ -1,17 +1,17 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-05-23 08:15+0200\n"
-"PO-Revision-Date: 2016-01-25 09:59+0000\n"
-"Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
+"PO-Revision-Date: 2016-02-29 10:15+0100\n"
+"Last-Translator: Josef Moravec <josef.moravec@gmail.com>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8-bit\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Pootle 2.5.1.1\n"
+"X-Generator: Poedit 1.8.4\n"
 "X-POOTLE-MTIME: 1453715994.000000\n"
 
 # Acquisitions
@@ -602,6 +602,18 @@ msgstr "Nepropojovat"
 msgid "authorities.pref#CatalogModuleRelink# automatically relink headings that have previously been linked when saving records in the cataloging module."
 msgstr "při ukládání katalogizačních záznamů automaticky znovu ta záhlaví, která již byla dříve propojena."
 
+# Authorities > General
+msgid "authorities.pref#EnablePushingToAuthorityServer# Don't use"
+msgstr "Vypnout"
+
+# Authorities > General
+msgid "authorities.pref#EnablePushingToAuthorityServer# Enables pushing to authority server as an update or create action"
+msgstr "posílání autorit přes Z39.50 Update."
+
+# Authorities > General
+msgid "authorities.pref#EnablePushingToAuthorityServer# Use"
+msgstr "Zapnout"
+
 # Authorities > Linker
 msgid "authorities.pref#LinkerKeepStale# Do"
 msgstr "Zachovat"
@@ -1117,6 +1129,18 @@ msgstr "Použít"
 # Cataloging > Display
 msgid "cataloguing.pref#UseControlNumber# record control number ($w subfields) and control number (001) for linking of bibliographic records."
 msgstr "kontrolní číslo bibliografického záznamu ($w podpole) a řídící číslo (001) pro propojení biblografických záznamů."
+
+# Cataloging > Display
+msgid "cataloguing.pref#UsePermanentWithdrawal# Don't use"
+msgstr "Nepoužívat"
+
+# Cataloging > Display
+msgid "cataloguing.pref#UsePermanentWithdrawal# Use"
+msgstr "Používat"
+
+# Cataloging > Display
+msgid "cataloguing.pref#UsePermanentWithdrawal# permanent withdrawal mode for withdrawing items. This generates an unique withdrawal number."
+msgstr "pro odepisování jednotek režim trvalého odpisu. Zároveň bude generováno unikátní úbytkové číslo."
 
 # Cataloging > Interface
 msgid "cataloguing.pref#advancedMARCeditor# Display"
@@ -4507,6 +4531,22 @@ msgstr "knihovně v které byl vypůjčen výtisk"
 msgid "opac.pref#OpacRenewalBranch# the patron's home library"
 msgstr "v čtenářově domovské knihovně"
 
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword#  to recover their password via e-mail in the OPAC"
+msgstr "obnovit heslo přes on-line katalog"
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# Library users are "
+msgstr "Čtenáři si"
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# allowed"
+msgstr "mohou"
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# not allowed"
+msgstr "nemohou"
+
 # OPAC > Appearance
 msgid "opac.pref#OpacSeparateHoldings# Don't separate"
 msgstr "Neoddělovat"
@@ -5028,6 +5068,26 @@ msgid "patrons.pref#CardnumberLength# characters long. The length can be a singl
 msgstr "znaků dlouhá. Je-li vyplněno jedno číslo, musí být počet znaků přesně odpovídat tomuto číslu. Je možné také vyplnit rozsah (ve tvaru \"min,max\"), nebo je minimální či maximální počet znaků (např.: \",max\")."
 
 # Patrons > General
+msgid "patrons.pref#CheckPrevIssue#  check borrower loan history to see if the current item has been loaned before."
+msgstr "historii výpůjček čtenáře a upozornit, pokud již daný dokument měl vypůjčený."
+
+# Patrons > General
+msgid "patrons.pref#CheckPrevIssue# Unless overridden, do"
+msgstr "Kontrolovat"
+
+# Patrons > General
+msgid "patrons.pref#CheckPrevIssue# Unless overridden, do not"
+msgstr "Nekontrolovat"
+
+# Patrons > General
+msgid "patrons.pref#CheckPrevIssueSerialFrameworks# (separate columns with |)"
+msgstr "(oddělit sloupce svislítkem |)"
+
+# Patrons > General
+msgid "patrons.pref#CheckPrevIssueSerialFrameworks# The following frameworks are considered serials while checking for already loaned items:"
+msgstr "Tyto katalogizační šablony se používají pro katalogizaci periodik (kontrola, zdali již měli čtenáři půjčeno tak proběhne na základně jednotek, nikoliv titulů):"
+
+# Patrons > General
 msgid "patrons.pref#EnableBorrowerFiles# Do"
 msgstr "Umožnit"
 
@@ -5228,8 +5288,8 @@ msgid "patrons.pref#intranetreadinghistory# Don't allow"
 msgstr "Nepovolit"
 
 # Patrons > General
-msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (it is stored regardless)."
-msgstr "obsluze přístup k historii výpůjček čtenáře (stejně se pamatuje)."
+msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
+msgstr "knihovníkům přístup k historii výpůjček čtenáře (historie je normálně ukládána bez ohledu na toto nastavení)."
 
 # Patrons > General
 msgid "patrons.pref#minPasswordLength# Login passwords for staff and patrons must be at least"
@@ -6262,4 +6322,3 @@ msgstr "Vracet maximálně"
 # Web services > Reporting
 msgid "web_services.pref#SvcMaxReportRows# rows of a report requested via the reports web service."
 msgstr "řádků z výstupů vyžádaných pomocí webové služby."
-
