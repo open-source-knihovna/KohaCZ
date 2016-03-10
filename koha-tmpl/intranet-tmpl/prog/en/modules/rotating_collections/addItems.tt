@@ -28,6 +28,12 @@
               [% ELSE %]
               [% INCLUDE 'rotating-collections-toolbar.inc' %]
               <h1>Collection <i>[% colTitle %]</i></h1>
+                [% IF ( returnNote == "ITEM_ISSUED") %]
+                      <div class="dialog message">
+                        <p>Item was issued by [% borrower.firstname %] [% borrower.surname %] ([% borrower.cardnumber %]) and now is returned</p>
+                      </div>
+                [% END %]
+
 
               [% IF ( previousActionAdd ) %]
                 [% IF ( addSuccess ) %]

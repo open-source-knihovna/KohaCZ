@@ -24,6 +24,7 @@ use C4::Context;
 use C4::RotatingCollections;
 use C4::Items;
 use C4::Biblio;
+use C4::Circulation;
 
 use CGI qw ( -utf8 );
 
@@ -73,6 +74,15 @@ if ( $query->param('action') eq 'addItem' ) {
         ## Remove the given item from the collection
         ( $success, $errorCode, $errorMessage ) =
           RemoveItemFromCollection( $colId, $itemnumber );
+
+        my ($doreturn, $messages, $iteminformation, $borrower);
+
+        if (IsItemIssued($itemnumber)) {
+          $template->param( returnNote => "ITEM_ISSUED" );
+          ($doreturn, $messages, $iteminformation, $borrower) = AddReturn($barcode);
+          $template->param( borrower => $borrower);
+        }
+
 
         $template->param(
             previousActionRemove => 1,
