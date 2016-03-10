@@ -26,6 +26,7 @@ use C4::Context;
 use C4::RotatingCollections;
 use C4::Items;
 use C4::Biblio;
+use C4::Circulation;
 
 my $query = new CGI;
 
@@ -45,6 +46,14 @@ if ( $query->param('action') eq 'removeItem' ) {
   my $barcode = $query->param('barcode');
   my $itemnumber = GetItemnumberFromBarcode($barcode);
   my $itemInfo = &GetBiblioFromItemNumber($itemnumber, undef);
+
+  my ($doreturn, $messages, $iteminformation, $borrower);
+
+  if (IsItemIssued($itemnumber)) {
+      $template->param( returnNote => "ITEM_ISSUED" );
+      ($doreturn, $messages, $iteminformation, $borrower) = AddReturn($barcode);
+      $template->param( borrower => $borrower);
+  }
 
   $template->param( barcode => $barcode );
   $template->param( itemInfo => $itemInfo );
