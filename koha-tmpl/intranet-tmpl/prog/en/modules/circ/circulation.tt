@@ -265,7 +265,7 @@ $(document).ready(function() {
 [% END %]
 
 [% IF PREVISSUE %]
-    <li>This item has previously been issued to this patron on <span class="prevIssueDate">[% PREVISSUEDATE | $KohaDates %]</span>. Check out anyway?</li>
+    <li>This item has previously been checked out to this patron. Check out anyway?</li>
 [% END %]
 
 [% IF BIBLIO_ALREADY_ISSUED %]

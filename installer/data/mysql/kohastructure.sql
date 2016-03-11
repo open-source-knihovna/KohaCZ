@@ -319,7 +319,7 @@ CREATE TABLE `categories` ( -- this table shows information related to Koha patr
   `category_type` varchar(1) NOT NULL default 'A', -- type of Koha patron (Adult, Child, Professional, Organizational, Statistical, Staff)
   `BlockExpiredPatronOpacActions` tinyint(1) NOT NULL default '-1', -- wheither or not a patron of this category can renew books or place holds once their card has expired. 0 means they can, 1 means they cannot, -1 means use syspref BlockExpiredPatronOpacActions
   `default_privacy` ENUM( 'default', 'never', 'forever' ) NOT NULL DEFAULT 'default', -- Default privacy setting for this patron category
-  `checkprevissue` varchar(7) NOT NULL default 'inherit', -- produce a warning for this borrower category if this item has previously been issued to this borrower if 'yes', not if 'no', defer to syspref setting if 'inherit'.
+  `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron category if this item has previously been checked out to this patron if 'yes', not if 'no', defer to syspref setting if 'inherit'.
   PRIMARY KEY  (`categorycode`),
   UNIQUE KEY `categorycode` (`categorycode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -620,6 +620,7 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `privacy` integer(11) DEFAULT '1' NOT NULL, -- patron/borrower's privacy settings related to their reading history  KEY `borrowernumber` (`borrowernumber`),
   `checkprevissue` varchar(7) NOT NULL default 'inherit', -- produce a warning for this borrower if this item has previously been issued to this borrower if 'yes', not if 'no', defer to category setting if 'inherit'.
   `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
+  `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron if this item has previously been checked out to this patron if 'yes', not if 'no', defer to category setting if 'inherit'.
   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
   KEY borrowernumber (borrowernumber),
   KEY `cardnumber` (`cardnumber`),
@@ -1644,6 +1645,7 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `privacy` integer(11) DEFAULT '1' NOT NULL, -- patron/borrower's privacy settings related to their reading history
   `checkprevissue` varchar(7) NOT NULL default 'inherit', -- produce a warning for this borrower if this item has previously been issued to this borrower if 'yes', not if 'no', defer to category setting if 'inherit'.
   `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
+  `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron if this item has previously been checked out to this patron if 'yes', not if 'no', defer to category setting if 'inherit'.
   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
   UNIQUE KEY `cardnumber` (`cardnumber`),
   PRIMARY KEY `borrowernumber` (`borrowernumber`),
