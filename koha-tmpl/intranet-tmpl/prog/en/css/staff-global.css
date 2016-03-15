@@ -237,6 +237,10 @@ table.indexes td {
     vertical-align : middle;
 }
 
+td.actions {
+    white-space: nowrap;
+}
+
 td.borderless {
     border-collapse : separate;
     border : 0 none;
@@ -262,20 +266,12 @@ table+table {
 	border : 0;
 }
 
-.highlighted-row { background-color: orange !important }
+.highlighted-row,
+.highlighted-row td { background-color: #FFD000 !important }
 
-tbody tr:nth-child(odd) td,
-tr.highlight td,
-tr.highlight th,
-tr.odd td,
-tr.odd.highlight td {
+tbody tr:nth-child(odd) td {
 	background-color : #F3F3F3;
     border : 1px solid #BCBCBC;
-    border-right : 1px solid #BCBCBC;
-}
-
-tr.even td, tr.even.highlight td {
-	background-color: #FFF;
     border-right : 1px solid #BCBCBC;
 }
 
@@ -929,6 +925,21 @@ fieldset.rows .inputnote {
        color: #cc0000;
 }
 
+/* Font Awesome icon */
+.error i {
+    color: #CC0000;
+}
+
+/* Font Awesome icon */
+.warn i {
+    color: orange;
+}
+
+/* For Font Awesome icon bullets */
+ul.fa-ul li {
+    list-style-type: none;
+}
+
 div.error {
 	border : 2px dashed #990000;
 	background-color : #FFFF99;
@@ -1210,6 +1221,10 @@ div.alert strong {
     color: #cc0000;
 }
 
+.new i.fa {
+    color: #425FAF;
+}
+
 a.clear-field {
     background : transparent url("../../img/clear-field.png") center left no-repeat;
     padding-left : 16px;
@@ -1432,17 +1447,16 @@ h1#logo a {
         vertical-align: middle;
 }
 
-li.email a {
-	display:block;
-	overflow:hidden;
-	width:13em;
-}
 li.email {
-	background: #FFF url(../../img/elipsis.gif) right bottom no-repeat;
-	font-size :  87%;
-	overflow:hidden;
-	padding :0 10px 0 0;
-	width:13em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.patronbriefinfo li.email {
+    font-size :  87%;
+    padding : 0 10px 0 0;
+    width: 90%;
 }
 
 .empty {
@@ -2809,6 +2823,7 @@ span.onsite_checkout {
     border-radius: 4px;
     border : 1px solid #FFF2CE;
 }
+
 div.lastchecked {
     padding : .2em 1em;
     border: 2px solid #BCDB89;
@@ -2840,9 +2855,31 @@ div#cn_browser_table_wrapper > table#cn_browser_table {
    width:90%;
 }
 
-td p.error {
-    color: red;
+/* Tools > automatic_item_modification_by_age */
+div.rules {
+    display: block;
 }
-td p.warn {
-    color: orange;
+div#new_rule, div.rule {
+    background-color: #F4F8F9;
+    border: 2px solid #B9D8D9;
+    border-radius: 5px;
+    margin: .3em;
+    padding: .3em;
+}
+
+div.duration, div.blocks {
+    border: 2px solid #B9D8D9;
+    border-radius: 5px 5px 5px 5px;
+    margin: .3em;
+    padding: 0 .3em .3em .3em;
+}
+
+div.duration h5, div.blocks h5 {
+    padding-bottom: 4px;
+    padding-left: 0.2em;
+    background-color: #E6F0F2;
+    border-radius: 1px;
+}
+div.duration span, div.blocks div {
+    display:block;
 }

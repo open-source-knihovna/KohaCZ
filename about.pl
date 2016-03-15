@@ -34,7 +34,8 @@ use C4::Context;
 use C4::Installer;
 
 use Koha;
-use Koha::Borrowers;
+use Koha::Acquisition::Currencies;
+use Koha::Patrons;
 use Koha::Config::SysPrefs;
 
 #use Smart::Comments '####';
@@ -51,18 +52,11 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
-my $kohaVersion   = Koha::version();
-my $osVersion     = `uname -a`;
 my $perl_path = $^X;
 if ($^O ne 'VMS') {
     $perl_path .= $Config{_exe} unless $perl_path =~ m/$Config{_exe}$/i;
 }
-my $perlVersion   = $];
-my $mysqlVersion  = `mysql -V`;
-# Get Apache version
-my $apacheVersion = (`apache2ctl -v`)[0];
-$apacheVersion    = `httpd2 -v 2> /dev/null` unless $apacheVersion;
-$apacheVersion    = `httpd -v 2> /dev/null` unless $apacheVersion;
+
 my $zebraVersion = `zebraidx -V`;
 
 # Check running PSGI env
@@ -88,14 +82,14 @@ my $warnPrefAnonymousPatron = (
         and not C4::Context->preference('AnonymousPatron')
 );
 
-my $anonymous_patron = Koha::Borrowers->find( C4::Context->preference('AnonymousPatron') );
-my $warnPrefAnonymousPatron_PatronDoesNotExist = ( not $anonymous_patron and Koha::Borrowers->search({ privacy => 2 })->count );
+my $anonymous_patron = Koha::Patrons->find( C4::Context->preference('AnonymousPatron') );
+my $warnPrefAnonymousPatron_PatronDoesNotExist = ( not $anonymous_patron and Koha::Patrons->search({ privacy => 2 })->count );
 
 my $errZebraConnection = C4::Context->Zconn("biblioserver",0)->errcode();
 
 my $warnIsRootUser   = (! $loggedinuser);
 
-my $warnNoActiveCurrency = (! defined C4::Budgets->GetCurrency());
+my $warnNoActiveCurrency = (! defined Koha::Acquisition::Currencies->get_active);
 my @xml_config_warnings;
 
 my $context = new C4::Context;
@@ -255,14 +249,16 @@ if (  C4::Context->preference('WebBasedSelfCheck')
 
 }
 
+my %versions = C4::Context::get_versions();
+
 $template->param(
-    kohaVersion   => $kohaVersion,
-    osVersion     => $osVersion,
+    kohaVersion   => $versions{'kohaVersion'},
+    osVersion     => $versions{'osVersion'},
     perlPath      => $perl_path,
-    perlVersion   => $perlVersion,
+    perlVersion   => $versions{'perlVersion'},
     perlIncPath   => [ map { perlinc => $_ }, @INC ],
-    mysqlVersion  => $mysqlVersion,
-    apacheVersion => $apacheVersion,
+    mysqlVersion  => $versions{'mysqlVersion'},
+    apacheVersion => $versions{'apacheVersion'},
     zebraVersion  => $zebraVersion,
     prefBiblioAddsAuthorities => $prefBiblioAddsAuthorities,
     prefAutoCreateAuthorities => $prefAutoCreateAuthorities,

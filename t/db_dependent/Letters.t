@@ -18,7 +18,7 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Test::More tests => 68;
+use Test::More tests => 72;
 use Test::MockModule;
 use Test::Warn;
 
@@ -136,6 +136,16 @@ is(
     'failed',
     'message marked failed if tried to send SMS message for borrower with no smsalertnumber set (bug 11208)'
 );
+
+# ResendMessage
+my $resent = C4::Letters::ResendMessage($messages->[0]->{message_id});
+my $message = C4::Letters::GetMessage( $messages->[0]->{message_id});
+is( $resent, 1, 'The message should have been resent' );
+is($message->{status},'pending', 'ResendMessage sets status to pending correctly (bug 12426)');
+$resent = C4::Letters::ResendMessage($messages->[0]->{message_id});
+is( $resent, 0, 'The message should not have been resent again' );
+$resent = C4::Letters::ResendMessage();
+is( $resent, undef, 'ResendMessage should return undef if not message_id given' );
 
 # GetLetters
 my $letters = C4::Letters::GetLetters();
@@ -394,7 +404,7 @@ C4::Bookseller::ModBookseller($bookseller);
 $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
 
 # Ensure that the preference 'LetterLog' is set to logging
-C4::Context->set_preference( 'LetterLog', 'on' );
+t::lib::Mocks::mock_preference( 'LetterLog', 'on' );
 
 {
 warning_is {

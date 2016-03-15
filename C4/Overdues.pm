@@ -26,14 +26,16 @@ use Date::Manip qw/UnixDate/;
 use List::MoreUtils qw( uniq );
 use POSIX qw( floor ceil );
 use Locale::Currency::Format 1.28;
+use Carp;
 
 use C4::Circulation;
 use C4::Context;
 use C4::Accounts;
 use C4::Log; # logaction
 use C4::Debug;
-use C4::Budgets qw(GetCurrency);
 use Koha::DateUtils;
+use Koha::Account::Line;
+use Koha::Account::Lines;
 
 use vars qw($VERSION @ISA @EXPORT);
 
@@ -471,7 +473,7 @@ sub GetIssuesIteminfo {
 
 =head2 UpdateFine
 
-    &UpdateFine($itemnumber, $borrowernumber, $amount, $type, $description);
+    &UpdateFine({ issue_id => $issue_id, itemnumber => $itemnumber, borrwernumber => $borrowernumber, amount => $amount, type => $type, $due => $date_due });
 
 (Note: the following is mostly conjecture and guesswork.)
 
@@ -486,8 +488,7 @@ C<$amount> is the current amount owed by the patron.
 
 C<$type> will be used in the description of the fine.
 
-C<$description> is a string that must be present in the description of
-the fine. I think this is expected to be a date in DD/MM/YYYY format.
+C<$due> is the due date formatted to the currently specified date format
 
 C<&UpdateFine> looks up the amount currently owed on the given item
 and sets it to C<$amount>, creating, if necessary, a new entry in the
@@ -504,8 +505,22 @@ accountlines table of the Koha database.
 # Possible Answer: You might update a fine for a damaged item, *after* it is returned.
 #
 sub UpdateFine {
-    my ( $itemnum, $borrowernumber, $amount, $type, $due ) = @_;
-	$debug and warn "UpdateFine($itemnum, $borrowernumber, $amount, " . ($type||'""') . ", $due) called";
+    my ($params) = @_;
+
+    my $issue_id       = $params->{issue_id};
+    my $itemnum        = $params->{itemnumber};
+    my $borrowernumber = $params->{borrowernumber};
+    my $amount         = $params->{amount};
+    my $type           = $params->{type};
+    my $due            = $params->{due};
+
+    $debug and warn "UpdateFine({ itemnumber => $itemnum, borrowernumber => $borrowernumber, type => $type, due => $due, issue_id => $issue_id})";
+
+    unless ( $issue_id ) {
+        carp("No issue_id passed in!");
+        return;
+    }
+
     my $dbh = C4::Context->dbh;
     # FIXME - What exactly is this query supposed to do? It looks up an
     # entry in accountlines that matches the given item and borrower
@@ -513,15 +528,15 @@ sub UpdateFine {
     # account type has one of several values, but what does this _mean_?
     # Does it look up existing fines for this item?
     # FIXME - What are these various account types? ("FU", "O", "F", "M")
-	#	"L"   is LOST item
-	#   "A"   is Account Management Fee
-	#   "N"   is New Card
-	#   "M"   is Sundry
-	#   "O"   is Overdue ??
-	#   "F"   is Fine ??
-	#   "FU"  is Fine UPDATE??
-	#	"Pay" is Payment
-	#   "REF" is Cash Refund
+    #   "L"   is LOST item
+    #   "A"   is Account Management Fee
+    #   "N"   is New Card
+    #   "M"   is Sundry
+    #   "O"   is Overdue ??
+    #   "F"   is Fine ??
+    #   "FU"  is Fine UPDATE??
+    #   "Pay" is Payment
+    #   "REF" is Cash Refund
     my $sth = $dbh->prepare(
         "SELECT * FROM accountlines
         WHERE borrowernumber=?
@@ -536,10 +551,11 @@ sub UpdateFine {
     # - accumulate fines for other items
     # so we can update $itemnum fine taking in account fine caps
     while (my $rec = $sth->fetchrow_hashref) {
-        if ($rec->{itemnumber} == $itemnum && $rec->{description} =~ /$due_qr/) {
+        if ( $rec->{issue_id} == $issue_id ) {
             if ($data) {
-                warn "Not a unique accountlines record for item $itemnum borrower $borrowernumber";
-            } else {
+                warn "Not a unique accountlines record for issue_id $issue_id";
+            }
+            else {
                 $data = $rec;
                 next;
             }
@@ -557,35 +573,25 @@ sub UpdateFine {
     }
 
     if ( $data ) {
-
-		# we're updating an existing fine.  Only modify if amount changed
+        # we're updating an existing fine.  Only modify if amount changed
         # Note that in the current implementation, you cannot pay against an accruing fine
         # (i.e. , of accounttype 'FU').  Doing so will break accrual.
-    	if ( $data->{'amount'} != $amount ) {
+        if ( $data->{'amount'} != $amount ) {
+            my $accountline = Koha::Account::Lines->find( $data->{accountlines_id} );
             my $diff = $amount - $data->{'amount'};
-	    #3341: diff could be positive or negative!
-            my $out  = $data->{'amountoutstanding'} + $diff;
-            my $query = "
-                UPDATE accountlines
-				SET date=now(), amount=?, amountoutstanding=?,
-					lastincrement=?, accounttype='FU'
-	  			WHERE borrowernumber=?
-				AND   itemnumber=?
-				AND   accounttype IN ('FU','O')
-				AND   description LIKE ?
-				LIMIT 1 ";
-            my $sth2 = $dbh->prepare($query);
-			# FIXME: BOGUS query cannot ensure uniqueness w/ LIKE %x% !!!
-			# 		LIMIT 1 added to prevent multiple affected lines
-			# FIXME: accountlines table needs unique key!! Possibly a combo of borrowernumber and accountline.  
-			# 		But actually, we should just have a regular autoincrementing PK and forget accountline,
-			# 		including the bogus getnextaccountno function (doesn't prevent conflict on simultaneous ops).
-			# FIXME: Why only 2 account types here?
-			$debug and print STDERR "UpdateFine query: $query\n" .
-				"w/ args: $amount, $out, $diff, $data->{'borrowernumber'}, $data->{'itemnumber'}, \"\%$due\%\"\n";
-            $sth2->execute($amount, $out, $diff, $data->{'borrowernumber'}, $data->{'itemnumber'}, "%$due%");
-        } else {
-            #      print "no update needed $data->{'amount'}"
+
+            #3341: diff could be positive or negative!
+            my $out   = $data->{'amountoutstanding'} + $diff;
+
+            $accountline->set(
+                {
+                    date          => dt_from_string(),
+                    amount        => $amount,
+                    outstanding   => $out,
+                    lastincrement => $diff,
+                    accounttype   => 'FU',
+                }
+            )->store();
         }
     } else {
         if ( $amount ) { # Don't add new fines with an amount of 0
@@ -599,12 +605,19 @@ sub UpdateFine {
 
             my $desc = ( $type ? "$type " : '' ) . "$title $due";    # FIXEDME, avoid whitespace prefix on empty $type
 
-            my $query = "INSERT INTO accountlines
-                         (borrowernumber,itemnumber,date,amount,description,accounttype,amountoutstanding,lastincrement,accountno)
-                         VALUES (?,?,now(),?,?,'FU',?,?,?)";
-            my $sth2 = $dbh->prepare($query);
-            $debug and print STDERR "UpdateFine query: $query\nw/ args: $borrowernumber, $itemnum, $amount, $desc, $amount, $amount, $nextaccntno\n";
-            $sth2->execute( $borrowernumber, $itemnum, $amount, $desc, $amount, $amount, $nextaccntno );
+            my $accountline = Koha::Account::Line->new(
+                {
+                    borrowernumber    => $borrowernumber,
+                    itemnumber        => $itemnum,
+                    date              => dt_from_string(),
+                    amount            => $amount,
+                    description       => $desc,
+                    accounttype       => 'FU',
+                    amountoutstanding => $amount,
+                    lastincrement     => $amount,
+                    accountno         => $nextaccntno,
+                }
+            )->store();
         }
     }
     # logging action
@@ -990,9 +1003,10 @@ sub parse_overdues_letter {
         $tables{'branches'} = $p;
     }
 
-    my $currencies = GetCurrency();
+    my $active_currency = Koha::Acquisition::Currencies->get_active;
+
     my $currency_format;
-    $currency_format = $currencies->{currency} if defined($currencies);
+    $currency_format = $active_currency->currency if defined($active_currency);
 
     my @item_tables;
     if ( my $i = $params->{'items'} ) {

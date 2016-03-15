@@ -773,6 +773,7 @@ CREATE TABLE `currency` (
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `rate` float(15,5) default NULL,
   `active` tinyint(1) default NULL,
+  `archived` tinyint(1) DEFAULT 0,
   PRIMARY KEY  (`currency`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -976,6 +977,7 @@ CREATE TABLE `deleteditems` (
   `enumchron` text default NULL, -- serial enumeration/chronology for the item (MARC21 952$h)
   `copynumber` varchar(32) default NULL, -- copy number (MARC21 952$t)
   `stocknumber` varchar(32) default NULL, -- inventory number (MARC21 952$i)
+  `new` VARCHAR(32) DEFAULT NULL, -- 'new' value, you can put whatever free-text information. This field is intented to be managed by the automatic_item_modification_by_age cronjob.
   PRIMARY KEY  (`itemnumber`),
   KEY `delitembarcodeidx` (`barcode`),
   KEY `delitemstocknumberidx` (`stocknumber`),
@@ -1209,7 +1211,7 @@ CREATE TABLE `issuingrules` ( -- circulation and fine rules
   `hardduedatecompare` tinyint NOT NULL default "0", -- type of hard due date (1 = after, 0 = on, -1 = before)
   `renewalsallowed` smallint(6) NOT NULL default "0", -- how many renewals are allowed
   `renewalperiod` int(4) default NULL, -- renewal period in the unit set in issuingrules.lengthunit
-  `norenewalbefore` int(4) default NULL, -- no renewal allowed until X days or hours before due date. In the unit set in issuingrules.lengthunit
+  `norenewalbefore` int(4) default NULL, -- no renewal allowed until X days or hours before due date.
   `auto_renew` BOOLEAN default FALSE, -- automatic renewal
   `reservesallowed` smallint(6) NOT NULL default "0", -- how many holds are allowed
   `branchcode` varchar(10) NOT NULL default '', -- the branch this rule is for (branches.branchcode)
@@ -1273,6 +1275,7 @@ CREATE TABLE `items` ( -- holdings/item information
   `enumchron` text default NULL, -- serial enumeration/chronology for the item (MARC21 952$h)
   `copynumber` varchar(32) default NULL, -- copy number (MARC21 952$t)
   `stocknumber` varchar(32) default NULL, -- inventory number (MARC21 952$i)
+  `new` VARCHAR(32) DEFAULT NULL, -- 'new' value, you can put whatever free-text information. This field is intented to be managed by the automatic_item_modification_by_age cronjob.
   PRIMARY KEY  (`itemnumber`),
   UNIQUE KEY `itembarcodeidx` (`barcode`),
   KEY `itemstocknumberidx` (`stocknumber`),
@@ -2236,7 +2239,7 @@ CREATE TABLE `suggestions` ( -- purchase suggestions
    collectiontitle text default NULL, -- collection name for the suggested item
    itemtype VARCHAR(30) default NULL, -- suggested item type 
    quantity SMALLINT(6) default NULL, -- suggested quantity to be purchased
-   currency VARCHAR(3) default NULL, -- suggested currency for the suggested price
+   currency VARCHAR(10) default NULL, -- suggested currency for the suggested price
    price DECIMAL(28,6) default NULL, -- suggested price
    total DECIMAL(28,6) default NULL, -- suggested total cost (price*quantity updated for currency)
   PRIMARY KEY  (`suggestionid`),
@@ -2777,6 +2780,7 @@ CREATE TABLE `messages` ( -- circulation messages left via the patron's check ou
 DROP TABLE IF EXISTS `accountlines`;
 CREATE TABLE `accountlines` (
   `accountlines_id` int(11) NOT NULL AUTO_INCREMENT,
+  `issue_id` int(11) NULL DEFAULT NULL,
   `borrowernumber` int(11) NOT NULL default 0,
   `accountno` smallint(6) NOT NULL default 0,
   `itemnumber` int(11) default NULL,
@@ -2929,7 +2933,7 @@ CREATE TABLE `aqbooksellers` ( -- information about the vendors listed in acquis
   `phone` varchar(30) default NULL, -- vendor phone number
   `accountnumber` mediumtext, -- unused in Koha
   `othersupplier` mediumtext,  -- unused in Koha
-  `currency` varchar(3) NOT NULL default '', -- unused in Koha
+  `currency` varchar(10) NOT NULL default '', -- unused in Koha
   `booksellerfax` mediumtext, -- vendor fax number
   `notes` mediumtext, -- order notes
   `bookselleremail` mediumtext, -- vendor email
@@ -3088,7 +3092,7 @@ CREATE TABLE `aqorders` ( -- information related to the basket line items
   `biblionumber` int(11) default NULL, -- links the order to the biblio being ordered (biblio.biblionumber)
   `entrydate` date default NULL, -- the date the bib was added to the basket
   `quantity` smallint(6) default NULL, -- the quantity ordered
-  `currency` varchar(3) default NULL, -- the currency used for the purchase
+  `currency` varchar(10) default NULL, -- the currency used for the purchase
   `listprice` decimal(28,6) default NULL, -- the vendor price for this line item
   `datereceived` date default NULL, -- the date this order was received
   invoiceid int(11) default NULL, -- id of invoice
@@ -3129,7 +3133,8 @@ CREATE TABLE `aqorders` ( -- information related to the basket line items
   CONSTRAINT `aqorders_ibfk_1` FOREIGN KEY (`basketno`) REFERENCES `aqbasket` (`basketno`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `aqorders_ibfk_2` FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT aqorders_ibfk_3 FOREIGN KEY (invoiceid) REFERENCES aqinvoices (invoiceid) ON DELETE SET NULL ON UPDATE CASCADE,
-  CONSTRAINT `aqorders_subscriptionid` FOREIGN KEY (`subscriptionid`) REFERENCES `subscription` (`subscriptionid`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `aqorders_subscriptionid` FOREIGN KEY (`subscriptionid`) REFERENCES `subscription` (`subscriptionid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `aqorders_currency` FOREIGN KEY (`currency`) REFERENCES `currency` (`currency`) ON DELETE SET NULL ON UPDATE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --

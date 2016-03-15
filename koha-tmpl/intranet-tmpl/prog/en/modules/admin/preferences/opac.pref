@@ -54,6 +54,12 @@ OPAC:
                   no: "Don't show"
             - "a warning that the OPAC is under maintenance, instead of the OPAC itself. Note: this shows the same warning as when the database needs to be upgraded, but unconditionally."
         -
+        -
+            - "Show the following HTML when OpacMaintenance is enabled:"
+            - pref: OpacMaintenanceNotice
+              type: htmlarea
+              class: code
+        -
             - By default, show bib records
             - pref: BiblioDefaultView
               choices:
@@ -485,13 +491,6 @@ OPAC:
             - the acquisition details on OPAC detail pages.
     Policy:
         -
-            - pref: singleBranchMode
-              default: 0
-              choices:
-                  yes: "Don't allow"
-                  no: Allow
-            - patrons to select their branch on the OPAC or show branch names with callnumbers.
-        -
             - pref: SearchMyLibraryFirst
               choices:
                   yes: Limit
@@ -673,7 +672,7 @@ OPAC:
               choices:
                   yes: Allow
                   no: "Don't allow"
-            - "library patrons to register an account via the OPAC."
+            - "library patrons to register or modify their account via the OPAC."
         -
             - pref: PatronSelfRegistrationVerifyByEmail
               choices:
@@ -696,8 +695,13 @@ OPAC:
               class: multi
             - (separate columns with |)
         -
-            - "The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron entry screen:"
+            - "The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-registration screen:"
             - pref: PatronSelfRegistrationBorrowerUnwantedField
+              class: multi
+            - (separate columns with |)
+        -
+            - "The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-modification screen:"
+            - pref: PatronSelfModificationBorrowerUnwantedField
               class: multi
             - (separate columns with |)
         -

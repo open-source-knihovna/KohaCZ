@@ -588,6 +588,7 @@ foreach ( sort { $a <=> $b } keys %returneditems ) {
         $ri{itemtitle}           = $biblio->{'title'};
         $ri{itemauthor}          = $biblio->{'author'};
         $ri{itemcallnumber}      = $biblio->{'itemcallnumber'};
+        $ri{dateaccessioned}     = $item->{dateaccessioned};
         $ri{itemtype}            = $biblio->{'itemtype'};
         $ri{itemnote}            = $biblio->{'itemnotes'};
         $ri{itemnotes_nonpublic} = $item->{'itemnotes_nonpublic'};

@@ -48,11 +48,12 @@ use Data::Dumper;
 use Koha::DateUtils;
 use Koha::Calendar;
 use Koha::Items;
-use Koha::Borrowers;
-use Koha::Borrower::Debarments;
+use Koha::Patrons;
+use Koha::Patron::Debarments;
 use Koha::Borrower::CheckPrevIssue qw( WantsCheckPrevIssue CheckPrevIssue );
 use Koha::Database;
 use Koha::Libraries;
+use Koha::Holds;
 use Carp;
 use List::MoreUtils qw( uniq );
 use Date::Calc qw(
@@ -675,6 +676,7 @@ C<$issuingimpossible> and C<$needsconfirmation> are some hashref.
 =item C<$duedates> is a DateTime object.
 
 =item C<$inprocess> boolean switch
+
 =item C<$ignore_reserves> boolean switch
 
 =back
@@ -1087,16 +1089,14 @@ sub CanBookBeIssued {
     }
 
     ## check for high holds decreasing loan period
-    my $decrease_loan = C4::Context->preference('decreaseLoanHighHolds');
-    if ( $decrease_loan && $decrease_loan == 1 ) {
-        my ( $reserved, $num, $duration, $returndate ) =
-          checkHighHolds( $item, $borrower );
+    if ( C4::Context->preference('decreaseLoanHighHolds') ) {
+        my $check = checkHighHolds( $item, $borrower );
 
-        if ( $num >= C4::Context->preference('decreaseLoanHighHoldsValue') ) {
+        if ( $check->{exceeded} ) {
             $needsconfirmation{HIGHHOLDS} = {
-                num_holds  => $num,
-                duration   => $duration,
-                returndate => output_pref($returndate),
+                num_holds  => $check->{outstanding},
+                duration   => $check->{duration},
+                returndate => output_pref( $check->{due_date} ),
             };
         }
     }
@@ -1191,13 +1191,60 @@ sub checkHighHolds {
     my ( $item, $borrower ) = @_;
     my $biblio = GetBiblioFromItemNumber( $item->{itemnumber} );
     my $branch = _GetCircControlBranch( $item, $borrower );
-    my $dbh    = C4::Context->dbh;
-    my $sth    = $dbh->prepare(
-'select count(borrowernumber) as num_holds from reserves where biblionumber=?'
-    );
-    $sth->execute( $item->{'biblionumber'} );
-    my ($holds) = $sth->fetchrow_array;
-    if ($holds) {
+
+    my $return_data = {
+        exceeded    => 0,
+        outstanding => 0,
+        duration    => 0,
+        due_date    => undef,
+    };
+
+    my $holds = Koha::Holds->search( { biblionumber => $item->{'biblionumber'} } );
+
+    if ( $holds->count() ) {
+        $return_data->{outstanding} = $holds->count();
+
+        my $decreaseLoanHighHoldsControl        = C4::Context->preference('decreaseLoanHighHoldsControl');
+        my $decreaseLoanHighHoldsValue          = C4::Context->preference('decreaseLoanHighHoldsValue');
+        my $decreaseLoanHighHoldsIgnoreStatuses = C4::Context->preference('decreaseLoanHighHoldsIgnoreStatuses');
+
+        my @decreaseLoanHighHoldsIgnoreStatuses = split( /,/, $decreaseLoanHighHoldsIgnoreStatuses );
+
+        if ( $decreaseLoanHighHoldsControl eq 'static' ) {
+
+            # static means just more than a given number of holds on the record
+
+            # If the number of holds is less than the threshold, we can stop here
+            if ( $holds->count() < $decreaseLoanHighHoldsValue ) {
+                return $return_data;
+            }
+        }
+        elsif ( $decreaseLoanHighHoldsControl eq 'dynamic' ) {
+
+            # dynamic means X more than the number of holdable items on the record
+
+            # let's get the items
+            my @items = $holds->next()->biblio()->items();
+
+            # Remove any items with status defined to be ignored even if the would not make item unholdable
+            foreach my $status (@decreaseLoanHighHoldsIgnoreStatuses) {
+                @items = grep { !$_->$status } @items;
+            }
+
+            # Remove any items that are not holdable for this patron
+            @items = grep { CanItemBeReserved( $borrower->{borrowernumber}, $_->itemnumber ) eq 'OK' } @items;
+
+            my $items_count = scalar @items;
+
+            my $threshold = $items_count + $decreaseLoanHighHoldsValue;
+
+            # If the number of holds is less than the count of items we have
+            # plus the number of holds allowed above that count, we can stop here
+            if ( $holds->count() <= $threshold ) {
+                return $return_data;
+            }
+        }
+
         my $issuedate = DateTime->now( time_zone => C4::Context->tz() );
 
         my $calendar = Koha::Calendar->new( branchcode => $branch );
@@ -1206,21 +1253,21 @@ sub checkHighHolds {
           ( C4::Context->preference('item-level_itypes') )
           ? $biblio->{'itype'}
           : $biblio->{'itemtype'};
-        my $orig_due =
-          C4::Circulation::CalcDateDue( $issuedate, $itype, $branch,
-            $borrower );
 
-        my $reduced_datedue =
-          $calendar->addDate( $issuedate,
-            C4::Context->preference('decreaseLoanHighHoldsDuration') );
+        my $orig_due = C4::Circulation::CalcDateDue( $issuedate, $itype, $branch, $borrower );
+
+        my $decreaseLoanHighHoldsDuration = C4::Context->preference('decreaseLoanHighHoldsDuration');
+
+        my $reduced_datedue = $calendar->addDate( $issuedate, $decreaseLoanHighHoldsDuration );
 
         if ( DateTime->compare( $reduced_datedue, $orig_due ) == -1 ) {
-            return ( 1, $holds,
-                C4::Context->preference('decreaseLoanHighHoldsDuration'),
-                $reduced_datedue );
+            $return_data->{exceeded} = 1;
+            $return_data->{duration} = $decreaseLoanHighHoldsDuration;
+            $return_data->{due_date} = $reduced_datedue;
         }
     }
-    return ( 0, 0, 0, undef );
+
+    return $return_data;
 }
 
 =head2 AddIssue
@@ -1954,18 +2001,32 @@ sub AddReturn {
 
                 if ( C4::Context->preference('finesMode') eq 'production' ) {
                     if ( $amount > 0 ) {
-                        C4::Overdues::UpdateFine( $issue->{itemnumber},
-                            $issue->{borrowernumber},
-                            $amount, $type, output_pref($datedue) );
+                        C4::Overdues::UpdateFine(
+                            {
+                                issue_id       => $issue->{issue_id},
+                                itemnumber     => $issue->{itemnumber},
+                                borrowernumber => $issue->{borrowernumber},
+                                amount         => $amount,
+                                type           => $type,
+                                due            => output_pref($datedue),
+                            }
+                        );
                     }
                     elsif ($return_date) {
 
-                       # Backdated returns may have fines that shouldn't exist,
-                       # so in this case, we need to drop those fines to 0
+                        # Backdated returns may have fines that shouldn't exist,
+                        # so in this case, we need to drop those fines to 0
 
-                        C4::Overdues::UpdateFine( $issue->{itemnumber},
-                            $issue->{borrowernumber},
-                            0, $type, output_pref($datedue) );
+                        C4::Overdues::UpdateFine(
+                            {
+                                issue_id       => $issue->{issue_id},
+                                itemnumber     => $issue->{itemnumber},
+                                borrowernumber => $issue->{borrowernumber},
+                                amount         => 0,
+                                type           => $type,
+                                due            => output_pref($datedue),
+                            }
+                        );
                     }
                 }
             }
@@ -2205,7 +2266,7 @@ sub MarkIssueReturned {
 
     if ( C4::Context->preference('StoreLastBorrower') ) {
         my $item = Koha::Items->find( $itemnumber );
-        my $patron = Koha::Borrowers->find( $borrowernumber );
+        my $patron = Koha::Patrons->find( $borrowernumber );
         $item->last_returned_by( $patron );
     }
 }
@@ -2269,13 +2330,13 @@ sub _debar_user_on_return {
             my $new_debar_dt =
               $dt_today->clone()->add_duration( $suspension_days );
 
-            Koha::Borrower::Debarments::AddUniqueDebarment({
+            Koha::Patron::Debarments::AddUniqueDebarment({
                 borrowernumber => $borrower->{borrowernumber},
                 expiration     => $new_debar_dt->ymd(),
                 type           => 'SUSPENSION',
             });
             # if borrower was already debarred but does not get an extra debarment
-            if ( $borrower->{debarred} eq Koha::Borrower::Debarments::IsDebarred($borrower->{borrowernumber}) ) {
+            if ( $borrower->{debarred} eq Koha::Patron::Debarments::IsDebarred($borrower->{borrowernumber}) ) {
                     return ($borrower->{debarred},1);
             }
             return $new_debar_dt->ymd();
@@ -2838,7 +2899,7 @@ sub CanBookBeRenewed {
 
     my $overduesblockrenewing = C4::Context->preference('OverduesBlockRenewing');
     my $restrictionblockrenewing = C4::Context->preference('RestrictionBlockRenewing');
-    my $restricted = Koha::Borrower::Debarments::IsDebarred($borrowernumber);
+    my $restricted = Koha::Patron::Debarments::IsDebarred($borrowernumber);
     my $hasoverdues = C4::Members::HasOverdues($borrowernumber);
 
     if ( $restricted and $restrictionblockrenewing ) {
@@ -2851,14 +2912,20 @@ sub CanBookBeRenewed {
         and $issuingrule->{norenewalbefore} ne "" )
     {
 
-        # Get current time and add norenewalbefore.
-        # If this is smaller than date_due, it's too soon for renewal.
-        my $now = dt_from_string;
-        if (
-            $now->add(
-                $issuingrule->{lengthunit} => $issuingrule->{norenewalbefore}
-            ) < $itemissue->{date_due}
-          )
+        # Calculate soonest renewal by subtracting 'No renewal before' from due date
+        my $soonestrenewal =
+          $itemissue->{date_due}->clone()
+          ->subtract(
+            $issuingrule->{lengthunit} => $issuingrule->{norenewalbefore} );
+
+        # Depending on syspref reset the exact time, only check the date
+        if ( C4::Context->preference('NoRenewalBeforePrecision') eq 'date'
+            and $issuingrule->{lengthunit} eq 'days' )
+        {
+            $soonestrenewal->truncate( to => 'day' );
+        }
+
+        if ( $soonestrenewal > DateTime->now( time_zone => C4::Context->tz() ) )
         {
             return ( 0, "auto_too_soon" ) if $itemissue->{auto_renew};
             return ( 0, "too_soon" );
@@ -3094,11 +3161,16 @@ sub GetSoonestRenewDate {
         and $issuingrule->{norenewalbefore} ne "" )
     {
         my $soonestrenewal =
-          $itemissue->{date_due}->subtract(
+          $itemissue->{date_due}->clone()
+          ->subtract(
             $issuingrule->{lengthunit} => $issuingrule->{norenewalbefore} );
 
-        $soonestrenewal = $now > $soonestrenewal ? $now : $soonestrenewal;
-        return $soonestrenewal;
+        if ( C4::Context->preference('NoRenewalBeforePrecision') eq 'date'
+            and $issuingrule->{lengthunit} eq 'days' )
+        {
+            $soonestrenewal->truncate( to => 'day' );
+        }
+        return $soonestrenewal if $now < $soonestrenewal;
     }
     return $now;
 }

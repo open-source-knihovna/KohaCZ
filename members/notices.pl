@@ -28,6 +28,7 @@ use C4::Members;
 use C4::Branch;
 use C4::Letters;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
+use Koha::Patron::Images;
 
 my $input=new CGI;
 
@@ -46,8 +47,20 @@ my ($template, $loggedinuser, $cookie)
 				});
 
 $template->param( $borrower );
-my ($picture, $dberror) = GetPatronImage($borrower->{'borrowernumber'});
-$template->param( picture => 1 ) if $picture;
+my $patron_image = Koha::Patron::Images->find($borrower->{borrowernumber});
+$template->param( picture => 1 ) if $patron_image;
+
+# Allow resending of messages in Notices tab
+my $op = $input->param('op') || q{};
+if ( $op eq 'resend_notice' ) {
+    my $message_id = $input->param('message_id');
+    my $message = C4::Letters::GetMessage( $message_id );
+    if ( $message->{borrowernumber} = $borrowernumber ) {
+        C4::Letters::ResendMessage( $message_id );
+        # redirect to self to avoid form submission on refresh
+        print $input->redirect("/cgi-bin/koha/members/notices.pl?borrowernumber=$borrowernumber");
+    }
+}
 
 # Getting the messages
 my $queued_messages = C4::Letters::GetQueuedMessages({borrowernumber => $borrowernumber});

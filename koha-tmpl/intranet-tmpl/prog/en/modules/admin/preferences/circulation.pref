@@ -254,6 +254,13 @@ Circulation:
                   Calendar: the calendar to skip all days the library is closed.
                   Datedue: the calendar to push the due date to the next open day
         -
+            - Calculate "No renewal before" based on
+            - pref: NoRenewalBeforePrecision
+              choices:
+                  date: date.
+                  exact_time: exact time.
+            - Only relevant for loans calculated in days, hourly loans are not affected.
+        -
             - When renewing checkouts, base the new due date on
             - pref: RenewalPeriodBase
               choices:
@@ -494,10 +501,15 @@ Circulation:
             - pref: ExpireReservesMaxPickUpDelayCharge
               class: currency
         -
-            - Satisfy holds from the libraries
+            - Satisfy holds using items from the libraries
             - pref: StaticHoldsQueueWeight
               class: multi
             - (as branchcodes, separated by commas; if empty, uses all libraries)
+            - when they are
+            - pref: HoldsQueueSkipClosed
+              choices:
+                  yes: open
+                  no: open or closed
             - pref: RandomizeHoldsQueueWeight
               choices:
                   yes: in random order.
@@ -579,7 +591,18 @@ Circulation:
             - days for items with more than
             - pref: decreaseLoanHighHoldsValue
               class: integer
-            - holds.
+            - holds
+            - pref: decreaseLoanHighHoldsControl
+              choices:
+                  static: "on the record"
+                  dynamic: "over the number of holdable items on the record"
+            - . Ignore items with the following statuses when counting items
+            - pref: decreaseLoanHighHoldsIgnoreStatuses
+              multiple:
+                damaged: Damaged
+                itemlost: Lost
+                withdrawn: Withdrawn
+                notforloan: Not for loan
         -
             - pref: AllowHoldsOnPatronsPossessions
               choices:

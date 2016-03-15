@@ -17,12 +17,13 @@
 
 use Modern::Perl;
 
-use Test::More tests => 77;
+use Test::More tests => 58;
 use Test::MockModule;
 use Data::Dumper;
 use C4::Context;
 use Koha::Database;
 
+use t::lib::Mocks;
 use t::lib::TestBuilder;
 
 BEGIN {
@@ -130,7 +131,7 @@ ok ( $changedmember->{firstname} eq $CHANGED_FIRSTNAME &&
      , "Member Changed")
   or diag("Mismatching member details: ".Dumper($member, $changedmember));
 
-C4::Context->set_preference( 'CardnumberLength', '' );
+t::lib::Mocks::mock_preference( 'CardnumberLength', '' );
 C4::Context->clear_syspref_cache();
 
 my $checkcardnum=C4::Members::checkcardnumber($CARDNUMBER, "");
@@ -139,7 +140,7 @@ is ($checkcardnum, "1", "Card No. in use");
 $checkcardnum=C4::Members::checkcardnumber($IMPOSSIBLE_CARDNUMBER, "");
 is ($checkcardnum, "0", "Card No. not used");
 
-C4::Context->set_preference( 'CardnumberLength', '4' );
+t::lib::Mocks::mock_preference( 'CardnumberLength', '4' );
 C4::Context->clear_syspref_cache();
 
 $checkcardnum=C4::Members::checkcardnumber($IMPOSSIBLE_CARDNUMBER, "");
@@ -147,13 +148,13 @@ is ($checkcardnum, "2", "Card number is too long");
 
 
 
-C4::Context->set_preference( 'AutoEmailPrimaryAddress', 'OFF' );
+t::lib::Mocks::mock_preference( 'AutoEmailPrimaryAddress', 'OFF' );
 C4::Context->clear_syspref_cache();
 
 my $notice_email = GetNoticeEmailAddress($member->{'borrowernumber'});
 is ($notice_email, $EMAIL, "GetNoticeEmailAddress returns correct value when AutoEmailPrimaryAddress is off");
 
-C4::Context->set_preference( 'AutoEmailPrimaryAddress', 'emailpro' );
+t::lib::Mocks::mock_preference( 'AutoEmailPrimaryAddress', 'emailpro' );
 C4::Context->clear_syspref_cache();
 
 $notice_email = GetNoticeEmailAddress($member->{'borrowernumber'});
@@ -163,50 +164,6 @@ ok(!$member->{is_expired}, "GetMemberDetails() indicates that patron is not expi
 ModMember(borrowernumber => $member->{'borrowernumber'}, dateexpiry => '2001-01-1');
 $member = GetMemberDetails($member->{'borrowernumber'});
 ok($member->{is_expired}, "GetMemberDetails() indicates that patron is expired");
-
-
-my $message_type = 'B';
-my $message = 'my message';
-my $messages_count = GetMessagesCount($member->{borrowernumber}, $message_type, $BRANCHCODE);
-is( $messages_count, 0, 'GetMessagesCount returns the number of messages correclty' );
-
-is( AddMessage(), undef, 'AddMessage without argument returns undef' );
-is( AddMessage(undef, $message_type, $message, $BRANCHCODE), undef,  'AddMessage without the borrower number returns undef' );
-is( AddMessage($member->{borrowernumber}, undef, $message, $BRANCHCODE), undef,  'AddMessage without the message type returns undef' );
-is( AddMessage($member->{borrowernumber}, $message_type, undef, $BRANCHCODE), undef,  'AddMessage without the message returns undef' );
-is( AddMessage($member->{borrowernumber}, $message_type, $message, undef), undef,  'AddMessage without the branch code returns undef' );
-is( AddMessage($member->{borrowernumber}, $message_type, $message, $BRANCHCODE), 1,  'AddMessage functions correctly' );
-
-$messages_count = GetMessagesCount();
-is( $messages_count, 0, 'GetMessagesCount without argument returns 0' );
-$messages_count = GetMessagesCount(undef, $message_type, $BRANCHCODE);
-is( $messages_count, '0', 'GetMessagesCount without the borrower number returns the number of messages' );
-$messages_count = GetMessagesCount($member->{borrowernumber}, undef, $BRANCHCODE);
-is( $messages_count, '1', 'GetMessagesCount without the message type returns the total number of messages' );
-$messages_count = GetMessagesCount($member->{borrowernumber}, $message_type, undef);
-is( $messages_count, '1', 'GetMessagesCount without the branchcode returns the total number of messages' );
-$messages_count = GetMessagesCount($member->{borrowernumber}, $message_type, $BRANCHCODE);
-is( $messages_count, '1', 'GetMessagesCount returns the number of messages correctly' );
-
-my $messages = GetMessages();
-is( @$messages, 0, 'GetMessages without argument returns 0' );
-$messages = GetMessages($member->{borrowernumber}, $message_type, $BRANCHCODE);
-is( @$messages, 1, 'GetMessages returns the correct number of messages' );
-is( $messages->[0]->{borrowernumber}, $member->{borrowernumber}, 'GetMessages returns the borrower number correctly' );
-is( $messages->[0]->{message_type}, $message_type, 'GetMessages returns the message type correclty' );
-is( $messages->[0]->{message}, $message, 'GetMessages returns the message correctly' );
-is( $messages->[0]->{branchcode}, $BRANCHCODE, 'GetMessages returns the branch code correctly' );
-
-$messages_count = GetMessagesCount($member->{borrowernumber}, $message_type, $BRANCHCODE);
-is( $messages_count, 1, 'GetMessagesCount returns the number of messages correclty' );
-
-DeleteMessage();
-$messages = GetMessages($member->{borrowernumber}, $message_type, $BRANCHCODE);
-is( @$messages, 1, 'DeleteMessage without message id does not delete messages' );
-DeleteMessage($messages->[0]->{message_id});
-$messages = GetMessages($member->{borrowernumber}, $message_type, $BRANCHCODE);
-is( @$messages, 0, 'DeleteMessage deletes a message correctly' );
-
 
 # clean up 
 DelMember($member->{borrowernumber});
@@ -322,15 +279,15 @@ subtest 'GetMemberAccountBalance' => sub {
         'Expected 15 outstanding for both borrowernumber and cardnumber.');
 
     # do not count holds charges
-    C4::Context->set_preference( 'HoldsInNoissuesCharge', '1' );
-    C4::Context->set_preference( 'ManInvInNoissuesCharge', '0' );
+    t::lib::Mocks::mock_preference( 'HoldsInNoissuesCharge', '1' );
+    t::lib::Mocks::mock_preference( 'ManInvInNoissuesCharge', '0' );
     my ($total, $total_minus_charges,
         $other_charges) = C4::Members::GetMemberAccountBalance(123);
     is( $total, 15 , "Total calculated correctly");
     is( $total_minus_charges, 15, "Holds charges are not count if HoldsInNoissuesCharge=1");
     is( $other_charges, 0, "Holds charges are not considered if HoldsInNoissuesCharge=1");
 
-    C4::Context->set_preference( 'HoldsInNoissuesCharge', '0' );
+    t::lib::Mocks::mock_preference( 'HoldsInNoissuesCharge', '0' );
     ($total, $total_minus_charges,
         $other_charges) = C4::Members::GetMemberAccountBalance(123);
     is( $total, 15 , "Total calculated correctly");
@@ -352,8 +309,8 @@ subtest 'purgeSelfRegistration' => sub {
     #purge members in temporary category
     my $c= 'XYZ';
     $dbh->do("INSERT IGNORE INTO categories (categorycode) VALUES ('$c')");
-    C4::Context->set_preference('PatronSelfRegistrationDefaultCategory', $c );
-    C4::Context->set_preference('PatronSelfRegistrationExpireTemporaryAccountsDelay', 360);
+    t::lib::Mocks::mock_preference('PatronSelfRegistrationDefaultCategory', $c );
+    t::lib::Mocks::mock_preference('PatronSelfRegistrationExpireTemporaryAccountsDelay', 360);
     C4::Members::DeleteExpiredOpacRegistrations();
     $dbh->do("INSERT INTO borrowers (surname, address, city, branchcode, categorycode, dateenrolled) VALUES ('Testaabbcc', 'Street 1', 'CITY', ?, '$c', '2014-01-01 01:02:03')", undef, $library1->{branchcode});
     is( C4::Members::DeleteExpiredOpacRegistrations(), 1, 'Test for DeleteExpiredOpacRegistrations');
@@ -452,5 +409,13 @@ sub testAgeAccessors {
 
     $member->{dateofbirth} = $original_dateofbirth; #It is polite to revert made changes in the unit tests.
 } #sub testAgeAccessors
+
+# regression test for bug 16009
+my $patron;
+eval {
+    my $patron = GetMember(cardnumber => undef);
+};
+is($@, '', 'Bug 16009: GetMember(cardnumber => undef) works');
+is($patron, undef, 'Bug 16009: GetMember(cardnumber => undef) returns undef');
 
 1;

@@ -59,10 +59,6 @@ BEGIN {
 
         &ModBudgetPlan
 
-        &GetCurrency
-        &GetCurrencies
-        &ConvertCurrency
-        
 		&GetBudgetsPlanCell
         &AddBudgetPlanValue
         &GetBudgetAuthCats
@@ -913,76 +909,6 @@ sub CanUserModifyBudget {
     }
 
     return 1;
-}
-
-# -------------------------------------------------------------------
-
-=head2 GetCurrencies
-
-  @currencies = &GetCurrencies;
-
-Returns the list of all known currencies.
-
-C<$currencies> is a array; its elements are references-to-hash, whose
-keys are the fields from the currency table in the Koha database.
-
-=cut
-
-sub GetCurrencies {
-    my $dbh   = C4::Context->dbh;
-    my $query = "
-        SELECT *
-        FROM   currency
-    ";
-    my $sth = $dbh->prepare($query);
-    $sth->execute;
-    my @results = ();
-    while ( my $data = $sth->fetchrow_hashref ) {
-        push( @results, $data );
-    }
-    return @results;
-}
-
-# -------------------------------------------------------------------
-
-sub GetCurrency {
-    my $dbh   = C4::Context->dbh;
-    my $query = "
-        SELECT * FROM currency where active = '1'    ";
-    my $sth = $dbh->prepare($query);
-    $sth->execute;
-    my $r = $sth->fetchrow_hashref;
-    return $r;
-}
-
-# -------------------------------------------------------------------
-
-=head2 ConvertCurrency
-
-  $foreignprice = &ConvertCurrency($currency, $localprice);
-
-Converts the price C<$localprice> to foreign currency C<$currency> by
-dividing by the exchange rate, and returns the result.
-
-If no exchange rate is found, e is one to one.
-
-=cut
-
-sub ConvertCurrency {
-    my ( $currency, $price ) = @_;
-    my $dbh   = C4::Context->dbh;
-    my $query = "
-        SELECT rate
-        FROM   currency
-        WHERE  currency=?
-    ";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($currency);
-    my $cur = ( $sth->fetchrow_array() )[0];
-    unless ($cur) {
-        $cur = 1;
-    }
-    return ( $price / $cur );
 }
 
 sub _round {

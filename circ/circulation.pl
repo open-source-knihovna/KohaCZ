@@ -43,9 +43,12 @@ use Koha::Holds;
 use C4::Context;
 use CGI::Session;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
-use Koha::Borrower::Debarments qw(GetDebarments IsDebarred);
+use Koha::Patron;
+use Koha::Patron::Debarments qw(GetDebarments IsDebarred);
 use Koha::DateUtils;
 use Koha::Database;
+use Koha::Patron::Messages;
+use Koha::Patron::Images;
 
 use Date::Calc qw(
   Today
@@ -546,11 +549,23 @@ if ( $borrowernumber && $borrower->{'category_type'} eq 'C') {
     $template->param( 'catcode' =>    $catcodes->[0])  if $cnt == 1;
 }
 
-my $lib_messages_loop = GetMessages( $borrowernumber, 'L', $branch );
-if($lib_messages_loop){ $template->param(flagged => 1 ); }
+my $librarian_messages = Koha::Patron::Messages->search(
+    {
+        borrowernumber => $borrowernumber,
+        message_type => 'L',
+    }
+);
 
-my $bor_messages_loop = GetMessages( $borrowernumber, 'B', $branch );
-if($bor_messages_loop){ $template->param(flagged => 1 ); }
+my $patron_messages = Koha::Patron::Messages->search(
+    {
+        borrowernumber => $borrowernumber,
+        message_type => 'B',
+    }
+);
+
+if( $librarian_messages->count or $patron_messages->count ) {
+    $template->param(flagged => 1)
+}
 
 my $fast_cataloging = 0;
 if (defined getframeworkinfo('FA')) {
@@ -568,7 +583,14 @@ my $view = $batch
     ?'batch_checkout_view'
     : 'circview';
 
-my @relatives = GetMemberRelatives( $borrower->{'borrowernumber'} );
+my $patron = Koha::Patrons->find( $borrower->{borrowernumber} );
+my @relatives;
+if ( my $guarantor = $patron->guarantor ) {
+    push @relatives, $guarantor->borrowernumber;
+    push @relatives, $_->borrowernumber for $patron->siblings;
+} else {
+    push @relatives, $_->borrowernumber for $patron->guarantees;
+}
 my $relatives_issues_count =
   Koha::Database->new()->schema()->resultset('Issue')
   ->count( { borrowernumber => \@relatives } );
@@ -589,9 +611,8 @@ if ($restoreduedatespec || $stickyduedate) {
 }
 
 $template->param(
-    lib_messages_loop => $lib_messages_loop,
-    bor_messages_loop => $bor_messages_loop,
-    all_messages_del  => C4::Context->preference('AllowAllMessageDeletion'),
+    librarian_messages => $librarian_messages,
+    patron_messages   => $patron_messages,
     findborrower      => $findborrower,
     borrower          => $borrower,
     borrowernumber    => $borrowernumber,
@@ -625,8 +646,8 @@ $template->param(
     relatives_borrowernumbers => \@relatives,
 );
 
-my ($picture, $dberror) = GetPatronImage($borrower->{'borrowernumber'});
-$template->param( picture => 1 ) if $picture;
+my $patron_image = Koha::Patron::Images->find($borrower->{borrowernumber});
+$template->param( picture => 1 ) if $patron_image;
 
 # get authorised values with type of BOR_NOTES
 

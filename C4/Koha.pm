@@ -39,7 +39,6 @@ BEGIN {
 	require Exporter;
 	@ISA    = qw(Exporter);
 	@EXPORT = qw(
-		&subfield_is_koha_internal_p
 		&GetPrinters &GetPrinter
 		&GetItemTypes &getitemtypeinfo
                 &GetItemTypesCategorized &GetItemTypesByCategory
@@ -48,7 +47,6 @@ BEGIN {
         &GetFrameworksLoop
 		&getallthemes
 		&getFacets
-		&displayServers
 		&getnbpages
 		&get_infos_of
 		&get_notforloan_label_of
@@ -57,7 +55,6 @@ BEGIN {
 		&getitemtypeimagelocation
 		&GetAuthorisedValues
 		&GetAuthorisedValueCategories
-                &IsAuthorisedValueCategory
 		&GetKohaAuthorisedValues
 		&GetKohaAuthorisedValuesFromField
     &GetKohaAuthorisedValuesMapping
@@ -95,17 +92,6 @@ Koha.pm provides many functions for Koha scripts.
 =head1 FUNCTIONS
 
 =cut
-
-# FIXME.. this should be moved to a MARC-specific module
-sub subfield_is_koha_internal_p {
-    my ($subfield) = @_;
-
-    # We could match on 'lib' and 'tab' (and 'mandatory', & more to come!)
-    # But real MARC subfields are always single-character
-    # so it really is safer just to check the length
-
-    return length $subfield != 1;
-}
 
 =head2 GetSupportName
 
@@ -757,8 +743,7 @@ sub getFacets {
             }
             ];
 
-            unless ( C4::Context->preference("singleBranchMode")
-                || Koha::Libraries->search->count == 1 )
+            unless ( Koha::Libraries->search->count == 1 )
             {
                 my $DisplayLibraryFacets = C4::Context->preference('DisplayLibraryFacets');
                 if (   $DisplayLibraryFacets eq 'both'
@@ -839,8 +824,7 @@ sub getFacets {
             },
             ];
 
-            unless ( C4::Context->preference("singleBranchMode")
-                || Koha::Libraries->search->count == 1 )
+            unless ( Koha::Libraries->search->count == 1 )
             {
                 my $DisplayLibraryFacets = C4::Context->preference('DisplayLibraryFacets');
                 if (   $DisplayLibraryFacets eq 'both'
@@ -971,73 +955,6 @@ SELECT lib,
     $sth->finish;
 
     return \%notforloan_label_of;
-}
-
-=head2 displayServers
-
-   my $servers = displayServers();
-   my $servers = displayServers( $position );
-   my $servers = displayServers( $position, $type );
-
-displayServers returns a listref of hashrefs, each containing
-information about available z3950 servers. Each hashref has a format
-like:
-
-    {
-      'checked'    => 'checked',
-      'encoding'   => 'utf8',
-      'icon'       => undef,
-      'id'         => 'LIBRARY OF CONGRESS',
-      'label'      => '',
-      'name'       => 'server',
-      'opensearch' => '',
-      'value'      => 'lx2.loc.gov:210/',
-      'zed'        => 1,
-    },
-
-=cut
-
-sub displayServers {
-    my ( $position, $type ) = @_;
-    my $dbh = C4::Context->dbh;
-
-    my $strsth = 'SELECT * FROM z3950servers';
-    my @where_clauses;
-    my @bind_params;
-
-    if ($position) {
-        push @bind_params,   $position;
-        push @where_clauses, ' position = ? ';
-    }
-
-    if ($type) {
-        push @bind_params,   $type;
-        push @where_clauses, ' type = ? ';
-    }
-
-    # reassemble where clause from where clause pieces
-    if (@where_clauses) {
-        $strsth .= ' WHERE ' . join( ' AND ', @where_clauses );
-    }
-
-    my $rq = $dbh->prepare($strsth);
-    $rq->execute(@bind_params);
-    my @primaryserverloop;
-
-    while ( my $data = $rq->fetchrow_hashref ) {
-        push @primaryserverloop,
-          { label    => $data->{description},
-            id       => $data->{name},
-            name     => "server",
-            value    => $data->{host} . ":" . $data->{port} . "/" . $data->{database},
-            encoding => ( $data->{encoding} ? $data->{encoding} : "iso-5426" ),
-            checked  => "checked",
-            icon     => $data->{icon},
-            zed        => $data->{type} eq 'zed',
-            opensearch => $data->{type} eq 'opensearch'
-          };
-    }
-    return \@primaryserverloop;
 }
 
 =head2 GetAuthValCode
@@ -1186,28 +1103,6 @@ sub GetAuthorisedValueCategories {
         push @results, $category;
     }
     return \@results;
-}
-
-=head2 IsAuthorisedValueCategory
-
-    $is_auth_val_category = IsAuthorisedValueCategory($category);
-
-Returns whether a given category name is a valid one
-
-=cut
-
-sub IsAuthorisedValueCategory {
-    my $category = shift;
-    my $query = '
-        SELECT category
-        FROM authorised_values
-        WHERE category=?
-        LIMIT 1
-    ';
-    my $sth = C4::Context->dbh->prepare($query);
-    $sth->execute($category);
-    $sth->fetchrow ? return 1
-                   : return 0;
 }
 
 =head2 GetAuthorisedValueByCode

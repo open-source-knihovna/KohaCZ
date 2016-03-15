@@ -1,7 +1,5 @@
-package Koha::Borrower;
+package Koha::Account::Lines;
 
-# Copyright ByWater Solutions 2014
-#
 # This file is part of Koha.
 #
 # Koha is free software; you can redistribute it and/or modify it under the
@@ -23,11 +21,14 @@ use Carp;
 
 use Koha::Database;
 
-use base qw(Koha::Object);
+use Koha::Account::Line;
+
+use base qw(Koha::Objects);
 
 =head1 NAME
 
-Koha::Borrower - Koha Borrower Object class
+Koha::Cities - Koha City Object set class
+Koha::Account::Lines - Koha Account Line Object set class
 
 =head1 API
 
@@ -35,30 +36,16 @@ Koha::Borrower - Koha Borrower Object class
 
 =cut
 
-=head3 guarantor
-
-Returns a Koha::Borrower object for this borrower's guarantor
-
-=cut
-
-sub guarantor {
-    my ( $self ) = @_;
-
-    return Koha::Borrowers->find( $self->guarantorid() );
-}
-
 =head3 type
 
 =cut
 
 sub _type {
-    return 'Borrower';
+    return 'Accountline';
 }
 
-=head1 AUTHOR
-
-Kyle M Hall <kyle@bywatersolutions.com>
-
-=cut
+sub object_class {
+    return 'Koha::Account::Line';
+}
 
 1;

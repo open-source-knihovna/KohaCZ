@@ -1094,6 +1094,56 @@ sub GetMessageTransportTypes {
     return $mtts;
 }
 
+=head2 GetMessage
+
+    my $message = C4::Letters::Message($message_id);
+
+=cut
+
+sub GetMessage {
+    my ( $message_id ) = @_;
+    return unless $message_id;
+    my $dbh = C4::Context->dbh;
+    return $dbh->selectrow_hashref(q|
+        SELECT message_id, borrowernumber, subject, content, metadata, letter_code, message_transport_type, status, time_queued, to_address, from_address, content_type
+        FROM message_queue
+        WHERE message_id = ?
+    |, {}, $message_id );
+}
+
+=head2 ResendMessage
+
+  Attempt to resend a message which has failed previously.
+
+  my $has_been_resent = C4::Letters::ResendMessage($message_id);
+
+  Updates the message to 'pending' status so that
+  it will be resent later on.
+
+  returns 1 on success, 0 on failure, undef if no message was found
+
+=cut
+
+sub ResendMessage {
+    my $message_id = shift;
+    return unless $message_id;
+
+    my $message = GetMessage( $message_id );
+    return unless $message;
+    my $rv = 0;
+    if ( $message->{status} ne 'pending' ) {
+        $rv = C4::Letters::_set_message_status({
+            message_id => $message_id,
+            status => 'pending',
+        });
+        $rv = $rv > 0? 1: 0;
+        # Clear destination email address to force address update
+        _update_message_to_address( $message_id, undef ) if $rv &&
+            $message->{message_transport_type} eq 'email';
+    }
+    return $rv;
+}
+
 =head2 _add_attachements
 
 named parameters:

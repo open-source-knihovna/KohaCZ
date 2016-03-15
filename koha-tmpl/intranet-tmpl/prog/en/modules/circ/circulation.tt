@@ -367,9 +367,9 @@ $(document).ready(function() {
     <input type="hidden" name="stickyduedate" value="[% stickyduedate %]" />
     <input type="hidden" name="branch" value="[% branch %]" />
     [% IF ( RENEW_ISSUE ) %]
-    <input type="submit" class="approve" value="Yes, renew (Y)" accesskey="y" />
+    <button type="submit" class="approve" accesskey="y"><i class="fa fa-check"></i> Yes, renew (Y)</button>
     [% ELSE %]
-    <input type="submit" class="approve" value="Yes, check out (Y)" accesskey="y" />
+    <button type="submit" class="approve" accesskey="y"><i class="fa fa-check"></i> Yes, check out (Y)</button>
     [% END %]
     <input type="hidden" name="onsite_checkout" value="[% onsite_checkout %]" />
 </form>
@@ -381,7 +381,7 @@ $(document).ready(function() {
     <input type="hidden" name="borrowernumber" value="[% borrowernumber %]" />
     <input type="hidden" name="duedatespec" value="[% duedatespec %]" />
     <input type="hidden" name="stickyduedate" value="[% stickyduedate %]" />
-    <input class="print" type="submit" onclick="Dopop('hold-transfer-slip.pl?borrowernumber=[% reserveborrowernumber %]&amp;biblionumber=[% itembiblionumber %]&amp;op=slip');this.form.submit();" value="Don't check out and print slip (P)">
+    <button class="print" type="submit" onclick="Dopop('hold-transfer-slip.pl?borrowernumber=[% reserveborrowernumber %]&amp;biblionumber=[% itembiblionumber %]&amp;op=slip');this.form.submit();"><i class="fa fa-print"></i> Don't check out and print slip (P)</button>
 </form>
 [% END %]
 
@@ -391,7 +391,7 @@ $(document).ready(function() {
     <input type="hidden" name="borrowernumber" value="[% borrowernumber %]" />
     <input type="hidden" name="duedatespec" value="[% duedatespec %]" />
     <input type="hidden" name="stickyduedate" value="[% stickyduedate %]" />
-    <input class="print" type="submit" onclick="Dopop('hold-transfer-slip.pl?borrowernumber=[% reserveborrowernumber %]&amp;biblionumber=[% itembiblionumber %]&amp;op=slip');this.form.submit();" value="Don't check out and print slip (P)">
+    <button class="print" type="submit" onclick="Dopop('hold-transfer-slip.pl?borrowernumber=[% reserveborrowernumber %]&amp;biblionumber=[% itembiblionumber %]&amp;op=slip');this.form.submit();"><i class="fa fa-print"></i> Don't check out and print slip (P)</button>
 </form>
 [% END %]
 
@@ -403,18 +403,18 @@ $(document).ready(function() {
     <input type="hidden" name="stickyduedate" value="[% stickyduedate %]" />
     [% IF CAN_user_circulate_force_checkout or HIGHHOLDS %]
         [% IF ( RENEW_ISSUE ) %]
-        <input type="submit" class="deny" value="No, don't renew (N)" accesskey="n" />
+        <button type="submit" class="deny" accesskey="n"><i class="fa fa-times"></i> No, don't renew (N)</button>
         [% ELSE %]
-        <input type="submit" class="deny" value="No, don't check out (N)" accesskey="n" />
+        <button type="submit" class="deny" accesskey="n"><i class="fa fa-times"></i> No, don't check out (N)</button>
         [% END %]
     [% ELSE %]
-        <input type="submit" class="deny" value="Continue" />
+        <button type="submit" class="deny"><i class="fa fa-times></i> Continue</button>
     [% END %]
 </form>
 
 [% IF ( RESERVED || ISSUED_TO_ANOTHER ) && (CAN_user_reserveforothers_place_holds ) %]
     [% UNLESS flagged && noissues %]
-        <div class="circ-checkoutplacehold"><a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% itembiblionumber %]&borrowernumber=[% borrowernumber %]">Click here to place a hold for [% INCLUDE 'patron-title.inc' %]</a></div>
+        <button type="submit" onclick="window.location.href='/cgi-bin/koha/reserve/request.pl?biblionumber=[% itembiblionumber %]&borrowernumber=[% borrowernumber %]'"><i class="fa fa-times-circle"></i> Cancel checkout and place a hold for [% INCLUDE 'patron-title.inc' %]</button>
     [% END %]
 [% END %]
 </div></div>
@@ -455,7 +455,7 @@ $(document).ready(function() {
                         <input type="hidden" name="stickyduedate" value="[% stickyduedate %]" />
                         <input type="hidden" name="branch" value="[% branch %]" />
                         <input type="hidden" name="barcode" value="[% book.barcode %]" />
-                        <input type="submit" name="x" value="Check out [% book.barcode %]: [% book.title %]" />
+                        <button type="submit" name="x"><i class="fa fa-check"></i> Check out [% book.barcode %]: [% book.title %]</button>
                     </form>
                 [% END %]
             [% ELSE %]
@@ -842,35 +842,30 @@ No patron matched <span class="ex">[% message %]</span>
 
     <!-- /If notes -->[% END %]
 
-	<div id="messages" class="circmessage">
-		<h4>Messages:</h4>
-		<ul>
-			[% FOREACH lib_messages_loo IN lib_messages_loop %]
-				<li>
-					<span class="circ-hlt">
-                                                [% lib_messages_loo.message_date_formatted  | $KohaDates %]
-                                                [% Branches.GetName( lib_messages_loo.branchcode ) %]
-						<i>"[% lib_messages_loo.message %]"</i>
-					</span>
-					[% IF ( lib_messages_loo.can_delete ) %]
-						<a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% lib_messages_loo.message_id %]&amp;borrowernumber=[% lib_messages_loo.borrowernumber %]">[Delete]</a>
-					[% ELSE %]
-						[% IF ( all_messages_del ) %]
-							<a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% lib_messages_loo.message_id %]&amp;borrowernumber=[% lib_messages_loo.borrowernumber %]">[Delete]</a>
-						[% END %]
-					[% END %]
-				</li>
-			[% END %]
-			[% FOREACH bor_messages_loo IN bor_messages_loop %]
-                            <li><span class="">[% bor_messages_loo.message_date_formatted  | $KohaDates %] [% Branches.GetName( bor_messages_loo.branchcode ) %] <i>"[% bor_messages_loo.message %]"</i></span> [% IF ( bor_messages_loo.can_delete ) %]<a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% bor_messages_loo.message_id %]&amp;borrowernumber=[% bor_messages_loo.borrowernumber %]">[Delete]</a>
-                [% ELSIF ( all_messages_del ) %]
-                    <a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% bor_messages_loo.message_id %]&amp;borrowernumber=[% bor_messages_loo.borrowernumber %]">[Delete]</a>
+    <div id="messages" class="circmessage">
+        <h4>Messages:</h4>
+        <ul>
+            [% FOREACH message IN librarian_messages %]
+                <li>
+                    <span class="circ-hlt">
+                        [% message.message_date | $KohaDates %]
+                        [% Branches.GetName( lib_messages_loo.branchcode ) %]
+                        <i>"[% message.message %]"</i>
+                    </span>
+                    [% IF message.branchcode == branch OR Koha.Preference('AllowAllMessageDeletion') %]
+                        <a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% message.message_id %]&amp;borrowernumber=[% message.borrowernumber %]">[Delete]</a>
+                    [% END %]
+                </li>
+            [% END %]
+            [% FOREACH message IN patron_messages %]
+                <li><span class="">[% message.message_date | $KohaDates %] [% Branches.GetName( message.branchcode )%] <i>"[% message.message %]"</i></span>
+                [% IF message.branchcode == branch OR Koha.Preference('AllowAllMessageDeletion') %]
+                    <a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% message.message_id %]&amp;borrowernumber=[% message.borrowernumber %]">[Delete]</a>
                 [% END %]</li>
-			[% END %]
+            [% END %]
+        </ul>
+    </div>
 
-		</ul>
-	</div>	
-	
      <!-- /If flagged -->[% END %]
 
 	

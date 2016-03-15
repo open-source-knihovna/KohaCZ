@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 # Converted to new plugin style (Bug 13437)
-
+# This plugin adds the MARC organization code in fields like 003, 040cd
 
 # Copyright 2000-2002 Katipo Communications
 #
@@ -25,22 +25,20 @@ use C4::Context;
 
 my $builder = sub {
     my ( $params ) = @_;
-    my $function_name = $params->{id};
-
     my $org = C4::Context->preference('MARCOrgCode');
-    my $res  = "
+    return <<"HERE";
 <script type=\"text/javascript\">
 //<![CDATA[
 
-function Focus$function_name(event) {
-    document.getElementById(event.data.id).value='$org';
-    return 0;
+function Focus$params->{id}(event) {
+    if( ! \$('#'+event.data.id).val() ) {
+        \$('#'+event.data.id).val('$org');
+    }
 }
 
 //]]>
 </script>
-";
-    return $res;
+HERE
 };
 
 return { builder => $builder };

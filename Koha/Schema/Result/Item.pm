@@ -285,6 +285,13 @@ __PACKAGE__->table("items");
   is_nullable: 1
   size: 32
 
+=head2 new
+
+  accessor: undef
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -396,6 +403,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "stocknumber",
   { data_type => "varchar", is_nullable => 1, size => 32 },
+  "new",
+  { accessor => undef, data_type => "varchar", is_nullable => 1, size => 32 },
 );
 
 =head1 PRIMARY KEY
@@ -647,8 +656,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-02-15 09:10:53
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:r99nQQ7UuMZ0rGx2zZHDSQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-03-04 19:32:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rhW0Ddhh2hLoV//7nonLCA
 
 __PACKAGE__->belongs_to( biblioitem => "Koha::Schema::Result::Biblioitem", "biblioitemnumber" );
 
@@ -659,15 +668,16 @@ __PACKAGE__->belongs_to(
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
 );
 
+use C4::Context;
 sub effective_itemtype {
     my ( $self ) = @_;
 
-    my $pref = $self->result_source->schema->resultset('Systempreference')->find('item-level_itypes');
-    if ( $pref->value() && $self->itype() ) {
+    my $pref = C4::Context->preference('item-level_itypes');
+    if ( $pref && $self->itype() ) {
         return $self->itype();
     } else {
         warn "item-level_itypes set but no itemtype set for item ($self->itemnumber)"
-          if $pref->value();
+          if $pref;
         return $self->biblioitemnumber()->itemtype();
     }
 }

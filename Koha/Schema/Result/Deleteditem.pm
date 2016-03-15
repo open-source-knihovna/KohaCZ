@@ -282,6 +282,13 @@ __PACKAGE__->table("deleteditems");
   is_nullable: 1
   size: 32
 
+=head2 new
+
+  accessor: undef
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -388,6 +395,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "stocknumber",
   { data_type => "varchar", is_nullable => 1, size => 32 },
+  "new",
+  { accessor => undef, data_type => "varchar", is_nullable => 1, size => 32 },
 );
 
 =head1 PRIMARY KEY
@@ -403,8 +412,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("itemnumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-01-11 10:42:04
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:akmOZfV4EHojo1UVu2m06w
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-03-04 19:32:39
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:uu6dMCUUlDOkveF9SYkKew
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

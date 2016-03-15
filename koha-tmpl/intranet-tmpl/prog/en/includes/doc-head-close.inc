@@ -2,6 +2,20 @@
 [% USE AudioAlerts %]
 [% USE String %]
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+[%# Prevent XFS attacks -%]
+[% UNLESS popup %]
+    <style id="antiClickjack">body{display:none !important;}</style>
+    <script type="text/javascript">
+       if (self === top) {
+           var antiClickjack = document.getElementById("antiClickjack");
+           antiClickjack.parentNode.removeChild(antiClickjack);
+       } else {
+           top.location = self.location;
+       }
+    </script>
+[% END %]
+
 <link rel="shortcut icon" href="[% IF ( IntranetFavicon ) %][% IntranetFavicon %][% ELSE %][% interface %]/[% theme %]/img/favicon.ico[% END %]" type="image/x-icon" />
 
 <link rel="stylesheet" type="text/css" href="[% interface %]/lib/jquery/jquery-ui.css" />
@@ -69,7 +83,7 @@
     <script type="text/javascript">
         //<![CDATA[
             var AUDIO_ALERT_PATH = '[% interface %]/[% theme %]/sound/';
-            var AUDIO_ALERTS = JSON.parse( '[% AudioAlerts.AudioAlerts | replace( "'", "\\'" ) %]' );
+            var AUDIO_ALERTS = JSON.parse( '[% AudioAlerts.AudioAlerts | replace( "'", "\\'" ) | replace( '"', '\\"' ) %]' );
         //]]>
 
         $( document ).ready(function() {
@@ -85,6 +99,3 @@
         });
     </script>
 [% END %]
-
-<!-- For keeping the text when navigating the search tabs -->
-[% INCLUDE 'searchbox-keep-text.inc' %]

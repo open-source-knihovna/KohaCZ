@@ -11865,9 +11865,9 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "3.23.00.023";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
-    INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
-VALUES('OpenLibrarySearch','0','If Yes Open Library search results will show in OPAC',NULL,'YesNo');
-});
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES('OpenLibrarySearch','0','If Yes Open Library search results will show in OPAC',NULL,'YesNo');
+    });
 
     print "Upgrade to $DBversion done (Bug 6624 - Allow Koha to use the new read API from OpenLibrary)\n";
     SetVersion($DBversion);
@@ -11876,11 +11876,13 @@ VALUES('OpenLibrarySearch','0','If Yes Open Library search results will show in 
 $DBversion = "3.23.00.024";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
-    ALTER TABLE deletedborrowers MODIFY COLUMN userid VARCHAR(75) DEFAULT NULL;
-});
+        ALTER TABLE deletedborrowers MODIFY COLUMN userid VARCHAR(75) DEFAULT NULL;
+    });
+
     $dbh->do(q{
-    ALTER TABLE deletedborrowers MODIFY COLUMN password VARCHAR(60) DEFAULT NULL;
-});
+        ALTER TABLE deletedborrowers MODIFY COLUMN password VARCHAR(60) DEFAULT NULL;
+    });
+
     print "Upgrade to $DBversion done (Bug 15517 - Tables borrowers and deletedborrowers differ again)\n";
     SetVersion($DBversion);
 }
@@ -11888,8 +11890,8 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "3.23.00.025";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
-    DROP TABLE nozebra;
-});
+        DROP TABLE IF EXISTS nozebra;
+    });
 
     print "Upgrade to $DBversion done (Bug 15526 - Drop nozebra database table)\n";
     SetVersion($DBversion);
@@ -11898,10 +11900,202 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "3.23.00.026";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
-    UPDATE systempreferences SET value = CONCAT_WS('|', IF(value='', NULL, value), "password") WHERE variable="PatronSelfRegistrationBorrowerUnwantedField" AND value NOT LIKE "%password%";
-});
+        UPDATE systempreferences SET value = CONCAT_WS('|', IF(value='', NULL, value), "password") WHERE variable="PatronSelfRegistrationBorrowerUnwantedField" AND value NOT LIKE "%password%";
+    });
 
     print "Upgrade to $DBversion done (Bug 15343 - Allow patrons to choose their own password on self registration)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.027";
+if ( CheckVersion($DBversion) ) {
+    my ( $db_value ) = $dbh->selectrow_array(q|SELECT count(*) FROM branches|);
+    my $pref_value = C4::Context->preference("singleBranchMode") || 0;
+    if ( $db_value > 1 and $pref_value == 1 ) {
+        warn "WARNING: You have more than 1 libraries in your branches tables but the singleBranchMode system preference is on.\n";
+        warn "This configuration does not make sense. The system preference is going to be deleted,\n";
+        warn "and this parameter will be based on the number of libraries defined.\n";
+    }
+    $dbh->do(q|DELETE FROM systempreferences WHERE variable="singleBranchMode"|);
+
+    print "Upgrade to $DBversion done (Bug 4941 - Can't set branch in staff client when singleBranchMode is enabled)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.028";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) SELECT 'PatronSelfModificationBorrowerUnwantedField',value,NULL,'Name the fields you don\'t want to display when a patron is editing their information via the OPAC.','free' FROM systempreferences WHERE variable = 'PatronSelfRegistrationBorrowerUnwantedField';
+    });
+
+    print "Upgrade to $DBversion done (Bug 14658 - Split PatronSelfRegistrationBorrowerUnwantedField into two preferences for creating and editing)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.029";
+if ( CheckVersion($DBversion) ) {
+
+    # move marc21_field_003.pl 040c and 040d to marc21_orgcode.pl
+    $dbh->do(q{
+        update marc_subfield_structure set value_builder='marc21_orgcode.pl' where value_builder IN ( 'marc21_field_003.pl', 'marc21_field_040c.pl', 'marc21_field_040d.pl' );
+    });
+    $dbh->do(q{
+        update auth_subfield_structure set value_builder='marc21_orgcode.pl' where value_builder IN ( 'marc21_field_003.pl', 'marc21_field_040c.pl', 'marc21_field_040d.pl' );
+    });
+
+    print "Upgrade to $DBversion done (Bug 14199 - Unify all organization code plugins)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.030";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('OpacMaintenanceNotice','','','A user-defined block of HTML to appear on screen when OpacMaintenace is enabled','Textarea')
+    });
+
+    print "Upgrade to $DBversion done (Bug 15311: Let libraries set text to display when OpacMaintenance = on)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.031";
+if(CheckVersion($DBversion)) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('NoRenewalBeforePrecision', 'date', 'Calculate "No renewal before" based on date or exact time. Only relevant for loans calculated in days, hourly loans are not affected.', 'date|exact_time', 'Choice')
+    });
+
+    print "Upgrade to $DBversion done (Bug 14395 - Two different ways to calculate 'No renewal before')\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.032";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+   -- Add issue_id to accountlines table
+    ALTER TABLE accountlines ADD issue_id INT(11) NULL DEFAULT NULL AFTER accountlines_id;
+    });
+
+## Close out any accruing fines with no current issue
+    $dbh->do(q{
+    UPDATE accountlines LEFT JOIN issues USING ( itemnumber, borrowernumber ) SET accounttype = 'F' WHERE accounttype = 'FU' and issues.issue_id IS NULL;
+    });
+
+## Close out any extra not really accruing fines, keep only the latest accring fine
+    $dbh->do(q{
+    UPDATE accountlines a1
+    LEFT JOIN (SELECT MAX(accountlines_id) AS keeper,
+                      borrowernumber,
+                      itemnumber
+               FROM   accountlines
+               WHERE  accounttype = 'FU'
+               GROUP BY borrowernumber, itemnumber
+              ) a2 USING ( borrowernumber, itemnumber )
+    SET    a1.accounttype = 'F'
+    WHERE  a1.accounttype = 'FU'
+    AND  a1.accountlines_id != a2.keeper;
+    });
+
+## Update the unclosed fines to add the current issue_id to them
+    $dbh->do(q{
+    UPDATE accountlines LEFT JOIN issues USING ( itemnumber ) SET accountlines.issue_id = issues.issue_id WHERE accounttype = 'FU'; 
+    });
+
+    print "Upgrade to $DBversion done (Bug 15675 - Add issue_id column to accountlines and use it for updating fines)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.033";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+    UPDATE systempreferences SET value = CONCAT_WS('|', IF(value = '', NULL, value), 'cardnumber') WHERE variable = 'PatronSelfRegistrationBorrowerUnwantedField' AND value NOT LIKE '%cardnumber%';
+    });
+
+    $dbh->do(q{
+    UPDATE systempreferences SET value = CONCAT_WS('|', IF(value = '', NULL, value), 'categorycode') WHERE variable = 'PatronSelfRegistrationBorrowerUnwantedField' AND value NOT LIKE '%categorycode%';
+    });
+
+    print "Upgrade to $DBversion done (Bug 14659 - Allow patrons to enter card number and patron category on OPAC registration page)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.034";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE `items` ADD `new` VARCHAR(32) NULL AFTER `stocknumber`;
+    });
+    $dbh->do(q{
+        ALTER TABLE `deleteditems` ADD `new` VARCHAR(32) NULL AFTER `stocknumber`;
+    });
+    print "Upgrade to $DBversion done (Bug 11023: Adds field 'new' in items and deleteditems tables)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.035";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('HTML5MediaYouTube',0,'Embed|Don\'t embed','YouTube links as videos','YesNo');
+    });
+    print "Upgrade to $DBversion done (Bug 14168 - enhance streaming cataloging to include youtube)\n";
+
+    SetVersion($DBversion);
+    }
+
+$DBversion = "3.23.00.036";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do(q{
+    INSERT INTO systempreferences (variable,value,explanation,type) VALUES ('HoldsQueueSkipClosed', '0', 'If enabled, any libraries that are closed when the holds queue is built will be ignored for the purpose of filling holds.', 'YesNo');
+    });
+    print "Upgrade to $DBversion done (Bug 12803 - Add ability to skip closed libraries when generating the holds queue)\n";
+    SetVersion($DBversion);
+    }
+
+$DBversion = "3.23.00.037";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+## Add the new currency.archived column
+    $dbh->do(q{
+    ALTER TABLE currency ADD column archived tinyint(1) DEFAULT 0;
+    });
+## Set currency=NULL if empty (just in case)
+    $dbh->do(q{
+    UPDATE aqorders SET currency=NULL WHERE currency="";
+    });
+## Insert the missing currency and mark them as archived before adding the FK
+    $dbh->do(q{
+    INSERT INTO currency(currency, archived) SELECT distinct currency, 1 FROM aqorders WHERE currency NOT IN (SELECT currency FROM currency);
+    });
+## Correct the field length in aqorders before adding FK too
+    $dbh->do(q{ ALTER TABLE aqorders MODIFY COLUMN currency varchar(10) default NULL; });
+## And finally add the FK
+    $dbh->do(q{
+    ALTER TABLE aqorders ADD FOREIGN KEY (currency) REFERENCES currency(currency) ON DELETE SET NULL ON UPDATE SET null;
+    });
+
+    print "Upgrade to $DBversion done (Bug 15084 - Move the currency related code to Koha::Acquisition::Currenc[y|ies])\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.038";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do(q{
+    INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('decreaseLoanHighHoldsControl', 'static', 'static|dynamic', "Chooses between static and dynamic high holds checking", 'Choice'), ('decreaseLoanHighHoldsIgnoreStatuses', '', 'damaged|itemlost|notforloan|withdrawn', "Ignore items with these statuses for dynamic high holds checking", 'Choice');
+    });
+    print "Upgrade to $DBversion done (Bug 14694 - Make decreaseloanHighHolds more flexible)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.039";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+
+    $dbh->do(q{
+    ALTER TABLE suggestions
+    MODIFY COLUMN currency varchar(10) default NULL;
+    });
+    $dbh->do(q{
+    ALTER TABLE aqbooksellers
+    MODIFY COLUMN currency varchar(10) default NULL;
+    });
+    print "Upgrade to $DBversion done (Bug 15084 - Move the currency related code to Koha::Acquisition::Currenc[y|ies])\n";
     SetVersion($DBversion);
 }
 

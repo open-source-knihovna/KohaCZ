@@ -18,6 +18,7 @@
 use Modern::Perl;
 
 use DateTime;
+use t::lib::Mocks;
 use C4::Biblio;
 use C4::Branch;
 use C4::Items;
@@ -29,7 +30,7 @@ use Koha::Database;
 
 use t::lib::TestBuilder;
 
-use Test::More tests => 82;
+use Test::More tests => 83;
 
 BEGIN {
     use_ok('C4::Circulation');
@@ -66,7 +67,7 @@ my $borrower = {
 };
 
 # No userenv, PickupLibrary
-C4::Context->set_preference('CircControl', 'PickupLibrary');
+t::lib::Mocks::mock_preference('CircControl', 'PickupLibrary');
 is(
     C4::Context->preference('CircControl'),
     'PickupLibrary',
@@ -79,7 +80,7 @@ is(
 );
 
 # No userenv, PatronLibrary
-C4::Context->set_preference('CircControl', 'PatronLibrary');
+t::lib::Mocks::mock_preference('CircControl', 'PatronLibrary');
 is(
     C4::Context->preference('CircControl'),
     'PatronLibrary',
@@ -92,7 +93,7 @@ is(
 );
 
 # No userenv, ItemHomeLibrary
-C4::Context->set_preference('CircControl', 'ItemHomeLibrary');
+t::lib::Mocks::mock_preference('CircControl', 'ItemHomeLibrary');
 is(
     C4::Context->preference('CircControl'),
     'ItemHomeLibrary',
@@ -110,7 +111,7 @@ C4::Context->set_userenv(0,0,0,'firstname','surname', $library2->{branchcode}, '
 is(C4::Context->userenv->{branch}, $library2->{branchcode}, 'userenv set');
 
 # Userenv set, PickupLibrary
-C4::Context->set_preference('CircControl', 'PickupLibrary');
+t::lib::Mocks::mock_preference('CircControl', 'PickupLibrary');
 is(
     C4::Context->preference('CircControl'),
     'PickupLibrary',
@@ -123,7 +124,7 @@ is(
 );
 
 # Userenv set, PatronLibrary
-C4::Context->set_preference('CircControl', 'PatronLibrary');
+t::lib::Mocks::mock_preference('CircControl', 'PatronLibrary');
 is(
     C4::Context->preference('CircControl'),
     'PatronLibrary',
@@ -136,7 +137,7 @@ is(
 );
 
 # Userenv set, ItemHomeLibrary
-C4::Context->set_preference('CircControl', 'ItemHomeLibrary');
+t::lib::Mocks::mock_preference('CircControl', 'ItemHomeLibrary');
 is(
     C4::Context->preference('CircControl'),
     'ItemHomeLibrary',
@@ -149,7 +150,7 @@ is(
 );
 
 # Reset initial configuration
-C4::Context->set_preference('CircControl', $CircControl);
+t::lib::Mocks::mock_preference('CircControl', $CircControl);
 is(
     C4::Context->preference('CircControl'),
     $CircControl,
@@ -318,7 +319,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 
     # Testing of feature to allow the renewal of reserved items if other items on the record can fill all needed holds
     C4::Context->dbh->do("UPDATE issuingrules SET onshelfholds = 1");
-    C4::Context->set_preference('AllowRenewalIfOtherItemsAvailable', 1 );
+    t::lib::Mocks::mock_preference('AllowRenewalIfOtherItemsAvailable', 1 );
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber);
     is( $renewokay, 1, 'Bug 11634 - Allow renewal of item with unfilled holds if other available items can fill those holds');
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber2);
@@ -354,7 +355,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     is( $renewokay, 0, 'Bug 11634 - Allow renewal of item with unfilled holds if other available items can fill those holds');
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber2);
     is( $renewokay, 0, 'Bug 11634 - Allow renewal of item with unfilled holds if other available items can fill those holds');
-    C4::Context->set_preference('AllowRenewalIfOtherItemsAvailable', 0 );
+    t::lib::Mocks::mock_preference('AllowRenewalIfOtherItemsAvailable', 0 );
 
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber);
     is( $renewokay, 0, '(Bug 10663) Cannot renew, reserved');
@@ -410,7 +411,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my $datedue5 = AddIssue($restricted_borrower, $barcode5);
     is (defined $datedue5, 1, "Item with date due checked out, due date: $datedue5");
 
-    C4::Context->set_preference('RestrictionBlockRenewing','1');
+    t::lib::Mocks::mock_preference('RestrictionBlockRenewing','1');
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber2);
     is( $renewokay, 1, '(Bug 8236), Can renew, user is not restricted');
     ( $renewokay, $error ) = CanBookBeRenewed($restricted_borrowernumber, $itemnumber5);
@@ -445,7 +446,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     is (defined $passeddatedue1, 1, "Item with passed date due checked out, due date: $passeddatedue1");
 
 
-    C4::Context->set_preference('OverduesBlockRenewing','blockitem');
+    t::lib::Mocks::mock_preference('OverduesBlockRenewing','blockitem');
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber6);
     is( $renewokay, 1, '(Bug 8236), Can renew, this item is not overdue');
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber7);
@@ -455,7 +456,9 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     $reserveid = C4::Reserves::GetReserveId({ biblionumber => $biblionumber, itemnumber => $itemnumber, borrowernumber => $reserving_borrowernumber});
     CancelReserve({ reserve_id => $reserveid });
 
+    # Bug 14101
     # Test automatic renewal before value for "norenewalbefore" in policy is set
+    # In this case automatic renewal is not permitted prior to due date
     my $barcode4 = '11235813';
     my ( $item_bibnum4, $item_bibitemnum4, $itemnumber4 ) = AddItem(
         {
@@ -467,31 +470,46 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         $biblionumber
     );
 
-    AddIssue( $renewing_borrower, $barcode4, undef, undef, undef, undef, { auto_renew => 1 } );
+    $issue = AddIssue( $renewing_borrower, $barcode4, undef, undef, undef, undef, { auto_renew => 1 } );
     ( $renewokay, $error ) =
       CanBookBeRenewed( $renewing_borrowernumber, $itemnumber4 );
     is( $renewokay, 0, 'Bug 14101: Cannot renew, renewal is automatic and premature' );
     is( $error, 'auto_too_soon',
         'Bug 14101: Cannot renew, renewal is automatic and premature, "No renewal before" = undef (returned code is auto_too_soon)' );
 
-    # set policy to require that loans cannot be
-    # renewed until seven days prior to the due date
+    # Bug 7413
+    # Test premature manual renewal
     $dbh->do('UPDATE issuingrules SET norenewalbefore = 7');
+
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber);
     is( $renewokay, 0, 'Bug 7413: Cannot renew, renewal is premature');
     is( $error, 'too_soon', 'Bug 7413: Cannot renew, renewal is premature (returned code is too_soon)');
+
+    # Bug 14395
+    # Test 'exact time' setting for syspref NoRenewalBeforePrecision
+    t::lib::Mocks::mock_preference( 'NoRenewalBeforePrecision', 'exact_time' );
     is(
-        GetSoonestRenewDate($renewing_borrowernumber, $itemnumber),
-        $datedue->clone->add(days => -7),
-        'Bug 7413: Renewals permitted 7 days before due date, as expected',
+        GetSoonestRenewDate( $renewing_borrowernumber, $itemnumber ),
+        $datedue->clone->add( days => -7 ),
+        'Bug 14395: Renewals permitted 7 days before due date, as expected'
     );
 
-    # Test automatic renewal again
+    # Bug 14395
+    # Test 'date' setting for syspref NoRenewalBeforePrecision
+    t::lib::Mocks::mock_preference( 'NoRenewalBeforePrecision', 'date' );
+    is(
+        GetSoonestRenewDate( $renewing_borrowernumber, $itemnumber ),
+        $datedue->clone->add( days => -7 )->truncate( to => 'day' ),
+        'Bug 14395: Renewals permitted 7 days before due date, as expected'
+    );
+
+    # Bug 14101
+    # Test premature automatic renewal
     ( $renewokay, $error ) =
       CanBookBeRenewed( $renewing_borrowernumber, $itemnumber4 );
     is( $renewokay, 0, 'Bug 14101: Cannot renew, renewal is automatic and premature' );
     is( $error, 'auto_too_soon',
-'Bug 14101: Cannot renew, renewal is automatic and premature (returned code is auto_too_soon)'
+        'Bug 14101: Cannot renew, renewal is automatic and premature (returned code is auto_too_soon)'
     );
 
     # Change policy so that loans can only be renewed exactly on due date (0 days prior to due date)
@@ -501,7 +519,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
       CanBookBeRenewed( $renewing_borrowernumber, $itemnumber4 );
     is( $renewokay, 0, 'Bug 14101: Cannot renew, renewal is automatic and premature' );
     is( $error, 'auto_too_soon',
-'Bug 14101: Cannot renew, renewal is automatic and premature, "No renewal before" = 0 (returned code is auto_too_soon)'
+        'Bug 14101: Cannot renew, renewal is automatic and premature, "No renewal before" = 0 (returned code is auto_too_soon)'
     );
 
     # Change policy so that loans can be renewed 99 days prior to the due date
@@ -511,7 +529,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
       CanBookBeRenewed( $renewing_borrowernumber, $itemnumber4 );
     is( $renewokay, 0, 'Bug 14101: Cannot renew, renewal is automatic' );
     is( $error, 'auto_renew',
-'Bug 14101: Cannot renew, renewal is automatic (returned code is auto_renew)'
+        'Bug 14101: Cannot renew, renewal is automatic (returned code is auto_renew)'
     );
 
     # Too many renewals
@@ -524,11 +542,19 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     is( $error, 'too_many', 'Cannot renew, 0 renewals allowed (returned code is too_many)');
 
     # Test WhenLostForgiveFine and WhenLostChargeReplacementFee
-    C4::Context->set_preference('WhenLostForgiveFine','1');
-    C4::Context->set_preference('WhenLostChargeReplacementFee','1');
+    t::lib::Mocks::mock_preference('WhenLostForgiveFine','1');
+    t::lib::Mocks::mock_preference('WhenLostChargeReplacementFee','1');
 
-    C4::Overdues::UpdateFine( $itemnumber, $renewing_borrower->{borrowernumber},
-        15.00, q{}, Koha::DateUtils::output_pref($datedue) );
+    C4::Overdues::UpdateFine(
+        {
+            issue_id       => $issue->id(),
+            itemnumber     => $itemnumber,
+            borrowernumber => $renewing_borrower->{borrowernumber},
+            amount         => 15.00,
+            type           => q{},
+            due            => Koha::DateUtils::output_pref($datedue)
+        }
+    );
 
     LostItem( $itemnumber, 1 );
 
@@ -544,11 +570,19 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 
     C4::Context->dbh->do("DELETE FROM accountlines");
 
-    C4::Context->set_preference('WhenLostForgiveFine','0');
-    C4::Context->set_preference('WhenLostChargeReplacementFee','0');
+    t::lib::Mocks::mock_preference('WhenLostForgiveFine','0');
+    t::lib::Mocks::mock_preference('WhenLostChargeReplacementFee','0');
 
-    C4::Overdues::UpdateFine( $itemnumber2, $renewing_borrower->{borrowernumber},
-        15.00, q{}, Koha::DateUtils::output_pref($datedue) );
+    C4::Overdues::UpdateFine(
+        {
+            issue_id       => $issue2->id(),
+            itemnumber     => $itemnumber2,
+            borrowernumber => $renewing_borrower->{borrowernumber},
+            amount         => 15.00,
+            type           => q{},
+            due            => Koha::DateUtils::output_pref($datedue)
+        }
+    );
 
     LostItem( $itemnumber2, 0 );
 
@@ -569,7 +603,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     ok( $units == 0, '_get_chargeable_units returns 0 for items not past due date (Bug 12596)' );
 
     # Users cannot renew any item if there is an overdue item
-    C4::Context->set_preference('OverduesBlockRenewing','block');
+    t::lib::Mocks::mock_preference('OverduesBlockRenewing','block');
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber6);
     is( $renewokay, 0, '(Bug 8236), Cannot renew, one of the items is overdue');
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber7);
@@ -692,7 +726,15 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 
     my $borrowernumber = AddMember(%a_borrower_data);
 
-    UpdateFine( $itemnumber, $borrowernumber, 0 );
+    my $issue = AddIssue( GetMember( borrowernumber => $borrowernumber ), $barcode );
+    UpdateFine(
+        {
+            issue_id       => $issue->id(),
+            itemnumber     => $itemnumber,
+            borrowernumber => $borrowernumber,
+            amount         => 0
+        }
+    );
 
     my $hr = $dbh->selectrow_hashref(q{SELECT COUNT(*) AS count FROM accountlines WHERE borrowernumber = ? AND itemnumber = ?}, undef, $borrowernumber, $itemnumber );
     my $count = $hr->{count};
@@ -766,22 +808,22 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     );
 
     C4::Context->dbh->do("UPDATE issuingrules SET onshelfholds = 0");
-    C4::Context->set_preference( 'AllowRenewalIfOtherItemsAvailable', 0 );
+    t::lib::Mocks::mock_preference( 'AllowRenewalIfOtherItemsAvailable', 0 );
     ( $renewokay, $error ) = CanBookBeRenewed( $borrowernumber1, $itemnumber1 );
     is( $renewokay, 0, 'Bug 14337 - Verify the borrower cannot renew with a hold on the record if AllowRenewalIfOtherItemsAvailable and onshelfholds are disabled' );
 
     C4::Context->dbh->do("UPDATE issuingrules SET onshelfholds = 0");
-    C4::Context->set_preference( 'AllowRenewalIfOtherItemsAvailable', 1 );
+    t::lib::Mocks::mock_preference( 'AllowRenewalIfOtherItemsAvailable', 1 );
     ( $renewokay, $error ) = CanBookBeRenewed( $borrowernumber1, $itemnumber1 );
     is( $renewokay, 0, 'Bug 14337 - Verify the borrower cannot renew with a hold on the record if AllowRenewalIfOtherItemsAvailable is enabled and onshelfholds is disabled' );
 
     C4::Context->dbh->do("UPDATE issuingrules SET onshelfholds = 1");
-    C4::Context->set_preference( 'AllowRenewalIfOtherItemsAvailable', 0 );
+    t::lib::Mocks::mock_preference( 'AllowRenewalIfOtherItemsAvailable', 0 );
     ( $renewokay, $error ) = CanBookBeRenewed( $borrowernumber1, $itemnumber1 );
     is( $renewokay, 0, 'Bug 14337 - Verify the borrower cannot renew with a hold on the record if AllowRenewalIfOtherItemsAvailable is disabled and onshelfhold is enabled' );
 
     C4::Context->dbh->do("UPDATE issuingrules SET onshelfholds = 1");
-    C4::Context->set_preference( 'AllowRenewalIfOtherItemsAvailable', 1 );
+    t::lib::Mocks::mock_preference( 'AllowRenewalIfOtherItemsAvailable', 1 );
     ( $renewokay, $error ) = CanBookBeRenewed( $borrowernumber1, $itemnumber1 );
     is( $renewokay, 1, 'Bug 14337 - Verify the borrower can renew with a hold on the record if AllowRenewalIfOtherItemsAvailable and onshelfhold are enabled' );
 

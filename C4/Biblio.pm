@@ -40,6 +40,7 @@ use C4::OAI::Sets;
 
 use Koha::Cache;
 use Koha::Authority::Types;
+use Koha::Acquisition::Currencies;
 
 use vars qw($VERSION @ISA @EXPORT);
 
@@ -91,6 +92,7 @@ BEGIN {
 
       &GetAuthorisedValueDesc
       &GetMarcStructure
+      &IsMarcStructureInternal
       &GetMarcFromKohaField
       &GetMarcSubfieldStructureFromKohaField
       &GetFrameworkCode
@@ -1080,6 +1082,27 @@ sub GetBiblioItemInfosOf {
 
 =head1 FUNCTIONS FOR HANDLING MARC MANAGEMENT
 
+=head2 IsMarcStructureInternal
+
+    my $tagslib = C4::Biblio::GetMarcStructure();
+    for my $tag ( sort keys %$tagslib ) {
+        next unless $tag;
+        for my $subfield ( sort keys %{ $tagslib->{$tag} } ) {
+            next if IsMarcStructureInternal($tagslib->{$tag}{$subfield});
+        }
+        # Process subfield
+    }
+
+GetMarcStructure creates keys (lib, tab, mandatory, repeatable) for a display purpose.
+These different values should not be processed as valid subfields.
+
+=cut
+
+sub IsMarcStructureInternal {
+    my ( $subfield ) = @_;
+    return ref $subfield ? 0 : 1;
+}
+
 =head2 GetMarcStructure
 
   $res = GetMarcStructure($forlibrarian,$frameworkcode);
@@ -1531,10 +1554,10 @@ sub MungeMarcPrice {
     my ( $price ) = @_;
     return unless ( $price =~ m/\d/ ); ## No digits means no price.
     # Look for the currency symbol and the normalized code of the active currency, if it's there,
-    my $active_currency = C4::Budgets->GetCurrency();
-    my $symbol = $active_currency->{'symbol'};
-    my $isocode = $active_currency->{'isocode'};
-    $isocode = $active_currency->{'currency'} unless defined $isocode;
+    my $active_currency = Koha::Acquisition::Currencies->get_active;
+    my $symbol = $active_currency->symbol;
+    my $isocode = $active_currency->isocode;
+    $isocode = $active_currency->currency unless defined $isocode;
     my $localprice;
     if ( $symbol ) {
         my @matches =($price=~ /
@@ -1767,10 +1790,11 @@ sub GetMarcISSN {
 
 =head2 GetMarcNotes
 
-  $marcnotesarray = GetMarcNotes( $record, $marcflavour );
+    $marcnotesarray = GetMarcNotes( $record, $marcflavour );
 
-Get all notes from the MARC record and returns them in an array.
-The note are stored in different fields depending on MARC flavour
+    Get all notes from the MARC record and returns them in an array.
+    The notes are stored in different fields depending on MARC flavour.
+    MARC21 field 555 gets special attention for the $u subfields.
 
 =cut
 
@@ -1780,38 +1804,28 @@ sub GetMarcNotes {
         carp 'GetMarcNotes called on undefined record';
         return;
     }
-    my $scope;
-    if ( $marcflavour eq "UNIMARC" ) {
-        $scope = '3..';
-    } else {    # assume marc21 if not unimarc
-        $scope = '5..';
-    }
+
+    my $scope = $marcflavour eq "UNIMARC"? '3..': '5..';
     my @marcnotes;
-    my $note = "";
-    my $tag  = "";
-    my $marcnote;
-    my %blacklist = map { $_ => 1 } split(/,/,C4::Context->preference('NotesBlacklist'));
+    my %blacklist = map { $_ => 1 }
+        split( /,/, C4::Context->preference('NotesBlacklist'));
     foreach my $field ( $record->field($scope) ) {
         my $tag = $field->tag();
-        if (!$blacklist{$tag}) {
-            my $value = $field->as_string();
-            if ( $note ne "" ) {
-                $marcnote = { marcnote => $note, };
-                push @marcnotes, $marcnote;
-                $note = $value;
+        next if $blacklist{ $tag };
+        if( $marcflavour ne 'UNIMARC' && $tag =~ /555/ ) {
+            # Field 555$u contains URLs
+            # We first push the regular subfields and all $u's separately
+            # Leave further actions to the template
+            push @marcnotes, { marcnote => $field->as_string('abcd') };
+            foreach my $sub ( $field->subfield('u') ) {
+                push @marcnotes, { marcnote => $sub };
             }
-            if ( $note ne $value ) {
-                $note = $note . " " . $value;
-            }
+        } else {
+            push @marcnotes, { marcnote => $field->as_string() };
         }
     }
-
-    if ($note) {
-        $marcnote = { marcnote => $note };
-        push @marcnotes, $marcnote;    #load last tag into array
-    }
     return \@marcnotes;
-}    # end GetMarcNotes
+}
 
 =head2 GetMarcSubjects
 
@@ -3671,7 +3685,7 @@ sub prepare_host_field {
         if ( $field = $host->field('205') ) {
             my $s = $field->as_string();
             if ($s) {
-                $sfd{a} = $s;
+                $sfd{e} = $s;
             }
         }
         #URL

@@ -25,12 +25,13 @@ use C4::Auth;
 use C4::Output;
 use C4::Members;
 use C4::Form::MessagingPreferences;
-use Koha::Borrowers;
-use Koha::Borrower::Modifications;
+use Koha::Patrons;
+use Koha::Patron::Modifications;
 use C4::Branch qw(GetBranchesLoop);
 use C4::Scrubber;
 use Email::Valid;
 use Koha::DateUtils;
+use Koha::Patron::Images;
 
 my $cgi = new CGI;
 my $dbh = C4::Context->dbh;
@@ -61,11 +62,10 @@ if ( $action eq q{} ) {
 }
 
 my $mandatory = GetMandatoryFields($action);
-my $hidden = GetHiddenFields($mandatory);
 
 $template->param(
     action            => $action,
-    hidden            => $hidden,
+    hidden            => GetHiddenFields( $mandatory, 'registration' ),
     mandatory         => $mandatory,
     member_titles     => GetTitles() || undef,
     branches          => GetBranchesLoop(),
@@ -81,8 +81,20 @@ if ( $action eq 'create' ) {
     my @empty_mandatory_fields = CheckMandatoryFields( \%borrower, $action );
     my $invalidformfields = CheckForInvalidFields(\%borrower);
     delete $borrower{'password2'};
+    my $cardnumber_error_code;
+    if ( !grep { $_ eq 'cardnumber' } @empty_mandatory_fields ) {
+        # No point in checking the cardnumber if it's missing and mandatory, it'll just generate a
+        # spurious length warning.
+        $cardnumber_error_code = checkcardnumber( $borrower{cardnumber}, $borrower{borrowernumber} );
+    }
 
-    if (@empty_mandatory_fields || @$invalidformfields) {
+    if ( @empty_mandatory_fields || @$invalidformfields || $cardnumber_error_code ) {
+        if ( $cardnumber_error_code == 1 ) {
+            $template->param( cardnumber_already_exists => 1 );
+        } elsif ( $cardnumber_error_code == 2 ) {
+            $template->param( cardnumber_wrong_length => 1 );
+        }
+
         $template->param(
             empty_mandatory_fields => \@empty_mandatory_fields,
             invalid_form_fields    => $invalidformfields,
@@ -115,7 +127,8 @@ if ( $action eq 'create' ) {
 
             my $verification_token = md5_hex( \%borrower );
             $borrower{'password'} = random_string("..........");
-            Koha::Borrower::Modifications->new(
+
+            Koha::Patron::Modifications->new(
                 verification_token => $verification_token )
               ->AddModifications(\%borrower);
 
@@ -196,7 +209,7 @@ elsif ( $action eq 'update' ) {
             );
 
             my $m =
-              Koha::Borrower::Modifications->new(
+              Koha::Patron::Modifications->new(
                 borrowernumber => $borrowernumber );
 
             $m->DelModifications;
@@ -227,16 +240,13 @@ elsif ( $action eq 'edit' ) {    #Display logged in borrower's data
 
     $template->param(
         borrower  => $borrower,
-        guarantor => scalar Koha::Borrowers->find($borrowernumber)->guarantor(),
+        guarantor => scalar Koha::Patrons->find($borrowernumber)->guarantor(),
+        hidden => GetHiddenFields( $mandatory, 'modification' ),
     );
 
     if (C4::Context->preference('OPACpatronimages')) {
-        my ($image, $dberror) = GetPatronImage($borrower->{borrowernumber});
-        if ($image) {
-            $template->param(
-                display_patron_image => 1
-            );
-        }
+        my $patron_image = Koha::Patron::Images->find($borrower->{borrowernumber});
+        $template->param( display_patron_image => 1 ) if $patron_image;
     }
 
 }
@@ -251,13 +261,14 @@ $template->param(
 output_html_with_http_headers $cgi, $cookie, $template->output, undef, { force_no_caching => 1 };
 
 sub GetHiddenFields {
-    my ($mandatory) = @_;
+    my ( $mandatory, $action ) = @_;
     my %hidden_fields;
 
-    my $BorrowerUnwantedField =
-      C4::Context->preference("PatronSelfRegistrationBorrowerUnwantedField");
+    my $BorrowerUnwantedField = $action eq 'modification' ?
+      C4::Context->preference( "PatronSelfModificationBorrowerUnwantedField" ) :
+      C4::Context->preference( "PatronSelfRegistrationBorrowerUnwantedField" );
 
-    my @fields = split( /\|/, $BorrowerUnwantedField );
+    my @fields = split( /\|/, $BorrowerUnwantedField || q|| );
     foreach (@fields) {
         next unless m/\w/o;
         #Don't hide mandatory fields

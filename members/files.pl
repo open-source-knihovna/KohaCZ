@@ -30,7 +30,8 @@ use C4::Members::Attributes qw(GetBorrowerAttributes);
 use C4::Debug;
 
 use Koha::DateUtils;
-use Koha::Borrower::Files;
+use Koha::Patron::Files;
+use Koha::Patron::Images;
 
 my $cgi = CGI->new;
 
@@ -47,7 +48,7 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 $template->param( 'borrower_files' => 1 );
 
 my $borrowernumber = $cgi->param('borrowernumber');
-my $bf = Koha::Borrower::Files->new( borrowernumber => $borrowernumber );
+my $bf = Koha::Patron::Files->new( borrowernumber => $borrowernumber );
 
 my $op = $cgi->param('op') || '';
 
@@ -115,11 +116,11 @@ else {
         );
     }
 
-    my ($picture, $dberror) = GetPatronImage($data->{'borrowernumber'});
-    $template->param( picture => 1 ) if $picture;
+    my $patron_image = Koha::Patron::Images->find($data->{borrowernumber});
+    $template->param( picture => 1 ) if $patron_image;
 
     $template->param(
-        files => Koha::Borrower::Files->new( borrowernumber => $borrowernumber )
+        files => Koha::Patron::Files->new( borrowernumber => $borrowernumber )
           ->GetFilesInfo(),
 
         errors => \%errors,

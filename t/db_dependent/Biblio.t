@@ -17,9 +17,10 @@
 
 use Modern::Perl;
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 use Test::MockModule;
 
+use List::MoreUtils qw( uniq );
 use MARC::Record;
 use t::lib::Mocks qw( mock_preference );
 
@@ -37,11 +38,19 @@ my $context = new Test::MockModule('C4::Context');
 
 mock_marcfromkohafield();
 
-my $currency = new Test::MockModule('C4::Budgets');
-$currency->mock( 'GetCurrency', sub {
-    return { symbol   => '$',   isocode  => 'USD',
-             currency => 'USD', active => 1 };
-});
+my $currency = new Test::MockModule('Koha::Acquisition::Currencies');
+$currency->mock(
+    'get_active',
+    sub {
+        return Koha::Acquisition::Currency->new(
+            {   symbol   => '$',
+                isocode  => 'USD',
+                currency => 'USD',
+                active   => 1,
+            }
+        );
+    }
+);
 
 sub run_tests {
 
@@ -191,7 +200,6 @@ sub run_tests {
             "(GetMarcISBN) Corretly retrieves ISBN #". ($i + 1));
     }
 
-
     is( GetMarcPrice( $record_for_isbn, $marcflavour ), 100,
         "GetMarcPrice returns the correct value");
     my $newincbiblioitemnumber=$biblioitemnumber+1;
@@ -206,7 +214,16 @@ sub run_tests {
     } else {
         $biblioitemnumbertotest = $updatedrecord->field($biblioitem_tag)->subfield($biblioitem_subfield);
     }
-    is ($newincbiblioitemnumber, $biblioitemnumbertotest);
+    is ($newincbiblioitemnumber, $biblioitemnumbertotest, 'Check newincbiblioitemnumber');
+
+    # test for GetMarcNotes
+    my $a1= GetMarcNotes( $marc_record, $marcflavour );
+    my $field2 = MARC::Field->new( $marcflavour eq 'UNIMARC'? 300: 555, 0, '', a=> 'Some text', u=> 'http://url-1.com', u=> 'nohttp://something_else' );
+    $marc_record->append_fields( $field2 );
+    my $a2= GetMarcNotes( $marc_record, $marcflavour );
+    is( ( $marcflavour eq 'UNIMARC' && @$a2 == @$a1 + 1 ) ||
+        ( $marcflavour ne 'UNIMARC' && @$a2 == @$a1 + 3 ), 1,
+        'Check the number of returned notes of GetMarcNotes' );
 }
 
 sub mock_marcfromkohafield {
@@ -273,19 +290,19 @@ sub create_issn_field {
 }
 
 subtest 'MARC21' => sub {
-    plan tests => 28;
+    plan tests => 29;
     run_tests('MARC21');
     $dbh->rollback;
 };
 
 subtest 'UNIMARC' => sub {
-    plan tests => 28;
+    plan tests => 29;
     run_tests('UNIMARC');
     $dbh->rollback;
 };
 
 subtest 'NORMARC' => sub {
-    plan tests => 28;
+    plan tests => 29;
     run_tests('NORMARC');
     $dbh->rollback;
 };
@@ -313,6 +330,25 @@ subtest 'GetMarcSubfieldStructureFromKohaField' => sub {
     # foo.bar does not exist so this should return undef
     $marc_subfield_structure = GetMarcSubfieldStructureFromKohaField('foo.bar', '');
     is($marc_subfield_structure, undef, "invalid kohafield returns undef");
+};
+
+subtest 'IsMarcStructureInternal' => sub {
+    plan tests => 6;
+    my $tagslib = GetMarcStructure();
+    my @internals;
+    for my $tag ( sort keys %$tagslib ) {
+        next unless $tag;
+        for my $subfield ( sort keys %{ $tagslib->{$tag} } ) {
+            push @internals, $subfield if IsMarcStructureInternal($tagslib->{$tag}{$subfield});
+        }
+    }
+    @internals = uniq @internals;
+    is( scalar(@internals), 4, 'expect four internals');
+    is( grep( /^lib$/, @internals ), 1, 'check lib' );
+    is( grep( /^tab$/, @internals ), 1, 'check tab' );
+    is( grep( /^mandatory$/, @internals ), 1, 'check mandatory' );
+    is( grep( /^repeatable$/, @internals ), 1, 'check repeatable' );
+    is( grep( /^a$/, @internals ), 0, 'no subfield a' );
 };
 
 1;

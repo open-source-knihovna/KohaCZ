@@ -1,3 +1,4 @@
+[% USE Koha %]
 <script type="text/javascript">//<![CDATA[
     $(document).ready(function() {
         var path = location.pathname.substring(1);
@@ -45,7 +46,7 @@
     <li><a href="/cgi-bin/koha/admin/classsources.pl">Classification sources</a></li>
     <li><a href="/cgi-bin/koha/admin/matching-rules.pl">Record matching rules</a></li>
     <li><a href="/cgi-bin/koha/admin/oai_sets.pl">OAI sets configuration</a></li>
-    <li><a href="/cgi-bin/koha/admin/items_search_fields.pl">Items search fields</a></li>
+    <li><a href="/cgi-bin/koha/admin/items_search_fields.pl">Item search fields</a></li>
 </ul>
 
 <h5>Acquisition parameters</h5>
@@ -72,6 +73,9 @@
     <li><a href="/cgi-bin/koha/admin/didyoumean.pl">Did you mean?</a></li>
     <li><a href="/cgi-bin/koha/admin/columns_settings.pl">Columns settings</a></li>
     <li><a href="/cgi-bin/koha/admin/audio_alerts.pl">Audio alerts</a></li>
+    [% IF Koha.Preference('SMSSendDriver') == 'Email' %]
+        <li><a href="/cgi-bin/koha/admin/sms_providers.pl">SMS cellular providers</a></li>
+    [% END %]
 </ul>
 </div>
 </div>

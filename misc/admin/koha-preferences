@@ -82,7 +82,6 @@ sub _set_preference {
     _debug( "Setting $preference to $value" );
 
     C4::Context->set_preference( $preference, $value );
-    logaction( 'SYSTEMPREFERENCE', 'MODIFY', undef, $preference . " | " . $value );
 }
 
 sub GetPreferences {
@@ -126,6 +125,7 @@ sub SetPreferences {
         _set_preference( $row->{'variable'}, $preferences{$row->{'variable'}} );
     }
 
+    # FIXME This may be not needed
     C4::Context->clear_syspref_cache();
 }
 

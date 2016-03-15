@@ -136,7 +136,7 @@ function validate1(date) {
 &rsaquo; [% IF ( unknowuser ) %]Patron does not exist[% ELSE %]Patron details for [% INCLUDE 'patron-title.inc' %][% END %]
 </div>
 
-<div id="doc3" class="yui-t1">
+<div id="doc3" class="yui-t2">
    
    <div id="bd">
 	<div id="yui-main">
@@ -210,7 +210,7 @@ function validate1(date) {
 		<ol>
         [% IF ( I ) %]
             [% IF ( phonepro ) %]<li><span class="label">Organization phone: </span>[% phonepro %]</li>[% END %]
-            [% IF ( emailpro ) %]<li><span class="label">Organization email: </span>[% emailpro %]</li>[% END %]
+            [% IF ( emailpro ) %]<li class="email"><span class="label">Organization email: </span>[% emailpro %]</li>[% END %]
         [% ELSE %]
             [% IF ( phone ) %]<li><span class="label">Primary phone: </span>[% phone %]</li>[% END %]
             [% IF ( phonepro ) %]<li><span class="label">Secondary phone: </span>[% phonepro %]</li>[% END %]
@@ -223,22 +223,28 @@ function validate1(date) {
     [% END %]   	
 	[% IF ( fax ) %]<li><span class="label">Fax: </span>[% fax %]</li>[% END %]
     [% UNLESS ( I ) %]
-        [% IF ( email ) %]<li><span class="label">Primary email:</span><a href="mailto:[% email %]">[% email %]</a></li>[% END %]
-        [% IF ( emailpro ) %]<li><span class="label">Secondary email: </span><a href="mailto:[% emailpro %]">[% emailpro %]</a></li>[% END %]
+        [% IF ( email ) %]<li class="email"><span class="label">Primary email:</span><a title="[% email %]" href="mailto:[% email %]">[% email %]</a></li>[% END %]
+        [% IF ( emailpro ) %]<li class="email"><span class="label">Secondary email: </span><a title="[% emailpro %]" href="mailto:[% emailpro %]">[% emailpro %]</a></li>[% END %]
     [% END %]
     [% IF ( initials ) %]<li><span class="label">Initials: </span>[% initials %]</li>[% END %]
     [% IF ( dateofbirth ) %]<li><span class="label">Date of birth:</span>[% dateofbirth | $KohaDates %] ([% age %] years)</li>[% END %]
     [% IF ( sex ) %]<li><span class="label">Gender:</span>
     [% IF ( sex == 'F' ) %]Female[% ELSIF ( sex == 'M' ) %]Male[% ELSE %][% sex %][% END %]
     </li>[% END %][% END %]
-    [% IF ( isguarantee ) %]
-        [% IF ( guaranteeloop ) %]
-            <li><span class="label">Guarantees:</span><ul>[% FOREACH guaranteeloo IN guaranteeloop %]<li><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% guaranteeloo.borrowernumber %]">[% guaranteeloo.name %]  </a></li>[% END %]</ul></li>
-        [% END %]
-    [% ELSE %]
-        [% IF ( guarantorborrowernumber ) %]
-            <li><span class="label">Guarantor:</span><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% guarantorborrowernumber %]">[% guarantorsurname %][%IF ( guarantorfirstname ) %], [% guarantorfirstname %] [% END %]</a></li>
-        [% END %]
+    [% IF guarantees %]
+        <li>
+            <span class="label">Guarantees:</span>
+            <ul>
+                [% FOREACH guarantee IN guarantees %]
+                    <li><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% guarantee.borrowernumber %]">[% guarantee.firstname %] [% guarantee.surname %]</a></li>
+                [% END %]
+            </ul>
+        </li>
+    [% ELSIF guarantor %]
+        <li>
+            <span class="label">Guarantor:</span>
+            <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% guarantor.borrowernumber %]">[% guarantor.firstname %] [% guarantor.surname %]</a>
+        </li>
     [% END %]
 </ol>
 </div>
@@ -411,7 +417,7 @@ function validate1(date) {
       <li><span class="label">ZIP/Postal code: </span>[% B_zipcode %]</li>
       [% IF ( B_country ) %]<li><span class="label">Country: </span>[% B_country %]</li>[% END %]
       [% IF ( B_phone ) %]<li><span class="label">Phone: </span>[% B_phone %]</li>[% END %]
-      [% IF ( B_email ) %]<li><span class="label">Email: </span><a href="mailto:[% B_email %]">[% B_email %]</a></li>[% END %]
+      [% IF ( B_email ) %]<li class="email"><span class="label">Email: </span><a title="[% B_email %]" href="mailto:[% B_email %]">[% B_email %]</a></li>[% END %]
       [% IF ( contactnote ) %]<li><span class="label">Contact note: </span> [% contactnote %]</li>[% END %]
       </ol>
     </div>

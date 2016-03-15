@@ -36,7 +36,7 @@ use C4::NewsChannels; #get slip news
 use DateTime;
 use Koha::Database;
 use Koha::DateUtils;
-use Koha::Borrower::Debarments qw(IsDebarred);
+use Koha::Patron::Debarments qw(IsDebarred);
 use Text::Unaccent qw( unac_string );
 use Koha::AuthUtils qw(hash_password);
 use Koha::Database;
@@ -61,8 +61,6 @@ BEGIN {
         &GetMemberRelatives
         &GetMember
 
-        &GetGuarantees
-
         &GetMemberIssuesAndFines
         &GetPendingIssues
         &GetAllIssues
@@ -73,10 +71,6 @@ BEGIN {
         &GetAge
         &GetSortDetails
         &GetTitles
-
-        &GetPatronImage
-        &PutPatronImage
-        &RmPatronImage
 
         &GetHideLostItemsPreference
 
@@ -95,11 +89,6 @@ BEGIN {
 
         &GetExpiryDate
         &GetUpcomingMembershipExpires
-
-        &AddMessage
-        &DeleteMessage
-        &GetMessages
-        &GetMessagesCount
 
         &IssueSlip
         GetBorrowersWithEmail
@@ -444,7 +433,7 @@ sub GetMember {
     }
     $debug && warn $select, " ",values %information;
     my $sth = $dbh->prepare("$select");
-    $sth->execute(map{$information{$_}} keys %information);
+    $sth->execute(@values);
     my $data = $sth->fetchall_arrayref({});
     #FIXME interface to this routine now allows generation of a result set
     #so whole array should be returned but bowhere in the current code expects this
@@ -453,48 +442,6 @@ sub GetMember {
     }
 
     return;
-}
-
-=head2 GetMemberRelatives
-
- @borrowernumbers = GetMemberRelatives($borrowernumber);
-
- C<GetMemberRelatives> returns a borrowersnumber's list of guarantor/guarantees of the member given in parameter
-
-=cut
-
-sub GetMemberRelatives {
-    my $borrowernumber = shift;
-    my $dbh = C4::Context->dbh;
-    my @glist;
-
-    # Getting guarantor
-    my $query = "SELECT guarantorid FROM borrowers WHERE borrowernumber=?";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($borrowernumber);
-    my $data = $sth->fetchrow_arrayref();
-    push @glist, $data->[0] if $data->[0];
-    my $guarantor = $data->[0] ? $data->[0] : undef;
-
-    # Getting guarantees
-    $query = "SELECT borrowernumber FROM borrowers WHERE guarantorid=?";
-    $sth = $dbh->prepare($query);
-    $sth->execute($borrowernumber);
-    while ($data = $sth->fetchrow_arrayref()) {
-       push @glist, $data->[0];
-    }
-
-    # Getting sibling guarantees
-    if ($guarantor) {
-        $query = "SELECT borrowernumber FROM borrowers WHERE guarantorid=?";
-        $sth = $dbh->prepare($query);
-        $sth->execute($guarantor);
-        while ($data = $sth->fetchrow_arrayref()) {
-           push @glist, $data->[0] if ($data->[0] != $borrowernumber);
-        }
-    }
-
-    return @glist;
 }
 
 =head2 IsMemberBlocked
@@ -521,7 +468,7 @@ sub IsMemberBlocked {
     my $borrowernumber = shift;
     my $dbh            = C4::Context->dbh;
 
-    my $blockeddate = Koha::Borrower::Debarments::IsDebarred($borrowernumber);
+    my $blockeddate = Koha::Patron::Debarments::IsDebarred($borrowernumber);
 
     return ( 1, $blockeddate ) if $blockeddate;
 
@@ -663,16 +610,6 @@ sub ModMember {
 
     my $execute_success = $rs->update($new_borrower);
     if ($execute_success ne '0E0') { # only proceed if the update was a success
-
-        # ok if its an adult (type) it may have borrowers that depend on it as a guarantor
-        # so when we update information for an adult we should check for guarantees and update the relevant part
-        # of their records, ie addresses and phone numbers
-        my $borrowercategory= GetBorrowercategory( $data{'category_type'} );
-        if ( exists  $borrowercategory->{'category_type'} && $borrowercategory->{'category_type'} eq ('A' || 'S') ) {
-            # is adult check guarantees;
-            UpdateGuarantees(%data);
-        }
-
         # If the patron changes to a category with enrollment fee, we add a fee
         if ( $data{categorycode} and $data{categorycode} ne $old_categorycode ) {
             if ( C4::Context->preference('FeeOnChangePatronCategory') ) {
@@ -746,6 +683,9 @@ sub AddMember {
       : $patron_category->default_privacy() eq 'never'   ? 2
       : $patron_category->default_privacy() eq 'forever' ? 0
       :                                                    undef;
+
+    $data{'privacy_guarantor_checkouts'} = 0 unless defined( $data{'privacy_guarantor_checkouts'} );
+
     # Make a copy of the plain text password for later use
     my $plain_text_password = $data{'password'};
 
@@ -753,8 +693,9 @@ sub AddMember {
     $data{'password'} = ($data{'password'})? hash_password($data{'password'}) : '!';
 
     # we don't want invalid dates in the db (mysql has a bad habit of inserting 0000-00-00
-    $data{'dateofbirth'} = undef if( not $data{'dateofbirth'} );
-    $data{'debarred'} = undef if ( not $data{'debarred'} );
+    $data{'dateofbirth'}     = undef if ( not $data{'dateofbirth'} );
+    $data{'debarred'}        = undef if ( not $data{'debarred'} );
+    $data{'sms_provider_id'} = undef if ( not $data{'sms_provider_id'} );
 
     # get only the columns of Borrower
     my @columns = $schema->source('Borrower')->columns;
@@ -946,61 +887,6 @@ sub fixup_cardnumber {
     return $cardnumber;     # just here as a fallback/reminder 
 }
 
-=head2 GetGuarantees
-
-  ($num_children, $children_arrayref) = &GetGuarantees($parent_borrno);
-  $child0_cardno = $children_arrayref->[0]{"cardnumber"};
-  $child0_borrno = $children_arrayref->[0]{"borrowernumber"};
-
-C<&GetGuarantees> takes a borrower number (e.g., that of a patron
-with children) and looks up the borrowers who are guaranteed by that
-borrower (i.e., the patron's children).
-
-C<&GetGuarantees> returns two values: an integer giving the number of
-borrowers guaranteed by C<$parent_borrno>, and a reference to an array
-of references to hash, which gives the actual results.
-
-=cut
-
-#'
-sub GetGuarantees {
-    my ($borrowernumber) = @_;
-    my $dbh              = C4::Context->dbh;
-    my $sth              =
-      $dbh->prepare(
-"select cardnumber,borrowernumber, firstname, surname from borrowers where guarantorid=?"
-      );
-    $sth->execute($borrowernumber);
-
-    my @dat;
-    my $data = $sth->fetchall_arrayref({}); 
-    return ( scalar(@$data), $data );
-}
-
-=head2 UpdateGuarantees
-
-  &UpdateGuarantees($parent_borrno);
-  
-
-C<&UpdateGuarantees> borrower data for an adult and updates all the guarantees
-with the modified information
-
-=cut
-
-#'
-sub UpdateGuarantees {
-    my %data = shift;
-    my $dbh = C4::Context->dbh;
-    my ( $count, $guarantees ) = GetGuarantees( $data{'borrowernumber'} );
-    foreach my $guarantee (@$guarantees){
-        my $guaquery = qq|UPDATE borrowers 
-              SET address=?,fax=?,B_city=?,mobile=?,city=?,phone=?
-              WHERE borrowernumber=?
-        |;
-        my $sth = $dbh->prepare($guaquery);
-        $sth->execute($data{'address'},$data{'fax'},$data{'B_city'},$data{'mobile'},$data{'city'},$data{'phone'},$guarantee->{'borrowernumber'});
-    }
-}
 =head2 GetPendingIssues
 
   my $issues = &GetPendingIssues(@borrowernumber);
@@ -1014,7 +900,6 @@ The keys include C<biblioitems> fields except marc and marcxml.
 
 =cut
 
-#'
 sub GetPendingIssues {
     my @borrowernumbers = @_;
 
@@ -1831,66 +1716,6 @@ sub GetTitles {
     }
 }
 
-=head2 GetPatronImage
-
-    my ($imagedata, $dberror) = GetPatronImage($borrowernumber);
-
-Returns the mimetype and binary image data of the image for the patron with the supplied borrowernumber.
-
-=cut
-
-sub GetPatronImage {
-    my ($borrowernumber) = @_;
-    warn "Borrowernumber passed to GetPatronImage is $borrowernumber" if $debug;
-    my $dbh = C4::Context->dbh;
-    my $query = 'SELECT mimetype, imagefile FROM patronimage WHERE borrowernumber = ?';
-    my $sth = $dbh->prepare($query);
-    $sth->execute($borrowernumber);
-    my $imagedata = $sth->fetchrow_hashref;
-    warn "Database error!" if $sth->errstr;
-    return $imagedata, $sth->errstr;
-}
-
-=head2 PutPatronImage
-
-    PutPatronImage($cardnumber, $mimetype, $imgfile);
-
-Stores patron binary image data and mimetype in database.
-NOTE: This function is good for updating images as well as inserting new images in the database.
-
-=cut
-
-sub PutPatronImage {
-    my ($cardnumber, $mimetype, $imgfile) = @_;
-    warn "Parameters passed in: Cardnumber=$cardnumber, Mimetype=$mimetype, " . ($imgfile ? "Imagefile" : "No Imagefile") if $debug;
-    my $dbh = C4::Context->dbh;
-    my $query = "INSERT INTO patronimage (borrowernumber, mimetype, imagefile) VALUES ( ( SELECT borrowernumber from borrowers WHERE cardnumber = ? ),?,?) ON DUPLICATE KEY UPDATE imagefile = ?;";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($cardnumber,$mimetype,$imgfile,$imgfile);
-    warn "Error returned inserting $cardnumber.$mimetype." if $sth->errstr;
-    return $sth->errstr;
-}
-
-=head2 RmPatronImage
-
-    my ($dberror) = RmPatronImage($borrowernumber);
-
-Removes the image for the patron with the supplied borrowernumber.
-
-=cut
-
-sub RmPatronImage {
-    my ($borrowernumber) = @_;
-    warn "Borrowernumber passed to GetPatronImage is $borrowernumber" if $debug;
-    my $dbh = C4::Context->dbh;
-    my $query = "DELETE FROM patronimage WHERE borrowernumber = ?;";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($borrowernumber);
-    my $dberror = $sth->errstr;
-    warn "Database error!" if $sth->errstr;
-    return $dberror;
-}
-
 =head2 GetHideLostItemsPreference
 
   $hidelostitemspref = &GetHideLostItemsPreference($borrowernumber);
@@ -2130,130 +1955,6 @@ sub ModPrivacy {
                       privacy        => $privacy );
 }
 
-=head2 AddMessage
-
-  AddMessage( $borrowernumber, $message_type, $message, $branchcode );
-
-Adds a message to the messages table for the given borrower.
-
-Returns:
-  True on success
-  False on failure
-
-=cut
-
-sub AddMessage {
-    my ( $borrowernumber, $message_type, $message, $branchcode ) = @_;
-
-    my $dbh  = C4::Context->dbh;
-
-    if ( ! ( $borrowernumber && $message_type && $message && $branchcode ) ) {
-      return;
-    }
-
-    my $query = "INSERT INTO messages ( borrowernumber, branchcode, message_type, message ) VALUES ( ?, ?, ?, ? )";
-    my $sth = $dbh->prepare($query);
-    $sth->execute( $borrowernumber, $branchcode, $message_type, $message );
-    logaction("MEMBERS", "ADDCIRCMESSAGE", $borrowernumber, $message) if C4::Context->preference("BorrowersLog");
-    return 1;
-}
-
-=head2 GetMessages
-
-  GetMessages( $borrowernumber, $type );
-
-$type is message type, B for borrower, or L for Librarian.
-Empty type returns all messages of any type.
-
-Returns all messages for the given borrowernumber
-
-=cut
-
-sub GetMessages {
-    my ( $borrowernumber, $type, $branchcode ) = @_;
-
-    if ( ! $type ) {
-      $type = '%';
-    }
-
-    my $dbh  = C4::Context->dbh;
-
-    my $query = "SELECT
-                  branches.branchname,
-                  messages.*,
-                  message_date,
-                  messages.branchcode LIKE '$branchcode' AS can_delete
-                  FROM messages, branches
-                  WHERE borrowernumber = ?
-                  AND message_type LIKE ?
-                  AND messages.branchcode = branches.branchcode
-                  ORDER BY message_date DESC";
-    my $sth = $dbh->prepare($query);
-    $sth->execute( $borrowernumber, $type ) ;
-    my @results;
-
-    while ( my $data = $sth->fetchrow_hashref ) {
-        $data->{message_date_formatted} = output_pref( { dt => dt_from_string( $data->{message_date} ), dateonly => 1, dateformat => 'iso' } );
-        push @results, $data;
-    }
-    return \@results;
-
-}
-
-=head2 GetMessages
-
-  GetMessagesCount( $borrowernumber, $type );
-
-$type is message type, B for borrower, or L for Librarian.
-Empty type returns all messages of any type.
-
-Returns the number of messages for the given borrowernumber
-
-=cut
-
-sub GetMessagesCount {
-    my ( $borrowernumber, $type, $branchcode ) = @_;
-
-    if ( ! $type ) {
-      $type = '%';
-    }
-
-    my $dbh  = C4::Context->dbh;
-
-    my $query = "SELECT COUNT(*) as MsgCount FROM messages WHERE borrowernumber = ? AND message_type LIKE ?";
-    my $sth = $dbh->prepare($query);
-    $sth->execute( $borrowernumber, $type ) ;
-    my @results;
-
-    my $data = $sth->fetchrow_hashref;
-    my $count = $data->{'MsgCount'};
-
-    return $count;
-}
-
-
-
-=head2 DeleteMessage
-
-  DeleteMessage( $message_id );
-
-=cut
-
-sub DeleteMessage {
-    my ( $message_id ) = @_;
-
-    my $dbh = C4::Context->dbh;
-    my $query = "SELECT * FROM messages WHERE message_id = ?";
-    my $sth = $dbh->prepare($query);
-    $sth->execute( $message_id );
-    my $message = $sth->fetchrow_hashref();
-
-    $query = "DELETE FROM messages WHERE message_id = ?";
-    $sth = $dbh->prepare($query);
-    $sth->execute( $message_id );
-    logaction("MEMBERS", "DELCIRCMESSAGE", $message->{'borrowernumber'}, $message->{'message'}) if C4::Context->preference("BorrowersLog");
-}
-
 =head2 IssueSlip
 
   IssueSlip($branchcode, $borrowernumber, $quickslip)
@@ -2410,7 +2111,7 @@ sub GetBorrowersWithEmail {
 sub AddMember_Opac {
     my ( %borrower ) = @_;
 
-    $borrower{'categorycode'} = C4::Context->preference('PatronSelfRegistrationDefaultCategory');
+    $borrower{'categorycode'} //= C4::Context->preference('PatronSelfRegistrationDefaultCategory');
     if (not defined $borrower{'password'}){
         my $sr = new String::Random;
         $sr->{'A'} = [ 'A'..'Z', 'a'..'z' ];
@@ -2418,7 +2119,7 @@ sub AddMember_Opac {
         $borrower{'password'} = $password;
     }
 
-    $borrower{'cardnumber'} = fixup_cardnumber();
+    $borrower{'cardnumber'} = fixup_cardnumber( $borrower{'cardnumber'} );
 
     my $borrowernumber = AddMember(%borrower);
 

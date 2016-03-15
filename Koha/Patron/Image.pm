@@ -1,7 +1,5 @@
-package Koha::Borrowers;
+package Koha::Patron::Image;
 
-# Copyright ByWater Solutions 2014
-#
 # This file is part of Koha.
 #
 # Koha is free software; you can redistribute it and/or modify it under the
@@ -23,13 +21,11 @@ use Carp;
 
 use Koha::Database;
 
-use Koha::Borrower;
-
-use base qw(Koha::Objects);
+use base qw(Koha::Object);
 
 =head1 NAME
 
-Koha::Borrower - Koha Borrower Object class
+Koha::Patron;;Image - Koha Patron;;Image Object class
 
 =head1 API
 
@@ -37,22 +33,12 @@ Koha::Borrower - Koha Borrower Object class
 
 =cut
 
-=head3 type
+=head3 _type
 
 =cut
 
 sub _type {
-    return 'Borrower';
+    return 'Patronimage';
 }
-
-sub object_class {
-    return 'Koha::Borrower';
-}
-
-=head1 AUTHOR
-
-Kyle M Hall <kyle@bywatersolutions.com>
-
-=cut
 
 1;

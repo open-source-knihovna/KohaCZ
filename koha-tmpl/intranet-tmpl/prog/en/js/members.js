@@ -217,6 +217,27 @@ function select_user(borrowernumber, borrower) {
     return 0;
 }
 
+function CalculateAge(dateofbirth) {
+    var today = new Date();
+    var dob = Date_from_syspref(dateofbirth)
+    var age = new Object();
+
+    age.year = today.getFullYear() - dob.getFullYear();
+    age.month = today.getMonth() - dob.getMonth();
+    var day = today.getDate() - dob.getDate();
+
+    if(day < 0) {
+        age.month = parseInt(age.month) -1;
+    }
+
+    if(age.month < 0) {
+        age.year = parseInt(age.year) -1;
+        age.month = 12 + age.month;
+    }
+
+    return age;
+}
+
 $(document).ready(function(){
     if($("#yesdebarred").is(":checked")){
         $("#debarreduntil").show();

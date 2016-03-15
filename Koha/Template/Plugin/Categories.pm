@@ -21,6 +21,13 @@ use Template::Plugin;
 use base qw( Template::Plugin );
 
 use C4::Category;
+use Koha::Patron::Categories;
+
+sub GetName {
+    my ( $self, $categorycode ) = @_;
+
+    return Koha::Patron::Categories->find( $categorycode )->description;
+}
 
 sub all {
     my ( $self, $params ) = @_;
@@ -55,6 +62,11 @@ Koha::Template::Plugin::Categories - TT Plugin for categories
 
 In a template, you can get the all categories with
 the following TT code: [% Categories.all() %]
+
+=head2 GetName
+
+In a template, you can get the name of a patron category using
+[% Categories.GetName( categorycode ) %].
 
 =head1 AUTHOR
 

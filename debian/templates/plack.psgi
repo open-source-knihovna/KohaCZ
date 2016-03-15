@@ -44,11 +44,10 @@ use CGI qw(-utf8 ); # we will loose -utf8 under plack, otherwise
     *CGI::new = sub {
         my $q = $old_new->( @_ );
         $CGI::PARAM_UTF8 = 1;
+        C4::Context->clear_syspref_L1_cache();
         return $q;
     };
 }
-
-C4::Context->disable_syspref_cache();
 
 my $intranet = Plack::App::CGIBin->new(
     root => '/usr/share/koha/intranet/cgi-bin'

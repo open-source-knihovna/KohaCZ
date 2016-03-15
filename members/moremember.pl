@@ -51,8 +51,8 @@ use C4::Branch; # GetBranchName
 use C4::Form::MessagingPreferences;
 use List::MoreUtils qw/uniq/;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
-use Koha::Borrower::Debarments qw(GetDebarments IsDebarred);
-use Koha::Libraries;
+use Koha::Patron::Debarments qw(GetDebarments IsDebarred);
+use Koha::Patron::Images;
 use Module::Load;
 if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preference('NorwegianPatronDBEnable') == 1 ) {
     load Koha::NorwegianPatronDB, qw( NLGetSyncDataFromBorrowernumber );
@@ -163,39 +163,21 @@ if ( $category_type eq 'C') {
    $template->param( 'catcode' =>    $catcodes->[0])  if $cnt == 1;
 }
 
-my ( $count, $guarantees ) = GetGuarantees( $data->{'borrowernumber'} );
-if ( $count ) {
-    $template->param( isguarantee => 1 );
+my $patron = Koha::Patrons->find($data->{borrowernumber});
+my @relatives;
+if ( my $guarantor = $patron->guarantor ) {
+    $template->param( guarantor => $guarantor );
+    push @relatives, $guarantor->borrowernumber;
+    push @relatives, $_->borrowernumber for $patron->siblings;
+} else {
+    my @guarantees = $patron->guarantees;
+    $template->param( guarantees => \@guarantees );
+    push @relatives, $_->borrowernumber for @guarantees;
+}
 
-    # FIXME
-    # It looks like the $i is only being returned to handle walking through
-    # the array, which is probably better done as a foreach loop.
-    #
-    my @guaranteedata;
-    for ( my $i = 0 ; $i < $count ; $i++ ) {
-        push(@guaranteedata,
-            {
-                borrowernumber => $guarantees->[$i]->{'borrowernumber'},
-                cardnumber     => $guarantees->[$i]->{'cardnumber'},
-                name           => $guarantees->[$i]->{'firstname'} . " "
-                                . $guarantees->[$i]->{'surname'}
-            }
-        );
-    }
-    $template->param( guaranteeloop => \@guaranteedata );
-}
-else {
-    if ($data->{'guarantorid'}){
-	    my ($guarantor) = GetMember( 'borrowernumber' =>$data->{'guarantorid'});
-		$template->param(guarantor => 1);
-		foreach (qw(borrowernumber cardnumber firstname surname)) {        
-			  $template->param("guarantor$_" => $guarantor->{$_});
-        }
-    }
-	if ($category_type eq 'C'){
-		$template->param('C' => 1);
-	}
-}
+my $relatives_issues_count =
+  Koha::Database->new()->schema()->resultset('Issue')
+  ->count( { borrowernumber => \@relatives } );
 
 $template->param( adultborrower => 1 ) if ( $category_type eq 'A' || $category_type eq 'I' );
 
@@ -244,11 +226,6 @@ if ( C4::Context->preference('OPACPrivacy') ) {
     $template->param( "privacy".$data->{'privacy'} => 1);
 }
 
-my @relatives = GetMemberRelatives($borrowernumber);
-my $relatives_issues_count =
-  Koha::Database->new()->schema()->resultset('Issue')
-  ->count( { borrowernumber => \@relatives } );
-
 my $today       = DateTime->now( time_zone => C4::Context->tz);
 $today->truncate(to => 'day');
 my $overdues_exist = 0;
@@ -288,8 +265,8 @@ if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preferen
 # check to see if patron's image exists in the database
 # basically this gives us a template var to condition the display of
 # patronimage related interface on
-my ($picture, $dberror) = GetPatronImage($data->{'borrowernumber'});
-$template->param( picture => 1 ) if $picture;
+my $patron_image = Koha::Patron::Images->find($data->{borrowernumber});
+$template->param( picture => 1 ) if $patron_image;
 
 my $branch=C4::Context->userenv->{'branch'};
 

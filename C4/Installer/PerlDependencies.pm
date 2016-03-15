@@ -552,36 +552,6 @@ our $PERL_DEPS = {
         'required' => '1',
         'min_ver'  => '0.02',
     },
-    'MooseX::Storage' => {
-        'usage'    => 'Core',
-        'required' => '0',
-        'min_ver'  => '0.30',
-    },
-    'MooseX::Types' => {
-        'usage'    => 'Core',
-        'required' => '0',
-        'min_ver'  => '0.30',
-    },
-    'MooseX::Getopt' => {
-        'usage'    => 'Command line scripts',
-        'required' => '0',
-        'min_ver'  => '0.46',
-    },
-    'MooseX::RW' => {
-        'usage'    => 'Command line scripts',
-        'required' => '0',
-        'min_ver'  => '0.003',
-    },
-    'String::RewritePrefix' => {
-        'usage'    => 'Core',
-        'required' => '0',
-        'min_ver'  => '0.006',
-    },
-    'Time::Progress' => {
-        'usage'    => 'Core',
-        'required' => '0',
-        'min_ver'  => '1.7',
-    },
     'DBD::Mock' => {
         'usage'    => 'Core',
         'required' => '1',
@@ -641,16 +611,6 @@ our $PERL_DEPS = {
         'usage'    => 'Core',
         'required' => '0',
         'min_ver'  => '1',
-    },
-    'AnyEvent::Processor' => {
-        'usage'    => 'Command line scripts',
-        'required' => '0',
-        'min_ver'  => '0.003',
-    },
-    'Moose' => {
-        'usage'    => 'Core',
-        'required' => '0',
-        'min_ver'  => '1.09',
     },
     'String::Random' => {
         'usage'    => 'OpacSelfRegistration',
@@ -821,6 +781,11 @@ our $PERL_DEPS = {
         'usage'    => 'PayPal',
         'required' => '0',
         'min_ver'  => '0.03',
+    },
+    'WWW::YouTube::Download' => {
+        'usage'    => 'HTML5Media streaming from YouTube',
+        'required' => '0',
+        'min_ver'  => '0.56',
     },
 };
 
