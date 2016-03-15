@@ -1,4 +1,4 @@
-package Koha::Borrower::CheckPrevIssue;
+package Koha::Patron::CheckPrevIssue;
 
 # This file is part of Koha.
 #
@@ -28,9 +28,9 @@ our @EXPORT = qw(
         CheckPrevIssue
 );
 
-=head1 Koha::Borrower::CheckPrevIssue
+=head1 Koha::Patron::CheckPrevIssue
 
-Koha::Borrower::Debarments - Manage Previous Issue preferences & searches.
+Koha::Patron::Debarments - Manage Previous Issue preferences & searches.
 
 =head2 WantsCheckPrevIssue
 

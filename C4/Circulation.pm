@@ -50,7 +50,7 @@ use Koha::Calendar;
 use Koha::Items;
 use Koha::Patrons;
 use Koha::Patron::Debarments;
-use Koha::Borrower::CheckPrevIssue qw( WantsCheckPrevIssue CheckPrevIssue );
+use Koha::Patron::CheckPrevIssue qw( WantsCheckPrevIssue CheckPrevIssue );
 use Koha::Database;
 use Koha::Libraries;
 use Koha::Holds;
