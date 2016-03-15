@@ -64,6 +64,7 @@ BEGIN {
       RemoveItemFromCollection
       RemoveItemFromAnyCollection
       TransferCollection
+      WasBiblioTransferedBefore
 
       GetCollectionItemBranches
     );
@@ -502,6 +503,37 @@ sub TransferCollection {
     return 1;
 
 }
+
+
+=head2 WasBiblioTransferedBefore
+
+  Tests, if a biblio was at least once transfered to given branch
+
+  my $transferedBefore = WasBiblioTransferedBefore( $branchcode, $biblionumber );
+
+=cut
+
+sub WasBiblioTransferedBefore {
+    my ($branchcode, $biblionumber ) = @_;
+    $sth = $dbh->prepare(
+        "SELECT branchtransfers.datesent
+        FROM branchtransfers
+        JOIN items ON branchtransfers.itemnumber = items.itemnumber
+        WHERE branchtransfers.tobranch = ? AND items.biblionumber = ?
+        ORDER BY branchtransfers.datesent DESC
+        LIMIT 1"
+    );
+    $sth->execute($branchcode, $biblionumber);
+
+    my $row = $sth->fetchrow_hashref;
+
+    if ( defined $row ) {
+        return 1;
+     } else {
+        return 0;
+     }
+}
+
 
 =head2 GetCollectionItemBranches
 
