@@ -537,7 +537,7 @@ foreach my $flag ( sort keys %$flags ) {
     }
 }
 
-my $amountold = $borrower->{flags}->{'CHARGES'}->{'message'} || 0;
+my $amountold = $borrower->{flags} ? $borrower->{flags}->{'CHARGES'}->{'message'} || 0 : 0;
 $amountold =~ s/^.*\$//;    # remove upto the $, if any
 
 my ( $total, $accts, $numaccts) = GetMemberAccountRecords( $borrowernumber );
@@ -583,13 +583,16 @@ my $view = $batch
     ?'batch_checkout_view'
     : 'circview';
 
-my $patron = Koha::Patrons->find( $borrower->{borrowernumber} );
 my @relatives;
-if ( my $guarantor = $patron->guarantor ) {
-    push @relatives, $guarantor->borrowernumber;
-    push @relatives, $_->borrowernumber for $patron->siblings;
-} else {
-    push @relatives, $_->borrowernumber for $patron->guarantees;
+if ( $borrowernumber ) {
+    if ( my $patron = Koha::Patrons->find( $borrower->{borrowernumber} ) ) {
+        if ( my $guarantor = $patron->guarantor ) {
+            push @relatives, $guarantor->borrowernumber;
+            push @relatives, $_->borrowernumber for $patron->siblings;
+        } else {
+            push @relatives, $_->borrowernumber for $patron->guarantees;
+        }
+    }
 }
 my $relatives_issues_count =
   Koha::Database->new()->schema()->resultset('Issue')

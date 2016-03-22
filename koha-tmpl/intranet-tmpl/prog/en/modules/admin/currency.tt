@@ -65,6 +65,29 @@
 </div>
 [% END %]
 
+[% FOR m IN messages %]
+    <div class="dialog [% m.type %]">
+        [% SWITCH m.code %]
+        [% CASE 'error_on_update' %]
+            An error occurred when updating this currency. Perhaps it already exists.
+        [% CASE 'error_on_insert' %]
+            An error occurred when adding this currency. The currency code might already exist.
+        [% CASE 'error_on_delete' %]
+            An error occurred when deleting this currency. Check the logs.
+        [% CASE 'success_on_update' %]
+            Currency updated successfully.
+        [% CASE 'success_on_insert' %]
+            Currency added successfully.
+        [% CASE 'success_on_delete' %]
+            Currency deleted successfully.
+        [% CASE %]
+            [% m.code %]
+        [% END %]
+    </div>
+[% END %]
+
+
+
 [% IF op == 'add_form' %]
 
 <form action="/cgi-bin/koha/admin/currency.pl" name="Aform" method="post" class="validated">
@@ -124,10 +147,17 @@
 [% END %]
 
 [% IF op =='delete_confirm' %]
-    [% IF nb_of_orders %]
+    [% IF nb_of_orders or nb_of_vendors %]
     <div class="dialog alert">
         <h3>Cannot delete currency <span class="ex">'[% currency.currency %]'</span></h3>
-        <p>This currency is used by [% nb_of_orders %] orders. Deletion not possible</p>
+        <p>
+            [% IF nb_of_orders %]
+                This currency is used by [% nb_of_orders %] orders.
+            [% ELSIF nb_of_vendors %]
+                This currency is used by [% nb_of_vendors %] vendors.
+            [% END %]
+            Deletion not possible
+        </p>
         <form action="/cgi-bin/koha/admin/currency.pl" method="post">
             <button type="submit" class="approve"><i class="fa fa-fw fa-check"></i> OK</button>
         </form>
@@ -190,10 +220,9 @@
             <td><span title="[% currency.timestamp %]">[% currency.timestamp | $KohaDates %]</span></td>
             <td style="color:green;">[% IF currency.active %]✓[% END %]</td>
             <td>[% IF currency.archived %]Yes[% END %]</td>
-            <td>
-              <a href="/cgi-bin/koha/admin/currency.pl?op=add_form&amp;currency_code=[% currency.currency %]">Edit</a>
-              |
-              <a href="/cgi-bin/koha/admin/currency.pl?op=delete_confirm&amp;currency_code=[% currency.currency %]">Delete</a>
+            <td class="actions">
+              <a class="btn btn-mini" href="/cgi-bin/koha/admin/currency.pl?op=add_form&amp;currency_code=[% currency.currency %]"><i class="fa fa-pencil"></i> Edit</a>
+              <a class="btn btn-mini" href="/cgi-bin/koha/admin/currency.pl?op=delete_confirm&amp;currency_code=[% currency.currency %]"><i class="fa fa-trash"></i> Delete</a>
             </td>
           </tr>
         [% END %]

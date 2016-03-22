@@ -253,6 +253,13 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
             next;
         }
 
+        # generate a proper login if none provided
+        if ( $borrower{userid} eq '' || !Check_Userid( $borrower{userid} ) ) {
+            push @errors, { duplicate_userid => 1, userid => $borrower{userid} };
+            $invalid++;
+            next LINE;
+        }
+
 
         if ($borrowernumber) {
             # borrower exists
@@ -308,7 +315,7 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
                     my $old_attributes = GetBorrowerAttributes($borrowernumber);
                     $patron_attributes = extended_attributes_merge($old_attributes, $patron_attributes);  #TODO: expose repeatable options in template
                 }
-                push @errors, {unknown_error => 1} unless SetBorrowerAttributes($borrower{'borrowernumber'}, $patron_attributes);
+                push @errors, {unknown_error => 1} unless SetBorrowerAttributes($borrower{'borrowernumber'}, $patron_attributes, 'no_branch_limit' );
             }
             $overwritten++;
             $template->param('lastoverwritten'=>$borrower{'surname'}.' / '.$borrowernumber);
