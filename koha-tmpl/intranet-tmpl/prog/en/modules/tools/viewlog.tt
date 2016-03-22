@@ -41,6 +41,11 @@
 [%        CASE 'ISSUE'  %]Checkout
 [%        CASE 'RETURN' %]Return
 [%        CASE 'CREATE' %]Create
+[%        CASE 'RENEW'  %]Renew
+[%        CASE 'CHANGE PASS' %]Change password
+[%        CASE 'ADDCIRCMESSAGE' %]Add circulation message
+[%        CASE 'DELCIRCMESSAGE' %]Delete circulation message
+[%        CASE 'Run'    %]Run
 [%        CASE %][% action %]
 [%    END %]
 [% END %]
@@ -97,7 +102,7 @@
                                         <option value="">All</option>
                                     [% END %]
 
-                                    [% FOREACH actx IN [ 'ADD' 'DELETE' 'MODIFY' 'ISSUE' 'RETURN' 'CREATE' ] %]
+                                    [% FOREACH actx IN [ 'ADD' 'DELETE' 'MODIFY' 'ISSUE' 'RETURN' 'RENEW' 'CREATE' 'ADDCIRCMESSAGE' 'DELCIRCMESSAGE' 'CHANGE PASS' 'Run' ] %]
                                         [% IF actions.grep(actx).size %]
                                             <option value="[% actx %]" selected="selected">[% PROCESS translate_log_action action=actx %]</option>
                                         [% ELSE %]
@@ -166,7 +171,7 @@
                             </thead>
                             <tbody>
                             [% FOREACH loopro IN looprow %]
-                                [% UNLESS ( loop.odd ) %]<tr class="highlight">[% ELSE %]<tr>[% END %]
+                                <tr>
                                     <td>[% loopro.timestamp %]</td>
                                     <td>
                                         <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% loopro.user %]" title="display detail for this librarian."> [% IF ( loopro.userfirstname ) || ( loopro.usersurname ) %][% loopro.userfirstname %] [% loopro.usersurname %] ([% loopro.user %]) [% ELSE %][% loopro.user %][% END %]</a>

@@ -49,7 +49,6 @@ unless ($url) {
         say "OPACBaseURL syspref isn't defined. You can use --url parameter.";
         exit;
     }
-    $url = 'http://' . $url;
 }
 $url =~ s/\/*$//g;
 
@@ -73,7 +72,8 @@ $sitemaper->run();
 =head1 SYNOPSIS
 
   sitemap.pl --verbose
-  sitemap.pl --noshort --url /home/koha/mylibrary/www
+  sitemap.pl --noshort --dir /home/koha/mylibrary/www
+  sitemap.pl --url opac.myDNSname.org
 
 =head1 DESCRIPTION
 

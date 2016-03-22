@@ -173,9 +173,10 @@ elsif ( $record_type eq 'auths' ) {
 }
 
 @record_ids = uniq @record_ids;
-if ( @record_ids and my $id_list_file ) {
-    my @filter_record_ids = <$id_list_file>;
-    @filter_record_ids = map { my $id = $_; $id =~ s/[\r\n]*$// } @filter_record_ids;
+if ( @record_ids and $id_list_file ) {
+    open my $fh, '<', $id_list_file or die "Cannot open file $id_list_file ($!)";
+    my @filter_record_ids = <$fh>;
+    @filter_record_ids = map { my $id = $_; $id =~ s/[\r\n]*$//; $id } @filter_record_ids;
     # intersection
     my %record_ids = map { $_ => 1 } @record_ids;
     @record_ids = grep $record_ids{$_}, @filter_record_ids;
