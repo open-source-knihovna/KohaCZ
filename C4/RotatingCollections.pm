@@ -515,7 +515,10 @@ sub TransferCollection {
 
 sub WasBiblioTransferedBefore {
     my ($branchcode, $biblionumber ) = @_;
-    $sth = $dbh->prepare(
+    
+    my $dbh = C4::Context->dbh;
+    
+    my $sth = $dbh->prepare(
         "SELECT branchtransfers.datesent
         FROM branchtransfers
         JOIN items ON branchtransfers.itemnumber = items.itemnumber
