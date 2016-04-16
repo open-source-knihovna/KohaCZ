@@ -26,7 +26,7 @@ use C4::Koha;
 use C4::Charset;
 use MARC::File::USMARC;
 use C4::ImportBatch;
-use C4::AuthoritiesMarc; #GuessAuthTypeCode, FindDuplicateAuthority
+use C4::AuthoritiesMarc qw(GuessAuthTypeCode, FindDuplicateAuthority);
 use C4::Languages;
 use Koha::Database;
 use Koha::XSLT_Handler;
