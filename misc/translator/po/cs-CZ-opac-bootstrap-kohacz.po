@@ -1,0 +1,186 @@
+# LibLime Koha Translation Manager
+# Copyright (C) 2007 LibLime
+# http://liblime.com <info@liblime.com>
+# Based on Kartouche http://www.dotmon.com/kartouche/
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2016-05-26 09:50+0200\n"
+"PO-Revision-Date: 2016-05-26 12:02+0200\n"
+"Last-Translator: Josef Moravec <josef.moravec@gmail.com>\n"
+"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
+">\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"X-POOTLE-MTIME: 1463395146.000000\n"
+
+#. %1$s:  ELSIF (errPassNotMatch)
+#. %2$s:  ELSIF (errPassTooShort)
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:60
+#, c-format
+msgid ""
+"%s Oops! The passwords must match. %s Your chosen password is too short. "
+msgstr ""
+"%s Chyba! Hesla se musí shodovat. %s Vámi zvolené heslo je příliš krátké. "
+
+#. %1$s:  IF ( LibraryNameTitle )
+#. %2$s:  LibraryNameTitle
+#. %3$s:  ELSE
+#. %4$s:  END
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:3
+#, c-format
+msgid ""
+"%s%s - Forgotten password recovery%sKoha online%s catalog - Forgotten "
+"password recovery"
+msgstr "%s%s - Obnova hesla%sKoha on-line%s katalog - Obnova hesla"
+
+#. %1$s:  email
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:109
+#, c-format
+msgid "An email has been sent to \"%s\". "
+msgstr "E-mail byl odeslán na adresu \"%s\". "
+
+#. %1$s:  END
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:68
+#, c-format
+msgid ""
+"Be sure you used the link from the email, or contact library staff for "
+"assistance. %s "
+msgstr ""
+"Ujistěte se, že jste použili odkaz, který Vám přišel e-mailem. V případě "
+"potíží kontaktujte knihovnu. %s "
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:118
+#, c-format
+msgid "Click "
+msgstr "Klikněte "
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:33
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:47
+#, c-format
+msgid "Forgotten password recovery"
+msgstr "Obnova hesla"
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:60
+#, c-format
+msgid "If you did not receive this email, you can "
+msgstr "Pokud jste e-mail neobdrželi, můžete "
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:50
+#, c-format
+msgid "Oops!"
+msgstr "Chyba!"
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:111
+#, c-format
+msgid ""
+"Please click the link in this email to finish the process of resetting your "
+"password. "
+msgstr ""
+"Pro dokončení procesu obnovy hesla, klikněte na odkaz, který Vám přišel e-"
+"mailem. "
+
+#. %1$s:  ELSIF (errNoBorrowerFound)
+#. %2$s:  ELSIF (errAlreadyStartRecovery)
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:54
+#, c-format
+msgid ""
+"Please try again later. %s No account was found with the provided "
+"information. %s The process of password recovery has already been started "
+"for this account (\""
+msgstr ""
+"Zkuste to znovu později. %s Podle zadaných informací nebyl nalezen žádný "
+"účet. %s Pro tento účet už bylo nedávno požádáno o obnovu hesla (\""
+
+#. %1$s:  minPassLength
+#. %2$s:  ELSIF (errLinkNotValid)
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:65
+#, c-format
+msgid ""
+"The password must contain at least %s characters. %s The link you clicked is "
+"either invalid, or expired. "
+msgstr ""
+"Heslo musí být dlouhé alespoň %s znaků. %s Odkaz, který jste použili je "
+"neplatný nebo již vypršel. "
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:112
+#, c-format
+msgid "This link is valid for 2 days starting now. "
+msgstr "Odkaz je možné použít jen během následujících 2 dnů. "
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:59
+#, c-format
+msgid "You should have received an email with a link to reset your password. "
+msgstr "Měli byste obdržet e-mail s odkazem pro dokončení obnovy hesla."
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:60
+#, c-format
+msgid "request a new password recovery link."
+msgstr "požádat o zaslání nového odkazu pro obnovu hesla."
+
+#. %1$s:  IF (sendmailError)
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:51
+#, c-format
+msgid "%s An error has occurred while sending you the password recovery link. "
+msgstr ""
+"%s Došlo k chybě při pokusu o odeslání e-mailu s odkazem pro obnovu hesla. "
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:98
+#, c-format
+msgid "Confirm new password:"
+msgstr "Nové heslo (pro potvrzení):"
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:84
+#, c-format
+msgid "Email:"
+msgstr "E-mail:"
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-auth.tt:162
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-main.tt:90
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/includes/masthead.inc:321
+#, c-format
+msgid "Forgot your password?"
+msgstr "Zapomněli jste heslo?"
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:71
+#, c-format
+msgid "Please contact the library if you need further assistance."
+msgstr "Pro více informací prosím kontaktujte knihovnu."
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:114
+#, c-format
+msgid "Return to the main page"
+msgstr "Zpátky na hlavní stránku"
+
+#. %1$s:  username
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:118
+#, c-format
+msgid "The password has been changed for user \"%s\"."
+msgstr "Heslo uživatele %s bylo změněno."
+
+#. %1$s:  minPassLength
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:95
+#, c-format
+msgid "The password must contain at least %s characters."
+msgstr "Heslo musí být alespoň %s znaků dlouhé."
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:81
+#, c-format
+msgid "To reset your password, enter your login and email address. "
+msgstr ""
+"Pro obnovu hesla vložte vaše přihlašovací jméno (pokud ho znáte), nebo e-"
+"mailovou adresu. "
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:76
+#, c-format
+msgid "You can't reset your password."
+msgstr "Heslo není možné změnit."
+
+#: /usr/share/koha/opac/htdocs/opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:119
+#, c-format
+msgid "to login. "
+msgstr "pro přihlášení. "

@@ -1,0 +1,93 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-05-23 08:15+0200\n"
+"PO-Revision-Date: 2016-05-26 11:58+0200\n"
+"Last-Translator: Josef Moravec <josef.moravec@gmail.com>\n"
+"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
+">\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"X-POOTLE-MTIME: 1463551297.000000\n"
+
+# Authorities > General
+msgid "authorities.pref#EnablePushingToAuthorityServer# Don't use"
+msgstr "Vypnout"
+
+# Authorities > General
+msgid ""
+"authorities.pref#EnablePushingToAuthorityServer# Enables pushing to "
+"authority server as an update or create action"
+msgstr "posílání autorit přes Z39.50 Update."
+
+# Authorities > General
+msgid "authorities.pref#EnablePushingToAuthorityServer# Use"
+msgstr "Zapnout"
+
+# Cataloging > Display
+msgid "cataloguing.pref#UsePermanentWithdrawal# Don't use"
+msgstr "Nepoužívat"
+
+# Cataloging > Display
+msgid "cataloguing.pref#UsePermanentWithdrawal# Use"
+msgstr "Používat"
+
+# Cataloging > Display
+msgid ""
+"cataloguing.pref#UsePermanentWithdrawal# permanent withdrawal mode for "
+"withdrawing items. This generates an unique withdrawal number."
+msgstr ""
+"pro odepisování jednotek režim trvalého odpisu. Zároveň bude generováno "
+"unikátní úbytkové číslo."
+
+# OPAC > Features
+msgid ""
+"opac.pref#OpacResetPassword#  to recover their password via e-mail in the "
+"OPAC"
+msgstr "obnovit heslo přes on-line katalog"
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# Library users are "
+msgstr "Čtenáři si"
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# allowed"
+msgstr "mohou"
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# not allowed"
+msgstr "nemohou"
+
+# Patrons > General
+msgid ""
+"patrons.pref#CheckPrevIssue#  check borrower loan history to see if the "
+"current item has been loaned before."
+msgstr ""
+"historii výpůjček čtenáře a upozornit, pokud již daný dokument měl "
+"vypůjčený."
+
+# Patrons > General
+msgid "patrons.pref#CheckPrevIssue# Unless overridden, do"
+msgstr "Kontrolovat"
+
+# Patrons > General
+msgid "patrons.pref#CheckPrevIssue# Unless overridden, do not"
+msgstr "Nekontrolovat"
+
+# Patrons > General
+msgid "patrons.pref#CheckPrevIssueSerialFrameworks# (separate columns with |)"
+msgstr "(oddělit sloupce svislítkem |)"
+
+# Patrons > General
+msgid ""
+"patrons.pref#CheckPrevIssueSerialFrameworks# The following frameworks are "
+"considered serials while checking for already loaned items:"
+msgstr ""
+"Tyto katalogizační šablony se používají pro katalogizaci periodik "
+"(kontrola, zdali již měli čtenáři půjčeno tak proběhne na základně "
+"jednotek, nikoliv titulů):"
