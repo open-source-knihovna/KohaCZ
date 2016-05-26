@@ -2230,6 +2230,18 @@ msgstr "خوێنه‌ر ده‌توانێت بێته‌ سیسته‌می خوا
 msgid "circulation.pref#SelfCheckoutByLogin# Username and Password"
 msgstr "ناوی به‌كارهێنه‌ر و ووشه‌ی نهێنی"
 
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Do not show"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Show"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# all items in the \"Checked-in items\" list, even items that were not checked out."
+msgstr ""
+
 # Circulation > Self Checkout
 msgid "circulation.pref#ShowPatronImageInWebBasedSelfCheck# Don't show"
 msgstr "نیشان مه‌ده ‌"
@@ -4463,8 +4475,8 @@ msgid "opac.pref#OpacPublic# Enable"
 msgstr "كارا بكه‌"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
-msgstr "ئۆپاكی كۆها بۆ به‌كارهێنانی گشتی. ئۆپاكی تایبه‌ت پێوستی به‌ په‌سه‌ندكردن هه‌یه‌ پێش چونه‌ ناوی."
+msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalAllowed# Allow"
@@ -5167,8 +5179,8 @@ msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
 msgstr "وه‌ك به‌رنامه‌ی ناردنی كورته‌نامه‌كان."
 
 # Patrons > General
-msgid "patrons.pref#StatisticsFields# (separate fields with |)"
-msgstr "patrons.pref#StatisticsFields# (separate fields with |)"
+msgid "patrons.pref#StatisticsFields# (separate fields with |, without trailing |). Default if empty: location|itype|ccode"
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#StatisticsFields# Show the following fields from the items database table as columns on the statistics tab on the patron record: "
@@ -5227,8 +5239,8 @@ msgid "patrons.pref#intranetreadinghistory# Don't allow"
 msgstr "ڕێگه‌مه‌ده‌"
 
 # Patrons > General
-msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (it is stored regardless)."
-msgstr "به‌ كارمه‌ندان بۆ بینینی مێژوی خواستنی خوێنه‌ر (ئه‌و زانیاریانه‌ ده‌پارێزرێن له‌ هه‌ر بارێكدا بێت."
+msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#minPasswordLength# Login passwords for staff and patrons must be at least"

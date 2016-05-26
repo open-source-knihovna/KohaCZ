@@ -141,7 +141,10 @@ function validate1(date) {
    <div id="bd">
 	<div id="yui-main">
 	<div class="yui-b">
+
+[% UNLESS ( unknowuser ) %]
 [% INCLUDE 'members-toolbar.inc' %]
+[% END %]
 
 [% IF ( error ) %]
 <div class="dialog alert">
@@ -166,7 +169,7 @@ function validate1(date) {
 <div class="yui-g">
 
 [% IF ( unknowuser ) %]
-   <div class="dialog message">This patron does not exist.</div>
+   <div class="dialog message">This patron does not exist. <a href="/cgi-bin/koha/members/members-home.pl">Find another patron?</a></div>
 [% ELSE %]
     [% IF ( was_renewed ) %]<div class="dialog message">Patron's account has been renewed until [% dateexpiry | $KohaDates %]</div>[% END %]
 
@@ -238,6 +241,8 @@ function validate1(date) {
     [% ELSE %]
         [% IF ( guarantorborrowernumber ) %]
             <li><span class="label">Guarantor:</span><a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% guarantorborrowernumber %]">[% guarantorsurname %][%IF ( guarantorfirstname ) %], [% guarantorfirstname %] [% END %]</a></li>
+        [% ELSIF (guarantorsurname || guarantorfirstname) %]
+            <li><span class="label">Guarantor:</span>[% guarantorsurname %][%IF ( guarantorfirstname ) %], [% guarantorfirstname %][% END %]</li>
         [% END %]
     [% END %]
 </ol>

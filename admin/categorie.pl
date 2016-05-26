@@ -91,8 +91,8 @@ elsif ( $op eq 'add_validate' ) {
     my $category_type = $input->param('category_type');
     my $BlockExpiredPatronOpacActions = $input->param('BlockExpiredPatronOpacActions');
     my $default_privacy = $input->param('default_privacy');
-    my @branches = grep { $_ ne q{} } $input->param('branches');
     my $checkprevissue = $input->param('checkprevissue');
+    my @branches = grep { $_ ne q{} } $input->multi_param('branches');
 
     my $is_a_modif = $input->param("is_a_modif");
 
@@ -157,7 +157,7 @@ elsif ( $op eq 'add_validate' ) {
 
     if ( C4::Context->preference('EnhancedMessagingPreferences') ) {
         C4::Form::MessagingPreferences::handle_form_action( $input,
-            { categorycode => $input->param('categorycode') }, $template );
+            { categorycode => scalar $input->param('categorycode') }, $template );
     }
 
     $searchfield = q||;

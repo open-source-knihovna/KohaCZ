@@ -38,6 +38,12 @@
     <link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/right-to-left.css" />
 [% END %]
 [% IF ( OPACUserCSS ) %]<style type="text/css">[% OPACUserCSS %]</style>[% END %]
+[% IF SCO_login %]
+    [% SET SCOUserCSS = Koha.Preference('SCOUserCSS') %]
+    [% IF SCOUserCSS %]
+        <style type="text/css">[% SCOUserCSS %]</style>
+    [% END %]
+[% END %]
 <link rel="unapi-server" type="application/xml" title="unAPI" href="[% OPACBaseURL %]/cgi-bin/koha/unapi" />
 [% PROCESS cssinclude %]
 <!-- Respond.js brings responsive layout behavior to IE < v.9 -->

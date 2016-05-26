@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION.\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-14 16:49-0300\n"
+"POT-Creation-Date: 2016-05-17 10:26-0300\n"
 "PO-Revision-Date: 2015-05-22 09:29+0100\n"
 "Last-Translator: Viktor Sarge <viktor.sarge@regionhalland.se>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -768,6 +768,7 @@ msgstr "(! betyder 'inte synlig' eller vid minimering 'inte minimerad')"
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:22
@@ -946,6 +947,14 @@ msgstr "(! betyder 'inte synlig' eller vid minimering 'inte minimerad')"
 #, c-format
 msgid "(online)."
 msgstr "(online)."
+
+#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
+#, c-format
+msgid ""
+"(system preference) must be set to \"Don't automatically transfer items to "
+"their home library when they are returned\" for Rotating Collections to "
+"function properly."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/offline_circ/list.tt:5
 #, c-format
@@ -2801,6 +2810,13 @@ msgstr ""
 #, c-format
 msgid "Author"
 msgstr "Författare"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:18
+#, c-format
+msgid ""
+"Authorised values category can be used to turn this search field in to a "
+"pull down instead of a free text field"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/authorities/detail.tt:3
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities-home.tt:3
@@ -6627,6 +6643,13 @@ msgstr ""
 "Härifrån kan du 'Godkänna' och tillämpa ändringarna av utlåningsposten, 'Ta "
 "bort' och avlägsna ändringarna eller 'Ignorera' och behålla ändringarna för "
 "senare genomgång."
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:5
+#, fuzzy, c-format
+msgid ""
+"From here you can add custom search fields to the item search option in the "
+"staff client."
+msgstr "Härifrån kan du ladda upp filer som ska bifogas låntagarposten."
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbooks.tt:7
 #, c-format
@@ -10749,6 +10772,11 @@ msgstr ""
 "Objekt återgår till utlåningsbibliotek: objektet kommer att uppmana "
 "bibliotekarien att överföra objektet tillbaka till utlåningsbiblioteket "
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:3
+#, c-format
+msgid "Item search fields help"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:105
 #, c-format
 msgid "Item should be on the hold shelf waiting for someone else"
@@ -10900,8 +10928,8 @@ msgid ""
 msgstr "Koha installeras med många av de nödvändiga auktoritetsramverken."
 
 #: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#, c-format
-msgid "Koha database schema"
+#, fuzzy, c-format
+msgid "Koha database schema:"
 msgstr "Koha databasschema"
 
 #: intranet-tmpl/prog/en/modules/help/admin/admin-home.tt:9
@@ -10993,8 +11021,8 @@ msgstr ""
 "normaliseringsprocessen."
 
 #: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:12
-#, c-format
-msgid "Koha reports library"
+#, fuzzy, c-format
+msgid "Koha reports library:"
 msgstr "Koha rapportbibliotek"
 
 #: intranet-tmpl/prog/en/modules/help/about.tt:20
@@ -11136,6 +11164,11 @@ msgstr "LR = Förlorat objekt återlämnat/ersatt"
 #, c-format
 msgid "Label Creator"
 msgstr "Etikettverktyg"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:12
+#, fuzzy, c-format
+msgid "Label is what will appear on the item search page"
+msgstr "Namnet är det som kommer att visas i listan med listor"
 
 #. %1$s:  fields.008.0.substr( 28, 3 ) 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:128
@@ -11415,10 +11448,20 @@ msgstr "MARC underliggande fält för poster"
 msgid "MARC export"
 msgstr "MARC-export"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:14
+#, c-format
+msgid "MARC field allows you to pick which field you'd like to search in"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/tools/stage-marc-import.tt:3
 #, c-format
 msgid "MARC import"
 msgstr "MARC-import"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:16
+#, c-format
+msgid "MARC subfield is the subfield you'd like to search in"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:50
 #, c-format
@@ -11767,6 +11810,11 @@ msgid ""
 msgstr ""
 "NULL: betyder att låntagaren valde den första som fanns tillgänglig och vi "
 "har inte valt objektet"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:10
+#, c-format
+msgid "Name is a field for you to identify the search term"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:26
 #, c-format
@@ -12949,6 +12997,13 @@ msgstr ""
 msgid ""
 "Once your import is complete you will be brought to the framework edit tool "
 "where you can make any changes you need to the framework you imported."
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:21
+#, c-format
+msgid ""
+"Once your new field is added it will be visible at the top of this page and "
+"on the item search page"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:121
@@ -14372,6 +14427,11 @@ msgstr "Se den fullständiga dokumentationen för Objektposter i "
 msgid "See the full documentation for Item Types in the "
 msgstr "Se den fullständiga dokumentationen för Objekttyper i "
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
+#, fuzzy, c-format
+msgid "See the full documentation for Item search fields in the "
+msgstr "Se den fullständiga dokumentationen för Objektposter i "
+
 #: intranet-tmpl/prog/en/modules/help/admin/fieldmapping.tt:23
 #, c-format
 msgid "See the full documentation for Keyword to MARC Mapping in the "
@@ -15620,13 +15680,6 @@ msgstr "Text för OPAC "
 #, c-format
 msgid "Text for librarian "
 msgstr "Text för bibliotekarie "
-
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:12
-#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
-#, c-format
-msgid "The "
-msgstr "Den "
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:62
 #, c-format
@@ -18565,6 +18618,11 @@ msgstr ""
 "För att lägga till en ny profil klickar du på knappen 'Profiler' längst upp "
 "i sidan och väljer 'Ny profil'"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:7
+#, c-format
+msgid "To add a new search term simply fill in the 'Add a new field' area:"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/labels/label-edit-template.tt:9
 #: intranet-tmpl/prog/en/modules/help/labels/label-manage.tt:25
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:9
@@ -19795,6 +19853,19 @@ msgstr ""
 "Med beställningssökningen kan du söka efter objekt som beställts med eller "
 "utan leverantören."
 
+#: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:35
+#, fuzzy, c-format
+msgid ""
+"Using the circulation and fine rules matrix you can define rules that depend "
+"on patron/item type combinations. To set your rules, choose a library from "
+"the pull down (or 'all libraries' if you want to apply these rules to all "
+"libraries)"
+msgstr ""
+"Med låneregeltabellen kan du definiera regler som gäller för kombinationen "
+"låntagare och objekttyp. För att ställa in regler väljer du ett bibliotek "
+"från rullgardinsmenyn (eller 'alla bibliotek', om reglerna ska gälla för "
+"alla bibliotek)"
+
 #: intranet-tmpl/prog/en/modules/help/tools/batchMod.tt:11
 #, c-format
 msgid ""
@@ -19862,18 +19933,6 @@ msgid ""
 msgstr ""
 "I formuläret som visas kan du definiera mallen för ditt ark med etiketter "
 "eller kort."
-
-#: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:35
-#, c-format
-msgid ""
-"Using the issuing rules matrix you can define rules that depend on patron/"
-"item type combinations. To set your rules, choose a library from the pull "
-"down (or 'all libraries' if you want to apply these rules to all libraries)"
-msgstr ""
-"Med låneregeltabellen kan du definiera regler som gäller för kombinationen "
-"låntagare och objekttyp. För att ställa in regler väljer du ett bibliotek "
-"från rullgardinsmenyn (eller 'alla bibliotek', om reglerna ska gälla för "
-"alla bibliotek)"
 
 #: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:14
 #, c-format
@@ -22107,8 +22166,8 @@ msgid "fast_cataloging "
 msgstr "fast_cataloging "
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:35
-#, c-format
-msgid "fic:0 Non fiction"
+#, fuzzy, c-format
+msgid "fic:0 Non-fiction"
 msgstr "fic:0 Non fiction"
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:34
@@ -22406,6 +22465,7 @@ msgstr "hantering "
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:22
@@ -22814,6 +22874,15 @@ msgstr "schedule_tasks "
 msgid "serials "
 msgstr "periodika "
 
+#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
+#, fuzzy, c-format
+msgid ""
+"shows the entire Koha database structure so that you can write effective SQL "
+"Queries"
+msgstr ""
+"hjälper dig att lära dig Kohas databasstruktur så att du kan skriva "
+"effektiva SQL-frågor"
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:122
 #, c-format
 msgid "staffaccess "
@@ -22833,14 +22902,6 @@ msgstr "superlibrarian "
 #, c-format
 msgid "superserials "
 msgstr "superperiodika "
-
-#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
-#, c-format
-msgid ""
-"system preference must be set to \"Don't automatically transfer items to "
-"their home library when they are returned\" for Rotating Collections to "
-"function properly."
-msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:96
 #: intranet-tmpl/prog/en/modules/help/admin/marc_subfields_structure.tt:42
@@ -22941,15 +23002,6 @@ msgstr ""
 #, c-format
 msgid "will be stored into the following structure:"
 msgstr "lagras i följande struktur:"
-
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#, c-format
-msgid ""
-"will help you learn the Koha database structure so that you can write "
-"effective SQL Queries"
-msgstr ""
-"hjälper dig att lära dig Kohas databasstruktur så att du kan skriva "
-"effektiva SQL-frågor"
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:142
 #, c-format

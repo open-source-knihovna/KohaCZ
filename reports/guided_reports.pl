@@ -114,7 +114,7 @@ elsif ( $phase eq 'Build new' ) {
 }
 
 elsif ( $phase eq 'Delete Multiple') {
-    my @ids = $input->param('ids');
+    my @ids = $input->multi_param('ids');
     delete_report( @ids );
     print $input->redirect("/cgi-bin/koha/reports/guided_reports.pl?phase=Use%20saved");
     exit;
@@ -284,16 +284,16 @@ elsif ( $phase eq 'Report on this Area' ) {
         'areas'   => get_report_areas(),
         'cache_expiry' => $cache_expiry,
         'usecache' => $usecache,
-        'public' => $input->param('public'),
+        'public' => scalar $input->param('public'),
       );
     } else {
       # they have choosen a new report and the area to report on
       $template->param(
           'build2' => 1,
-          'area'   => $input->param('area'),
+          'area'   => scalar $input->param('area'),
           'types'  => get_report_types(),
           'cache_expiry' => $cache_expiry,
-          'public' => $input->param('public'),
+          'public' => scalar $input->param('public'),
       );
     }
 }
@@ -308,8 +308,8 @@ elsif ( $phase eq 'Choose this type' ) {
         'area'   => $area,
         'type'   => $type,
         columns  => get_columns($area,$input),
-        'cache_expiry' => $input->param('cache_expiry'),
-        'public' => $input->param('public'),
+        'cache_expiry' => scalar $input->param('cache_expiry'),
+        'public' => scalar $input->param('public'),
     );
 }
 
@@ -318,7 +318,7 @@ elsif ( $phase eq 'Choose these columns' ) {
     # next step is the constraints
     my $area    = $input->param('area');
     my $type    = $input->param('type');
-    my @columns = $input->param('columns');
+    my @columns = $input->multi_param('columns');
     my $column  = join( ',', @columns );
 
     $template->param(
@@ -328,12 +328,12 @@ elsif ( $phase eq 'Choose these columns' ) {
         'column' => $column,
         definitions => get_from_dictionary($area),
         criteria    => get_criteria($area,$input),
-        'public' => $input->param('public'),
+        'public' => scalar $input->param('public'),
     );
     if ( $usecache ) {
         $template->param(
-            cache_expiry => $input->param('cache_expiry'),
-            cache_expiry_units => $input->param('cache_expiry_units'),
+            cache_expiry => scalar $input->param('cache_expiry'),
+            cache_expiry_units => scalar $input->param('cache_expiry_units'),
         );
     }
 
@@ -343,9 +343,9 @@ elsif ( $phase eq 'Choose these criteria' ) {
     my $area     = $input->param('area');
     my $type     = $input->param('type');
     my $column   = $input->param('column');
-    my @definitions = $input->param('definition');
+    my @definitions = $input->multi_param('definition');
     my $definition = join (',',@definitions);
-    my @criteria = $input->param('criteria_column');
+    my @criteria = $input->multi_param('criteria_column');
     my $query_criteria;
     foreach my $crit (@criteria) {
         my $value = $input->param( $crit . "_value" );
@@ -393,12 +393,12 @@ elsif ( $phase eq 'Choose these criteria' ) {
         'column'         => $column,
         'definition'     => $definition,
         'criteriastring' => $query_criteria,
-        'public' => $input->param('public'),
+        'public' => scalar $input->param('public'),
     );
     if ( $usecache ) {
         $template->param(
-            cache_expiry => $input->param('cache_expiry'),
-            cache_expiry_units => $input->param('cache_expiry_units'),
+            cache_expiry => scalar $input->param('cache_expiry'),
+            cache_expiry_units => scalar $input->param('cache_expiry_units'),
         );
     }
 
@@ -425,7 +425,7 @@ elsif ( $phase eq 'Choose these operations' ) {
     my $column   = $input->param('column');
     my $criteria = $input->param('criteria');
 	my $definition = $input->param('definition');
-    my @total_by = $input->param('total_by');
+    my @total_by = $input->multi_param('total_by');
     my $totals;
     foreach my $total (@total_by) {
         my $value = $input->param( $total . "_tvalue" );
@@ -440,8 +440,8 @@ elsif ( $phase eq 'Choose these operations' ) {
         'criteriastring' => $criteria,
         'totals'         => $totals,
         'definition'     => $definition,
-        'cache_expiry' => $input->param('cache_expiry'),
-        'public' => $input->param('public'),
+        'cache_expiry' => scalar $input->param('cache_expiry'),
+        'public' => scalar $input->param('public'),
     );
 
     # get columns
@@ -472,7 +472,7 @@ elsif ( $phase eq 'Build report' ) {
     my $query_criteria=$crit;
     # split the columns up by ,
     my @columns = split( ',', $column );
-    my @order_by = $input->param('order_by');
+    my @order_by = $input->multi_param('order_by');
 
     my $query_orderby;
     foreach my $order (@order_by) {
@@ -493,8 +493,8 @@ elsif ( $phase eq 'Build report' ) {
         'area'       => $area,
         'sql'        => $sql,
         'type'       => $type,
-        'cache_expiry' => $input->param('cache_expiry'),
-        'public' => $input->param('public'),
+        'cache_expiry' => scalar $input->param('cache_expiry'),
+        'public' => scalar $input->param('public'),
     );
 }
 
@@ -508,8 +508,8 @@ elsif ( $phase eq 'Save' ) {
         'area'  => $area,
         'sql'  => $sql,
         'type' => $type,
-        'cache_expiry' => $input->param('cache_expiry'),
-        'public' => $input->param('public'),
+        'cache_expiry' => scalar $input->param('cache_expiry'),
+        'public' => scalar $input->param('public'),
         'groups_with_subgroups' => groups_with_subgroups($area), # in case we have a report group that matches area
     );
 }
@@ -619,7 +619,7 @@ elsif ($phase eq 'Run this report'){
     my $limit      = $input->param('limit') || 20;
     my $offset     = 0;
     my $report_id  = $input->param('reports');
-    my @sql_params = $input->param('sql_params');
+    my @sql_params = $input->multi_param('sql_params');
     # offset algorithm
     if ($input->param('page')) {
         $offset = ($input->param('page') - 1) * $limit;
@@ -910,9 +910,9 @@ elsif ( $phase eq 'Create report from SQL' ) {
         $group = $input->param('report_group');
         $subgroup  = $input->param('report_subgroup');
         $template->param(
-            'sql'           => $input->param('sql') // '',
-            'reportname'    => $input->param('reportname') // '',
-            'notes'         => $input->param('notes') // '',
+            'sql'           => scalar $input->param('sql') // '',
+            'reportname'    => scalar $input->param('reportname') // '',
+            'notes'         => scalar $input->param('notes') // '',
         );
     }
     $template->param(

@@ -32,7 +32,7 @@ use C4::Acquisition qw/ModOrder GetOrdersByBiblionumber/;
 use Koha::MetadataRecord;
 
 my $input = new CGI;
-my @biblionumbers = $input->param('biblionumber');
+my @biblionumbers = $input->multi_param('biblionumber');
 my $merge = $input->param('merge');
 
 my @errors;
@@ -178,7 +178,7 @@ if ($merge) {
         result => 1,
         report_records => \@report_records,
         report_header => $report_header,
-        ref_biblionumber => $input->param('ref_biblionumber')
+        ref_biblionumber => scalar $input->param('ref_biblionumber')
     );
 
 #-------------------------

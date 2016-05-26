@@ -85,7 +85,7 @@ function verify_images() {
         no_images_msg = '<p>' + no_images_msg + '</p>';
     [% IF ( CAN_user_tools_upload_local_cover_images ) %]
         var please_upload = _("Please select the image file to upload. %sUpload%s").format(
-            "<a class='btn' href='/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=[% biblionumber %]&amp;filetype=image'>",
+            "<a class='btn btn-mini' href='/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=[% biblionumber %]&amp;filetype=image'><i class='fa fa-upload' aria-hidden='true'></i> ",
             "</a>");
         no_images_msg += "<p id='upload_image'>" + please_upload + '</p>';
     [% END %]
@@ -336,7 +336,7 @@ function verify_images() {
         <span class="Z3988" title="[% ocoins %]"></span>
     [% END %]
 
-    [% IF ( AmazonCoverImages ) %]
+    [% IF ( AmazonCoverImages  || LocalCoverImages ) %]
         [% IF ( XSLTDetailsDisplay ) %]
             <div class="yui-gc">
             <div id="catalogue_detail_biblio" class="yui-u first">
@@ -1034,14 +1034,14 @@ function verify_images() {
 
 [% IF ( HTML5MediaEnabled ) %]
 <div id="html5media">
-        <p>
-        <[% HTML5MediaParent %] controls preload=none>
           [% FOREACH HTML5MediaSet IN HTML5MediaSets %]
-            <[% HTML5MediaSet.child  %] src="[% HTML5MediaSet.srcblock %]"[% HTML5MediaSet.typeblock %] />
+            <p>
+              <[% HTML5MediaParent %] controls preload=none>
+                <[% HTML5MediaSet.child  %] src="[% HTML5MediaSet.srcblock %]"[% HTML5MediaSet.typeblock %] />
+                [[% HTML5MediaParent %] tag not supported by your browser.]
+              </[% HTML5MediaParent %]>
+            </p>
           [% END %]
-            [[% HTML5MediaParent %] tag not supported by your browser.]
-        </[% HTML5MediaParent %]>
-        </p>
 </div>
 [% END %]
 

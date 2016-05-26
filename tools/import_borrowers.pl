@@ -253,7 +253,6 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
             next;
         }
 
-
         if ($borrowernumber) {
             # borrower exists
             unless ($overwrite_cardnumber) {
@@ -273,6 +272,16 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
                     $borrower{$col} = $member->{$col} if($member->{$col}) ;
                 }
             }
+
+            # Check if the userid provided does not exist yet
+            if (  exists $borrower{userid}
+                     and $borrower{userid}
+                 and not Check_Userid( $borrower{userid}, $borrower{borrowernumber} ) ) {
+                push @errors, { duplicate_userid => 1, userid => $borrower{userid} };
+                $invalid++;
+                next LINE;
+            }
+
             unless (ModMember(%borrower)) {
                 $invalid++;
                 # until we have better error trapping, we have no way of knowing why ModMember errored out...
@@ -308,7 +317,7 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
                     my $old_attributes = GetBorrowerAttributes($borrowernumber);
                     $patron_attributes = extended_attributes_merge($old_attributes, $patron_attributes);  #TODO: expose repeatable options in template
                 }
-                push @errors, {unknown_error => 1} unless SetBorrowerAttributes($borrower{'borrowernumber'}, $patron_attributes);
+                push @errors, {unknown_error => 1} unless SetBorrowerAttributes($borrower{'borrowernumber'}, $patron_attributes, 'no_branch_limit' );
             }
             $overwritten++;
             $template->param('lastoverwritten'=>$borrower{'surname'}.' / '.$borrowernumber);

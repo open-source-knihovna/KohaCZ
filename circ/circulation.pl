@@ -46,6 +46,7 @@ use C4::Members::Attributes qw(GetBorrowerAttributes);
 use Koha::Borrower::Debarments qw(GetDebarments IsDebarred);
 use Koha::DateUtils;
 use Koha::Database;
+use Koha::Borrower::Modifications;
 
 use Date::Calc qw(
   Today
@@ -61,24 +62,7 @@ my $query = new CGI;
 
 my $sessionID = $query->cookie("CGISESSID") ;
 my $session = get_session($sessionID);
-
-# branch and printer are now defined by the userenv
-# but first we have to check if someone has tried to change them
-
-my $branch = $query->param('branch');
-if ($branch){
-    # update our session so the userenv is updated
-    $session->param('branch', $branch);
-    $session->param('branchname', GetBranchName($branch));
-}
-
-my $printer = $query->param('printer');
-if ($printer){
-    # update our session so the userenv is updated
-    $session->param('branchprinter', $printer);
-}
-
-if (!C4::Context->userenv && !$branch){
+if (!C4::Context->userenv){
     if ($session->param('branch') eq 'NO_LIBRARY_SET'){
         # no branch set we can't issue
         print $query->redirect("/cgi-bin/koha/circ/selectbranchprinter.pl");
@@ -89,7 +73,7 @@ if (!C4::Context->userenv && !$branch){
 my $barcodes = [];
 my $barcode =  $query->param('barcode');
 # Barcode given by user could be '0'
-if ( $barcode || $barcode eq '0' ) {
+if ( $barcode || ( defined($barcode) && $barcode eq '0' ) ) {
     $barcodes = [ $barcode ];
 } else {
     my $filefh = $query->upload('uploadfile');
@@ -102,7 +86,7 @@ if ( $barcode || $barcode eq '0' ) {
         push @$barcodes, split( /\s\n/, $list );
         $barcodes = [ map { $_ =~ /^\s*$/ ? () : $_ } @$barcodes ];
     } else {
-        @$barcodes = $query->param('barcodes');
+        @$barcodes = $query->multi_param('barcodes');
     }
 }
 
@@ -142,19 +126,18 @@ if (!C4::Auth::haspermission( C4::Context->userenv->{id} , { circulate => 'force
 
 my $onsite_checkout = $query->param('onsite_checkout');
 
-my @failedrenews = $query->param('failedrenew');    # expected to be itemnumbers
+my @failedrenews = $query->multi_param('failedrenew');    # expected to be itemnumbers
 our %renew_failed = ();
 for (@failedrenews) { $renew_failed{$_} = 1; }
 
-my @failedreturns = $query->param('failedreturn');
+my @failedreturns = $query->multi_param('failedreturn');
 our %return_failed = ();
 for (@failedreturns) { $return_failed{$_} = 1; }
 
 my $findborrower = $query->param('findborrower') || q{};
 $findborrower =~ s|,| |g;
 
-$branch  = C4::Context->userenv->{'branch'};  
-$printer = C4::Context->userenv->{'branchprinter'};
+my $branch = C4::Context->userenv->{'branch'};
 
 # If AutoLocation is not activated, we show the Circulation Parameters to chage settings of librarian
 if (C4::Context->preference("AutoLocation") != 1) {
@@ -176,7 +159,7 @@ my $duedatespec    = $query->param('duedatespec')   || $session->param('stickydu
 $duedatespec = eval { output_pref( { dt => dt_from_string( $duedatespec ), dateformat => 'iso' }); }
     if ( $duedatespec );
 my $restoreduedatespec  = $query->param('restoreduedatespec') || $session->param('stickyduedate') || $duedatespec;
-if ($restoreduedatespec eq "highholds_empty") {
+if ( $restoreduedatespec && $restoreduedatespec eq "highholds_empty" ) {
     undef $restoreduedatespec;
 }
 my $issueconfirmed = $query->param('issueconfirmed');
@@ -193,7 +176,7 @@ if ( @$barcodes ) {
         $stickyduedate  = $query->param('stickyduedate');
         $duedatespec    = $query->param('duedatespec');
     }
-    $session->param('auto_renew', $query->param('auto_renew'));
+    $session->param('auto_renew', scalar $query->param('auto_renew'));
 }
 else {
     $session->clear('auto_renew');
@@ -404,7 +387,7 @@ if (@$barcodes) {
         }
         unless($confirm_required) {
             my $issue = AddIssue( $borrower, $barcode, $datedue, $cancelreserve, undef, undef, { onsite_checkout => $onsite_checkout, auto_renew => $session->param('auto_renew') } );
-            $template->param( issue => $issue );
+            $template_params->{issue} = $issue;
             $session->clear('auto_renew');
             $inprocess = 1;
         }
@@ -529,7 +512,7 @@ foreach my $flag ( sort keys %$flags ) {
     }
 }
 
-my $amountold = $borrower->{flags}->{'CHARGES'}->{'message'} || 0;
+my $amountold = $borrower->{flags} ? $borrower->{flags}->{'CHARGES'}->{'message'} || 0 : 0;
 $amountold =~ s/^.*\$//;    # remove upto the $, if any
 
 my ( $total, $accts, $numaccts) = GetMemberAccountRecords( $borrowernumber );
@@ -593,9 +576,7 @@ $template->param(
     categoryname      => $borrower->{'description'},
     branch            => $branch,
     branchname        => GetBranchName($borrower->{'branchcode'}),
-    printer           => $printer,
-    printername       => $printer,
-    was_renewed       => $query->param('was_renewed') ? 1 : 0,
+    was_renewed       => scalar $query->param('was_renewed') ? 1 : 0,
     expiry            => $borrower->{'dateexpiry'},
     roadtype          => $roadtype,
     amountold         => $amountold,
@@ -634,6 +615,8 @@ $template->param(
     canned_bor_notes_loop     => $canned_notes,
     debarments                => GetDebarments({ borrowernumber => $borrowernumber }),
     todaysdate                => output_pref( { dt => dt_from_string()->set(hour => 23)->set(minute => 59), dateformat => 'sql' } ),
+    nopermission              => $query->param('nopermission'),
+    modifications             => Koha::Borrower::Modifications->GetModifications({ borrowernumber => $borrowernumber }),
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

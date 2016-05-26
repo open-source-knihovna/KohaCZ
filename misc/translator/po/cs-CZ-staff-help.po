@@ -5,18 +5,18 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-02-14 14:04-0300\n"
-"PO-Revision-Date: 2016-02-22 07:13+0000\n"
-"Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
-"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/>"
-"\n"
+"POT-Creation-Date: 2016-05-17 08:08-0300\n"
+"PO-Revision-Date: 2016-04-27 12:06+0000\n"
+"Last-Translator: kolator <kolatorj@email.cz>\n"
+"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
+">\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1456125187.000000\n"
+"X-POOTLE-MTIME: 1461758791.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -215,9 +215,9 @@ msgstr ""
 "'CCODE' je pro kódy sbírek (používá se při katalogizaci a práci s jednotkami)"
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:26
-#, fuzzy, c-format
+#, c-format
 msgid "'Call Number' is for your item's call number or call number prefix"
-msgstr "'Signatura' slouží jako signatura nebo předpona signatury jednotky"
+msgstr "'Signatura' slouží jako signatura nebo prefix signatury pro jednotku"
 
 #: intranet-tmpl/prog/en/modules/help/admin/authorised_values.tt:21
 #, c-format
@@ -454,13 +454,14 @@ msgstr ""
 "podrobnějšímu popisu výstupu nebo k poskytnutí tipů k zadávání vstupních dat."
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:80
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "'Numbering pattern' will help you determine how the numbers are printed for "
 "each issue. Patterns entered here are saved and editable at any time by "
 "visiting 'Manage numbering patterns' "
 msgstr ""
-"'Vzor číslování' pomůže určit, jak vytisknout čísla pro každou jednotku "
+"'Vzor číslování' pomůže určit, jak vytisknout čísla pro každou jednotku. "
+"Uložené vzory lze upravit v 'Spravovat vzory číslování'.    "
 
 #: intranet-tmpl/prog/en/modules/help/admin/matching-rules.tt:22
 #, c-format
@@ -767,6 +768,7 @@ msgstr "(! znamená 'neviditelný' nebo v případě zhrouceno 'nezhrouceno')"
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:22
@@ -945,6 +947,14 @@ msgstr "(! znamená 'neviditelný' nebo v případě zhrouceno 'nezhrouceno')"
 #, c-format
 msgid "(online)."
 msgstr "(on-line)."
+
+#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
+#, c-format
+msgid ""
+"(system preference) must be set to \"Don't automatically transfer items to "
+"their home library when they are returned\" for Rotating Collections to "
+"function properly."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/offline_circ/list.tt:5
 #, c-format
@@ -2575,16 +2585,16 @@ msgstr ""
 "může být také použit k uložení čtenářovy domácí adresy."
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:188
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "An easy way to create a new framework is to import one created for your or "
 "another Koha installation. This framework would need to be exported from the "
 "other system using the instructions above to be available for import here."
 msgstr ""
-"Jednoduchý způsob jak vytvořit novou šablonu je importovat nějakou "
-"vytvořenou pro vaši nebo jinou instalaci Kohy. Nejprve bude nutné provést "
-"export z jiného systému s pomocí výše uvedených instrukcí a následně soubor "
-"použijete pro import do vaší instalace systému."
+"Jednoduchý způsob jak vytvořit novou katalogizační šablonu je importovat "
+"nějakou již vytvořenou z vaší nebo jiné instalace Kohy. Nejprve bude nutné "
+"exportovat z jiného systému s pomocí výše uvedených instrukcí. Výsledný "
+"soubor poté naimportujete do této instalace."
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:72
 #, c-format
@@ -2820,6 +2830,13 @@ msgstr "Zvuková upozornění"
 #, c-format
 msgid "Author"
 msgstr "Autor"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:18
+#, c-format
+msgid ""
+"Authorised values category can be used to turn this search field in to a "
+"pull down instead of a free text field"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/authorities/detail.tt:3
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities-home.tt:3
@@ -4610,13 +4627,13 @@ msgstr ""
 "mít k dispozici všechny možnosti pořadí vyhledávání."
 
 #: intranet-tmpl/prog/en/modules/help/tools/batch_record_modification.tt:24
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Clicking Preview MARC will allow you to see what edits will be made when you "
 "finalize the edit."
 msgstr ""
-"Kliknutím na Náhled MARC budete moci vidět, jaké úpravy budou provedeny, "
-"když dokončíte úpravy."
+"Kliknutím na Náhled MARC budete moci vidět, jaké změny budou provedeny, "
+"pokud úpravy dokončíte."
 
 #: intranet-tmpl/prog/en/modules/help/tools/holidays.tt:57
 #, c-format
@@ -6647,6 +6664,13 @@ msgstr ""
 "Odtud můžete \"Schválit\" a aplikovat změny ve čtenářově záznamu, \"Vymazat"
 "\" a \"Odstranit změny\" nebo \"Ignorovat\" a zachovat změny čekající na "
 "pozdější zhodnocení."
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:5
+#, fuzzy, c-format
+msgid ""
+"From here you can add custom search fields to the item search option in the "
+"staff client."
+msgstr "Zde můžete nahrávat soubory určené pro připojení k záznamu o čtenáři."
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbooks.tt:7
 #, c-format
@@ -9751,9 +9775,9 @@ msgid ""
 "problems with your cataloging records - always create a new template based "
 "on the Default Framework, or alter the other Frameworks."
 msgstr ""
-"Neodstraňujte ani neupravujte výchozí šablonu pokud nezpůsobuje problémy s "
-"vašimi katalogizačními záznamy - vždy vytvořte novou šablonu založenou na "
-"výchozí šabloně nebo upravte ostatní šablony."
+"Neodstraňujte ani neupravujte Výchozí šablonu, protože to může způsobit "
+"problémy s vašimi katalogizačními záznamy - vždy vytvořte novou šablonu "
+"založenou na výchozí šabloně nebo upravte některou z existujících šablon."
 
 #: intranet-tmpl/prog/en/modules/help/admin/itemtypes.tt:36
 #, c-format
@@ -10746,6 +10770,11 @@ msgstr ""
 "Výtisk se vrací do pobočky: Knihovník bude upozorněn, aby převedl výtisk "
 "zpět do knihovny, ve které byla půjčena "
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:3
+#, fuzzy, c-format
+msgid "Item search fields help"
+msgstr "Nápověda k polím pro hledání jednotek"
+
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:105
 #, c-format
 msgid "Item should be on the hold shelf waiting for someone else"
@@ -10898,8 +10927,8 @@ msgstr ""
 "Koha přichází s mnohými nezbytnými, předem nainstalovanými šablonami autorit."
 
 #: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#, c-format
-msgid "Koha database schema"
+#, fuzzy, c-format
+msgid "Koha database schema:"
 msgstr "Schéma databáze systému Koha"
 
 #: intranet-tmpl/prog/en/modules/help/admin/admin-home.tt:9
@@ -10990,8 +11019,8 @@ msgstr ""
 "normalizační proces bezpředmětná."
 
 #: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:12
-#, c-format
-msgid "Koha reports library"
+#, fuzzy, c-format
+msgid "Koha reports library:"
 msgstr "Knihovna výstupů (v angličtině)"
 
 #: intranet-tmpl/prog/en/modules/help/about.tt:20
@@ -11131,6 +11160,11 @@ msgstr "LR = Ztracený výtisk navrácen/nahrazen"
 #, c-format
 msgid "Label Creator"
 msgstr "Editor štítků"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:12
+#, fuzzy, c-format
+msgid "Label is what will appear on the item search page"
+msgstr "Název, který se objeví na přehledu seznamů"
 
 #. %1$s:  fields.008.0.substr( 28, 3 ) 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:128
@@ -11415,10 +11449,20 @@ msgstr "Podpole formátu MARC"
 msgid "MARC export"
 msgstr "Export do formátu MARC"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:14
+#, fuzzy, c-format
+msgid "MARC field allows you to pick which field you'd like to search in"
+msgstr "Budete moci vybrat pole MARC, která chcete prohledávat"
+
 #: intranet-tmpl/prog/en/modules/help/tools/stage-marc-import.tt:3
 #, c-format
 msgid "MARC import"
 msgstr "Importovat MARC"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:16
+#, fuzzy, c-format
+msgid "MARC subfield is the subfield you'd like to search in"
+msgstr "podpole MARC je podpole, které chcte prohledávat"
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:50
 #, c-format
@@ -11458,7 +11502,7 @@ msgstr "Spravovat systémová nastavení Koha (Panel administrace)"
 #: intranet-tmpl/prog/en/modules/help/labels/label-manage.tt:3
 #, fuzzy, c-format
 msgid "Manage Labels"
-msgstr "Spravovat obrázky"
+msgstr "Spravovat šítky"
 
 #: intranet-tmpl/prog/en/modules/help/tools/manage-marc-import.tt:3
 #, c-format
@@ -11763,6 +11807,11 @@ msgid ""
 msgstr ""
 "NULL: znamená, že čtenář požádal první výtisk k dispozici, a my jsme "
 "nevybrali tento výtisk"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:10
+#, c-format
+msgid "Name is a field for you to identify the search term"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:26
 #, c-format
@@ -12564,16 +12613,16 @@ msgstr ""
 "šablonu, která odpovídá vámi vybranému stavu."
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/merge.tt:15
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Once you have completed your selections click the 'merge' button. The "
 "primary record will now CONTAIN the data you chose for it as well as all of "
 "the items/holdings from both bib records, and the second record will be "
 "deleted."
 msgstr ""
-"Po skončení výběru klikněte na tlačítko 'Sloučit'. Primární záznam nyní "
-"zobrazí záznamy, které jste určili a také všechny položky z obou knihovních "
-"záznamů, druhý záznam bude smazán."
+"Jakmile dokončíte výber záznamů, klikněte na tlačítko 'Sloučit'. Primární "
+"záznam nyní zobrazí záznamy, které jste určili a také všechny jednotky z "
+"obou knihovních záznamů. Druhý záznam bude smazán."
 
 #: intranet-tmpl/prog/en/modules/help/authorities/merge.tt:11
 #, c-format
@@ -12737,7 +12786,7 @@ msgstr ""
 "dotázání, která šablona má být použita pro výsledný záznam."
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/merge.tt:9
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Once you have selected the records you want to merge, click the 'Merge "
 "selected' button at the top of the list. You will be asked which of the two "
@@ -12747,9 +12796,9 @@ msgid ""
 "merged record to use."
 msgstr ""
 "Jakmile vyberete záznamy určené ke sloučení, klikněte na tlačítko \"Sloučit "
-"vybrané záznamy\". Zvolte, který záznam má být ponechán a který má být "
-"vymazán. Pokud byly záznamy vytvořeny podle rozdílných šablon, budete "
-"dotázání, která šablona má být použita pro výsledný záznam."
+"vybrané záznamy\". Zvolte, který záznam má být ponechán a který vymazán. "
+"Pokud byly záznamy vytvořeny podle rozdílných šablon, budete dotázání, která "
+"šablona má být použita pro výsledný záznam."
 
 #: intranet-tmpl/prog/en/modules/help/mainpage.tt:7
 #, fuzzy, c-format
@@ -12801,11 +12850,13 @@ msgstr ""
 "v sekci Čtenáři"
 
 #: intranet-tmpl/prog/en/modules/help/tools/batch_record_modification.tt:26
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Once you're sure everything is the way you want you can click the 'Modify "
 "selected records' button and your records will be modified."
 msgstr ""
+"Jakmile vše zkotrolujete a ujistíte se, že chcte změnu skutečně provést, "
+"klikněte na tlačítko 'Upravit vybrané záznamy' a záznamy budou upraveny."
 
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:106
 #, c-format
@@ -12947,6 +12998,13 @@ msgid ""
 "where you can make any changes you need to the framework you imported."
 msgstr ""
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:21
+#, c-format
+msgid ""
+"Once your new field is added it will be visible at the top of this page and "
+"on the item search page"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:121
 #, c-format
 msgid ""
@@ -13040,7 +13098,7 @@ msgstr "Objednat z připraveného souboru"
 #: intranet-tmpl/prog/en/modules/help/acqui/newordersubscription.tt:3
 #, fuzzy, c-format
 msgid "Order from a subscription"
-msgstr "Prodloužení odběru"
+msgstr "Objednávka z předplatného"
 
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:3
 #, c-format
@@ -13441,7 +13499,7 @@ msgstr "Zaplatit a prominout pokuty"
 #: intranet-tmpl/prog/en/modules/help/circ/on-site_checkouts.tt:3
 #, fuzzy, c-format
 msgid "Pending on-site checkouts"
-msgstr "Čtenáři bez výpůjček"
+msgstr "Čekající prezenční výpůjčky"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:419
 #, c-format
@@ -13805,7 +13863,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:3
 #, c-format
 msgid "Renew"
-msgstr "Prodloužit"
+msgstr "Prodloužení"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:342
 #, c-format
@@ -13913,9 +13971,9 @@ msgstr ""
 "očekáváte"
 
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Rotating Collections"
-msgstr "Soubor periodika"
+msgstr "Výměnné soubory"
 
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:5
 #, c-format
@@ -14362,6 +14420,11 @@ msgstr "Viz úplnou dokumentaci pro pro Záznamy výtisků v "
 msgid "See the full documentation for Item Types in the "
 msgstr "Viz úplnou dokumentaci pro Typy výtisků v "
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
+#, fuzzy, c-format
+msgid "See the full documentation for Item search fields in the "
+msgstr "Prohlédněte si kompletní dokumentaci pro pole Vyhledávání jednotek v "
+
 #: intranet-tmpl/prog/en/modules/help/admin/fieldmapping.tt:23
 #, c-format
 msgid "See the full documentation for Keyword to MARC Mapping in the "
@@ -14556,7 +14619,8 @@ msgstr "Viz úplná dokumentace pro platby pokut v "
 #: intranet-tmpl/prog/en/modules/help/circ/on-site_checkouts.tt:9
 #, fuzzy, c-format
 msgid "See the full documentation for Pending on-site checkouts in the "
-msgstr "Viz úplnou dokumentaci pro Dodavatelské smlouvy "
+msgstr ""
+"Prohlédněte si kompletní dokumetaci pro Čekající prezenční výpůjčky v  "
 
 #: intranet-tmpl/prog/en/modules/help/suggestion/suggestion.tt:41
 #, c-format
@@ -14596,9 +14660,9 @@ msgid "See the full documentation for Reports in the "
 msgstr "Viz úplnou dokumentaci pro Výstupy v "
 
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:35
-#, fuzzy, c-format
+#, c-format
 msgid "See the full documentation for Rotating Collections in the "
-msgstr "Viz úplnou dokumentaci pro Kolovací seznamy v "
+msgstr "Prohlédněte si kompletní dokumentaci pro Výměnné soubory v "
 
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:21
 #, c-format
@@ -15584,13 +15648,6 @@ msgstr "Text pro OPAC "
 #, c-format
 msgid "Text for librarian "
 msgstr "Text pro knihovníka "
-
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:12
-#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
-#, c-format
-msgid "The "
-msgstr " "
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:62
 #, c-format
@@ -18510,6 +18567,11 @@ msgstr ""
 "Chcete-li přidat nový profil, klikněte na tlačítko 'Profily' na horní části "
 "stránky a vyberte \"Nový profil\""
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:7
+#, c-format
+msgid "To add a new search term simply fill in the 'Add a new field' area:"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/labels/label-edit-template.tt:9
 #: intranet-tmpl/prog/en/modules/help/labels/label-manage.tt:25
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:9
@@ -19727,6 +19789,19 @@ msgstr ""
 "Použitím \"Hledání objednávek\" můžete vyhledávat výtisky, které byly "
 "objednány s prodejcem nebo bez prodejce."
 
+#: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:35
+#, fuzzy, c-format
+msgid ""
+"Using the circulation and fine rules matrix you can define rules that depend "
+"on patron/item type combinations. To set your rules, choose a library from "
+"the pull down (or 'all libraries' if you want to apply these rules to all "
+"libraries)"
+msgstr ""
+"Použitím matice na vydávání pravidel můžete definovat pravidla, která závisí "
+"na čtenáří/výtisku. Chcete-li nastavit pravidla, vyberte knihovnu z "
+"rozbalovací roletky (nebo \"všechny knihovny\", chcete-li použít tato "
+"pravidla pro všechny knihovny)"
+
 #: intranet-tmpl/prog/en/modules/help/tools/batchMod.tt:11
 #, c-format
 msgid ""
@@ -19796,18 +19871,6 @@ msgid ""
 msgstr ""
 "Pomocí formuláře, který se zobrazí, můžete definovat šablony pro váš list se "
 "štítky nebo s kartami."
-
-#: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:35
-#, c-format
-msgid ""
-"Using the issuing rules matrix you can define rules that depend on patron/"
-"item type combinations. To set your rules, choose a library from the pull "
-"down (or 'all libraries' if you want to apply these rules to all libraries)"
-msgstr ""
-"Použitím matice na vydávání pravidel můžete definovat pravidla, která závisí "
-"na čtenáří/výtisku. Chcete-li nastavit pravidla, vyberte knihovnu z "
-"rozbalovací roletky (nebo \"všechny knihovny\", chcete-li použít tato "
-"pravidla pro všechny knihovny)"
 
 #: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:14
 #, c-format
@@ -21003,7 +21066,8 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/tools/stage-marc-import.tt:17
 #, c-format
 msgid "You can set up record matching rules through the administration area "
-msgstr "Můžete nastavit pravidla porovnání záznamů přes administrátorskou část "
+msgstr ""
+"Můžete nastavit pravidla porovnání záznamů přes administrátorskou část "
 
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:25
 #, c-format
@@ -22045,8 +22109,8 @@ msgid "fast_cataloging "
 msgstr "fast_cataloging "
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:35
-#, c-format
-msgid "fic:0 Non fiction"
+#, fuzzy, c-format
+msgid "fic:0 Non-fiction"
 msgstr "fic:0 Ne fikce"
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:34
@@ -22344,6 +22408,7 @@ msgstr "management (správa) "
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:22
@@ -22752,6 +22817,15 @@ msgstr "schedule_tasks "
 msgid "serials "
 msgstr "serials (periodika) "
 
+#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
+#, fuzzy, c-format
+msgid ""
+"shows the entire Koha database structure so that you can write effective SQL "
+"Queries"
+msgstr ""
+"pomůže vám naučit se strukturu databáze Koha, takže budete moci efektivně "
+"psát SQL dotazy"
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:122
 #, c-format
 msgid "staffaccess "
@@ -22771,14 +22845,6 @@ msgstr "superlibrarian (superknihovník) "
 #, c-format
 msgid "superserials "
 msgstr "superserials "
-
-#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
-#, c-format
-msgid ""
-"system preference must be set to \"Don't automatically transfer items to "
-"their home library when they are returned\" for Rotating Collections to "
-"function properly."
-msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:96
 #: intranet-tmpl/prog/en/modules/help/admin/marc_subfields_structure.tt:42
@@ -22876,15 +22942,6 @@ msgstr "co se objeví před podpolem v knihovnickém interface"
 #, c-format
 msgid "will be stored into the following structure:"
 msgstr "bude uloženo v následující struktuře:"
-
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#, c-format
-msgid ""
-"will help you learn the Koha database structure so that you can write "
-"effective SQL Queries"
-msgstr ""
-"pomůže vám naučit se strukturu databáze Koha, takže budete moci efektivně "
-"psát SQL dotazy"
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:142
 #, c-format

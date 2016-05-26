@@ -17,6 +17,7 @@
 
 use Modern::Perl;
 
+use t::lib::Mocks;
 use C4::Context;
 use C4::Members;
 use C4::Letters;
@@ -26,7 +27,7 @@ use C4::Budgets qw( AddBudgetPeriod AddBudget );
 use Koha::DateUtils qw( dt_from_string );
 
 use DateTime::Duration;
-use Test::More tests => 105;
+use Test::More tests => 106;
 use Test::Warn;
 
 BEGIN {
@@ -301,6 +302,11 @@ $search_suggestion = SearchSuggestion({
     STATUS => $mod_suggestion3->{STATUS},
 });
 is( @$search_suggestion, 1, 'SearchSuggestion returns the correct number of suggestions' );
+
+$search_suggestion = SearchSuggestion({
+    STATUS => q||
+});
+is( @$search_suggestion, 0, 'SearchSuggestion should not return all suggestions if we want the suggestions with a STATUS=""' );
 $search_suggestion = SearchSuggestion({
     STATUS => 'REJECTED',
 });
@@ -343,11 +349,11 @@ is( @$suggestions, 1, 'DelSuggestion deletes one suggestion' );
 is( $suggestions->[0]->{title}, $del_suggestion->{title}, 'DelSuggestion deletes the correct suggestion' );
 
 ## Bug 11466, making sure GetSupportList() returns itemtypes, even if AdvancedSearchTypes has multiple values
-C4::Context->set_preference("AdvancedSearchTypes", 'itemtypes|loc|ccode');
+t::lib::Mocks::mock_preference("AdvancedSearchTypes", 'itemtypes|loc|ccode');
 my $itemtypes1 = C4::Koha::GetSupportList();
 is(@$itemtypes1, 8, "Purchase suggestion itemtypes collected, multiple AdvancedSearchTypes");
 
-C4::Context->set_preference("AdvancedSearchTypes", 'itemtypes');
+t::lib::Mocks::mock_preference("AdvancedSearchTypes", 'itemtypes');
 my $itemtypes2 = C4::Koha::GetSupportList();
 is(@$itemtypes2, 8, "Purchase suggestion itemtypes collected, default AdvancedSearchTypes");
 

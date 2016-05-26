@@ -1,18 +1,19 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-05-23 08:15+0200\n"
-"PO-Revision-Date: 2016-02-29 10:15+0100\n"
-"Last-Translator: Josef Moravec <josef.moravec@gmail.com>\n"
-"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/>\n"
+"PO-Revision-Date: 2016-05-18 06:01+0000\n"
+"Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
+"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/>"
+"\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.4\n"
-"X-POOTLE-MTIME: 1453715994.000000\n"
+"X-Generator: Pootle 2.5.1.1\n"
+"X-POOTLE-MTIME: 1463551297.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -602,18 +603,6 @@ msgstr "Nepropojovat"
 msgid "authorities.pref#CatalogModuleRelink# automatically relink headings that have previously been linked when saving records in the cataloging module."
 msgstr "při ukládání katalogizačních záznamů automaticky znovu ta záhlaví, která již byla dříve propojena."
 
-# Authorities > General
-msgid "authorities.pref#EnablePushingToAuthorityServer# Don't use"
-msgstr "Vypnout"
-
-# Authorities > General
-msgid "authorities.pref#EnablePushingToAuthorityServer# Enables pushing to authority server as an update or create action"
-msgstr "posílání autorit přes Z39.50 Update."
-
-# Authorities > General
-msgid "authorities.pref#EnablePushingToAuthorityServer# Use"
-msgstr "Zapnout"
-
 # Authorities > Linker
 msgid "authorities.pref#LinkerKeepStale# Do"
 msgstr "Zachovat"
@@ -1129,18 +1118,6 @@ msgstr "Použít"
 # Cataloging > Display
 msgid "cataloguing.pref#UseControlNumber# record control number ($w subfields) and control number (001) for linking of bibliographic records."
 msgstr "kontrolní číslo bibliografického záznamu ($w podpole) a řídící číslo (001) pro propojení biblografických záznamů."
-
-# Cataloging > Display
-msgid "cataloguing.pref#UsePermanentWithdrawal# Don't use"
-msgstr "Nepoužívat"
-
-# Cataloging > Display
-msgid "cataloguing.pref#UsePermanentWithdrawal# Use"
-msgstr "Používat"
-
-# Cataloging > Display
-msgid "cataloguing.pref#UsePermanentWithdrawal# permanent withdrawal mode for withdrawing items. This generates an unique withdrawal number."
-msgstr "pro odepisování jednotek režim trvalého odpisu. Zároveň bude generováno unikátní úbytkové číslo."
 
 # Cataloging > Interface
 msgid "cataloguing.pref#advancedMARCeditor# Display"
@@ -2255,6 +2232,18 @@ msgstr "Čtenáři se do samoobslužného systému přihlašují pomocí"
 msgid "circulation.pref#SelfCheckoutByLogin# Username and Password"
 msgstr "Uživatelského jména a hesla"
 
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Do not show"
+msgstr "Nezobrazovat"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Show"
+msgstr "Zobrazovat"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# all items in the \"Checked-in items\" list, even items that were not checked out."
+msgstr "všechny jednotky v seznamu vrácených, včetně těch, které nebyly vypůjčeny."
+
 # Circulation > Self Checkout
 msgid "circulation.pref#ShowPatronImageInWebBasedSelfCheck# Don't show"
 msgstr "Nezobraziovat"
@@ -2633,35 +2622,35 @@ msgstr "posledně vrácené jednotky na obrazovce příjmu."
 
 # Circulation > Interface
 msgid "circulation.pref#previousIssuesDefaultSortOrder# Sort previous checkouts on the circulation page from"
-msgstr "Setřídit předchozí výpůjčky na výpůjční obrazovce podle"
+msgstr "Přehled předchozích výpůjček řadit podle termínu vrácení"
 
 # Circulation > Interface
 msgid "circulation.pref#previousIssuesDefaultSortOrder# due date."
-msgstr "datumu vrácení."
+msgstr "."
 
 # Circulation > Interface
 msgid "circulation.pref#previousIssuesDefaultSortOrder# earliest to latest"
-msgstr "nejstaršího k nejnovějšímu"
+msgstr "vzestupně"
 
 # Circulation > Interface
 msgid "circulation.pref#previousIssuesDefaultSortOrder# latest to earliest"
-msgstr "nejnovějšího k nejstaršímu"
+msgstr "sestupně"
 
 # Circulation > Interface
 msgid "circulation.pref#todaysIssuesDefaultSortOrder# Sort today's checkouts on the circulation page from"
-msgstr "Seřadit dnes načtené výpůjčky v přehledu výpůjček podle"
+msgstr "Přehled dnešních výpůjček řadit podle termínu vrácení"
 
 # Circulation > Interface
 msgid "circulation.pref#todaysIssuesDefaultSortOrder# due date."
-msgstr "termínu vrácení."
+msgstr "."
 
 # Circulation > Interface
 msgid "circulation.pref#todaysIssuesDefaultSortOrder# earliest to latest"
-msgstr "nejstarší po nejnovější"
+msgstr "vzestupně"
 
 # Circulation > Interface
 msgid "circulation.pref#todaysIssuesDefaultSortOrder# latest to earliest"
-msgstr "nejnovější po nejstarší"
+msgstr "sestupně"
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#useDaysMode# Calculate the due date using"
@@ -4481,15 +4470,17 @@ msgstr "čtenářům měnit jejich vlastní heslo do OPACu. Pozn: musí být př
 
 # OPAC > Appearance
 msgid "opac.pref#OpacPublic# Disable"
-msgstr "Neumožnit"
+msgstr "Nezpřístupňovat"
 
 # OPAC > Appearance
 msgid "opac.pref#OpacPublic# Enable"
-msgstr "Umožnit"
+msgstr "Zpřístupnit"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
-msgstr "Koha OPAC jako veřejný. Privátní OPAC vyžaduje autentifikaci před jeho zobrazením."
+msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
+msgstr ""
+"on-line katalog veřejně. Pokud není katalog zpřístupněný veřejně, bude pro "
+"použití vždy vyžadovat přihlášení."
 
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalAllowed# Allow"
@@ -4530,22 +4521,6 @@ msgstr "knihovně v které byl vypůjčen výtisk"
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalBranch# the patron's home library"
 msgstr "v čtenářově domovské knihovně"
-
-# OPAC > Features
-msgid "opac.pref#OpacResetPassword#  to recover their password via e-mail in the OPAC"
-msgstr "obnovit heslo přes on-line katalog"
-
-# OPAC > Features
-msgid "opac.pref#OpacResetPassword# Library users are "
-msgstr "Čtenáři si"
-
-# OPAC > Features
-msgid "opac.pref#OpacResetPassword# allowed"
-msgstr "mohou"
-
-# OPAC > Features
-msgid "opac.pref#OpacResetPassword# not allowed"
-msgstr "nemohou"
 
 # OPAC > Appearance
 msgid "opac.pref#OpacSeparateHoldings# Don't separate"
@@ -5068,26 +5043,6 @@ msgid "patrons.pref#CardnumberLength# characters long. The length can be a singl
 msgstr "znaků dlouhá. Je-li vyplněno jedno číslo, musí být počet znaků přesně odpovídat tomuto číslu. Je možné také vyplnit rozsah (ve tvaru \"min,max\"), nebo je minimální či maximální počet znaků (např.: \",max\")."
 
 # Patrons > General
-msgid "patrons.pref#CheckPrevIssue#  check borrower loan history to see if the current item has been loaned before."
-msgstr "historii výpůjček čtenáře a upozornit, pokud již daný dokument měl vypůjčený."
-
-# Patrons > General
-msgid "patrons.pref#CheckPrevIssue# Unless overridden, do"
-msgstr "Kontrolovat"
-
-# Patrons > General
-msgid "patrons.pref#CheckPrevIssue# Unless overridden, do not"
-msgstr "Nekontrolovat"
-
-# Patrons > General
-msgid "patrons.pref#CheckPrevIssueSerialFrameworks# (separate columns with |)"
-msgstr "(oddělit sloupce svislítkem |)"
-
-# Patrons > General
-msgid "patrons.pref#CheckPrevIssueSerialFrameworks# The following frameworks are considered serials while checking for already loaned items:"
-msgstr "Tyto katalogizační šablony se používají pro katalogizaci periodik (kontrola, zdali již měli čtenáři půjčeno tak proběhne na základně jednotek, nikoliv titulů):"
-
-# Patrons > General
 msgid "patrons.pref#EnableBorrowerFiles# Do"
 msgstr "Umožnit"
 
@@ -5228,8 +5183,8 @@ msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
 msgstr "driver pro posílání SMS zpráv."
 
 # Patrons > General
-msgid "patrons.pref#StatisticsFields# (separate fields with |)"
-msgstr "(oddělit pole svislítkem |)"
+msgid "patrons.pref#StatisticsFields# (separate fields with |, without trailing |). Default if empty: location|itype|ccode"
+msgstr "(pole oddělte znakem \"|\"). Výchozí hodnota: location|itype|ccode"
 
 # Patrons > General
 msgid "patrons.pref#StatisticsFields# Show the following fields from the items database table as columns on the statistics tab on the patron record: "
@@ -5289,7 +5244,7 @@ msgstr "Nepovolit"
 
 # Patrons > General
 msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
-msgstr "knihovníkům přístup k historii výpůjček čtenáře (historie je normálně ukládána bez ohledu na toto nastavení)."
+msgstr "zaměstnancům zobrazovat historii výpůjček čtenářů (ta je stále ukládána, bez ohledu na to, jestli ji někdo vidí nebo ne)."
 
 # Patrons > General
 msgid "patrons.pref#minPasswordLength# Login passwords for staff and patrons must be at least"
@@ -5945,7 +5900,7 @@ msgstr "Zobrazovat"
 
 # Staff Client > Appearance
 msgid "staff_client.pref#DisplayIconsXSLT# the format, audience, and material type icons in XSLT MARC21 results and detail pages in the staff client."
-msgstr "formát, cílovou skupinu, a typ materiálu v XSLT MARC21 výsledcích a na detailních stránkách v inferfejsu obsluhy."
+msgstr "formát, cílovou skupinu a typ materiálu v XSLT MARC21 výsledcích a na stránkách s podrobným záznamem v intranetu."
 
 # Staff Client > Options
 msgid "staff_client.pref#HidePatronName# Don't show"

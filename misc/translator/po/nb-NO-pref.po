@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: nb-NO-i-staff-prog-v-3000000\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-02-17 13:45+0000\n"
+"PO-Revision-Date: 2016-03-18 14:23+0000\n"
 "Last-Translator: Magnus <magnus@enger.priv.no>\n"
 "Language-Team: Norwegian Bokmål <>\n"
 "Language: nb\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1455716747.000000\n"
+"X-POOTLE-MTIME: 1458311012.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -2230,6 +2230,18 @@ msgstr "La lånerne logge inn i det web-baserte grensesnittet for selvbetjent l�
 msgid "circulation.pref#SelfCheckoutByLogin# Username and Password"
 msgstr "brukernavn og passord"
 
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Do not show"
+msgstr "Ikke vis"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Show"
+msgstr "Vis"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# all items in the \"Checked-in items\" list, even items that were not checked out."
+msgstr "alle eksemplarer i lista \"Innleverte eksemplarer\", også eksemplarer som ikke var lånt ut."
+
 # Circulation > Self Checkout
 msgid "circulation.pref#ShowPatronImageInWebBasedSelfCheck# Don't show"
 msgstr "Ikke vis"
@@ -3396,8 +3408,7 @@ msgstr "Tysk format ([Adresse] [Gatenummer - [Postnummer] [By] - [Land])"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [ZIP/Postal Code], [Country])"
-msgstr ""
-"Amerikanske format ([Gatenummer], [Adresse] - [By], [Postnummer], [Land])"
+msgstr "Amerikanske format ([Gatenummer], [Adresse] - [By], [Postnummer], [Land])"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Friday"
@@ -4464,8 +4475,8 @@ msgid "opac.pref#OpacPublic# Enable"
 msgstr "Gjør"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
-msgstr "Kohas OPAC offentlig tilgjengelig. En privat OPAC krever innlogging før lånerne får tilgang til OPACen."
+msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalAllowed# Allow"
@@ -5168,8 +5179,8 @@ msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
 msgstr "for å sende tekstmeldinger."
 
 # Patrons > General
-msgid "patrons.pref#StatisticsFields# (separate fields with |)"
-msgstr "(skill felter med tegnet «|»)"
+msgid "patrons.pref#StatisticsFields# (separate fields with |, without trailing |). Default if empty: location|itype|ccode"
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#StatisticsFields# Show the following fields from the items database table as columns on the statistics tab on the patron record: "
@@ -5228,8 +5239,8 @@ msgid "patrons.pref#intranetreadinghistory# Don't allow"
 msgstr "Ikke tillat"
 
 # Patrons > General
-msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (it is stored regardless)."
-msgstr "ansatte å se lånehistorikken til lånere. (Historikken lagres uavhengig av denne innstillingen.)"
+msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
+msgstr "ansatte i biblioteket tilgang til lånernes lånehistorikk (historikken lagres uansett, uavhengig av om ansatte får tilgang eller ikke.)"
 
 # Patrons > General
 msgid "patrons.pref#minPasswordLength# Login passwords for staff and patrons must be at least"
@@ -5389,21 +5400,15 @@ msgstr "bruk"
 
 # Searching > Results Display
 msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>If a record has more than this number of items, they availability statuses may be incorrect in the search results, but will be correct in the record details."
-msgstr ""
-"Om en post har flere enn dette antallet eksmeplarer, kan "
-"tilgjengelighetsstatusen i trefflistene være feil, men vil være korrekt i "
-"detaljvisning."
+msgstr "Om en post har flere enn dette antallet eksmeplarer, kan tilgjengelighetsstatusen i trefflistene være feil, men vil være korrekt i detaljvisning."
 
 # Searching > Results Display
 msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>Leave empty for no limit on the number of items for which to check the status."
-msgstr ""
-"La feltet være tomt om du ikke ønsker noen begrensning på antallet "
-"eksemplarer det skal sjekkes status for."
+msgstr "La feltet være tomt om du ikke ønsker noen begrensning på antallet eksemplarer det skal sjekkes status for."
 
 # Searching > Results Display
 msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# For records with many items, only check the availability status for the first"
-msgstr ""
-"For poster med mange eksemplarer, bare sjekke tilgjengeligheten for de første"
+msgstr "For poster med mange eksemplarer, bare sjekke tilgjengeligheten for de første"
 
 # Searching > Results Display
 msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# items."
@@ -6268,3 +6273,4 @@ msgstr "Send bare"
 # Web services > Reporting
 msgid "web_services.pref#SvcMaxReportRows# rows of a report requested via the reports web service."
 msgstr "rader med data for rapporter som kalles opp via «web services» for rapporter."
+

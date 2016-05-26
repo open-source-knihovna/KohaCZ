@@ -43,19 +43,39 @@ BEGIN {
 
 our $fields = get_fields();
 
+
+=head2 get_fields
+  Get fields form syspref 'StatisticsFields'
+  Returns list of valid fields, defaults to 'location|itype|ccode'
+  if syspref is empty or does not contain valid fields
+
+=cut
+
 sub get_fields {
-    my $r = C4::Context->preference('StatisticsFields') || 'location|itype|ccode';
-    unless ( $r =~ m/^(\w|\d|\||-)+$/) {
-        warn "Members/Statistics : Bad value for syspref StatisticsFields" if $debug;
-        $r = 'location|itype|ccode';
+
+    my $syspref = C4::Context->preference('StatisticsFields');
+    my $ret;
+
+    if ( $syspref ) {
+        my @ret;
+        my @spfields = split ('\|', $syspref);
+        my $schema       = Koha::Database->new()->schema();
+        my @columns = $schema->source('Item')->columns;
+
+        foreach my $fn ( @spfields ) {
+            push ( @ret, $fn ) if ( grep(/^$fn$/, @columns) );
+        }
+        $ret = join( '|', @ret);
     }
-    return $r;
+    return $ret || 'location|itype|ccode';
 }
 
 =head2 construct_query
   Build a sql query from a subquery
   Adds statistics fields to the select and the group by clause
+
 =cut
+
 sub construct_query {
     my $count    = shift;
     my $subquery = shift;
@@ -74,7 +94,9 @@ sub construct_query {
 
 =head2 GetTotalIssuesTodayByBorrower
   Return total issues for a borrower at this current day
+
 =cut
+
 sub GetTotalIssuesTodayByBorrower {
     my ($borrowernumber) = @_;
     my $dbh   = C4::Context->dbh;
@@ -93,7 +115,9 @@ sub GetTotalIssuesTodayByBorrower {
 
 =head2 GetTotalIssuesReturnedTodayByBorrower
   Return total issues returned by a borrower at this current day
+
 =cut
+
 sub GetTotalIssuesReturnedTodayByBorrower {
     my ($borrowernumber) = @_;
     my $dbh   = C4::Context->dbh;
@@ -107,7 +131,9 @@ sub GetTotalIssuesReturnedTodayByBorrower {
 
 =head2 GetPrecedentStateByBorrower
   Return the precedent state (before today) for a borrower of his checkins and checkouts
+
 =cut
+
 sub GetPrecedentStateByBorrower {
     my ($borrowernumber) = @_;
     my $dbh   = C4::Context->dbh;

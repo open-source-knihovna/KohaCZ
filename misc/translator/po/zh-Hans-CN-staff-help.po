@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: zh-Hans-TW-i-staff-t-prog-v-3004000\n"
-"POT-Creation-Date: 2016-02-14 17:25-0300\n"
+"POT-Creation-Date: 2016-05-17 10:55-0300\n"
 "PO-Revision-Date: 2015-11-26 22:40+0000\n"
 "Last-Translator: Anthony <mao@lins.fju.edu.tw>\n"
 "Language-Team: koha_TW <kohataiwan@googlegroups.com>\n"
@@ -676,6 +676,7 @@ msgstr "( ! 表示 '不可见' 或在折叠时为 '不可收叠')"
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:22
@@ -854,6 +855,14 @@ msgstr "( ! 表示 '不可见' 或在折叠时为 '不可收叠')"
 #, c-format
 msgid "(online)."
 msgstr "(联机)。"
+
+#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
+#, c-format
+msgid ""
+"(system preference) must be set to \"Don't automatically transfer items to "
+"their home library when they are returned\" for Rotating Collections to "
+"function properly."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/offline_circ/list.tt:5
 #, c-format
@@ -2573,6 +2582,13 @@ msgstr "音效报警"
 #, c-format
 msgid "Author"
 msgstr "着者"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:18
+#, c-format
+msgid ""
+"Authorised values category can be used to turn this search field in to a "
+"pull down instead of a free text field"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/authorities/detail.tt:3
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities-home.tt:3
@@ -6016,6 +6032,13 @@ msgid ""
 msgstr ""
 "从这里，您可以 '批准' 并采用此改变于读者记录；'删除' 并删除这些改变；或 '忽"
 "略' 并维持此改变待来日再决定。"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:5
+#, fuzzy, c-format
+msgid ""
+"From here you can add custom search fields to the item search option in the "
+"staff client."
+msgstr "从此上传附加于读者纪录的文件。"
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbooks.tt:7
 #, c-format
@@ -9525,6 +9548,11 @@ msgid ""
 "transfer the item back to the library where it was checked out "
 msgstr "馆藏还入至借出图书馆：将指示图书员将馆藏转移回借出的图书馆 "
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:3
+#, c-format
+msgid "Item search fields help"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:105
 #, c-format
 msgid "Item should be on the hold shelf waiting for someone else"
@@ -9657,8 +9685,8 @@ msgid ""
 msgstr "Koha内置必要的权威框架。"
 
 #: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#, c-format
-msgid "Koha database schema"
+#, fuzzy, c-format
+msgid "Koha database schema:"
 msgstr "Koha数据库纲要"
 
 #: intranet-tmpl/prog/en/modules/help/admin/admin-home.tt:9
@@ -9737,8 +9765,8 @@ msgstr ""
 "Koha 有个 '正规化规则' 删除逗号与分号等额外的字符。键入字段的值与正规化无关。"
 
 #: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:12
-#, c-format
-msgid "Koha reports library"
+#, fuzzy, c-format
+msgid "Koha reports library:"
 msgstr "Koha报表库"
 
 #: intranet-tmpl/prog/en/modules/help/about.tt:20
@@ -9868,6 +9896,11 @@ msgstr "LR = 还入/退款遗失馆藏"
 #, c-format
 msgid "Label Creator"
 msgstr "书标产生器"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:12
+#, fuzzy, c-format
+msgid "Label is what will appear on the item search page"
+msgstr "名称将显示在虚拟书架的清单上"
 
 #. %1$s:  fields.008.0.substr( 28, 3 ) 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:128
@@ -10127,10 +10160,20 @@ msgstr "MARC 纪录分栏"
 msgid "MARC export"
 msgstr "MARC 输出"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:14
+#, c-format
+msgid "MARC field allows you to pick which field you'd like to search in"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/tools/stage-marc-import.tt:3
 #, c-format
 msgid "MARC import"
 msgstr "MARC 输入"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:16
+#, c-format
+msgid "MARC subfield is the subfield you'd like to search in"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:50
 #, c-format
@@ -10456,6 +10499,11 @@ msgid ""
 "NULL: means the patron requested the 1st available, and we haven't chosen "
 "the item"
 msgstr "NULL：表示读者要求第 1 个可用的馆藏，我们没有选择该馆藏"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:10
+#, c-format
+msgid "Name is a field for you to identify the search term"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:26
 #, c-format
@@ -11487,6 +11535,13 @@ msgid ""
 "Once your import is complete you will be brought to the framework edit tool "
 "where you can make any changes you need to the framework you imported."
 msgstr "输入之后进入框架编辑工具再编辑它。"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:21
+#, c-format
+msgid ""
+"Once your new field is added it will be visible at the top of this page and "
+"on the item search page"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:121
 #, c-format
@@ -12833,6 +12888,11 @@ msgstr "见馆藏纪录的完整文件 "
 msgid "See the full documentation for Item Types in the "
 msgstr "见馆藏类型的完整文件 "
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
+#, fuzzy, c-format
+msgid "See the full documentation for Item search fields in the "
+msgstr "见馆藏纪录的完整文件 "
+
 #: intranet-tmpl/prog/en/modules/help/admin/fieldmapping.tt:23
 #, c-format
 msgid "See the full documentation for Keyword to MARC Mapping in the "
@@ -14008,13 +14068,6 @@ msgstr "给 OPAC 的文字 "
 #, c-format
 msgid "Text for librarian "
 msgstr "给馆员的文字 "
-
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:12
-#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
-#, c-format
-msgid "The "
-msgstr "这个 "
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:62
 #, c-format
@@ -16550,6 +16603,11 @@ msgid ""
 "of your page and choose 'New Profile'"
 msgstr "勾选页面上方的 '配置文件' 钮，选择 '新增配置文件'，就能新增配置文件"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:7
+#, c-format
+msgid "To add a new search term simply fill in the 'Add a new field' area:"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/labels/label-edit-template.tt:9
 #: intranet-tmpl/prog/en/modules/help/labels/label-manage.tt:25
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:9
@@ -17599,6 +17657,17 @@ msgid ""
 "or without the vendor."
 msgstr "使用订单寻找，可寻找已发出订单的馆藏，不论是否有代理商承接。"
 
+#: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:35
+#, fuzzy, c-format
+msgid ""
+"Using the circulation and fine rules matrix you can define rules that depend "
+"on patron/item type combinations. To set your rules, choose a library from "
+"the pull down (or 'all libraries' if you want to apply these rules to all "
+"libraries)"
+msgstr ""
+"依读者/馆藏类型的组合从流通规则矩阵中决定适用的流通规则。从下拉选单里选择图书"
+"馆决定您的流通规则 (若要该规则适用于所有图书馆时则选择 '所有图书馆')"
+
 #: intranet-tmpl/prog/en/modules/help/tools/batchMod.tt:11
 #, c-format
 msgid ""
@@ -17656,16 +17725,6 @@ msgid ""
 "Using the form that appears you can define the template for your sheet of "
 "labels or cards."
 msgstr "以显示的表单，可以设置书标与读者证的模板。"
-
-#: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:35
-#, c-format
-msgid ""
-"Using the issuing rules matrix you can define rules that depend on patron/"
-"item type combinations. To set your rules, choose a library from the pull "
-"down (or 'all libraries' if you want to apply these rules to all libraries)"
-msgstr ""
-"依读者/馆藏类型的组合从流通规则矩阵中决定适用的流通规则。从下拉选单里选择图书"
-"馆决定您的流通规则 (若要该规则适用于所有图书馆时则选择 '所有图书馆')"
 
 #: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:14
 #, c-format
@@ -19641,8 +19700,8 @@ msgid "fast_cataloging "
 msgstr "fast_cataloging "
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:35
-#, c-format
-msgid "fic:0 Non fiction"
+#, fuzzy, c-format
+msgid "fic:0 Non-fiction"
 msgstr "fic:0 非小说"
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:34
@@ -19924,6 +19983,7 @@ msgstr "管理 "
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:22
@@ -20324,6 +20384,13 @@ msgstr "schedule_tasks "
 msgid "serials "
 msgstr "期刊 "
 
+#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
+#, fuzzy, c-format
+msgid ""
+"shows the entire Koha database structure so that you can write effective SQL "
+"Queries"
+msgstr "将协助您学习Koha数据库结构，足以撰写有效的SQL询问"
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:122
 #, c-format
 msgid "staffaccess "
@@ -20343,14 +20410,6 @@ msgstr "超级图书馆员 "
 #, c-format
 msgid "superserials "
 msgstr "superserials "
-
-#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
-#, c-format
-msgid ""
-"system preference must be set to \"Don't automatically transfer items to "
-"their home library when they are returned\" for Rotating Collections to "
-"function properly."
-msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:96
 #: intranet-tmpl/prog/en/modules/help/admin/marc_subfields_structure.tt:42
@@ -20443,13 +20502,6 @@ msgstr "内容，显示在馆员界面分栏前"
 #, c-format
 msgid "will be stored into the following structure:"
 msgstr "将存储入以下的结构："
-
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#, c-format
-msgid ""
-"will help you learn the Koha database structure so that you can write "
-"effective SQL Queries"
-msgstr "将协助您学习Koha数据库结构，足以撰写有效的SQL询问"
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:142
 #, c-format

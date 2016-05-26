@@ -188,7 +188,7 @@ if ( $op eq 'add_form' ) {
 } elsif ( $op eq 'remove_biblios' ) {
     $shelfnumber = $query->param('shelfnumber');
     $shelf = Koha::Virtualshelves->find($shelfnumber);
-    my @biblionumber = $query->param('biblionumber');
+    my @biblionumber = $query->multi_param('biblionumber');
     if ($shelf) {
         if ( $shelf->can_biblios_be_removed( $loggedinuser ) ) {
             my $number_of_biblios_removed = eval {
@@ -250,8 +250,8 @@ if ( $op eq 'view' ) {
 
             my @items;
             while ( my $content = $contents->next ) {
-                my $this_item;
                 my $biblionumber = $content->biblionumber->biblionumber;
+                my $this_item    = GetBiblioData($biblionumber);
                 my $record       = GetMarcBiblio($biblionumber);
 
                 if ( C4::Context->preference("OPACXSLTResultsDisplay") ) {
@@ -259,7 +259,7 @@ if ( $op eq 'view' ) {
                 }
 
                 my $marcflavour = C4::Context->preference("marcflavour");
-                my $itemtypeinfo = getitemtypeinfo( $content->biblionumber->biblioitems->first->itemtype, 'intranet' );
+                my $itemtypeinfo = getitemtypeinfo( $content->biblionumber->biblioitems->first->itemtype, 'opac' );
                 $this_item->{imageurl}          = $itemtypeinfo->{imageurl};
                 $this_item->{description}       = $itemtypeinfo->{description};
                 $this_item->{notforloan}        = $itemtypeinfo->{notforloan};
@@ -355,7 +355,7 @@ $template->param(
     shelf    => $shelf,
     messages => \@messages,
     category => $category,
-    print    => $query->param('print') || 0,
+    print    => scalar $query->param('print') || 0,
     listsview => 1,
 );
 

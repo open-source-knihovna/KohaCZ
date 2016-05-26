@@ -112,7 +112,7 @@ else {
 #end
 
 sub HandleBiblioPars {
-    my @bib= $query->param('biblionumber');
+    my @bib= $query->multi_param('biblionumber');
     if(@bib==0 && $query->param('biblionumbers')) {
         my $str= $query->param('biblionumbers');
         @bib= split '/', $str;
@@ -132,8 +132,8 @@ sub HandleNewVirtualShelf {
                 sortfield => $sortfield,
                 owner => $loggedinuser,
             }
-        );
-    }->store;
+        )->store;
+    };
     if ( $@ or not $shelf ) {
         $authorized = 0;
         $errcode    = 1;

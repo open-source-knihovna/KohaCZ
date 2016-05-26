@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-01-15 16:33+0000\n"
-"Last-Translator: kyr.stefanidis <kyr.stefanidis@gmail.com>\n"
+"PO-Revision-Date: 2016-04-16 10:11+0000\n"
+"Last-Translator: Dimitris <dimantonak@gmail.com>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1421339597.000000\n"
+"X-POOTLE-MTIME: 1460801462.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -2230,6 +2230,18 @@ msgstr "Τα μέλη να συνδέονται στο διαδικτυακό σ
 msgid "circulation.pref#SelfCheckoutByLogin# Username and Password"
 msgstr "Όνομα χρήστη και τον Κωδικό Πρόσβασής τους"
 
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Do not show"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Show"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# all items in the \"Checked-in items\" list, even items that were not checked out."
+msgstr ""
+
 # Circulation > Self Checkout
 msgid "circulation.pref#ShowPatronImageInWebBasedSelfCheck# Don't show"
 msgstr "Να μην εμφανίζεται"
@@ -3880,11 +3892,11 @@ msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#LibraryName# Show"
-msgstr "Να εμφανίζεται το"
+msgstr "opac.pref#LibraryName# Προβολή"
 
 # OPAC > Appearance
 msgid "opac.pref#LibraryName# as the name of the library on the OPAC."
-msgstr "ως το όνομα της βιβλιοθήκης στον OPAC."
+msgstr "opac.pref#LibraryName# το όνομα της Βιβλιοθήκης στον OPAC."
 
 # OPAC > Appearance
 msgid "opac.pref#NoLoginInstructions# Show the following HTML on the OPAC login form when a patron is not logged in:"
@@ -4463,8 +4475,8 @@ msgid "opac.pref#OpacPublic# Enable"
 msgstr "Να είναι"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
-msgstr "ο OPAC δημόσιος. Ο ιδιωτικός OPAC απαιτεί πιστοποίηση ταυτότητας πριν την πρόσβαση σε αυτόν."
+msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalAllowed# Allow"
@@ -5167,7 +5179,7 @@ msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
 msgstr "οδηγός για την αποστολή μηνυμάτων SMS."
 
 # Patrons > General
-msgid "patrons.pref#StatisticsFields# (separate fields with |)"
+msgid "patrons.pref#StatisticsFields# (separate fields with |, without trailing |). Default if empty: location|itype|ccode"
 msgstr ""
 
 # Patrons > General
@@ -5227,8 +5239,8 @@ msgid "patrons.pref#intranetreadinghistory# Don't allow"
 msgstr "Να μην επιτρέπεται"
 
 # Patrons > General
-msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (it is stored regardless)."
-msgstr "στο προσωπικό να έχει πρόσβαση στο ιστορικό δανεισμών των μελών (αποθηκεύεται ανεξάρτητα από την επιλογή)."
+msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#minPasswordLength# Login passwords for staff and patrons must be at least"

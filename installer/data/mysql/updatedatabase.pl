@@ -8363,10 +8363,9 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "3.15.00.041";
 if ( CheckVersion($DBversion) ) {
-    my $name = $dbh->selectcol_arrayref(q|
+    my ( $name ) = $dbh->selectrow_array(q|
         SELECT name FROM letter WHERE code="HOLD"
     |);
-    $name = $name->[0];
     $dbh->do(q|
         UPDATE letter
         SET code="HOLD",
@@ -8375,6 +8374,9 @@ if ( CheckVersion($DBversion) ) {
         WHERE code="HOLD_PHONE"
     |, {}, $name);
 
+    ( $name ) = $dbh->selectrow_array(q|
+        SELECT name FROM letter WHERE code="PREDUE"
+    |);
     $dbh->do(q|
         UPDATE letter
         SET code="PREDUE",
@@ -8383,6 +8385,9 @@ if ( CheckVersion($DBversion) ) {
         WHERE code="PREDUE_PHONE"
     |, {}, $name);
 
+    ( $name ) = $dbh->selectrow_array(q|
+        SELECT name FROM letter WHERE code="OVERDUE"
+    |);
     $dbh->do(q|
         UPDATE letter
         SET code="OVERDUE",
@@ -11588,6 +11593,121 @@ if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Bug 15446 - Fix systempreferences rows where type=YesNo and value='')\n";
     SetVersion($DBversion);
 }
+
+$DBversion = "3.22.05.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 3.22.5)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.06.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 3.22.6)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.06.001";
+if ( CheckVersion($DBversion) ) {
+    my $letters = $dbh->selectall_arrayref(q|
+        SELECT code, name
+        FROM letter
+        WHERE message_transport_type="email"
+    |, { Slice => {} });
+
+    for my $letter ( @$letters ) {
+        $dbh->do(q|
+            UPDATE letter
+            SET name = ?
+            WHERE code = ?
+            AND message_transport_type <> "email"
+        |, undef, $letter->{name}, $letter->{code});
+    }
+
+    print "Upgrade to $DBversion done (Bug 16217 - Notice' names may have diverged)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.06.002";
+if ( CheckVersion($DBversion) ) {
+
+    my ($count_imageurl) = $dbh->selectrow_array(q|
+        SELECT COUNT(*)
+        FROM authorised_values
+        WHERE imageurl IS NOT NULL
+            AND imageurl <> ""
+    |);
+
+    unless ($count_imageurl) {
+        if (   C4::Context->preference('AuthorisedValueImages')
+            or C4::Context->preference('StaffAuthorisedValueImages') )
+        {
+            $dbh->do(q|
+                UPDATE systempreferences
+                SET value = 0
+                WHERE variable = "AuthorisedValueImages"
+                   or variable = "StaffAuthorisedValueImages"
+            |);
+            warn "The system preferences AuthorisedValueImages and StaffAuthorisedValueImages have been turned off\n";
+            warn "authorised_values.imageurl is not populated, that means you are not using this feature\n";
+        }
+    }
+    else {
+        warn "At least one authorised value has an icon defined (imageurl)\n";
+        warn "The system preference AuthorisedValueImages or StaffAuthorisedValueImages could be turned off if you are not aware of this feature\n";
+    }
+
+    print "Upgrade to $DBversion done (Bug 16041 - StaffAuthorisedValueImages & AuthorisedValueImages preferences - impact on search performance)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.06.003";
+if ( CheckVersion($DBversion) ) {
+    my ( $cnt ) = $dbh->selectrow_array( q|
+        SELECT COUNT(*) FROM items it
+        LEFT JOIN biblio bi ON bi.biblionumber=it.biblionumber
+        LEFT JOIN biblioitems bii USING (biblioitemnumber)
+        WHERE bi.biblionumber IS NULL
+    |);
+    if( $cnt ) {
+        print "WARNING: You have corrupted data in your items table!! The table contains $cnt references to biblio records that do not exist.\nPlease correct your data IMMEDIATELY after this upgrade and manually add the foreign key constraint for biblionumber in the items table.\n";
+    } else {
+        # now add FK
+        $dbh->do( q|
+            ALTER TABLE items
+            ADD FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE CASCADE ON UPDATE CASCADE
+        |);
+        print "Upgrade to $DBversion done (Bug 16170 - Add FK for biblionumber in items)\n";
+    }
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.06.004";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE letter MODIFY COLUMN branchcode varchar(10) NOT NULL DEFAULT ''
+    });
+    $dbh->do(q{
+        ALTER TABLE permissions MODIFY COLUMN code varchar(64) NOT NULL DEFAULT '';
+    });
+    print "Upgrade to $DBversion done (Bug 16402: Fix DB structure to work on MySQL 5.7)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.06.005";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE creator_layouts MODIFY layout_name char(25) NOT NULL DEFAULT 'DEFAULT';
+    });
+    print "Upgrade to $DBversion done (Bug 15086 - Creators layout and template sql has warnings)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.07.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 3.22.7)\n";
+    SetVersion($DBversion);
+}
+
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068

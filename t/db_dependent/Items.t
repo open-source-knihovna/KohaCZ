@@ -50,7 +50,7 @@ subtest 'General Add, Get and Del tests' => sub {
     });
 
     # Create a biblio instance for testing
-    C4::Context->set_preference('marcflavour', 'MARC21');
+    t::lib::Mocks::mock_preference('marcflavour', 'MARC21');
     my ($bibnum, $bibitemnum) = get_biblio();
 
     # Add an item.
@@ -111,7 +111,7 @@ subtest 'GetHiddenItemnumbers tests' => sub {
     });
 
     # Create a new biblio
-    C4::Context->set_preference('marcflavour', 'MARC21');
+    t::lib::Mocks::mock_preference('marcflavour', 'MARC21');
     my ($biblionumber, $biblioitemnumber) = get_biblio();
 
     # Add two items
@@ -136,19 +136,19 @@ subtest 'GetHiddenItemnumbers tests' => sub {
     push @items, GetItem( $item2_itemnumber );
 
     # Empty OpacHiddenItems
-    C4::Context->set_preference('OpacHiddenItems','');
+    t::lib::Mocks::mock_preference('OpacHiddenItems','');
     ok( !defined( GetHiddenItemnumbers( @items ) ),
         "Hidden items list undef if OpacHiddenItems empty");
 
     # Blank spaces
-    C4::Context->set_preference('OpacHiddenItems','  ');
+    t::lib::Mocks::mock_preference('OpacHiddenItems','  ');
     ok( scalar GetHiddenItemnumbers( @items ) == 0,
         "Hidden items list empty if OpacHiddenItems only contains blanks");
 
     # One variable / value
     $opachiddenitems = "
         withdrawn: [1]";
-    C4::Context->set_preference( 'OpacHiddenItems', $opachiddenitems );
+    t::lib::Mocks::mock_preference( 'OpacHiddenItems', $opachiddenitems );
     @hidden = GetHiddenItemnumbers( @items );
     ok( scalar @hidden == 1, "Only one hidden item");
     is( $hidden[0], $item1_itemnumber, "withdrawn=1 is hidden");
@@ -156,7 +156,7 @@ subtest 'GetHiddenItemnumbers tests' => sub {
     # One variable, two values
     $opachiddenitems = "
         withdrawn: [1,0]";
-    C4::Context->set_preference( 'OpacHiddenItems', $opachiddenitems );
+    t::lib::Mocks::mock_preference( 'OpacHiddenItems', $opachiddenitems );
     @hidden = GetHiddenItemnumbers( @items );
     ok( scalar @hidden == 2, "Two items hidden");
     is_deeply( \@hidden, \@itemnumbers, "withdrawn=1 and withdrawn=0 hidden");
@@ -166,7 +166,7 @@ subtest 'GetHiddenItemnumbers tests' => sub {
         withdrawn: [1]
         homebranch: [$library2->{branchcode}]
     ";
-    C4::Context->set_preference( 'OpacHiddenItems', $opachiddenitems );
+    t::lib::Mocks::mock_preference( 'OpacHiddenItems', $opachiddenitems );
     @hidden = GetHiddenItemnumbers( @items );
     ok( scalar @hidden == 2, "Two items hidden");
     is_deeply( \@hidden, \@itemnumbers, "withdrawn=1 and homebranch library2 hidden");
@@ -228,27 +228,22 @@ subtest q{Test Koha::Database->schema()->resultset('Item')->itemtype()} => sub {
 
     $schema->storage->txn_begin;
 
-    my $biblio =
-    $schema->resultset('Biblio')->create(
-        {
-            title       => "Test title",
-            biblioitems => [
-                {
-                    itemtype => 'BIB_LEVEL',
-                    items    => [ { itype => "ITEM_LEVEL" } ]
-                }
-            ]
-        }
-    );
+    my $biblio = $schema->resultset('Biblio')->create({
+        title       => "Test title",
+        biblioitems => [ { itemtype => 'BIB_LEVEL' } ],
+    });
+    my $biblioitem = $biblio->biblioitems->first;
+    my $item = $schema->resultset('Item')->create({
+        biblioitemnumber => $biblioitem->biblioitemnumber,
+        biblionumber     => $biblio->biblionumber,
+        itype            => "ITEM_LEVEL",
+    });
 
-    my @bi = $biblio->biblioitems();
-    my ( $item ) = $bi[0]->items();
+    t::lib::Mocks::mock_preference( 'item-level_itypes', 0 );
+    is( $item->effective_itemtype(), 'BIB_LEVEL', '$item->itemtype() returns biblioitem.itemtype when item-level_itypes is disabled' );
 
-    C4::Context->set_preference( 'item-level_itypes', 0 );
-    ok( $item->effective_itemtype() eq 'BIB_LEVEL', '$item->itemtype() returns biblioitem.itemtype when item-level_itypes is disabled' );
-
-    C4::Context->set_preference( 'item-level_itypes', 1 );
-    ok( $item->effective_itemtype() eq 'ITEM_LEVEL', '$item->itemtype() returns items.itype when item-level_itypes is enabled' );
+    t::lib::Mocks::mock_preference( 'item-level_itypes', 1 );
+    is( $item->effective_itemtype(), 'ITEM_LEVEL', '$item->itemtype() returns items.itype when item-level_itypes is enabled' );
 
     # If itemtype is not defined and item-level_level item types are set
     # fallback to biblio-level itemtype (Bug 14651) and warn
@@ -280,7 +275,7 @@ subtest 'SearchItems test' => sub {
         source => 'Branch',
     });
 
-    C4::Context->set_preference('marcflavour', 'MARC21');
+    t::lib::Mocks::mock_preference('marcflavour', 'MARC21');
     my $cpl_items_before = SearchItemsByField( 'homebranch', $library1->{branchcode});
 
     my ($biblionumber) = get_biblio();
@@ -444,7 +439,7 @@ subtest 'Koha::Item(s) tests' => sub {
     });
 
     # Create a biblio and item for testing
-    C4::Context->set_preference('marcflavour', 'MARC21');
+    t::lib::Mocks::mock_preference('marcflavour', 'MARC21');
     my ($bibnum, $bibitemnum) = get_biblio();
     my ($item_bibnum, $item_bibitemnum, $itemnumber) = AddItem({ homebranch => $library1->{branchcode}, holdingbranch => $library2->{branchcode} } , $bibnum);
 
@@ -534,14 +529,14 @@ subtest 'C4::Biblio::EmbedItemsInMarcBiblio' => sub {
     @items = $record->field($itemfield);
     is( scalar @items,
         $number_of_items,
-        'Even with OpacHiddenItems set, all items should have been embeded' );
+        'Even with OpacHiddenItems set, all items should have been embedded' );
 
     C4::Biblio::EmbedItemsInMarcBiblio( $record, $biblionumber, undef, 1 );
     @items = $record->field($itemfield);
     is(
         scalar @items,
         $number_of_items - $number_of_items_with_homebranch_is_CPL,
-'For OPAC, the pref OpacHiddenItems should have been take into account. Only items with homebranch ne CPL should have been embeded'
+'For OPAC, the pref OpacHiddenItems should have been take into account. Only items with homebranch ne CPL should have been embedded'
     );
 
     $opachiddenitems = "
@@ -552,7 +547,7 @@ subtest 'C4::Biblio::EmbedItemsInMarcBiblio' => sub {
     is(
         scalar @items,
         0,
-'For OPAC, If all items are hidden, no item should have been embeded'
+'For OPAC, If all items are hidden, no item should have been embedded'
     );
 
     $schema->storage->txn_rollback;

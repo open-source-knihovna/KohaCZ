@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-02-14 14:57-0300\n"
-"PO-Revision-Date: 2016-01-24 16:21+0000\n"
+"POT-Creation-Date: 2016-05-17 08:57-0300\n"
+"PO-Revision-Date: 2016-05-02 17:15+0000\n"
 "Last-Translator: tigran <tigran@flib.sci.am>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
 "Language: hy\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Pootle 2.5.1.1\n"
 "X-Poedit-Bookmarks: 1755,-1,-1,-1,-1,-1,-1,-1,-1,-1\n"
-"X-POOTLE-MTIME: 1453652476.000000\n"
+"X-POOTLE-MTIME: 1462209327.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -787,6 +787,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:22
@@ -965,6 +966,17 @@ msgstr ""
 #, c-format
 msgid "(online)."
 msgstr "(առցանց)."
+
+#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
+#, c-format
+msgid ""
+"(system preference) must be set to \"Don't automatically transfer items to "
+"their home library when they are returned\" for Rotating Collections to "
+"function properly."
+msgstr ""
+"(համակարգային նախապատվություն) պետք է կարգաբերված լինի \"Ավտոմատ մի "
+"տեղափոխիր նյութերը իրենց տնային գրադարան երբ դրանք վերադարձվում են\", "
+"որպեսզի Շրջանառվող հավաքածուները աշխատեն ճիշտ։"
 
 #: intranet-tmpl/prog/en/modules/help/offline_circ/list.tt:5
 #, c-format
@@ -2884,6 +2896,15 @@ msgstr "Ձայնային ահազանգեր"
 msgid "Author"
 msgstr "Հեղինակ"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:18
+#, c-format
+msgid ""
+"Authorised values category can be used to turn this search field in to a "
+"pull down instead of a free text field"
+msgstr ""
+"Թույլատրված արժեքների դասը կարելի է օգտագործել փնտրման այս դաշտը դարձնելու "
+"բացվող ազատ տեքստային դաշտի փոխարեն"
+
 #: intranet-tmpl/prog/en/modules/help/authorities/detail.tt:3
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities-home.tt:3
 #, c-format
@@ -2971,7 +2992,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
 #, c-format
 msgid "AutomaticItemReturn"
-msgstr ""
+msgstr "AutomaticItemReturn"
 
 #: intranet-tmpl/prog/en/modules/help/reports/issues_avg_stats.tt:3
 #, c-format
@@ -3519,6 +3540,8 @@ msgid ""
 "Change the current location of the items in that collection to the library "
 "it is to be transferred to"
 msgstr ""
+"Փոխիր այս հավաքածուի նյութերի ընթացիկ տեղաբաշխումը դեպի այն գրադարան ուր "
+"տեղափոխվում են նյութերը"
 
 #: intranet-tmpl/prog/en/modules/help/members/boraccount.tt:7
 #, c-format
@@ -6760,6 +6783,15 @@ msgstr ""
 "գրառմանը, 'Ջնջել' և հեռացնել փոփոխությունները կամ 'Անտեսել' և պահել "
 "հաստատման սպասող փոփոխությունները։"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:5
+#, c-format
+msgid ""
+"From here you can add custom search fields to the item search option in the "
+"staff client."
+msgstr ""
+"Այստեղից դու կարող ես աշխատակազմի հաճախորդից նյութի փնտրման ընտրանքում "
+"ավելացնել հաճախորդի սահմանած փնտրման դաշտերը։"
+
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbooks.tt:7
 #, c-format
 msgid "From here you can add new bibliographic records to Koha."
@@ -6989,6 +7021,9 @@ msgid ""
 "of the collection you wish to transfer; choose the library you wish to "
 "transfer the collection to and click \"Transfer collection\"."
 msgstr ""
+"Հիմնական Շրջաբերական ցուցակի էջից սեղմիր Տեղափոխել որը տեղափոխման ենթական "
+"հավաքածուի վերնագրից հաջորդն է, ընտրիր գրադարանը դեպի ուր ցանկանում ես "
+"տեղափոխել հավաքածուն, և սեղմիր \"Տեղափոխիր հավաքածուն\"։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:13
 #, c-format
@@ -7726,6 +7761,10 @@ msgid ""
 "notifying library staff that the item is part of a rotating collection, also "
 "letting them know where the item needs to be sent."
 msgstr ""
+"Եթե շրջաբերական հավաքածուի նյութը հետ է ընդունվել գրադարանում որը այն չէ, "
+"դեպի ուր այն տեղափոխվում էր, կարտածվի զգուշացում հիշեցնելով գրադարանի "
+"աշխատակազմին որ նյութը շրջաբերական ցուցակի մաս է, և հիշեցնելով թե ուր պետք է "
+"նյութը առաքվի։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/columns_settings.tt:11
 #, c-format
@@ -9787,9 +9826,9 @@ msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:31
-#, fuzzy, c-format
+#, c-format
 msgid "Important:"
-msgstr "Կարևոր է "
+msgstr "Կարևոր է։"
 
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:108
 #, c-format
@@ -10471,6 +10510,9 @@ msgid ""
 "receive them. This will clear the transfer so that the items are no longer "
 "shown as being \"in transit\"."
 msgstr ""
+"Տեղափոխումը ավարտելու նպատակով շրջաբերական ցուցակը ստացող գրադարանը պետք է "
+"ընդունի հավաքածուի նյութերը ինչպես որ գալիս են։ Սա կմաքրի տեղափոխումը, "
+"այնպես որ նյութերը էլ չեն որպես \"տեղափոխման մեջ\"։"
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:24
 #, c-format
@@ -10736,6 +10778,9 @@ msgid ""
 "receives a collection they will need to check in the items to complete the "
 "transfer."
 msgstr ""
+"Նախաձեռնի տեղափոխում իրական տեղաբաշխումից դեպի ընթացիկ պահման վայր։ Երբ "
+"գրադարանը կստանա հավաքածուն նրանց հարկ կլինի ընդունել նյութերը տեղափոխումը "
+"ավարտին հասցնելու համար։"
 
 #: intranet-tmpl/prog/en/modules/help/tools/inventory.tt:3
 #, c-format
@@ -10935,6 +10980,11 @@ msgstr ""
 "Նյութը վերադարձվում է տացքի գրադարան։ Նյութը կզգուշացնի գրադարանավարին որ "
 "իրեն տեղափոխեն այն գրադարան որտեղից դուրս է տրվել "
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:3
+#, c-format
+msgid "Item search fields help"
+msgstr "Նյութի փնտրման դաշտերի օգնություն"
+
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:105
 #, c-format
 msgid "Item should be on the hold shelf waiting for someone else"
@@ -11088,8 +11138,8 @@ msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
 #, c-format
-msgid "Koha database schema"
-msgstr "Կոհա շտեմարանի սխեմա"
+msgid "Koha database schema:"
+msgstr "Կոհա շտեմարանի սխեմա։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/admin-home.tt:9
 #, c-format
@@ -11183,8 +11233,8 @@ msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:12
 #, c-format
-msgid "Koha reports library"
-msgstr "Կոհայի հաշվետվությունների գրադարան"
+msgid "Koha reports library:"
+msgstr "Կոհայի հաշվետվությունների գրադարան։"
 
 #: intranet-tmpl/prog/en/modules/help/about.tt:20
 #, c-format
@@ -11325,6 +11375,11 @@ msgstr "LR = Կորած նյութը վերադարձվել է/վճարվել է
 #, c-format
 msgid "Label Creator"
 msgstr "Պիտակի ստեղծող"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:12
+#, c-format
+msgid "Label is what will appear on the item search page"
+msgstr "Պիտակը դա այն է որ կհայտնվի նյութի փնտրման էջում"
 
 #. %1$s:  fields.008.0.substr( 28, 3 ) 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:128
@@ -11608,10 +11663,20 @@ msgstr "MARC գրառման ենթադաշտեր"
 msgid "MARC export"
 msgstr "ՄԵԸՔ արտահանում"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:14
+#, c-format
+msgid "MARC field allows you to pick which field you'd like to search in"
+msgstr "ՄԵԸՔ դաշտը թույլ է տալիս ընտրելու թե որ դաշտն ես ցանկանում որոնել"
+
 #: intranet-tmpl/prog/en/modules/help/tools/stage-marc-import.tt:3
 #, c-format
 msgid "MARC import"
 msgstr "ՄԵԸՔ ներմուծում"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:16
+#, c-format
+msgid "MARC subfield is the subfield you'd like to search in"
+msgstr "ՄԵԸՔ ենթադաշտը դա ենթադաշտ է որ կցանկանաս փնտրել"
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:50
 #, c-format
@@ -11965,6 +12030,11 @@ msgid ""
 msgstr ""
 "NULL: նշանակում է որ ընթերցողը պատվիրել է առաջին հասանելին, և մենք չենք "
 "ընտրել նյութը"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:10
+#, c-format
+msgid "Name is a field for you to identify the search term"
+msgstr "Անունը քո համար դաշտ է որոնման տերմինը բնութագրելու համար"
 
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:26
 #, c-format
@@ -13187,6 +13257,15 @@ msgstr ""
 "գործիք, որտեղ դու կարող ես ներմուծված կառուցվածքում կատարել ցանկացած "
 "փոփոխություններ։"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:21
+#, c-format
+msgid ""
+"Once your new field is added it will be visible at the top of this page and "
+"on the item search page"
+msgstr ""
+"Հենց քո նար դաշտը կավելացվի այն կլինի տեսանելի այս էջի վերին մասում և նյութի "
+"փնտրման էջում"
+
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:121
 #, c-format
 msgid ""
@@ -13261,6 +13340,9 @@ msgid ""
 "the Transfer button, choose the library you wish to transfer the collection "
 "to and click \"Transfer Collection\"."
 msgstr ""
+"Կամ, \"ավելացրու կամ հեռացրու նյութերը\" էջից, դու կարող ես սեղմել Տեղափոխիր "
+"կոճակը, ընտրես գրադարանը ուր ցանկանում ես տեղափոխել հավաքածուն, և սեղմես "
+"\"Տեղափոխիր հավաքածուն\"։"
 
 #: intranet-tmpl/prog/en/modules/help/acqui/newordersuggestion.tt:3
 #, c-format
@@ -14170,9 +14252,9 @@ msgstr ""
 "ինչպես որ սպասում ես"
 
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Rotating Collections"
-msgstr "Պարբերական հավաքածու"
+msgstr "Շրջաբերական հավաքածուներ"
 
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:5
 #, c-format
@@ -14186,6 +14268,12 @@ msgid ""
 "is part of a rotating collection and which branch it should be sent to if it "
 "is not at the correct one."
 msgstr ""
+"Շրջանառվող հավաքածուները գործիք է գրադարանից գրադարան հաճախ տեղափոխվող "
+"հավաքածուների կառավարման համար։ Սա լրացուցիչ հնարավորություն է պահելու ոչ "
+"միայն տնային գրադարանի նյութերը և ընթացիկ տեղաբաշխումները, բայց նաև "
+"տեղեկատվություն թե ուր պետք է տեղափոխվի։ Երբ շրջանառվող հավաքածուի նյութը "
+"ընդունված է, աշխատակազմը ստանում է զգուշացում որ նյութը շրջանառվող "
+"հավաքածուի մաս է, և թե որ մասնաճյուղ է այն գնալու, եթե այն ճիշտ տեղում չէ։"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:347
 #, c-format
@@ -14620,6 +14708,11 @@ msgstr "Տես լրիվ փաստաթղթերը Նյութի գրառումներ
 msgid "See the full documentation for Item Types in the "
 msgstr "Տես լրիվ փաստաթղթերը Նյութի տեսակների համար "
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
+#, c-format
+msgid "See the full documentation for Item search fields in the "
+msgstr "Տես լրիվ փաստաթղթերը նյութի փնտրման դաշտերի համար "
+
 #: intranet-tmpl/prog/en/modules/help/admin/fieldmapping.tt:23
 #, c-format
 msgid "See the full documentation for Keyword to MARC Mapping in the "
@@ -14854,7 +14947,7 @@ msgid "See the full documentation for Reports in the "
 msgstr "Տես լրիվ փաստաթղթերը Հաշվետվությունների համար "
 
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:35
-#, fuzzy, c-format
+#, c-format
 msgid "See the full documentation for Rotating Collections in the "
 msgstr "Տես լրիվ փաստաթղթերը Շրջաբերական Ցուցակների համար "
 
@@ -15863,13 +15956,6 @@ msgstr "Տեքստ ՀՕԱՔի համար "
 #, c-format
 msgid "Text for librarian "
 msgstr "Տեքստ գրադարանավարի համար "
-
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:12
-#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
-#, c-format
-msgid "The "
-msgstr "Այս "
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:62
 #, c-format
@@ -18888,6 +18974,13 @@ msgstr ""
 "Նոր պրոֆայլ ավելացնելու համար քո էջի վերին մասում սեղմիր 'Պրոֆայլեր' կոճակի "
 "վրա և ընտրի 'Նոր պրոֆաըլ'։"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:7
+#, c-format
+msgid "To add a new search term simply fill in the 'Add a new field' area:"
+msgstr ""
+"Որոնման նոր տերմին ավելացնելու համար պարզապես լրացրու ՛Ավելացրու նոր դաշտ՛ "
+"տիրույթը։"
+
 #: intranet-tmpl/prog/en/modules/help/labels/label-edit-template.tt:9
 #: intranet-tmpl/prog/en/modules/help/labels/label-manage.tt:25
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:9
@@ -18934,6 +19027,10 @@ msgid ""
 "scan or type in the barcode of the item you wish to add to the collection, "
 "and hit Enter or click Submit if necessary."
 msgstr ""
+"Հավաքածուին նյութ ավելացնելու համար, սեղմիր \"Ավելացրու կամ հեռացրու նյութեր"
+"\", որը հավաքածուների ցուցակի հավաքածուի անվանից հետո է։ \"Ավելացրու կամ "
+"հեռացրու նյութեր\" ներքո սքան արա կամ մուտք արա հավաքածուին ավելացվող նյութի "
+"շտրիծ կոդը, և սեղմիր Մուտք կամ սեղմիր Հաստատիր։"
 
 #: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:7
 #, c-format
@@ -19074,6 +19171,12 @@ msgid ""
 "collections home\" to return to the main Rotating Collections management "
 "page (or click Rotating Collections in the sidebar)."
 msgstr ""
+"Նոր շրջաբերական հավաքածու ստեղծելու համար, սեղմիր \"Նոր հավաքածու\" կոճակը, "
+"լրացրու Վերնագիրը և Նկարագրությունը, և սեղմիր Հաստատել։ Հաստատումից հետո դու "
+"կտեսնես \"Հավաքածուի անունը հաջողությամբ ավելացվել է\", սեղմիր \"Վերադարձիր "
+"շրջաբերական հավաքածուների տունը\" որպեսզի վերադառնաս հիմնական Շրջաբերական "
+"հավաքածուների կառավարման էջին (կամ կողային տողից սեղմիր Շրջաբերական "
+"հավաքածուները)։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:15
 #, c-format
@@ -19578,6 +19681,14 @@ msgid ""
 "unless you uncheck it, to facilitate quickly removing a number of items at a "
 "time by scanning their barcodes."
 msgstr ""
+"Նյութը հավաքածուից հեռացնելու համար, կամ սեղմիր հավաքածուի ներսում նյութերի "
+"ցանկում շտրիխ կոդերից հետո Հեռացնել կոճակը, կամ ընտրիր \"Հեռացրու նյութը "
+"հավաքածուից\" վանդակը, որը հաջորդում է շտրիխ կոդի տեքստի վանդակին "
+"\"Ավելացրու կամ հեռացրու նյութերը\" ներքո, և սքան արա կամ մուտքագրի շտրիխ "
+"կոդը, սեղմելով Հաստատիր կամ Մուտք։ Նկատի առ։ \"Հեռացրու նյութը հավաքածուից\" "
+"վանդակը կմնա ընտրված այնքան ժամանակ քանի դեռ դու գտնվում ես \"Ավելացրու կամ "
+"հեռացրու նյութերը\" էջում, մինչև այն հետ չընտրես, որպեսզի սկսես նյութերի "
+"արագ հեռացումը դրանց շտրիխ կոդերը սքանավորելով։"
 
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:7
 #, c-format
@@ -19842,7 +19953,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:17
 #, c-format
 msgid "Transfer a Rotating Collection"
-msgstr ""
+msgstr "Տեղափոխիր շրջանառվող հավաքածուն"
 
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:11
 #, c-format
@@ -19856,7 +19967,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:19
 #, c-format
 msgid "Transferring a collection will:"
-msgstr ""
+msgstr "Հավաքածուի տեղափոխումը կհանգեցնի։"
 
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:3
 #, c-format
@@ -20124,6 +20235,19 @@ msgstr ""
 "Օգտագործելով Պատվերների Որոնումը, դու կարող ես փնտրել նյութերի համար որոնք "
 "պատվիրվել են առանց մատակարարի կամ մատակարարի հետ։"
 
+#: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:35
+#, c-format
+msgid ""
+"Using the circulation and fine rules matrix you can define rules that depend "
+"on patron/item type combinations. To set your rules, choose a library from "
+"the pull down (or 'all libraries' if you want to apply these rules to all "
+"libraries)"
+msgstr ""
+"Օգտագործելով տացքի և տուգանքների օրենքների մատրիցան դու կարող ես սահմանել "
+"օրենքները որ կախված են ընթերցողի/նյութի տեսակ համադրումից։ Քո օրենքների "
+"կարգաբերման համար բացվող ընտրացանկից ընտրիր գրադարանը (կամ 'բոլոր "
+"գրադարանները' եթե ցանկանում ես կիրառել այս օրենքները բոլոր գրադարանների վրա)"
+
 #: intranet-tmpl/prog/en/modules/help/tools/batchMod.tt:11
 #, c-format
 msgid ""
@@ -20193,18 +20317,6 @@ msgid ""
 msgstr ""
 "Օգտագործելով տրամադրված ձևը դու կարող ես սահմանել քո պիտակների թերթի կամ "
 "քարտերի ձևաչափը։"
-
-#: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:35
-#, c-format
-msgid ""
-"Using the issuing rules matrix you can define rules that depend on patron/"
-"item type combinations. To set your rules, choose a library from the pull "
-"down (or 'all libraries' if you want to apply these rules to all libraries)"
-msgstr ""
-"Օգտագործելով տրման օրենքների մատրիցան դու կարող ես սահմանել օրենքները որ "
-"կախված են ընթերցողի/նյութի տեսակ համադրումից։ Քո օրենքների կարգաբերման համար "
-"բացվող ընտրացանկից ընտրիր գրադարանը (կամ 'բոլոր գրադարանները' եթե դու "
-"ցանկանում ես կիրառել այս օրենքները բոլոր գրադարանների վրա)"
 
 #: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:14
 #, c-format
@@ -21435,7 +21547,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:25
 #, c-format
 msgid "You can transfer a collection in one of two ways:"
-msgstr ""
+msgstr "Դու կարող ես տեղափոխել հավաքածուն երկու եղանակով։"
 
 #: intranet-tmpl/prog/en/modules/help/tools/batch_record_modification.tt:13
 #, c-format
@@ -22497,7 +22609,7 @@ msgstr "արագ_քարտարգրում "
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:35
 #, c-format
-msgid "fic:0 Non fiction"
+msgid "fic:0 Non-fiction"
 msgstr "fic:0 Ոչ գեղարվեստական"
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:34
@@ -22801,6 +22913,7 @@ msgstr "Կառավարում "
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:22
@@ -23209,6 +23322,15 @@ msgstr "schedule_tasks "
 msgid "serials "
 msgstr "պարբերականներ "
 
+#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
+#, c-format
+msgid ""
+"shows the entire Koha database structure so that you can write effective SQL "
+"Queries"
+msgstr ""
+"ցույց է տալիս ողջ Կոհա շտեմարանի կառուցվածքը այնպես որ դու կարող ես գրել "
+"արդյունավետ SQL հարցումներ"
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:122
 #, c-format
 msgid "staffaccess "
@@ -23228,14 +23350,6 @@ msgstr "Գերգրադարանավար "
 #, c-format
 msgid "superserials "
 msgstr "գերպարբերականներ "
-
-#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
-#, c-format
-msgid ""
-"system preference must be set to \"Don't automatically transfer items to "
-"their home library when they are returned\" for Rotating Collections to "
-"function properly."
-msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:96
 #: intranet-tmpl/prog/en/modules/help/admin/marc_subfields_structure.tt:42
@@ -23335,15 +23449,6 @@ msgstr "ինչը հայտնվում է ենթադաշտի առաջ գրադար�
 #, c-format
 msgid "will be stored into the following structure:"
 msgstr "կհիշվի հետևյալ կառուցվածքում"
-
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#, c-format
-msgid ""
-"will help you learn the Koha database structure so that you can write "
-"effective SQL Queries"
-msgstr ""
-"կօգնի քեզ սովորելու Կոհայի շտեմարանի կառուցվածքը այնպես որ դու կարող ես գրել "
-"արդյունավետ SQL հարցումներ"
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:142
 #, c-format

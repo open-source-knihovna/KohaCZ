@@ -5,14 +5,14 @@ use lib qw( ./lib );
 use Plack::Middleware::Debug;
 use Plack::App::Directory;
 
-use CGI qw(-utf8 ); # we will loose -utf8 under plack
+use CGI qw(-utf8 ); # we will lose -utf8 under plack
 {
     no warnings 'redefine';
     my $old_new = \&CGI::new;
     *CGI::new = sub {
         my $q = $old_new->( @_ );
         $CGI::PARAM_UTF8 = 1;
-        C4::Context->clear_syspref_cache();
+        C4::Context->clear_syspref_L1_cache();
         return $q;
     };
 }
@@ -51,8 +51,6 @@ use C4::Tags; # FIXME
 
 use Devel::Size 0.77; # 0.71 doesn't work for Koha
 my $watch_capture_regex = '(C4|Koha)';
-
-C4::Context->disable_syspref_cache;
 
 sub watch_for_size {
 	my @watch =

@@ -10,6 +10,7 @@ use Test::MockModule;
 use List::MoreUtils qw/all any none/;
 use Test::More tests => 13;
 use Test::Warn;
+use t::lib::Mocks;
 use C4::Members;
 use Koha::AuthUtils qw/hash_password/;
 
@@ -36,7 +37,7 @@ $dbh->{RaiseError} = 1;
         # we don't need to bother about permissions for this test
         my $flags = {
             superlibrarian    => 1, acquisition       => 0,
-            borrow            => 0, borrowers         => 0,
+            borrowers         => 0,
             catalogue         => 1, circulate         => 0,
             coursereserves    => 0, editauthorities   => 0,
             editcatalogue     => 0, management        => 0,
@@ -61,10 +62,10 @@ $dbh->{RaiseError} = 1;
     $auth->mock( 'checkauth', \&MockedCheckauth );
 
     # Make sure 'EnableOpacSearchHistory' is set
-    C4::Context->set_preference('EnableOpacSearchHistory',1);
+    t::lib::Mocks::mock_preference('EnableOpacSearchHistory',1);
     # Enable es-ES for the OPAC and staff interfaces
-    C4::Context->set_preference('opaclanguages','en,es-ES');
-    C4::Context->set_preference('language','en,es-ES');
+    t::lib::Mocks::mock_preference('opaclanguages','en,es-ES');
+    t::lib::Mocks::mock_preference('language','en,es-ES');
 
     # we need a session cookie
     $ENV{"SERVER_PORT"} = 80;

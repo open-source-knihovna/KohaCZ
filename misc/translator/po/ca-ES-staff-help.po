@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Koha 3.10\n"
-"POT-Creation-Date: 2016-02-14 14:01-0300\n"
-"PO-Revision-Date: 2014-06-04 08:09+0000\n"
+"POT-Creation-Date: 2016-05-17 08:05-0300\n"
+"PO-Revision-Date: 2016-03-23 09:15+0000\n"
 "Last-Translator: hagud <hagud@orex.es>\n"
 "Language-Team: Koha Translation Team <koha-translate@lists.koha-community."
 "org>\n"
@@ -11,9 +11,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Pootle 2.5.0\n"
+"X-Generator: Pootle 2.5.1.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-POOTLE-MTIME: 1401869342.0\n"
+"X-POOTLE-MTIME: 1458724545.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -620,6 +620,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:22
@@ -797,6 +798,14 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:35
 #, c-format
 msgid "(online)."
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
+#, c-format
+msgid ""
+"(system preference) must be set to \"Don't automatically transfer items to "
+"their home library when they are returned\" for Rotating Collections to "
+"function properly."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/offline_circ/list.tt:5
@@ -1408,9 +1417,9 @@ msgid "Access to the Batch Item Modification Tool"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:468
-#, fuzzy, c-format
+#, c-format
 msgid "Access to the Batch Record Deletion Tool"
-msgstr "%s%s amb el comentari"
+msgstr "Accés a l'eina d' eliminacio de registres en lot"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:444
 #, c-format
@@ -1425,7 +1434,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:456
 #, fuzzy, c-format
 msgid "Access to the Comments Tool"
-msgstr "%s%s amb el comentari"
+msgstr "Accés e l'eina de moderació de comentaris"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:402
 #, c-format
@@ -1648,9 +1657,9 @@ msgid "Add or modify patrons"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/memberentry.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Add patrons"
-msgstr "Afegir a %s"
+msgstr "Afegir usuaris"
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:37
 #, c-format
@@ -2419,6 +2428,13 @@ msgstr ""
 msgid "Author"
 msgstr "Autor"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:18
+#, c-format
+msgid ""
+"Authorised values category can be used to turn this search field in to a "
+"pull down instead of a free text field"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/authorities/detail.tt:3
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities-home.tt:3
 #, fuzzy, c-format
@@ -2495,9 +2511,9 @@ msgid "AutomaticItemReturn"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/reports/issues_avg_stats.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Average loan time"
-msgstr "valoració mitja: %s (%s vots)"
+msgstr "Durada mitja dels préstecs"
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:180
 #, c-format
@@ -2912,7 +2928,7 @@ msgstr "Cancel·lar"
 #: intranet-tmpl/prog/en/modules/help/admin/admin-home.tt:25
 #, fuzzy, c-format
 msgid "Catalog"
-msgstr "Catàlegs"
+msgstr "Catàleg"
 
 #: intranet-tmpl/prog/en/modules/help/reports/manager.tt:3
 #, fuzzy, c-format
@@ -3168,9 +3184,9 @@ msgid "Checkout History"
 msgstr "&#8674; Historial de préstecs"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:124
-#, fuzzy, c-format
+#, c-format
 msgid "Checkouts Per Patron"
-msgstr "Préstecs de %s"
+msgstr "Préstecs per usuari"
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:15
 #, c-format
@@ -3838,9 +3854,9 @@ msgid "Click on the link 'Add a new set'"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/course_reserves/add_items.tt:7
-#, fuzzy, c-format
+#, c-format
 msgid "Click on the title of the course you would like to add materials to."
-msgstr "%s %s Selecciona el sistema que vols per autenticar-te:"
+msgstr "Selecciona el nom del curs al que vols afegir exemplars."
 
 #: intranet-tmpl/prog/en/modules/help/members/pay.tt:27
 #: intranet-tmpl/prog/en/modules/help/members/paycollect.tt:27
@@ -4466,7 +4482,7 @@ msgstr "Elimina el llistat"
 #: intranet-tmpl/prog/en/modules/help/admin/itemtypes.tt:54
 #, fuzzy, c-format
 msgid "Deleting Item Types"
-msgstr "%sCol·lecció%sTipus d'ítem%s"
+msgstr "Eliminant tipus d'exemplar"
 
 #: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, fuzzy, c-format
@@ -5432,9 +5448,9 @@ msgid "First choose the type of credit you'd like to apply"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/maninvoice.tt:7
-#, fuzzy, c-format
+#, c-format
 msgid "First choose the type of invoice you would like to create "
-msgstr "%s %s Selecciona el sistema que vols per autenticar-te: "
+msgstr "Primer sel·leciona el tipus de factura que vols crear "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:40
 #, c-format
@@ -5729,6 +5745,13 @@ msgid ""
 "From here you can 'Approve' and apply the changes to the patron record, "
 "'Delete' and remove the changes or 'Ignore' and keep the changes pending to "
 "review later."
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:5
+#, c-format
+msgid ""
+"From here you can add custom search fields to the item search option in the "
+"staff client."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbooks.tt:7
@@ -8915,9 +8938,9 @@ msgid "Item Types"
 msgstr "Tipus d'ítem"
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:106
-#, fuzzy, c-format
+#, c-format
 msgid "Item already checked out to this patron"
-msgstr "%sJa tens aquest ítem en préstec.%s"
+msgstr "Aquest exemplar ja està prestat a aquest usuari"
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:120
 #, c-format
@@ -8960,14 +8983,14 @@ msgid ""
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:108
-#, fuzzy, c-format
+#, c-format
 msgid "Item not for loan"
-msgstr "Aquest exemplar no pot sortir en préstec. %s"
+msgstr "Exemplar exclòs de préstec"
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:104
-#, fuzzy, c-format
+#, c-format
 msgid "Item on hold for someone else"
-msgstr "Aquest exemplar està reservat per un altre usuari. %s"
+msgstr "Aquest exemplar està reservat per un altre usuari"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:112
 #, c-format
@@ -8991,6 +9014,11 @@ msgstr ""
 msgid ""
 "Item returns to issuing library: The item will prompt the librarian to "
 "transfer the item back to the library where it was checked out "
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:3
+#, c-format
+msgid "Item search fields help"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:105
@@ -9054,9 +9082,9 @@ msgstr ""
 
 #. %1$s:  helpVersion 
 #: intranet-tmpl/prog/en/modules/help/nohelp.tt:5
-#, fuzzy, c-format
+#, c-format
 msgid "Koha %s manual"
-msgstr "Semestral"
+msgstr "Manual Koha %s"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:130
 #, fuzzy, c-format
@@ -9116,7 +9144,7 @@ msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
 #, c-format
-msgid "Koha database schema"
+msgid "Koha database schema:"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/admin-home.tt:9
@@ -9186,7 +9214,7 @@ msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:12
 #, fuzzy, c-format
-msgid "Koha reports library"
+msgid "Koha reports library:"
 msgstr "Etiquetes d'aquesta biblioteca:"
 
 #: intranet-tmpl/prog/en/modules/help/about.tt:20
@@ -9306,11 +9334,16 @@ msgstr ""
 msgid "Label Creator"
 msgstr ""
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:12
+#, c-format
+msgid "Label is what will appear on the item search page"
+msgstr ""
+
 #. %1$s:  fields.008.0.substr( 28, 3 ) 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:128
-#, fuzzy, c-format
+#, c-format
 msgid "Language=%s "
-msgstr "Idioma"
+msgstr "Idioma=%s "
 
 #: intranet-tmpl/prog/en/modules/help/labels/label-home.tt:36
 #: intranet-tmpl/prog/en/modules/help/labels/label-manage.tt:5
@@ -9556,10 +9589,20 @@ msgstr "Camps codificats"
 msgid "MARC export"
 msgstr "Vista MARC"
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:14
+#, c-format
+msgid "MARC field allows you to pick which field you'd like to search in"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/tools/stage-marc-import.tt:3
 #, fuzzy, c-format
 msgid "MARC import"
 msgstr "Vista MARC"
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:16
+#, c-format
+msgid "MARC subfield is the subfield you'd like to search in"
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:50
 #, c-format
@@ -9748,9 +9791,9 @@ msgid "Matchpoints (just the one):"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/authorities/merge.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Merge authorities"
-msgstr "Busca els %s"
+msgstr "Combinar autoritats"
 
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:52
 #, fuzzy, c-format
@@ -9763,9 +9806,9 @@ msgid "Merging items"
 msgstr "Torna l'ítem"
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbiblio.tt:89
-#, fuzzy, c-format
+#, c-format
 msgid "Merging records"
-msgstr "%s registres"
+msgstr "Combinant registres"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:40
 #, c-format
@@ -9773,9 +9816,9 @@ msgid "Message Subject is what will appear in the subject line of the email"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:455
-#, fuzzy, c-format
+#, c-format
 msgid "Moderate patron comments"
-msgstr "Comentaris d'usuari sobre %s"
+msgstr "Moderar comentaris d'usuaris"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:461
 #, c-format
@@ -9880,6 +9923,11 @@ msgstr ""
 msgid ""
 "NULL: means the patron requested the 1st available, and we haven't chosen "
 "the item"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:10
+#, c-format
+msgid "Name is a field for you to identify the search term"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/virtualshelves/shelves.tt:26
@@ -10123,7 +10171,7 @@ msgstr "Notes:"
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:21
 #, fuzzy, c-format
 msgid "Note: "
-msgstr "Notes:"
+msgstr "Notes: "
 
 #: intranet-tmpl/prog/en/modules/help/members/discharge.tt:9
 #: intranet-tmpl/prog/en/modules/help/members/moremember.tt:79
@@ -10853,6 +10901,13 @@ msgid ""
 "where you can make any changes you need to the framework you imported."
 msgstr ""
 
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:21
+#, c-format
+msgid ""
+"Once your new field is added it will be visible at the top of this page and "
+"on the item search page"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:121
 #, c-format
 msgid ""
@@ -11116,9 +11171,9 @@ msgid "Patron files"
 msgstr "al fitxer"
 
 #: intranet-tmpl/prog/en/modules/help/members/boraccount.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Patron fines"
-msgstr "a %s sancions"
+msgstr "Sancions a l'usuari"
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:79
 #, fuzzy, c-format
@@ -11434,9 +11489,9 @@ msgid "Private list: Is managed by you and can be seen only by you"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:30
-#, fuzzy, c-format
+#, c-format
 msgid "Professional "
-msgstr "%s Crítics professionals "
+msgstr "Professional "
 
 #: intranet-tmpl/prog/en/modules/help/members/memberentry.tt:12
 #, c-format
@@ -11759,9 +11814,9 @@ msgid ""
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:347
-#, fuzzy, c-format
+#, c-format
 msgid "Routing"
-msgstr "valoració: %s"
+msgstr "Encaminament"
 
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:3
 #: intranet-tmpl/prog/en/modules/help/members/moremember.tt:28
@@ -11891,9 +11946,9 @@ msgstr "Busca"
 
 #: intranet-tmpl/prog/en/modules/help/authorities/detail.tt:7
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities-home.tt:7
-#, fuzzy, c-format
+#, c-format
 msgid "Searching Authorities"
-msgstr "Busca els %s"
+msgstr "Cercant Autoritats"
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:13
 #, c-format
@@ -12178,6 +12233,11 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/admin/itemtypes.tt:60
 #, c-format
 msgid "See the full documentation for Item Types in the "
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
+#, c-format
+msgid "See the full documentation for Item search fields in the "
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/fieldmapping.tt:23
@@ -13146,9 +13206,9 @@ msgstr "Matèria"
 #. %4$s:  END 
 #. %5$s:  END 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:123
-#, fuzzy, c-format
+#, c-format
 msgid "Subject=%s%s%s%s%s "
-msgstr "Matèria: %s "
+msgstr "Matèria=%s%s%s%s%s "
 
 #. INPUT type=submit name=submit
 #: intranet-tmpl/prog/en/modules/help/edithelp.tt:36
@@ -13330,13 +13390,6 @@ msgstr ""
 #, c-format
 msgid "Text for librarian "
 msgstr ""
-
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:12
-#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
-#, fuzzy, c-format
-msgid "The "
-msgstr "El llistat "
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:62
 #, c-format
@@ -15591,9 +15644,9 @@ msgstr "Títol"
 #. %2$s:  fields.245.0.a.0 
 #. %3$s:  END 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:133
-#, fuzzy, c-format
+#, c-format
 msgid "Title=%s%s%s "
-msgstr "Notes: %s "
+msgstr "Títol=%s%s%s "
 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:58
 #, c-format
@@ -15715,6 +15768,11 @@ msgstr ""
 msgid ""
 "To add a new profile, you want to click on the 'Profiles' button at the top "
 "of your page and choose 'New Profile'"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:7
+#, c-format
+msgid "To add a new search term simply fill in the 'Add a new field' area:"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/labels/label-edit-template.tt:9
@@ -16707,6 +16765,15 @@ msgid ""
 "or without the vendor."
 msgstr ""
 
+#: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:35
+#, c-format
+msgid ""
+"Using the circulation and fine rules matrix you can define rules that depend "
+"on patron/item type combinations. To set your rules, choose a library from "
+"the pull down (or 'all libraries' if you want to apply these rules to all "
+"libraries)"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/tools/batchMod.tt:11
 #, c-format
 msgid ""
@@ -16762,14 +16829,6 @@ msgid ""
 "labels or cards."
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:35
-#, c-format
-msgid ""
-"Using the issuing rules matrix you can define rules that depend on patron/"
-"item type combinations. To set your rules, choose a library from the pull "
-"down (or 'all libraries' if you want to apply these rules to all libraries)"
-msgstr ""
-
 #: intranet-tmpl/prog/en/modules/help/tools/koha-news.tt:14
 #, c-format
 msgid ""
@@ -16819,9 +16878,9 @@ msgid "Values that are pre-configured in Koha are:"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Vendor Contracts"
-msgstr "%s Extractes de vídeo"
+msgstr "Contractes del proveïdor"
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:13
 #, c-format
@@ -16834,9 +16893,9 @@ msgid "Vendors"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/systempreferences.tt:9
-#, fuzzy, c-format
+#, c-format
 msgid "Version"
-msgstr "Publicació periòdica: %s"
+msgstr "Versió"
 
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:46
 #, c-format
@@ -18642,7 +18701,7 @@ msgstr "catàleg "
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:35
 #, fuzzy, c-format
-msgid "fic:0 Non fiction"
+msgid "fic:0 Non-fiction"
 msgstr "No ficció"
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:34
@@ -18658,7 +18717,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "here"
-msgstr ""
+msgstr "aquí"
 
 #: intranet-tmpl/prog/en/modules/help/admin/preferences.tt:19
 #, c-format
@@ -18922,6 +18981,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:200
 #: intranet-tmpl/prog/en/modules/help/admin/aqcontract.tt:19
 #: intranet-tmpl/prog/en/modules/help/admin/branch_transfer_limits.tt:19
+#: intranet-tmpl/prog/en/modules/help/admin/items_search_fields.tt:23
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:91
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:21
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:22
@@ -19320,6 +19380,13 @@ msgstr ""
 msgid "serials "
 msgstr "publicació periòdica "
 
+#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
+#, c-format
+msgid ""
+"shows the entire Koha database structure so that you can write effective SQL "
+"Queries"
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:122
 #, c-format
 msgid "staffaccess "
@@ -19339,14 +19406,6 @@ msgstr ""
 #, fuzzy, c-format
 msgid "superserials "
 msgstr "publicació periòdica "
-
-#: intranet-tmpl/prog/en/modules/help/rotating_collections/rotatingCollections.tt:7
-#, c-format
-msgid ""
-"system preference must be set to \"Don't automatically transfer items to "
-"their home library when they are returned\" for Rotating Collections to "
-"function properly."
-msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:96
 #: intranet-tmpl/prog/en/modules/help/admin/marc_subfields_structure.tt:42
@@ -19439,13 +19498,6 @@ msgstr ""
 #, fuzzy, c-format
 msgid "will be stored into the following structure:"
 msgstr "Registre amb codi de barres coincident"
-
-#: intranet-tmpl/prog/en/modules/help/reports/reports-home.tt:11
-#, c-format
-msgid ""
-"will help you learn the Koha database structure so that you can write "
-"effective SQL Queries"
-msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:142
 #, c-format

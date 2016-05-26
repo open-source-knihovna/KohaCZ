@@ -1452,47 +1452,47 @@ sub GetLoanLength {
     my $loanlength = $sth->fetchrow_hashref;
 
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( $borrowertype, '*', $branchcode );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( '*', $itemtype, $branchcode );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( '*', '*', $branchcode );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( $borrowertype, $itemtype, '*' );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( $borrowertype, '*', '*' );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( '*', $itemtype, '*' );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( '*', '*', '*' );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
-    # if no rule is set => 21 days (hardcoded)
+    # if no rule is set => 0 day (hardcoded)
     return {
-        issuelength => 21,
-        renewalperiod => 21,
+        issuelength => 0,
+        renewalperiod => 0,
         lengthunit => 'days',
     };
 
@@ -3942,7 +3942,8 @@ sub GetAgeRestriction {
             }
 
             #Get how many days the borrower has to reach the age restriction
-            my $daysToAgeRestriction = Date_to_Days(@alloweddate) - Date_to_Days(Today);
+            my @Today = split /-/, DateTime->today->ymd();
+            my $daysToAgeRestriction = Date_to_Days(@alloweddate) - Date_to_Days(@Today);
             #Negative days means the borrower went past the age restriction age
             return ($restriction_year, $daysToAgeRestriction);
         }

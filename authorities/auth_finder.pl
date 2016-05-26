@@ -64,10 +64,10 @@ foreach my $thisauthtype ( keys %$authtypes ) {
 
 # If search form posted
 if ( $op eq "do_search" ) {
-    my @marclist  = $query->param('marclist');
-    my @and_or    = $query->param('and_or');
-    my @excluding = $query->param('excluding');
-    my @operator  = $query->param('operator');
+    my @marclist  = $query->multi_param('marclist');
+    my @and_or    = $query->multi_param('and_or');
+    my @excluding = $query->multi_param('excluding');
+    my @operator  = $query->multi_param('operator');
     my @value     = (
         $query->param('value_mainstr') || undef,
         $query->param('value_main')    || undef,
@@ -93,7 +93,7 @@ if ( $op eq "do_search" ) {
     my @field_data = ();
 
 # get marclist again, as the previous one has been modified by catalogsearch (mainentry replaced by field name)
-    my @marclist_ini = $query->param('marclist');
+    my @marclist_ini = $query->multi_param('marclist');
     for ( my $i = 0 ; $i <= $#marclist ; $i++ ) {
         push @field_data, { term => "marclist",  val => $marclist_ini[$i] };
         push @field_data, { term => "and_or",    val => $and_or[$i] };
@@ -102,13 +102,13 @@ if ( $op eq "do_search" ) {
     }
 
     push @field_data,
-      { term => "value_mainstr", val => $query->param('value_mainstr') || "" };
+      { term => "value_mainstr", val => scalar $query->param('value_mainstr') || "" };
     push @field_data,
-      { term => "value_main", val => $query->param('value_main') || "" };
+      { term => "value_main", val => scalar $query->param('value_main') || "" };
     push @field_data,
-      { term => "value_any", val => $query->param('value_any') || "" };
+      { term => "value_any", val => scalar $query->param('value_any') || "" };
     push @field_data,
-      { term => "value_match", val => $query->param('value_match') || "" };
+      { term => "value_match", val => scalar $query->param('value_match') || "" };
 
     my @numbers = ();
     if ( $total > $resultsperpage ) {
@@ -167,10 +167,10 @@ else {
 
 $template->param(
     op            => $op,
-    value_mainstr => $query->param('value_mainstr') || '',
-    value_main    => $query->param('value_main') || '',
-    value_any     => $query->param('value_any') || '',
-    value_match   => $query->param('value_match') || '',
+    value_mainstr => scalar $query->param('value_mainstr') || '',
+    value_main    => scalar $query->param('value_main') || '',
+    value_any     => scalar $query->param('value_any') || '',
+    value_match   => scalar $query->param('value_match') || '',
     tagid         => $tagid,
     index         => $index,
     authtypesloop => \@authtypesloop,

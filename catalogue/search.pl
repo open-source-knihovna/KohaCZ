@@ -165,7 +165,7 @@ my $cgi = new CGI;
 # decide which template to use
 my $template_name;
 my $template_type;
-my @params = $cgi->param("limit");
+my @params = $cgi->multi_param("limit");
 if ((@params>=1) || ($cgi->param("q")) || ($cgi->param('multibranchlimit')) || ($cgi->param('limit-yr')) ) {
     $template_name = 'catalogue/results.tt';
 }
@@ -383,7 +383,7 @@ if (   C4::Context->preference('defaultSortField')
       . C4::Context->preference('defaultSortOrder');
 }
 
-@sort_by = $cgi->param('sort_by');
+@sort_by = $cgi->multi_param('sort_by');
 $sort_by[0] = $default_sort_by unless $sort_by[0];
 foreach my $sort (@sort_by) {
     $template->param($sort => 1) if $sort;
@@ -391,7 +391,7 @@ foreach my $sort (@sort_by) {
 $template->param('sort_by' => $sort_by[0]);
 
 # Use the servers defined, or just search our local catalog(default)
-my @servers = $cgi->param('server');
+my @servers = $cgi->multi_param('server');
 unless (@servers) {
     #FIXME: this should be handled using Context.pm
     @servers = ("biblioserver");
@@ -399,11 +399,11 @@ unless (@servers) {
 }
 # operators include boolean and proximity operators and are used
 # to evaluate multiple operands
-my @operators = map uri_unescape($_), $cgi->param('op');
+my @operators = map uri_unescape($_), $cgi->multi_param('op');
 
 # indexes are query qualifiers, like 'title', 'author', etc. They
 # can be single or multiple parameters separated by comma: kw,right-Truncation 
-my @indexes = map uri_unescape($_), $cgi->param('idx');
+my @indexes = map uri_unescape($_), $cgi->multi_param('idx');
 
 # if a simple index (only one)  display the index used in the top search box
 if ($indexes[0] && (!$indexes[1] || $params->{'scan'})) {
@@ -413,11 +413,11 @@ if ($indexes[0] && (!$indexes[1] || $params->{'scan'})) {
 }
 
 # an operand can be a single term, a phrase, or a complete ccl query
-my @operands = map uri_unescape($_), $cgi->param('q');
+my @operands = map uri_unescape($_), $cgi->multi_param('q');
 
 # limits are use to limit to results to a pre-defined category such as branch or language
-my @limits = map uri_unescape($_), $cgi->param('limit');
-my @nolimits = map uri_unescape($_), $cgi->param('nolimit');
+my @limits = map uri_unescape($_), $cgi->multi_param('limit');
+my @nolimits = map uri_unescape($_), $cgi->multi_param('nolimit');
 my %is_nolimit = map { $_ => 1 } @nolimits;
 @limits = grep { not $is_nolimit{$_} } @limits;
 

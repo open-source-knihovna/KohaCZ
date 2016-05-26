@@ -3,16 +3,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-05-14 17:47+0200\n"
-"PO-Revision-Date: 2013-06-08 09:31+0000\n"
-"Last-Translator: Md. <mamun.lis@gmail.com>\n"
+"PO-Revision-Date: 2016-03-29 16:26+0000\n"
+"Last-Translator: sujan <sujan.lib@gmail.com>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
 "Language: bn\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Pootle 2.5.0\n"
-"X-POOTLE-MTIME: 1370683862.0\n"
+"X-Generator: Pootle 2.5.1.1\n"
+"X-POOTLE-MTIME: 1459268773.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -20,7 +20,7 @@ msgstr "একুইজিসনস.পছন্দ করুন"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref Policy"
-msgstr "একুইজিসনস.পছন্দ করুন নীতি  বা কর্মপদধতি"
+msgstr "একুইজিসনস.পছন্দ করুন নীতি  বা কর্মপদ্ধতি"
 
 # Acquisitions > Printing
 msgid "acquisitions.pref Printing"
@@ -28,7 +28,7 @@ msgstr "acquisitions.pref Printing"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqCreateItem# Create an item when"
-msgstr ""
+msgstr "সংগ্রহ.পূর্বপদ#সংগ্রহ আইটেম তৈরি করুন# একটি আইটেম যখন তৈরি করুন"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqCreateItem# cataloging the record."
@@ -2229,6 +2229,18 @@ msgstr ""
 
 # Circulation > Self Checkout
 msgid "circulation.pref#SelfCheckoutByLogin# Username and Password"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Do not show"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Show"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# all items in the \"Checked-in items\" list, even items that were not checked out."
 msgstr ""
 
 # Circulation > Self Checkout
@@ -4464,7 +4476,7 @@ msgid "opac.pref#OpacPublic# Enable"
 msgstr ""
 
 # OPAC > Appearance
-msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
+msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
 msgstr ""
 
 # OPAC > Policy
@@ -5168,7 +5180,7 @@ msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
 msgstr ""
 
 # Patrons > General
-msgid "patrons.pref#StatisticsFields# (separate fields with |)"
+msgid "patrons.pref#StatisticsFields# (separate fields with |, without trailing |). Default if empty: location|itype|ccode"
 msgstr ""
 
 # Patrons > General
@@ -5228,7 +5240,7 @@ msgid "patrons.pref#intranetreadinghistory# Don't allow"
 msgstr ""
 
 # Patrons > General
-msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (it is stored regardless)."
+msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
 msgstr ""
 
 # Patrons > General

@@ -3,15 +3,15 @@ msgstr ""
 "Project-Id-Version: KOHA 3.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-06-15 16:43+0000\n"
-"PO-Revision-Date: 2016-02-04 18:34+0000\n"
-"Last-Translator: siracide <paul.vilhan@gmail.com>\n"
+"PO-Revision-Date: 2016-05-17 12:06+0200\n"
+"Last-Translator: Paul <paul.vilhan@gmail.com>\n"
 "Language-Team: Paul Vilhan\n"
 "Language: sk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Pootle 2.5.1.1\n"
+"X-Generator: Virtaal 0.7.1\n"
 "X-Poedit-SourceCharset: utf-8\n"
 "X-POOTLE-MTIME: 1454610864.000000\n"
 
@@ -2231,6 +2231,18 @@ msgstr "Čitatelia sa musia prihlásiť do samoobslužného výpožičného syst
 # Circulation > Self Checkout
 msgid "circulation.pref#SelfCheckoutByLogin# Username and Password"
 msgstr "užívateľským menom a heslom"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Do not show"
+msgstr "Nezobrazovať"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Show"
+msgstr "Zobrazovať"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# all items in the \"Checked-in items\" list, even items that were not checked out."
+msgstr "všetky exempláre v zozname \"Vrátených exemplárov\", vrátane nevypožičaných exemplárov."
 
 # Circulation > Self Checkout
 msgid "circulation.pref#ShowPatronImageInWebBasedSelfCheck# Don't show"
@@ -4465,8 +4477,8 @@ msgid "opac.pref#OpacPublic# Enable"
 msgstr "Sprístupniť"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
-msgstr "Koha OPAC pre verejnosť. Súkromný OPAC vyžaduje overenie pred prístupom do OPACu."
+msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalAllowed# Allow"
@@ -5169,8 +5181,8 @@ msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
 msgstr "pre posielanie SMS správ."
 
 # Patrons > General
-msgid "patrons.pref#StatisticsFields# (separate fields with |)"
-msgstr "(oddeliť polia pomocou |)"
+msgid "patrons.pref#StatisticsFields# (separate fields with |, without trailing |). Default if empty: location|itype|ccode"
+msgstr "(separate fields with |, without trailing |). Predvolene je prázdne: location|itype|ccode"
 
 # Patrons > General
 msgid "patrons.pref#StatisticsFields# Show the following fields from the items database table as columns on the statistics tab on the patron record: "
@@ -5229,8 +5241,8 @@ msgid "patrons.pref#intranetreadinghistory# Don't allow"
 msgstr "Nepovoliť"
 
 # Patrons > General
-msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (it is stored regardless)."
-msgstr "knihovníkom prístup do výpisu výpožičiek čitateľa (ktorý sa jednako ukladá)."
+msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
+msgstr "zamestnancom prístup k výpisu výpožičiek čitateľov (čitateľský výpis sa stále ukladá, či už majú zamestnanci prístup alebo nie)."
 
 # Patrons > General
 msgid "patrons.pref#minPasswordLength# Login passwords for staff and patrons must be at least"

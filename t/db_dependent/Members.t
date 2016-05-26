@@ -17,12 +17,13 @@
 
 use Modern::Perl;
 
-use Test::More tests => 76;
+use Test::More tests => 78;
 use Test::MockModule;
 use Data::Dumper;
 use C4::Context;
 use Koha::Database;
 
+use t::lib::Mocks;
 use t::lib::TestBuilder;
 
 BEGIN {
@@ -130,7 +131,7 @@ ok ( $changedmember->{firstname} eq $CHANGED_FIRSTNAME &&
      , "Member Changed")
   or diag("Mismatching member details: ".Dumper($member, $changedmember));
 
-C4::Context->set_preference( 'CardnumberLength', '' );
+t::lib::Mocks::mock_preference( 'CardnumberLength', '' );
 C4::Context->clear_syspref_cache();
 
 my $checkcardnum=C4::Members::checkcardnumber($CARDNUMBER, "");
@@ -139,7 +140,7 @@ is ($checkcardnum, "1", "Card No. in use");
 $checkcardnum=C4::Members::checkcardnumber($IMPOSSIBLE_CARDNUMBER, "");
 is ($checkcardnum, "0", "Card No. not used");
 
-C4::Context->set_preference( 'CardnumberLength', '4' );
+t::lib::Mocks::mock_preference( 'CardnumberLength', '4' );
 C4::Context->clear_syspref_cache();
 
 $checkcardnum=C4::Members::checkcardnumber($IMPOSSIBLE_CARDNUMBER, "");
@@ -147,13 +148,13 @@ is ($checkcardnum, "2", "Card number is too long");
 
 
 
-C4::Context->set_preference( 'AutoEmailPrimaryAddress', 'OFF' );
+t::lib::Mocks::mock_preference( 'AutoEmailPrimaryAddress', 'OFF' );
 C4::Context->clear_syspref_cache();
 
 my $notice_email = GetNoticeEmailAddress($member->{'borrowernumber'});
 is ($notice_email, $EMAIL, "GetNoticeEmailAddress returns correct value when AutoEmailPrimaryAddress is off");
 
-C4::Context->set_preference( 'AutoEmailPrimaryAddress', 'emailpro' );
+t::lib::Mocks::mock_preference( 'AutoEmailPrimaryAddress', 'emailpro' );
 C4::Context->clear_syspref_cache();
 
 $notice_email = GetNoticeEmailAddress($member->{'borrowernumber'});
@@ -272,6 +273,19 @@ $borrowernumber = AddMember( %data );
 $borrower = GetMember( borrowernumber => $borrowernumber );
 is( $borrower->{userid}, $data{userid}, 'AddMember should insert the given userid' );
 
+subtest 'ModMember should not update userid if not true' => sub {
+    plan tests => 3;
+    ModMember( borrowernumber => $borrowernumber, firstname => 'Tomas', userid => '' );
+    $borrower = GetMember( borrowernumber => $borrowernumber );
+    is ( $borrower->{userid}, $data{userid}, 'ModMember should not update the userid with an empty string' );
+    ModMember( borrowernumber => $borrowernumber, firstname => 'Tomas', userid => 0 );
+    $borrower = GetMember( borrowernumber => $borrowernumber );
+    is ( $borrower->{userid}, $data{userid}, 'ModMember should not update the userid with an 0');
+    ModMember( borrowernumber => $borrowernumber, firstname => 'Tomas', userid => undef );
+    $borrower = GetMember( borrowernumber => $borrowernumber );
+    is ( $borrower->{userid}, $data{userid}, 'ModMember should not update the userid with an undefined value');
+};
+
 # Regression tests for BZ13502
 ## Remove all entries with userid='' (should be only 1 max)
 $dbh->do(q|DELETE FROM borrowers WHERE userid = ''|);
@@ -287,6 +301,35 @@ ok( $borrower->{userid},  'A userid should have been generated correctly' );
 # Regression tests for BZ12226
 is( Check_Userid( C4::Context->config('user'), '' ), 0,
     'Check_Userid should return 0 for the DB user (Bug 12226)');
+
+subtest 'GetMemberAccountRecords' => sub {
+
+    plan tests => 2;
+
+    my $borrowernumber = $builder->build({ source => 'Borrower' })->{ borrowernumber };
+    my $accountline_1  = $builder->build({
+        source => 'Accountline',
+        value  => {
+            borrowernumber    => $borrowernumber,
+            amountoutstanding => 64.60
+        }
+    });
+
+    my ($total,undef,undef) = GetMemberAccountRecords( $borrowernumber );
+    is( $total , 64.60, "Rounding works correctly in total calculation (single value)" );
+
+    my $accountline_2 = $builder->build({
+        source => 'Accountline',
+        value  => {
+            borrowernumber    => $borrowernumber,
+            amountoutstanding => 10.65
+        }
+    });
+
+    ($total,undef,undef) = GetMemberAccountRecords( $borrowernumber );
+    is( $total , 75.25, "Rounding works correctly in total calculation (multiple values)" );
+
+};
 
 subtest 'GetMemberAccountBalance' => sub {
 
@@ -322,15 +365,15 @@ subtest 'GetMemberAccountBalance' => sub {
         'Expected 15 outstanding for both borrowernumber and cardnumber.');
 
     # do not count holds charges
-    C4::Context->set_preference( 'HoldsInNoissuesCharge', '1' );
-    C4::Context->set_preference( 'ManInvInNoissuesCharge', '0' );
+    t::lib::Mocks::mock_preference( 'HoldsInNoissuesCharge', '1' );
+    t::lib::Mocks::mock_preference( 'ManInvInNoissuesCharge', '0' );
     my ($total, $total_minus_charges,
         $other_charges) = C4::Members::GetMemberAccountBalance(123);
     is( $total, 15 , "Total calculated correctly");
     is( $total_minus_charges, 15, "Holds charges are not count if HoldsInNoissuesCharge=1");
     is( $other_charges, 0, "Holds charges are not considered if HoldsInNoissuesCharge=1");
 
-    C4::Context->set_preference( 'HoldsInNoissuesCharge', '0' );
+    t::lib::Mocks::mock_preference( 'HoldsInNoissuesCharge', '0' );
     ($total, $total_minus_charges,
         $other_charges) = C4::Members::GetMemberAccountBalance(123);
     is( $total, 15 , "Total calculated correctly");
@@ -352,8 +395,8 @@ subtest 'purgeSelfRegistration' => sub {
     #purge members in temporary category
     my $c= 'XYZ';
     $dbh->do("INSERT IGNORE INTO categories (categorycode) VALUES ('$c')");
-    C4::Context->set_preference('PatronSelfRegistrationDefaultCategory', $c );
-    C4::Context->set_preference('PatronSelfRegistrationExpireTemporaryAccountsDelay', 360);
+    t::lib::Mocks::mock_preference('PatronSelfRegistrationDefaultCategory', $c );
+    t::lib::Mocks::mock_preference('PatronSelfRegistrationExpireTemporaryAccountsDelay', 360);
     C4::Members::DeleteExpiredOpacRegistrations();
     $dbh->do("INSERT INTO borrowers (surname, address, city, branchcode, categorycode, dateenrolled) VALUES ('Testaabbcc', 'Street 1', 'CITY', ?, '$c', '2014-01-01 01:02:03')", undef, $library1->{branchcode});
     is( C4::Members::DeleteExpiredOpacRegistrations(), 1, 'Test for DeleteExpiredOpacRegistrations');

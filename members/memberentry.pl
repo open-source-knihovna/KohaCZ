@@ -97,7 +97,7 @@ my $userenv = C4::Context->userenv;
 ## Deal with debarments
 $template->param(
     debarments => GetDebarments( { borrowernumber => $borrowernumber } ) );
-my @debarments_to_remove = $input->param('remove_debarment');
+my @debarments_to_remove = $input->multi_param('remove_debarment');
 foreach my $d ( @debarments_to_remove ) {
     DelDebarment( $d );
 }
@@ -114,7 +114,7 @@ if ( $input->param('add_debarment') ) {
         {
             borrowernumber => $borrowernumber,
             type           => 'MANUAL',
-            comment        => $input->param('debarred_comment'),
+            comment        => scalar $input->param('debarred_comment'),
             expiration     => $expiration,
         }
     );
@@ -725,7 +725,7 @@ output_html_with_http_headers $input, $cookie, $template->output;
 
 sub  parse_extended_patron_attributes {
     my ($input) = @_;
-    my @patron_attr = grep { /^patron_attr_\d+$/ } $input->param();
+    my @patron_attr = grep { /^patron_attr_\d+$/ } $input->multi_param();
 
     my @attr = ();
     my %dups = ();

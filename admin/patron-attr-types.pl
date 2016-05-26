@@ -105,7 +105,7 @@ sub add_attribute_type_form {
 sub error_add_attribute_type_form {
     my $template = shift;
 
-    $template->param(description => $input->param('description'));
+    $template->param(description => scalar $input->param('description'));
 
     if ($input->param('repeatable')) {
         $template->param(repeatable_checked => 1);
@@ -126,8 +126,8 @@ sub error_add_attribute_type_form {
         $template->param(display_checkout_checked => 'checked="checked"');
     }
 
-    $template->param( category_code => $input->param('category_code') );
-    $template->param( class => $input->param('class') );
+    $template->param( category_code => scalar $input->param('category_code') );
+    $template->param( class => scalar $input->param('class') );
 
     $template->param(
         attribute_type_form => 1,
@@ -171,9 +171,9 @@ sub add_update_attribute_type {
     $attr_type->password_allowed($password_allowed);
     my $display_checkout = $input->param('display_checkout');
     $attr_type->display_checkout($display_checkout);
-    $attr_type->category_code($input->param('category_code'));
-    $attr_type->class($input->param('class'));
-    my @branches = $input->param('branches');
+    $attr_type->category_code(scalar $input->param('category_code'));
+    $attr_type->class(scalar $input->param('class'));
+    my @branches = $input->multi_param('branches');
     $attr_type->branches( \@branches );
 
     if ($op eq 'edit') {

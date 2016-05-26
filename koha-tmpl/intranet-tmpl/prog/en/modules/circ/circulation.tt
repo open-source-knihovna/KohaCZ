@@ -10,7 +10,7 @@
 [% INCLUDE 'doc-head-open.inc' %]
 [% SET destination = "circ" %]
 <title>Koha &rsaquo; Circulation
-[% IF borrowernumber %]
+[% IF borrowernumber and borrower%]
   &rsaquo; Checking out to [% INCLUDE 'patron-title.inc' invert_name = 1 %]
 [% END %]
 </title>
@@ -50,7 +50,7 @@ var MSG_EXPORT_SELECT_CHECKOUTS = _("You must select checkout(s) to export");
 
 columns_settings = [% ColumnsSettings.GetColumns( 'circ', 'circulation', 'issues-table', 'json' ) %]
 
-[% IF ( borrowernumber ) %]
+[% IF borrowernumber and borrower %]
     if($.cookie("holdfor") != [% borrowernumber %]){
         $.removeCookie("holdfor", { path: '/' });
     }
@@ -117,7 +117,6 @@ $(document).ready(function() {
             $(':radio', this).attr('checked', 'true')
         }
     });
-
 });
 
 //]]>
@@ -129,7 +128,7 @@ $(document).ready(function() {
 [% INCLUDE 'circ-search.inc' %]
 
 <div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/circ/circulation-home.pl">Circulation</a> &rsaquo;
-[% IF ( borrowernumber ) %]
+[% IF borrowernumber and borrower %]
     <a href="/cgi-bin/koha/circ/circulation.pl">Checkouts</a> &rsaquo; [% INCLUDE 'patron-title.inc' %]
 [% ELSE %]
     <strong>Checkouts</strong>
@@ -149,7 +148,7 @@ $(document).ready(function() {
 	<div class="yui-b">
 [% END %]
 
-[% IF ( borrowernumber ) %]
+[% IF borrowernumber and borrower %]
 [% INCLUDE 'members-toolbar.inc' %]
 [% END %]
 
@@ -205,6 +204,10 @@ $(document).ready(function() {
 
 [% IF ( alert.OTHER_CHARGES ) %]
     <div class="dialog message">The patron has unpaid charges for holds, rentals etc of [% alert.OTHER_CHARGES %]</div>
+[% END %]
+
+[% IF ( nopermission ) %]
+    <div class="dialog alert">Staff members are not allowed to discharge borrowers, nor borrowers to request a discharge.</div>
 [% END %]
 
 [% IF ( NEEDSCONFIRMATION ) %]
@@ -419,6 +422,9 @@ $(document).ready(function() {
 
 <div class="yui-g">
 <div id="circ_impossible" class="dialog alert audio-alert-warning">
+    [% IF ( UNKNOWN_BARCODE ) %]
+        <h3>Barcode not found</h3>
+    [% END %]
 <!-- RESULT OF ISSUING REQUEST -->
         <ul>
         [% IF ( STATS ) %]
@@ -430,7 +436,7 @@ $(document).ready(function() {
         [% END %]
 
         [% IF ( UNKNOWN_BARCODE ) %]
-            <li>The barcode was not found [% barcode |html %]
+            <li>The barcode was not found: <span class="ex">[% barcode |html %]</span>
 	    [% IF ( fast_cataloging ) %]
 	        [% IF ( CAN_user_editcatalogue_fast_cataloging ) %]
             <a href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=FA&amp;barcode=[% barcode |uri %]&amp;circborrowernumber=[% borrowernumber %]&amp;branch=[% branch %]&amp;duedatespec=[% duedatespec %]&amp;stickyduedate=[% stickyduedate %]">Fast cataloging</a>
@@ -563,7 +569,6 @@ No patron matched <span class="ex">[% message %]</span>
 
 [% IF (forceallow) %]<input type="hidden" name="forceallow" value="1">[% END %]
     <input type="hidden" name="branch" value="[% branch %]" />
-    <input type="hidden" name="printer" value="[% printer %]" />
     <input type="hidden" name="duedatespec" value="[% duedatespec %]" />
     <input type="hidden" name="stickyduedate" value="[% stickyduedate %]" />
 
@@ -598,7 +603,7 @@ No patron matched <span class="ex">[% message %]</span>
 
 <!-- BARCODE ENTRY -->
 
-[% IF ( borrowernumber ) %]
+[% IF borrowernumber and borrower %]
 <div class="yui-g">
 
 [% IF privacy == 2 AND NOT Koha.Preference('AnonymousPatron') %]
@@ -685,7 +690,6 @@ No patron matched <span class="ex">[% message %]</span>
 
           <input type="hidden" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" />
           <input type="hidden" name="branch" value="[% branch %]" />
-          <input type="hidden" name="printer" value="[% printer %]" />
           <input type="hidden" name="print" value="maybe" />
           <input type="hidden" name="debt_confirmed" value="[% debt_confirmed %]" />
                 [% IF ( CHARGES ) %]
@@ -732,6 +736,14 @@ No patron matched <span class="ex">[% message %]</span>
         [% END %]
 
 		<ul>
+
+                   [% IF ( modifications ) %]
+                    <li><span class="circ-hlt">Pending modifications:</span> Patron has pending modifications.
+                            [% IF CAN_user_borrowers && ( !Koha.Preference('IndependentBranchesPatronModifications') || borrower.branch == branch ) %]
+                                    <a href="/cgi-bin/koha/members/members-update.pl">View all pending patron modifications</a>
+                            [% END %]
+                   </li>
+                  [% END %]
 
 			[% IF ( warndeparture ) %]
 			<li><span class="circ-hlt">Expiration:</span> Patron's card will expire soon.
@@ -980,13 +992,15 @@ No patron matched <span class="ex">[% message %]</span>
 [% END %]
 </div> <!-- reservesloop -->
 
-[% END %] <!-- borrowernumber -->
+[% ELSIF borrowernumber %]
+    <div class="dialog message">This patron does not exist. <a href="/cgi-bin/koha/members/members-home.pl">Find another patron?</a></div>
+[% END %] <!-- borrowernumber and borrower-->
 </div></div>
 [% END %]
 
 </div>
 </div>
-[% UNLESS ( borrowers ) %][% IF ( borrowernumber ) %]<div class="yui-b">
+[% UNLESS ( borrowers ) %][% IF borrowernumber and borrower %]<div class="yui-b">
 [% INCLUDE 'circ-menu.inc' %]
 </div>[% END %][% END %]
 </div>
