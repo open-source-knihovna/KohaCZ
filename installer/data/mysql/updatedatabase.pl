@@ -12676,10 +12676,19 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
-$DBversion = "16.056.00.000";
+$DBversion = "16.06.00.000";
 if ( CheckVersion($DBversion) ) {
         print "Upgrade to $DBversion done (Koha 16.06 - starting a new dev line at KohaCon16 in Thessaloniki, Greece! Koha is great!)\n";
             SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.001";
+if ( CheckVersion($DBversion) ) {
+        $dbh->do(q{
+                UPDATE accountlines SET accounttype='HE', description=itemnumber WHERE (description REGEXP '^Hold waiting too long [0-9]+') AND accounttype='F';
+    });
+            print "Upgrade to $DBversion done (Bug 16200 - 'Hold waiting too long' fee has a translation problem)\n";
+                SetVersion($DBversion);
 }
 
 

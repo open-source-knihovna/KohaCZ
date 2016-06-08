@@ -30,7 +30,6 @@ use constant TAG_FIELDS => qw(tag_id borrowernumber biblionumber term language d
 use constant TAG_SELECT => "SELECT " . join(',', TAG_FIELDS) . "\n FROM   tags_all\n";
 
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-our $ext_dict;
 
 BEGIN {
 	@ISA = qw(Exporter);
@@ -50,7 +49,7 @@ BEGIN {
       stratify_tags
     );
 	# %EXPORT_TAGS = ();
-	$ext_dict = C4::Context->preference('TagsExternalDictionary');
+    my $ext_dict = C4::Context->preference('TagsExternalDictionary');
 	if ($debug) {
 		require Data::Dumper;
 		import Data::Dumper qw(:DEFAULT);
@@ -58,7 +57,9 @@ BEGIN {
 	}
 	if ($ext_dict) {
 		require Lingua::Ispell;
-		import Lingua::Ispell qw(spellcheck add_word_lc save_dictionary);
+        import Lingua::Ispell qw(spellcheck add_word_lc);
+        $Lingua::Ispell::path = $ext_dict;
+        $debug and print STDERR "\$Lingua::Ispell::path = $Lingua::Ispell::path\n";
 	}
 }
 
@@ -67,11 +68,6 @@ BEGIN {
 More verose debugging messages are sent in the presence of non-zero $ENV{"DEBUG"}.
 
 =cut
-
-INIT {
-    $ext_dict and $Lingua::Ispell::path = $ext_dict;
-    $debug and print STDERR "\$Lingua::Ispell::path = $Lingua::Ispell::path\n";
-}
 
 sub get_filters {
 	my $query = "SELECT * FROM tags_filters ";
@@ -367,6 +363,7 @@ sub is_approved {
 	my $term = shift or return;
 	my $sth = C4::Context->dbh->prepare("SELECT approved FROM tags_approval WHERE term = ?");
 	$sth->execute($term);
+    my $ext_dict = C4::Context->preference('TagsExternalDictionary');
 	unless ($sth->rows) {
 		$ext_dict and return (spellcheck($term) ? 0 : 1);	# spellcheck returns empty on OK word
 		return 0;
@@ -390,6 +387,7 @@ sub get_tag_index {
 sub whitelist {
 	my $operator = shift;
 	defined $operator or return; # have to test defined to allow =0 (kohaadmin)
+    my $ext_dict = C4::Context->preference('TagsExternalDictionary');
 	if ($ext_dict) {
 		foreach (@_) {
 			spellcheck($_) or next;

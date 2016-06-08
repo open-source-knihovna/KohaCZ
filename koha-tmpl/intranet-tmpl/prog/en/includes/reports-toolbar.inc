@@ -28,7 +28,7 @@
         [% IF ( CAN_user_reports_create_reports ) %]
             <div class="btn-group">
                 <a class="delete btn btn-small" href="/cgi-bin/koha/reports/guided_reports.pl?reports=[% id %]&phase=Delete%20Saved">
-                    <i class="fa fa-remove"></i> Delete
+                    <i class="fa fa-trash"></i> Delete
                 </a>
             </div>
         [% END %]
@@ -45,6 +45,18 @@
                 </a>
             </div>
         [% END %]
+
+        [% IF ( execute ) %]
+            <div class="btn-group">
+                <button class="btn btn-small dropdown-toggle" data-toggle="dropdown" id="format"><i class="fa fa-upload"></i> Download <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    <li><a id="csv" href="/cgi-bin/koha/reports/guided_reports.pl?reports=1&phase=Export&amp;format=csv&amp;sql=[% sql |uri %]&amp;reportname=[% name |uri %]">Comma separated text</a></li>
+                    <li><a id="tab" href="/cgi-bin/koha/reports/guided_reports.pl?reports=1&phase=Export&amp;format=tab&amp;sql=[% sql |uri %]&amp;reportname=[% name |uri %]">Tab separated text</a></li>
+                    <li><a id="ods" href="/cgi-bin/koha/reports/guided_reports.pl?reports=1&phase=Export&amp;format=ods&amp;sql=[% sql |uri %]&amp;reportname=[% name |uri %]">Open Document Spreadsheet</a></li>
+                </ul>
+            </div>
+        [% END %]
+
     [% END %]
 </div>
 

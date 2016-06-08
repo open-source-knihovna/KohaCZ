@@ -254,7 +254,7 @@ sub DeleteBorrowerAttributes {
     $query .= $branch_limit
         ? q{
             LEFT JOIN borrower_attribute_types_branches ON bat_code = code
-            WHERE b_branchcode = ? OR b_branchcode IS NULL
+            WHERE ( b_branchcode = ? OR b_branchcode IS NULL )
                 AND borrowernumber = ?
         }
         : q{
@@ -271,6 +271,7 @@ sub DeleteBorrowerAttributes {
 Delete a borrower attribute for the patron identified by C<$borrowernumber> and the attribute code of C<$attribute>
 
 =cut
+
 sub DeleteBorrowerAttribute {
     my ( $borrowernumber, $attribute ) = @_;
 
@@ -290,6 +291,7 @@ sub DeleteBorrowerAttribute {
 Update a borrower attribute C<$attribute> for the patron identified by C<$borrowernumber>,
 
 =cut
+
 sub UpdateBorrowerAttribute {
     my ( $borrowernumber, $attribute ) = @_;
 
