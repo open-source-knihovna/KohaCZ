@@ -35,6 +35,14 @@ use C4::Branch;    # GetBranches
 
 use Koha::ItemTypes;
 
+use Koha::SearchEngine;
+use Koha::SearchEngine::Search;
+
+sub plugin_parameters {
+    my ( $dbh, $record, $tagslib, $i, $tabloop ) = @_;
+    return "";
+}
+
 sub plugin_javascript {
     my ( $dbh, $record, $tagslib, $field_number, $tabloop ) = @_;
     my $function_name = $field_number;
@@ -324,7 +332,7 @@ sub plugin {
         $subfield_value_y =~ s/'/\\'/g;
         $template->param(
             fillinput        => 1,
-            index            => $query->param('index') . "",
+            index            => scalar $query->param('index') . "",
             biblionumber     => $biblionumber ? $biblionumber : "",
             subfield_value_9 => "$subfield_value_9",
             subfield_value_0 => "$subfield_value_0",
@@ -361,7 +369,8 @@ sub plugin {
             $op = 'and';
         }
         $search = 'kw:'.$search." $op mc-itemtype:".$itype if $itype;
-        my ( $errors, $results, $total_hits ) = SimpleSearch($search, $startfrom * $resultsperpage, $resultsperpage );
+        my $searcher = Koha::SearchEngine::Search->new({index => $Koha::SearchEngine::BIBLIOS_INDEX});
+        my ( $errors, $results, $total_hits ) = $searcher->simple_search_compat($search, $startfrom * $resultsperpage, $resultsperpage );
         if (defined $errors ) {
             $results = [];
         }
@@ -397,7 +406,7 @@ sub plugin {
          {
             my $record = C4::Search::new_record_from_zebra( 'biblioserver', $results->[$i] );
             next unless $record;
-            my $rechash = TransformMarcToKoha( $dbh, $record );
+            my $rechash = TransformMarcToKoha( $record );
             if ( my $f = $record->field('200') ) {
                 $rechash->{fulltitle} =
                     join(', ', map { $_->[1] } grep { $_->[0] =~ /[aehi]/ } $f->subfields() );
@@ -478,7 +487,7 @@ sub plugin {
 #           );
         $template->param(
             result         => \@arrayresults,
-            index          => $query->param('index') . "",
+            index          => scalar $query->param('index') . "",
             startfrom      => $startfrom,
             displaynext    => $displaynext,
             displayprev    => $displayprev,
@@ -512,7 +521,7 @@ sub plugin {
 
         $template->param(    #classlist => $classlist,
             itypeloop    => \@itemtypes,
-            index        => $query->param('index'),
+            index        => scalar $query->param('index'),
             Search       => 1,
         );
     }

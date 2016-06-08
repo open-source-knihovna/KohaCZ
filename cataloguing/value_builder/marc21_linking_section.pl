@@ -35,6 +35,9 @@ use C4::Branch;
 
 use Koha::ItemTypes;
 
+use Koha::SearchEngine;
+use Koha::SearchEngine::Search;
+
 my $builder = sub {
     my ( $params ) = @_;
     my $function_name = $params->{id};
@@ -144,7 +147,7 @@ my $launcher = sub {
         $subfield_value_z =~ s/'/\\'/g;
         $template->param(
             fillinput        => 1,
-            index            => $query->param('index') . "",
+            index            => scalar $query->param('index') . "",
             biblionumber     => $biblionumber ? $biblionumber : "",
             subfield_value_9 => "$subfield_value_9",
             subfield_value_0 => "$subfield_value_0",
@@ -179,8 +182,13 @@ my $launcher = sub {
         } else {
             $op = 'and';
         }
+        my $searcher = Koha::SearchEngine::Search->new(
+            { index => $Koha::SearchEngine::BIBLIOS_INDEX } );
         $search = 'kw:' . $search . " $op mc-itemtype:" . $itype if $itype;
-        my ( $errors, $results, $total_hits ) = SimpleSearch( $search, $startfrom * $resultsperpage, $resultsperpage );
+        my ( $errors, $results, $total_hits ) =
+          $searcher->simple_search_compat( $search,
+            $startfrom * $resultsperpage,
+            $resultsperpage );
         if ( defined $errors ) {
             $results = [];
         }
@@ -208,7 +216,7 @@ my $launcher = sub {
         my @field_data = ($search);
         for ( my $i = 0 ; $i < $resultsperpage ; $i++ ) {
             my $record = C4::Search::new_record_from_zebra( 'biblioserver', $results->[$i] );
-            my $rechash = TransformMarcToKoha( $dbh, $record );
+            my $rechash = TransformMarcToKoha( $record );
             my $pos;
             my $countitems = $rechash->{itembumber} ? 1 : 0;
             while ( index( $rechash->{itemnumber}, '|', $pos ) > 0 ) {
@@ -277,7 +285,7 @@ my $launcher = sub {
         #           );
         $template->param(
             result         => \@arrayresults,
-            index          => $query->param('index') . "",
+            index          => scalar $query->param('index') . "",
             startfrom      => $startfrom,
             displaynext    => $displaynext,
             displayprev    => $displayprev,
@@ -308,7 +316,7 @@ my $launcher = sub {
 
         $template->param(
             itypeloop => \@itemtypes,
-            index     => $query->param('index'),
+            index     => scalar $query->param('index'),
             Search    => 1,
         );
     }

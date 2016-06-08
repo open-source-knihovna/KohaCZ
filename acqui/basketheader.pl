@@ -123,6 +123,7 @@ if ( $op eq 'add_form' ) {
                     booksellers => \@booksellers,
                     deliveryplace => $basket->{deliveryplace},
                     billingplace => $basket->{billingplace},
+                    is_standing => $basket->{is_standing},
     );
 
     my $billingplace = $basket->{'billingplace'} || C4::Context->userenv->{"branch"};
@@ -148,6 +149,7 @@ if ( $op eq 'add_form' ) {
             $input->param('basketbooksellerid'),
             $input->param('deliveryplace'),
             $input->param('billingplace'),
+            $input->param('is_standing') ? 1 : undef,
         );
     } else { #New basket
         $basketno = NewBasket(
@@ -159,6 +161,7 @@ if ( $op eq 'add_form' ) {
             $input->param('basketcontractnumber') || undef,
             $input->param('deliveryplace'),
             $input->param('billingplace'),
+            $input->param('is_standing') ? 1 : undef,
         );
     }
     print $input->redirect('basket.pl?basketno='.$basketno);

@@ -106,6 +106,12 @@ __PACKAGE__->table("aqbasket");
   is_nullable: 1
   size: 10
 
+=head2 is_standing
+
+  data_type: 'tinyint'
+  default_value: 0
+  is_nullable: 0
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -142,6 +148,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 10 },
   "branch",
   { data_type => "varchar", is_foreign_key => 1, is_nullable => 1, size => 10 },
+  "is_standing",
+  { data_type => "tinyint", default_value => 0, is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -263,6 +271,21 @@ __PACKAGE__->belongs_to(
   },
 );
 
+=head2 edifact_messages
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::EdifactMessage>
+
+=cut
+
+__PACKAGE__->has_many(
+  "edifact_messages",
+  "Koha::Schema::Result::EdifactMessage",
+  { "foreign.basketno" => "self.basketno" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 borrowernumbers
 
 Type: many_to_many
@@ -274,9 +297,9 @@ Composing rels: L</aqbasketusers> -> borrowernumber
 __PACKAGE__->many_to_many("borrowernumbers", "aqbasketusers", "borrowernumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07039 @ 2014-07-11 09:26:55
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:pT+YFf9nfD/dmBuE4RNCFw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-04-29 13:13:55
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6gRJtrZ6ZXLHjqX281d9Hg
 
 
-# You can replace this text with custom content, and it will be preserved on regeneration
+# You can replace this text with custom code or comments, and it will be preserved on regeneration
 1;

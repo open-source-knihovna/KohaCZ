@@ -77,7 +77,7 @@ if ( $op ne "do_search" ) {
     exit;
 }
 
-my @id = $input->param('id');
+my @id = $input->multi_param('id');
 if ( @id==0 ) {
         # empty server list -> report and exit
         $template->param( emptyserverlist => 1 );
@@ -86,7 +86,7 @@ if ( @id==0 ) {
 }
 
 my $pars= {
-        random => $input->param('random') || rand(1000000000),
+        random => scalar $input->param('random') || rand(1000000000),
         page => $page,
         id => \@id,
         nameany => $nameany,

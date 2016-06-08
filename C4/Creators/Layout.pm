@@ -9,9 +9,6 @@ use C4::Context;
 use C4::Debug;
 use C4::Creators::PDF;
 
-BEGIN {
-    use version; our $VERSION = qv('3.07.00.049');
-}
 
 # FIXME: Consider this style parameter verification instead...
 #  my %param = @_;

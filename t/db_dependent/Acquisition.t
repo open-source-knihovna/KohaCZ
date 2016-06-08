@@ -19,7 +19,7 @@ use Modern::Perl;
 
 use POSIX qw(strftime);
 
-use Test::More tests => 87;
+use Test::More tests => 91;
 use Koha::Database;
 
 BEGIN {
@@ -147,10 +147,18 @@ ok(
 );
 ok( $basket = GetBasket($basketno), "GetBasket($basketno) returns $basket" );
 
+my $bpid=AddBudgetPeriod({
+        budget_period_startdate => '2008-01-01'
+        , budget_period_enddate => '2008-12-31'
+        , budget_period_active  => 1
+        , budget_period_description    => "MAPERI"
+});
+
 my $budgetid = C4::Budgets::AddBudget(
     {
         budget_code => "budget_code_test_getordersbybib",
         budget_name => "budget_name_test_getordersbybib",
+        budget_period_id => $bpid,
     }
 );
 my $budget = C4::Budgets::GetBudget($budgetid);
@@ -351,7 +359,6 @@ my @expectedfields = qw(
   gstrate
   discount
   budget_id
-  budgetgroup_id
   budgetdate
   sort1
   sort2
@@ -363,6 +370,10 @@ my @expectedfields = qw(
   subscriptionid
   parent_ordernumber
   orderstatus
+  line_item_id
+  suppliers_reference_number
+  suppliers_reference_qualifier
+  suppliers_report
   title
   author
   basketname
@@ -458,6 +469,10 @@ my @base_expectedfields = qw(
   biblioitemnumber
   datereceived
   orderstatus
+  line_item_id
+  suppliers_reference_number
+  suppliers_reference_qualifier
+  suppliers_report
   agerestriction
   budget_branchcode
   gstrate
@@ -471,7 +486,6 @@ my @base_expectedfields = qw(
   publicationyear
   collectiontitle
   invoiceid
-  budgetgroup_id
   place
   issn
   quantityreceived
@@ -575,6 +589,10 @@ ok(
   creationdate
   datereceived
   orderstatus
+  line_item_id
+  suppliers_reference_number
+  suppliers_reference_qualifier
+  suppliers_report
   isbn
   copyrightdate
   gstrate
@@ -589,7 +607,6 @@ ok(
   title
   closedate
   basketname
-  budgetgroup_id
   invoiceid
   author
   parent_ordernumber
@@ -920,5 +937,15 @@ ok((defined $order4->{datecancellationprinted}), "order is cancelled");
 ok(($order4->{cancellationreason} eq "foobar"), "order has cancellation reason \"foobar\"");
 ok((not defined GetBiblio($order4->{biblionumber})), "biblio does not exist anymore");
 # End of tests for DelOrder
+
+# Budget reports
+my $all_count = scalar GetBudgetsReport();
+ok($all_count >= 1, "GetBudgetReport OK");
+
+my $active_count = scalar GetBudgetsReport(1);
+ok($active_count >= 1 , "GetBudgetsReport(1) OK");
+
+is($all_count, scalar GetBudgetsReport(), "GetBudgetReport returns inactive budget period acquisitions.");
+ok($active_count >= scalar GetBudgetsReport(1), "GetBudgetReport doesn't return inactive budget period acquisitions.");
 
 $schema->storage->txn_rollback();

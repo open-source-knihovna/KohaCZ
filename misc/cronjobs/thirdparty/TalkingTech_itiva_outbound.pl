@@ -30,13 +30,12 @@ BEGIN {
 
 use Getopt::Long;
 use Pod::Usage;
-use Date::Calc qw(Add_Delta_Days);
 
 use C4::Context;
 use C4::Items;
 use C4::Letters;
 use C4::Overdues;
-use C4::Calendar;
+use Koha::Calendar;
 use Koha::DateUtils;
 
 sub usage {
@@ -44,8 +43,7 @@ sub usage {
     exit;
 }
 
-die
-  "TalkingTechItivaPhoneNotification system preference not activated... dying\n"
+die "TalkingTechItivaPhoneNotification system preference not activated... dying\n"
   unless ( C4::Context->preference("TalkingTechItivaPhoneNotification") );
 
 # Database handle
@@ -92,8 +90,7 @@ pod2usage( -verbose => 1 ) if $help;
 my $OUT;
 if ( defined $outfile ) {
     open( $OUT, '>', "$outfile" ) || die("Cannot open output file");
-}
-else {
+} else {
     print "No output file defined; printing to STDOUT\n"
       if ( defined $verbose );
     open( $OUT, '>', "&STDOUT" ) || die("Couldn't duplicate STDOUT: $!");
@@ -103,21 +100,17 @@ my $format = 'V';    # format for phone notifications
 
 foreach my $type (@types) {
     $type = uc($type);    #just in case lower or mixed-case was supplied
-    my $module =
-      $type_module_map->{$type}; #since the module is required to get the letter
-    my $code = $type_notice_map->{$type};    #to get the Koha name of the notice
+    my $module = $type_module_map->{$type};    #since the module is required to get the letter
+    my $code   = $type_notice_map->{$type};    #to get the Koha name of the notice
 
     my @loop;
     if ( $type eq 'OVERDUE' ) {
         @loop = GetOverdueIssues();
-    }
-    elsif ( $type eq 'PREOVERDUE' ) {
+    } elsif ( $type eq 'PREOVERDUE' ) {
         @loop = GetPredueIssues();
-    }
-    elsif ( $type eq 'RESERVE' ) {
+    } elsif ( $type eq 'RESERVE' ) {
         @loop = GetWaitingHolds();
-    }
-    else {
+    } else {
         print "Unknown or unsupported message type $type; skipping...\n"
           if ( defined $verbose );
         next;
@@ -143,20 +136,16 @@ foreach my $type (@types) {
         my $message_id = 0;
         if ($outfile) {
             $message_id = C4::Letters::EnqueueLetter(
-                {
-                    letter                 => $letter,
+                {   letter                 => $letter,
                     borrowernumber         => $issues->{'borrowernumber'},
                     message_transport_type => 'phone',
                 }
             );
         }
 
-        print $OUT
-"\"$format\",\"$language\",\"$type\",\"$issues->{level}\",\"$issues->{cardnumber}\",\"$issues->{patron_title}\",\"$issues->{firstname}\",";
-        print $OUT
-"\"$issues->{surname}\",\"$issues->{phone}\",\"$issues->{email}\",\"$library_code\",";
-        print $OUT
-"\"$issues->{site}\",\"$issues->{site_name}\",\"$issues->{barcode}\",\"$due_date\",\"$issues->{title}\",\"$message_id\"\n";
+        print $OUT "\"$format\",\"$language\",\"$type\",\"$issues->{level}\",\"$issues->{cardnumber}\",\"$issues->{patron_title}\",\"$issues->{firstname}\",";
+        print $OUT "\"$issues->{surname}\",\"$issues->{phone}\",\"$issues->{email}\",\"$library_code\",";
+        print $OUT "\"$issues->{site}\",\"$issues->{site_name}\",\"$issues->{barcode}\",\"$due_date\",\"$issues->{title}\",\"$message_id\"\n";
     }
 }
 
@@ -173,6 +162,8 @@ TalkingTech_itiva_outbound.pl
 
 Script to generate Spec C outbound notifications file for Talking Tech i-tiva
 phone notification system.
+
+=over
 
 =item B<--help> B<-h>
 
@@ -215,11 +206,12 @@ consortium purposes and apply library specific settings, such as
 prompts, to those notices.
 This field can be blank if all messages are from a single library.
 
+=back
+
 =cut
 
 sub GetOverdueIssues {
-    my $query =
-"SELECT borrowers.borrowernumber, borrowers.cardnumber, borrowers.title as patron_title, borrowers.firstname, borrowers.surname,
+    my $query = "SELECT borrowers.borrowernumber, borrowers.cardnumber, borrowers.title as patron_title, borrowers.firstname, borrowers.surname,
                 borrowers.phone, borrowers.email, borrowers.branchcode, biblio.biblionumber, biblio.title, items.barcode, issues.date_due,
                 max(overduerules.branchcode) as rulebranch, TO_DAYS(NOW())-TO_DAYS(date_due) as daysoverdue, delay1, delay2, delay3,
                 issues.branchcode as site, branches.branchname as site_name
@@ -240,14 +232,11 @@ sub GetOverdueIssues {
     while ( my $issue = $sth->fetchrow_hashref() ) {
         if ( $issue->{'daysoverdue'} == $issue->{'delay1'} ) {
             $issue->{'level'} = 1;
-        }
-        elsif ( $issue->{'daysoverdue'} == $issue->{'delay2'} ) {
+        } elsif ( $issue->{'daysoverdue'} == $issue->{'delay2'} ) {
             $issue->{'level'} = 2;
-        }
-        elsif ( $issue->{'daysoverdue'} == $issue->{'delay3'} ) {
+        } elsif ( $issue->{'daysoverdue'} == $issue->{'delay3'} ) {
             $issue->{'level'} = 3;
-        }
-        else {
+        } else {
 
             # this shouldn't ever happen, based our SQL criteria
         }
@@ -257,8 +246,7 @@ sub GetOverdueIssues {
 }
 
 sub GetPredueIssues {
-    my $query =
-"SELECT borrowers.borrowernumber, borrowers.cardnumber, borrowers.title as patron_title, borrowers.firstname, borrowers.surname,
+    my $query = "SELECT borrowers.borrowernumber, borrowers.cardnumber, borrowers.title as patron_title, borrowers.firstname, borrowers.surname,
                 borrowers.phone, borrowers.email, borrowers.branchcode, biblio.biblionumber, biblio.title, items.barcode, issues.date_due,
                 issues.branchcode as site, branches.branchname as site_name
                 FROM borrowers JOIN issues USING (borrowernumber)
@@ -283,8 +271,7 @@ sub GetPredueIssues {
 }
 
 sub GetWaitingHolds {
-    my $query =
-"SELECT borrowers.borrowernumber, borrowers.cardnumber, borrowers.title as patron_title, borrowers.firstname, borrowers.surname,
+    my $query = "SELECT borrowers.borrowernumber, borrowers.cardnumber, borrowers.title as patron_title, borrowers.firstname, borrowers.surname,
                 borrowers.phone, borrowers.email, borrowers.branchcode, biblio.biblionumber, biblio.title, items.barcode, reserves.waitingdate,
                 reserves.branchcode AS site, branches.branchname AS site_name,
                 TO_DAYS(NOW())-TO_DAYS(reserves.waitingdate) AS days_since_waiting
@@ -304,40 +291,27 @@ sub GetWaitingHolds {
     $sth->execute();
     my @results;
     while ( my $issue = $sth->fetchrow_hashref() ) {
-        my @waitingdate = split( /-/, $issue->{'waitingdate'} );
-        my @date_due =
-          Add_Delta_Days( $waitingdate[0], $waitingdate[1], $waitingdate[2],
-            $pickupdelay );
-        $issue->{'date_due'} =
-          sprintf( "%04d-%02d-%02d", $date_due[0], $date_due[1], $date_due[2] );
-        $issue->{'level'} = 1;   # only one level for Hold Waiting notifications
+        my $calendar = Koha::Calendar->new( branchcode => $issue->{'site'} );
+
+        my $waiting_date = dt_from_string( $issue->{waitingdate}, 'sql' );
+        my $pickup_date = $waiting_date->clone->add( days => $pickupdelay );
+        if ( $calendar->is_holiday($pickup_date) ) {
+            $pickup_date = $calendar->next_open_day( $pickup_date );
+        }
+
+        $issue->{'date_due'} = output_pref({dt => $pickup_date, dateformat => 'iso' });
+        $issue->{'level'} = 1;    # only one level for Hold Waiting notifications
 
         my $days_to_subtract = 0;
-        my $calendar = C4::Calendar->new( branchcode => $issue->{'site'} );
-        while (
-            $calendar->isHoliday(
-                reverse(
-                    Add_Delta_Days(
-                        $waitingdate[0], $waitingdate[1],
-                        $waitingdate[2], $days_to_subtract
-                    )
-                )
-            )
-          )
-        {
-            $days_to_subtract++;
+        if ( $calendar->is_holiday($waiting_date) ) {
+            my $next_open_day = $calendar->next_open_day( $waiting_date );
+            $days_to_subtract = $calendar->days_between($waiting_date, $next_open_day)->days;
         }
-        $issue->{'days_since_waiting'} =
-          $issue->{'days_since_waiting'} - $days_to_subtract;
 
-        if (
-            (
-                grep $_ eq $issue->{'days_since_waiting'},
-                @holds_waiting_days_to_call
-            )
-            || !scalar(@holds_waiting_days_to_call)
-          )
-        {
+        $issue->{'days_since_waiting'} = $issue->{'days_since_waiting'} - $days_to_subtract;
+
+        if ( ( grep $_ eq $issue->{'days_since_waiting'}, @holds_waiting_days_to_call )
+            || !scalar(@holds_waiting_days_to_call) ) {
             push @results, $issue;
         }
     }

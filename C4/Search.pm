@@ -37,11 +37,9 @@ use URI::Escape;
 use Business::ISBN;
 use MARC::Record;
 use MARC::Field;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $DEBUG);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $DEBUG);
 
-# set the version for version checking
 BEGIN {
-    $VERSION = 3.07.00.049;
     $DEBUG = ($ENV{DEBUG}) ? 1 : 0;
 }
 
@@ -85,7 +83,7 @@ This function attempts to find duplicate records using a hard-coded, fairly simp
 sub FindDuplicate {
     my ($record) = @_;
     my $dbh = C4::Context->dbh;
-    my $result = TransformMarcToKoha( $dbh, $record, '' );
+    my $result = TransformMarcToKoha( $record, '' );
     my $sth;
     my $query;
     my $search;
@@ -147,7 +145,7 @@ sub FindDuplicate {
                 $possible_duplicate_record
             );
 
-            my $result = TransformMarcToKoha( $dbh, $marcrecord, '' );
+            my $result = TransformMarcToKoha( $marcrecord, '' );
 
             # FIXME :: why 2 $biblionumber ?
             if ($result) {
@@ -203,7 +201,7 @@ my @results;
 
 for my $r ( @{$marcresults} ) {
     my $marcrecord = MARC::File::USMARC::decode($r);
-    my $biblio = TransformMarcToKoha(C4::Context->dbh,$marcrecord,q{});
+    my $biblio = TransformMarcToKoha($marcrecord,q{});
 
     #build the iarray of hashs for the template.
     push @results, {
@@ -625,6 +623,15 @@ sub getRecords {
                 }
             }
         );
+
+    # This sorts the facets into alphabetical order
+    if (@facets_loop) {
+        foreach my $f (@facets_loop) {
+            $f->{facets} = [ sort { uc($a->{facet_label_value}) cmp uc($b->{facet_label_value}) } @{ $f->{facets} } ];
+        }
+        @facets_loop = sort {$a->{expand} cmp $b->{expand}} @facets_loop;
+    }
+
     return ( undef, $results_hashref, \@facets_loop );
 }
 
@@ -1022,6 +1029,11 @@ sub _build_weighted_query {
         $weighted_query .= "an=\"$operand\"";
     }
 
+    # If the index is numeric, don't autoquote it.
+    elsif ( $index =~ /,st-numeric$/ ) {
+        $weighted_query .= " $index=$operand";
+    }
+
     # If the index already has more than one qualifier, wrap the operand
     # in quotes and pass it back (assumption is that the user knows what they
     # are doing and won't appreciate us mucking up their query
@@ -1127,6 +1139,8 @@ sub getIndexes{
                     'Illustration-code',
                     'Index-term-genre',
                     'Index-term-uncontrolled',
+                    'Interest-age-level',
+                    'Interest-grade-level',
                     'ISBN',
                     'isbn',
                     'ISSN',
@@ -1141,6 +1155,7 @@ sub getIndexes{
                     'LC-card-number',
                     'lcn',
                     'lex',
+                    'lexile-number',
                     'llength',
                     'ln',
                     'ln-audio',
@@ -1177,6 +1192,7 @@ sub getIndexes{
                     'Publisher',
                     'Provider',
                     'pv',
+                    'Reading-grade-level',
                     'Record-control-number',
                     'rcn',
                     'Record-type',
@@ -1314,6 +1330,7 @@ Shim function to ease the transition from buildQuery to a new QueryParser.
 This function is called at the beginning of buildQuery, and modifies
 buildQuery's input. If it can handle the input, it returns a query that
 buildQuery will not try to parse.
+
 =cut
 
 sub parseQuery {
@@ -1518,8 +1535,8 @@ sub buildQuery {
                 #which is processed higher up in this sub. Other than that, year searches are typically
                 #handled as limits which are not processed her either.
 
-                # Date of Publication
-                if ( $index =~ /yr/ ) {
+                # Search ranges: Date of Publication, st-numeric
+                if ( $index =~ /(yr|st-numeric)/ ) {
                     #weight_fields/relevance search causes errors with date ranges
                     #In the case of YYYY-, it will only return records with a 'yr' of YYYY (not the range)
                     #In the case of YYYY-YYYY, it will return no results
@@ -1748,6 +1765,7 @@ sub buildQuery {
         warn "LIMIT DESC:" . $limit_desc;
         warn "---------\nLeave buildQuery\n---------";
     }
+
     return (
         undef,              $query, $simple_query, $query_cgi,
         $query_desc,        $limit, $limit_cgi,    $limit_desc,
@@ -1864,6 +1882,13 @@ sub searchResults {
     # We get the biblionumber position in MARC
     my ($bibliotag,$bibliosubf)=GetMarcFromKohaField('biblio.biblionumber','');
 
+    # set stuff for XSLT processing here once, not later again for every record we retrieved
+    my $interface = $search_context eq 'opac' ? 'OPAC' : '';
+    my $xslsyspref = $interface . "XSLTResultsDisplay";
+    my $xslfile = C4::Context->preference($xslsyspref);
+    my $lang   = $xslfile ? C4::Languages::getlanguage()  : undef;
+    my $sysxml = $xslfile ? C4::XSLT::get_xslt_sysprefs() : undef;
+
     # loop through all of the records we've retrieved
     for ( my $i = $offset ; $i <= $times - 1 ; $i++ ) {
 
@@ -1891,14 +1916,13 @@ sub searchResults {
                : GetFrameworkCode($marcrecord->subfield($bibliotag,$bibliosubf));
 
         SetUTF8Flag($marcrecord);
-        my $oldbiblio = TransformMarcToKoha( $dbh, $marcrecord, $fw );
+        my $oldbiblio = TransformMarcToKoha( $marcrecord, $fw );
         $oldbiblio->{subtitle} = GetRecordValue('subtitle', $marcrecord, $fw);
         $oldbiblio->{result_number} = $i + 1;
 
         # add imageurl to itemtype if there is one
         $oldbiblio->{imageurl} = getitemtypeimagelocation( $search_context, $itemtypes{ $oldbiblio->{itemtype} }->{imageurl} );
 
-        $oldbiblio->{'authorised_value_images'}  = ($search_context eq 'opac' && C4::Context->preference('AuthorisedValueImages')) || ($search_context eq 'intranet' && C4::Context->preference('StaffAuthorisedValueImages')) ? C4::Items::get_authorised_value_images( C4::Biblio::get_biblio_authorised_values( $oldbiblio->{'biblionumber'}, $marcrecord ) ) : [];
 		$oldbiblio->{normalized_upc}  = GetNormalizedUPC(       $marcrecord,$marcflavour);
 		$oldbiblio->{normalized_ean}  = GetNormalizedEAN(       $marcrecord,$marcflavour);
 		$oldbiblio->{normalized_oclc} = GetNormalizedOCLCNumber($marcrecord,$marcflavour);
@@ -2192,9 +2216,9 @@ sub searchResults {
         }
 
         # XSLT processing of some stuff
-        my $interface = $search_context eq 'opac' ? 'OPAC' : '';
-        if (!$scan && C4::Context->preference($interface . "XSLTResultsDisplay")) {
-            $oldbiblio->{XSLTResultsRecord} = XSLTParse4Display($oldbiblio->{biblionumber}, $marcrecord, $interface."XSLTResultsDisplay", 1, \@hiddenitems);
+        # we fetched the sysprefs already before the loop through all retrieved record!
+        if (!$scan && $xslfile) {
+            $oldbiblio->{XSLTResultsRecord} = XSLTParse4Display($oldbiblio->{biblionumber}, $marcrecord, $xslsyspref, 1, \@hiddenitems, $sysxml, $xslfile, $lang);
         # the last parameter tells Koha to clean up the problematic ampersand entities that Zebra outputs
         }
 
@@ -2530,7 +2554,7 @@ sub _ZOOM_event_loop {
 
 =head2 new_record_from_zebra
 
-Given raw data from a Zebra result set, return a MARC::Record object
+Given raw data from a searchengine result set, return a MARC::Record object
 
 This helper function is needed to take into account all the involved
 system preferences and configuration variables to properly create the
@@ -2539,6 +2563,9 @@ MARC::Record object.
 If we are using GRS-1, then the raw data we get from Zebra should be USMARC
 data. If we are using DOM, then it has to be MARCXML.
 
+If we are using elasticsearch, it'll already be a MARC::Record and this
+function needs a new name.
+
 =cut
 
 sub new_record_from_zebra {
@@ -2546,6 +2573,10 @@ sub new_record_from_zebra {
     my $server   = shift;
     my $raw_data = shift;
     # Set the default indexing modes
+    my $search_engine = C4::Context->preference("SearchEngine");
+    if ($search_engine eq 'Elasticsearch') {
+        return $raw_data;
+    }
     my $index_mode = ( $server eq 'biblioserver' )
                         ? C4::Context->config('zebra_bib_index_mode') // 'dom'
                         : C4::Context->config('zebra_auth_index_mode') // 'dom';

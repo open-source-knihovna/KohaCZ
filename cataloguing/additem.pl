@@ -404,7 +404,7 @@ $restrictededition = 0 if ($restrictededition != 0 && $frameworkcode eq 'FA' && 
 
 my $tagslib = &GetMarcStructure(1,$frameworkcode);
 my $record = GetMarcBiblio($biblionumber);
-my $oldrecord = TransformMarcToKoha($dbh,$record);
+my $oldrecord = TransformMarcToKoha($record);
 my $itemrecord;
 my $nextop="additem";
 my @errors; # store errors found while checking data BEFORE saving item.
@@ -429,12 +429,12 @@ if ($op eq "additem") {
 
     #-------------------------------------------------------------------------------
     # rebuild
-    my @tags      = $input->param('tag');
-    my @subfields = $input->param('subfield');
-    my @values    = $input->param('field_value');
+    my @tags      = $input->multi_param('tag');
+    my @subfields = $input->multi_param('subfield');
+    my @values    = $input->multi_param('field_value');
     # build indicator hash.
-    my @ind_tag   = $input->param('ind_tag');
-    my @indicator = $input->param('indicator');
+    my @ind_tag   = $input->multi_param('ind_tag');
+    my @indicator = $input->multi_param('indicator');
     my $xml = TransformHtmlToXml(\@tags,\@subfields,\@values,\@indicator,\@ind_tag, 'ITEM');
     my $record = MARC::Record::new_from_xml($xml, 'UTF-8');
 
@@ -457,7 +457,7 @@ if ($op eq "additem") {
         $record = _increment_barcode($record, $frameworkcode);
     }
 
-    my $addedolditem = TransformMarcToKoha( $dbh, $record );
+    my $addedolditem = TransformMarcToKoha( $record );
 
     # If we have to add or add & duplicate, we add the item
     if ( $add_submit || $add_duplicate_submit ) {
@@ -671,19 +671,19 @@ if ($op eq "additem") {
 } elsif ($op eq "saveitem") {
 #-------------------------------------------------------------------------------
     # rebuild
-    my @tags      = $input->param('tag');
-    my @subfields = $input->param('subfield');
-    my @values    = $input->param('field_value');
+    my @tags      = $input->multi_param('tag');
+    my @subfields = $input->multi_param('subfield');
+    my @values    = $input->multi_param('field_value');
     # build indicator hash.
-    my @ind_tag   = $input->param('ind_tag');
-    my @indicator = $input->param('indicator');
+    my @ind_tag   = $input->multi_param('ind_tag');
+    my @indicator = $input->multi_param('indicator');
     # my $itemnumber = $input->param('itemnumber');
     my $xml = TransformHtmlToXml(\@tags,\@subfields,\@values,\@indicator,\@ind_tag,'ITEM');
     my $itemtosave=MARC::Record::new_from_xml($xml, 'UTF-8');
     # MARC::Record builded => now, record in DB
     # warn "R: ".$record->as_formatted;
     # check that the barcode don't exist already
-    my $addedolditem = TransformMarcToKoha($dbh,$itemtosave);
+    my $addedolditem = TransformMarcToKoha($itemtosave);
     my $exist_itemnumber = get_item_from_barcode($addedolditem->{'barcode'});
     if ($exist_itemnumber && $exist_itemnumber != $itemnumber) {
         push @errors,"barcode_not_unique";
@@ -919,7 +919,7 @@ $template->param(
     itemtagsubfield  => $itemtagsubfield,
     op      => $nextop,
     opisadd => ($nextop eq "saveitem") ? 0 : 1,
-    popup => $input->param('popup') ? 1: 0,
+    popup => scalar $input->param('popup') ? 1: 0,
     C4::Search::enabled_staff_search_views,
 );
 $template->{'VARS'}->{'searchid'} = $searchid;

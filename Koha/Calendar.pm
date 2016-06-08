@@ -52,23 +52,15 @@ sub _init {
     return;
 }
 
-
-# FIXME: use of package-level variables for caching the holiday
-# lists breaks persistance engines.  As of 2013-12-10, the RM
-# is allowing this with the expectation that prior to release of
-# 3.16, bug 8089 will be fixed and we can switch the caching over
-# to Koha::Cache.
-
-our $exception_holidays;
-
 sub exception_holidays {
     my ( $self ) = @_;
+
+    my $cache  = Koha::Cache->get_instance();
+    my $cached = $cache->get_from_cache('exception_holidays');
+    return $cached if $cached;
+
     my $dbh = C4::Context->dbh;
     my $branch = $self->{branchcode};
-    if ( $exception_holidays ) {
-        $self->{exception_holidays} = $exception_holidays;
-        return $exception_holidays;
-    }
     my $exception_holidays_sth = $dbh->prepare(
 'SELECT day, month, year FROM special_holidays WHERE branchcode = ? AND isexception = 1'
     );
@@ -85,8 +77,8 @@ sub exception_holidays {
     }
     $self->{exception_holidays} =
       DateTime::Set->from_datetimes( dates => $dates );
-    $exception_holidays = $self->{exception_holidays};
-    return $exception_holidays;
+    $cache->set_in_cache( 'exception_holidays', $self->{exception_holidays} );
+    return $self->{exception_holidays};
 }
 
 sub single_holidays {
@@ -116,7 +108,7 @@ sub single_holidays {
             my $single_holidays_sth = $dbh->prepare(
 'SELECT day, month, year FROM special_holidays WHERE branchcode = ? AND isexception = 0'
             );
-            $single_holidays_sth->execute($branchcode);
+            $single_holidays_sth->execute($br);
 
             my @ymd_arr;
             while ( my ( $day, $month, $year ) =
@@ -380,10 +372,6 @@ __END__
 =head1 NAME
 
 Koha::Calendar - Object containing a branches calendar
-
-=head1 VERSION
-
-This documentation refers to Koha::Calendar version 0.0.1
 
 =head1 SYNOPSIS
 

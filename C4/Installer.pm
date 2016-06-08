@@ -17,11 +17,10 @@ package C4::Installer;
 # You should have received a copy of the GNU General Public License
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-#use warnings; FIXME - Bug 2505
+use Modern::Perl;
 
 use Encode qw( encode is_utf8 );
-our $VERSION = 3.07.00.049;
+use DBIx::RunSQL;
 use C4::Context;
 use C4::Installer::PerlModules;
 use DBI;
@@ -413,62 +412,40 @@ sub set_version_syspref {
 
   my $error = $installer->load_sql($filename);
 
-Runs a the specified SQL using the DB's command-line
-SQL tool, and returns any strings sent to STDERR
-by the command-line tool.
+Runs a the specified SQL file using a sql loader DBIx::RunSQL
+Returns any strings sent to STDERR
 
-B<FIXME:> there has been a long-standing desire to
-replace this with an SQL loader that goes
-through DBI; partly for portability issues
-and partly to improve error handling.
-
-B<FIXME:> even using the command-line loader, some more
-basic error handling should be added - deal
-with missing files, e.g.
+# FIXME This should be improved: sometimes the caller and load_sql warn the same
+error.
 
 =cut
 
 sub load_sql {
     my $self = shift;
     my $filename = shift;
-
-    my $datadir = C4::Context->config('intranetdir') . "/installer/data/$self->{dbms}";
     my $error;
-    my $strcmd;
-    my $cmd;
-    if ( $self->{dbms} eq 'mysql' ) {
-        $cmd = qx(which mysql 2>/dev/null || whereis mysql 2>/dev/null);
-        chomp $cmd;
-        $cmd = $1 if ($cmd && $cmd =~ /^(.+?)[\r\n]+$/);
-        $cmd = 'mysql' if (!$cmd || !-x $cmd);
-        $strcmd = "$cmd "
-            . ( $self->{hostname} ? " -h $self->{hostname} " : "" )
-            . ( $self->{port}     ? " -P $self->{port} "     : "" )
-            . ( $self->{user}     ? " -u $self->{user} "     : "" )
-            . ( $self->{password} ? " -p'$self->{password}'"   : "" )
-            . " $self->{dbname} ";
-        $error = qx($strcmd --default-character-set=utf8 <$filename 2>&1 1>/dev/null);
-    } elsif ( $self->{dbms} eq 'Pg' ) {
-        $cmd = qx(which psql 2>/dev/null || whereis psql 2>/dev/null);
-        chomp $cmd;
-        $cmd = $1 if ($cmd && $cmd =~ /^(.+?)[\r\n]+$/);
-        $cmd = 'psql' if (!$cmd || !-x $cmd);
-        $strcmd = "$cmd "
-            . ( $self->{hostname} ? " -h $self->{hostname} " : "" )
-            . ( $self->{port}     ? " -p $self->{port} "     : "" )
-            . ( $self->{user}     ? " -U $self->{user} "     : "" )
-#            . ( $self->{password} ? " -W $self->{password}"   : "" )       # psql will NOT accept a password, but prompts...
-            . " $self->{dbname} ";                        # Therefore, be sure to run 'trust' on localhost in pg_hba.conf -fbcit
-        $error = qx($strcmd -f $filename 2>&1 1>/dev/null);
-        # Be sure to set 'client_min_messages = error' in postgresql.conf
-        # so that only true errors are returned to stderr or else the installer will
-        # report the import as a failure although it really succeeded -fbcit
+
+    my $dbh = $self->{ dbh };
+
+    my $dup_stderr;
+    do {
+        local *STDERR;
+        open STDERR, ">>", \$dup_stderr;
+
+        eval {
+            DBIx::RunSQL->run_sql_file(
+                dbh     => $dbh,
+                sql     => $filename,
+            );
+        };
+    };
+    #   errors thrown while loading installer data should be logged
+    if( $dup_stderr ) {
+        warn "C4::Installer::load_sql returned the following errors while attempting to load $filename:\n";
+        $error = $dup_stderr;
+
     }
-#   errors thrown while loading installer data should be logged
-    if($error) {
-      warn "C4::Installer::load_sql returned the following errors while attempting to load $filename:\n";
-      warn "$error";
-    }
+
     return $error;
 }
 

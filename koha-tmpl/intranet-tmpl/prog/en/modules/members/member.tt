@@ -5,13 +5,13 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Patrons [% IF ( searching ) %]&rsaquo; Search results[% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 [% INCLUDE 'columns_settings.inc' %]
 <script type="text/javascript">
 //<![CDATA[
 $(document).ready(function() {
-    $('#add_to_patron_list_submit').attr('disabled', 'disabled');
+    $('#add_to_patron_list_submit').prop('disabled', true);
     $('#new_patron_list').hide();
 
     $('#add_to_patron_list').change(function() {
@@ -22,18 +22,18 @@ $(document).ready(function() {
             $('#new_patron_list').focus();
         } else if ( value ) {
             $('#new_patron_list').hide();
-            $('#add_to_patron_list_submit').removeAttr('disabled');
+            $('#add_to_patron_list_submit').prop('disabled', false);
         } else {
             $('#new_patron_list').hide();
-            $('#add_to_patron_list_submit').attr('disabled', 'disabled');
+            $('#add_to_patron_list_submit').prop('disabled', true);
         }
     });
 
     $('#new_patron_list').on('input', function() {
         if ( $('#new_patron_list').val() ) {
-            $('#add_to_patron_list_submit').removeAttr('disabled');
+            $('#add_to_patron_list_submit').prop('disabled', false);
         } else {
-            $('#add_to_patron_list_submit').attr('disabled', 'disabled');
+            $('#add_to_patron_list_submit').prop('disabled', true);
         }
     });
 
@@ -219,7 +219,7 @@ $(document).ready(function() {
             { 'mDataProp': 'dt_od_checkouts', 'bSortable': false },
             { 'mDataProp': 'dt_fines', 'bSortable': false },
             { 'mDataProp': 'dt_borrowernotes' },
-            { 'mDataProp': 'dt_action', 'bSortable': false }
+            { 'mDataProp': 'dt_action', 'bSortable': false, 'sClass': 'actions' }
         ],
         'fnRowCallback': function(nRow, aData, iDisplayIndex, iDisplayIndexFull) {
             /* Center text for 6th column */
@@ -423,6 +423,11 @@ function filterByFirstLetterSurname(letter) {
                 [% ELSE %]
                   <option value='standard'>Standard</option>
                 [% END %]
+                [% IF searchfieldstype == "surname" %]
+                  <option selected="selected" value='surname'>Surname</option>
+                [% ELSE %]
+                  <option value='surname'>Surname</option>
+                [% END %]
                 [% IF searchfieldstype == "email" %]
                   <option selected="selected" value='email'>Email</option>
                 [% ELSE %]
@@ -468,10 +473,11 @@ function filterByFirstLetterSurname(letter) {
             <li>
               <label for="searchtype_filter">Search type:</label>
               <select name="searchtype" id="searchtype_filter">
-                <option value='start_with'>Starts with</option>
-                [% IF searchtype == "contain" %]
-                  <option value="contain" selected="selected">Contains</option>
+                [% IF searchtype == "start_with" %]
+                  <option value='start_with' selected="selected">Starts with</option>
+                  <option value="contain">Contains</option>
                 [% ELSE %]
+                  <option value='start_with'>Starts with</option>
                   <option value="contain" selected="selected">Contains</option>
                 [% END %]
               </select>

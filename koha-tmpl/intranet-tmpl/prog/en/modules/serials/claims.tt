@@ -5,7 +5,7 @@
     <title>Koha &rsaquo; Serials &rsaquo; Claims</title>
     [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'calendar.inc' %]
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript">
 //<![CDATA[
@@ -29,7 +29,7 @@
 	    $("span.checkall").html("<input type=\"checkbox\" name=\"CheckAll\"> "+_("Check All")+"</input>");
 
         $("#CheckAll").click(function() {
-            $("#claimst tr:visible :checkbox").attr('checked', $("#CheckAll").is(':checked'));
+            $("#claimst tr:visible :checkbox").prop('checked', $("#CheckAll").is(':checked'));
         });
 
         // Generates a dynamic link for exporting the selections data as CSV

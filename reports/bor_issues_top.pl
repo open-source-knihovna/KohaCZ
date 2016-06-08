@@ -49,7 +49,7 @@ my $fullreportname = "reports/bor_issues_top.tt";
 my $do_it   = $input->param('do_it');
 my $limit   = $input->param("Limit");
 my $column  = $input->param("Criteria");
-my @filters = $input->param("Filter");
+my @filters = $input->multi_param("Filter");
 foreach ( @filters[0..3] ) {
     $_ and $_ = eval { output_pref( { dt => dt_from_string ( $_ ), dateonly => 1, dateformat => 'iso' }); };
 }
@@ -159,6 +159,7 @@ sub calculate {
 	my %columns;
     my $grantotal =0;
     my $dbh = C4::Context->dbh;
+
 
 # Checking filters
     my @loopfilter;
@@ -279,7 +280,7 @@ sub calculate {
     my $strcalc ;
 
 # Processing average loanperiods
-    $strcalc .= "SELECT  CONCAT(borrowers.surname , \",\\t\",borrowers.firstname),  COUNT(*) AS RANK, borrowers.borrowernumber AS ID";
+    $strcalc .= "SELECT  CONCAT_WS('', borrowers.surname , \",\\t\", borrowers.firstname),  COUNT(*) AS RANK, borrowers.borrowernumber AS ID";
     $strcalc .= " , $colfield " if ($colfield);
     $strcalc .= " FROM `old_issues`
                   LEFT JOIN  borrowers  USING(borrowernumber)
@@ -362,6 +363,7 @@ sub calculate {
 						} keys %patrons;
     foreach my $id (@ranked_ids) {
         my @loopcell;
+
         foreach my $key (@cols_in_order) {
 			if($column){
 		      push @loopcell, {
@@ -381,8 +383,10 @@ sub calculate {
                         'loopcell' => \@loopcell,
                         'hilighted' => ($i%2),
                     };
+        # use a limit, if a limit is defined
+        last if $i > $limit and $limit
     }
-	
+
     # the header of the table
     $globalline{loopfilter}=\@loopfilter;
     # the core of the table

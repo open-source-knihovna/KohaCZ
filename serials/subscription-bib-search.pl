@@ -58,6 +58,9 @@ use C4::Search;
 use C4::Biblio;
 use C4::Debug;
 
+use Koha::SearchEngine;
+use Koha::SearchEngine::Search;
+
 my $input = new CGI;
 my $op = $input->param('op') || q{};
 my $dbh = C4::Context->dbh;
@@ -96,8 +99,9 @@ if ( $op eq "do_search" && $query ) {
     $resultsperpage = $input->param('resultsperpage');
     $resultsperpage = 20 if ( !defined $resultsperpage );
 
+    my $searcher = Koha::SearchEngine::Search->new({index => $Koha::SearchEngine::BIBLIOS_INDEX});
     my ( $error, $marcrecords, $total_hits ) =
-      SimpleSearch( $query, $startfrom * $resultsperpage, $resultsperpage );
+      $searcher->simple_search_compat( $query, $startfrom * $resultsperpage, $resultsperpage );
     my $total = 0;
     if ( defined $marcrecords ) {
         $total = scalar @{$marcrecords};
@@ -114,7 +118,7 @@ if ( $op eq "do_search" && $query ) {
     for ( my $i = 0 ; $i < $total ; $i++ ) {
         my %resultsloop;
         my $marcrecord = C4::Search::new_record_from_zebra( 'biblioserver', $marcrecords->[$i] );
-        my $biblio = TransformMarcToKoha( C4::Context->dbh, $marcrecord, '' );
+        my $biblio = TransformMarcToKoha( $marcrecord, '' );
 
         #build the hash for the template.
         $resultsloop{highlight}       = ( $i % 2 ) ? (1) : (0);

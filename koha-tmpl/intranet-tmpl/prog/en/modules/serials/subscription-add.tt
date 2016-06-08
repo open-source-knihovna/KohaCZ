@@ -103,9 +103,9 @@ function frequencyload(){
             if ( globalfreqdata.unit && globalfreqdata.unit.length == 0 ) {
                 var option = $("#subtype option[value='issues']");
                 $(option).attr('selected', 'selected');
-                $("#subtype option[value!='issues']").attr('disabled', 'disabled')
+                $("#subtype option[value!='issues']").prop('disabled', true)
             } else {
-                $("#subtype option").attr('disabled', false)
+                $("#subtype option").prop('disabled', false)
             }
         }
     )
@@ -197,14 +197,14 @@ function toggleAdvancedPattern() {
 }
 
 function modifyAdvancedPattern() {
-    $("#patternname").attr("readonly", false).val('');
-    $("#numberingmethod").attr("readonly", false);
+    $("#patternname").prop('readOnly', false).val('');
+    $("#numberingmethod").prop('readOnly', false);
 
     $("#advancedpredictionpatternt input").each(function() {
-        $(this).attr("readonly", false);
+        $(this).prop('readOnly', false);
     });
     $("#advancedpredictionpatternt select").each(function() {
-        $(this).attr("disabled", false);
+        $(this).prop('disabled', false);
     });
 
     $("#restoreadvancedpatternbutton").show();
@@ -215,11 +215,11 @@ function modifyAdvancedPattern() {
 }
 
 function restoreAdvancedPattern() {
-    $("#patternname").attr("readonly", true).val(globalnumpatterndata.label);
-    $("#numberingmethod").attr("readonly", true).val(globalnumpatterndata.numberingmethod);
+    $("#patternname").prop('readOnly', true).val(globalnumpatterndata.label);
+    $("#numberingmethod").prop('readOnly', true).val(globalnumpatterndata.numberingmethod);
 
     $("#advancedpredictionpatternt input").each(function() {
-        $(this).attr("readonly", true);
+        $(this).prop('readOnly', true);
         var id = $(this).attr('id');
         if(id.match(/lastvalue/) || id.match(/innerloop/)) {
             var tempid = id.replace(/(\d)/, "temp$1");
@@ -229,7 +229,7 @@ function restoreAdvancedPattern() {
         }
     });
     $("#advancedpredictionpatternt select").each(function() {
-        $(this).attr("disabled", true);
+        $(this).prop('disabled', true);
         var id = $(this).attr('id');
         $(this).val(globalnumpatterndata[id]);
     });
@@ -451,7 +451,7 @@ $(document).ready(function() {
 
     var node;
     [% FOREACH field IN dont_export_field_loop %]
-        node = $("#[% field.fieldid %]");
+        node = $("[name='[% field.fieldid %]']");
         if ( $(node).is('input') || $(node).is('textarea') ) {
             $(node).val("");
         } else if ( $(node).is('select') ) {
@@ -542,7 +542,7 @@ $(document).ready(function() {
                                   [% END %]
                                 </li>
                                 <li>
-                                    <label for="manualhistory">Manual history</label>
+                                    <label for="manualhistory">Manual history:</label>
                                     [% IF (manualhistory) %]
                                         <input type="checkbox" id="manualhistory" name="manualhist" checked="checked" />
                                     [% ELSE %]
@@ -550,7 +550,7 @@ $(document).ready(function() {
                                     [% END %]
                                 </li>
                                 <li>
-                                    <label for="callnumber">Call number</label>
+                                    <label for="callnumber">Call number:</label>
                                     <input type="text" name="callnumber" id="callnumber" value="[% callnumber %]" size="20" />
                                 </li>
                                 <li>
@@ -600,7 +600,7 @@ $(document).ready(function() {
                                     <select name="location" id="location">
                                         <option value="">None</option>
                                         [% FOREACH locations_loo IN locations_loop %]
-                                            [% IF ( locations_loo.selected ) %]
+                                            [% IF locations_loo.authorised_value == location %]
                                                 <option value="[% locations_loo.authorised_value %]" selected="selected">[% locations_loo.lib %]</option>
                                             [% ELSE %]
                                                 <option value="[% locations_loo.authorised_value %]">[% locations_loo.lib %]</option>
@@ -722,7 +722,7 @@ $(document).ready(function() {
                                         </select>
                                     </li>
                                     <li>
-                                        <label for="locale">Locale</label>
+                                        <label for="locale">Locale:</label>
                                         <select id="locale" name="locale">
                                             <option value=""></option>
                                             [% FOREACH l IN locales %]

@@ -2,7 +2,7 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Tools &rsaquo; Batch record deletion</title>
 [% INCLUDE 'doc-head-close.inc' %]
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.checkboxes.min.js"></script>
 <script type="text/javascript">
@@ -35,8 +35,8 @@ $(document).ready(function() {
   [% IF recordtype == 'biblio' %]
     $(".records input:checkbox[data-issues!='0']").each(function(){
       $(this).attr('title', MSG_CANNOT_BE_DELETED)
-      $(this).attr('disabled', true);
-      $(this).attr('checked', false);
+      $(this).prop('disabled', true);
+      $(this).prop('checked', false);
       $(this).parents('tr').find('td').css('background-color', '#ffff99');
     });
   [% END %]
@@ -145,8 +145,8 @@ $(document).ready(function() {
     [% IF records %]
       [% IF recordtype == 'biblio' %]
         <div id="toolbar">
-          <a id="selectall" href="#">Select all</a>
-          | <a id="clearall" href="#">Clear all</a>
+          <a id="selectall" href="#"><i class="fa fa-check"></i> Select all</a>
+          | <a id="clearall" href="#"><i class="fa fa-remove"></i> Clear all</a>
           | <a id="selectwithoutitems" href="#">Select without items</a>
           | <a id="selectnotreserved" href="#">Select without holds</a>
         </div>
@@ -175,11 +175,11 @@ $(document).ready(function() {
               [% END %]
             </tbody>
           </table>
-          <div class="note">Reminder: this action will delete all selected bibliographic records, attached subscriptions, existing holds, and attached items!</div>
+          <div class="note"><i class="fa fa-exclamation"></i> Reminder: this action will delete all selected bibliographic records, attached subscriptions, existing holds, and attached items!</div>
       [% ELSE %]
         <div id="toolbar">
-          <a id="selectall" href="#">Select all</a>
-          | <a id="clearall" href="#">Clear all</a>
+          <a id="selectall" href="#"><i class="fa fa-check"></i> Select all</a>
+          | <a id="clearall" href="#"><i class="fa fa-remove"></i> Clear all</a>
           | <a id="clearlinkedtobiblio" href="#">Clear used authorities</a>
         </div>
         <form action="/cgi-bin/koha/tools/batch_delete_records.pl" method="post">
@@ -203,7 +203,7 @@ $(document).ready(function() {
               [% END %]
             </tbody>
           </table>
-          <div class="note">Reminder: this action will delete all selected authorities!</div>
+          <div class="note"><i class="fa fa-exclamation"></i> Reminder: this action will delete all selected authorities!</div>
       [% END %]
         <fieldset class="action">
           <input type="hidden" name="op" value="delete" />

@@ -40,7 +40,7 @@ use List::MoreUtils qw/ any /;
 use Encode qw( encode is_utf8);
 
 # use utf8;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $debug $ldap $cas $caslogout $shib $shib_login);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $debug $ldap $cas $caslogout $shib $shib_login);
 
 BEGIN {
     sub psgi_env { any { /^psgi\./ } keys %ENV }
@@ -49,7 +49,6 @@ BEGIN {
         if   (psgi_env) { die 'psgi:exit' }
         else            { exit }
     }
-    $VERSION = 3.07.00.049;    # set version for version checking
 
     $debug     = $ENV{DEBUG};
     @ISA       = qw(Exporter);
@@ -193,11 +192,16 @@ sub get_template_and_user {
                 -HttpOnly => 1,
             );
 
-            $template->param( loginprompt => 1 );
+            $template->param(
+                loginprompt => 1,
+                script_name => _get_script_name(),
+            );
             print $in->{query}->header(
-                -type    => 'text/html',
-                -charset => 'utf-8',
-                -cookie  => $cookie,
+                {   type              => 'text/html',
+                    charset           => 'utf-8',
+                    cookie            => $cookie,
+                    'X-Frame-Options' => 'SAMEORIGIN'
+                }
               ),
             $template->output;
             safe_exit;
@@ -508,7 +512,6 @@ sub get_template_and_user {
         $template->param(
             OpacAdditionalStylesheet                   => C4::Context->preference("OpacAdditionalStylesheet"),
             AnonSuggestions                       => "" . C4::Context->preference("AnonSuggestions"),
-            AuthorisedValueImages                 => C4::Context->preference("AuthorisedValueImages"),
             BranchesLoop                          => GetBranchesLoop($opac_name),
             BranchCategoriesLoop                  => $library_categories,
             opac_name                             => $opac_name,
@@ -1208,6 +1211,7 @@ sub checkauth {
         opaclayoutstylesheet                  => C4::Context->preference("opaclayoutstylesheet"),
         login                                 => 1,
         INPUTS                                => \@inputs,
+        script_name                           => _get_script_name(),
         casAuthentication                     => C4::Context->preference("casAuthentication"),
         shibbolethAuthentication              => $shib,
         SessionRestrictionByIP                => C4::Context->preference("SessionRestrictionByIP"),
@@ -1248,6 +1252,7 @@ sub checkauth {
         opac_css_override                     => $ENV{'OPAC_CSS_OVERRIDE'},
     );
 
+    $template->param( SCO_login => 1 ) if ( $query->param('sco_user_login') );
     $template->param( OpacPublic => C4::Context->preference("OpacPublic") );
     $template->param( loginprompt => 1 ) unless $info{'nopermission'};
 
@@ -1293,6 +1298,13 @@ sub checkauth {
         );
     }
 
+    if (C4::Context->preference('GoogleOpenIDConnect')) {
+        if ($query->param("OpenIDConnectFailed")) {
+            my $reason = $query->param('OpenIDConnectFailed');
+            $template->param(invalidGoogleOpenIDConnectLogin => $reason);
+        }
+    }
+
     $template->param(
         LibraryName => C4::Context->preference("LibraryName"),
     );
@@ -1301,9 +1313,11 @@ sub checkauth {
     #    $cookie = $query->cookie(CGISESSID => $session->id
     #   );
     print $query->header(
-        -type    => 'text/html',
-        -charset => 'utf-8',
-        -cookie  => $cookie
+        {   type              => 'text/html',
+            charset           => 'utf-8',
+            cookie            => $cookie,
+            'X-Frame-Options' => 'SAMEORIGIN'
+        }
       ),
       $template->output;
     safe_exit;
@@ -2029,6 +2043,24 @@ sub getborrowernumber {
         }
     }
     return 0;
+}
+
+=head2 _get_script_name
+
+This returns the correct script name, for use in redirecting back to the correct page after showing
+the login screen. It depends on details of the package Plack configuration, and should not be used
+outside this context.
+
+=cut
+
+sub _get_script_name {
+    # This is the method about.pl uses to detect Plack; now that two places use it, it MUST be
+    # right.
+    if ( ( any { /(^psgi\.|^plack\.)/i } keys %ENV ) && $ENV{SCRIPT_NAME} =~ m,^/(intranet|opac)(.*), ) {
+        return '/cgi-bin/koha' . $2;
+    } else {
+        return $ENV{SCRIPT_NAME};
+    }
 }
 
 END { }    # module clean-up code here (global destructor)

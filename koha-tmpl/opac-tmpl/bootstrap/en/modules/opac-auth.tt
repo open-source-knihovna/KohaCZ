@@ -29,6 +29,9 @@
                             <div class="alert">
                                 <h3>Access denied</h3>
                                 <p>Sorry, the system doesn't think you have permission to access this page. </p>
+                                [% IF SCO_login %]
+                                    <p><a href="/cgi-bin/koha/sco/sco-main.pl?logout.x=1">Logout</a> and try again with a different user</p>
+                                [% END %]
                             </div>
                         [% END %]
 
@@ -138,7 +141,22 @@
 
                             [% END # / IF casAuthentication %]
 
-                            <form action="/cgi-bin/koha/opac-user.pl" name="auth" id="auth" method="post">
+                                [% IF ( Koha.Preference('GoogleOpenIDConnect') == 1 ) %]
+                                  [% IF ( invalidGoogleOpenIDConnectLogin ) %]
+                                <h4>Google login</h4>
+                                <p>Sorry, your Google login failed. <span class="error">[% invalidGoogleOpenIDConnectLogin %]</span></p>
+                                <p>Please note that the Google login will only work if you are using the e-mail address registered with this library.</p>
+                                <p>If you want to, you can try to <a href="/cgi-bin/koha/svc/auth/googleopenidconnect?reauthenticate=select_account">log in using a different account</a>
+                                  [% END %]
+                                  <a href="/cgi-bin/koha/svc/auth/googleopenidconnect" class="btn btn-primary" id="openid_connect">Log in with Google</a>
+                              <p>If you do not have a Google account, but do have a local account, you can still log in: </p>
+                                [% END %]
+
+                            [% IF SCO_login %]
+                                <form action="/cgi-bin/koha/sco/sco-main.pl" name="auth" id="auth" method="post">
+                            [% ELSE %]
+                                <form action="[% script_name %]" name="auth" id="auth" method="post">
+                            [% END %]
                                 <input type="hidden" name="koha_login_context" value="opac" />
                                 <fieldset class="brief">
                                     [% FOREACH INPUT IN INPUTS %]

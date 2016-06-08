@@ -56,6 +56,7 @@ use Koha::Libraries;
 use Koha::Holds;
 use Carp;
 use List::MoreUtils qw( uniq );
+use Scalar::Util qw( looks_like_number );
 use Date::Calc qw(
   Today
   Today_and_Now
@@ -65,11 +66,10 @@ use Date::Calc qw(
   Day_of_Week
   Add_Delta_Days
 );
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 BEGIN {
 	require Exporter;
-    $VERSION = 3.07.00.049;	# for version checking
 	@ISA    = qw(Exporter);
 
 	# FIXME subs that should probably be elsewhere
@@ -143,7 +143,7 @@ use C4::Circulation;
 
 The functions in this module deal with circulation, issues, and
 returns, as well as general information about the library.
-Also deals with stocktaking.
+Also deals with inventory.
 
 =head1 FUNCTIONS
 
@@ -661,7 +661,7 @@ sub itemissues {
 =head2 CanBookBeIssued
 
   ( $issuingimpossible, $needsconfirmation ) =  CanBookBeIssued( $borrower, 
-                      $barcode, $duedate, $inprocess, $ignore_reserves );
+                      $barcode, $duedate, $inprocess, $ignore_reserves, $params );
 
 Check if a book can be issued.
 
@@ -678,6 +678,12 @@ C<$issuingimpossible> and C<$needsconfirmation> are some hashref.
 =item C<$inprocess> boolean switch
 
 =item C<$ignore_reserves> boolean switch
+
+=item C<$params> Hashref of additional parameters
+
+Available keys:
+    override_high_holds - Ignore high holds
+    onsite_checkout     - Checkout is an onsite checkout that will not leave the library
 
 =back
 
@@ -759,7 +765,8 @@ sub CanBookBeIssued {
     my %issuingimpossible;    # filled with problems that causes the issue to be IMPOSSIBLE
     my %alerts;               # filled with messages that shouldn't stop issuing, but the librarian should be aware of.
 
-    my $onsite_checkout = $params->{onsite_checkout} || 0;
+    my $onsite_checkout     = $params->{onsite_checkout}     || 0;
+    my $override_high_holds = $params->{override_high_holds} || 0;
 
     my $item = GetItem(GetItemnumberFromBarcode( $barcode ));
     my $issue = GetItemIssue($item->{itemnumber});
@@ -846,9 +853,32 @@ sub CanBookBeIssued {
     # DEBTS
     my ($balance, $non_issue_charges, $other_charges) =
       C4::Members::GetMemberAccountBalance( $borrower->{'borrowernumber'} );
+
     my $amountlimit = C4::Context->preference("noissuescharge");
     my $allowfineoverride = C4::Context->preference("AllowFineOverride");
     my $allfinesneedoverride = C4::Context->preference("AllFinesNeedOverride");
+
+    # Check the debt of this patrons guarantees
+    my $no_issues_charge_guarantees = C4::Context->preference("NoIssuesChargeGuarantees");
+    $no_issues_charge_guarantees = undef unless looks_like_number( $no_issues_charge_guarantees );
+    if ( defined $no_issues_charge_guarantees ) {
+        my $p = Koha::Patrons->find( $borrower->{borrowernumber} );
+        my @guarantees = $p->guarantees();
+        my $guarantees_non_issues_charges;
+        foreach my $g ( @guarantees ) {
+            my ( $b, $n, $o ) = C4::Members::GetMemberAccountBalance( $g->id );
+            $guarantees_non_issues_charges += $n;
+        }
+
+        if ( $guarantees_non_issues_charges > $no_issues_charge_guarantees && !$inprocess && !$allowfineoverride) {
+            $issuingimpossible{DEBT_GUARANTEES} = $guarantees_non_issues_charges;
+        } elsif ( $guarantees_non_issues_charges > $no_issues_charge_guarantees && !$inprocess && $allowfineoverride) {
+            $needsconfirmation{DEBT_GUARANTEES} = $guarantees_non_issues_charges;
+        } elsif ( $allfinesneedoverride && $guarantees_non_issues_charges > 0 && $guarantees_non_issues_charges <= $no_issues_charge_guarantees && !$inprocess ) {
+            $needsconfirmation{DEBT_GUARANTEES} = $guarantees_non_issues_charges;
+        }
+    }
+
     if ( C4::Context->preference("IssuingInProcess") ) {
         if ( $non_issue_charges > $amountlimit && !$inprocess && !$allowfineoverride) {
             $issuingimpossible{DEBT} = sprintf( "%.2f", $non_issue_charges );
@@ -867,6 +897,7 @@ sub CanBookBeIssued {
             $needsconfirmation{DEBT} = sprintf( "%.2f", $non_issue_charges );
         }
     }
+
     if ($balance > 0 && $other_charges > 0) {
         $alerts{OTHER_CHARGES} = sprintf( "%.2f", $other_charges );
     }
@@ -1093,11 +1124,20 @@ sub CanBookBeIssued {
         my $check = checkHighHolds( $item, $borrower );
 
         if ( $check->{exceeded} ) {
-            $needsconfirmation{HIGHHOLDS} = {
-                num_holds  => $check->{outstanding},
-                duration   => $check->{duration},
-                returndate => output_pref( $check->{due_date} ),
-            };
+            if ($override_high_holds) {
+                $alerts{HIGHHOLDS} = {
+                    num_holds  => $check->{outstanding},
+                    duration   => $check->{duration},
+                    returndate => output_pref( $check->{due_date} ),
+                };
+            }
+            else {
+                $needsconfirmation{HIGHHOLDS} = {
+                    num_holds  => $check->{outstanding},
+                    duration   => $check->{duration},
+                    returndate => output_pref( $check->{due_date} ),
+                };
+            }
         }
     }
 
@@ -1504,47 +1544,47 @@ sub GetLoanLength {
     my $loanlength = $sth->fetchrow_hashref;
 
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( $borrowertype, '*', $branchcode );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( '*', $itemtype, $branchcode );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( '*', '*', $branchcode );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( $borrowertype, $itemtype, '*' );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( $borrowertype, '*', '*' );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( '*', $itemtype, '*' );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
     $sth->execute( '*', '*', '*' );
     $loanlength = $sth->fetchrow_hashref;
     return $loanlength
-      if defined($loanlength) && $loanlength->{issuelength};
+      if defined($loanlength) && defined $loanlength->{issuelength};
 
-    # if no rule is set => 21 days (hardcoded)
+    # if no rule is set => 0 day (hardcoded)
     return {
-        issuelength => 21,
-        renewalperiod => 21,
+        issuelength => 0,
+        renewalperiod => 0,
         lengthunit => 'days',
     };
 
@@ -1744,17 +1784,17 @@ sub GetBranchItemRule {
     my $result = {};
 
     my @attempts = (
-        ['SELECT holdallowed, returnbranch
+        ['SELECT holdallowed, returnbranch, hold_fulfillment_policy
             FROM branch_item_rules
             WHERE branchcode = ?
               AND itemtype = ?', $branchcode, $itemtype],
-        ['SELECT holdallowed, returnbranch
+        ['SELECT holdallowed, returnbranch, hold_fulfillment_policy
             FROM default_branch_circ_rules
             WHERE branchcode = ?', $branchcode],
-        ['SELECT holdallowed, returnbranch
+        ['SELECT holdallowed, returnbranch, hold_fulfillment_policy
             FROM default_branch_item_rules
             WHERE itemtype = ?', $itemtype],
-        ['SELECT holdallowed, returnbranch
+        ['SELECT holdallowed, returnbranch, hold_fulfillment_policy
             FROM default_circ_rules'],
     );
 
@@ -1767,11 +1807,13 @@ sub GetBranchItemRule {
         # defaults tables, we have to check that the key we want is set, not
         # just that a row was returned
         $result->{'holdallowed'}  = $search_result->{'holdallowed'}  unless ( defined $result->{'holdallowed'} );
+        $result->{'hold_fulfillment_policy'} = $search_result->{'hold_fulfillment_policy'} unless ( defined $result->{'hold_fulfillment_policy'} );
         $result->{'returnbranch'} = $search_result->{'returnbranch'} unless ( defined $result->{'returnbranch'} );
     }
     
     # built-in default circulation rule
     $result->{'holdallowed'} = 2 unless ( defined $result->{'holdallowed'} );
+    $result->{'hold_fulfillment_policy'} = 'any' unless ( defined $result->{'hold_fulfillment_policy'} );
     $result->{'returnbranch'} = 'homebranch' unless ( defined $result->{'returnbranch'} );
 
     return $result;
@@ -4025,7 +4067,8 @@ sub GetAgeRestriction {
             }
 
             #Get how many days the borrower has to reach the age restriction
-            my $daysToAgeRestriction = Date_to_Days(@alloweddate) - Date_to_Days(Today);
+            my @Today = split /-/, DateTime->today->ymd();
+            my $daysToAgeRestriction = Date_to_Days(@alloweddate) - Date_to_Days(@Today);
             #Negative days means the borrower went past the age restriction age
             return ($restriction_year, $daysToAgeRestriction);
         }

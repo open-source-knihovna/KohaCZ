@@ -30,6 +30,17 @@ use Modern::Perl;
 use C4::Context;
 use List::MoreUtils q/any/;
 
+use Data::Dumper; # TODO remove
+
+use Koha::SearchEngine::Search;
+use Koha::SearchEngine::QueryBuilder;
+
+my $searchengine = C4::Context->preference("SearchEngine");
+my ($builder, $searcher);
+#$searchengine = 'Zebra'; # XXX
+$builder  = Koha::SearchEngine::QueryBuilder->new({index => 'biblios'});
+$searcher = Koha::SearchEngine::Search->new({index => 'biblios'});
+
 use C4::Output;
 use C4::Auth qw(:DEFAULT get_session);
 use C4::Languages qw(getLanguages);
@@ -85,8 +96,8 @@ my ($template,$borrowernumber,$cookie);
 # decide which template to use
 my $template_name;
 my $template_type = 'basic';
-my @params = $cgi->param("limit");
-my @searchCategories = $cgi->param('searchcat');
+my @params = $cgi->multi_param("limit");
+my @searchCategories = $cgi->multi_param('searchcat');
 
 my $format = $cgi->param("format") || '';
 my $build_grouped_results = C4::Context->preference('OPACGroupResults');
@@ -267,7 +278,7 @@ foreach my $advanced_srch_type (@advanced_search_types) {
         push @advancedsearchesloop, \%search_code;
     } else {
     # covers all the other cases: non-itemtype authorized values
-       my $advsearchtypes = GetAuthorisedValues($advanced_srch_type, '', 'opac');
+       my $advsearchtypes = GetAuthorisedValues($advanced_srch_type, 'opac');
         my @authvalueloop;
 	for my $thisitemtype (@$advsearchtypes) {
             my $hiding_key = lc $thisitemtype->{category};
@@ -363,7 +374,7 @@ if ( $template_type && $template_type eq 'advsearch' ) {
     # but let the user override it
     if (defined $cgi->param('expanded_options')) {
         if ( ($cgi->param('expanded_options') == 0) || ($cgi->param('expanded_options') == 1 ) ) {
-            $template->param( expanded_options => $cgi->param('expanded_options'));
+            $template->param( expanded_options => scalar $cgi->param('expanded_options'));
         }
     }
 
@@ -393,7 +404,7 @@ if ( $params->{tag} ) {
 my $pasarParams = '';
 my $j = 0;
 for (keys %$params) {
-    my @pasarParam = $cgi->param($_);
+    my @pasarParam = $cgi->multi_param($_);
     for my $paramValue(@pasarParam) {
         $pasarParams .= '&amp;' if ($j > 0);
         $pasarParams .= $_ . '=' . uri_escape_utf8($paramValue);
@@ -414,7 +425,7 @@ if (   C4::Context->preference('OPACdefaultSortField')
 }
 
 my @allowed_sortby = qw /acqdate_asc acqdate_dsc author_az author_za call_number_asc call_number_dsc popularity_asc popularity_dsc pubdate_asc pubdate_dsc relevance title_az title_za/; 
-@sort_by = $cgi->param('sort_by');
+@sort_by = $cgi->multi_param('sort_by');
 $sort_by[0] = $default_sort_by if !$sort_by[0] && defined($default_sort_by);
 foreach my $sort (@sort_by) {
     if ( grep { /^$sort$/ } @allowed_sortby ) {
@@ -424,7 +435,7 @@ foreach my $sort (@sort_by) {
 $template->param('sort_by' => $sort_by[0]);
 
 # Use the servers defined, or just search our local catalog(default)
-my @servers = $cgi->param('server');
+my @servers = $cgi->multi_param('server');
 unless (@servers) {
     #FIXME: this should be handled using Context.pm
     @servers = ("biblioserver");
@@ -433,12 +444,12 @@ unless (@servers) {
 
 # operators include boolean and proximity operators and are used
 # to evaluate multiple operands
-my @operators = $cgi->param('op');
+my @operators = $cgi->multi_param('op');
 @operators = map { uri_unescape($_) } @operators;
 
 # indexes are query qualifiers, like 'title', 'author', etc. They
 # can be single or multiple parameters separated by comma: kw,right-Truncation 
-my @indexes = $cgi->param('idx');
+my @indexes = $cgi->multi_param('idx');
 @indexes = map { uri_unescape($_) } @indexes;
 
 # if a simple index (only one)  display the index used in the top search box
@@ -446,7 +457,7 @@ if ($indexes[0] && !$indexes[1]) {
     $template->param("ms_".$indexes[0] => 1);
 }
 # an operand can be a single term, a phrase, or a complete ccl query
-my @operands = $cgi->param('q');
+my @operands = $cgi->multi_param('q');
 @operands = map { uri_unescape($_) } @operands;
 
 $template->{VARS}->{querystring} = join(' ', @operands);
@@ -459,9 +470,9 @@ if ($operands[0] && !$operands[1]) {
 }
 
 # limits are use to limit to results to a pre-defined category such as branch or language
-my @limits = $cgi->param('limit');
+my @limits = $cgi->multi_param('limit');
 @limits = map { uri_unescape($_) } @limits;
-my @nolimits = $cgi->param('nolimit');
+my @nolimits = $cgi->multi_param('nolimit');
 @nolimits = map { uri_unescape($_) } @nolimits;
 my %is_nolimit = map { $_ => 1 } @nolimits;
 @limits = grep { not $is_nolimit{$_} } @limits;
@@ -525,7 +536,7 @@ my ($error,$query,$simple_query,$query_cgi,$query_desc,$limit,$limit_cgi,$limit_
 my @results;
 
 ## I. BUILD THE QUERY
-( $error,$query,$simple_query,$query_cgi,$query_desc,$limit,$limit_cgi,$limit_desc,$query_type) = buildQuery(\@operators,\@operands,\@indexes,\@limits,\@sort_by, 0, $lang);
+( $error,$query,$simple_query,$query_cgi,$query_desc,$limit,$limit_cgi,$limit_desc,$query_type) = $builder->build_query_compat(\@operators,\@operands,\@indexes,\@limits,\@sort_by, 0, $lang, { expanded_facet => $expanded_facet });
 
 sub _input_cgi_parse {
     my @elements;
@@ -605,15 +616,8 @@ if ($tag) {
     $pasarParams .= '&amp;simple_query=' . uri_escape_utf8($simple_query);
     $pasarParams .= '&amp;query_type=' . uri_escape_utf8($query_type) if ($query_type);
     eval {
-        ($error, $results_hashref, $facets) = getRecords($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,$branches,$itemtypes_nocategory,$query_type,$scan,1);
-    };
-}
-# This sorts the facets into alphabetical order
-if ($facets) {
-    foreach my $f (@$facets) {
-        $f->{facets} = [ sort { uc($a->{facet_label_value}) cmp uc($b->{facet_label_value}) } @{ $f->{facets} } ];
-    }
-    @$facets = sort {$a->{expand} cmp $b->{expand}} @$facets;
+        ($error, $results_hashref, $facets) = $searcher->search_compat($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,$branches,$itemtypes,$query_type,$scan,1);
+};
 }
 
 # use Data::Dumper; print STDERR "-" x 25, "\n", Dumper($results_hashref);

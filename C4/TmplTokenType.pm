@@ -21,7 +21,7 @@ use strict;
 #use warnings; FIXME - Bug 2505
 require Exporter;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 ###############################################################################
 
@@ -38,7 +38,6 @@ The predefined constants are
 
 ###############################################################################
 
-$VERSION = 3.07.00.049;
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(

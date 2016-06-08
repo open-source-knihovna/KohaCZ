@@ -18,7 +18,7 @@ package C4::Context;
 
 use strict;
 use warnings;
-use vars qw($VERSION $AUTOLOAD $context @context_stack $servers $memcached $ismemcached);
+use vars qw($AUTOLOAD $context @context_stack $servers $memcached $ismemcached);
 BEGIN {
 	if ($ENV{'HTTP_USER_AGENT'})	{
 		require CGI::Carp;
@@ -76,6 +76,15 @@ BEGIN {
 		if ($ENV{KOHA_BACKTRACES}) {
 			$main::SIG{__DIE__} = \&CGI::Carp::confess;
 		}
+
+        # Redefine multi_param if cgi version is < 4.08
+        # Remove the "CGI::param called in list context" warning in this case
+        if (!defined($CGI::VERSION) || $CGI::VERSION < 4.08) {
+            no warnings 'redefine';
+            *CGI::multi_param = \&CGI::param;
+            use warnings 'redefine';
+            $CGI::LIST_CONTEXT_WARN = 0;
+        }
     }  	# else there is no browser to send fatals to!
 
     # Check if there are memcached servers set
@@ -94,7 +103,6 @@ BEGIN {
     $ismemcached = $memcached->set('ismemcached','1');
     }
 
-    $VERSION = '3.07.00.049';
 }
 
 use Encode;
@@ -505,7 +513,6 @@ with this method.
 =cut
 
 my $syspref_cache = Koha::Cache->get_instance();
-my %syspref_L1_cache;
 my $use_syspref_cache = 1;
 sub preference {
     my $self = shift;
@@ -513,28 +520,20 @@ sub preference {
 
     $var = lc $var;
 
-    # Return the value if the var has already been accessed
-    if ($use_syspref_cache && exists $syspref_L1_cache{$var}) {
-        return $syspref_L1_cache{$var};
-    }
+    return $ENV{"OVERRIDE_SYSPREF_$var"}
+        if defined $ENV{"OVERRIDE_SYSPREF_$var"};
 
     my $cached_var = $use_syspref_cache
         ? $syspref_cache->get_from_cache("syspref_$var")
         : undef;
     return $cached_var if defined $cached_var;
 
-    my $value;
-    if ( defined $ENV{"OVERRIDE_SYSPREF_$var"} ) {
-        $value = $ENV{"OVERRIDE_SYSPREF_$var"};
-    } else {
-        my $syspref;
-        eval { $syspref = Koha::Config::SysPrefs->find( lc $var ) };
-        $value = $syspref ? $syspref->value() : undef;
-    }
+    my $syspref;
+    eval { $syspref = Koha::Config::SysPrefs->find( lc $var ) };
+    my $value = $syspref ? $syspref->value() : undef;
 
     if ( $use_syspref_cache ) {
         $syspref_cache->set_in_cache("syspref_$var", $value);
-        $syspref_L1_cache{$var} = $value;
     }
     return $value;
 }
@@ -590,11 +589,6 @@ will not be seen by this process.
 sub clear_syspref_cache {
     return unless $use_syspref_cache;
     $syspref_cache->flush_all;
-    clear_syspref_L1_cache()
-}
-
-sub clear_syspref_L1_cache {
-    %syspref_L1_cache = ();
 }
 
 =head2 set_preference
@@ -647,7 +641,6 @@ sub set_preference {
 
     if ( $use_syspref_cache ) {
         $syspref_cache->set_in_cache( "syspref_$variable", $value );
-        $syspref_L1_cache{$variable} = $value;
     }
 
     return $syspref;
@@ -669,7 +662,6 @@ sub delete_preference {
     if ( Koha::Config::SysPrefs->find( $var )->delete ) {
         if ( $use_syspref_cache ) {
             $syspref_cache->clear_from_cache("syspref_$var");
-            delete $syspref_L1_cache{$var};
         }
 
         return 1;

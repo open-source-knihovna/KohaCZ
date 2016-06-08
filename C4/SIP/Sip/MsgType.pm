@@ -21,13 +21,12 @@ use C4::Auth qw(&check_api_auth);
 
 use UNIVERSAL::can;
 
-use vars qw(@ISA $VERSION @EXPORT_OK);
+use vars qw(@ISA @EXPORT_OK);
 
 use constant INVALID_CARD => 'Invalid cardnumber';
 use constant INVALID_PW   => 'Invalid password';
 
 BEGIN {
-    $VERSION   = 3.07.00.049;
     @ISA       = qw(Exporter);
     @EXPORT_OK = qw(handle login_core);
 }
@@ -468,7 +467,6 @@ sub build_patron_status {
 
 sub handle_patron_status {
     my ( $self, $server ) = @_;
-    warn "handle_patron_status server: " . Dumper( \$server );
     my $ils = $server->{ils};
     my $patron;
     my $resp    = (PATRON_STATUS_RESP);
@@ -476,9 +474,6 @@ sub handle_patron_status {
     my ( $lang, $date ) = @{ $self->{fixed_fields} };
     my $fields = $self->{fields};
 
-    #warn Dumper($fields);
-    #warn FID_INST_ID;
-    #warn $fields->{(FID_INST_ID)};
     $ils->check_inst_id( $fields->{ (FID_INST_ID) }, "handle_patron_status" );
     $patron = $ils->find_patron( $fields->{ (FID_PATRON_ID) } );
     $resp = build_patron_status( $patron, $lang, $fields, $server );
@@ -891,7 +886,7 @@ sub handle_login {
 # and we're going to believe it.
 #
 sub summary_info {
-    my ( $ils, $patron, $summary, $start, $end ) = @_;
+    my ( $ils, $patron, $summary, $start, $end, $server ) = @_;
     my $resp = '';
     my $summary_type;
 
@@ -916,7 +911,7 @@ sub summary_info {
 
     my $func     = $summary_map[$summary_type]->{func};
     my $fid      = $summary_map[$summary_type]->{fid};
-    my $itemlist = &$func( $patron, $start, $end );
+    my $itemlist = &$func( $patron, $start, $end, $server );
 
     syslog( "LOG_DEBUG", "summary_info: list = (%s)", join( ", ", @{$itemlist} ) );
     foreach my $i ( @{$itemlist} ) {
@@ -988,7 +983,7 @@ sub handle_patron_info {
         #          fine_items
         #        recall_items
 
-        $resp .= summary_info( $ils, $patron, $summary, $start, $end );
+        $resp .= summary_info( $ils, $patron, $summary, $start, $end, $server );
 
         $resp .= maybe_add( FID_HOME_ADDR,  $patron->address );
         $resp .= maybe_add( FID_EMAIL,      $patron->email_addr );
@@ -1006,10 +1001,10 @@ sub handle_patron_info {
         if( defined( $patron_pwd ) && !$password_rc ) {
             $msg .= ' -- ' . INVALID_PW;
         }
-        if ( $server->{account}->{send_patron_home_library_in_af} ) {
-            $msg .= ' -- ' . $patron->{branchcode};
-        }
         $resp .= maybe_add( FID_SCREEN_MSG, $msg, $server );
+        if ( $server->{account}->{send_patron_home_library_in_af} ) {
+            $resp .= maybe_add( FID_SCREEN_MSG, $patron->{branchcode}, $server);
+        }
         $resp .= maybe_add( FID_PRINT_LINE, $patron->print_line );
     } else {
 

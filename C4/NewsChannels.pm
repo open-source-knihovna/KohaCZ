@@ -22,10 +22,9 @@ use Modern::Perl;
 use C4::Context;
 use Koha::DateUtils;
 
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
 
 BEGIN { 
-    $VERSION = 3.07.00.049;    # set the version for version checking
     @ISA = qw(Exporter);
     @EXPORT = qw(
         &GetNewsToDisplay
@@ -135,7 +134,7 @@ sub get_opac_new {
     $sth->execute($idnew);
     my $data = $sth->fetchrow_hashref;
     $data->{$data->{'lang'}} = 1 if defined $data->{lang};
-    $data->{expirationdate} = output_pref({ dt => dt_from_string( $data->{expirationdate} ), dateonly => 1 });
+    $data->{expirationdate} = output_pref({ dt => dt_from_string( $data->{expirationdate} ), dateonly => 1 }) if ( $data->{expirationdate} );
     $data->{timestamp}      = output_pref({ dt => dt_from_string( $data->{timestamp} ), dateonly => 1 }) ;
     return $data;
 }

@@ -1,5 +1,6 @@
 [% USE Koha %]
 [% USE KohaDates %]
+[% USE ItemTypes %]
 [% INCLUDE 'doc-head-open.inc' %]
 [% UNLESS ( multi_hold ) %]
     <title>Koha &rsaquo; Circulation &rsaquo; Holds &rsaquo; Place a hold on [% title |html %]</title>
@@ -7,7 +8,7 @@
     <title>Koha &rsaquo; Circulation &rsaquo; Holds &rsaquo; Confirm holds</title>
 [% END %]
 [% INCLUDE 'doc-head-close.inc' %]
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 [% INCLUDE 'calendar.inc' %]
 <script type="text/javascript">
@@ -40,7 +41,7 @@ $(document).ready(function() {
         $('#table_borrowers tbody tr').removeClass('selected');
         $(this).addClass('selected');
         if (event.target.type !== 'radio') {
-            $(':radio', this).attr('checked', 'true')
+            $(':radio', this).prop('checked', 'true')
         }
     });
     var my_table = $("#requestspecific").dataTable($.extend(true, {}, dataTablesDefaults, {
@@ -149,26 +150,26 @@ function checkMultiHold() {
     $("input.warning").click(function() {
         return confirm( _("None of these items can normally be put on hold for this patron.") + "\n\n" + _("Place hold?") );
     });
- 	$("#requestany").click(function() {
-		if(this.checked){
-		$("input[name=checkitem]").each(function() {
-            $(this).removeAttr("checked");
-		});
-		}
-	});
- 	$("input[name=checkitem]").click(function() {
-		onechecked = 0;
-		$("input[name=checkitem]").each(function() {
-			if(this.checked){
-				onechecked = 1;
-			}
-		});
-		if(onechecked == 1){
-            $("#requestany").removeAttr("checked");
-		} else {
-			$("#requestany").attr("checked","checked");
-		}
-	});
+    $("#requestany").click(function() {
+        if(this.checked){
+            $("input[name=checkitem]").each(function() {
+                $(this).prop("checked", false);
+            });
+        }
+    });
+    $("input[name=checkitem]").click(function() {
+        onechecked = 0;
+        $("input[name=checkitem]").each(function() {
+            if(this.checked){
+                onechecked = 1;
+            }
+        });
+        if(onechecked == 1){
+            $("#requestany").prop("checked", false);
+        } else {
+            $("#requestany").prop("checked",true);
+        }
+    });
 
     $(".clear-date").on("click",function(e){
         e.preventDefault();
@@ -409,6 +410,20 @@ function checkMultiHold() {
             [%- END %]
             </select>
         </li>
+
+        [% UNLESS ( multi_hold ) %]
+            [% IF Koha.Preference('AllowHoldItemTypeSelection') %]
+                <li>
+                    <label for="itemtype">Request specific item type:</label>
+                    <select name="itemtype" size="1" id="itemtype">
+                        <option value="">Any item type</option>
+                        [%- FOREACH itemtype IN available_itemtypes %]
+                            <option value="[% itemtype %]">[% ItemTypes.GetDescription( itemtype ) %]</option>
+                        [%- END %]
+                    </select>
+                </li>
+            [% END %]
+        [% END %]
 
 	[% IF ( reserve_in_future ) %]
 	<li>
@@ -677,7 +692,7 @@ function checkMultiHold() {
         <th>Pickup library</th>
         <th>Details</th>
         [% IF ( CAN_user_reserveforothers_modify_holds_priority ) %]
-            <th><img src="[% interface %]/[% theme %]/img/go-bottom.png" border="0" alt="Toggle set to lowest priority" /></th>
+            <th><img src="[% interface %]/[% theme %]/img/go-bottom.png" alt="Toggle set to lowest priority" /></th>
         [% END %]
 	<th>&nbsp;</th>
     [% IF SuspendHoldsIntranet %]<th>&nbsp;</th><!-- Suspend Holds Column Header -->[% END %]
@@ -715,19 +730,19 @@ function checkMultiHold() {
      [% IF ( CAN_user_reserveforothers_modify_holds_priority ) %]
         <td style="white-space:nowrap;">
             <a title="Move hold up" href="request.pl?action=move&amp;where=up&amp;borrowernumber=[% reserveloo.borrowernumber %]&amp;biblionumber=[% reserveloo.biblionumber %]&amp;reserve_id=[% reserveloo.reserve_id %]&amp;date=[% reserveloo.date %]">
-            <img src="[% interface %]/[% theme %]/img/go-up.png" border="0" alt="Go up" />
+            <img src="[% interface %]/[% theme %]/img/go-up.png" alt="Go up" />
                 </a>
 
                 <a title="Move hold to top" href="request.pl?action=move&amp;where=top&amp;borrowernumber=[% reserveloo.borrowernumber %]&amp;biblionumber=[% reserveloo.biblionumber %]&amp;reserve_id=[% reserveloo.reserve_id %]&amp;date=[% reserveloo.date %]">
-                    <img src="[% interface %]/[% theme %]/img/go-top.png" border="0" alt="Go top" />
+                    <img src="[% interface %]/[% theme %]/img/go-top.png" alt="Go top" />
                 </a>
 
                 <a title="Move hold to bottom" href="request.pl?action=move&amp;where=bottom&amp;borrowernumber=[% reserveloo.borrowernumber %]&amp;biblionumber=[% reserveloo.biblionumber %]&amp;reserve_id=[% reserveloo.reserve_id %]&amp;date=[% reserveloo.date %]">
-                    <img src="[% interface %]/[% theme %]/img/go-bottom.png" border="0" alt="Go bottom" />
+                    <img src="[% interface %]/[% theme %]/img/go-bottom.png" alt="Go bottom" />
                 </a>
 
                 <a title="Move hold down" href="request.pl?action=move&amp;where=down&amp;borrowernumber=[% reserveloo.borrowernumber %]&amp;biblionumber=[% reserveloo.biblionumber %]&amp;reserve_id=[% reserveloo.reserve_id %]&amp;date=[% reserveloo.date %]">
-                    <img src="[% interface %]/[% theme %]/img/go-down.png" border="0" alt="Go down" />
+                    <img src="[% interface %]/[% theme %]/img/go-down.png" alt="Go down" />
                 </a>
         </td>
     [% END %]
@@ -798,7 +813,11 @@ function checkMultiHold() {
                 </a>
                 </i>
             [% ELSE %]
-                <i>Next available</i>
+                [% IF reserveloo.itemtype %]
+                    <i>Next available [% ItemTypes.GetDescription( reserveloo.itemtype ) %] item</i>
+                [% ELSE %]
+                    <i>Next available</i>
+                [% END %]
                  <input type="hidden" name="itemnumber" value="" />
             [% END %]
     [% END %]
@@ -808,9 +827,9 @@ function checkMultiHold() {
 	<td>
                 <a title="Toggle lowest priority" href="request.pl?action=setLowestPriority&amp;borrowernumber=[% reserveloo.borrowernumber %]&amp;biblionumber=[% reserveloo.biblionumber %]&amp;reserve_id=[% reserveloo.reserve_id %]&amp;date=[% reserveloo.date %]">
 			[% IF ( reserveloo.lowestPriority ) %]
-                        <img src="[% interface %]/[% theme %]/img/go-bottom.png" border="0" alt="Unset lowest priority" />
+                        <img src="[% interface %]/[% theme %]/img/go-bottom.png" alt="Unset lowest priority" />
 		        [% ELSE %]
-                        <img src="[% interface %]/[% theme %]/img/go-down.png" border="0" alt="Set to lowest priority" />
+                        <img src="[% interface %]/[% theme %]/img/go-down.png" alt="Set to lowest priority" />
 		        [% END %]
 		</a>
 	</td>
@@ -818,7 +837,7 @@ function checkMultiHold() {
 
 	<td>
            <a title="Cancel hold" href="request.pl?action=cancel&amp;borrowernumber=[% reserveloo.borrowernumber %]&amp;biblionumber=[% reserveloo.biblionumber %]&amp;reserve_id=[% reserveloo.reserve_id %]&amp;date=[% reserveloo.date %]">
-                    <img src="[% interface %]/[% theme %]/img/x.png" border="0" alt="Cancel" />
+                    <img src="[% interface %]/[% theme %]/img/x.png" alt="Cancel" />
                 </a>
 	</td>
 

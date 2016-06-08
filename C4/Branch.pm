@@ -22,11 +22,9 @@ require Exporter;
 use C4::Context;
 use Koha::LibraryCategories;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 BEGIN {
-	# set the version for version checking
-    $VERSION = 3.07.00.049;
 	@ISA    = qw(Exporter);
 	@EXPORT = qw(
 		&GetBranchName

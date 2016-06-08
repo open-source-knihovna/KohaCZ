@@ -14,18 +14,24 @@ function clear_edit(){
         var type = $(this).attr("type");
         if (type != "button" && type != "submit" ) {
             $(this).val("");
-            $(this).removeAttr("disabled");
+            $(this).prop('disabled', false);
         }
         if ( type == "checkbox" ) {
-            $(this).attr('checked', false);
+            $(this).prop('checked', false);
         }
     });
-    $(edit_row).find("select").removeAttr("disabled");
+    $(edit_row).find("select").prop('disabled', false);
     $(edit_row).find("select option:first").attr("selected", "selected");
     $(edit_row).find("td:last input[name='clear']").remove();
 }
 
+var MSG_CONFIRM_DELETE = _("Are you sure you want to delete this rule? This cannot be undone.");
+
 $(document).ready(function() {
+    $(".delete").on("click",function(){
+        return confirmDelete(MSG_CONFIRM_DELETE);
+    });
+
         $('#cap_fine_to_replacement_price').on('change', function(){
             $('#overduefinescap').prop('disabled', $(this).is(':checked') );
         });
@@ -58,7 +64,7 @@ $(document).ready(function() {
                 } else if ( i == 12 ) {
                     // specific processing for cap_fine_to_replacement_price
                     var cap_fine_to_replacement_price = $(this).find("input[type='checkbox']");
-                    $('#cap_fine_to_replacement_price').attr('checked', cap_fine_to_replacement_price.is(':checked') );
+                    $('#cap_fine_to_replacement_price').prop('checked', cap_fine_to_replacement_price.is(':checked') );
                     $('#overduefinescap').prop('disabled', cap_fine_to_replacement_price.is(':checked') );
                 } else {
                     $(current_column).find("input[type='text']").val(itm);
@@ -90,8 +96,8 @@ $(document).ready(function() {
                     }
                 }
             });
-            $("#default-circulation-rules tr:last td:eq(0) select").attr('disabled', 'disabled');
-            $("#default-circulation-rules tr:last td:eq(1) select").attr('disabled', 'disabled');
+            $("#default-circulation-rules tr:last td:eq(0) select").prop('disabled', true);
+            $("#default-circulation-rules tr:last td:eq(1) select").prop('disabled', true);
             return false;
         });
 });
@@ -173,7 +179,7 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                 <th>On shelf holds allowed</th>
                 <th>Item level holds</th>
                 <th>Rental discount (%)</th>
-                <th colspan="2">&nbsp;</th>
+                <th>Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -248,12 +254,19 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                                 [% END %]
                             </td>
 							<td>[% rule.reservesallowed %]</td>
-                                                        <td>[% IF rule.onshelfholds %]Yes[% ELSE %]No[% END %]</td>
+                                                        <td>
+                                                            [% IF rule.onshelfholds == 1 %]
+                                                                Yes
+                                                            [% ELSIF rule.onshelfholds == 2 %]
+                                                                If all unavailable
+                                                            [% ELSE %]
+                                                                If any unavailable
+                                                            [% END %]</td>
                                                         <td>[% IF rule.opacitemholds == 'F'%]Force[% ELSIF rule.opacitemholds == 'Y'%]Allow[% ELSE %]Don't allow[% END %]</td>
 							<td>[% rule.rentaldiscount %]</td>
-                            <td><a href="#" class="editrule">Edit</a></td>
-							<td>
-								<a class="button" href="/cgi-bin/koha/admin/smart-rules.pl?op=delete&amp;itemtype=[% rule.itemtype %]&amp;categorycode=[% rule.categorycode %]&amp;branch=[% rule.current_branch %]">Delete</a>
+                                                        <td class="actions">
+                                                          <a href="#" class="editrule btn btn-mini"><i class="fa fa-pencil"></i> Edit</a>
+                                                          <a class="btn btn-mini delete" href="/cgi-bin/koha/admin/smart-rules.pl?op=delete&amp;itemtype=[% rule.itemtype %]&amp;categorycode=[% rule.categorycode %]&amp;branch=[% rule.current_branch %]"><i class="fa fa-trash"></i> Delete</a>
 							</td>
                 	</tr>
             	[% END %]
@@ -317,8 +330,9 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                     <td><input type="text" name="reservesallowed" id="reservesallowed" size="2" /></td>
                     <td>
                         <select name="onshelfholds" id="onshelfholds">
-                            <option value="0" selected>No</option>
                             <option value="1">Yes</option>
+                            <option value="0">If any unavailable</option>
+                            <option value="2">If all unavailable</option>
                         </select>
                     </td>
                     <td>
@@ -329,10 +343,10 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                         </select>
                     </td>
                     <td><input type="text" name="rentaldiscount" id="rentaldiscount" size="2" /></td>
-                    <td colspan="2">
+                    <td class="actions">
                         <input type="hidden" name="branch" value="[% current_branch %]"/>
-                        <input type="submit" value="Save" class="submit" />
-                        <input type="button" name="cancel" value="Clear" onclick="clear_edit();return false;" />
+                        <button type="submit" class="btn btn-mini"><i class="fa fa-save"></i> Save</button>
+                        <button name="cancel" onclick="clear_edit();return false;" class="btn btn-mini"><i class="fa fa-undo"></i> Clear</button>
                     </td>
                 </tr>
                 <tfoot>
@@ -379,9 +393,9 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                     <th>Total current checkouts allowed</th>
                     <th>Total current on-site checkouts allowed</th>
                     <th>Hold policy</th>
+                    <th>Hold pickup library match</th>
                     <th>Return policy</th>
-                    <th>&nbsp;</th>
-                    <th>&nbsp;</th>
+                    <th>Actions</th>
                 </tr>
                 <tr>
                     <td><em>Defaults[% UNLESS ( default_rules ) %] (not set)[% END %]</em></td>
@@ -413,6 +427,39 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                         </select>
                     </td>
                     <td>
+                        <select name="hold_fulfillment_policy">
+                            [% IF default_hold_fulfillment_policy == 'any' %]
+                                <option value="any" selected="selected">
+                                    any library
+                                </option>
+                            [% ELSE %]
+                                <option value="any">
+                                    any library
+                                </option>
+                            [% END %]
+
+                            [% IF default_hold_fulfillment_policy == 'homebranch' %]
+                                <option value="homebranch" selected="selected">
+                                    item's home library
+                                </option>
+                            [% ELSE %]
+                                <option value="homebranch">
+                                    item's home library
+                                </option>
+                            [% END %]
+
+                            [% IF default_hold_fulfillment_policy == 'holdingbranch' %]
+                                <option value="holdingbranch" selected="selected">
+                                    item's holding library
+                                </option>
+                            [% ELSE %]
+                                <option value="holdingbranch">
+                                    item's holding library
+                                </option>
+                            [% END %]
+                        </select>
+                    </td>
+                    <td>
                         <select name="returnbranch">
                             [% IF ( default_returnbranch == 'homebranch' ) %]
                             <option value="homebranch" selected="selected">
@@ -437,9 +484,9 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                             </option>
                         </select>
                     </td>
-                    <td><input type="submit" value="Save" class="submit" /></td>
-                    <td>
-                        <a class="button" href="/cgi-bin/koha/admin/smart-rules.pl?op=delete-branch-cat&amp;categorycode=*&amp;branch=[% current_branch %]">Unset</a>
+                    <td class="actions">
+                        <button type="submit" class="btn btn-mini"><i class="fa fa-save"></i> Save</button>
+                        <a class="btn btn-mini delete" href="/cgi-bin/koha/admin/smart-rules.pl?op=delete-branch-cat&amp;categorycode=*&amp;branch=[% current_branch %]" id="unset"><i class="fa fa-undo"></i> Unset</a>
                     </td>
                 </tr>
             </table>
@@ -489,8 +536,8 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                             [% END %]
                         </td>
 
-                        <td>
-                            <a class="button" href="/cgi-bin/koha/admin/smart-rules.pl?op=delete-branch-cat&amp;categorycode=[% branch_cat_rule_loo.categorycode %]&amp;branch=[% current_branch %]">Delete</a>
+                        <td class="actions">
+                            <a class="btn btn-mini delete" href="/cgi-bin/koha/admin/smart-rules.pl?op=delete-branch-cat&amp;categorycode=[% branch_cat_rule_loo.categorycode %]&amp;branch=[% current_branch %]"><i class="fa fa-trash"></i> Delete</a>
                         </td>
                     </tr>
                 [% END %]
@@ -504,7 +551,7 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                     </td>
                     <td><input name="maxissueqty" size="3" /></td>
                     <td><input name="maxonsiteissueqty" size="3" /></td>
-                    <td><input type="submit" value="Add" class="submit" /></td>
+                    <td class="actions"><button type="submit" class="btn btn-mini"><i class="fa fa-plus"></i> Add</td>
                 </tr>
             </table>
         </form>
@@ -536,6 +583,7 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                 <tr>
                     <th>Item type</th>
                     <th>Hold policy</th>
+                    <th>Hold pickup library match</th>
                     <th>Return policy</th>
                     <th>&nbsp;</th>
                 </tr>
@@ -559,6 +607,14 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                                 No holds allowed
                             [% END %]
                         </td>
+                        <td>[% IF ( branch_item_rule_loo.hold_fulfillment_policy == 'any' ) %]
+                                any library
+                            [% ELSIF ( branch_item_rule_loo.hold_fulfillment_policy == 'homebranch' ) %]
+                                item's home library
+                            [% ELSIF ( branch_item_rule_loo.hold_fulfillment_policy == 'holdingbranch' ) %]
+                                item's holding library
+                            [% END %]
+                        </td>
                         <td>[% IF ( branch_item_rule_loo.returnbranch == 'homebranch' ) %]
                                 Item returns home
                             [% ELSIF ( branch_item_rule_loo.returnbranch == 'holdingbranch' ) %]
@@ -569,8 +625,8 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                                 Error - unknown option
                             [% END %]
                         </td>
-                        <td>
-                            <a class="button" href="/cgi-bin/koha/admin/smart-rules.pl?op=delete-branch-item&amp;itemtype=[% branch_item_rule_loo.itemtype %]&amp;branch=[% current_branch %]">Delete</a>
+                        <td class="actions">
+                            <a class="btn btn-mini delete" href="/cgi-bin/koha/admin/smart-rules.pl?op=delete-branch-item&amp;itemtype=[% branch_item_rule_loo.itemtype %]&amp;branch=[% current_branch %]"><i class="fa fa-trash"></i> Delete</a>
                         </td>
                     </tr>
                 [% END %]
@@ -590,13 +646,28 @@ for="tobranch"><strong>Clone these rules to:</strong></label> <input type="hidde
                         </select>
                     </td>
                     <td>
+                        <select name="hold_fulfillment_policy">
+                            <option value="any">
+                                any library
+                            </option>
+
+                            <option value="homebranch">
+                                item's home library
+                            </option>
+
+                            <option value="holdingbranch">
+                                item's holding library
+                            </option>
+                        </select>
+                    </td>
+                    <td>
                         <select name="returnbranch">
                             <option value="homebranch">Item returns home</option>
                             <option value="holdingbranch">Item returns to issuing library</option>
                             <option value="noreturn">Item floats</option>
                         </select>
                     </td>
-                    <td><input type="submit" value="Add" class="submit" /></td>
+                    <td class="actions"><button type="submit" class="btn btn-mini"><i class="fa fa-plus"></i> Add</button></td>
                 </tr>
             </table>
         </form>

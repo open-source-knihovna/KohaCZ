@@ -20,10 +20,9 @@ package C4::Utils::DataTables;
 use Modern::Perl;
 require Exporter;
 
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
 
 BEGIN {
-    $VERSION    = 3.07.00.049,
 
     @ISA        = qw(Exporter);
     @EXPORT     = qw(dt_build_orderby dt_build_having dt_get_params dt_build_query);

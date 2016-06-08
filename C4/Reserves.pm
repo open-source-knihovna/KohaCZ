@@ -41,11 +41,13 @@ use Koha::Database;
 use Koha::Hold;
 use Koha::Holds;
 use Koha::Libraries;
+use Koha::Items;
+use Koha::ItemTypes;
 
 use List::MoreUtils qw( firstidx any );
 use Carp;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 =head1 NAME
 
@@ -91,8 +93,6 @@ This modules provides somes functions to deal with reservations.
 =cut
 
 BEGIN {
-    # set the version for version checking
-    $VERSION = 3.07.00.049;
     require Exporter;
     @ISA = qw(Exporter);
     @EXPORT = qw(
@@ -166,9 +166,9 @@ The following tables are available witin the HOLDPLACED message:
 
 sub AddReserve {
     my (
-        $branch,    $borrowernumber, $biblionumber,
-        $bibitems,  $priority, $resdate, $expdate, $notes,
-        $title,      $checkitem, $found
+        $branch,   $borrowernumber, $biblionumber, $bibitems,
+        $priority, $resdate,        $expdate,      $notes,
+        $title,    $checkitem,      $found,        $itemtype
     ) = @_;
 
     if ( Koha::Holds->search( { borrowernumber => $borrowernumber, biblionumber => $biblionumber } )->count() > 0 ) {
@@ -196,6 +196,9 @@ sub AddReserve {
         $waitingdate = $resdate;
     }
 
+    # Don't add itemtype limit if specific item is selected
+    $itemtype = undef if $checkitem;
+
     # updates take place here
     my $hold = Koha::Hold->new(
         {
@@ -208,7 +211,8 @@ sub AddReserve {
             itemnumber     => $checkitem,
             found          => $found,
             waitingdate    => $waitingdate,
-            expirationdate => $expdate
+            expirationdate => $expdate,
+            itemtype       => $itemtype,
         }
     )->store();
     my $reserve_id = $hold->id();
@@ -315,7 +319,8 @@ sub GetReservesFromBiblionumber {
                 expirationdate,
                 lowestPriority,
                 suspend,
-                suspend_until
+                suspend_until,
+                itemtype
         FROM     reserves
         WHERE biblionumber = ? ";
     push( @params, $biblionumber );
@@ -523,8 +528,8 @@ sub CanItemBeReserved{
     # level itemtype if the hold has no associated item
     $querycount .=
       C4::Context->preference('item-level_itypes')
-      ? " AND COALESCE( itype, itemtype ) = ?"
-      : " AND itemtype = ?"
+      ? " AND COALESCE( items.itype, biblioitems.itemtype ) = ?"
+      : " AND biblioitems.itemtype = ?"
       if ( $ruleitemtype ne "*" );
 
     my $sthcount = $dbh->prepare($querycount);
@@ -998,12 +1003,14 @@ sub CheckReserves {
 
                 # See if this item is more important than what we've got so far
                 if ( ( $res->{'priority'} && $res->{'priority'} < $priority ) || $local_hold_match ) {
-                    $borrowerinfo ||= C4::Members::GetMember( borrowernumber => $res->{'borrowernumber'} );
                     $iteminfo ||= C4::Items::GetItem($itemnumber);
+                    next if $res->{itemtype} && $res->{itemtype} ne _get_itype( $iteminfo );
+                    $borrowerinfo ||= C4::Members::GetMember( borrowernumber => $res->{'borrowernumber'} );
                     my $branch = GetReservesControlBranch( $iteminfo, $borrowerinfo );
                     my $branchitemrule = C4::Circulation::GetBranchItemRule($branch,$iteminfo->{'itype'});
                     next if ($branchitemrule->{'holdallowed'} == 0);
                     next if (($branchitemrule->{'holdallowed'} == 1) && ($branch ne $borrowerinfo->{'branchcode'}));
+                    next if ( ($branchitemrule->{hold_fulfillment_policy} ne 'any') && ($res->{branchcode} ne $iteminfo->{ $branchitemrule->{hold_fulfillment_policy} }) );
                     $priority = $res->{'priority'};
                     $highest  = $res;
                     last if $local_hold_match;
@@ -1543,8 +1550,30 @@ sub IsAvailableForItemLevelRequest {
         $item->{withdrawn}        ||
         ($item->{damaged} && !C4::Context->preference('AllowHoldsOnDamagedItems'));
 
+    my $on_shelf_holds = _OnShelfHoldsAllowed($itype,$borrower->{categorycode},$item->{holdingbranch});
 
-    return 1 if _OnShelfHoldsAllowed($itype,$borrower->{categorycode},$item->{holdingbranch});
+    if ( $on_shelf_holds == 1 ) {
+        return 1;
+    } elsif ( $on_shelf_holds == 2 ) {
+        my @items =
+          Koha::Items->search( { biblionumber => $item->{biblionumber} } );
+
+        my $any_available = 0;
+
+        foreach my $i (@items) {
+            $any_available = 1
+              unless $i->itemlost
+              || $i->{notforloan} > 0
+              || $i->withdrawn
+              || $i->onloan
+              || IsItemOnHoldAndFound( $i->id )
+              || ( $i->damaged
+                && !C4::Context->preference('AllowHoldsOnDamagedItems') )
+              || Koha::ItemTypes->find( $i->effective_itemtype() )->notforloan;
+        }
+
+        return $any_available ? 0 : 1;
+    }
 
     return $item->{onloan} || GetReserveStatus($item->{itemnumber}) eq "Waiting";
 }
@@ -1884,7 +1913,8 @@ sub _Findgroupreserve {
                reserves.timestamp           AS timestamp,
                biblioitems.biblioitemnumber AS biblioitemnumber,
                reserves.itemnumber          AS itemnumber,
-               reserves.reserve_id          AS reserve_id
+               reserves.reserve_id          AS reserve_id,
+               reserves.itemtype            AS itemtype
         FROM reserves
         JOIN biblioitems USING (biblionumber)
         JOIN hold_fill_targets USING (biblionumber, borrowernumber, itemnumber)
@@ -1918,7 +1948,8 @@ sub _Findgroupreserve {
                reserves.timestamp           AS timestamp,
                biblioitems.biblioitemnumber AS biblioitemnumber,
                reserves.itemnumber          AS itemnumber,
-               reserves.reserve_id          AS reserve_id
+               reserves.reserve_id          AS reserve_id,
+               reserves.itemtype            AS itemtype
         FROM reserves
         JOIN biblioitems USING (biblionumber)
         JOIN hold_fill_targets USING (biblionumber, borrowernumber)
@@ -1951,7 +1982,8 @@ sub _Findgroupreserve {
                reserves.priority                   AS priority,
                reserves.timestamp                  AS timestamp,
                reserves.itemnumber                 AS itemnumber,
-               reserves.reserve_id                 AS reserve_id
+               reserves.reserve_id                 AS reserve_id,
+               reserves.itemtype                   AS itemtype
         FROM reserves
         WHERE reserves.biblionumber = ?
           AND (reserves.itemnumber IS NULL OR reserves.itemnumber = ?)

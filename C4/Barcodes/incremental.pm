@@ -20,10 +20,9 @@ package C4::Barcodes::incremental;
 use strict;
 use warnings;
 
-use vars qw($VERSION @ISA);
+use vars qw(@ISA);
 
 BEGIN {
-    $VERSION = 3.07.00.049;
     @ISA = qw(C4::Barcodes);
 }
 

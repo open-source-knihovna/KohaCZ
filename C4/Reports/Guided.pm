@@ -21,7 +21,7 @@ use Modern::Perl;
 use CGI qw ( -utf8 );
 use Carp;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use C4::Context;
 use C4::Templates qw/themelanguage/;
 use C4::Koha;
@@ -37,8 +37,6 @@ use C4::Log;
 use Koha::AuthorisedValues;
 
 BEGIN {
-    # set the version for version checking
-    $VERSION = 3.07.00.049;
     require Exporter;
     @ISA    = qw(Exporter);
     @EXPORT = qw(

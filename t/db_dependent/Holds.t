@@ -34,6 +34,12 @@ my $dbh     = C4::Context->dbh;
 my $branch_1 = $builder->build({ source => 'Branch' })->{ branchcode };
 my $branch_2 = $builder->build({ source => 'Branch' })->{ branchcode };
 
+# This test assumes we have a category S. This statement helps.
+$builder->build({
+    source => 'Category',
+    value  => { categorycode => 'S', category_type => 'S' },
+});
+
 my $borrowers_count = 5;
 
 $dbh->do('DELETE FROM itemtypes');
@@ -73,7 +79,7 @@ foreach my $borrowernumber ( @borrowernumbers ) {
         $borrowernumber,
         $biblionumber,
         my $bibitems = q{},
-        my $priority = 1,
+        my $priority = C4::Reserves::CalculatePriority( $biblionumber ),
         my $resdate,
         my $expdate,
         my $notes = q{},

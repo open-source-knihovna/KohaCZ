@@ -38,11 +38,12 @@ use Koha::DateUtils qw/dt_from_string/;
 use Koha::Database;
 
 use Koha::Database;
+use Koha::SearchEngine;
+use Koha::SearchEngine::Search;
 
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
 
 BEGIN {
-    $VERSION = 3.07.00.049;
 
 	require Exporter;
     @ISA = qw( Exporter );
@@ -252,7 +253,7 @@ sub AddItemFromMarc {
 	
 	my $localitemmarc=MARC::Record->new;
 	$localitemmarc->append_fields($source_item_marc->field($itemtag));
-    my $item = &TransformMarcToKoha( $dbh, $localitemmarc, $frameworkcode ,'items');
+    my $item = &TransformMarcToKoha( $localitemmarc, $frameworkcode ,'items');
     my $unlinked_item_subfields = _get_unlinked_item_subfields($localitemmarc, $frameworkcode);
     return AddItem($item, $biblionumber, $dbh, $frameworkcode, $unlinked_item_subfields);
 }
@@ -384,7 +385,7 @@ sub AddItemBatchFromMarc {
         $temp_item_marc->append_fields($item_field);
     
         # add biblionumber and biblioitemnumber
-        my $item = TransformMarcToKoha( $dbh, $temp_item_marc, $frameworkcode, 'items' );
+        my $item = TransformMarcToKoha( $temp_item_marc, $frameworkcode, 'items' );
         my $unlinked_item_subfields = _get_unlinked_item_subfields($temp_item_marc, $frameworkcode);
         $item->{'more_subfields_xml'} = _get_unlinked_subfields_xml($unlinked_item_subfields);
         $item->{'biblionumber'} = $biblionumber;
@@ -474,7 +475,7 @@ sub _build_default_values_for_mod_marc {
         location                 => undef,
         permanent_location       => undef,
         materials                => undef,
-        new                      => undef,
+        new_status               => undef,
         notforloan               => 0,
         # paidfor => undef, # commented, see bug 12817
         price                    => undef,
@@ -508,7 +509,7 @@ sub ModItemFromMarc {
 
     my $localitemmarc = MARC::Record->new;
     $localitemmarc->append_fields( $item_marc->field($itemtag) );
-    my $item = &TransformMarcToKoha( $dbh, $localitemmarc, $frameworkcode, 'items' );
+    my $item = &TransformMarcToKoha( $localitemmarc, $frameworkcode, 'items' );
     my $default_values = _build_default_values_for_mod_marc();
     foreach my $item_field ( keys %$default_values ) {
         $item->{$item_field} = $default_values->{$item_field}
@@ -1761,104 +1762,6 @@ sub GetHiddenItemnumbers {
     return @resultitems;
 }
 
-=head3 get_item_authorised_values
-
-find the types and values for all authorised values assigned to this item.
-
-parameters: itemnumber
-
-returns: a hashref malling the authorised value to the value set for this itemnumber
-
-    $authorised_values = {
-             'CCODE'      => undef,
-             'DAMAGED'    => '0',
-             'LOC'        => '3',
-             'LOST'       => '0'
-             'NOT_LOAN'   => '0',
-             'RESTRICTED' => undef,
-             'STACK'      => undef,
-             'WITHDRAWN'  => '0',
-             'branches'   => 'CPL',
-             'cn_source'  => undef,
-             'itemtypes'  => 'SER',
-           };
-
-Notes: see C4::Biblio::get_biblio_authorised_values for a similar method at the biblio level.
-
-=cut
-
-sub get_item_authorised_values {
-    my $itemnumber = shift;
-
-    # assume that these entries in the authorised_value table are item level.
-    my $query = q(SELECT distinct authorised_value, kohafield
-                    FROM marc_subfield_structure
-                    WHERE kohafield like 'item%'
-                      AND authorised_value != '' );
-
-    my $itemlevel_authorised_values = C4::Context->dbh->selectall_hashref( $query, 'authorised_value' );
-    my $iteminfo = GetItem( $itemnumber );
-    # warn( Data::Dumper->Dump( [ $itemlevel_authorised_values ], [ 'itemlevel_authorised_values' ] ) );
-    my $return;
-    foreach my $this_authorised_value ( keys %$itemlevel_authorised_values ) {
-        my $field = $itemlevel_authorised_values->{ $this_authorised_value }->{'kohafield'};
-        $field =~ s/^items\.//;
-        if ( exists $iteminfo->{ $field } ) {
-            $return->{ $this_authorised_value } = $iteminfo->{ $field };
-        }
-    }
-    # warn( Data::Dumper->Dump( [ $return ], [ 'return' ] ) );
-    return $return;
-}
-
-=head3 get_authorised_value_images
-
-find a list of icons that are appropriate for display based on the
-authorised values for a biblio.
-
-parameters: listref of authorised values, such as comes from
-get_item_authorised_values or
-from C4::Biblio::get_biblio_authorised_values
-
-returns: listref of hashrefs for each image. Each hashref looks like this:
-
-      { imageurl => '/intranet-tmpl/prog/img/itemtypeimg/npl/WEB.gif',
-        label    => '',
-        category => '',
-        value    => '', }
-
-Notes: Currently, I put on the full path to the images on the staff
-side. This should either be configurable or not done at all. Since I
-have to deal with 'intranet' or 'opac' in
-get_biblio_authorised_values, perhaps I should be passing it in.
-
-=cut
-
-sub get_authorised_value_images {
-    my $authorised_values = shift;
-
-    my @imagelist;
-
-    my $authorised_value_list = GetAuthorisedValues();
-    # warn ( Data::Dumper->Dump( [ $authorised_value_list ], [ 'authorised_value_list' ] ) );
-    foreach my $this_authorised_value ( @$authorised_value_list ) {
-        if ( exists $authorised_values->{ $this_authorised_value->{'category'} }
-             && $authorised_values->{ $this_authorised_value->{'category'} } eq $this_authorised_value->{'authorised_value'} ) {
-            # warn ( Data::Dumper->Dump( [ $this_authorised_value ], [ 'this_authorised_value' ] ) );
-            if ( defined $this_authorised_value->{'imageurl'} ) {
-                push @imagelist, { imageurl => C4::Koha::getitemtypeimagelocation( 'intranet', $this_authorised_value->{'imageurl'} ),
-                                   label    => $this_authorised_value->{'lib'},
-                                   category => $this_authorised_value->{'category'},
-                                   value    => $this_authorised_value->{'authorised_value'}, };
-            }
-        }
-    }
-
-    # warn ( Data::Dumper->Dump( [ \@imagelist ], [ 'imagelist' ] ) );
-    return \@imagelist;
-
-}
-
 =head1 LIMITED USE FUNCTIONS
 
 The following functions, while part of the public API,
@@ -2201,7 +2104,7 @@ sub _koha_new_item {
             more_subfields_xml  = ?,
             copynumber          = ?,
             stocknumber         = ?,
-            new                 = ?
+            new_status          = ?
           ";
     my $sth = $dbh->prepare($query);
     my $today = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
@@ -2245,7 +2148,7 @@ sub _koha_new_item {
             $item->{'more_subfields_xml'},
             $item->{'copynumber'},
             $item->{'stocknumber'},
-            $item->{'new'},
+            $item->{'new_status'},
     );
 
     my $itemnumber;
@@ -2602,12 +2505,12 @@ counts Usage of itemnumber in Analytical bibliorecords.
 
 sub GetAnalyticsCount {
     my ($itemnumber) = @_;
-    require C4::Search;
 
     ### ZOOM search here
     my $query;
     $query= "hi=".$itemnumber;
-            my ($err,$res,$result) = C4::Search::SimpleSearch($query,0,10);
+    my $searcher = Koha::SearchEngine::Search->new({index => $Koha::SearchEngine::BIBLIOS_INDEX});
+    my ($err,$res,$result) = $searcher->simple_search_compat($query,0,10);
     return ($result);
 }
 

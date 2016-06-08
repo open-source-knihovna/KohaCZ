@@ -300,13 +300,13 @@ for my $subfield_code ( @item_subfield_codes ) {
      }
 }
 
-if(C4::Context->preference("ISBD")) {
-	$template->param(ISBD => 1);
+if ( C4::Context->preference("OPACISBD") ) {
+    $template->param( ISBD => 1 );
 }
 
 #Search for title in links
 my $marcflavour  = C4::Context->preference("marcflavour");
-my $dat = TransformMarcToKoha( $dbh, $record );
+my $dat = TransformMarcToKoha( $record );
 my $isbn = GetNormalizedISBN(undef,$record,$marcflavour);
 my $marccontrolnumber   = GetMarcControlnumber ($record, $marcflavour);
 my $marcissns = GetMarcISSN( $record, $marcflavour );

@@ -33,7 +33,7 @@
     #sql { width: 90%; height: 9em;}
 </style>
 [% IF ( saved1 ) %]
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 [% END %]
 
@@ -67,6 +67,22 @@ function load_group_subgroups () {
 }
 
 $(document).ready(function(){
+    $('#limit').change(function() {
+        $('#limitselect').submit();
+    });
+
+$(".goback").on("click",function(e){
+    e.preventDefault();
+    window.history.back();
+});
+
+$("#addColumn").on("click",function(){
+    addColumn();
+});
+
+$("#delColumn").on("click",function(){
+    delColumn();
+});
 
 [% IF (saved1) %]
     var rtable = $("#table_reports").dataTable($.extend(true, {}, dataTablesDefaults, {
@@ -169,12 +185,12 @@ $(document).ready(function(){
 
 [% IF (create || editsql || save) %]
     $("#select_group").change(function() {
-        if($(this).attr('checked')) {
-            $("#group_input").attr('disabled', 'disabled');
-            $("#groupdesc_input").attr('disabled', 'disabled');
-            $("#group_select").attr('disabled', false);
+        if($(this).prop('checked')) {
+            $("#group_input").prop('disabled', true);
+            $("#groupdesc_input").prop('disabled', true);
+            $("#group_select").prop('disabled', false);
             if ($("#group_select").val().length > 0) {
-                $("#select_subgroup").attr('checked', 'checked');
+                $("#select_subgroup").prop('checked', true);
                 $("#select_subgroup").change();
                 $("#subgroup, #subgroup *").show();
             } else {
@@ -183,11 +199,11 @@ $(document).ready(function(){
         }
     });
     $("#create_group").change(function() {
-        if($(this).attr('checked')) {
-            $("#group_input").attr('disabled', false);
-            $("#groupdesc_input").attr('disabled', false);
-            $("#group_select").attr('disabled', 'disabled');
-            $("#create_subgroup").attr('checked', 'checked').change();
+        if($(this).prop('checked')) {
+            $("#group_input").prop('disabled', false);
+            $("#groupdesc_input").prop('disabled', false);
+            $("#group_select").prop('disabled', true);
+            $("#create_subgroup").prop('checked', true).change();
             $("#subgroup_select").hide();
             $("#subgroup input[type='radio']").hide();
             $("#subgroup label[for]").hide();
@@ -197,17 +213,17 @@ $(document).ready(function(){
         }
     });
     $("#select_subgroup").change(function() {
-        if($(this).attr('checked')) {
-            $("#subgroup_select").attr('disabled', false);
-            $("#subgroup_input").attr('disabled', 'disabled');
-            $("#subgroupdesc_input").attr('disabled', 'disabled');
+        if($(this).prop('checked')) {
+            $("#subgroup_select").prop('disabled', false);
+            $("#subgroup_input").prop('disabled', true);
+            $("#subgroupdesc_input").prop('disabled', true);
         }
     });
     $("#create_subgroup").change(function() {
-        if($(this).attr('checked')) {
-            $("#subgroup_input").attr('disabled', false);
-            $("#subgroupdesc_input").attr('disabled', false);
-            $("#subgroup_select").attr('disabled', 'disabled');
+        if($(this).prop('checked')) {
+            $("#subgroup_input").prop('disabled', false);
+            $("#subgroupdesc_input").prop('disabled', false);
+            $("#subgroup_select").prop('disabled', true);
         }
     });
     $("#select_group").change();
@@ -344,7 +360,7 @@ canned reports and writing custom SQL reports.</p>
                         <td>[% IF ( savedreport.date_run ) %]<a href="/cgi-bin/koha/reports/guided_reports.pl?phase=retrieve%20results&amp;id=[% savedreport.id %]">[% savedreport.date_run %]</a>[% END %]
                         </td>
                         <td>
-                            <div class="dropdown">
+                            <div class="dropup">
                                 <a class="btn btn-mini dropdown-toggle" id="reportactions[% savedreport.id %]" role="button" data-toggle="dropdown" href="#">
                                    Actions <b class="caret"></b>
                                 </a>
@@ -414,7 +430,7 @@ canned reports and writing custom SQL reports.</p>
 <h1>Build a report</h1>
 <form action="/cgi-bin/koha/reports/guided_reports.pl">
 <fieldset class="rows">
-<legend>Step 1 of 6: Choose a module to report on,[% IF (usecache) %] Set cache expiry, [% END %] and Choose report visibility </legend>
+<legend>Step 1 of 6: Choose a module to report on,[% IF (usecache) %] Set cache expiry, [% END %] and choose report visibility </legend>
 <ol>
   <li>
     <label for="area">Choose: </label>
@@ -466,7 +482,7 @@ canned reports and writing custom SQL reports.</p>
 
 <fieldset class="action">
     <input type="hidden" name="phase" value="Choose this type" />
-    <input type="button" name="back" value="&lt;&lt; Back" onclick="javascript:history.back()" />
+    <input type="button" name="back" value="&lt;&lt; Back" class="goback" />
     <input type="submit" name="submit" value="Next &gt;&gt;" />
 </fieldset>
 </form>
@@ -514,8 +530,8 @@ canned reports and writing custom SQL reports.</p>
 [% END %]
 </optgroup>
 </select></div>
-<div style="width: 6.3em; float: right; margin-top: 100px"><input type="button" name="Add" value="Add" class="button" style="width:6em;" onclick="addColumn()" /><br />
-<input type="button" name="delete" value="&lt;&lt; Delete" class="button" style="width: 6em; margin: 1em 0;" onclick="delColumn()" /></div>
+<div style="width: 6.3em; float: right; margin-top: 100px"><input type="button" name="Add" value="Add" class="button" style="width:6em;" id="addColumn" /><br />
+<input type="button" name="delete" value="&lt;&lt; Delete" class="button" style="width: 6em; margin: 1em 0;" id="delColumn" /></div>
 </div>
 
 <div class="yui-u">
@@ -526,7 +542,7 @@ canned reports and writing custom SQL reports.</p>
 <div class="yui-g">
 <fieldset class="action">
     <input type="hidden" name="phase" value="Choose these columns" />
-    <input type="button" name="back" value="&lt;&lt; Back" onclick="javascript:history.back()" />
+    <input type="button" name="back" value="&lt;&lt; Back" class="goback" />
     <input type="submit" name="submit" value="Next &gt;&gt;" />
 </fieldset>
 </div>
@@ -599,7 +615,7 @@ canned reports and writing custom SQL reports.</p>
 [% END %]
 
 <fieldset class="action"><input type="hidden" name="phase" value="Choose these criteria" />
-    <input type="button" name="back" value="&lt;&lt; Back" onclick="javascript:history.back()" />
+    <input type="button" name="back" value="&lt;&lt; Back" class="goback" />
     <input type="submit" name="submit" value="Next &gt;&gt;" /> </fieldset>
 </form>
 [% END %]
@@ -631,7 +647,7 @@ canned reports and writing custom SQL reports.</p>
 </table></fieldset>
 
 <fieldset class="action"><input type="hidden" name="phase" value="Choose these operations" />
-    <input type="button" name="back" value="&lt;&lt; Back" onclick="javascript:history.back()" />
+    <input type="button" name="back" value="&lt;&lt; Back" class="goback" />
     <input type="submit" name="submit" value="Next &gt;&gt;" /></fieldset>
 </form>
 [% END %]
@@ -738,7 +754,7 @@ canned reports and writing custom SQL reports.</p>
         </form>
         <!-- Go back to editing -->
         <form action='/cgi-bin/koha/reports/guided_reports.pl'>
-            <button type="button" class="new" onclick="history.back()"><i class="fa fa-fw fa-pencil"></i> Edit SQL</button>
+            <button type="button" class="new goback"><i class="fa fa-fw fa-pencil"></i> Edit SQL</button>
         </form>
     </div>
 [% END %]
@@ -794,7 +810,7 @@ canned reports and writing custom SQL reports.</p>
 [% IF ( unlimited_total ) %]<p>Total number of rows matching the (unlimited) query is [% unlimited_total %].</p>[% END %]
 <pre id="sql_output">[% sql |html %]</pre>
 
-<form action="/cgi-bin/koha/reports/guided_reports.pl" method="get">
+<form action="/cgi-bin/koha/reports/guided_reports.pl" method="get" id="limitselect">
     <input type="hidden" name="phase" value="Run this report"/>
     <input type="hidden" name="reports" value="[% report_id %]"/>
 
@@ -803,7 +819,7 @@ canned reports and writing custom SQL reports.</p>
     [% END %]
 
     <label for="limit">Rows per page: </label>
-    <select name="limit">
+    <select name="limit" id="limit">
         [% limits = [ 10, 20, 50, 100, 200, 300, 400, 500, 1000 ] %]
         [% FOREACH l IN limits %]
                 [% IF l == limit %]
@@ -813,8 +829,6 @@ canned reports and writing custom SQL reports.</p>
                 [% END %]
         [% END %]
     </select>
-
-    <input type="submit" value="Update" />
 </form>
 
 <div class="pages">[% pagination_bar %]</div>
@@ -1005,7 +1019,7 @@ Sub report:<select name="subreport">
     [% ELSE %]
     [% END %]
     <div id="onerror_actions">
-        <a href="javascript:window.history.back()" class="button">Return to previous page</a>
+        <a href="#" class="button goback">Return to previous page</a>
     </div>
 [% END %]
 </div>
@@ -1030,8 +1044,8 @@ Sub report:<select name="subreport">
     <div class="hint">[% INCLUDE 'date-format.inc' %]</div>
 
     </li>
-    <li><label for="filter_author">Author:</label> <input type="text" id="filter_author" name="filter_author" value="[% filters.author %]" /></li>
-    <li><label for="filter_keyword">Keyword:</label> <input type="text" id="filter_keyword" name="filter_keyword" value="[% filters.keyword %]" /></li>
+    <li><label for="filter_author">Author:</label> <input type="text" id="filter_author" name="filter_author" value="[% filters.author %]" size="16" /></li>
+    <li><label for="filter_keyword">Keyword:</label> <input type="text" id="filter_keyword" name="filter_keyword" value="[% filters.keyword %]" size="16" /></li>
   </ol>
   </fieldset>
   <fieldset class="action">
@@ -1086,7 +1100,7 @@ $("#column_submit").submit(function() {
             [% END %]
         </select>
         <input type="radio" name="select_or_create_group" id="create_group" />
-        <label for="create_group" style="float:none">or create</label>
+        <label for="create_group" style="float:none">or create:</label>
         <input type="text" name="group" id="group_input" title="Group code" placeholder="Code" />
         <input type="text" name="groupdesc" id="groupdesc_input" title="Group name" placeholder="Name" />
     </li>

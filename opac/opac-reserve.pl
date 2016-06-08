@@ -37,6 +37,7 @@ use Koha::DateUtils;
 use Koha::Libraries;
 use Koha::Patron::Debarments qw(IsDebarred);
 use Date::Calc qw/Today Date_to_Days/;
+use List::MoreUtils qw/uniq/;
 
 my $maxreserves = C4::Context->preference("maxreserves");
 
@@ -281,15 +282,16 @@ if ( $query->param('place_reserve') ) {
             $canreserve = 0;
         }
 
+        my $itemtype = $query->param('itemtype') || undef;
+        $itemtype = undef if $itemNum;
+
         # Here we actually do the reserveration. Stage 3.
         if ($canreserve) {
             my $reserve_id = AddReserve(
-                $branch,      $borrowernumber,
-                $biblioNum,
-                [$biblioNum], $rank,
-                $startdate,   $expiration_date,
-                $notes,       $biblioData->{title},
-                $itemNum,     $found
+                $branch,          $borrowernumber, $biblioNum,
+                [$biblioNum],     $rank,           $startdate,
+                $expiration_date, $notes,          $biblioData->{title},
+                $itemNum,         $found,          $itemtype,
             );
             $failed_holds++ unless $reserve_id;
             ++$reserve_cnt;
@@ -441,6 +443,7 @@ foreach my $biblioNum (@biblionumbers) {
         $itemLoopIter->{copynumber} = $itemInfo->{copynumber};
         if ($itemLevelTypes) {
             $itemLoopIter->{translated_description} = $itemInfo->{translated_description};
+            $itemLoopIter->{itype} = $itemInfo->{itype};
             $itemLoopIter->{imageurl} = $itemInfo->{imageurl};
         }
 
@@ -570,6 +573,7 @@ foreach my $biblioNum (@biblionumbers) {
 
     $anyholdable = 1 if $biblioLoopIter{holdable};
 }
+
 
 if ( $numBibsAvailable == 0 || $anyholdable == 0) {
     $template->param( none_available => 1 );

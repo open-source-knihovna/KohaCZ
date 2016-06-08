@@ -27,20 +27,19 @@ use C4::Debug;
 
 use Koha::DateUtils qw( output_pref dt_from_string );
 
-use vars qw($VERSION @ISA);
+use vars qw(@ISA);
 use vars qw($debug $cgi_debug);	# from C4::Debug, of course
 use vars qw($width);
 
 BEGIN {
-    $VERSION = 3.07.00.049;
     @ISA = qw(C4::Barcodes);
 	$width = 4;
 }
 
 sub db_max ($;$) {
 	my $self = shift;
-	my $query = "SELECT max(substring_index(barcode,'-',-1)) AS chunk,barcode FROM items WHERE barcode LIKE ? GROUP BY barcode";
-		# FIXME: unreasonably expensive query on large datasets
+	my $query = "SELECT substring_index(barcode,'-',-1) AS chunk,barcode FROM items WHERE barcode LIKE ? ORDER BY chunk DESC LIMIT 1";
+		# FIXME: unreasonably expensive query on large datasets (I think removal of group by does this?)
 	my $sth = C4::Context->dbh->prepare($query);
 	my ($iso);
 	if (@_) {

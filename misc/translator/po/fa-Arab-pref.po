@@ -102,6 +102,18 @@ msgid "acquisitions.pref#BasketConfirmations# do not ask for confirmation."
 msgstr "برای تأئید سوال نکن"
 
 # Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# Don't send"
+msgstr ""
+
+# Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# Send"
+msgstr ""
+
+# Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# blind copy (BCC) to logged in user when sending serial or acquisitions claims notices."
+msgstr ""
+
+# Acquisitions > Policy
 msgid "acquisitions.pref#CurrencyFormat# 360 000,00 (FR)"
 msgstr "360 000,00 (فرانسه)"
 
@@ -169,9 +181,13 @@ msgstr "نرخ های پیش فرض مالیات هستند"
 msgid "admin.pref"
 msgstr "مدیریت"
 
-# Administration > CAS Authentication
-msgid "admin.pref CAS Authentication"
-msgstr "ورود با احراز هویت با استفاده از یک سرویس احراز هویت مرکزی (CAS)"
+# Administration > CAS authentication
+msgid "admin.pref CAS authentication"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref Google OpenID Connect"
+msgstr ""
 
 # Administration > Interface options
 msgid "admin.pref Interface options"
@@ -185,29 +201,37 @@ msgstr "گزینه های ورود"
 msgid "admin.pref Mozilla Persona"
 msgstr "پرسونای موزیلا"
 
+# Administration > SSL client certificate authentication
+msgid "admin.pref SSL client certificate authentication"
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref Search Engine"
+msgstr ""
+
 # Administration > Share anonymous usage statistics
 msgid "admin.pref Share anonymous usage statistics"
 msgstr ""
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# Use"
-msgstr "به کار بردن"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# Use"
+msgstr ""
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# field for SSL client certificate authentication"
-msgstr "فیلد گواهی احراز هویت مشتری SSL"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# field for SSL client certificate authentication"
+msgstr ""
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# no"
-msgstr "خیر"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# no"
+msgstr ""
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# the Common Name"
-msgstr "نام رایج"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# the Common Name"
+msgstr ""
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# the emailAddress"
-msgstr "آدرس پست الکترونیکی"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# the emailAddress"
+msgstr ""
 
 # Administration > Login options
 msgid "admin.pref#AutoLocation# Don't require"
@@ -240,6 +264,86 @@ msgstr "خیر"
 # Administration > Interface options
 msgid "admin.pref#DebugLevel# some"
 msgstr "بعضی"
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# When editing circulation rules show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# rules by default."
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# When editing notices and slips show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# notices and slips by default."
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# When editing overdue notice/status triggers show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# rules by default."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOAuth2ClientID# Google OAuth2 Client ID"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOAuth2ClientSecret# Google OAuth2 Client Secret"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Don't Use"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Google OpenID Connect login."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Use"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# You will need to select OAuth2 when creating an app in the google cloud console, and set the web origin to your_opac_url and the redirect url to your_opac_url/cgi-bin/koha/svc/auth/googleopenidconnect ."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnectDomain# . Leave blank for all google domains"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnectDomain# Google OpenID Connect Restrict to domain (or subdomain of this domain)"
+msgstr ""
 
 # Administration > Login options
 msgid "admin.pref#IndependentBranches# Don't prevent"
@@ -299,6 +403,18 @@ msgstr "به کار بردن"
 
 # Administration > Interface options
 msgid "admin.pref#ReturnpathDefault# as the return path or bounce address for undeliverable mail messages. If you leave this empty, the From address will be used (often defaulting to the admin address)."
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# Elasticsearch"
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# Zebra"
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# is the search engine used."
 msgstr ""
 
 # Administration > Login options
@@ -437,31 +553,31 @@ msgstr ""
 msgid "admin.pref#UsageStatsLibraryUrl# will be shown on the <a href=\"http://hea.koha-community.org\">Hea Koha community website</a>."
 msgstr ""
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# CAS for login authentication."
 msgstr "استفاده از سرویس احراز هویت مرکزی (CAS)برای ورود"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# Don't use"
 msgstr "به کار نبردن"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# Use"
 msgstr "به کار بردن"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# Don't Logout"
 msgstr "عدم خروج"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# Logout"
 msgstr "خروج"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# of CAS when logging out of Koha."
 msgstr "از  CAS هنگام خروج از کوها."
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casServerUrl# The CAS Authentication Server can be found at"
 msgstr "سرور احراز هویت CAS می تواند یافت شود در"
 
@@ -812,8 +928,8 @@ msgid "cataloguing.pref#EasyAnalyticalRecords# easy ways to create analytical re
 msgstr "راههای آسان برای ایجاد روابط رکوردهای تحلیلی "
 
 # Cataloging > Display
-msgid "cataloguing.pref#ISBD# Use the following as the ISBD template:"
-msgstr "از دستور زیر برای قالب ISBD استفاده کنید"
+msgid "cataloguing.pref#ISBD# Use the following as the staff ISBD template:"
+msgstr ""
 
 # Cataloging > Display
 msgid "cataloguing.pref#IntranetBiblioDefaultView# By default, display biblio records in"
@@ -928,8 +1044,8 @@ msgid "cataloguing.pref#OpacSuppression# an explanatory page ('This record is bl
 msgstr "مخفی نکردن"
 
 # Cataloging > Display
-msgid "cataloguing.pref#OpacSuppression# items marked as suppressed from OPAC search results. Note that you must have the <code>Suppress</code> index set up in Zebra and at least one suppressed biblio record, or your searches will be broken."
-msgstr "منابع خاص مشخص شده به عنوان ممنوع. توجه داشته باشید که شما باید <code>Suppress</code> نمایه راه اندازی در زبرا و حداقل یک منبع ممنوع  را داشته باشید، یا جستجوهای شما ناتمام مانده باشد."
+msgid "cataloguing.pref#OpacSuppression# items marked as suppressed from OPAC search results."
+msgstr ""
 
 # Cataloging > Display
 msgid "cataloguing.pref#OpacSuppression# the 404 error page ('Not found')."
@@ -1324,6 +1440,18 @@ msgstr "اجازه ندادن"
 # Circulation > Holds Policy
 msgid "circulation.pref#AllowHoldDateInFuture# hold requests to be placed that do not enter the waiting list until a certain future date."
 msgstr "درخواست های رزرو برای جایگزینی تا زمانی که یک تاریخ خاصی در آینده در فهرست انتظار وارد نشوند."
+
+# Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# Allow"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# Don't allow"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# hold fulfillment to be limited by itemtype."
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#AllowHoldPolicyOverride# Allow"
@@ -1801,6 +1929,18 @@ msgstr "شامل شدن"
 msgid "circulation.pref#FinesIncludeGracePeriod# the grace period when calculating the fine for an overdue item."
 msgstr "مهلت تأئید هنگام محاسبه جریمه برای یک منبع تأخیری"
 
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# Charge a hold fee"
+msgstr ""
+
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# any time a hold is placed."
+msgstr ""
+
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# only if all items are checked out and the record has at least one hold already."
+msgstr ""
+
 # Circulation > Checkout Policy
 msgid "circulation.pref#HoldsInNoissuesCharge# Don't include"
 msgstr "شامل نشدن"
@@ -1917,6 +2057,30 @@ msgstr "شامل شدن"
 # Circulation > Checkout Policy
 msgid "circulation.pref#ManInvInNoissuesCharge# MANUAL_INV charges when summing up charges for noissuescharge."
 msgstr "شامل نشدن"
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoIssuesChargeGuarantees# Prevent a patron from checking out if the patron has guarantees owing in total more than"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoIssuesChargeGuarantees# [% local_currency %] in fines."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# Calculate \"No renewal before\" based on"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# Only relevant for loans calculated in days, hourly loans are not affected."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# date."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# exact time."
+msgstr ""
 
 # Circulation > Interface
 msgid "circulation.pref#NoticeCSS# Include the stylesheet at"
@@ -2226,6 +2390,18 @@ msgstr "کاربران می توانند به سیستم تحت وب امانت 
 msgid "circulation.pref#SelfCheckoutByLogin# Username and Password"
 msgstr "نام کاربری و کلمه عبور"
 
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Do not show"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Show"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# all items in the \"Checked-in items\" list, even items that were not checked out."
+msgstr ""
+
 # Circulation > Self Checkout
 msgid "circulation.pref#ShowPatronImageInWebBasedSelfCheck# Don't show"
 msgstr "عدم نمایش"
@@ -2279,8 +2455,8 @@ msgid "circulation.pref#StaticHoldsQueueWeight# (as branchcodes, separated by co
 msgstr "(به عنوان کدهای شعبه ها، جدا شده با کاما؛ اگر خالی است، همه کتابخانه ها استفاده می کنند )"
 
 # Circulation > Holds Policy
-msgid "circulation.pref#StaticHoldsQueueWeight# Satisfy holds from the libraries"
-msgstr "تأئید رزروها از کتابخانه ها."
+msgid "circulation.pref#StaticHoldsQueueWeight# Satisfy holds using items from the libraries"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#StaticHoldsQueueWeight# in random order."
@@ -2289,6 +2465,18 @@ msgstr "به ترتیب تصادفی."
 # Circulation > Holds Policy
 msgid "circulation.pref#StaticHoldsQueueWeight# in that order."
 msgstr "به آن ترتیب."
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# open"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# open or closed"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# when they are"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#SuspendHoldsIntranet# Allow"
@@ -2467,6 +2655,10 @@ msgid "circulation.pref#canreservefromotherbranches# a user from one library to 
 msgstr "یک کاربر از یک کتابخانه برای رزرو کردن یک منبع از کتابخانه دیگر"
 
 # Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# . Ignore items with the following statuses when counting items"
+msgstr ""
+
+# Circulation > Holds Policy
 msgid "circulation.pref#decreaseLoanHighHolds# Don't enable"
 msgstr "فعال نکردن"
 
@@ -2479,8 +2671,16 @@ msgid "circulation.pref#decreaseLoanHighHolds# days for items with more than"
 msgstr "روز برای منابعی با بیش از"
 
 # Circulation > Holds Policy
-msgid "circulation.pref#decreaseLoanHighHolds# holds."
-msgstr "رزروها"
+msgid "circulation.pref#decreaseLoanHighHolds# holds"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# on the record"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# over the number of holdable items on the record"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#decreaseLoanHighHolds# the reduction of loan period to"
@@ -2918,6 +3118,18 @@ msgstr "لازم بودن"
 msgid "enhanced_content.pref#HTML5MediaExtensions# Media file extensions"
 msgstr "لازم بودن"
 
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# Don't embed"
+msgstr ""
+
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# Embed"
+msgstr ""
+
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# YouTube links as videos."
+msgstr ""
+
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReadometer# Add"
 msgstr "اضافه کردن"
@@ -3105,6 +3317,18 @@ msgstr "اضافه نکردن"
 # Enhanced Content > Open Library
 msgid "enhanced_content.pref#OpenLibraryCovers# cover images from Open Library to search results and item detail pages on the OPAC."
 msgstr "تصاویر روی جلد از Open Library برای صفحات نتایج جستجوی و جزئیات منابع در اپک."
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# Don't show"
+msgstr ""
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# Show"
+msgstr ""
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# search results from Open Library on the OPAC."
+msgstr ""
 
 # Enhanced Content > OverDrive
 msgid "enhanced_content.pref#OverDriveClientKey# ."
@@ -3391,11 +3615,11 @@ msgid "i18n_l10n.pref#AddressFormat# Format postal addresses using"
 msgstr "اشکال تاریخ مانند"
 
 # I18N/L10N
-msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [Zip/Postal Code] [City] - [Country])"
+msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [ZIP/Postal Code] [City] - [Country])"
 msgstr ""
 
 # I18N/L10N
-msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [Zip/Postal Code], [Country])"
+msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [ZIP/Postal Code], [Country])"
 msgstr ""
 
 # I18N/L10N
@@ -3714,6 +3938,10 @@ msgstr "ظاهر"
 msgid "opac.pref Features"
 msgstr "ویژگی ها"
 
+# OPAC > Payments
+msgid "opac.pref Payments"
+msgstr ""
+
 # OPAC > Policy
 msgid "opac.pref Policy"
 msgstr "خط مشی"
@@ -3733,6 +3961,18 @@ msgstr "اجازه دادن"
 # OPAC > Shelf Browser
 msgid "opac.pref Shelf Browser"
 msgstr "بروزر قفسه"
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# Allow"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# Don't allow"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# patrons to choose their own privacy settings for showing the patron's checkouts to the patron's guarantor\"."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#AllowPurchaseSuggestionBranchChoice# Allow"
@@ -3765,18 +4005,6 @@ msgstr "به کار بردن شماره امانت گیرنده"
 # OPAC > Privacy
 msgid "opac.pref#AnonymousPatron# as the Anonymous Patron (for anonymous suggestions and reading history)"
 msgstr "به عنوان کاربر ناشناس (برای پیشنهادهای ناشناس و تاریخچه مطالعه)"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# Don't show"
-msgstr "عدم نمایش"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# Show"
-msgstr "نمایش"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# images for <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">authorized values</a> (such as lost statuses and locations) in search results and item detail pages on the OPAC."
-msgstr "تصاویر برای <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">ارزش های مستند</a> (مانند محل نگهداری و وضعیت های مفقود شده) در صفحات جزئیات منبع و نتایج جستجو در اپک."
 
 # OPAC > Appearance
 msgid "opac.pref#BiblioDefaultView# By default, show bib records"
@@ -3841,6 +4069,30 @@ msgstr "نگهداری کردن"
 # OPAC > Privacy
 msgid "opac.pref#EnableOpacSearchHistory# patron search history in the OPAC."
 msgstr "تاریخچه جستجوی کاربران در اپک."
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Allow"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Don't allow"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Production"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Sandbox"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# mode."
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# patrons to make payments from the OPAC via PayPal in"
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#GoogleIndicTransliteration# Don't show"
@@ -3969,6 +4221,10 @@ msgstr "اجازه ندادن"
 # OPAC > Features
 msgid "opac.pref#OPACFinesTab# patrons to access the Fines tab on the My Account page on the OPAC."
 msgstr "کاربران برای دسترسی به تب جریمه ها در صفحه حساب کاربری من در اپک."
+
+# OPAC > Features
+msgid "opac.pref#OPACISBD# Use the following as the OPAC ISBD template:"
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OPACMySummaryHTML# <br />Note: The placeholders {BIBLIONUMBER}, {TITLE}, {ISBN} and {AUTHOR} will be replaced with information from the displayed record."
@@ -4423,6 +4679,10 @@ msgid "opac.pref#OpacMaintenance# a warning that the OPAC is under maintenance, 
 msgstr "یک اخطار مه اپک در دست نگهداری است، به جای خود اپک. توجه: این اخطار مشابهی را در زمانی که پایگاه نیاز به به روز رسانی دارد نشان می دهد، اما بدون قید و شرط."
 
 # OPAC > Appearance
+msgid "opac.pref#OpacMaintenanceNotice# Show the following HTML when OpacMaintenance is enabled:"
+msgstr ""
+
+# OPAC > Appearance
 msgid "opac.pref#OpacMaxItemsToDisplay# Display up to"
 msgstr ""
 
@@ -4463,8 +4723,8 @@ msgid "opac.pref#OpacPublic# Enable"
 msgstr "فعال کردن"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
-msgstr "اپک عمومی کوها. اپک شخصی پیش از دسترسی به اپک نیاز به تأئید دارد."
+msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalAllowed# Allow"
@@ -4505,6 +4765,22 @@ msgstr "کتابخانه ای که منبع از آن امانت گرفته شد
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalBranch# the patron's home library"
 msgstr "کاربر کتابخانه اصلی"
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword#  to recover their password via e-mail in the OPAC"
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# Library users are "
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# allowed"
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# not allowed"
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OpacSeparateHoldings# Don't separate"
@@ -4587,6 +4863,14 @@ msgid "opac.pref#OpacTopissue# patrons to access a list of the most checked out 
 msgstr "کاربران برای دسترسی به یک فهرست منابع بیشتر امانت گرفته شده از طریق اپک. توجه داشته باشید که این موضوع تا اندازه ای آزمایشی است، و باید از آن هنگامی که مجموعه شما بزرگ است، احتناب شود."
 
 # OPAC > Self Registration
+msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# (separate columns with |)"
+msgstr ""
+
+# OPAC > Self Registration
+msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-modification screen:"
+msgstr ""
+
+# OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistration# Allow"
 msgstr "اجازه دادن"
 
@@ -4595,8 +4879,8 @@ msgid "opac.pref#PatronSelfRegistration# Don't allow"
 msgstr "اجازه ندادن"
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfRegistration# library patrons to register an account via the OPAC."
-msgstr "کاربران برای وارد شدن به حساب کاربری خود در اپک."
+msgid "opac.pref#PatronSelfRegistration# library patrons to register or modify their account via the OPAC."
+msgstr ""
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationAdditionalInstructions# Display the following additional instructions for patrons who self register via the OPAC ( HTML is allowed ):"
@@ -4615,8 +4899,8 @@ msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# (separate columns 
 msgstr "(جدا کردن ستون ها با |)"
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron entry screen:"
-msgstr "در زیر <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>ستون های پایگاه اطلاعاتی</a> در صفحه ورود اطلاعات کاربران ظاهر نخواهد شد:"
+msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-registration screen:"
+msgstr ""
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationDefaultCategory# Use the patron category code"
@@ -4644,6 +4928,22 @@ msgstr "اجازه دادن"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationVerifyByEmail# that a self-registering patron verify his or herself via email."
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalChargeDescription# The patron should see the charge description as "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalPwd# The password for the PayPal account to receive payments is "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalSignature# The signature for the PayPal account to receive payments is "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalUser# The email address to receive PayPal payments is "
 msgstr ""
 
 # OPAC > Features
@@ -4795,6 +5095,18 @@ msgid "opac.pref#SocialNetworks# social network links in opac detail pages"
 msgstr "لینک های شبکه اجتماعی در صفحات جزئیات اپک"
 
 # OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# Don't store"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# Store"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# the last patron to return an item. This setting is independent of opacreadinghistory/AnonymousPatron."
+msgstr ""
+
+# OPAC > Privacy
 msgid "opac.pref#TrackClicks# Don't track"
 msgstr "عدم نمایش"
 
@@ -4902,18 +5214,6 @@ msgstr "اجازه ندادن"
 msgid "opac.pref#reviewson# patrons to make comments on items on the OPAC."
 msgstr "کاربران برای درج کامنت روی منابع در اپک."
 
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# Allow"
-msgstr "اجازه دادن"
-
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# Don't allow"
-msgstr "اجازه ندادن"
-
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# patrons to select their branch on the OPAC or show branch names with callnumbers."
-msgstr "کاربران برای انتخاب شعبه شان در اپک یا نمایش نام شعبه ها با شماره بازیابی شان."
-
 # OPAC > Features
 msgid "opac.pref#suggestion# Allow"
 msgstr "اجازه دادن"
@@ -4936,6 +5236,18 @@ msgstr "عمومی"
 
 # Patrons > Norwegian patron database
 msgid "patrons.pref Norwegian patron database"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# Allow"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# Don't allow"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# staff to set the ability for a patron's checkouts to be viewed by linked patrons in the OPAC."
 msgstr ""
 
 # Patrons > General
@@ -5047,8 +5359,20 @@ msgid "patrons.pref#EnhancedMessagingPreferences# Don't allow"
 msgstr "اجازه ندادن"
 
 # Patrons > General
-msgid "patrons.pref#EnhancedMessagingPreferences# patrons to choose which notices they receive and when they receive them. Note that this only applies to certain kinds of notices."
-msgstr "کاربران برای انتخاب اینکه چه آگهی هایی و در چه زمانهایی آنها را دریافت کنند. توجه داشته باشید که این موضوع برای انواع خاصی از اگهی ها کاربرد دارد. "
+msgid "patrons.pref#EnhancedMessagingPreferences# Staff to manage which notices patrons will receive and when they will receive them. Note: this only applies to courtesy notices. To manage if patrons have also access to these settings, use EnhancedMessagingPreferencesOPAC."
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# Don't show"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# Show"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# patron messaging setting on the OPAC (note: EnhancedMessagingPreferences must be enabled)."
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#ExtendedPatronAttributes# Don't enable"
@@ -5167,8 +5491,8 @@ msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
 msgstr "تحویل در ارسال پیام های کوتاه."
 
 # Patrons > General
-msgid "patrons.pref#StatisticsFields# (separate fields with |)"
-msgstr "(جدا کردن فیلدها با |)"
+msgid "patrons.pref#StatisticsFields# (separate fields with |, without trailing |). Default if empty: location|itype|ccode"
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#StatisticsFields# Show the following fields from the items database table as columns on the statistics tab on the patron record: "
@@ -5227,8 +5551,8 @@ msgid "patrons.pref#intranetreadinghistory# Don't allow"
 msgstr "اجازه ندادن"
 
 # Patrons > General
-msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (it is stored regardless)."
-msgstr "کارکنان برای دسترسی به تاریخچه امانت های یک کاربر (این علیرغم میل ذخیره می شود(."
+msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#minPasswordLength# Login passwords for staff and patrons must be at least"
@@ -5385,6 +5709,22 @@ msgstr "عملگر \"PHR\" در شماره بازیابی و شماره استا
 # Searching > Search Form
 msgid "searching.pref#IntranetNumbersPreferPhrase# use"
 msgstr "به کار بردن"
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>If a record has more than this number of items, they availability statuses may be incorrect in the search results, but will be correct in the record details."
+msgstr ""
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>Leave empty for no limit on the number of items for which to check the status."
+msgstr ""
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# For records with many items, only check the availability status for the first"
+msgstr ""
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# items."
+msgstr ""
 
 # Searching > Results Display
 msgid "searching.pref#OPACItemsResultsDisplay# Don't show"
@@ -5883,6 +6223,10 @@ msgid "staff_client.pref#HidePatronName# the names of patrons that have items ch
 msgstr "اسامی کاربرانی که منابعی در امانت یا رزرو در صفحات جزئیات یا صفحه \"رزرو کردن\" دارند."
 
 # Staff Client > Appearance
+msgid "staff_client.pref#IntranetCirculationHomeHTML# Show the following HTML in its own div on the bottom of the home page of the circulation module:"
+msgstr ""
+
+# Staff Client > Appearance
 msgid "staff_client.pref#IntranetFavicon# Use the image at"
 msgstr "به کاربردن تصویر در"
 
@@ -5893,6 +6237,10 @@ msgstr "برای موارد دلخواه در کلاینت کارکنان. (ای
 # Staff Client > Appearance
 msgid "staff_client.pref#IntranetNav# Show the following HTML to the left of the More menu at the top of each page on the staff client (should be a list of links or blank):"
 msgstr "نمایش HTML زیر در سمت چپ منوهای بیشتر در بالای هر صفحه از کلاینت کارکنان (باید یک فهرست از لینک ها یا خالی باشد):"
+
+# Staff Client > Appearance
+msgid "staff_client.pref#IntranetReportsHomeHTML# Show the following HTML in its own div on the bottom of the home page of the reports module:"
+msgstr ""
 
 # Staff Client > Appearance
 msgid "staff_client.pref#IntranetSlipPrinterJS# Use the following JavaScript for printing slips. Define at least function printThenClose(). For use e.g. with Firefox PlugIn jsPrintSetup, see http://jsprintsetup.mozdev.org/:"
@@ -5915,20 +6263,8 @@ msgid "staff_client.pref#SlipCSS# Include the stylesheet at"
 msgstr "شامل شیوه نامه در"
 
 # Staff Client > Appearance
-msgid "staff_client.pref#SlipCSS# on Issue and Reserve Slips. (This should be a complete URL, starting with <code>http://</code>.)"
-msgstr "در یادداشت های شماره و رزرو. (این باید یک URL كامل باشد که شروع می شود با <code>http://</code>.)"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# Don't show"
-msgstr "عدم نمایش"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# Show"
-msgstr "نمایش"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# images for <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">authorized values</a> (such as lost statuses and locations) in search results."
-msgstr "تصاویر برای <a href=\"/cgi-bin/koha/admin/authorised_values.pl\"> ارزش های مستند</a> (مانند وضعیت مفقود شده و محل نگهداری ها) در نتایج جستجو."
+msgid "staff_client.pref#SlipCSS# on Issue and Hold Slips. (This should be a complete URL, starting with <code>http://</code>.)"
+msgstr ""
 
 # Staff Client > Options
 msgid "staff_client.pref#StaffDetailItemSelection# Disable"

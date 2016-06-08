@@ -19,11 +19,9 @@ package Koha::Template::Plugin::Cache;
 
 use strict;
 use warnings;
-use vars qw( $VERSION );
 use base qw( Template::Plugin );
 use Template::Plugin;
 use C4::Context;
-$VERSION = '0.01';
 
 #------------------------------------------------------------------------
 # new(\%options)

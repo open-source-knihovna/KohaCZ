@@ -304,6 +304,11 @@ Circulation:
               class: integer
             - '[% local_currency %] in fines.'
         -
+            - Prevent a patron from checking out if the patron has guarantees owing in total more than
+            - pref: NoIssuesChargeGuarantees
+              class: integer
+            - '[% local_currency %] in fines.'
+        -
             - pref: RentalsInNoissuesCharge
               choices:
                   yes: Include
@@ -443,6 +448,12 @@ Circulation:
             - "it will be updated to the right-hand value. E.g. '-1: 0' will cause an item that was set to 'Ordered' to now be available for loan."
             - Each pair of values should be on a separate line.
     Holds Policy:
+        -
+            - pref: AllowHoldItemTypeSelection
+              choices:
+                  yes: Allow
+                  no: "Don't allow"
+            - hold fulfillment to be limited by itemtype.
         -
             - pref: AllowRenewalIfOtherItemsAvailable
               choices:

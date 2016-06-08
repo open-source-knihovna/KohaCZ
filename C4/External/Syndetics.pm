@@ -26,11 +26,10 @@ use HTTP::Request::Common;
 use strict;
 use warnings;
 
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
 
 BEGIN {
     require Exporter;
-    $VERSION = 3.07.00.049;
     @ISA = qw(Exporter);
     @EXPORT = qw(
         &get_syndetics_index

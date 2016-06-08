@@ -21,13 +21,11 @@ use strict;
 #use warnings; FIXME - Bug 2505
 use CGI qw ( -utf8 );
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use C4::Context;
 use C4::Debug;
 
 BEGIN {
-    # set the version for version checking
-    $VERSION = 3.07.00.049;
     require Exporter;
     @ISA = qw(Exporter);
     @EXPORT = qw(

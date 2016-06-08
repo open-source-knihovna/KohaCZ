@@ -36,7 +36,7 @@ use Koha::Libraries;
 
 use Encode;
 
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
 
 my $engine; #XSLT Handler object
 my %authval_per_framework;
@@ -45,7 +45,6 @@ my %authval_per_framework;
 
 BEGIN {
     require Exporter;
-    $VERSION = 3.07.00.049;
     @ISA = qw(Exporter);
     @EXPORT = qw(
         &XSLTParse4Display
@@ -76,6 +75,7 @@ sub transformMARCXML4XSLT {
         @fields = $record->fields();
     };
     if ($@) { warn "PROBLEM WITH RECORD"; next; }
+    my $marcflavour = C4::Context->preference('marcflavour');
     my $av = getAuthorisedValues4MARCSubfields($frameworkcode);
     foreach my $tag ( keys %$av ) {
         foreach my $field ( $record->field( $tag ) ) {
@@ -83,8 +83,11 @@ sub transformMARCXML4XSLT {
                 my @new_subfields = ();
                 for my $subfield ( $field->subfields() ) {
                     my ( $letter, $value ) = @$subfield;
-                    $value = GetAuthorisedValueDesc( $tag, $letter, $value, '', $tagslib )
-                        if $av->{ $tag }->{ $letter };
+                    # Replace the field value with the authorised value *except* for MARC21/NORMARC field 942$n (suppression in opac)
+                    if ( !( $tag eq '942' && $subfield eq 'n' ) || $marcflavour eq 'UNIMARC' ) {
+                        $value = GetAuthorisedValueDesc( $tag, $letter, $value, '', $tagslib )
+                            if $av->{ $tag }->{ $letter };
+                    }
                     push( @new_subfields, $letter, $value );
                 } 
                 $field ->replace_with( MARC::Field->new(
@@ -157,13 +160,42 @@ sub _get_best_default_xslt_filename {
     return $xslfilename;
 }
 
+sub get_xslt_sysprefs {
+    my $sysxml = "<sysprefs>\n";
+    foreach my $syspref ( qw/ hidelostitems OPACURLOpenInNewWindow
+                              DisplayOPACiconsXSLT URLLinkText viewISBD
+                              OPACBaseURL TraceCompleteSubfields UseICU
+                              UseAuthoritiesForTracings TraceSubjectSubdivisions
+                              Display856uAsImage OPACDisplay856uAsImage 
+                              UseControlNumber IntranetBiblioDefaultView BiblioDefaultView
+                              OPACItemLocation DisplayIconsXSLT
+                              AlternateHoldingsField AlternateHoldingsSeparator
+                              TrackClicks opacthemes IdRef OpacSuppression / )
+    {
+        my $sp = C4::Context->preference( $syspref );
+        next unless defined($sp);
+        $sysxml .= "<syspref name=\"$syspref\">$sp</syspref>\n";
+    }
+
+    # singleBranchMode was a system preference, but no longer is
+    # we can retain it here for compatibility
+    my $singleBranchMode = Koha::Libraries->search->count == 1;
+    $sysxml .= "<syspref name=\"singleBranchMode\">$singleBranchMode</syspref>\n";
+
+    $sysxml .= "</sysprefs>\n";
+    return $sysxml;
+}
+
 sub XSLTParse4Display {
-    my ( $biblionumber, $orig_record, $xslsyspref, $fixamps, $hidden_items ) = @_;
-    my $xslfilename = C4::Context->preference($xslsyspref);
+    my ( $biblionumber, $orig_record, $xslsyspref, $fixamps, $hidden_items, $sysxml, $xslfilename, $lang ) = @_;
+
+    $sysxml ||= C4::Context->preference($xslsyspref);
+    $xslfilename ||= C4::Context->preference($xslsyspref);
+    $lang ||= C4::Languages::getlanguage();
+
     if ( $xslfilename =~ /^\s*"?default"?\s*$/i ) {
         my $htdocs;
         my $theme;
-        my $lang = C4::Languages::getlanguage();
         my $xslfile;
         if ($xslsyspref eq "XSLTDetailsDisplay") {
             $htdocs  = C4::Context->config('intrahtdocs');
@@ -190,7 +222,6 @@ sub XSLTParse4Display {
     }
 
     if ( $xslfilename =~ m/\{langcode\}/ ) {
-        my $lang = C4::Languages::getlanguage();
         $xslfilename =~ s/\{langcode\}/$lang/;
     }
 
@@ -198,28 +229,7 @@ sub XSLTParse4Display {
     my $record = transformMARCXML4XSLT($biblionumber, $orig_record);
     my $itemsxml  = buildKohaItemsNamespace($biblionumber, $hidden_items);
     my $xmlrecord = $record->as_xml(C4::Context->preference('marcflavour'));
-    my $sysxml = "<sysprefs>\n";
-    foreach my $syspref ( qw/ hidelostitems OPACURLOpenInNewWindow
-                              DisplayOPACiconsXSLT URLLinkText viewISBD
-                              OPACBaseURL TraceCompleteSubfields UseICU
-                              UseAuthoritiesForTracings TraceSubjectSubdivisions
-                              Display856uAsImage OPACDisplay856uAsImage 
-                              UseControlNumber IntranetBiblioDefaultView BiblioDefaultView
-                              OPACItemLocation DisplayIconsXSLT
-                              AlternateHoldingsField AlternateHoldingsSeparator
-                              TrackClicks opacthemes IdRef / )
-    {
-        my $sp = C4::Context->preference( $syspref );
-        next unless defined($sp);
-        $sysxml .= "<syspref name=\"$syspref\">$sp</syspref>\n";
-    }
 
-    # singleBranchMode was a system preference, but no longer is
-    # we can retain it here for compatibility
-    my $singleBranchMode = Koha::Libraries->search->count == 1;
-    $sysxml .= "<syspref name=\"singleBranchMode\">$singleBranchMode</syspref>\n";
-
-    $sysxml .= "</sysprefs>\n";
     $xmlrecord =~ s/\<\/record\>/$itemsxml$sysxml\<\/record\>/;
     if ($fixamps) { # We need to correct the HTML entities that Zebra outputs
         $xmlrecord =~ s/\&amp;amp;/\&amp;/g;

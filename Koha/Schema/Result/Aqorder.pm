@@ -158,11 +158,6 @@ __PACKAGE__->table("aqorders");
   is_foreign_key: 1
   is_nullable: 0
 
-=head2 budgetgroup_id
-
-  data_type: 'integer'
-  is_nullable: 0
-
 =head2 budgetdate
 
   data_type: 'date'
@@ -228,6 +223,29 @@ __PACKAGE__->table("aqorders");
   is_nullable: 1
   size: 16
 
+=head2 line_item_id
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 35
+
+=head2 suppliers_reference_number
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 35
+
+=head2 suppliers_reference_qualifier
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 3
+
+=head2 suppliers_report
+
+  data_type: 'text'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -282,8 +300,6 @@ __PACKAGE__->add_columns(
   { data_type => "float", is_nullable => 1, size => [6, 4] },
   "budget_id",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
-  "budgetgroup_id",
-  { data_type => "integer", is_nullable => 0 },
   "budgetdate",
   { data_type => "date", datetime_undef_if_invalid => 1, is_nullable => 1 },
   "sort1",
@@ -311,6 +327,14 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => 16,
   },
+  "line_item_id",
+  { data_type => "varchar", is_nullable => 1, size => 35 },
+  "suppliers_reference_number",
+  { data_type => "varchar", is_nullable => 1, size => 35 },
+  "suppliers_reference_qualifier",
+  { data_type => "varchar", is_nullable => 1, size => 3 },
+  "suppliers_report",
+  { data_type => "text", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -513,9 +537,9 @@ Composing rels: L</aqorder_users> -> borrowernumber
 __PACKAGE__->many_to_many("borrowernumbers", "aqorder_users", "borrowernumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-03-09 15:14:35
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:somjoqKl7W2FYfhmgw4LQQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-05-06 18:07:43
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:SQC7q+ZeARRBGvdzzWgSkw
 
 
-# You can replace this text with custom content, and it will be preserved on regeneration
+# You can replace this text with custom code or comments, and it will be preserved on regeneration
 1;

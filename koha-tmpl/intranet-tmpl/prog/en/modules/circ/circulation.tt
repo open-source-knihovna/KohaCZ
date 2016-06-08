@@ -3,6 +3,7 @@
 [% USE KohaDates %]
 [% USE ColumnsSettings %]
 [% USE ItemTypes %]
+[% USE Price %]
 [% IF Koha.Preference('ExportRemoveFields') OR Koha.Preference('ExportWithCsvProfile') %]
    [% SET exports_enabled = 1 %]
 [% END %]
@@ -17,7 +18,7 @@
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'calendar.inc' %]
 
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'strings.inc' %]
 [% INCLUDE 'datatables.inc' %]
 [% INCLUDE 'columns_settings.inc' %]
@@ -25,9 +26,9 @@
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery-ui-timepicker-addon.min.js"></script>
 [% INCLUDE 'timepicker.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.dataTables.rowGrouping.js"></script>
-<script type="text/javascript" src="[% themelang %]/js/pages/circulation.js"></script>
-<script type="text/javascript" src="[% themelang %]/js/checkouts.js"></script>
-<script type="text/javascript" src="[% themelang %]/js/holds.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/pages/circulation.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/checkouts.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/holds.js"></script>
 <script type="text/javascript">
 //<![CDATA[
 /* Set some variable needed in circulation.js */
@@ -47,6 +48,7 @@ var relatives_borrowernumbers = new Array();
 
 var MSG_ADD_MESSAGE = _("Add a new message");
 var MSG_EXPORT_SELECT_CHECKOUTS = _("You must select checkout(s) to export");
+var MSG_CONFIRM_DELETE_MESSAGE = _("Are you sure you want to delete this message? This cannot be undone.");
 
 columns_settings = [% ColumnsSettings.GetColumns( 'circ', 'circulation', 'issues-table', 'json' ) %]
 
@@ -62,7 +64,7 @@ columns_settings = [% ColumnsSettings.GetColumns( 'circ', 'circulation', 'issues
 
 // On-site checkout
 function toggle_onsite_checkout(){
-    if ( $("#onsite_checkout").attr('checked') ) {
+    if ( $("#onsite_checkout").prop('checked') ) {
         $("#duedatespec").val("[% todaysdate | $KohaDates with_hours => 1%]")
         [% IF !Koha.Preference('SpecifyDueDate') %]
             $("#duedatespec").datetimepicker('destroy');
@@ -87,6 +89,10 @@ $(document).ready(function() {
                 event.preventDefault(); }
             );
         }
+    });
+
+    $(".clickable").click(function() {
+        window.document.location = $(this).data('url');
     });
 
     [% IF !( CircAutoPrintQuickSlip == 'clear' ) %]
@@ -114,10 +120,9 @@ $(document).ready(function() {
         $('#table_borrowers tbody tr').removeClass('selected');
         $(this).addClass('selected');
         if (event.target.type !== 'radio') {
-            $(':radio', this).attr('checked', 'true')
+            $(':radio', this).prop('checked', 'true')
         }
     });
-
 });
 
 //]]>
@@ -207,6 +212,14 @@ $(document).ready(function() {
     <div class="dialog message">The patron has unpaid charges for holds, rentals etc of [% alert.OTHER_CHARGES %]</div>
 [% END %]
 
+[% IF alert.HIGHHOLDS %]
+    <div class="dialog message">High demand item. <b>Loan period was not shortened due to override.</b> Shortened due date would have been [% alert.HIGHHOLDS.returndate %] ([% alert.HIGHHOLDS.duration %] days).</div>
+[% END %]
+
+[% IF ( nopermission ) %]
+    <div class="dialog alert">Staff members are not allowed to discharge borrowers, nor borrowers to request a discharge.</div>
+[% END %]
+
 [% IF ( NEEDSCONFIRMATION ) %]
 <div class="yui-g">
 
@@ -229,6 +242,11 @@ $(document).ready(function() {
 [% IF ( DEBT ) %]
     <li>The patron has a debt of [% DEBT %].</li>
 [% END %]
+
+[% IF ( DEBT_GUARANTEES ) %]
+    <li>The patron's guarantees collectively have a debt of [% DEBT_GUARANTEES | $Price %].</li>
+[% END %]
+
 [% IF ( RENTALCHARGE && RENTALCHARGE > 0 ) %]
     <li>Rental charge for this item: [% RENTALCHARGE %]</li>
 [% END %]
@@ -299,7 +317,7 @@ $(document).ready(function() {
     </li>
 [% END %]
 
-[% IF  HIGHHOLDS %]
+[% IF HIGHHOLDS %]
     <li>High demand item. Loan period shortened to [% HIGHHOLDS.duration %] days (due [% HIGHHOLDS.returndate %]). Check out anyway?</li>
 [% END %]
 
@@ -318,16 +336,24 @@ $(document).ready(function() {
 </ul>
 
 [% IF HIGHHOLDS %]
-	<script language="JavaScript" type="text/javascript">
-	$(document).ready(function() {
-            $("input[name=duedatespec]:hidden").val('[% HIGHHOLDS.returndate %]');
-            if ('[% duedatespec %]' === '') {
-                $("input[name=restoreduedatespec]:hidden").val('highholds_empty');
-            } else {
-                $("input[name=restoreduedatespec]:hidden").val('[% duedatespec %]');
-            }
-	});
-	</script>
+<script language="JavaScript" type="text/javascript">
+$(document).ready(function() {
+    [% IF !override_high_holds %]
+        $("input[name=duedatespec]:hidden").val('[% HIGHHOLDS.returndate %]');
+        if ('[% duedatespec %]' === '') {
+            $("input[name=restoreduedatespec]:hidden").val('highholds_empty');
+        } else {
+            $("input[name=restoreduedatespec]:hidden").val('[% duedatespec %]');
+        }
+    [% END %]
+
+    $("#override_high_holds_tmp").on( 'change', function() {
+        if ( this.checked ) {
+            $("input[name=duedatespec]:hidden").val('');
+        }
+    });
+});
+</script>
 [% END %]
 
 [% IF CAN_user_circulate_force_checkout or HIGHHOLDS %]
@@ -335,6 +361,13 @@ $(document).ready(function() {
     <input type="hidden" name="restoreduedatespec" />
 
 [% IF (forceallow) %]<input type="hidden" name="forceallow" value="1">[% END %]
+
+[% IF HIGHHOLDS %]
+    <p class="circ-override-high-holds">
+    <input type="checkbox" name="override_high_holds_tmp" id="override_high_holds_tmp" value="1" />
+    <label for="override_high_holds_tmp">Don't decrease loan length based on holds</label>
+    </p>
+[% END %]
 
 [% IF ( RESERVED ) %]
     <p>
@@ -355,6 +388,7 @@ $(document).ready(function() {
     <input type="hidden" name="barcode" value="[% barcode |html %]" />
     <input type="hidden" name="borrowernumber" value="[% borrowernumber %]" />
     <input type="hidden" name="issueconfirmed" value="1" />
+    <input type="hidden" name="override_high_holds" value="[% override_high_holds %]"/>
     [% IF ( DEBT ) %]<input type="hidden" name="debt_confirmed" value="1" />[% END %]
     [% IF ( INVALID_DATE ) %]
     <p>
@@ -408,12 +442,12 @@ $(document).ready(function() {
         <button type="submit" class="deny" accesskey="n"><i class="fa fa-times"></i> No, don't check out (N)</button>
         [% END %]
     [% ELSE %]
-        <button type="submit" class="deny"><i class="fa fa-times></i> Continue</button>
+        <button type="submit" class="deny"><i class="fa fa-times"></i> Continue</button>
     [% END %]
 </form>
 
 [% IF ( RESERVED || ISSUED_TO_ANOTHER ) && (CAN_user_reserveforothers_place_holds ) %]
-    [% UNLESS flagged && noissues %]
+    [% UNLESS noissues %]
         <button type="submit" onclick="window.location.href='/cgi-bin/koha/reserve/request.pl?biblionumber=[% itembiblionumber %]&borrowernumber=[% borrowernumber %]'"><i class="fa fa-times-circle"></i> Cancel checkout and place a hold for [% INCLUDE 'patron-title.inc' %]</button>
     [% END %]
 [% END %]
@@ -424,6 +458,9 @@ $(document).ready(function() {
 
 <div class="yui-g">
 <div id="circ_impossible" class="dialog alert audio-alert-warning">
+    [% IF ( UNKNOWN_BARCODE ) %]
+        <h3>Barcode not found</h3>
+    [% END %]
 <!-- RESULT OF ISSUING REQUEST -->
         <ul>
         [% IF ( STATS ) %]
@@ -435,7 +472,7 @@ $(document).ready(function() {
         [% END %]
 
         [% IF ( UNKNOWN_BARCODE ) %]
-            <li>The barcode was not found [% barcode |html %]
+            <li>The barcode was not found: <span class="ex">[% barcode |html %]</span>
 	    [% IF ( fast_cataloging ) %]
 	        [% IF ( CAN_user_editcatalogue_fast_cataloging ) %]
             <a href="/cgi-bin/koha/cataloguing/addbiblio.pl?frameworkcode=FA&amp;barcode=[% barcode |uri %]&amp;circborrowernumber=[% borrowernumber %]&amp;branch=[% branch %]&amp;duedatespec=[% duedatespec %]&amp;stickyduedate=[% stickyduedate %]">Fast cataloging</a>
@@ -568,14 +605,12 @@ No patron matched <span class="ex">[% message %]</span>
 
 [% IF (forceallow) %]<input type="hidden" name="forceallow" value="1">[% END %]
     <input type="hidden" name="branch" value="[% branch %]" />
-    <input type="hidden" name="printer" value="[% printer %]" />
     <input type="hidden" name="duedatespec" value="[% duedatespec %]" />
     <input type="hidden" name="stickyduedate" value="[% stickyduedate %]" />
 
-    <table id="table_borrowers">
+    <table id="table_borrowers" class="table_borrowers">
         <thead>
             <tr>
-                <th></th>
                 <th>Name</th>
                 <th>Cardnumber</th>
                 <th>Category</th>
@@ -585,8 +620,7 @@ No patron matched <span class="ex">[% message %]</span>
         </thead>
         <tbody>
             [% FOREACH borrower IN borrowers %]
-            <tr>
-                <td><input type="radio" name="borrowernumber" value="[% borrower.borrowernumber %]" /></td>
+            <tr class="clickable" data-url="/cgi-bin/koha/circ/circulation.pl?borrowernumber=[% borrower.borrowernumber %]">
                 <td>[% borrower.surname %], [% borrower.firstname %]</td>
                 <td>[% borrower.cardnumber %]</td>
                 <td>[% borrower.categorycode %]</td>
@@ -596,7 +630,6 @@ No patron matched <span class="ex">[% message %]</span>
             [% END %]
         </tbody>
     </table>
-    <fieldset class="action"><input type="submit" value="Select" /></fieldset>
 </fieldset>
 </form>
 [% ELSE %]
@@ -611,12 +644,7 @@ No patron matched <span class="ex">[% message %]</span>
 [% END %]
 
 [% IF ( !noissues ) || ( Koha.Preference('OnSiteCheckouts') && Koha.Preference('OnSiteCheckoutsForce') )%]
-[% IF ( flagged ) %]
 <div class="yui-u first">
-[% ELSE %]
-<div>
-
-[% END %]
 
 <form method="post" action="/cgi-bin/koha/circ/circulation.pl" id="mainform" name="mainform" autocomplete="off">
     <input type="hidden" name="restoreduedatespec" />
@@ -631,7 +659,7 @@ No patron matched <span class="ex">[% message %]</span>
 
     [% IF (forceallow) %]<input type="hidden" name="forceallow" value="1">[% END %]
 
-    <label for="barcode">Checking out to [% INCLUDE 'patron-title.inc' %]</label>
+    <label class="circ_barcode" for="barcode">Checking out to [% INCLUDE 'patron-title.inc' %]</label>
 
 	<div class="hint">Enter item barcode:</div>
 
@@ -642,55 +670,80 @@ No patron matched <span class="ex">[% message %]</span>
     [% END %]
     <button type="submit" class="btn">Check out</button>
 
-    [% UNLESS flagged and noissues %]
-        <div class="date-select">
-            [% IF NEEDSCONFIRMATION %]
-                <input type="checkbox" name="auto_renew" id="auto_renew" value="auto_renew" disabled="disabled" />
-            [% ELSE %]
-                <input type="checkbox" name="auto_renew" id="auto_renew" value="auto_renew" />
+    <div id="show-checkout-settings">
+        <a href="#"><i class="fa fa-caret-right checkout-settings-icon"></i> Checkout settings</a>
+    </div>
+
+    <div class="checkout-settings">
+
+        [% UNLESS ( noissues && Koha.Preference('OnSiteCheckoutsForce') ) %]
+            [% IF ( SpecifyDueDate ) %]
+                <div id="specify-due-date" class="checkout-setting">
+                    <div class="hint">Specify due date [% INCLUDE 'date-format.inc' %]: </div>
+                    [% IF ( duedatespec ) %]
+                        <input type="text" size="13" id="duedatespec" name="duedatespec" value="[% duedatespec %]" readonly="readonly" />
+                    [% ELSE %]
+                        <input type="text" size="13" id="duedatespec" name="duedatespec" value="" readonly="readonly" />
+                    [% END %]
+                    <label for="stickyduedate"> Remember for session:</label>
+                    [% IF ( stickyduedate ) %]
+                        <input type="checkbox" id="stickyduedate" onclick="this.form.barcode.focus();" name="stickyduedate" checked="checked" />
+                    [% ELSE %]
+                        <input type="checkbox" id="stickyduedate" onclick="this.form.barcode.focus();" name="stickyduedate" />
+                    [% END %]
+                    <button class="btn btn-small action" id="cleardate" name="cleardate" onclick="this.checked = false; this.form.duedatespec.value = ''; this.form.stickyduedate.checked = false; this.form.barcode.focus(); return false;" >Clear</button>
+                </div>
             [% END %]
+        [% END %]
 
-            <label for="auto_renew">Automatic renewal</label>
-        </div>
-    [% END %]
+        [% UNLESS ( noissues ) %]
+            <div id="set-automatic-renewal" class="checkout-setting">
+                [% IF NEEDSCONFIRMATION %]
+                    <input type="checkbox" name="auto_renew" id="auto_renew" value="auto_renew" disabled="disabled" />
+                [% ELSE %]
+                    <input type="checkbox" name="auto_renew" id="auto_renew" value="auto_renew" />
+                [% END %]
 
-    [% UNLESS ( noissues && Koha.Preference('OnSiteCheckoutsForce') ) %]
-        [% IF ( SpecifyDueDate ) %]
-            <div class="date-select">
-                <div class="hint">Specify due date [% INCLUDE 'date-format.inc' %]: </div>
-                [% IF ( duedatespec ) %]
-                    <input type="text" size="13" id="duedatespec" name="duedatespec" value="[% duedatespec %]" readonly="readonly" />
+                <label for="auto_renew">Automatic renewal</label>
+            </div>
+            [% IF Koha.Preference('decreaseLoanHighHolds') %]
+                <div id="set_high_holds_overrride" class="checkout-setting">
+                    [% IF NEEDSCONFIRMATION %]
+                        [% IF override_high_holds %]
+                            <input type="checkbox" name="override_high_holds" id="override_high_holds" value="1" disabled="disabled" checked="checked"/>
+                        [% ELSE %]
+                            <input type="checkbox" name="override_high_holds" id="override_high_holds" value="1" disabled="disabled"/>
+                        [% END %]
+                    [% ELSE %]
+                        [% IF override_high_holds %]
+                            <input type="checkbox" name="override_high_holds" id="override_high_holds" value="1" checked="checked" />
+                        [% ELSE %]
+                            <input type="checkbox" name="override_high_holds" id="override_high_holds" value="1" />
+                        [% END %]
+                    [% END %]
+                    <label for="override_high_holds">Don't decrease checkout length based on holds</label>
+                </div>
+            [% END %]
+        [% END %]
+
+        [% IF Koha.Preference('OnSiteCheckouts') %]
+            <div id="onsite_checkout-select" class="checkout-setting">
+                [% IF noissues %]
+                    <div class="onsite-checkout-only">
+                        <input type="checkbox" id="onsite_checkout" name="onsite_checkout_forced" checked="checked" disabled="disabled" /> <label for="onsite_checkout">On-site checkouts only. Automatic due date: </label>
+                        <input type="text" name="duedatespec" id="duedatespec" readonly="readonly" />
+                        <input type="hidden" name="onsite_checkout" checked="checked" value="1" />
+                    </div>
                 [% ELSE %]
-                    <input type="text" size="13" id="duedatespec" name="duedatespec" value="" readonly="readonly" />
+                    <input type="checkbox" id="onsite_checkout" name="onsite_checkout" /> <label for="onsite_checkout">On-site checkout</label>
                 [% END %]
-                <label for="stickyduedate"> Remember for session:</label>
-                [% IF ( stickyduedate ) %]
-                    <input type="checkbox" id="stickyduedate" onclick="this.form.barcode.focus();" name="stickyduedate" checked="checked" />
-                [% ELSE %]
-                    <input type="checkbox" id="stickyduedate" onclick="this.form.barcode.focus();" name="stickyduedate" />
-                [% END %]
-                <button class="btn btn-small action" id="cleardate" name="cleardate" onclick="this.checked = false; this.form.duedatespec.value = ''; this.form.stickyduedate.checked = false; this.form.barcode.focus(); return false;" >Clear</button>
             </div>
         [% END %]
-    [% END %]
 
-    [% IF Koha.Preference('OnSiteCheckouts') %]
-        <div class="onsite_checkout-select">
-            [% IF noissues %]
-                <div class="onsite-checkout-only">
-                    <input type="checkbox" id="onsite_checkout" name="onsite_checkout_forced" checked="checked" disabled="disabled" /> <label for="onsite_checkout">On-site checkouts only. Automatic due date: </label>
-                    <input type="text" name="duedatespec" id="duedatespec" readonly="readonly" />
-                    <input type="hidden" name="onsite_checkout" checked="checked" value="1" />
-                </div>
-            [% ELSE %]
-                <input type="checkbox" id="onsite_checkout" name="onsite_checkout" /> <label for="onsite_checkout">On-site checkout</label>
-            [% END %]
-        </div>
-    [% END %]
+    </div> <!-- /.checkout-settings -->
 
           <input type="hidden" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" />
           <input type="hidden" name="branch" value="[% branch %]" />
-          <input type="hidden" name="printer" value="[% printer %]" />
           <input type="hidden" name="print" value="maybe" />
           <input type="hidden" name="debt_confirmed" value="[% debt_confirmed %]" />
                 [% IF ( CHARGES ) %]
@@ -717,7 +770,6 @@ No patron matched <span class="ex">[% message %]</span>
     <div class="yui-u">
 [% END %]
 
-    [% IF flagged %]
         [% IF ( noissues ) %]
             [% IF ( Koha.Preference('OnSiteCheckouts') && Koha.Preference('OnSiteCheckoutsForce') ) %]
                 <div id="circmessages" class="circmessage attention">
@@ -737,6 +789,14 @@ No patron matched <span class="ex">[% message %]</span>
         [% END %]
 
 		<ul>
+
+                   [% IF ( modifications ) %]
+                    <li><span class="circ-hlt">Pending modifications:</span> Patron has pending modifications.
+                            [% IF CAN_user_borrowers && ( !Koha.Preference('IndependentBranchesPatronModifications') || borrower.branch == branch ) %]
+                                    <a href="/cgi-bin/koha/members/members-update.pl">View all pending patron modifications</a>
+                            [% END %]
+                   </li>
+                  [% END %]
 
 			[% IF ( warndeparture ) %]
 			<li><span class="circ-hlt">Expiration:</span> Patron's card will expire soon.
@@ -791,21 +851,27 @@ No patron matched <span class="ex">[% message %]</span>
                 [% IF ( odues ) %]<li>[% IF ( nonreturns ) %]<span class="circ-hlt">Overdues: Patron has ITEMS OVERDUE</span>. See highlighted items <a href="#checkouts">below</a>[% END %]</li>
             [% END %]
 
-        	[% IF ( charges ) %]
-			    <li>
-            <span class="circ-hlt">Fees &amp; Charges:</span> Patron has  <a href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% borrowernumber %]">Outstanding fees &amp; charges[% IF ( chargesamount ) %] of [% chargesamount %][% END %]</a>.
-                [% IF ( charges_is_blocker ) %]
-                    <span class="circ-hlt">Checkouts are BLOCKED because fine balance is OVER THE LIMIT.</span>
-                [% END %]
-            <a href="/cgi-bin/koha/members/pay.pl?borrowernumber=[% borrowernumber %]">Make payment</a> or
-            <a href="/cgi-bin/koha/members/paycollect.pl?borrowernumber=[% borrowernumber %]">Pay all fines</a></li>
-			[% END %]
+            [% IF ( charges ) %]
+                [% INCLUDE 'blocked-fines.inc'
+                    fines = chargesamount
+                %]
+            [% END %]
 
-        	[% IF ( credits ) %]
-			<li>
-                <span class="circ-hlt">Credits:</span> Patron has a credit[% IF ( creditsamount ) %] of [% creditsamount %][% END %]
-            </li>
-			[% END %]
+            [% IF ( charges_guarantees ) %]
+                <li>
+                    <span class="circ-hlt">Fees &amp; Charges:</span> Patron's guarantees collectively owe [% chargesamount_guarantees %].
+                        [% IF ( charges_guarantees_is_blocker ) %]
+                            <span class="circ-hlt">Checkouts are BLOCKED because fine balance is OVER THE LIMIT.</span>
+                        [% END %]
+                </li>
+            [% END %]
+
+
+            [% IF ( credits ) %]
+                <li>
+                    <span class="circ-hlt">Credits:</span> Patron has a credit[% IF ( creditsamount ) %] of [% creditsamount %][% END %]
+                </li>
+            [% END %]
 
 			</ul>
         </div>
@@ -849,11 +915,11 @@ No patron matched <span class="ex">[% message %]</span>
                 <li>
                     <span class="circ-hlt">
                         [% message.message_date | $KohaDates %]
-                        [% Branches.GetName( lib_messages_loo.branchcode ) %]
+                        [% Branches.GetName( message.branchcode ) %]
                         <i>"[% message.message %]"</i>
                     </span>
                     [% IF message.branchcode == branch OR Koha.Preference('AllowAllMessageDeletion') %]
-                        <a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% message.message_id %]&amp;borrowernumber=[% message.borrowernumber %]">[Delete]</a>
+                        <a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% message.message_id %]&amp;borrowernumber=[% message.borrowernumber %]" onclick="return confirm(MSG_CONFIRM_DELETE_MESSAGE);">[Delete]</a>
                     [% END %]
                 </li>
             [% END %]
@@ -866,9 +932,6 @@ No patron matched <span class="ex">[% message %]</span>
         </ul>
     </div>
 
-     <!-- /If flagged -->[% END %]
-
-	
 </div>
 </div>
 
@@ -981,7 +1044,7 @@ No patron matched <span class="ex">[% message %]</span>
 [% END %]
 </div> <!-- reservesloop -->
 
-[% ELSE %]
+[% ELSIF borrowernumber %]
     <div class="dialog message">This patron does not exist. <a href="/cgi-bin/koha/members/members-home.pl">Find another patron?</a></div>
 [% END %] <!-- borrowernumber and borrower-->
 </div></div>

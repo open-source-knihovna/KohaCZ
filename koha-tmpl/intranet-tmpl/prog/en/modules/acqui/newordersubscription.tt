@@ -3,7 +3,7 @@
 [% USE Koha %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Serials [% biblionumber %]</title>
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript">
@@ -27,9 +27,9 @@
         } ) )
 
         $("#show_only_renewed").click(function(){
-            updateRowsVisibility($(this+":checked").val());
+            updateRowsVisibility( $(this).is(":checked") );
         });
-        $("#show_only_renewed").attr('checked', false);
+        $("#show_only_renewed").prop('checked', false);
         updateRowsVisibility(false);
 
         $("#advsearch_form").show();
@@ -41,7 +41,7 @@
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'acquisitions-search.inc' %]
 
-<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/acqui/acqui-home.pl">Acquisitions</a> &rsaquo; <a href="/cgi-bin/koha/acqui/supplier.pl?supplierid=[% supplierid %]">[% booksellername %]</a> &rsaquo; <a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% basketno %]">Shopping Basket [% basketno %]</a> &rsaquo; Add order from a subscription</div>
+<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/acqui/acqui-home.pl">Acquisitions</a> &rsaquo; <a href="/cgi-bin/koha/acqui/supplier.pl?booksellerid=[% booksellerid %]">[% booksellername %]</a> &rsaquo; <a href="/cgi-bin/koha/acqui/basket.pl?basketno=[% basketno %]">Basket [% basketno %]</a> &rsaquo; Add order from a subscription</div>
 
 <div id="doc3" class="yui-t2">
     <div id="bd">

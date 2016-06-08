@@ -33,12 +33,13 @@ use C4::Log;
 use Koha::MetadataRecord::Authority;
 use Koha::Authorities;
 use Koha::Authority::Types;
+use Koha::Authority;
+use Koha::SearchEngine;
+use Koha::SearchEngine::Search;
 
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
 
 BEGIN {
-	# set the version for version checking
-    $VERSION = 3.07.00.049;
 
 	require Exporter;
 	@ISA = qw(Exporter);
@@ -308,8 +309,11 @@ sub SearchAuthorities {
                 }
             }
 
-            my $thisauthtypecode = Koha::Authorities->find($authid)->authtypecode;
-            my $thisauthtype = Koha::Authority::Types->find($thisauthtypecode);
+            my ( $thisauthtype, $thisauthtypecode );
+            if ( my $authority = Koha::Authorities->find($authid) ) {
+                $thisauthtypecode = $authority->authtypecode;
+                $thisauthtype = Koha::Authority::Types->find($thisauthtypecode);
+            }
             unless (defined $thisauthtype) {
                 $thisauthtypecode = $authtypecode;
                 $thisauthtype = Koha::Authority::Types->find($thisauthtypecode);
@@ -354,7 +358,10 @@ sub CountUsage {
         ### ZOOM search here
         my $query;
         $query= "an:".$authid;
-  		my ($err,$res,$result) = C4::Search::SimpleSearch($query,0,10);
+        # Should really be replaced with a real count call, this is a
+        # bad way.
+        my $searcher = Koha::SearchEngine::Search->new({index => $Koha::SearchEngine::BIBLIOS_INDEX});
+        my ($err,$res,$result) = $searcher->simple_search_compat($query,0,1);
         if ($err) {
             warn "Error: $err from search $query";
             $result = 0;
@@ -827,7 +834,8 @@ sub FindDuplicateAuthority {
             $_->[1]=~s/$filtervalues/ /g; $query.= " $op he:\"".$_->[1]."\"" if ($_->[0]=~/[A-z]/);
         }
     }
-    my ($error, $results, $total_hits) = C4::Search::SimpleSearch( $query, 0, 1, [ "authorityserver" ] );
+    my $searcher = Koha::SearchEngine::Search->new({index => $Koha::SearchEngine::AUTHORITIES_INDEX});
+    my ($error, $results, $total_hits) = $searcher->simple_search_compat( $query, 0, 1 );
     # there is at least 1 result => return the 1st one
     if (!defined $error && @{$results} ) {
         my $marcrecord = C4::Search::new_record_from_zebra(
@@ -1560,7 +1568,7 @@ sub merge {
 #         $update=1;
 #       }#for each tag
 #     }#foreach tagfield
-#     my $authoritynumber = TransformMarcToKoha($dbh,$marcrecord,"") ;
+#     my $authoritynumber = TransformMarcToKoha($marcrecord,"") ;
 #     if ($update==1){
 #       &ModAuthority($marcrecord,$authoritynumber,GetAuthTypeCode($authoritynumber)) ;
 #     }

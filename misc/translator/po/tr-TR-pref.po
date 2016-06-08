@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: Koha 3.0.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-06-12 12:52+0000\n"
-"PO-Revision-Date: 2015-11-25 11:46+0000\n"
-"Last-Translator: Onur <onurerdem@sdu.edu.tr>\n"
+"PO-Revision-Date: 2016-03-29 12:04+0000\n"
+"Last-Translator: Ugur <ugurbulgan@sdu.edu.tr>\n"
 "Language-Team: Koha Translation Team\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1448451980.000000\n"
+"X-POOTLE-MTIME: 1459253067.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -103,6 +103,18 @@ msgid "acquisitions.pref#BasketConfirmations# do not ask for confirmation."
 msgstr "doğrulama için sorma."
 
 # Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# Don't send"
+msgstr ""
+
+# Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# Send"
+msgstr ""
+
+# Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# blind copy (BCC) to logged in user when sending serial or acquisitions claims notices."
+msgstr ""
+
+# Acquisitions > Policy
 msgid "acquisitions.pref#CurrencyFormat# 360 000,00 (FR)"
 msgstr "360 000,00 (FR)"
 
@@ -170,9 +182,13 @@ msgstr "Vergi oranları"
 msgid "admin.pref"
 msgstr "Yönetim"
 
-# Administration > CAS Authentication
-msgid "admin.pref CAS Authentication"
-msgstr "CAS Kimlik Doğrulama"
+# Administration > CAS authentication
+msgid "admin.pref CAS authentication"
+msgstr "CAS kimlik koğrulaması"
+
+# Administration > Google OpenID Connect
+msgid "admin.pref Google OpenID Connect"
+msgstr ""
 
 # Administration > Interface options
 msgid "admin.pref Interface options"
@@ -186,29 +202,37 @@ msgstr "Oturum açma seçenekleri"
 msgid "admin.pref Mozilla Persona"
 msgstr "Mozilla Persona"
 
+# Administration > SSL client certificate authentication
+msgid "admin.pref SSL client certificate authentication"
+msgstr "SSL istemcisi sertifika kimlik doğrulaması"
+
+# Administration > Search Engine
+msgid "admin.pref Search Engine"
+msgstr ""
+
 # Administration > Share anonymous usage statistics
 msgid "admin.pref Share anonymous usage statistics"
 msgstr "Anonim kullanım istatistiklerini paylaş"
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# Use"
-msgstr "Kullan"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# Use"
+msgstr "Kullanım"
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# field for SSL client certificate authentication"
-msgstr "SSL istemci kimlik doğrulama için alan"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# field for SSL client certificate authentication"
+msgstr "SSL istemcisi sertifika kimlik doğrulama alanı"
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# no"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# no"
 msgstr "hayır"
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# the Common Name"
-msgstr "Common Name"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# the Common Name"
+msgstr "Ortak Ad"
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# the emailAddress"
-msgstr "emailAdres"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# the emailAddress"
+msgstr "the emailAddress"
 
 # Administration > Login options
 msgid "admin.pref#AutoLocation# Don't require"
@@ -242,6 +266,86 @@ msgstr "hayır"
 msgid "admin.pref#DebugLevel# some"
 msgstr "bazı"
 
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# When editing circulation rules show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# rules by default."
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# When editing notices and slips show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# notices and slips by default."
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# When editing overdue notice/status triggers show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# rules by default."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOAuth2ClientID# Google OAuth2 Client ID"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOAuth2ClientSecret# Google OAuth2 Client Secret"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Don't Use"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Google OpenID Connect login."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Use"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# You will need to select OAuth2 when creating an app in the google cloud console, and set the web origin to your_opac_url and the redirect url to your_opac_url/cgi-bin/koha/svc/auth/googleopenidconnect ."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnectDomain# . Leave blank for all google domains"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnectDomain# Google OpenID Connect Restrict to domain (or subdomain of this domain)"
+msgstr ""
+
 # Administration > Login options
 msgid "admin.pref#IndependentBranches# Don't prevent"
 msgstr "Engelleme"
@@ -264,10 +368,7 @@ msgstr "engelle"
 
 # Administration > Login options
 msgid "admin.pref#IndependentBranchesPatronModifications# staff (but not superlibrarians) from viewing and approving/denying patron modification requests for patrons belonging to other libraries."
-msgstr ""
-"personelin (superlibrarian personel hariç) diğer kütüphanelere ait olan "
-"kullanıcılardan gelen kullanıcı değişiklikleri isteklerini görebilmeleri ve "
-"onaylama/reddetmeleri."
+msgstr "personelin (superlibrarian personel hariç) diğer kütüphanelere ait olan kullanıcılardan gelen kullanıcı değişiklikleri isteklerini görebilmeleri ve onaylama/reddetmeleri."
 
 # Administration > Interface options
 msgid "admin.pref#KohaAdminEmailAddress# Use"
@@ -304,6 +405,18 @@ msgstr "Kullan"
 # Administration > Interface options
 msgid "admin.pref#ReturnpathDefault# as the return path or bounce address for undeliverable mail messages. If you leave this empty, the From address will be used (often defaulting to the admin address)."
 msgstr "yerine ulaşmayan e-postalar için dönüş yolu olarak ayarlanan e-posta adresi olarak, eğer bunu boş bırakırsanız ön tanımlı adres kullanılacaktır (genellikle sistem yöneticisi adresi öntanımlıdır)."
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# Elasticsearch"
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# Zebra"
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# is the search engine used."
+msgstr ""
 
 # Administration > Login options
 msgid "admin.pref#SessionRestrictionByIP# Disable"
@@ -347,11 +460,7 @@ msgstr "Paylaş"
 
 # Administration > Share anonymous usage statistics
 msgid "admin.pref#UsageStats# anonymous Koha usage data with the Koha community. You can see the data on the <a href=\"http://hea.koha-community.org\">Hea Koha community website</a>. You have to run misc/cronjobs/share_usage_with_koha_community.pl in a cronjob."
-msgstr ""
-"Koha topluluğu içerisindeki anonim Koha kullanımı. İlgili verileri <a href=\""
-"http://hea.koha-community.org\">Hea Koha topluluğu web sayfası</a> üzerinde "
-"görebilirsiniz. Bir cronjob içerisinde misc/cronjobs/"
-"share_usage_with_koha_community.pl çalıştırmalısınız."
+msgstr "Koha topluluğu içerisindeki anonim Koha kullanımı. İlgili verileri <a href=\"http://hea.koha-community.org\">Hea Koha topluluğu web sayfası</a> üzerinde görebilirsiniz. Bir cronjob içerisinde misc/cronjobs/share_usage_with_koha_community.pl çalıştırmalısınız."
 
 # Administration > Share anonymous usage statistics
 msgid "admin.pref#UsageStatsCountry# Note that this value has no effect if the UsageStats system preference is set to \"Don't share\""
@@ -445,31 +554,31 @@ msgstr "Kütüphane URL'si"
 msgid "admin.pref#UsageStatsLibraryUrl# will be shown on the <a href=\"http://hea.koha-community.org\">Hea Koha community website</a>."
 msgstr "<a href=\"http://hea.koha-community.org\">Hea Koha community web sayfası</a> üzerinde gösterilecektir."
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# CAS for login authentication."
 msgstr "CAS oturum açma kimlik doğrulaması."
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# Don't use"
 msgstr "Kullanma"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# Use"
 msgstr "Kullan"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# Don't Logout"
 msgstr "Oturumu Kapatma"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# Logout"
 msgstr "Oturumu kapat"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# of CAS when logging out of Koha."
 msgstr "Koha oturumunu kapatırken CAS oturumu."
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casServerUrl# The CAS Authentication Server can be found at"
 msgstr "CAS Doğrulama Sunucusu belirtilen adreste bulunabilir."
 
@@ -773,23 +882,23 @@ msgstr "<br/>"
 
 # Cataloging > Exporting
 msgid "cataloguing.pref#BibtexExportAdditionalFields# All values of repeating tags and subfields will be printed with the given BibTeX tag."
-msgstr ""
+msgstr "Yinelenen tag'lerin ve alt alanların tüm değerleri verilen BibTeX etiketi ile yazdırılacaktır."
 
 # Cataloging > Exporting
 msgid "cataloguing.pref#BibtexExportAdditionalFields# Include following fields when exporting BibTeX,"
-msgstr ""
+msgstr "BibTeX dışa aktarılırken aşağıdaki alanlar dahil edilecektir,"
 
 # Cataloging > Exporting
 msgid "cataloguing.pref#BibtexExportAdditionalFields# To specificy multiple marc tags/subfields as targets for a repeating BibTex tag, use the following format: BT_TAG: [TAG2$SUBFIELD1, TAG2$SUBFIELD2] ( e.g. notes: [501$a, 505$g] )"
-msgstr ""
+msgstr "Yinelenen bir BibTex tag'i için hedef olarak birden fazla marc tag/alt alanı belirtmek için aşağıdaki biçimi kullanın: BT_TAG: [TAG2$SUBFIELD1, TAG2$SUBFIELD2] ( e.g. notes: [501$a, 505$g] )"
 
 # Cataloging > Exporting
 msgid "cataloguing.pref#BibtexExportAdditionalFields# Use '@' ( with quotes ) as the BT_TAG to replace the bibtex record type with a field value of your choosing."
-msgstr ""
+msgstr "bibtex kayıt türünü seçtiğiniz bir alan değeri ile değiştirmek için, BT_TAG olarak '@' (tırnak işaretleri ile) kullanın."
 
 # Cataloging > Exporting
 msgid "cataloguing.pref#BibtexExportAdditionalFields# Use one line per tag in the format BT_TAG: TAG$SUBFIELD ( e.g. lccn: 010$a )"
-msgstr ""
+msgstr "BT_TAG formatında tag başına bir satır kullanın: TAG$SUBFIELD ( e.g. lccn: 010$a )"
 
 # Cataloging > Interface
 msgid "cataloguing.pref#DefaultClassificationSource# Use"
@@ -820,8 +929,8 @@ msgid "cataloguing.pref#EasyAnalyticalRecords# easy ways to create analytical re
 msgstr "analitik kayıt ilgililik oluşturmanın kolay yolları"
 
 # Cataloging > Display
-msgid "cataloguing.pref#ISBD# Use the following as the ISBD template:"
-msgstr "Aşağıdaki ISBD yi şablon olarak kullan:"
+msgid "cataloguing.pref#ISBD# Use the following as the staff ISBD template:"
+msgstr ""
 
 # Cataloging > Display
 msgid "cataloguing.pref#IntranetBiblioDefaultView# By default, display biblio records in"
@@ -889,7 +998,7 @@ msgstr "görüntüler:"
 
 # Cataloging > Display
 msgid "cataloguing.pref#MergeReportFields# fields to display for deleted records after merge"
-msgstr ""
+msgstr "Birleştirmeden sonra silinen kayıtlar için görüntülenecek alanlar"
 
 # Cataloging > Record Structure
 msgid "cataloguing.pref#NewItemsDefaultLocation# (should be a location code, or blank to disable)."
@@ -936,8 +1045,8 @@ msgid "cataloguing.pref#OpacSuppression# an explanatory page ('This record is bl
 msgstr "bir açıklama sayfası ('Bu kayıt blokeli')."
 
 # Cataloging > Display
-msgid "cataloguing.pref#OpacSuppression# items marked as suppressed from OPAC search results. Note that you must have the <code>Suppress</code> index set up in Zebra and at least one suppressed biblio record, or your searches will be broken."
-msgstr "OPAC arama sonuçlarında supressed olarak işaretlenmiş materyaller. Zebra içerisinde <code>Suppress</code> dizininin kurulmuş olması gerektiğini ve en az bir supressed bibliyo kaydınız olması gerektiğini göz önünde bulundurun, aksi takdirde aramalarınız sekteye uğrayacaktır."
+msgid "cataloguing.pref#OpacSuppression# items marked as suppressed from OPAC search results."
+msgstr "OPAC arama sonuçlarından bastırılmış olarak işaretlenmiş materyaller."
 
 # Cataloging > Display
 msgid "cataloguing.pref#OpacSuppression# the 404 error page ('Not found')."
@@ -963,23 +1072,23 @@ msgstr "<br/>"
 
 # Cataloging > Exporting
 msgid "cataloguing.pref#RisExportAdditionalFields# All values of repeating tags and subfields will be printed with the given RIS tag."
-msgstr ""
+msgstr "Yinelenen tag'ler ve alt alanların tüm değerleri verilen RIS tag'i ile yazdırılacaktır."
 
 # Cataloging > Exporting
 msgid "cataloguing.pref#RisExportAdditionalFields# Include following fields when exporting RIS,"
-msgstr ""
+msgstr "RIS dışa aktarılırkan aşağıdaki alanlar dahil edilecektir,"
 
 # Cataloging > Exporting
 msgid "cataloguing.pref#RisExportAdditionalFields# To specificy multiple marc tags/subfields as targets for a repeating RIS tag, use the following format: RIS_TAG: [TAG2$SUBFIELD1, TAG2$SUBFIELD2] ( e.g. NT: [501$a, 505$g] )"
-msgstr ""
+msgstr "Yinelenen bir RIS tag'i için hedef olarak birden fazla marc tag'i/alt alanı belirtmek için aşağıdaki biçimi kullanın: RIS_TAG: [TAG2$SUBFIELD1, TAG2$SUBFIELD2] ( e.g. NT: [501$a, 505$g] )"
 
 # Cataloging > Exporting
 msgid "cataloguing.pref#RisExportAdditionalFields# Use of TY ( record type ) as a key will <i>replace</i> the default TY with the field value of your choosing."
-msgstr ""
+msgstr "Bir anahtar olarak TY (kayıt türü) kullanılması, varsayılan TY'i seçtiğiniz alan değeri ile <i>değiştirecektir</i>."
 
 # Cataloging > Exporting
 msgid "cataloguing.pref#RisExportAdditionalFields# Use one line per tag in the format RIS_TAG: TAG$SUBFIELD ( e.g. LC: 010$a )"
-msgstr ""
+msgstr "RIS_TAG formatında tag başına bir satır kullanın: TAG$SUBFIELD ( e.g. LC: 010$a )"
 
 # Cataloging > Display
 msgid "cataloguing.pref#SeparateHoldings# Don't separate"
@@ -1334,6 +1443,18 @@ msgid "circulation.pref#AllowHoldDateInFuture# hold requests to be placed that d
 msgstr "beklemedeki ayırmaları belirli bir tarihe kadar bekleme listesine girmeyiniz."
 
 # Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# Allow"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# Don't allow"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# hold fulfillment to be limited by itemtype."
+msgstr ""
+
+# Circulation > Holds Policy
 msgid "circulation.pref#AllowHoldPolicyOverride# Allow"
 msgstr "İzin ver"
 
@@ -1555,11 +1676,11 @@ msgstr "toplu ödünç verilenler"
 
 # Circulation > Batch checkout
 msgid "circulation.pref#BatchCheckoutsValidCategories# (list of patron categories separated with a pipe '|')"
-msgstr ""
+msgstr "(kullanıcı kategorilerinin bir '|' boru işareti ile ayrılmış listesi)"
 
 # Circulation > Batch checkout
 msgid "circulation.pref#BatchCheckoutsValidCategories# Patron categories allowed to checkout in a batch"
-msgstr ""
+msgstr "Toplu olarak ödünç almaya izin verilen kullanıcı kategorileri"
 
 # Circulation > Checkin Policy
 msgid "circulation.pref#BlockReturnOfWithdrawnItems# Block"
@@ -1667,7 +1788,7 @@ msgstr "Etkinleştirilirse, izin verilen ödünç vermeler, normal ödünç verm
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#ConsiderOnSiteCheckoutsAsNormalCheckouts# on-site checkouts as normal checkouts."
-msgstr ""
+msgstr "Normal ödünç alma işlemleri olarak yerinde ödünç alma işlemleri"
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#DefaultLongOverdueChargeValue# <br>(Used when the longoverdue.pl script is called without the --charge parameter)"
@@ -1809,6 +1930,18 @@ msgstr "Dahil et"
 msgid "circulation.pref#FinesIncludeGracePeriod# the grace period when calculating the fine for an overdue item."
 msgstr "Gecikmiş bir materyalin cezasını hesaplarken dikkat alınan erteleme süresi."
 
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# Charge a hold fee"
+msgstr ""
+
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# any time a hold is placed."
+msgstr ""
+
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# only if all items are checked out and the record has at least one hold already."
+msgstr ""
+
 # Circulation > Checkout Policy
 msgid "circulation.pref#HoldsInNoissuesCharge# Don't include"
 msgstr "İçerme"
@@ -1925,6 +2058,30 @@ msgstr "Dahil et"
 # Circulation > Checkout Policy
 msgid "circulation.pref#ManInvInNoissuesCharge# MANUAL_INV charges when summing up charges for noissuescharge."
 msgstr "noissuescharge için giderler toplanırken MANUAL_INV giderler."
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoIssuesChargeGuarantees# Prevent a patron from checking out if the patron has guarantees owing in total more than"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoIssuesChargeGuarantees# [% local_currency %] in fines."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# Calculate \"No renewal before\" based on"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# Only relevant for loans calculated in days, hourly loans are not affected."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# date."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# exact time."
+msgstr ""
 
 # Circulation > Interface
 msgid "circulation.pref#NoticeCSS# Include the stylesheet at"
@@ -2234,6 +2391,18 @@ msgstr "Kullanıcıları web-tabanlı otomatik ödünç verme sistemine giriş y
 msgid "circulation.pref#SelfCheckoutByLogin# Username and Password"
 msgstr "Kullanıcı adı ve şifre"
 
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Do not show"
+msgstr "Gösterme"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Show"
+msgstr "Göster"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# all items in the \"Checked-in items\" list, even items that were not checked out."
+msgstr "\"Ödünç verilen materyaller\" listesindeki tüm materyaller, hatta ödünç verilmemiş materyaller dahil olmak üzere."
+
 # Circulation > Self Checkout
 msgid "circulation.pref#ShowPatronImageInWebBasedSelfCheck# Don't show"
 msgstr "Gösterme"
@@ -2287,8 +2456,8 @@ msgid "circulation.pref#StaticHoldsQueueWeight# (as branchcodes, separated by co
 msgstr "(dal kodları gibi, virgüllerle ayrılan; boşsa, tüm kütüphaneleri kullanır)."
 
 # Circulation > Holds Policy
-msgid "circulation.pref#StaticHoldsQueueWeight# Satisfy holds from the libraries"
-msgstr "Ayırmaları kütüphanelerden sağlayınız"
+msgid "circulation.pref#StaticHoldsQueueWeight# Satisfy holds using items from the libraries"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#StaticHoldsQueueWeight# in random order."
@@ -2297,6 +2466,18 @@ msgstr "rasgele sırala."
 # Circulation > Holds Policy
 msgid "circulation.pref#StaticHoldsQueueWeight# in that order."
 msgstr "bu sıralamada."
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# open"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# open or closed"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# when they are"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#SuspendHoldsIntranet# Allow"
@@ -2475,6 +2656,10 @@ msgid "circulation.pref#canreservefromotherbranches# a user from one library to 
 msgstr "bir kullanıcının bir kütüphaneden diğer bir kütüphanedeki materyali ayırtması"
 
 # Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# . Ignore items with the following statuses when counting items"
+msgstr ""
+
+# Circulation > Holds Policy
 msgid "circulation.pref#decreaseLoanHighHolds# Don't enable"
 msgstr "Etkinleştirme"
 
@@ -2487,8 +2672,16 @@ msgid "circulation.pref#decreaseLoanHighHolds# days for items with more than"
 msgstr "den daha fazla olan materyallerin günleri"
 
 # Circulation > Holds Policy
-msgid "circulation.pref#decreaseLoanHighHolds# holds."
-msgstr "ayırmalar."
+msgid "circulation.pref#decreaseLoanHighHolds# holds"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# on the record"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# over the number of holdable items on the record"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#decreaseLoanHighHolds# the reduction of loan period to"
@@ -2922,6 +3115,18 @@ msgstr "( | ile ayrılmış)."
 msgid "enhanced_content.pref#HTML5MediaExtensions# Media file extensions"
 msgstr "Ortam dosya uzantıları"
 
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# Don't embed"
+msgstr ""
+
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# Embed"
+msgstr ""
+
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# YouTube links as videos."
+msgstr ""
+
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReadometer# Add"
 msgstr "Ekle"
@@ -2932,7 +3137,7 @@ msgstr "Ekleme"
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReadometer# a \"Readometer\" that summarizes the reviews gathered by <a href='https://idreambooks.com/'>IDreamBooks.com</a> to the OPAC details page."
-msgstr ""
+msgstr "<a href='https://idreambooks.com/'>IDreamBooks.com</a> tarafından derlenen yorumları OPAC ayrıntıları sayfasında özetleyen bir \"Readometer\""
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksResults# Add"
@@ -2944,7 +3149,7 @@ msgstr "Ekleme"
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksResults# the rating from <a href='https://idreambooks.com/'>IDreamBooks.com</a> to OPAC search results."
-msgstr ""
+msgstr "<a href='https://idreambooks.com/'>IDreamBooks.com</a> sayfasından OPAC arama sonuçlarına aktarılan değerlendirmeler."
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReviews# Add"
@@ -2956,7 +3161,7 @@ msgstr "Ekleme"
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReviews# a tab on the OPAC details with book reviews from critics aggregated by <a href='https://idreambooks.com/'>IDreamBooks.com</a>."
-msgstr ""
+msgstr "<a href='https://idreambooks.com/'>IDreamBooks.com</a> tarafından toplanan eleştirmenlerden gelen kitap değerlendirmelerinin OPAC ayrıntıları sayfasındaki bir sekmesi."
 
 # Enhanced Content > Library Thing
 msgid "enhanced_content.pref#LibraryThingForLibrariesEnabled# <a href=\"http://www.librarything.com/forlibraries/\">sign up</a>, then enter in your ID below."
@@ -3109,6 +3314,18 @@ msgstr "Ekleme"
 # Enhanced Content > Open Library
 msgid "enhanced_content.pref#OpenLibraryCovers# cover images from Open Library to search results and item detail pages on the OPAC."
 msgstr "Açık bir Kütüphaneden OPAC’daki arama sonuçlarına ve materyal detay sayfalarına kapak resimleri."
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# Don't show"
+msgstr ""
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# Show"
+msgstr ""
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# search results from Open Library on the OPAC."
+msgstr ""
 
 # Enhanced Content > OverDrive
 msgid "enhanced_content.pref#OverDriveClientKey# ."
@@ -3395,12 +3612,12 @@ msgid "i18n_l10n.pref#AddressFormat# Format postal addresses using"
 msgstr "Posta adreslerinin kullandığı format"
 
 # I18N/L10N
-msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [Zip/Postal Code] [City] - [Country])"
-msgstr "Alma stili ([Adres] [Sokak numarası] - [Zip/Posta Kodu] [Şehir] - [Ülke])"
+msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [ZIP/Postal Code] [City] - [Country])"
+msgstr "Alman tarzı ([Adres] [Cadde numarası] - [ZIP/Posta kodu] [İl] - [İlçe]"
 
 # I18N/L10N
-msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [Zip/Postal Code], [Country])"
-msgstr "ABD stili ([Sokak numarası], [Adres] - [Şehir], [Zip/Posta Kodu], [Ülke])"
+msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [ZIP/Postal Code], [Country])"
+msgstr "ABD tarzı ([Cadde numarası], [Adres] - [İl], [ZIP/Posta Kodu], [Eyalet])"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Friday"
@@ -3516,7 +3733,7 @@ msgstr "labs.pref"
 
 # Labs > All
 msgid "labs.pref All"
-msgstr ""
+msgstr "Tümü"
 
 # Labs > All
 msgid "labs.pref#EnableAdvancedCatalogingEditor# <br/> NOTE:"
@@ -3532,7 +3749,7 @@ msgstr "Etkinleştir"
 
 # Labs > All
 msgid "labs.pref#EnableAdvancedCatalogingEditor# This feature is currently experimental, and may have bugs that cause corruption of records. It also does not include any support for UNIMARC or NORMARC fixed fields. Please help us test it and report any bugs, but do so at your own risk."
-msgstr ""
+msgstr "Bu özellik şu anda deneyseldir ve kayıtların bozulmasına neden olabilecek hataları olabilir. Ayrıca UNIMARC ya NORMARC sabit alanları için herhangi bir destek içermez. Lütfen bunu test etmemize yardımcı olun ve karşılaştığınız program hatalarını bize gönderin, ancak tüm risklerin size ait olduğunu unutmayın."
 
 # Labs > All
 msgid "labs.pref#EnableAdvancedCatalogingEditor# the advanced cataloging editor."
@@ -3552,11 +3769,11 @@ msgstr "Günlük"
 
 # Logging > Debugging
 msgid "logs.pref Debugging"
-msgstr ""
+msgstr "Hata ayıklama"
 
 # Logging > Logging
 msgid "logs.pref Logging"
-msgstr ""
+msgstr "Sistem günlüğü oluşturmak"
 
 # Logging > Logging
 msgid "logs.pref#AuthoritiesLog# Don't log"
@@ -3616,7 +3833,7 @@ msgstr "Yapma"
 
 # Logging > Debugging
 msgid "logs.pref#DumpTemplateVarsIntranet# dump all Template Toolkit variable to a comment in the html source for the staff intranet."
-msgstr ""
+msgstr "Tüm şablon araç seti değişkenlerinin personel intranet için html kaynağındaki bir yoruma dökümü."
 
 # Logging > Debugging
 msgid "logs.pref#DumpTemplateVarsOpac# Do"
@@ -3628,7 +3845,7 @@ msgstr "Yapma"
 
 # Logging > Debugging
 msgid "logs.pref#DumpTemplateVarsOpac# dump all Template Toolkit variable to a comment in the html source for the OPAC."
-msgstr ""
+msgstr "Tüm Şablon Araç Takımı değişkenlerini OPAC html kaynağındaki bir yoruma at."
 
 # Logging > Logging
 msgid "logs.pref#FinesLog# Don't log"
@@ -3668,11 +3885,11 @@ msgstr "Otomatik claim mesajı gönderildiğinde."
 
 # Logging > Logging
 msgid "logs.pref#ReportsLog# Don't log"
-msgstr ""
+msgstr "Sistem günlüğüne alma"
 
 # Logging > Logging
 msgid "logs.pref#ReportsLog# Log"
-msgstr ""
+msgstr "Sistem günlüğüne al"
 
 # Logging > Logging
 msgid "logs.pref#ReportsLog# when reports are added, deleted or changed."
@@ -3718,6 +3935,10 @@ msgstr "Görünüm"
 msgid "opac.pref Features"
 msgstr "Özellikler"
 
+# OPAC > Payments
+msgid "opac.pref Payments"
+msgstr ""
+
 # OPAC > Policy
 msgid "opac.pref Policy"
 msgstr "Politika"
@@ -3737,6 +3958,18 @@ msgstr "Self Registration"
 # OPAC > Shelf Browser
 msgid "opac.pref Shelf Browser"
 msgstr "Raf tarayıcı"
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# Allow"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# Don't allow"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# patrons to choose their own privacy settings for showing the patron's checkouts to the patron's guarantor\"."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#AllowPurchaseSuggestionBranchChoice# Allow"
@@ -3769,18 +4002,6 @@ msgstr "Üye Numarasını kullan"
 # OPAC > Privacy
 msgid "opac.pref#AnonymousPatron# as the Anonymous Patron (for anonymous suggestions and reading history)"
 msgstr "AnonimKullanıcı olarak (anonim öneriler ve okuma geçmişi için)"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# Don't show"
-msgstr "Gösterme"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# Show"
-msgstr "Göster"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# images for <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">authorized values</a> (such as lost statuses and locations) in search results and item detail pages on the OPAC."
-msgstr "OPAC arama sonuçları ve materyal detay sayfaları için görüntüler. <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">authorized values</a> ( kayıp durumlar ve konumlar gibi )"
 
 # OPAC > Appearance
 msgid "opac.pref#BiblioDefaultView# By default, show bib records"
@@ -3845,6 +4066,30 @@ msgstr "Tut"
 # OPAC > Privacy
 msgid "opac.pref#EnableOpacSearchHistory# patron search history in the OPAC."
 msgstr "OPAC kullanıcı tarama geçmişi."
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Allow"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Don't allow"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Production"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Sandbox"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# mode."
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# patrons to make payments from the OPAC via PayPal in"
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#GoogleIndicTransliteration# Don't show"
@@ -3973,6 +4218,10 @@ msgstr "İzin verme"
 # OPAC > Features
 msgid "opac.pref#OPACFinesTab# patrons to access the Fines tab on the My Account page on the OPAC."
 msgstr "OPAC üzerinde Hesabım sayfasındaki Cezalar sekmesine erişebilecek kullanıcılar."
+
+# OPAC > Features
+msgid "opac.pref#OPACISBD# Use the following as the OPAC ISBD template:"
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OPACMySummaryHTML# <br />Note: The placeholders {BIBLIONUMBER}, {TITLE}, {ISBN} and {AUTHOR} will be replaced with information from the displayed record."
@@ -4427,6 +4676,10 @@ msgid "opac.pref#OpacMaintenance# a warning that the OPAC is under maintenance, 
 msgstr "OPAC sistemi yerine, OPAC ‘ın bakımda olduğuna ilişkin uyarı. Not:  bu uyarı, veri tabanının koşulsuz olarak güncellenmesi gerektiğinde de çıkar."
 
 # OPAC > Appearance
+msgid "opac.pref#OpacMaintenanceNotice# Show the following HTML when OpacMaintenance is enabled:"
+msgstr ""
+
+# OPAC > Appearance
 msgid "opac.pref#OpacMaxItemsToDisplay# Display up to"
 msgstr "Şu miktara kadar görüntüle"
 
@@ -4467,8 +4720,8 @@ msgid "opac.pref#OpacPublic# Enable"
 msgstr "Etkinleştir"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
-msgstr "Genel olarak Koha OPAC. Giriş yapmadan önce, OPAC özel ayarlarının kimlik doğrulamasının olması gerekmektedir."
+msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalAllowed# Allow"
@@ -4509,6 +4762,22 @@ msgstr "materyalin ödünç verildiği kütüphane"
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalBranch# the patron's home library"
 msgstr "kulllanıcının ana kütüphanesi"
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword#  to recover their password via e-mail in the OPAC"
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# Library users are "
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# allowed"
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# not allowed"
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OpacSeparateHoldings# Don't separate"
@@ -4591,6 +4860,14 @@ msgid "opac.pref#OpacTopissue# patrons to access a list of the most checked out 
 msgstr "OPAC’daki en çok ödünç alınmış materyaller listesine giriş yapacak kullanıcılar. Bunun biraz deneysel olduğunu ve koleksiyonunuzda birçok sayıda materyal mevcutsa bundan kaçınılması gerektiğini göz önünde bulundurunuz."
 
 # OPAC > Self Registration
+msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# (separate columns with |)"
+msgstr ""
+
+# OPAC > Self Registration
+msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-modification screen:"
+msgstr ""
+
+# OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistration# Allow"
 msgstr "İzin ver"
 
@@ -4599,8 +4876,8 @@ msgid "opac.pref#PatronSelfRegistration# Don't allow"
 msgstr "İzin verme"
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfRegistration# library patrons to register an account via the OPAC."
-msgstr "OPAC aracılığı ile bir hesaba kayıt olacak kütüphane kullanıcıları."
+msgid "opac.pref#PatronSelfRegistration# library patrons to register or modify their account via the OPAC."
+msgstr ""
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationAdditionalInstructions# Display the following additional instructions for patrons who self register via the OPAC ( HTML is allowed ):"
@@ -4619,8 +4896,8 @@ msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# (separate columns 
 msgstr "(sütunları | ile ayırın)"
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron entry screen:"
-msgstr "Aşağıdaki <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'> veritabanı sütunları</a>  kulllanıcı giriş ekranında görünmeyecektir:"
+msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-registration screen:"
+msgstr ""
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationDefaultCategory# Use the patron category code"
@@ -4649,6 +4926,22 @@ msgstr "zorunlu kıl"
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationVerifyByEmail# that a self-registering patron verify his or herself via email."
 msgstr "kendi-kaydolan bir kullanıcının kayıt bilgilerini e-posta yoluyla doğruladığını."
+
+# OPAC > Payments
+msgid "opac.pref#PayPalChargeDescription# The patron should see the charge description as "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalPwd# The password for the PayPal account to receive payments is "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalSignature# The signature for the PayPal account to receive payments is "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalUser# The email address to receive PayPal payments is "
+msgstr ""
 
 # OPAC > Features
 msgid "opac.pref#QuoteOfTheDay# Disable"
@@ -4684,7 +4977,7 @@ msgstr "Şu IP numaraları ile başlayan adreslerden erişim"
 
 # OPAC > Restricted page
 msgid "opac.pref#RestrictedPageLocalIPs# do not need to be authenticated (comma separated - ex: '127.0.0,127.0.1')"
-msgstr ""
+msgstr "kimlik doğrulaması gerekmez (virgülle ayrılmış - ex: '127.0.0,127.0.1')"
 
 # OPAC > Restricted page
 msgid "opac.pref#RestrictedPageTitle# Use"
@@ -4692,7 +4985,7 @@ msgstr "Kullan"
 
 # OPAC > Restricted page
 msgid "opac.pref#RestrictedPageTitle# as title of your restricted page (appears in the breadcrumb and on the top of the restricted page)"
-msgstr ""
+msgstr "kısıtlanmış sayfanızın başlığı olarak (yer göstergeçlerinde ve kısıtlanmış sayfanın en üstünde görünür)"
 
 # OPAC > Policy
 msgid "opac.pref#SearchMyLibraryFirst# Don't limit"
@@ -4797,6 +5090,18 @@ msgstr "Etkinleştir"
 # OPAC > Features
 msgid "opac.pref#SocialNetworks# social network links in opac detail pages"
 msgstr "opac detay sayfalarındaki sosyal ağ bağlantıları"
+
+# OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# Don't store"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# Store"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# the last patron to return an item. This setting is independent of opacreadinghistory/AnonymousPatron."
+msgstr ""
 
 # OPAC > Privacy
 msgid "opac.pref#TrackClicks# Don't track"
@@ -4906,18 +5211,6 @@ msgstr "İzin verme"
 msgid "opac.pref#reviewson# patrons to make comments on items on the OPAC."
 msgstr "OPAC’da materyallere yorum yapacak kullanıcılar."
 
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# Allow"
-msgstr "İzin ver"
-
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# Don't allow"
-msgstr "İzin verme"
-
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# patrons to select their branch on the OPAC or show branch names with callnumbers."
-msgstr "kullanıcıların OPAC üzerinde kendi şubelerini seçmesi ya da yer numaraları ile birlikte şube isimlerini göstermesi."
-
 # OPAC > Features
 msgid "opac.pref#suggestion# Allow"
 msgstr "İzin ver"
@@ -4941,6 +5234,18 @@ msgstr "Genel"
 # Patrons > Norwegian patron database
 msgid "patrons.pref Norwegian patron database"
 msgstr "Norveç kullanıcı veritabanı"
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# Allow"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# Don't allow"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# staff to set the ability for a patron's checkouts to be viewed by linked patrons in the OPAC."
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#AutoEmailOpacUser# Don't send"
@@ -5051,8 +5356,20 @@ msgid "patrons.pref#EnhancedMessagingPreferences# Don't allow"
 msgstr "İzin verme"
 
 # Patrons > General
-msgid "patrons.pref#EnhancedMessagingPreferences# patrons to choose which notices they receive and when they receive them. Note that this only applies to certain kinds of notices."
-msgstr "hangi uyarıları ne zaman alacaklarını seçecek kullanıcılar. Bunun sadece belirli türdeki uyarılara uygulandığını göz önünde bulundurunuz."
+msgid "patrons.pref#EnhancedMessagingPreferences# Staff to manage which notices patrons will receive and when they will receive them. Note: this only applies to courtesy notices. To manage if patrons have also access to these settings, use EnhancedMessagingPreferencesOPAC."
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# Don't show"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# Show"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# patron messaging setting on the OPAC (note: EnhancedMessagingPreferences must be enabled)."
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#ExtendedPatronAttributes# Don't enable"
@@ -5076,7 +5393,7 @@ msgstr "Yapma"
 
 # Patrons > General
 msgid "patrons.pref#FeeOnChangePatronCategory# charge a fee when a patron changes to a category with an enrollment fee."
-msgstr ""
+msgstr "bir kullanıcı kayıt ücreti olan bir kategoriye değiştiğinde ücret uygula."
 
 # Patrons > General
 msgid "patrons.pref#MaxFine# Empty value means no limit. Single item caps are specified in the circulation rules matrix."
@@ -5092,7 +5409,7 @@ msgstr "[% local_currency %]."
 
 # Patrons > General
 msgid "patrons.pref#MembershipExpiryDaysNotice# Send an account expiration notice when a patron's card will expire in."
-msgstr ""
+msgstr "Kullanıcı kartının süresi dolduğunda bir hesap sona erme bildirimi gönder."
 
 # Patrons > General
 msgid "patrons.pref#MembershipExpiryDaysNotice# days."
@@ -5171,8 +5488,8 @@ msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
 msgstr "SMS mesajı göndermek için sürücü."
 
 # Patrons > General
-msgid "patrons.pref#StatisticsFields# (separate fields with |)"
-msgstr "( Alanları | ile ayırınız)"
+msgid "patrons.pref#StatisticsFields# (separate fields with |, without trailing |). Default if empty: location|itype|ccode"
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#StatisticsFields# Show the following fields from the items database table as columns on the statistics tab on the patron record: "
@@ -5231,8 +5548,8 @@ msgid "patrons.pref#intranetreadinghistory# Don't allow"
 msgstr "İzin verme"
 
 # Patrons > General
-msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (it is stored regardless)."
-msgstr "kullanıcının ödünç alma geçmişine erişecek personel (mutlaka kaydedilir)."
+msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
+msgstr "kullanıcının ödünç alma geçmişine erişebilecek personel (personel erişimine izin verilip verilmediğine bakmazsızın okuma geçmişi muhafaza edilir). "
 
 # Patrons > General
 msgid "patrons.pref#minPasswordLength# Login passwords for staff and patrons must be at least"
@@ -5389,6 +5706,22 @@ msgstr "yer numarası ve standart numara personel istemci aramalarda \"phr\" ope
 # Searching > Search Form
 msgid "searching.pref#IntranetNumbersPreferPhrase# use"
 msgstr "Kullan"
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>If a record has more than this number of items, they availability statuses may be incorrect in the search results, but will be correct in the record details."
+msgstr "<br/>Eğer bir kayıt üzerinde bu sayıdan daha fazla materyal varsa, kullanılabilirlik durumları arama sonuçlarında yanlış olabilir, ancak kayıt ayrıntılarında doğru olacaktır."
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>Leave empty for no limit on the number of items for which to check the status."
+msgstr "<br/>Durumu kontrol edilecek materyallerin sayısına herhangi bir sınır koymamak için boş bırakın."
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# For records with many items, only check the availability status for the first"
+msgstr "Çok fazla materyale sahip olan kayıtlar için, yalnızca ilk kaydın kullanılabilirlik durumunu denetleyin"
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# items."
+msgstr "materyaller."
 
 # Searching > Results Display
 msgid "searching.pref#OPACItemsResultsDisplay# Don't show"
@@ -5836,7 +6169,7 @@ msgstr "Etkinleştir"
 
 # Staff Client > Options
 msgid "staff_client.pref#AudioAlerts# audio alerts for events defined in the audio alerts section of administration."
-msgstr ""
+msgstr "yönetimin sesli uyarılar bölümünde tanımlanmış olaylar için sesli uyarılar."
 
 # Staff Client > Appearance
 msgid "staff_client.pref#Display856uAsImage# . Note: The corresponding XSLT option must be turned on."
@@ -5887,6 +6220,10 @@ msgid "staff_client.pref#HidePatronName# the names of patrons that have items ch
 msgstr "materyal ödünç alan, detay sayfalarında ya da \"Ayırma Yap\" ekranında ayırma yapan kullanıcıların isimleri."
 
 # Staff Client > Appearance
+msgid "staff_client.pref#IntranetCirculationHomeHTML# Show the following HTML in its own div on the bottom of the home page of the circulation module:"
+msgstr ""
+
+# Staff Client > Appearance
 msgid "staff_client.pref#IntranetFavicon# Use the image at"
 msgstr "de görüntüyü kullanınız"
 
@@ -5899,6 +6236,10 @@ msgid "staff_client.pref#IntranetNav# Show the following HTML to the left of the
 msgstr "Personel istemcideki her sayfanın en üstünde yer alan Daha fazla menüsünün solundaki takip eden HTML’yi gösteriniz (bağlantı listesi ya da boşluk olması gerekir):"
 
 # Staff Client > Appearance
+msgid "staff_client.pref#IntranetReportsHomeHTML# Show the following HTML in its own div on the bottom of the home page of the reports module:"
+msgstr ""
+
+# Staff Client > Appearance
 msgid "staff_client.pref#IntranetSlipPrinterJS# Use the following JavaScript for printing slips. Define at least function printThenClose(). For use e.g. with Firefox PlugIn jsPrintSetup, see http://jsprintsetup.mozdev.org/:"
 msgstr "Fişleri yazdırmak için aşağıdaki JavaScript'i kullanın. En az printThenClose() fonksiyonu tanımlayın. Firefox PlugIn jsPrintSetup ile kullanmak için http://jsprintsetup.mozdev.org/: adresine bakınız."
 
@@ -5908,7 +6249,7 @@ msgstr "Personel istemcinin tüm sayfalarındaki takip eden stil şablonunu(CSS)
 
 # Staff Client > Appearance
 msgid "staff_client.pref#IntranetUserJS# Include the following JavaScript on all pages in the staff client:"
-msgstr ""
+msgstr "Personel istemcideki tüm sayfalara aşağıdaki JavaScript'i ekleyin:"
 
 # Staff Client > Appearance
 msgid "staff_client.pref#IntranetmainUserblock# Show the following HTML in its own column on the main page of the staff client:"
@@ -5919,20 +6260,8 @@ msgid "staff_client.pref#SlipCSS# Include the stylesheet at"
 msgstr "de Stil sayfasını dahil et"
 
 # Staff Client > Appearance
-msgid "staff_client.pref#SlipCSS# on Issue and Reserve Slips. (This should be a complete URL, starting with <code>http://</code>.)"
-msgstr "Yayın ve Rezerv Slipleri. (Bunun <code>http://</code> ile başlayan tam bir URL olması gerekir .)"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# Don't show"
-msgstr "Gösterme"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# Show"
-msgstr "Göster"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# images for <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">authorized values</a> (such as lost statuses and locations) in search results."
-msgstr "arama sonuçlarında <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">authorized values</a> için görüntüler (kayıp durumlar ve konumlar gibi)."
+msgid "staff_client.pref#SlipCSS# on Issue and Hold Slips. (This should be a complete URL, starting with <code>http://</code>.)"
+msgstr ""
 
 # Staff Client > Options
 msgid "staff_client.pref#StaffDetailItemSelection# Disable"
@@ -5956,7 +6285,7 @@ msgstr "Göster"
 
 # Staff Client > Options
 msgid "staff_client.pref#UseWYSIWYGinSystemPreferences# WYSIWYG editor when editing certain HTML system preferences."
-msgstr ""
+msgstr "Belirli HTML sistem tercihlerini düzenlerken WYSIWYG editörü."
 
 # Staff Client > Appearance
 msgid "staff_client.pref#XSLTDetailsDisplay# <br />Options:<ul><li><a href=\"#\" class=\"set_syspref\" data-syspref=\"XSLTDetailsDisplay\" data-value=\"\">Leave empty</a> for \"no xslt\"</li><li>enter \"<a href=\"#\" class=\"set_syspref\" data-syspref=\"XSLTDetailsDisplay\" data-value=\"default\">default</a>\" for the default one</li><li>put a path to define a xslt file</li><li>put an URL for an external specific stylesheet.</li></ul>{langcode} will be replaced with current interface language"
@@ -6072,7 +6401,7 @@ msgstr "Toplu materyal değiştirme"
 
 # Tools > News
 msgid "tools.pref News"
-msgstr ""
+msgstr "Yenilikler"
 
 # Tools > Patron cards
 msgid "tools.pref Patron cards"
@@ -6100,7 +6429,7 @@ msgstr "Hem OPAC hem de personel istemci"
 
 # Tools > News
 msgid "tools.pref#NewsAuthorDisplay# Not at all"
-msgstr ""
+msgstr "Katiyen"
 
 # Tools > News
 msgid "tools.pref#NewsAuthorDisplay# OPAC only"
@@ -6108,7 +6437,7 @@ msgstr "yalnızca OPAC"
 
 # Tools > News
 msgid "tools.pref#NewsAuthorDisplay# Show the author for news items:"
-msgstr ""
+msgstr "Yeni materyaller için yazar bilgilerini göster:"
 
 # Tools > News
 msgid "tools.pref#NewsAuthorDisplay# Staff client only"
@@ -6216,15 +6545,15 @@ msgstr "Koha'nın silinen bibliyolar tablosu"
 
 # Web services > OAI-PMH
 msgid "web_services.pref#OAI-PMH:DeletedRecord# might be emptied or truncated at some point (transient)"
-msgstr ""
+msgstr "bir noktada boşaltılabilir veya kesilebilir (geçici)"
 
 # Web services > OAI-PMH
 msgid "web_services.pref#OAI-PMH:DeletedRecord# will never be emptied or truncated (persistent)"
-msgstr ""
+msgstr "asla boşaltılmayacak ya da kesilmeyecek (kalıcı)"
 
 # Web services > OAI-PMH
 msgid "web_services.pref#OAI-PMH:DeletedRecord# will never have any data in it (no)"
-msgstr ""
+msgstr "asla içinde herhangi bir veri olmayacak (hayır)"
 
 # Web services > OAI-PMH
 msgid "web_services.pref#OAI-PMH:MaxCount# Only return"

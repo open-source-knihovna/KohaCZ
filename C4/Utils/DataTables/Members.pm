@@ -13,7 +13,7 @@ sub search {
     my $firstletter = $params->{firstletter};
     my $categorycode = $params->{categorycode};
     my $branchcode = $params->{branchcode};
-    my $searchtype = $params->{searchtype} || 'start_with';
+    my $searchtype = $params->{searchtype} || 'contain';
     my $searchfieldstype = $params->{searchfieldstype} || 'standard';
     my $dt_params = $params->{dt_params};
 
@@ -61,6 +61,7 @@ sub search {
 
     my $searchfields = {
         standard => 'surname,firstname,othernames,cardnumber,userid',
+        surname => 'surname',
         email => 'email,emailpro,B_email',
         borrowernumber => 'borrowernumber',
         userid => 'userid',

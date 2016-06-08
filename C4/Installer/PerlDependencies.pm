@@ -765,27 +765,42 @@ our $PERL_DEPS = {
     'Mojolicious' => {
         'usage'    => 'REST API',
         'required' => '0',
-        'min_ver'  => '5.54',
+        'min_ver'  => '6.0',
     },
     'Swagger2' => {
         'usage'    => 'REST API',
         'required' => '0',
-        'min_ver'  => '0.28',
+        'min_ver'  => '0.59',
     },
     'UNIVERSAL::can' => {
         'usage'    => 'SIP',
         'required' => '1',
         'min_ver'  => '1.10',
     },
-    'URL::Encode' => {
-        'usage'    => 'PayPal',
-        'required' => '0',
-        'min_ver'  => '0.03',
-    },
     'WWW::YouTube::Download' => {
         'usage'    => 'HTML5Media streaming from YouTube',
         'required' => '0',
         'min_ver'  => '0.56',
+    },
+    'Net::SFTP::Foreign' => {
+        'usage'    => 'Edifact',
+        'required' => '0',
+        'min_ver'  => '1.73',
+    },
+    'Text::Unidecode' => {
+        'usage'    => 'Edifact',
+        'required' => '0',
+        'min_ver'  => '0.04',
+    },
+    'Time::Fake'   => {
+        'usage'    => 'Test code coverage',
+        'required' => '0',
+        'min_ver'  => '0.11',
+    },
+    'DBIx::RunSQL' => {
+        'usage'    => 'Load SQL files',
+        'required' => '1',
+        'min_ver'  => '0.14',
     },
 };
 

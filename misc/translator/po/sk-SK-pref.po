@@ -1,10 +1,9 @@
-# Paul <paul.vilhan@gmail.com>, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: KOHA 3.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-06-15 16:43+0000\n"
-"PO-Revision-Date: 2015-11-21 16:58+0200\n"
+"PO-Revision-Date: 2016-03-19 23:01+0200\n"
 "Last-Translator: Paul <paul.vilhan@gmail.com>\n"
 "Language-Team: Paul Vilhan\n"
 "Language: sk\n"
@@ -14,7 +13,7 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Virtaal 0.7.1\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-POOTLE-MTIME: 1432071840.000000\n"
+"X-POOTLE-MTIME: 1454610864.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -105,6 +104,18 @@ msgid "acquisitions.pref#BasketConfirmations# do not ask for confirmation."
 msgstr "nežiadať potvrdenie."
 
 # Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# Don't send"
+msgstr ""
+
+# Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# Send"
+msgstr ""
+
+# Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# blind copy (BCC) to logged in user when sending serial or acquisitions claims notices."
+msgstr ""
+
+# Acquisitions > Policy
 msgid "acquisitions.pref#CurrencyFormat# 360 000,00 (FR)"
 msgstr "360 000,00 (EUR)"
 
@@ -172,9 +183,13 @@ msgstr "Daňové sadzby sú"
 msgid "admin.pref"
 msgstr "Administrácia"
 
-# Administration > CAS Authentication
-msgid "admin.pref CAS Authentication"
+# Administration > CAS authentication
+msgid "admin.pref CAS authentication"
 msgstr "Overenie CAS"
+
+# Administration > Google OpenID Connect
+msgid "admin.pref Google OpenID Connect"
+msgstr ""
 
 # Administration > Interface options
 msgid "admin.pref Interface options"
@@ -188,28 +203,36 @@ msgstr "Možnosti prihlasovania"
 msgid "admin.pref Mozilla Persona"
 msgstr "Mozilla Persona"
 
+# Administration > SSL client certificate authentication
+msgid "admin.pref SSL client certificate authentication"
+msgstr "Overenie certifikátu klienta SSL"
+
+# Administration > Search Engine
+msgid "admin.pref Search Engine"
+msgstr ""
+
 # Administration > Share anonymous usage statistics
 msgid "admin.pref Share anonymous usage statistics"
 msgstr "Zdieľať štatistiku o anonymnom používaní"
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# Use"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# Use"
 msgstr "Použiť"
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# field for SSL client certificate authentication"
-msgstr "Pole pre overenie certifikátu klienta SSL"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# field for SSL client certificate authentication"
+msgstr "pole pre overenie certifikátu klienta SSL"
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# no"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# no"
 msgstr "nie"
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# the Common Name"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# the Common Name"
 msgstr "Bežné meno"
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# the emailAddress"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# the emailAddress"
 msgstr "E-mail"
 
 # Administration > Login options
@@ -244,6 +267,86 @@ msgstr "žiadne"
 msgid "admin.pref#DebugLevel# some"
 msgstr "niektoré"
 
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# When editing circulation rules show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# rules by default."
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# When editing notices and slips show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# notices and slips by default."
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# When editing overdue notice/status triggers show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# rules by default."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOAuth2ClientID# Google OAuth2 Client ID"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOAuth2ClientSecret# Google OAuth2 Client Secret"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Don't Use"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Google OpenID Connect login."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Use"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# You will need to select OAuth2 when creating an app in the google cloud console, and set the web origin to your_opac_url and the redirect url to your_opac_url/cgi-bin/koha/svc/auth/googleopenidconnect ."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnectDomain# . Leave blank for all google domains"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnectDomain# Google OpenID Connect Restrict to domain (or subdomain of this domain)"
+msgstr ""
+
 # Administration > Login options
 msgid "admin.pref#IndependentBranches# Don't prevent"
 msgstr "Nezabrániť"
@@ -266,9 +369,7 @@ msgstr "Zabrániť"
 
 # Administration > Login options
 msgid "admin.pref#IndependentBranchesPatronModifications# staff (but not superlibrarians) from viewing and approving/denying patron modification requests for patrons belonging to other libraries."
-msgstr ""
-"zamestnancom (ale nie hlavnému knihovníkovi) zobrazenie a schvaľovanie/"
-"zamietanie žiadostí o úpravu čitateľov patriacich do iných knižníc."
+msgstr "zamestnancom (ale nie hlavnému knihovníkovi) zobrazenie a schvaľovanie/zamietanie žiadostí o úpravu čitateľov patriacich do iných knižníc."
 
 # Administration > Interface options
 msgid "admin.pref#KohaAdminEmailAddress# Use"
@@ -305,6 +406,18 @@ msgstr "Použiť"
 # Administration > Interface options
 msgid "admin.pref#ReturnpathDefault# as the return path or bounce address for undeliverable mail messages. If you leave this empty, the From address will be used (often defaulting to the admin address)."
 msgstr "ako emailovú adresu nastavenú ako cestu nazad, ak ju necháte prázdnu, použije sa adresa administrátora."
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# Elasticsearch"
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# Zebra"
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# is the search engine used."
+msgstr ""
 
 # Administration > Login options
 msgid "admin.pref#SessionRestrictionByIP# Disable"
@@ -442,31 +555,31 @@ msgstr "URL knižnice"
 msgid "admin.pref#UsageStatsLibraryUrl# will be shown on the <a href=\"http://hea.koha-community.org\">Hea Koha community website</a>."
 msgstr "Toto sa zobrazí na <a href=\"http://hea.koha-community.org\">webstránke komunity Hea Koha</a>."
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# CAS for login authentication."
 msgstr "CAS pre overenie prihlásenia."
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# Don't use"
 msgstr "Nepoužiť"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# Use"
 msgstr "Použiť"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# Don't Logout"
 msgstr "Neodhlasovať sa"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# Logout"
 msgstr "Odhlásenie"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# of CAS when logging out of Koha."
 msgstr "z CAS pri odhlasovaní sa z Kohy."
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casServerUrl# The CAS Authentication Server can be found at"
 msgstr "Server overovania CAS možno nájsť na"
 
@@ -732,10 +845,7 @@ msgstr "Pri hľadaní zhodného ISBN pomocou nástroja importu záznamov,"
 
 # Cataloging > Importing
 msgid "cataloguing.pref#AggressiveMatchOnISBN# attempt to match aggressively by trying all variations of the ISBNs in the imported record as a phrase in the ISBN fields of already cataloged records.  Note that this preference has no effect if UseQueryParser is on."
-msgstr ""
-"agresívny pokus o zhodu pomocou všetkých variácií čísel ISBN v importovanom "
-"zázname v poliach ISBN už zakatalogizovaných záznamov. Pamätajte pritom, že "
-"toto nastavenie je neúčinné, pokiaľ je zapnutý UseQueryParser."
+msgstr "agresívny pokus o zhodu pomocou všetkých variácií čísel ISBN v importovanom zázname v poliach ISBN už zakatalogizovaných záznamov. Pamätajte pritom, že toto nastavenie je neúčinné, pokiaľ je zapnutý UseQueryParser."
 
 # Cataloging > Importing
 msgid "cataloguing.pref#AggressiveMatchOnISBN# do"
@@ -820,8 +930,8 @@ msgid "cataloguing.pref#EasyAnalyticalRecords# easy ways to create analytical re
 msgstr "ľahké spôsoby tvorby vzťahov analytických záznamov"
 
 # Cataloging > Display
-msgid "cataloguing.pref#ISBD# Use the following as the ISBD template:"
-msgstr "Použite nasledovné ako šablónu ISBD:"
+msgid "cataloguing.pref#ISBD# Use the following as the staff ISBD template:"
+msgstr ""
 
 # Cataloging > Display
 msgid "cataloguing.pref#IntranetBiblioDefaultView# By default, display biblio records in"
@@ -936,8 +1046,8 @@ msgid "cataloguing.pref#OpacSuppression# an explanatory page ('This record is bl
 msgstr "na vysvetľujúcu stránku ('Tento záznam je zablokovaný')."
 
 # Cataloging > Display
-msgid "cataloguing.pref#OpacSuppression# items marked as suppressed from OPAC search results. Note that you must have the <code>Suppress</code> index set up in Zebra and at least one suppressed biblio record, or your searches will be broken."
-msgstr "exempláre označené ako znemožnené zo stránky výsledkov hľadania v OPACu. Myslite na to, že musíte mať index <code>Znemožnenia</code> nastavený v Zebre a prinajmenšom jeden znemožnený biblio záznam, inak vaše hľadania zlyhajú."
+msgid "cataloguing.pref#OpacSuppression# items marked as suppressed from OPAC search results."
+msgstr "exempláre označené ako znemožnené z výsledkov hľadania v OPACu."
 
 # Cataloging > Display
 msgid "cataloguing.pref#OpacSuppression# the 404 error page ('Not found')."
@@ -1334,6 +1444,18 @@ msgid "circulation.pref#AllowHoldDateInFuture# hold requests to be placed that d
 msgstr "žiadosti o zadanie rezervácií, ktoré sa nezaraďujú na čakací zoznam až do určitého budúceho dátumu."
 
 # Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# Allow"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# Don't allow"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# hold fulfillment to be limited by itemtype."
+msgstr ""
+
+# Circulation > Holds Policy
 msgid "circulation.pref#AllowHoldPolicyOverride# Allow"
 msgstr "Povoliť"
 
@@ -1391,9 +1513,7 @@ msgstr "Nepovoliť"
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#AllowMultipleIssuesOnABiblio# patrons to check out multiple items from the same record.  (NOTE: This will only effect records without a subscription attached.)"
-msgstr ""
-"čitateľom výpožičku viacerých exemplárov rovnakého záznamu. (POZNÁMKA: Toto "
-"sa dotkne iba záznamov bez pridaného predplatného.)"
+msgstr "čitateľom výpožičku viacerých exemplárov rovnakého záznamu. (POZNÁMKA: Toto sa dotkne iba záznamov bez pridaného predplatného.)"
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#AllowNotForLoanOverride# Allow"
@@ -1811,6 +1931,18 @@ msgstr "Zahrnúť"
 msgid "circulation.pref#FinesIncludeGracePeriod# the grace period when calculating the fine for an overdue item."
 msgstr "dobu odkladu pri výpočte pokuty za oneskorený exemplár."
 
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# Charge a hold fee"
+msgstr ""
+
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# any time a hold is placed."
+msgstr ""
+
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# only if all items are checked out and the record has at least one hold already."
+msgstr ""
+
 # Circulation > Checkout Policy
 msgid "circulation.pref#HoldsInNoissuesCharge# Don't include"
 msgstr "Nezapočítať"
@@ -1928,6 +2060,30 @@ msgstr "Započítať"
 msgid "circulation.pref#ManInvInNoissuesCharge# MANUAL_INV charges when summing up charges for noissuescharge."
 msgstr "poplatky MANUAL_INV pri súčte poplatkov pre noissuescharge."
 
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoIssuesChargeGuarantees# Prevent a patron from checking out if the patron has guarantees owing in total more than"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoIssuesChargeGuarantees# [% local_currency %] in fines."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# Calculate \"No renewal before\" based on"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# Only relevant for loans calculated in days, hourly loans are not affected."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# date."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# exact time."
+msgstr ""
+
 # Circulation > Interface
 msgid "circulation.pref#NoticeCSS# Include the stylesheet at"
 msgstr "Zahrnúť stylesheet v"
@@ -2038,12 +2194,7 @@ msgstr "Zahrnúť nanajvýš"
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#PrintNoticesMaxLines# item lines in a printed overdue notice. If the number of items is greater than this number, the notice will end with a warning asking the borrower to check their online account for a full list of overdue items.  Set to 0 to include all overdue items in the notice, no matter how many there are."
-msgstr ""
-"riadkov exemplárov na tlačenom oznámení o omeškaní. Ak číslo exemplárov je "
-"väčšie ako toto číslo, oznámenie skončí s upozornením žiadajúcim čitateľa, "
-"aby si skontroloval svoj online účet a pozrel sa na celý zoznam omeškaných "
-"exemplárov. Nastavenie na 0 zahŕňa všetky omeškané exempláre v oznámení, bez "
-"ohľadu na ich počet."
+msgstr "riadkov exemplárov na tlačenom oznámení o omeškaní. Ak číslo exemplárov je väčšie ako toto číslo, oznámenie skončí s upozornením žiadajúcim čitateľa, aby si skontroloval svoj online účet a pozrel sa na celý zoznam omeškaných exemplárov. Nastavenie na 0 zahŕňa všetky omeškané exempláre v oznámení, bez ohľadu na ich počet."
 
 # Circulation > Interface
 msgid "circulation.pref#RecordLocalUseOnReturn# Don't record"
@@ -2241,6 +2392,18 @@ msgstr "Čitatelia sa musia prihlásiť do samoobslužného výpožičného syst
 msgid "circulation.pref#SelfCheckoutByLogin# Username and Password"
 msgstr "užívateľským menom a heslom"
 
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Do not show"
+msgstr "Nezobrazovať"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Show"
+msgstr "Zobrazovať"
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# all items in the \"Checked-in items\" list, even items that were not checked out."
+msgstr "všetky exempláre v zozname \"Vrátených exemplárov\", vrátane nevypožičaných exemplárov."
+
 # Circulation > Self Checkout
 msgid "circulation.pref#ShowPatronImageInWebBasedSelfCheck# Don't show"
 msgstr "Nezobraziť"
@@ -2294,8 +2457,8 @@ msgid "circulation.pref#StaticHoldsQueueWeight# (as branchcodes, separated by co
 msgstr "(ako kódy pobočiek, oddelených čiarkou; ak sú prázdne, používajú sa všetky knižnice)"
 
 # Circulation > Holds Policy
-msgid "circulation.pref#StaticHoldsQueueWeight# Satisfy holds from the libraries"
-msgstr "Poskytnúť rezervácie z knižníc"
+msgid "circulation.pref#StaticHoldsQueueWeight# Satisfy holds using items from the libraries"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#StaticHoldsQueueWeight# in random order."
@@ -2304,6 +2467,18 @@ msgstr "v náhodnom poradí."
 # Circulation > Holds Policy
 msgid "circulation.pref#StaticHoldsQueueWeight# in that order."
 msgstr "v tom poradí."
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# open"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# open or closed"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# when they are"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#SuspendHoldsIntranet# Allow"
@@ -2482,6 +2657,10 @@ msgid "circulation.pref#canreservefromotherbranches# a user from one library to 
 msgstr "užívateľovi z jednej knižnice zarezervovať exemplár z druhej knižnice"
 
 # Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# . Ignore items with the following statuses when counting items"
+msgstr ""
+
+# Circulation > Holds Policy
 msgid "circulation.pref#decreaseLoanHighHolds# Don't enable"
 msgstr "Nepovoliť"
 
@@ -2494,8 +2673,16 @@ msgid "circulation.pref#decreaseLoanHighHolds# days for items with more than"
 msgstr "dní pre exempláre s viac ako"
 
 # Circulation > Holds Policy
-msgid "circulation.pref#decreaseLoanHighHolds# holds."
-msgstr "rezervácie."
+msgid "circulation.pref#decreaseLoanHighHolds# holds"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# on the record"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# over the number of holdable items on the record"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#decreaseLoanHighHolds# the reduction of loan period to"
@@ -2929,6 +3116,18 @@ msgstr "(oddelené pomocou |)."
 msgid "enhanced_content.pref#HTML5MediaExtensions# Media file extensions"
 msgstr "koncovky mediálnych súborov"
 
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# Don't embed"
+msgstr ""
+
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# Embed"
+msgstr ""
+
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# YouTube links as videos."
+msgstr ""
+
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReadometer# Add"
 msgstr "Pridať"
@@ -2939,10 +3138,7 @@ msgstr "Nepridávať"
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReadometer# a \"Readometer\" that summarizes the reviews gathered by <a href='https://idreambooks.com/'>IDreamBooks.com</a> to the OPAC details page."
-msgstr ""
-"\"Merač čítanosti\", ktorý robí súhrn recenzií zozbieraných cez <a "
-"href='https://idreambooks.com/'>IDreamBooks.com</a> na stránku podrobností v "
-"OPACu."
+msgstr "\"Merač čítanosti\", ktorý robí súhrn recenzií zozbieraných cez <a href='https://idreambooks.com/'>IDreamBooks.com</a> na stránku podrobností v OPACu."
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksResults# Add"
@@ -2954,9 +3150,7 @@ msgstr "Nepridávať"
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksResults# the rating from <a href='https://idreambooks.com/'>IDreamBooks.com</a> to OPAC search results."
-msgstr ""
-"hodnotenie z <a href='https://idreambooks.com/'>IDreamBooks.com</a> na "
-"stránku výsledkov hľadania v OPACu."
+msgstr "hodnotenie z <a href='https://idreambooks.com/'>IDreamBooks.com</a> na stránku výsledkov hľadania v OPACu."
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReviews# Add"
@@ -2968,9 +3162,7 @@ msgstr "Nepridávať"
 
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReviews# a tab on the OPAC details with book reviews from critics aggregated by <a href='https://idreambooks.com/'>IDreamBooks.com</a>."
-msgstr ""
-"záložku na stránku podrobností v OPACu s recenziami kníh od kritikov "
-"združených na <a href='https://idreambooks.com/'>IDreamBooks.com</a>."
+msgstr "záložku na stránku podrobností v OPACu s recenziami kníh od kritikov združených na <a href='https://idreambooks.com/'>IDreamBooks.com</a>."
 
 # Enhanced Content > Library Thing
 msgid "enhanced_content.pref#LibraryThingForLibrariesEnabled# <a href=\"http://www.librarything.com/forlibraries/\">sign up</a>, then enter in your ID below."
@@ -3123,6 +3315,18 @@ msgstr "Nepridávať"
 # Enhanced Content > Open Library
 msgid "enhanced_content.pref#OpenLibraryCovers# cover images from Open Library to search results and item detail pages on the OPAC."
 msgstr "obrázky obálok z Open Library do výsledkov hľadania a na stránky podrobností o exemplári v OPACu."
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# Don't show"
+msgstr ""
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# Show"
+msgstr ""
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# search results from Open Library on the OPAC."
+msgstr ""
 
 # Enhanced Content > OverDrive
 msgid "enhanced_content.pref#OverDriveClientKey# ."
@@ -3409,12 +3613,12 @@ msgid "i18n_l10n.pref#AddressFormat# Format postal addresses using"
 msgstr "Formátovať čas v"
 
 # I18N/L10N
-msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [Zip/Postal Code] [City] - [Country])"
-msgstr "i18n_l10n.pref#AddressFormat# German style ([Adresa] [Číslo ulice] - [PSČ] [Mesto] - [Krajina])"
+msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [ZIP/Postal Code] [City] - [Country])"
+msgstr "Nemecký štýl ([Adresa] [Číslo ulice] - [PSČ] [Mesto] - [Krajina])"
 
 # I18N/L10N
-msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [Zip/Postal Code], [Country])"
-msgstr "i18n_l10n.pref#AddressFormat# US štýl ([Číslo domu], [Adresa] - [Mesto], [PSČ], [Krajina])"
+msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [ZIP/Postal Code], [Country])"
+msgstr "US štýl ([Číslo domu], [Adresa] - [Mesto], [PSČ], [Krajina])"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#CalendarFirstDayOfWeek# Friday"
@@ -3546,11 +3750,7 @@ msgstr "Zapnúť"
 
 # Labs > All
 msgid "labs.pref#EnableAdvancedCatalogingEditor# This feature is currently experimental, and may have bugs that cause corruption of records. It also does not include any support for UNIMARC or NORMARC fixed fields. Please help us test it and report any bugs, but do so at your own risk."
-msgstr ""
-"Táto funkcia je momentálne pokusná a môže mať mnoho chýb, ktoré spôsobujú "
-"porušenie záznamov. Takisto neposkytuje podporu pre pevné polia UNIMARCu "
-"alebo NORMARCu. Pomôžte nám, prosím, s testovaním a ohlasovaním akýchkoľvek "
-"chýb, robte to však na vlastné riziko."
+msgstr "Táto funkcia je momentálne pokusná a môže mať mnoho chýb, ktoré spôsobujú porušenie záznamov. Takisto neposkytuje podporu pre pevné polia UNIMARCu alebo NORMARCu. Pomôžte nám, prosím, s testovaním a ohlasovaním akýchkoľvek chýb, robte to však na vlastné riziko."
 
 # Labs > All
 msgid "labs.pref#EnableAdvancedCatalogingEditor# the advanced cataloging editor."
@@ -3736,6 +3936,10 @@ msgstr "Vzhľad"
 msgid "opac.pref Features"
 msgstr "Funkcie"
 
+# OPAC > Payments
+msgid "opac.pref Payments"
+msgstr ""
+
 # OPAC > Policy
 msgid "opac.pref Policy"
 msgstr "Pravidlo"
@@ -3755,6 +3959,18 @@ msgstr "Samoobslužná registrácia"
 # OPAC > Shelf Browser
 msgid "opac.pref Shelf Browser"
 msgstr "Prehliadač políc"
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# Allow"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# Don't allow"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# patrons to choose their own privacy settings for showing the patron's checkouts to the patron's guarantor\"."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#AllowPurchaseSuggestionBranchChoice# Allow"
@@ -3789,18 +4005,6 @@ msgid "opac.pref#AnonymousPatron# as the Anonymous Patron (for anonymous suggest
 msgstr "ako anonymného čitateľa (pre anonymné návrhy a čitateľský výpis)"
 
 # OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# Don't show"
-msgstr "Nezobraziť"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# Show"
-msgstr "Zobraziť"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# images for <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">authorized values</a> (such as lost statuses and locations) in search results and item detail pages on the OPAC."
-msgstr "obrázky pre <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">povolené hodnoty</a> (ako napríklad straty a lokácie) vo výsledkoch hľadania a na stránkach podrobností o exemplároch v OPACu."
-
-# OPAC > Appearance
 msgid "opac.pref#BiblioDefaultView# By default, show bib records"
 msgstr "Predvolene, zobraziť knižničné záznamy"
 
@@ -3826,10 +4030,7 @@ msgstr "Neblokovať"
 
 # OPAC > Policy
 msgid "opac.pref#BlockExpiredPatronOpacActions# expired patrons from OPAC actions such as placing a hold or renewing.  Note that the setting for a patron category takes priority over this system preference."
-msgstr ""
-"čitateľov s neplatným preukazom, ak chcú v OPACu zadať rezerváciu alebo "
-"obnovu. Pamätajte, že nastavenie pre kategóriu čitateľov má prednosť pre "
-"týmto systémovým nastavením."
+msgstr "čitateľov s neplatným preukazom, ak chcú v OPACu zadať rezerváciu alebo obnovu. Pamätajte, že nastavenie pre kategóriu čitateľov má prednosť pre týmto systémovým nastavením."
 
 # OPAC > Appearance
 msgid "opac.pref#COinSinOPACResults# COinS / OpenURL / Z39.88 in OPAC search results.  <br/>Warning: Enabling this feature will slow OPAC search response times."
@@ -3867,6 +4068,30 @@ msgstr "Uchovávať"
 msgid "opac.pref#EnableOpacSearchHistory# patron search history in the OPAC."
 msgstr "výpis hľadania čitateľa v OPACu."
 
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Allow"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Don't allow"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Production"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Sandbox"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# mode."
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# patrons to make payments from the OPAC via PayPal in"
+msgstr ""
+
 # OPAC > Appearance
 msgid "opac.pref#GoogleIndicTransliteration# Don't show"
 msgstr "Nezobraziť"
@@ -3881,9 +4106,7 @@ msgstr "Zobraziť"
 
 # OPAC > Appearance
 msgid "opac.pref#HighlightOwnItemsOnOPAC#  by moving the results to the front and increasing the size or highlighting the rows for those results. (Non-XSLT Only)"
-msgstr ""
-"presunutím výsledkov do čela a zväčšovaním veľkosti alebo zvýrazňovaním "
-"riadkov týchto výsledkov. (Iba ne-XSLT)"
+msgstr "presunutím výsledkov do čela a zväčšovaním veľkosti alebo zvýrazňovaním riadkov týchto výsledkov. (Iba ne-XSLT)"
 
 # OPAC > Appearance
 msgid "opac.pref#HighlightOwnItemsOnOPAC# Don't emphasize"
@@ -3997,6 +4220,10 @@ msgstr "Nepovoliť"
 msgid "opac.pref#OPACFinesTab# patrons to access the Fines tab on the My Account page on the OPAC."
 msgstr "čitateľom prístup na záložku Pokuty na stránke Môj účet v OPACu."
 
+# OPAC > Features
+msgid "opac.pref#OPACISBD# Use the following as the OPAC ISBD template:"
+msgstr ""
+
 # OPAC > Appearance
 msgid "opac.pref#OPACMySummaryHTML# <br />Note: The placeholders {BIBLIONUMBER}, {TITLE}, {ISBN} and {AUTHOR} will be replaced with information from the displayed record."
 msgstr "<br />Poznámka: Zástupné znaky {BIBLIONUMBER}, {TITLE}, {ISBN} a {AUTHOR} budú nahradené informáciami zo zobrazeného záznamu."
@@ -4051,9 +4278,7 @@ msgstr "Nepovoliť"
 
 # OPAC > Privacy
 msgid "opac.pref#OPACPrivacy# patrons to choose their own privacy settings for their reading history.  This requires opacreadinghistory and AnonymousPatron"
-msgstr ""
-"čitateľom voliť si svoje nastavenia súkromia pre ich čitateľský výpis. Toto "
-"vyžaduje nastavenie opacreadinghistory a AnonymousPatron"
+msgstr "čitateľom voliť si svoje nastavenia súkromia pre ich čitateľský výpis. Toto vyžaduje nastavenie opacreadinghistory a AnonymousPatron"
 
 # OPAC > Appearance
 msgid "opac.pref#OPACResultsSidebar# Include the following HTML under the facets in OPAC search results:"
@@ -4452,6 +4677,10 @@ msgid "opac.pref#OpacMaintenance# a warning that the OPAC is under maintenance, 
 msgstr "upozornenie, že OPAC je v režime údržby, namiesto OPACu samotného. Poznámka: toto zobrazuje rovnaké upozornenie ako keď databáza potrebuje upgrade, ale bezpodmienečne."
 
 # OPAC > Appearance
+msgid "opac.pref#OpacMaintenanceNotice# Show the following HTML when OpacMaintenance is enabled:"
+msgstr ""
+
+# OPAC > Appearance
 msgid "opac.pref#OpacMaxItemsToDisplay# Display up to"
 msgstr "Zobraziť najviac"
 
@@ -4485,15 +4714,15 @@ msgstr "čitateľom zmenu vlastného hesla v OPACu. Toto musí byť vypnuté pre
 
 # OPAC > Appearance
 msgid "opac.pref#OpacPublic# Disable"
-msgstr "Deaktivovať"
+msgstr "Nesprístupniť"
 
 # OPAC > Appearance
 msgid "opac.pref#OpacPublic# Enable"
-msgstr "Aktivovať"
+msgstr "Sprístupniť"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
-msgstr "Koha OPAC je verejný. Súkromný OPAC vyžaduje overenie pred prístupom do OPACu."
+msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalAllowed# Allow"
@@ -4534,6 +4763,22 @@ msgstr "knižnicu, z ktorej bol exemplár vypožičaný"
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalBranch# the patron's home library"
 msgstr "domácu pobočku čitateľa"
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword#  to recover their password via e-mail in the OPAC"
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# Library users are "
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# allowed"
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# not allowed"
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OpacSeparateHoldings# Don't separate"
@@ -4616,6 +4861,14 @@ msgid "opac.pref#OpacTopissue# patrons to access a list of the most checked out 
 msgstr "čitateľom prístup do zoznamu najvypožičiavanejších exemplárov v OPACu. Berte na vedomie, že je to pomerne pokusné, a mali by ste sa tomu vyhnúť, ak vaša zbierka má obrovské množstvo exemplárov."
 
 # OPAC > Self Registration
+msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# (separate columns with |)"
+msgstr ""
+
+# OPAC > Self Registration
+msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-modification screen:"
+msgstr ""
+
+# OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistration# Allow"
 msgstr "Povoliť"
 
@@ -4624,8 +4877,8 @@ msgid "opac.pref#PatronSelfRegistration# Don't allow"
 msgstr "Nepovoliť"
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfRegistration# library patrons to register an account via the OPAC."
-msgstr "čitateľom zaregistrovať svoj účet v knižnici cez OPAC."
+msgid "opac.pref#PatronSelfRegistration# library patrons to register or modify their account via the OPAC."
+msgstr ""
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationAdditionalInstructions# Display the following additional instructions for patrons who self register via the OPAC ( HTML is allowed ):"
@@ -4644,8 +4897,8 @@ msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# (separate columns 
 msgstr "(oddeliť stĺpce pomocou |)"
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron entry screen:"
-msgstr "Nasledovné <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>stĺpce databázy</a> musia byť vyplnené na vstupnej obrazovke čitateľa:"
+msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-registration screen:"
+msgstr ""
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationDefaultCategory# Use the patron category code"
@@ -4674,6 +4927,22 @@ msgstr "Vyžadovať"
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationVerifyByEmail# that a self-registering patron verify his or herself via email."
 msgstr ", aby sa čitateľ pri samoobslužnej registrácii overil prostredníctvom E-mailu."
+
+# OPAC > Payments
+msgid "opac.pref#PayPalChargeDescription# The patron should see the charge description as "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalPwd# The password for the PayPal account to receive payments is "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalSignature# The signature for the PayPal account to receive payments is "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalUser# The email address to receive PayPal payments is "
+msgstr ""
 
 # OPAC > Features
 msgid "opac.pref#QuoteOfTheDay# Disable"
@@ -4824,6 +5093,18 @@ msgid "opac.pref#SocialNetworks# social network links in opac detail pages"
 msgstr "odkazy sociálnych sietí na stránkach podrobností v opacu"
 
 # OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# Don't store"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# Store"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# the last patron to return an item. This setting is independent of opacreadinghistory/AnonymousPatron."
+msgstr ""
+
+# OPAC > Privacy
 msgid "opac.pref#TrackClicks# Don't track"
 msgstr "Nesledovať"
 
@@ -4931,18 +5212,6 @@ msgstr "Nepovoliť"
 msgid "opac.pref#reviewson# patrons to make comments on items on the OPAC."
 msgstr "čitateľom písať komentáre o exemplároch v OPACu."
 
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# Allow"
-msgstr "Povoliť"
-
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# Don't allow"
-msgstr "Nepovoliť"
-
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# patrons to select their branch on the OPAC or show branch names with callnumbers."
-msgstr "čitateľom výber ich pobočky v OPACu alebo zobraziť názvy pobočiek so signatúrami."
-
 # OPAC > Features
 msgid "opac.pref#suggestion# Allow"
 msgstr "Povoliť"
@@ -4966,6 +5235,18 @@ msgstr "Všeobecne"
 # Patrons > Norwegian patron database
 msgid "patrons.pref Norwegian patron database"
 msgstr "Nórska databáza užívateľov"
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# Allow"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# Don't allow"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# staff to set the ability for a patron's checkouts to be viewed by linked patrons in the OPAC."
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#AutoEmailOpacUser# Don't send"
@@ -5076,8 +5357,20 @@ msgid "patrons.pref#EnhancedMessagingPreferences# Don't allow"
 msgstr "Nepovoliť"
 
 # Patrons > General
-msgid "patrons.pref#EnhancedMessagingPreferences# patrons to choose which notices they receive and when they receive them. Note that this only applies to certain kinds of notices."
-msgstr "čitateľom výber, aké oznámenia dostávajú a kedy ich prijímajú. Toto sa týka len niektorých druhov oznámení."
+msgid "patrons.pref#EnhancedMessagingPreferences# Staff to manage which notices patrons will receive and when they will receive them. Note: this only applies to courtesy notices. To manage if patrons have also access to these settings, use EnhancedMessagingPreferencesOPAC."
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# Don't show"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# Show"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# patron messaging setting on the OPAC (note: EnhancedMessagingPreferences must be enabled)."
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#ExtendedPatronAttributes# Don't enable"
@@ -5105,9 +5398,7 @@ msgstr "poplatok, keď sa čitateľ zmení na kategóriu so zápisným poplatkom
 
 # Patrons > General
 msgid "patrons.pref#MaxFine# Empty value means no limit. Single item caps are specified in the circulation rules matrix."
-msgstr ""
-"Prázdna hodnota znamená žiadne obmedzenie. Stropy jednotlivých exemplárov sú "
-"určené v matrici pravidiel obehu."
+msgstr "Prázdna hodnota znamená žiadne obmedzenie. Stropy jednotlivých exemplárov sú určené v matrici pravidiel obehu."
 
 # Patrons > General
 msgid "patrons.pref#MaxFine# The late fine for all checkouts will only go up to"
@@ -5198,8 +5489,8 @@ msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
 msgstr "pre posielanie SMS správ."
 
 # Patrons > General
-msgid "patrons.pref#StatisticsFields# (separate fields with |)"
-msgstr "(oddeliť polia pomocou |)"
+msgid "patrons.pref#StatisticsFields# (separate fields with |, without trailing |). Default if empty: location|itype|ccode"
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#StatisticsFields# Show the following fields from the items database table as columns on the statistics tab on the patron record: "
@@ -5258,8 +5549,8 @@ msgid "patrons.pref#intranetreadinghistory# Don't allow"
 msgstr "Nepovoliť"
 
 # Patrons > General
-msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (it is stored regardless)."
-msgstr "knihovníkom prístup do výpisu výpožičiek čitateľa (ktorý sa jednako ukladá)."
+msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
+msgstr "zamestnancom prístup k výpisu výpožičiek čitateľov (čitateľský výpis sa stále ukladá, či už majú zamestnanci prístup alebo nie)."
 
 # Patrons > General
 msgid "patrons.pref#minPasswordLength# Login passwords for staff and patrons must be at least"
@@ -5416,6 +5707,22 @@ msgstr "operátor \"phr\" v signatúre a v štandardných číselných hľadania
 # Searching > Search Form
 msgid "searching.pref#IntranetNumbersPreferPhrase# use"
 msgstr "používať"
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>If a record has more than this number of items, they availability statuses may be incorrect in the search results, but will be correct in the record details."
+msgstr "<br/>Ak má záznam viac ako tento počet exemplárov, ich stav dostupnosti nemusí byť vo výsledkoch hľadania správy, ale bude správny v podrobnostiach o záznamoch."
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>Leave empty for no limit on the number of items for which to check the status."
+msgstr "<br/>Nechajte prázdne pre hľadanie bez obmedzenia počtu exemplárov, ktorých stav sa zisťuje."
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# For records with many items, only check the availability status for the first"
+msgstr "Pre záznamy s mnohými exemplármi, zistiť stav dostupnosti len u prvých"
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# items."
+msgstr "exemplárov."
 
 # Searching > Results Display
 msgid "searching.pref#OPACItemsResultsDisplay# Don't show"
@@ -5863,9 +6170,7 @@ msgstr "Zapnúť"
 
 # Staff Client > Options
 msgid "staff_client.pref#AudioAlerts# audio alerts for events defined in the audio alerts section of administration."
-msgstr ""
-"zvukové upozornenia pri udalostiach definovaných v sekcii administrácie "
-"zvukových upozornení."
+msgstr "zvukové upozornenia pri udalostiach definovaných v sekcii administrácie zvukových upozornení."
 
 # Staff Client > Appearance
 msgid "staff_client.pref#Display856uAsImage# . Note: The corresponding XSLT option must be turned on."
@@ -5916,6 +6221,10 @@ msgid "staff_client.pref#HidePatronName# the names of patrons that have items ch
 msgstr "mená čitateľov, ktorí majú vypožičané alebo zarezervované exempláre na stránkach podrobností alebo na obrazovke \"Zarezervovať\"."
 
 # Staff Client > Appearance
+msgid "staff_client.pref#IntranetCirculationHomeHTML# Show the following HTML in its own div on the bottom of the home page of the circulation module:"
+msgstr ""
+
+# Staff Client > Appearance
 msgid "staff_client.pref#IntranetFavicon# Use the image at"
 msgstr "Použiť obrázok na adrese"
 
@@ -5926,6 +6235,10 @@ msgstr "pre favicon knihovníckeho klienta. (Musí to byť kompletná URL, zač�
 # Staff Client > Appearance
 msgid "staff_client.pref#IntranetNav# Show the following HTML to the left of the More menu at the top of each page on the staff client (should be a list of links or blank):"
 msgstr "Zobraziť nasledovné HTML naľavo od ponuky Viac na vrchu každej stránky v knihovníckom rozhraní (mal by to byť zoznam odkazov alebo prázdny):"
+
+# Staff Client > Appearance
+msgid "staff_client.pref#IntranetReportsHomeHTML# Show the following HTML in its own div on the bottom of the home page of the reports module:"
+msgstr ""
 
 # Staff Client > Appearance
 msgid "staff_client.pref#IntranetSlipPrinterJS# Use the following JavaScript for printing slips. Define at least function printThenClose(). For use e.g. with Firefox PlugIn jsPrintSetup, see http://jsprintsetup.mozdev.org/:"
@@ -5948,20 +6261,8 @@ msgid "staff_client.pref#SlipCSS# Include the stylesheet at"
 msgstr "Zahrnúť štýlový hárok na"
 
 # Staff Client > Appearance
-msgid "staff_client.pref#SlipCSS# on Issue and Reserve Slips. (This should be a complete URL, starting with <code>http://</code>.)"
-msgstr "na ústrižky výdaja a rezervácie. (Musí to byť kompletná URL, začínajúca s <code>http://</code>.)"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# Don't show"
-msgstr "Nezobraziť"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# Show"
-msgstr "Zobraziť"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# images for <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">authorized values</a> (such as lost statuses and locations) in search results."
-msgstr "obrázky pre <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">povolené hodnoty</a> (ako napríklad straty a lokácie) vo výsledkoch hľadania."
+msgid "staff_client.pref#SlipCSS# on Issue and Hold Slips. (This should be a complete URL, starting with <code>http://</code>.)"
+msgstr ""
 
 # Staff Client > Options
 msgid "staff_client.pref#StaffDetailItemSelection# Disable"

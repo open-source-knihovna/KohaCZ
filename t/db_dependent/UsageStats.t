@@ -15,7 +15,7 @@
 # with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Test::More tests => 549;
+use Test::More tests => 545;
 use t::lib::Mocks qw(mock_preference);
 use POSIX qw(strftime);
 
@@ -455,6 +455,7 @@ sub mocking_systempreferences_to_a_set_value {
         NovelistSelectEnabled
         XISBN
         OpenLibraryCovers
+        OpenLibrarySearch
         UseKohaPlugins
         SyndeticsEnabled
         TagsEnabled
@@ -468,7 +469,6 @@ sub mocking_systempreferences_to_a_set_value {
         LetterLog
         ReturnLog
         SubscriptionLog
-        AuthorisedValueImages
         BiblioDefaultView
         COinSinOPACResults
         DisplayOPACiconsXSLT
@@ -564,7 +564,6 @@ sub mocking_systempreferences_to_a_set_value {
         SubscriptionHistory
         Display856uAsImage
         DisplayIconsXSLT
-        StaffAuthorisedValueImages
         template
         yuipath
         HidePatronName

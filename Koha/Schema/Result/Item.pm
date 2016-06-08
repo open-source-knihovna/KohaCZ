@@ -33,6 +33,7 @@ __PACKAGE__->table("items");
 
   data_type: 'integer'
   default_value: 0
+  is_foreign_key: 1
   is_nullable: 0
 
 =head2 biblioitemnumber
@@ -285,9 +286,8 @@ __PACKAGE__->table("items");
   is_nullable: 1
   size: 32
 
-=head2 new
+=head2 new_status
 
-  accessor: undef
   data_type: 'varchar'
   is_nullable: 1
   size: 32
@@ -298,7 +298,12 @@ __PACKAGE__->add_columns(
   "itemnumber",
   { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "biblionumber",
-  { data_type => "integer", default_value => 0, is_nullable => 0 },
+  {
+    data_type      => "integer",
+    default_value  => 0,
+    is_foreign_key => 1,
+    is_nullable    => 0,
+  },
   "biblioitemnumber",
   {
     data_type      => "integer",
@@ -403,8 +408,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 32 },
   "stocknumber",
   { data_type => "varchar", is_nullable => 1, size => 32 },
-  "new",
-  { accessor => undef, data_type => "varchar", is_nullable => 1, size => 32 },
+  "new_status",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
 );
 
 =head1 PRIMARY KEY
@@ -462,6 +467,21 @@ __PACKAGE__->belongs_to(
   "biblioitemnumber",
   "Koha::Schema::Result::Biblioitem",
   { biblioitemnumber => "biblioitemnumber" },
+  { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
+);
+
+=head2 biblionumber
+
+Type: belongs_to
+
+Related object: L<Koha::Schema::Result::Biblio>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "biblionumber",
+  "Koha::Schema::Result::Biblio",
+  { biblionumber => "biblionumber" },
   { is_deferrable => 1, on_delete => "CASCADE", on_update => "CASCADE" },
 );
 
@@ -656,8 +676,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-03-04 19:32:39
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rhW0Ddhh2hLoV//7nonLCA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-05-03 18:29:16
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2XK/xYWHqauPzYKJcKc0ig
 
 __PACKAGE__->belongs_to( biblioitem => "Koha::Schema::Result::Biblioitem", "biblioitemnumber" );
 

@@ -52,7 +52,7 @@ my $display_columns = [ {_label_number  => {label => 'Label Number', link_field 
                         {_summary       => {label => 'Summary', link_field => 0}},
                         {_item_type     => {label => 'Item Type', link_field => 0}},
                         {_barcode       => {label => 'Barcode', link_field => 0}},
-                        {_delete        => {label => ' ', link_field => 0}},
+                        {_delete        => {label => 'Actions', link_field => 0}},
                         {select         => {label => 'Select', value => '_label_id'}},
                       ];
 my $op = $cgi->param('op') || 'edit';
@@ -61,8 +61,8 @@ my @item_numbers;
 my $number_list;
 my $number_type = $cgi->param('number_type') || "barcode";
 my $batch_id = $cgi->param('element_id') || $cgi->param('batch_id') || 0;
-@label_ids = $cgi->param('label_id') if $cgi->param('label_id');
-@item_numbers = $cgi->param('item_number') if $cgi->param('item_number');
+@label_ids = $cgi->multi_param('label_id') if $cgi->param('label_id');
+@item_numbers = $cgi->multi_param('item_number') if $cgi->param('item_number');
 $number_list = $cgi->param('number_list') if $cgi->param('number_list');
 
 my $branch_code = C4::Context->userenv->{'branch'};

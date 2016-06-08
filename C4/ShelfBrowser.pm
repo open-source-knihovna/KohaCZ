@@ -27,10 +27,9 @@ use C4::Branch;
 use C4::Context;
 use C4::Koha;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
+use vars qw(@ISA @EXPORT @EXPORT_OK);
 
 BEGIN {
-    $VERSION = 3.07.00.049;
 	require Exporter;
 	@ISA    = qw(Exporter);
 	@EXPORT = qw(
@@ -230,6 +229,7 @@ sub GetShelfInfo {
         $item->{'browser_normalized_oclc'} = GetNormalizedOCLCNumber($this_record,$marcflavour);
         $item->{'browser_normalized_isbn'} = GetNormalizedISBN(undef,$this_record,$marcflavour);
         $item->{'browser_normalized_ean'} = GetNormalizedEAN($this_record,$marcflavour);
+        $item->{'subtitle'} = GetRecordValue('subtitle', $this_record, GetFrameworkCode( $item->{biblionumber} ));
         push @valid_items, $item;
     }
     return @valid_items;

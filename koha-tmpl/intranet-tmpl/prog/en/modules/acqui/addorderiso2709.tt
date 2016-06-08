@@ -7,12 +7,12 @@
  &rsaquo; Batch list
 [% END %]
 </title>
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 <style type="text/css">#dataPreview { width : 80%; margin-left : -40%; } @media (max-width: 767px) { #dataPreview { margin: 0; width : auto; } }</style>
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.checkboxes.min.js"></script>
-<script type="text/javascript" src="[% themelang %]/js/acq.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/acq.js"></script>
 <script type="text/JavaScript">
 //<![CDATA[
     $(document).ready(function() {
@@ -104,9 +104,9 @@
             }
         } );
 
-        $("input:checkbox").attr("checked", false);
-        $("div.biblio.unselected select").attr("disabled", false);
-        $("div.biblio.unselected input").attr("disabled", false);
+        $("input:checkbox").prop("checked", false);
+        $("div.biblio.unselected select").prop('disabled', false);
+        $("div.biblio.unselected input").prop('disabled', false);
 
         $("#checkAll").click(function(){
             $("#Aform").checkCheckboxes();

@@ -57,7 +57,9 @@ sub translated_description {
         entity => 'itemtypes',
         lang => $lang
     })->next;
-    return $translated_description || $self->description;
+    return $translated_description
+         ? $translated_description->translation
+         : $self->description;
 }
 
 =head3 translated_descriptions
@@ -84,6 +86,10 @@ sub translated_descriptions {
 =cut
 
 sub _type {
+    return 'Itemtype';
+}
+
+sub type {
     return 'Itemtype';
 }
 

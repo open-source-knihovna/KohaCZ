@@ -8,7 +8,7 @@
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
 
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript">
 //<![CDATA[
@@ -74,7 +74,7 @@ $(document).ready(function() {
 	   [% IF ( action_add_category ) %]New category[% END %]
 	</h1>
 
-    [% IF ( action_modify ) %]<div class="note"><strong>NOTE:</strong> If you change an authorized value code, existing records using it won't be updated. Changes to value descriptions will show immediately.</div>[% END %]
+    [% IF ( action_modify ) %]<div class="note"><i class="fa fa-exclamation"></i> <strong>NOTE:</strong> If you change an authorized value code, existing records using it won't be updated. Changes to value descriptions will show immediately.</div>[% END %]
 
  <form action="/cgi-bin/koha/admin/authorised_values.pl" name="Aform" method="post">
     <input type="hidden" name="op" value="add" />
@@ -167,7 +167,7 @@ $(document).ready(function() {
 </div>
 
 <h1>Authorized values</h1>
-<div class="note"><strong>NOTE:</strong> If you change an authorized value code, existing records using it won't be updated. Changes to value descriptions will show immediately.</div>
+<div class="note"><i class="fa fa-exclamation"></i> <strong>NOTE:</strong> If you change an authorized value code, existing records using it won't be updated. Changes to value descriptions will show immediately.</div>
 
 [% FOR m IN messages %]
     <div class="dialog [% m.type %]">
@@ -252,8 +252,7 @@ $(document).ready(function() {
 	<th>Description (OPAC)</th>
 	<th>Icon</th>
     <th>Branches limitations</th>
-	<th>Edit</th>
-	<th>Delete</th>
+    <th>Actions</th>
 	</tr>
 </thead><tbody>
 [% FOREACH loo IN loop %]
@@ -282,8 +281,8 @@ $(document).ready(function() {
             No limitation
         [% END %]
     </td>
-    <td><a href="/cgi-bin/koha/admin/authorised_values.pl?op=add_form&amp;id=[% loo.id %]">Edit</a></td>
-    <td><a class="delete" href="/cgi-bin/koha/admin/authorised_values.pl?op=delete&amp;searchfield=[% searchfield %]&amp;id=[% loo.id %]">Delete</a></td>
+    <td class="actions"><a href="/cgi-bin/koha/admin/authorised_values.pl?op=add_form&amp;id=[% loo.id %]" class="btn btn-mini"><i class="fa fa-pencil"></i> Edit</a>
+    <a class="delete btn btn-mini" href="/cgi-bin/koha/admin/authorised_values.pl?op=delete&amp;searchfield=[% searchfield %]&amp;id=[% loo.id %]"><i class="fa fa-trash"></i> Delete</a></td>
 </tr>
 [% END %]
 </tbody></table>[% ELSE %]

@@ -62,13 +62,11 @@ package C4::Ris;
 use Modern::Perl;
 
 use List::MoreUtils qw/uniq/;
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
 
 use C4::Biblio qw(GetMarcSubfieldStructureFromKohaField);
 use Koha::SimpleMARC qw(read_field);
 
-# set the version for version checking
-$VERSION = 3.07.00.049;
 
 @ISA = qw(Exporter);
 
@@ -167,7 +165,7 @@ sub marc2ris {
 	foreach my $field (@author_fields) {
 	    if (length($field)) {
 		my $author = &get_author($field);
-		print "AU  - ",&charconv($author),"\r\n";
+		print "AU  - ",$author,"\r\n";
 	    }
 	}
 
@@ -193,7 +191,7 @@ sub marc2ris {
 	foreach my $field (@editor_fields) {
 	    if (length($field)) {
 		my $editor = &get_editor($field);
-		print "ED  - ",&charconv($editor),"\r\n";
+		print "ED  - ",$editor,"\r\n";
 	    }
 	}
 
@@ -268,7 +266,7 @@ sub marc2ris {
     @kwpool = uniq @kwpool;
 
     for my $kw ( @kwpool ) {
-        print "KW  - ", &charconv($kw), "\r\n";
+        print "KW  - ", $kw, "\r\n";
     }
 
 	## 5XX have various candidates for notes and abstracts. We pool
@@ -295,7 +293,7 @@ sub marc2ris {
 	my $allnotes = join "; ", @notepool;
 
 	if (length($allnotes) > 0) {
-	    print "N1  - ", &charconv($allnotes), "\r\n";
+	    print "N1  - ", $allnotes, "\r\n";
 	}
 
 	## 320/520 have the abstract
@@ -390,7 +388,8 @@ sub print_typetag {
 		);
     
     ## The type of a MARC record is found at position 06 of the leader
-    my $typeofrecord = substr($leader, 6, 1);
+    my $typeofrecord = defined($leader) && length $leader >=6 ?
+                       substr($leader, 6, 1): undef;
 
     ## ToDo: for books, field 008 positions 24-27 might have a few more
     ## hints
@@ -398,7 +397,11 @@ sub print_typetag {
     my %typehash;
     
     ## the ukmarc here is just a guess
-    if ($intype eq "marc21" || $intype eq "ukmarc") {
+    if (! defined $intype) {
+        ## assume MARC21 as default
+        %typehash = %ustypehash;
+    }
+    elsif ($intype eq "marc21" || $intype eq "ukmarc") {
 	%typehash = %ustypehash;
     }
     elsif ($intype eq "unimarc") {
@@ -409,7 +412,7 @@ sub print_typetag {
 	%typehash = %ustypehash;
     }
 
-    if (!exists $typehash{$typeofrecord}) {
+    if (!defined $typeofrecord || !exists $typehash{$typeofrecord}) {
 	print "TY  - BOOK\r\n"; ## most reasonable default
 	warn ("no type found - assume BOOK") if $marcprint;
     }
@@ -551,11 +554,11 @@ $clean_subtitle ||= q{};
 
 	if (length($clean_title) > 0
 	    || (length($clean_subtitle) > 0 && $intype ne "unimarc")) {
-	    print "TI  - ", &charconv($clean_title);
+	    print "TI  - ", $clean_title;
 
 	    ## subfield $b is relevant only for marc21/ukmarc
 	    if (length($clean_subtitle) > 0 && $intype ne "unimarc") {
-		print ": ",&charconv($clean_subtitle);
+		print ": ",$clean_subtitle;
 	    }
 	    print "\r\n";
 	}
@@ -585,13 +588,13 @@ sub print_stitle {
 	$clean_title =~ s% *[/:;.]$%%;
 
 	if (length($clean_title) > 0) {
-	    print "T2  - ", &charconv($clean_title),"\r\n";
+	    print "T2  - ", $clean_title,"\r\n";
 	}
 
 	if ($intype eq "unimarc") {
 	    print "<marc>Series vol(\$v): ",$titlefield->subfield('v'),"\r\n" if $marcprint;
 	    if (length($titlefield->subfield('v')) > 0) {
-		print "VL  - ", &charconv($titlefield->subfield('v')),"\r\n";
+		print "VL  - ", $titlefield->subfield('v'),"\r\n";
 	    }
 	}
     }
@@ -615,7 +618,7 @@ sub print_isbn {
 	}
 
     my $isbn = $isbnfield->subfield('a');
-	print "SN  - ", &charconv($isbn), "\r\n";
+	print "SN  - ", $isbn, "\r\n";
     }
 }
 
@@ -637,7 +640,7 @@ sub print_issn {
 	}
 
 	my $issn = substr($issnfield->subfield('a'), 0, 9);
-	print "SN  - ", &charconv($issn), "\r\n";
+	print "SN  - ", $issn, "\r\n";
     }
 }
 
@@ -649,7 +652,7 @@ sub print_uri {
 
     foreach my $f856 (@f856s) {
         if (my $uri = $f856->subfield('u')) {
-	        print "UR  - ", charconv($uri), "\r\n";
+	        print "UR  - ", $uri, "\r\n";
         }
     }
 }
@@ -666,7 +669,7 @@ sub print_loc_callno {
 	warn("no LOC call number found") if $marcprint;
     }
     else {
-	print "AV  - ", &charconv($callnofield->subfield('a')), " ", &charconv($callnofield->subfield('b')), "\r\n";
+	print "AV  - ", $callnofield->subfield('a'), " ", $callnofield->subfield('b'), "\r\n";
     }
 }
 
@@ -682,7 +685,7 @@ sub print_dewey {
 	warn("no Dewey number found") if $marcprint;
     }
     else {
-	print "U1  - ", &charconv($deweyfield->subfield('a')), " ", &charconv($deweyfield->subfield('2')), "\r\n";
+	print "U1  - ", $deweyfield->subfield('a'), " ", $deweyfield->subfield('2'), "\r\n";
     }
 }
 
@@ -796,10 +799,10 @@ sub print_pubinfo {
 
 	## now dump the collected CY and PB lists
 	if (@cities > 0) {
-	    print "CY  - ", &charconv(join(", ", @cities)), "\r\n";
+	    print "CY  - ", join(", ", @cities), "\r\n";
 	}
 	if (@publishers > 0) {
-	    print "PB  - ", &charconv(join(", ", @publishers)), "\r\n";
+	    print "PB  - ", join(", ", @publishers), "\r\n";
 	}
     }
 }
@@ -999,30 +1002,9 @@ sub print_abstract {
     my $allabs = join "; ", @abstrings;
 
     if (length($allabs) > 0) {
-	print "N2  - ", &charconv($allabs), "\r\n";
+	print "N2  - ", $allabs, "\r\n";
     }
 
 }
 
-    
-    
-##********************************************************************
-## charconv(): converts to a different charset based on a global var
-## Arguments: string
-## Returns: string
-##********************************************************************
-sub charconv {
-    if ($utf) {
-	## return unaltered if already utf-8
-	return @_;
-    }
-    elsif (my $uniout eq "t") {
-	## convert to utf-8
-	return marc8_to_utf8("@_");
-    }
-    else {
-	## return unaltered if no utf-8 requested
-	return @_;
-    }
-}
 1;

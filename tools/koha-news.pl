@@ -40,8 +40,11 @@ my $cgi = new CGI;
 my $id             = $cgi->param('id');
 my $title          = $cgi->param('title');
 my $new            = $cgi->param('new');
-my $expirationdate = output_pref({ dt => dt_from_string( $cgi->param('expirationdate') ), dateformat => 'iso', dateonly => 1 });
-my $timestamp      = output_pref({ dt => dt_from_string( $cgi->param('timestamp') ), dateformat => 'iso', dateonly => 1 });
+my $expirationdate;
+if ( $cgi->param('expirationdate') ) {
+    $expirationdate = output_pref({ dt => dt_from_string( scalar $cgi->param('expirationdate') ), dateformat => 'iso', dateonly => 1 });
+}
+my $timestamp      = output_pref({ dt => dt_from_string( scalar $cgi->param('timestamp') ), dateformat => 'iso', dateonly => 1 });
 my $number         = $cgi->param('number');
 my $lang           = $cgi->param('lang');
 my $branchcode     = $cgi->param('branch');
@@ -139,7 +142,7 @@ elsif ( $op eq 'edit' ) {
     print $cgi->redirect("/cgi-bin/koha/tools/koha-news.pl");
 }
 elsif ( $op eq 'del' ) {
-    my @ids = $cgi->param('ids');
+    my @ids = $cgi->multi_param('ids');
     del_opac_new( join ",", @ids );
     print $cgi->redirect("/cgi-bin/koha/tools/koha-news.pl");
 }

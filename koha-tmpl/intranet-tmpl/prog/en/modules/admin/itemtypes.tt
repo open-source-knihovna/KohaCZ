@@ -21,7 +21,7 @@ Data deleted
 [% END %]
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'greybox.inc' %]
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript">
@@ -149,7 +149,7 @@ Item types administration
                     <select id="searchcategory" name="searchcategory">
                     <option value="">None</option>
                         [% FOREACH cat IN searchcategory %]
-                            [% IF cat.selected %]
+                            [% IF cat.authorised_value == itemtype.searchcategory %]
                                 <option value="[% cat.authorised_value %]" selected="selected">
                                     [% cat.lib %]
                                 </option>
@@ -278,8 +278,8 @@ Item types administration
                     <label for="sip_media_type">SIP media type: </label>
                     <select id="sip_media_type" name="sip_media_type">
                         <option value=""></option>
-                        [% FOREACH a IN AuthorisedValues.Get('SIP_MEDIA_TYPE', itemtype.sip_media_type ) %]
-                            [% IF a.selected %]
+                        [% FOREACH a IN AuthorisedValues.Get('SIP_MEDIA_TYPE') %]
+                            [% IF a.authorised_value == itemtype.sip_media_type %]
                                 <option value="[% a.authorised_value %]" selected="selected">[% a.lib %]</option>
                             [% ELSE %]
                                 <option value="[% a.authorised_value %]">[% a.lib %]</option>
@@ -379,9 +379,9 @@ Item types administration
             [% END %]
             </td>
             <td>[% itemtype.checkinmsg | html_line_break %]</td>
-            <td>
-              <a href="/cgi-bin/koha/admin/itemtypes.pl?op=add_form&amp;itemtype=[% itemtype.itemtype |html %]">Edit</a>
-              <a href="/cgi-bin/koha/admin/itemtypes.pl?op=delete_confirm&amp;itemtype=[% itemtype.itemtype |html %]">Delete</a>
+            <td class="actions">
+              <a href="/cgi-bin/koha/admin/itemtypes.pl?op=add_form&amp;itemtype=[% itemtype.itemtype |html %]" class="btn btn-mini"><i class="fa fa-pencil"></i> Edit</a>
+              <a href="/cgi-bin/koha/admin/itemtypes.pl?op=delete_confirm&amp;itemtype=[% itemtype.itemtype |html %]" class="btn btn-mini"><i class="fa fa-trash"></i> Delete</a>
             </td>
           </tr>
           [% END %]

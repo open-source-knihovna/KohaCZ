@@ -24,7 +24,7 @@ use utf8;
 use CGI;
 use HTTP::Request::Common;
 use LWP::UserAgent;
-use URL::Encode qw(url_params_mixed);
+use URI;
 
 use C4::Auth;
 use C4::Output;
@@ -55,7 +55,7 @@ my $active_currency = Koha::Acquisition::Currencies->get_active;
 my $token    = $cgi->param('token');
 my $payer_id = $cgi->param('PayerID');
 my $amount   = $cgi->param('amount');
-my @accountlines = $cgi->param('accountlines');
+my @accountlines = $cgi->multi_param('accountlines');
 
 my $ua = LWP::UserAgent->new;
 
@@ -85,10 +85,13 @@ my $response = $ua->request( POST $url, $nvp_params );
 
 my $error = q{};
 if ( $response->is_success ) {
-    my $params = url_params_mixed( $response->decoded_content );
 
-    if ( $params->{ACK} eq "Success" ) {
-        $amount = $params->{PAYMENTINFO_0_AMT};
+    my $urlencoded = $response->content;
+    my %params = URI->new( "?$urlencoded" )->query_form;
+
+
+    if ( $params{ACK} eq "Success" ) {
+        $amount = $params{PAYMENTINFO_0_AMT};
 
         my $accountlines_rs = Koha::Database->new()->schema()->resultset('Accountline');
         foreach my $accountlines_id ( @accountlines ) {

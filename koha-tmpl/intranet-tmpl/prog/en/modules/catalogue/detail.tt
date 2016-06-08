@@ -85,7 +85,7 @@ function verify_images() {
         no_images_msg = '<p>' + no_images_msg + '</p>';
     [% IF ( CAN_user_tools_upload_local_cover_images ) %]
         var please_upload = _("Please select the image file to upload. %sUpload%s").format(
-            "<a class='btn' href='/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=[% biblionumber %]&amp;filetype=image'>",
+            "<a class='btn btn-mini' href='/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=[% biblionumber %]&amp;filetype=image'><i class='fa fa-upload' aria-hidden='true'></i> ",
             "</a>");
         no_images_msg += "<p id='upload_image'>" + please_upload + '</p>';
     [% END %]
@@ -94,15 +94,6 @@ function verify_images() {
     }
 
     [% IF StaffDetailItemSelection %]
-        function selectAllItems(div) {
-            $("input[name='itemnumber'][type='checkbox']", div).attr('checked', 'checked');
-            itemSelectionBuildActionLinks(div);
-        }
-
-        function clearAllItems(div) {
-            $("input[name='itemnumber'][type='checkbox']", div).removeAttr('checked');
-            itemSelectionBuildActionLinks(div);
-        }
 
         function itemSelectionBuildDeleteLink(div) {
             var itemnumbers = new Array();
@@ -114,9 +105,7 @@ function verify_images() {
                   url += '&itemnumber=' + itemnumbers.join('&itemnumber=');
                   url += '&src=' + '[% "/cgi-bin/koha/catalogue/detail.pl?biblionumber=$biblionumber" |uri %]';
                   $('a.itemselection_action_delete').attr('href', url);
-                  $('a.itemselection_action_delete').show();
             } else {
-                $('a.itemselection_action_delete').hide();
                 return false;
             }
             return true
@@ -132,15 +121,14 @@ function verify_images() {
                   url += '&itemnumber=' + itemnumbers.join('&itemnumber=');
                   url += '&src=' + '[% "/cgi-bin/koha/catalogue/detail.pl?biblionumber=$biblionumber" |uri %]';
                   $('a.itemselection_action_modify').attr('href', url);
-                  $('a.itemselection_action_modify').show();
             } else {
-                $('a.itemselection_action_modify').hide();
                 return false;
             }
             return true;
         }
 
-        function itemSelectionBuildActionLinks(div) {
+        function itemSelectionBuildActionLinks(tab) {
+            var div = $("#" + tab);
           var delete_link_ok = itemSelectionBuildDeleteLink(div);
           var modify_link_ok = itemSelectionBuildModifyLink(div);
           if (modify_link_ok || delete_link_ok) {
@@ -151,14 +139,31 @@ function verify_images() {
         }
 
         $(document).ready(function() {
+
           $('table.items_table').each(function() {
-            var div = $(this).parent().parent();
+            var div = $(this).parent().attr("id");
             itemSelectionBuildActionLinks(div);
           });
+
           $("input[name='itemnumber'][type='checkbox']").change(function() {
-            var div = $(this).parents('table').parent().parent();
+            var div = $(this).parents('table').parent().parent().attr("id");
             itemSelectionBuildActionLinks(div);
           });
+
+            $(".SelectAll").on("click",function(e){
+                e.preventDefault();
+                var tab = $(this).data("tab");
+                $("input[name='itemnumber'][type='checkbox']", $("#"+tab)).prop('checked', true);
+                itemSelectionBuildActionLinks(tab);
+            });
+
+            $(".ClearAll").on("click",function(e){
+                e.preventDefault();
+                var tab = $(this).data("tab");
+                $("input[name='itemnumber'][type='checkbox']", $("#"+tab)).prop('checked', false);
+                itemSelectionBuildActionLinks(tab);
+            });
+
         });
     [% END %]
 
@@ -198,7 +203,7 @@ function verify_images() {
      });[% END %]
 //]]>
 </script>
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.dataTables.columnFilter.js"></script>
 [% INCLUDE 'browser-strings.inc' %]
@@ -236,7 +241,7 @@ function verify_images() {
         }
 
         $('#' + id + '_activate_filters')
-            .text(_("Deactivate filters"))
+            .html('<i class="fa fa-filter"></i> ' + _("Deactivate filters") )
             .unbind('click')
             .click(function() {
                 deactivate_filters(id);
@@ -254,7 +259,7 @@ function verify_images() {
         filters_row.hide();
 
         $('#' + id + '_activate_filters')
-            .text(_("Activate filters"))
+            .html('<i class="fa fa-filter"></i> ' + _("Activate filters") )
             .unbind('click')
             .click(function() {
                 activate_filters(id);
@@ -288,7 +293,7 @@ function verify_images() {
             link = $('<a>')
                 .attr('href', '#')
                 .attr('id', id + '_activate_filters');
-            table.before(link);
+            $("." + id + "_table_controls").prepend(link);
             deactivate_filters(id);
         }
         [% IF Koha.Preference('AcquisitionDetails') %]
@@ -336,7 +341,7 @@ function verify_images() {
         <span class="Z3988" title="[% ocoins %]"></span>
     [% END %]
 
-    [% IF ( AmazonCoverImages ) %]
+    [% IF ( AmazonCoverImages  || LocalCoverImages ) %]
         [% IF ( XSLTDetailsDisplay ) %]
             <div class="yui-gc">
             <div id="catalogue_detail_biblio" class="yui-u first">
@@ -378,7 +383,6 @@ function verify_images() {
                     </span>
         [% END %]
         <span id="catalogue_detail_marc_preview" class="results_summary"><span class="label">MARC Preview:</span> <a href="/cgi-bin/koha/catalogue/showmarc.pl?id=[% biblionumber %]&amp;viewas=html" title="MARC" class="previewMARC">Show</a></span>
-        [% IF ( holdcount ) %]<span class="results_summary"><span class="label">Holds:</span> <span class="holdcount"><a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% biblionumber %]">[% holdcount %]</a></span></span>[% ELSE %][% END %]
 
         [% IF ( AmazonCoverImages  || LocalCoverImages ) %]
         </div><div class="yui-u" id="bookcoverimg">
@@ -388,7 +392,7 @@ function verify_images() {
         [% IF ( AmazonCoverImages ) %]
             <div id="amazon-bookcoverimg">
             <a href="http://www.amazon[% AmazonTld %]/gp/reader/[% normalized_isbn %]/ref=sib_dp_pt/002-7879865-0184864#reader-link">
-                <img border="0" src="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn %].01.MZZZZZZZ.jpg" alt="" />
+                <img src="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn %].01.MZZZZZZZ.jpg" alt="" />
         </a></div>
         [% END %]
         [% END %]
@@ -462,7 +466,7 @@ function verify_images() {
         [% IF ( AmazonCoverImages ) %]
             <div id="amazon-bookcoverimg">
             <a href="http://www.amazon[% AmazonTld %]/gp/reader/[% normalized_isbn %]/ref=sib_dp_pt/002-7879865-0184864#reader-link">
-            <img border="0" src="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn %].01.MZZZZZZZ.jpg" alt="" />
+            <img src="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn %].01.MZZZZZZZ.jpg" alt="" />
             </a>
         </div>
         [% END %]
@@ -562,19 +566,21 @@ function verify_images() {
 [% items_table_block_iter = 0 %]
 [% BLOCK items_table %]
     [% items_table_block_iter = items_table_block_iter + 1 %]
-    [% IF (StaffDetailItemSelection) %]
-        <a href="#" onclick="selectAllItems($(this).parent()); return false;">Select all</a> |
-        <a href="#" onclick="clearAllItems($(this).parent()); return false;">Clear all</a>
-        <span class="itemselection_actions">
-          | Actions:
-          [% IF CAN_user_tools_items_batchdel %]
-            <a class="itemselection_action_delete">Delete selected items</a>
-          [% END %]
-          [% IF CAN_user_tools_items_batchmod %]
-            <a class="itemselection_action_modify">Modify selected items</a>
-          [% END %]
-        </span>
-    [% END %]
+    <div class="[% tab %]_table_controls">
+        [% IF (StaffDetailItemSelection) %]
+            | <a href="#" class="SelectAll" data-tab="[% tab %]"><i class="fa fa-check"></i> Select all</a> |
+            <a href="#" class="ClearAll" data-tab="[% tab %]"><i class="fa fa-remove"></i> Clear all</a>
+            <span class="itemselection_actions">
+              | Actions:
+              [% IF CAN_user_tools_items_batchdel %]
+                <a class="itemselection_action_delete"><i class="fa fa-trash"></i> Delete selected items</a>
+              [% END %]
+              [% IF CAN_user_tools_items_batchmod %]
+                <a class="itemselection_action_modify"><i class="fa fa-pencil"></i> Modify selected items</a>
+              [% END %]
+            </span>
+        [% END %]
+    </div>
     <table class="items_table">
         <thead>
             <tr>
@@ -593,11 +599,12 @@ function verify_images() {
                 [% IF ( itemdata_stocknumber ) %]<th>Inventory number</th>[% END %]
                 [% IF materials %]<th>Materials specified</th>[% END %]
                 [% IF ( itemdata_itemnotes ) %]<th>Public notes</th>[% END %]
+                [% IF ( itemdata_nonpublicnotes ) %]<th>Non-public notes</th>[% END %]
                 [% IF ( SpineLabelShowPrintOnBibDetails ) %]<th>Spine label</th>[% END %]
                 [% IF ( hostrecords ) %]<th>Host records</th>[% END %]
                 [% IF ( analyze ) %]<th>Used in</th><th></th>[% END %]
                 [% IF ( ShowCourseReserves ) %]<th>Course Reserves</th>[% END %]
-                [% IF ( CAN_user_editcatalogue_edit_items ) %]<th class="NoSort">Edit</th>[% END %]
+                [% IF ( CAN_user_editcatalogue_edit_items ) %]<th class="NoSort">&nbsp;</th>[% END %]
             </tr>
         </thead>
         <tbody>
@@ -648,9 +655,9 @@ function verify_images() {
                         [% END %]
 
                         [% IF ( item.itemlost ) %]
-                            [% IF ( item.itemlostloop ) %]
-                                [% FOREACH itemlostloo IN item.itemlostloop %]
-                                    [% IF ( itemlostloo.selected ) %]
+                            [% IF itemlostloop %]
+                                [% FOREACH itemlostloo IN itemlostloop %]
+                                    [% IF itemlostloo.authorised_value == item.itemlost %]
                                         <span class="lost">[% itemlostloo.lib %]</span>
                                     [% END %]
                                 [% END %]
@@ -664,9 +671,9 @@ function verify_images() {
                         [% END %]
 
                         [% IF ( item.damaged ) %]
-                            [% IF ( item.itemdamagedloop ) %]
-                                [% FOREACH itemdamagedloo IN item.itemdamagedloop %]
-                                    [% IF ( itemdamagedloo.selected ) %]
+                            [% IF itemdamagedloop %]
+                                [% FOREACH itemdamagedloo IN itemdamagedloop %]
+                                    [% IF itemdamagedloo.authorised_value == item.damaged %]
                                         <span class="dmg">[% itemdamagedloo.lib %]</span>
                                     [% END %]
                                 [% END %]
@@ -764,6 +771,9 @@ function verify_images() {
                     [% IF ( itemdata_itemnotes ) %]
                         <td><div class="itemnotes">[% item.itemnotes %]</div></td>
                     [% END %]
+                    [% IF itemdata_nonpublicnotes %]
+                        <td class="nonpublicnote">[% item.itemnotes_nonpublic %]</td>
+                    [% END %]
                     [% IF ( SpineLabelShowPrintOnBibDetails ) %]
                         <td><a href="/cgi-bin/koha/labels/spinelabel-print.pl?barcode=[% item.barcode %]" >Print label</a></td>
                     [% END %]
@@ -800,9 +810,9 @@ function verify_images() {
                     </td>
                 [% END %]
                 [% IF CAN_user_editcatalogue_edit_items %]
-                    <td>
+                    <td class="actions">
                         [% UNLESS item.cannot_be_edited %]
-                            <a href="/cgi-bin/koha/cataloguing/additem.pl?op=edititem&biblionumber=[% item.biblionumber %]&itemnumber=[% item.itemnumber %]#edititem">Edit</a>
+                            <a class="btn btn-mini" href="/cgi-bin/koha/cataloguing/additem.pl?op=edititem&biblionumber=[% item.biblionumber %]&itemnumber=[% item.itemnumber %]#edititem"><i class="fa fa-pencil"></i> Edit</a>
                         [% END %]
                     </td>
                 [% END %]
@@ -815,7 +825,7 @@ function verify_images() {
 <div id="holdings">
 [% IF ( count ) %]
     [% IF ( showncount ) %]
-        [% PROCESS items_table items=itemloop %]
+        [% PROCESS items_table tab="holdings" items=itemloop %]
         [% END %]
                 [% IF ( hiddencount ) %]
                    <p><a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber %]&amp;showallitems=1">Show all items ([% hiddencount %] hidden)</a>
@@ -842,7 +852,7 @@ function verify_images() {
 [% IF (SeparateHoldings) %]
     <div id="otherholdings">
         [% IF (otheritemloop.size) %]
-            [% PROCESS items_table items=otheritemloop %]
+            [% PROCESS items_table tab="otherholdings" items=otheritemloop %]
         [% ELSE %]
             No other items.
         [% END %]
@@ -1032,14 +1042,14 @@ function verify_images() {
 
 [% IF ( HTML5MediaEnabled ) %]
 <div id="html5media">
-        <p>
-        <[% HTML5MediaParent %] controls preload=none>
           [% FOREACH HTML5MediaSet IN HTML5MediaSets %]
-            <[% HTML5MediaSet.child  %] src="[% HTML5MediaSet.srcblock %]"[% HTML5MediaSet.typeblock %] />
+            <p>
+              <[% HTML5MediaParent %] controls preload=none>
+                <[% HTML5MediaSet.child  %] src="[% HTML5MediaSet.srcblock %]"[% HTML5MediaSet.typeblock %] />
+                [[% HTML5MediaParent %] tag not supported by your browser.]
+              </[% HTML5MediaParent %]>
+            </p>
           [% END %]
-            [[% HTML5MediaParent %] tag not supported by your browser.]
-        </[% HTML5MediaParent %]>
-        </p>
 </div>
 [% END %]
 

@@ -43,6 +43,46 @@ get_apache_config_for()
     fi
 }
 
+get_opacdomain_for()
+{
+    local site=$1
+
+    if [ -e /etc/koha/koha-sites.conf ]; then
+        . /etc/koha/koha-sites.conf
+    else
+        echo "Error: /etc/koha/koha-sites.conf not present." 1>&2
+        exit 1
+    fi
+    local opacdomain="$OPACPREFIX$site$OPACSUFFIX$DOMAIN"
+    echo "$opacdomain"
+}
+
+get_intradomain_for()
+{
+    local site=$1
+
+    if [ -e /etc/koha/koha-sites.conf ]; then
+        . /etc/koha/koha-sites.conf
+    else
+        echo "Error: /etc/koha/koha-sites.conf not present." 1>&2
+        exit 1
+    fi
+    local intradomain="$INTRAPREFIX$site$INTRASUFFIX$DOMAIN"
+    echo "$intradomain"
+}
+
+letsencrypt_get_opacdomain_for()
+{
+    local site=$1
+
+    if [ -e /var/lib/koha/$site/letsencrypt.enabled ]; then
+        . /var/lib/koha/$site/letsencrypt.enabled
+    else
+        local opacdomain=$(get_opacdomain_for $site)
+    fi
+    echo "$opacdomain"
+}
+
 is_enabled()
 {
     local site=$1
@@ -84,11 +124,33 @@ is_email_enabled()
     fi
 }
 
+is_letsencrypt_enabled()
+{
+    local instancename=$1
+
+    if [ -e /var/lib/koha/$instancename/letsencrypt.enabled ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 is_sip_enabled()
 {
     local instancename=$1
 
     if [ -e /etc/koha/sites/$instancename/SIPconfig.xml ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+is_sitemap_enabled()
+{
+    local instancename=$1
+
+    if [ -e /var/lib/koha/$instancename/sitemap.enabled ]; then
         return 0
     else
         return 1

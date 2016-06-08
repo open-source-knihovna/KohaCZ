@@ -15,7 +15,7 @@
                 "dt_cardnumber":
                     "[% data.cardnumber | html %]",
                 "dt_name":
-                    "<span style='white-space:nowrap'><a href='/cgi-bin/koha/members/moremember.pl?borrowernumber=[% data.borrowernumber %]'>[% INCLUDE 'patron-title.inc' borrowernumber = data.borrowernumber category_type = data.category_type firstname = data.firstname surname = data.surname othernames = data.othernames invert_name = 1 %]</a><br />[% INCLUDE escape_address data = data %]</span>",
+                    "<span style='white-space:nowrap'><a href='/cgi-bin/koha/members/moremember.pl?borrowernumber=[% data.borrowernumber %]'>[% INCLUDE 'patron-title.inc' borrowernumber = data.borrowernumber category_type = data.category_type firstname = To.json(data.firstname) surname = To.json(data.surname) othernames = To.json(data.othernames) invert_name = 1 %]</a><br />[% INCLUDE escape_address data = data %]</span>",
     "dt_dateofbirth":
         "[% data.dateofbirth | $KohaDates %]",
                 "dt_category":
@@ -31,7 +31,7 @@
                 "dt_borrowernotes":
                     "[% data.borrowernotes.replace('\\\\' , '\\\\') |html |html_line_break |collapse %]",
                 "dt_action":
-                    "<a href='/cgi-bin/koha/members/memberentry.pl?op=modify&amp;destination=circ&amp;borrowernumber=[% data.borrowernumber %]'>Edit</a>",
+                    "<a href='/cgi-bin/koha/members/memberentry.pl?op=modify&amp;destination=circ&amp;borrowernumber=[% data.borrowernumber %]' class='btn btn-mini'><i class='fa fa-pencil'></i> Edit</a>",
                 "borrowernumber":
                     "[% data.borrowernumber %]"
             }[% UNLESS loop.last %],[% END %]

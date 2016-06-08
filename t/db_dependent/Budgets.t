@@ -1,5 +1,6 @@
+#!/usr/bin/perl
 use Modern::Perl;
-use Test::More tests => 130;
+use Test::More tests => 137;
 
 BEGIN {
     use_ok('C4::Budgets')
@@ -468,6 +469,15 @@ for my $budget (@$budget_hierarchy_cloned) {
 is( $number_of_budgets_not_reset, 0,
     'CloneBudgetPeriod has reset all budgets (funds)' );
 
+#GetBudgetsByActivity
+my $result=C4::Budgets::GetBudgetsByActivity(1);
+isnt( $result, undef ,'GetBudgetsByActivity return correct value with parameter 1');
+$result=C4::Budgets::GetBudgetsByActivity(0);
+ isnt( $result, undef ,'GetBudgetsByActivity return correct value with parameter 0');
+$result=C4::Budgets::GetBudgetsByActivity();
+ is( $result, 0 , 'GetBudgetsByActivity return 0 with none parameter or other 0 or 1' );
+DelBudget($budget_id);
+DelBudgetPeriod($bpid);
 
 # CloneBudgetPeriod with param amount_change_*
 $budget_period_id_cloned = C4::Budgets::CloneBudgetPeriod(
@@ -622,6 +632,73 @@ is( C4::Budgets::GetBudget($budget_id2)->{budget_owner_id},
     undef, "SetOwnerToFundHierarchy should have set John Doe $john_doe for budget 2 ($budget_id2)" );
 is( C4::Budgets::GetBudget($budget_id21)->{budget_owner_id},
     undef, "SetOwnerToFundHierarchy should have set John Doe $john_doe for budget 21 ($budget_id21)" );
+
+# Test GetBudgetAuthCats
+
+my $budgetPeriodId = AddBudgetPeriod({
+    budget_period_startdate   => '2008-01-01',
+    budget_period_enddate     => '2008-12-31',
+    budget_period_description => 'just another budget',
+    budget_period_active      => 0,
+});
+
+$budgets = GetBudgets();
+my $i = 0;
+for my $budget ( @$budgets )
+{
+    $budget->{sort1_authcat} = "sort1_authcat_$i";
+    $budget->{sort2_authcat} = "sort2_authcat_$i";
+    $budget->{budget_period_id} = $budgetPeriodId;
+    ModBudget( $budget );
+    $i++;
+}
+
+my $authCat = GetBudgetAuthCats($budgetPeriodId);
+
+is( scalar @{$authCat}, $i * 2, "GetBudgetAuthCats returns only non-empty sorting categories (no empty authCat in db)" );
+
+$i = 0;
+for my $budget ( @$budgets )
+{
+    $budget->{sort1_authcat} = "sort_authcat_$i";
+    $budget->{sort2_authcat} = "sort_authcat_$i";
+    $budget->{budget_period_id} = $budgetPeriodId;
+    ModBudget( $budget );
+    $i++;
+}
+
+$authCat = GetBudgetAuthCats($budgetPeriodId);
+is( scalar @$authCat, scalar @$budgets, "GetBudgetAuthCats returns distinct authCat" );
+
+$i = 0;
+for my $budget ( @$budgets )
+{
+    $budget->{sort1_authcat} = "sort1_authcat_$i";
+    $budget->{sort2_authcat} = "";
+    $budget->{budget_period_id} = $budgetPeriodId;
+    ModBudget( $budget );
+    $i++;
+}
+
+$authCat = GetBudgetAuthCats($budgetPeriodId);
+
+is( scalar @{$authCat}, $i, "GetBudgetAuthCats returns only non-empty sorting categories (empty sort2_authcat on all records)" );
+
+$i = 0;
+for my $budget ( @$budgets )
+{
+    $budget->{sort1_authcat} = "";
+    $budget->{sort2_authcat} = "";
+    $budget->{budget_period_id} = $budgetPeriodId;
+    ModBudget( $budget );
+    $i++;
+}
+
+$authCat = GetBudgetAuthCats($budgetPeriodId);
+
+is( scalar @{$authCat}, 0, "GetBudgetAuthCats returns only non-empty sorting categories (all empty)" );
+
+# /Test GetBudgetAuthCats
 
 sub _get_dependencies {
     my ($budget_hierarchy) = @_;

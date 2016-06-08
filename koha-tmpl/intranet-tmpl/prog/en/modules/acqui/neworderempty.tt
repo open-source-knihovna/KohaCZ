@@ -3,11 +3,11 @@
 <title>Koha &rsaquo; Acquisitions &rsaquo; Basket [% basketno %] &rsaquo; [% IF ( ordernumber ) %]Modify order details (line #[% ordernumber %])[% ELSE %]New order[% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
 
-<script type="text/javascript" src="[% themelang %]/js/acq.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/acq.js"></script>
 [% INCLUDE 'additem.js.inc' %]
-<script type="text/javascript" src="[% themelang %]/js/additem.js"></script>
-<script type="text/javascript" src="[% themelang %]/js/cataloging.js"></script>
-<script type="text/javascript" src="[% themelang %]/js/prevent_submit.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/additem.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/cataloging.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/prevent_submit.js"></script>
 <script type="text/javascript">
 //<![CDATA[
 actTotal = "";
@@ -302,8 +302,8 @@ $(document).ready(function()
         <input type="hidden" name="suggestionid" value="[% suggestionid %]" />
         <input type="hidden" name="import_batch_id" value="[% import_batch_id %]" />
 
-        [% FOREACH currency IN currencies %]
-            <input type="hidden" id="currency_rate_[% currency.currency %]"  name="[% currency.currency %]" value="[% currency.rate %]" />
+        [% FOREACH c IN currencies %]
+            <input type="hidden" id="currency_rate_[% c.currency %]"  name="[% c.currency %]" value="[% c.rate %]" />
         [% END %]
 
         <ol><li>
@@ -413,7 +413,7 @@ $(document).ready(function()
         </fieldset>
     [% END %]
 
-    [% UNLESS subscriptionid %][% # it is a suggestion, we have not items %]
+    [% UNLESS subscriptionid || basket.is_standing %][% # it is a suggestion, we have not items %]
       [% IF (AcqCreateItemOrdering) %]
 
       <div id="items_list" style="display:none">
@@ -461,18 +461,18 @@ $(document).ready(function()
         <ol>
             <li>
                 [% IF ( close ) %]
-            <span class="label required">Quantity: </span>
+                    <span class="label required">Quantity: </span>
                     <input type="hidden" name="quantity" value="[% quantity %]" />[% quantity %]
                 [% ELSE %]
                     <label class="required" for="quantity">Quantity: </label>
                     [% IF (AcqCreateItemOrdering) %]
-                        [% IF subscriptionid %]
+                        [% IF subscriptionid || basket.is_standing %]
                             <input type="text" readonly="readonly" size="20" id="quantity" name="quantity" value="1" />
                         [% ELSE %]
                             <input type="text" readonly="readonly" size="20" id="quantity" name="quantity" value="0" />
                         [% END %]
                     [% ELSE %]
-                        [% IF subscriptionid %]
+                        [% IF subscriptionid || basket.is_standing %]
                             <input type="text" readonly="readonly" size="20" id="quantity" name="quantity" value="1" />
                         [% ELSE %]
                             <input type="text" size="20" id="quantity" name="quantity" value="[% quantityrec %]" onchange="updateCosts();" />
@@ -523,11 +523,11 @@ $(document).ready(function()
                 [% ELSE %]
 			<label for="currency">Currency:</label>
             <select name="currency" id="currency" onchange="updateCosts();">
-                [% FOREACH currency IN currencies %]
-                    [% IF ordernumber and currency.currency == listprice or not ordernumber and currency.active %]
-                        <option value="[% currency.currency %]" selected="selected">[% currency.currency %]</option>
-                    [% ELSIF not currency.archived %]
-                        <option value="[% currency.currency %]">[% currency.currency %]</option>
+                [% FOREACH c IN currencies %]
+                    [% IF ordernumber and c.currency == currency or not ordernumber and c.currency == vendor_currency %]
+                        <option value="[% c.currency %]" selected="selected">[% c.currency %]</option>
+                    [% ELSIF not c.archived %]
+                        <option value="[% c.currency %]">[% c.currency %]</option>
                     [% END %]
                 [% END %]
             </select>

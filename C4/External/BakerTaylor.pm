@@ -27,13 +27,13 @@ use C4::Debug;
 use strict;
 use warnings;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $VERSION);
 use vars qw($user $pass $agent $image_url $link_url);
 
 BEGIN {
 	require Exporter;
-    $VERSION = 3.07.00.049;
 	@ISA = qw(Exporter);
+    $VERSION = 3.07.00.049;
 	@EXPORT_OK = qw(&availability &content_cafe &image_url &link_url &http_jacket_link);
 	%EXPORT_TAGS = (all=>\@EXPORT_OK);
 }

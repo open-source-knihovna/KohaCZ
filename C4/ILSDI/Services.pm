@@ -34,6 +34,7 @@ use HTML::Entities;
 use CGI qw ( -utf8 );
 use DateTime;
 use C4::Auth;
+use C4::Members::Attributes qw(GetBorrowerAttributes);
 
 =head1 NAME
 
@@ -369,7 +370,7 @@ sub GetPatronInfo {
     delete $borrower->{'password'};
 
     # Contact fields management
-    if ( $cgi->param('show_contact') eq "0" ) {
+    if ( defined $cgi->param('show_contact') && $cgi->param('show_contact') eq "0" ) {
 
         # Define contact fields
         my @contactfields = (
@@ -386,7 +387,7 @@ sub GetPatronInfo {
     }
 
     # Fines management
-    if ( $cgi->param('show_fines') eq "1" ) {
+    if ( $cgi->param('show_fines') && $cgi->param('show_fines') eq "1" ) {
         my @charges;
         for ( my $i = 1 ; my @charge = getcharges( $borrowernumber, undef, $i ) ; $i++ ) {
             push( @charges, @charge );
@@ -395,7 +396,7 @@ sub GetPatronInfo {
     }
 
     # Reserves management
-    if ( $cgi->param('show_holds') eq "1" ) {
+    if ( $cgi->param('show_holds') && $cgi->param('show_holds') eq "1" ) {
 
         # Get borrower's reserves
         my @reserves = GetReservesFromBorrowernumber( $borrowernumber, undef );
@@ -419,13 +420,18 @@ sub GetPatronInfo {
     }
 
     # Issues management
-    if ( $cgi->param('show_loans') eq "1" ) {
+    if ( $cgi->param('show_loans') && $cgi->param('show_loans') eq "1" ) {
         my $issues = GetPendingIssues($borrowernumber);
         foreach my $issue ( @$issues ){
             $issue->{'issuedate'} = $issue->{'issuedate'}->strftime('%Y-%m-%d %H:%M');
             $issue->{'date_due'} = $issue->{'date_due'}->strftime('%Y-%m-%d %H:%M');
         }
         $borrower->{'loans'}->{'loan'} = $issues;
+    }
+
+    if ( $cgi->param('show_attributes') eq "1" ) {
+        my $attrs = GetBorrowerAttributes( $borrowernumber, 0, 1 );
+        $borrower->{'attributes'} = $attrs;
     }
 
     return $borrower;

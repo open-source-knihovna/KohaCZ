@@ -116,7 +116,7 @@ my $error = $input->param('error');
 $template->param( error => $error ) if ( $error );
 
 my ( $od, $issue, $fines ) = GetMemberIssuesAndFines($borrowernumber);
-$template->param( issuecount => $issue );
+$template->param( issuecount => $issue, fines => $fines );
 
 my $data = GetMember( 'borrowernumber' => $borrowernumber );
 
@@ -169,6 +169,13 @@ if ( my $guarantor = $patron->guarantor ) {
     $template->param( guarantor => $guarantor );
     push @relatives, $guarantor->borrowernumber;
     push @relatives, $_->borrowernumber for $patron->siblings;
+} elsif ( $patron->contactname || $patron->contactfirstname ) {
+    $template->param(
+        guarantor => {
+            firstname => $patron->contactfirstname,
+            surname   => $patron->contactname,
+        }
+    );
 } else {
     my @guarantees = $patron->guarantees;
     $template->param( guarantees => \@guarantees );
@@ -317,7 +324,7 @@ $template->param(
     borrowernumber  => $borrowernumber,
     othernames      => $data->{'othernames'},
     categoryname    => $data->{'description'},
-    was_renewed     => $input->param('was_renewed') ? 1 : 0,
+    was_renewed     => scalar $input->param('was_renewed') ? 1 : 0,
     branch          => $branch,
     todaysdate      => output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }),
     totalprice      => sprintf("%.2f", $totalprice),

@@ -104,7 +104,7 @@
 
         <div id="sysinfo">
     [% IF warnPrefBiblioAddsAuthorities || warnPrefEasyAnalyticalRecords || warnPrefAnonymousPatron ||
-          warnNoActiveCurrency || QueryParserError || warnIsRootUser || xml_config_warnings.size || AutoSelfCheckPatronDoesNotHaveSelfCheckPerm || AutoSelfCheckPatronHasTooManyPerm %]
+          warnNoActiveCurrency || QueryParserError || warnIsRootUser || xml_config_warnings.size || AutoSelfCheckPatronDoesNotHaveSelfCheckPerm || AutoSelfCheckPatronHasTooManyPerm || warnStatisticsFieldsError %]
         [% IF (warnIsRootUser) %]
             <h2>Warning regarding current user</h2>
             <p>You are logged in as the database administrative user. This is not recommended because some parts of Koha will not function as expected when using this account.</p>
@@ -112,7 +112,7 @@
         [% END %]
 
         [% IF warnPrefBiblioAddsAuthorities || warnPrefEasyAnalyticalRecords || warnPrefAnonymousPatron ||
-              warnNoActiveCurrency || QueryParserError || AutoSelfCheckPatronDoesNotHaveSelfCheckPerm || AutoSelfCheckPatronHasTooManyPerm %]
+              warnNoActiveCurrency || QueryParserError || AutoSelfCheckPatronDoesNotHaveSelfCheckPerm || AutoSelfCheckPatronHasTooManyPerm || warnStatisticsFieldsError%]
             <h2>Warnings regarding the system configuration</h2>
             <table>
                 <caption>Preferences and parameters</caption>
@@ -130,6 +130,9 @@
                 [% END %]
                 [% IF warnNoActiveCurrency %]
                     <tr><th scope="row"><b>Warning</b> </th><td>No active currency is defined. Please go to <a href="/cgi-bin/koha/admin/currency.pl">Administration &gt; Currencies and exchange rates</a> and mark one currency as active.</td></tr>
+                [% END %]
+                [% IF warnStatisticsFieldsError %]
+                    <tr><th scope="row"><b>Warning</b> </th><td>System preference 'StatisticsFields' contains field names not belonging to the items database table: [% warnStatisticsFieldsError %] </td></tr>
                 [% END %]
                 [% IF QueryParserError %]
                     <tr><th scope="row"><b>Warning</b> </th><td>
@@ -292,7 +295,7 @@
                 <li><a href="http://www.ashs.school.nz/">Albany Senior High School</a>, Auckland, New Zealand (OPAC 'star-ratings' sponsorship)</li>
             </ul>
 
-            <h2>Koha 3.24 release team</h2>
+            <h2>Koha <span style="color:red" title="Koha version numbering has jumped from 3.22 to 16.05 (yy.mm) as from May 2016">16.05</span> release team</h2>
             <ul>
                 <li><strong>Release manager:</strong>
                     <a href="https://www.openhub.net/p/koha/contributors/6618544661344">Brendan Gallagher</a></li>
@@ -757,6 +760,10 @@
 
             <h2>Require.js JS module system</h2>
             <p>The <a href="http://requirejs.org/">Require.js JS module system</a> by The Dojo Foundation is licensed under an <a href="https://github.com/jrburke/requirejs/blob/master/LICENSE">MIT license</a>.</p>
+
+            <h2>OAI xslt stylesheet</h2>
+            <p>The included OAI.xslt file by the <a href="http://dspace.org/">DSpace project</a> is licensed under a <a href="http://www.dspace.org/license/">BSD License</a>.</p>
+
         </div>
 
         <div id="translations">

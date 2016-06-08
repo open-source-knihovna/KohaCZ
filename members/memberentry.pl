@@ -102,7 +102,7 @@ my $userenv = C4::Context->userenv;
 ## Deal with debarments
 $template->param(
     debarments => GetDebarments( { borrowernumber => $borrowernumber } ) );
-my @debarments_to_remove = $input->param('remove_debarment');
+my @debarments_to_remove = $input->multi_param('remove_debarment');
 foreach my $d ( @debarments_to_remove ) {
     DelDebarment( $d );
 }
@@ -119,7 +119,7 @@ if ( $input->param('add_debarment') ) {
         {
             borrowernumber => $borrowernumber,
             type           => 'MANUAL',
-            comment        => $input->param('debarred_comment'),
+            comment        => scalar $input->param('debarred_comment'),
             expiration     => $expiration,
         }
     );
@@ -539,7 +539,7 @@ if($no_categories){ $no_add = 1; }
 
 
 my $cities = Koha::Cities->search( {}, { order_by => 'city_name' } );
-my $roadtypes = C4::Koha::GetAuthorisedValues( 'ROADTYPE', $data{streettype} );
+my $roadtypes = C4::Koha::GetAuthorisedValues( 'ROADTYPE' );
 $template->param(
     roadtypes => $roadtypes,
     cities    => $cities,
@@ -711,18 +711,17 @@ output_html_with_http_headers $input, $cookie, $template->output;
 
 sub  parse_extended_patron_attributes {
     my ($input) = @_;
-    my @patron_attr = grep { /^patron_attr_\d+$/ } $input->param();
+    my @patron_attr = grep { /^patron_attr_\d+$/ } $input->multi_param();
 
     my @attr = ();
     my %dups = ();
     foreach my $key (@patron_attr) {
         my $value = $input->param($key);
         next unless defined($value) and $value ne '';
-        my $password = $input->param("${key}_password");
         my $code     = $input->param("${key}_code");
         next if exists $dups{$code}->{$value};
         $dups{$code}->{$value} = 1;
-        push @attr, { code => $code, value => $value, password => $password };
+        push @attr, { code => $code, value => $value };
     }
     return \@attr;
 }
@@ -756,16 +755,13 @@ sub patron_attributes_form {
             code              => $attr_type->code(),
             description       => $attr_type->description(),
             repeatable        => $attr_type->repeatable(),
-            password_allowed  => $attr_type->password_allowed(),
             category          => $attr_type->authorised_value_category(),
             category_code     => $attr_type->category_code(),
-            password          => '',
         };
         if (exists $attr_hash{$attr_type->code()}) {
             foreach my $attr (@{ $attr_hash{$attr_type->code()} }) {
                 my $newentry = { %$entry };
                 $newentry->{value} = $attr->{value};
-                $newentry->{password} = $attr->{password};
                 $newentry->{use_dropdown} = 0;
                 if ($attr_type->authorised_value_category()) {
                     $newentry->{use_dropdown} = 1;

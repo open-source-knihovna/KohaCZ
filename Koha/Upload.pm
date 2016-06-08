@@ -170,7 +170,7 @@ sub get {
     my ( @rv, $res);
     foreach my $r ( @$temp ) {
         undef $res;
-        foreach( qw[id hashvalue filesize uploadcategorycode public permanent] ) {
+        foreach( qw[id hashvalue filesize uploadcategorycode public permanent owner] ) {
             $res->{$_} = $r->{$_};
         }
         $res->{name} = $r->{filename};
@@ -238,6 +238,27 @@ sub httpheaders {
         '-type'       => 'application/octet-stream',
         '-attachment' => $name,
     );
+}
+
+=head2 allows_add_by
+
+    allows_add_by checks if $userid has permission to add uploaded files
+
+=cut
+
+sub allows_add_by {
+    my ( $class, $userid ) = @_; # do not confuse with borrowernumber
+    my $flags = [
+        { tools      => 'upload_general_files' },
+        { circulate  => 'circulate_remaining_permissions' },
+        { tools      => 'stage_marc_import' },
+        { tools      => 'upload_local_cover_images' },
+    ];
+    require C4::Auth;
+    foreach( @$flags ) {
+        return 1 if C4::Auth::haspermission( $userid, $_ );
+    }
+    return;
 }
 
 =head1 INTERNAL ROUTINES
@@ -366,7 +387,7 @@ sub _lookup {
     my ( $self, $params ) = @_;
     my $dbh = C4::Context->dbh;
     my $sql = q|
-SELECT id,hashvalue,filename,dir,filesize,uploadcategorycode,public,permanent
+SELECT id,hashvalue,filename,dir,filesize,uploadcategorycode,public,permanent,owner
 FROM uploaded_files
     |;
     my @pars;

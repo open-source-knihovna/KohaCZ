@@ -2,17 +2,19 @@
 
 use Modern::Perl;
 use File::Temp qw/ tempdir /;
-use Test::More tests => 7;
+use Test::More tests => 8;
 
 use Test::MockModule;
 use t::lib::Mocks;
+use t::lib::TestBuilder;
 
 use C4::Context;
+use Koha::Database;
 use Koha::Upload;
 
+my $schema  = Koha::Database->new->schema;
+$schema->storage->txn_begin;
 my $dbh = C4::Context->dbh;
-$dbh->{AutoCommit} = 0;
-$dbh->{RaiseError} = 1;
 
 our $current_upload = 0;
 our $uploads = [
@@ -34,15 +36,6 @@ our $uploads = [
         { name => 'file4', cat => undef, size => 5000 }, # temp duplicate
     ],
 ];
-
-# Before we mock upload_path, we are checking the real folder
-# This may help identifying upload problems
-my $realdir = C4::Context->config('upload_path');
-if( !$realdir ) {
-    warn "WARNING: You do not have upload_path in koha-conf.xml";
-} elsif( !-w $realdir ) {
-    warn "WARNING: You do not have write permissions in $realdir";
-}
 
 # Redirect upload dir structure and mock File::Spec and CGI
 my $tempdir = tempdir( CLEANUP => 1 );
@@ -81,7 +74,11 @@ subtest 'Test07' => sub {
     plan tests => 2;
     test07();
 };
-$dbh->rollback;
+subtest 'Test08: allows_add_by' => sub {
+    plan tests => 4;
+    test08();
+};
+$schema->storage->txn_rollback;
 
 sub test01 {
     # Delete existing records (for later tests)
@@ -167,6 +164,43 @@ sub test07 { #simple test for httpheaders and getCategories
     $dbh->do("INSERT INTO authorised_values (category, authorised_value, lib) VALUES (?,?,?) ", undef, ( 'UPLOAD', 'HAVE_AT_LEAST_ONE', 'Hi there' ));
     my $cat = Koha::Upload->getCategories;
     is( @$cat >= 1, 1, 'getCategories returned at least one category' );
+}
+
+sub test08 { # allows_add_by
+    my $builder = t::lib::TestBuilder->new;
+    my $patron = $builder->build({
+        source => 'Borrower',
+        value  => { flags => 0 }, #no permissions
+    });
+    my $patronid = $patron->{borrowernumber};
+    is( Koha::Upload->allows_add_by( $patron->{userid} ),
+        undef, 'Patron is not allowed to do anything' );
+
+    # add some permissions: edit_catalogue
+    my $fl = 2**9; # edit_catalogue
+    $schema->resultset('Borrower')->find( $patronid )->update({ flags => $fl });
+    is( Koha::Upload->allows_add_by( $patron->{userid} ),
+        undef, 'Patron is still not allowed to add uploaded files' );
+
+    # replace flags by all tools
+    $fl = 2**13; # tools
+    $schema->resultset('Borrower')->find( $patronid )->update({ flags => $fl });
+    is( Koha::Upload->allows_add_by( $patron->{userid} ),
+        1, 'Patron should be allowed now to add uploaded files' );
+
+    # remove all tools and add upload_general_files only
+    $fl = 0; # no modules
+    $schema->resultset('Borrower')->find( $patronid )->update({ flags => $fl });
+    $builder->build({
+        source => 'UserPermission',
+        value  => {
+            borrowernumber => $patronid,
+            module_bit     => { module_bit => { flag => 'tools' } },
+            code           => 'upload_general_files',
+        },
+    });
+    is( Koha::Upload->allows_add_by( $patron->{userid} ),
+        1, 'Patron is still allowed to add uploaded files' );
 }
 
 sub newCGI {

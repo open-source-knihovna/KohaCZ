@@ -3,7 +3,7 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Cataloging &rsaquo; Merging records</title>
 [% INCLUDE 'doc-head-close.inc' %]
-<script type="text/javascript" src="[% themelang %]/js/merge-record.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/merge-record.js"></script>
 [% INCLUDE 'merge-record-strings.inc' %]
 <style type="text/css">
 div.record ul, div.record li { float:none; display:block; }
@@ -111,8 +111,8 @@ $(document).ready(function(){
 
     // Check all checkboxes in first tab, and uncheck all others to avoid
     // inconsistencies from a page refresh.
-    $('#tabs div#tabrecord[% ref_biblionumber %]').find('input[type="checkbox"]').attr('checked', true);
-    $('#tabs > div:not("#tabrecord[% ref_biblionumber %]")').find('input[type="checkbox"]').removeAttr('checked');
+    $('#tabs div#tabrecord[% ref_biblionumber %]').find('input[type="checkbox"]').prop('checked', true);
+    $('#tabs > div:not("#tabrecord[% ref_biblionumber %]")').find('input[type="checkbox"]').prop('checked', false);
 
     //Set focus to cataloging search
     $("input[name=q]:eq(0)").focus();
@@ -280,7 +280,7 @@ $(document).ready(function(){
 
 <input type="hidden" name="ref_biblionumber" value="[% ref_biblionumber %]" />
 [% FOREACH record IN records %]
-    <input type="hidden" name="biblionumber" value="[% record.biblionumber %]" />
+    <input type="hidden" name="biblionumber" value="[% record.recordid %]" />
 [% END %]
 <input type="hidden" name="frameworkcode" value="[% framework %]" />
 

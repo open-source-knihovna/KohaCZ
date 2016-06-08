@@ -65,7 +65,7 @@ my $new_ordernumber  = $ordernumber;
 if ($quantityrec > $origquantityrec ) {
     my @received_items = ();
     if(C4::Context->preference('AcqCreateItem') eq 'ordering') {
-        @received_items = $input->param('items_to_receive');
+        @received_items = $input->multi_param('items_to_receive');
         my @affects = split q{\|}, C4::Context->preference("AcqItemSetSubfieldsWhenReceived");
         if ( @affects ) {
             my $frameworkcode = GetFrameworkCode($biblionumber);
@@ -122,13 +122,13 @@ if ($quantityrec > $origquantityrec ) {
     # now, add items if applicable
     if (C4::Context->preference('AcqCreateItem') eq 'receiving') {
 
-        my @tags         = $input->param('tag');
-        my @subfields    = $input->param('subfield');
-        my @field_values = $input->param('field_value');
-        my @serials      = $input->param('serial');
-        my @itemid       = $input->param('itemid');
-        my @ind_tag      = $input->param('ind_tag');
-        my @indicator    = $input->param('indicator');
+        my @tags         = $input->multi_param('tag');
+        my @subfields    = $input->multi_param('subfield');
+        my @field_values = $input->multi_param('field_value');
+        my @serials      = $input->multi_param('serial');
+        my @itemid       = $input->multi_param('itemid');
+        my @ind_tag      = $input->multi_param('ind_tag');
+        my @indicator    = $input->multi_param('indicator');
         #Rebuilding ALL the data for items into a hash
         # parting them on $itemid.
         my %itemhash;

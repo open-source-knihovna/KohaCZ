@@ -43,15 +43,15 @@ if (defined $format and $format eq 'json') {
     # Map DataTables parameters with 'regular' parameters
     $cgi->param('rows', $cgi->param('iDisplayLength'));
     $cgi->param('page', ($cgi->param('iDisplayStart') / $cgi->param('iDisplayLength')) + 1);
-    my @columns = split /,/, $cgi->param('sColumns');
+    my @columns = split /,/, $cgi->multi_param('sColumns');
     $cgi->param('sortby', $columns[ $cgi->param('iSortCol_0') ]);
     $cgi->param('sortorder', $cgi->param('sSortDir_0'));
 
-    my @f = $cgi->param('f');
-    my @q = $cgi->param('q');
+    my @f = $cgi->multi_param('f');
+    my @q = $cgi->multi_param('q');
     push @q, '' if @q == 0;
-    my @op = $cgi->param('op');
-    my @c = $cgi->param('c');
+    my @op = $cgi->multi_param('op');
+    my @c = $cgi->multi_param('c');
     foreach my $i (0 .. ($cgi->param('iColumns') - 1)) {
         my $sSearch = $cgi->param("sSearch_$i");
         if (defined $sSearch and $sSearch ne '') {
@@ -102,7 +102,7 @@ if (scalar keys %params > 0) {
     };
 
     foreach my $p (qw(homebranch location itype ccode issues datelastborrowed notforloan)) {
-        if (my @q = $cgi->param($p)) {
+        if (my @q = $cgi->multi_param($p)) {
             if ($q[0] ne '') {
                 my $f = {
                     field => $p,
@@ -116,10 +116,10 @@ if (scalar keys %params > 0) {
         }
     }
 
-    my @c = $cgi->param('c');
-    my @fields = $cgi->param('f');
-    my @q = $cgi->param('q');
-    my @op = $cgi->param('op');
+    my @c = $cgi->multi_param('c');
+    my @fields = $cgi->multi_param('f');
+    my @q = $cgi->multi_param('q');
+    my @op = $cgi->multi_param('op');
 
     my $f;
     for (my $i = 0; $i < @fields; $i++) {
@@ -189,10 +189,10 @@ if (scalar keys %params > 0) {
         $sortby = 'copyrightdate';
     }
     my $search_params = {
-        rows => $cgi->param('rows') // 20,
-        page => $cgi->param('page') || 1,
+        rows => scalar $cgi->param('rows') // 20,
+        page => scalar $cgi->param('page') || 1,
         sortby => $sortby,
-        sortorder => $cgi->param('sortorder') || 'asc',
+        sortorder => scalar $cgi->param('sortorder') || 'asc',
     };
 
     my ($results, $total_rows) = SearchItems($filter, $search_params);
@@ -232,7 +232,7 @@ if (scalar keys %params > 0) {
         my $url = '/cgi-bin/koha/catalogue/itemsearch.pl';
         my @params;
         foreach my $p (keys %params) {
-            my @v = $cgi->param($p);
+            my @v = $cgi->multi_param($p);
             push @params, map { "$p=" . $_ } @v;
         }
         $url .= '?' . join ('&', @params);

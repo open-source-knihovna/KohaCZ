@@ -34,11 +34,14 @@ use C4::Output;
 use C4::Koha;
 use C4::Search;
 
+use Koha::SearchEngine::Search;
+use Koha::SearchEngine::QueryBuilder;
+
 my $input = new CGI;
 
 my $success = $input->param('biblioitem');
 my $query   = $input->param('q');
-my @value   = $input->param('value');
+my @value   = $input->multi_param('value');
 my $page    = $input->param('page') || 1;
 my $results_per_page = 20;
 
@@ -74,15 +77,17 @@ if ($query) {
     my $QParser;
     $QParser = C4::Context->queryparser if (C4::Context->preference('UseQueryParser'));
     my $builtquery;
+    my $builder = Koha::SearchEngine::QueryBuilder->new(
+        { index => $Koha::SearchEngine::BIBLIOS_INDEX } );
+    my $searcher = Koha::SearchEngine::Search->new(
+        { index => $Koha::SearchEngine::BIBLIOS_INDEX } );
     if ($QParser) {
         $builtquery = $query;
     } else {
-        my ( $builterror,$simple_query,$query_cgi,$query_desc,$limit,$limit_cgi,$limit_desc,$query_type);
-        ( $builterror,$builtquery,$simple_query,$query_cgi,$query_desc,$limit,$limit_cgi,$limit_desc,$query_type) = buildQuery(undef,\@operands);
+        ( undef,$builtquery,undef,undef,undef,undef,undef,undef,undef,undef) = $builder->build_query_compat(undef,\@operands);
     }
-
     # find results
-    my ( $error, $marcresults, $total_hits ) = SimpleSearch($builtquery, $results_per_page * ($page - 1), $results_per_page);
+    my ( $error, $marcresults, $total_hits ) = $searcher->simple_search_compat($builtquery, $results_per_page * ($page - 1), $results_per_page);
 
     if ( defined $error ) {
         $template->param( error => $error );

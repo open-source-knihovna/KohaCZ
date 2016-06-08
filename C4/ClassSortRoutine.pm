@@ -24,10 +24,8 @@ require Exporter;
 use Class::Factory::Util;
 use C4::Context;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
-# set the version for version checking
-$VERSION = 3.07.00.049;
 
 =head1 NAME 
 

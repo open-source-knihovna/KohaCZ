@@ -228,21 +228,16 @@ subtest q{Test Koha::Database->schema()->resultset('Item')->itemtype()} => sub {
 
     $schema->storage->txn_begin;
 
-    my $biblio =
-    $schema->resultset('Biblio')->create(
-        {
-            title       => "Test title",
-            biblioitems => [
-                {
-                    itemtype => 'BIB_LEVEL',
-                    items    => [ { itype => "ITEM_LEVEL" } ]
-                }
-            ]
-        }
-    );
-
-    my @bi = $biblio->biblioitems();
-    my ( $item ) = $bi[0]->items();
+    my $biblio = $schema->resultset('Biblio')->create({
+        title       => "Test title",
+        biblioitems => [ { itemtype => 'BIB_LEVEL' } ],
+    });
+    my $biblioitem = $biblio->biblioitems->first;
+    my $item = $schema->resultset('Item')->create({
+        biblioitemnumber => $biblioitem->biblioitemnumber,
+        biblionumber     => $biblio->biblionumber,
+        itype            => "ITEM_LEVEL",
+    });
 
     t::lib::Mocks::mock_preference( 'item-level_itypes', 0 );
     is( $item->effective_itemtype(), 'BIB_LEVEL', '$item->itemtype() returns biblioitem.itemtype when item-level_itypes is disabled' );
@@ -534,14 +529,14 @@ subtest 'C4::Biblio::EmbedItemsInMarcBiblio' => sub {
     @items = $record->field($itemfield);
     is( scalar @items,
         $number_of_items,
-        'Even with OpacHiddenItems set, all items should have been embeded' );
+        'Even with OpacHiddenItems set, all items should have been embedded' );
 
     C4::Biblio::EmbedItemsInMarcBiblio( $record, $biblionumber, undef, 1 );
     @items = $record->field($itemfield);
     is(
         scalar @items,
         $number_of_items - $number_of_items_with_homebranch_is_CPL,
-'For OPAC, the pref OpacHiddenItems should have been take into account. Only items with homebranch ne CPL should have been embeded'
+'For OPAC, the pref OpacHiddenItems should have been take into account. Only items with homebranch ne CPL should have been embedded'
     );
 
     $opachiddenitems = "
@@ -552,7 +547,7 @@ subtest 'C4::Biblio::EmbedItemsInMarcBiblio' => sub {
     is(
         scalar @items,
         0,
-'For OPAC, If all items are hidden, no item should have been embeded'
+'For OPAC, If all items are hidden, no item should have been embedded'
     );
 
     $schema->storage->txn_rollback;

@@ -19,7 +19,7 @@
                 </div>
             [% END %]
             <div class="btn-group">
-                <a class="btn btn-small" title="Duplicate this saved report" href="/cgi-bin/koha/reports/guided_reports.pl?phase=Create report from SQL&amp;sql=[% sql %]&amp;reportname=[% reportname %]&amp;notes=[% notes %]">
+                <a class="btn btn-small" title="Duplicate this saved report" href="/cgi-bin/koha/reports/guided_reports.pl?phase=Create report from SQL&amp;sql=[% sql |uri %]&amp;reportname=[% reportname |uri %]&amp;notes=[% notes |uri %]">
                     <i class="fa fa-copy"></i> Duplicate
                 </a>
             </div>
@@ -27,7 +27,7 @@
 
         [% IF ( CAN_user_reports_create_reports ) %]
             <div class="btn-group">
-                <a class="confirmdelete btn btn-small" href="/cgi-bin/koha/reports/guided_reports.pl?reports=[% id %]&phase=Delete%20Saved">
+                <a class="delete btn btn-small" href="/cgi-bin/koha/reports/guided_reports.pl?reports=[% id %]&phase=Delete%20Saved">
                     <i class="fa fa-remove"></i> Delete
                 </a>
             </div>
@@ -47,3 +47,13 @@
         [% END %]
     [% END %]
 </div>
+
+<script type="text/javascript">
+var MSG_CONFIRM_DELETE = _("Are you sure you want to delete this report? This cannot be undone.");
+
+$(document).ready(function(){
+    $(".delete").on("click",function(){
+        return confirmDelete(MSG_CONFIRM_DELETE);
+    });
+});
+</script>

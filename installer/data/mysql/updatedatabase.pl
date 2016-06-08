@@ -8363,10 +8363,9 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "3.15.00.041";
 if ( CheckVersion($DBversion) ) {
-    my $name = $dbh->selectcol_arrayref(q|
+    my ( $name ) = $dbh->selectrow_array(q|
         SELECT name FROM letter WHERE code="HOLD"
     |);
-    $name = $name->[0];
     $dbh->do(q|
         UPDATE letter
         SET code="HOLD",
@@ -8375,6 +8374,9 @@ if ( CheckVersion($DBversion) ) {
         WHERE code="HOLD_PHONE"
     |, {}, $name);
 
+    ( $name ) = $dbh->selectrow_array(q|
+        SELECT name FROM letter WHERE code="PREDUE"
+    |);
     $dbh->do(q|
         UPDATE letter
         SET code="PREDUE",
@@ -8383,6 +8385,9 @@ if ( CheckVersion($DBversion) ) {
         WHERE code="PREDUE_PHONE"
     |, {}, $name);
 
+    ( $name ) = $dbh->selectrow_array(q|
+        SELECT name FROM letter WHERE code="OVERDUE"
+    |);
     $dbh->do(q|
         UPDATE letter
         SET code="OVERDUE",
@@ -11832,9 +11837,6 @@ if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
         ALTER TABLE deletedborrowers ADD sms_provider_id INT( 11 ) NULL DEFAULT NULL AFTER smsalertnumber;
     });
-    $dbh->do(q{
-        ALTER TABLE deletedborrowers ADD FOREIGN KEY ( sms_provider_id ) REFERENCES sms_providers ( id ) ON UPDATE CASCADE ON DELETE SET NULL;
-    });
 
     print "Upgrade to $DBversion done (Bug 9021 - Add SMS via email as an alternative to SMS services via SMS::Send drivers)\n";
     SetVersion($DBversion);
@@ -12112,6 +12114,574 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
     print "Upgrade to $DBversion done (Bug 16019 - Check intranetcolorstylesheet for blue.css)\n";
     SetVersion($DBversion);
 }
+
+$DBversion = "3.23.00.041";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+
+    my $dbh = C4::Context->dbh;
+    my ($print_error) = $dbh->{PrintError};
+    $dbh->{RaiseError} = 0;
+    $dbh->{PrintError} = 0;
+    $dbh->do("ALTER TABLE overduerules_transport_types ADD COLUMN letternumber INT(1) NOT NULL DEFAULT 1 AFTER id");
+    $dbh->{PrintError} = $print_error;
+
+    print "Upgrade to $DBversion done (Bug 16007: Make sure overduerules_transport_types.letternumber exists)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.042";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+
+    $dbh->do(q{
+            ALTER TABLE items CHANGE new new_status VARCHAR(32) NULL;
+            });
+    $dbh->do(q{
+            ALTER TABLE deleteditems CHANGE new new_status VARCHAR(32) NULL;
+            });
+    $dbh->do(q{
+            UPDATE systempreferences SET value=REPLACE(value, '"items.new"', '"items.new_status"') WHERE variable="automatic_item_modification_by_age_configuration";
+            });
+
+    print "Upgrade to $DBversion done (Bug 16004 - Replace items.new with items.new_status)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.043";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do(q{
+            UPDATE systempreferences SET value="" WHERE value IS NULL;
+            });
+
+    print "Upgrade to $DBversion done (Bug 16070 - Empty (undef) system preferences may cause some issues in combination with memcache)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.044";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do(q{
+            INSERT INTO systempreferences (variable,value,explanation,options,type) VALUES
+            ('GoogleOpenIDConnect', '0', NULL, 'if ON, allows the use of Google OpenID Connect for login', 'YesNo'),
+            ('GoogleOAuth2ClientID', '', NULL, 'Client ID for the web app registered with Google', 'Free'),
+            ('GoogleOAuth2ClientSecret', '', NULL, 'Client Secret for the web app registered with Google', 'Free'),
+            ('GoogleOpenIDConnectDomain', '', NULL, 'Restrict OpenID Connect to this domain (or subdomains of this domain). Leave blank for all Google domains', 'Free');
+            });
+
+    print "Upgrade to $DBversion done (Bug 10988 - Allow login via Google OAuth2 (OpenID Connect))\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.045";
+if ( CheckVersion($DBversion) ) {
+## Holds details for vendors supplying goods by EDI
+   $dbh->do(q{
+           CREATE TABLE IF NOT EXISTS vendor_edi_accounts (
+                   id INT(11) NOT NULL auto_increment,
+                   description TEXT NOT NULL,
+                   host VARCHAR(40),
+                   username VARCHAR(40),
+                   password VARCHAR(40),
+                   last_activity DATE,
+                   vendor_id INT(11) REFERENCES aqbooksellers( id ),
+                   download_directory TEXT,
+                   upload_directory TEXT,
+                   san VARCHAR(20),
+                   id_code_qualifier VARCHAR(3) default '14',
+                   transport VARCHAR(6) default 'FTP',
+                   quotes_enabled TINYINT(1) not null default 0,
+                   invoices_enabled TINYINT(1) not null default 0,
+                   orders_enabled TINYINT(1) not null default 0,
+                   responses_enabled TINYINT(1) not null default 0,
+                   auto_orders TINYINT(1) not null default 0,
+                   shipment_budget INTEGER(11) REFERENCES aqbudgets( budget_id ),
+                   PRIMARY KEY  (id),
+                   KEY vendorid (vendor_id),
+                   KEY shipmentbudget (shipment_budget),
+                   CONSTRAINT vfk_vendor_id FOREIGN KEY ( vendor_id ) REFERENCES aqbooksellers ( id ),
+                   CONSTRAINT vfk_shipment_budget FOREIGN KEY ( shipment_budget ) REFERENCES aqbudgets ( budget_id )
+                       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+   });
+
+## Hold the actual edifact messages with links to associated baskets
+   $dbh->do(q{
+           CREATE TABLE IF NOT EXISTS edifact_messages (
+                   id INT(11) NOT NULL auto_increment,
+                   message_type VARCHAR(10) NOT NULL,
+                   transfer_date DATE,
+                   vendor_id INT(11) REFERENCES aqbooksellers( id ),
+                   edi_acct  INTEGER REFERENCES vendor_edi_accounts( id ),
+                   status TEXT,
+                   basketno INT(11) REFERENCES aqbasket( basketno),
+                   raw_msg MEDIUMTEXT,
+                   filename TEXT,
+                   deleted BOOLEAN NOT NULL DEFAULT 0,
+                   PRIMARY KEY  (id),
+                   KEY vendorid ( vendor_id),
+                   KEY ediacct (edi_acct),
+                   KEY basketno ( basketno),
+                   CONSTRAINT emfk_vendor FOREIGN KEY ( vendor_id ) REFERENCES aqbooksellers ( id ),
+                   CONSTRAINT emfk_edi_acct FOREIGN KEY ( edi_acct ) REFERENCES vendor_edi_accounts ( id ),
+                   CONSTRAINT emfk_basketno FOREIGN KEY ( basketno ) REFERENCES aqbasket ( basketno )
+                       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+            });
+
+## invoices link back to the edifact message it was generated from
+   $dbh->do(q{
+           ALTER TABLE aqinvoices ADD COLUMN message_id INT(11) REFERENCES edifact_messages( id );
+           });
+
+## clean up link on deletes
+   $dbh->do(q{
+           ALTER TABLE aqinvoices ADD CONSTRAINT edifact_msg_fk FOREIGN KEY ( message_id ) REFERENCES edifact_messages ( id ) ON DELETE SET NULL;
+           });
+
+## Hold the supplier ids from quotes for ordering
+## although this is an EAN-13 article number the standard says 35 characters ???
+   $dbh->do(q{
+           ALTER TABLE aqorders ADD COLUMN line_item_id VARCHAR(35);
+           });
+
+## The suppliers unique reference usually a quotation line number ('QLI')
+## Otherwise Suppliers unique orderline reference ('SLI')
+   $dbh->do(q{
+           ALTER TABLE aqorders ADD COLUMN suppliers_reference_number VARCHAR(35);
+           });
+   $dbh->do(q{
+           ALTER TABLE aqorders ADD COLUMN suppliers_reference_qualifier VARCHAR(3);
+           });
+   $dbh->do(q{
+           ALTER TABLE aqorders ADD COLUMN suppliers_report text;
+           });
+
+## hold the EAN/SAN used in ordering
+   $dbh->do(q{
+           CREATE TABLE IF NOT EXISTS edifact_ean (
+                   ee_id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                   description VARCHAR(128) NULL DEFAULT NULL,
+                   branchcode VARCHAR(10) NOT NULL REFERENCES branches (branchcode),
+                   ean VARCHAR(15) NOT NULL,
+                   id_code_qualifier VARCHAR(3) NOT NULL DEFAULT '14',
+                   CONSTRAINT efk_branchcode FOREIGN KEY ( branchcode ) REFERENCES branches ( branchcode )
+                   ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+           });
+
+## Add a permission for managing EDI
+   $dbh->do(q{
+           INSERT INTO permissions (module_bit, code, description) values (11, 'edi_manage', 'Manage EDIFACT transmissions');
+           });
+
+   print "Upgrade to $DBversion done (Bug 7736 - Edifact QUOTE and ORDER functionality))\n";
+   SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.046";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+
+    $dbh->do(q{
+    ALTER TABLE vendor_edi_accounts ADD COLUMN plugin VARCHAR(256) NOT NULL DEFAULT "";
+    });
+
+    print "Upgrade to $DBversion done (Bug 15630 - Make Edifact module pluggable))\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.047";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+
+    $dbh->do(q{
+         INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('IntranetReportsHomeHTML', '', 'Show the following HTML in a div on the bottom of the reports home page', NULL, 'Free');
+         });
+    $dbh->do(q{
+         INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('IntranetCirculationHomeHTML', '', 'Show the following HTML in a div on the bottom of the reports home page', NULL, 'Free');
+         });
+
+    print "Upgrade to $DBversion done (Bug 15008 - Add custom HTML areas to circulation and reports home pages)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.048";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+    $dbh->do(q{
+    INSERT IGNORE INTO `systempreferences` (variable,value,options,explanation,type)  SELECT 'OPACISBD', value, '70|10', 'Allows to define ISBD view in OPAC', 'Textarea' FROM `systempreferences` WHERE variable = 'ISBD';
+    });
+
+    print "Upgrade to $DBversion done (Bug 5979 - Add separate OPACISBD system preference)\n";
+    SetVersion($DBversion);
+}
+
+
+
+$DBversion = "3.23.00.049";
+if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
+my $dbh = C4::Context->dbh;
+my ( $column_has_been_used ) = $dbh->selectrow_array(q|
+            SELECT COUNT(*)
+                FROM borrower_attributes
+                    WHERE password IS NOT NULL
+                    |);
+
+if ( $column_has_been_used ) {
+        print q|WARNING: The columns borrower_attribute_types.password_allowed and borrower_attributes.password have been removed from the Koha codebase. They were not used. However your installation has at least one borrower_attributes.password defined. In order not to alter your data, the columns have been kept, please save the information elsewhere and remove these columns manually.|;
+} else {
+        $dbh->do(q|
+        ALTER TABLE borrower_attribute_types DROP column password_allowed
+        |);
+        $dbh->do(q|
+        ALTER TABLE borrower_attributes DROP column password;
+        |);
+    }
+    print "Upgrade to $DBversion done (Bug 12267 - Allow password option in Patron Attribute non functional)\n";
+        SetVersion($DBversion);
+}
+
+
+$DBversion = "3.23.00.050";
+if ( CheckVersion($DBversion) ) {
+    use YAML::Syck;
+    use Koha::SearchMarcMaps;
+    use Koha::SearchFields;
+
+    $dbh->do(q|INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+                    VALUES('SearchEngine','Zebra','Choose Search Engine','','Choice')|);
+
+
+    $dbh->do(q|DROP TABLE IF EXISTS search_marc_to_field|);
+    $dbh->do(q|DROP TABLE IF EXISTS search_marc_map|);
+    $dbh->do(q|DROP TABLE IF EXISTS search_field|);
+
+# This specifies the fields that will be stored in the search engine.
+ $dbh->do(q|
+         CREATE TABLE `search_field` (
+             `id` int(11) NOT NULL AUTO_INCREMENT, 
+             `name` varchar(255) NOT NULL COMMENT 'the name of the field as it will be stored in the search engine',
+             `label` varchar(255) NOT NULL COMMENT 'the human readable name of the field, for display', 
+             `type` ENUM('string', 'date', 'number', 'boolean', 'sum') NOT NULL COMMENT 'what type of data this holds, relevant when storing it in the search engine',
+             PRIMARY KEY (`id`),
+             UNIQUE KEY (`name`)
+             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+         |);
+# This contains a MARC field specifier for a given index, marc type, and marc
+# field.
+$dbh->do(q|
+        CREATE TABLE `search_marc_map` (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            index_name ENUM('biblios','authorities') NOT NULL COMMENT 'what storage index this map is for',
+            marc_type ENUM('marc21', 'unimarc', 'normarc') NOT NULL COMMENT 'what MARC type this map is for',
+            marc_field VARCHAR(255) NOT NULL COMMENT 'the MARC specifier for this field',
+            PRIMARY KEY(`id`),
+            unique key( index_name, marc_field, marc_type),
+            INDEX (`index_name`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+        |);
+
+# This joins the two search tables together. We can have any combination:
+# one marc field could have many search fields (maybe you want one value
+# to go to 'author' and 'corporate-author) and many marc fields could go
+# to one search field (e.g. all the various author fields going into
+# 'author'.)
+#
+# a note about the sort field:
+# * if all the entries for a mapping are 'null', nothing special is done with that mapping.
+# * if any of the entries are not null, then a __sort field is created in ES for this mapping. In this case:
+#   * any mapping with sort == false WILL NOT get copied into a __sort field
+#   * any mapping with sort == true or is null WILL get copied into a __sort field
+#   * any sorts on the field name will be applied to $fieldname.'__sort' instead.
+# this means that we can have search for author that includes 1xx, 245$c, and 7xx, but the sort only applies to 1xx.
+
+$dbh->do(q|
+        CREATE TABLE `search_marc_to_field` (
+            search_marc_map_id int(11) NOT NULL,
+            search_field_id int(11) NOT NULL,
+            facet boolean DEFAULT FALSE COMMENT 'true if a facet field should be generated for this',
+            suggestible boolean DEFAULT FALSE COMMENT 'true if this field can be used to generate suggestions for browse',
+            sort boolean DEFAULT NULL COMMENT 'true/false creates special sort handling, null doesn''t',
+            PRIMARY KEY(search_marc_map_id, search_field_id),
+            FOREIGN KEY(search_marc_map_id) REFERENCES search_marc_map(id) ON DELETE CASCADE ON UPDATE CASCADE,
+            FOREIGN KEY(search_field_id) REFERENCES search_field(id) ON DELETE CASCADE ON UPDATE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+        |);
+
+my $mappings_yaml = C4::Context->config('intranetdir') . '/admin/searchengine/elasticsearch/mappings.yaml';
+my $indexes = LoadFile( $mappings_yaml );
+
+while ( my ( $index_name, $fields ) = each %$indexes ) {
+        while ( my ( $field_name, $data ) = each %$fields ) {
+            my $field_type = $data->{type};
+            my $field_label = $data->{label};
+            my $mappings = $data->{mappings};
+            my $search_field = Koha::SearchFields->find_or_create({ name => $field_name, label => $field_label, type => $field_type }, { key => 'name' });
+            for my $mapping ( @$mappings ) {
+                my $marc_field = Koha::SearchMarcMaps->find_or_create({ index_name => $index_name, marc_type => $mapping->{marc_type}, marc_field => $mapping->{marc_field} });
+                $search_field->add_to_search_marc_maps($marc_field, { facet => $mapping->{facet}, suggestible => $mapping->{suggestible}, sort => $mapping->{sort} } );
+            }
+        }
+}
+
+print "Upgrade to $DBversion done (Bug 12478 - Elasticsearch support for Koha)\n";
+    SetVersion($DBversion);
+    }
+
+
+$DBversion = "3.23.00.051";
+if ( CheckVersion($DBversion) ) {
+$dbh->do(q{
+        ALTER TABLE edifact_messages
+        DROP FOREIGN KEY emfk_vendor,
+        DROP FOREIGN KEY emfk_edi_acct,
+        DROP FOREIGN KEY emfk_basketno;
+        });
+
+$dbh->do(q{
+        ALTER TABLE edifact_messages
+        ADD CONSTRAINT emfk_vendor FOREIGN KEY ( vendor_id ) REFERENCES aqbooksellers ( id ) ON DELETE CASCADE ON UPDATE CASCADE,
+        ADD CONSTRAINT emfk_edi_acct FOREIGN KEY ( edi_acct ) REFERENCES vendor_edi_accounts ( id ) ON DELETE CASCADE ON UPDATE CASCADE,
+        ADD CONSTRAINT emfk_basketno FOREIGN KEY ( basketno ) REFERENCES aqbasket ( basketno ) ON DELETE CASCADE ON UPDATE CASCADE;
+        });
+
+    print "Upgrade to $DBversion done (Bug 16354 - Fix FK constraints for edifact_messages table)\n";
+    SetVersion($DBversion);
+}
+
+
+$DBversion = "3.23.00.052";
+if ( CheckVersion($DBversion) ) {
+## Insert permission
+
+    $dbh->do(q{
+        INSERT IGNORE INTO permissions (module_bit, code, description) VALUES
+        (13, 'upload_general_files', 'Upload any file'),
+        (13, 'upload_manage', 'Manage uploaded files');
+        });
+## Update user_permissions for current users (check count in uploaded_files)
+## Note 9 == edit_catalogue and 13 == tools
+## We do not insert if someone is superlibrarian, does not have edit_catalogue,
+## or already has all tools
+
+        $dbh->do(q{
+                INSERT IGNORE INTO user_permissions (borrowernumber, module_bit, code)
+                SELECT borrowernumber, 13, 'upload_general_files'
+                FROM borrowers bo
+                WHERE flags<>1 AND flags & POW(2,13) = 0 AND
+                ( flags & POW(2,9) > 0 OR 
+                  (SELECT COUNT(*) FROM user_permissions
+                   WHERE borrowernumber=bo.borrowernumber AND module_bit=9 ) > 0 )
+                AND ( SELECT COUNT(*) FROM uploaded_files ) > 0
+                });
+
+    print "Upgrade to $DBversion done (Bug 14686 - New menu option and permission for file uploading)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.053";
+if ( CheckVersion($DBversion) ) {
+    my $letters = $dbh->selectall_arrayref(
+        q|
+        SELECT code, name
+        FROM letter
+        WHERE message_transport_type="email"
+        |, { Slice => {} }
+    );
+    for my $letter (@$letters) {
+        $dbh->do(
+            q|
+                UPDATE letter
+                SET name = ?
+                WHERE code = ?
+                AND message_transport_type <> "email"
+                |, undef, $letter->{name}, $letter->{code}
+        );
+    }
+
+    print "Upgrade to $DBversion done (Bug 16217 - Notice' names may have diverged)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.054";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE branch_item_rules ADD COLUMN hold_fulfillment_policy ENUM('any', 'homebranch', 'holdingbranch') NOT NULL DEFAULT 'any' AFTER holdallowed;
+    });
+    $dbh->do(q{
+        ALTER TABLE default_branch_circ_rules ADD COLUMN hold_fulfillment_policy ENUM('any', 'homebranch', 'holdingbranch') NOT NULL DEFAULT 'any' AFTER holdallowed;
+    });
+    $dbh->do(q{
+        ALTER TABLE default_branch_item_rules ADD COLUMN hold_fulfillment_policy ENUM('any', 'homebranch', 'holdingbranch') NOT NULL DEFAULT 'any' AFTER holdallowed;
+    });
+    $dbh->do(q{
+        ALTER TABLE default_circ_rules ADD COLUMN hold_fulfillment_policy ENUM('any', 'homebranch', 'holdingbranch') NOT NULL DEFAULT 'any' AFTER holdallowed;
+    });
+
+    print "Upgrade to $DBversion done (Bug 15532 - Add ability to allow only items whose home/holding branch matches the hold's pickup branch to fill a given hold)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.055";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE reserves ADD COLUMN itemtype VARCHAR(10) NULL DEFAULT NULL AFTER suspend_until;
+    });
+    $dbh->do(q{
+        ALTER TABLE reserves ADD KEY `itemtype` (`itemtype`);
+    });
+    $dbh->do(q{
+        ALTER TABLE reserves ADD CONSTRAINT `reserves_ibfk_5` FOREIGN KEY (`itemtype`) REFERENCES `itemtypes` (`itemtype`) ON DELETE CASCADE ON UPDATE CASCADE;
+    });
+    $dbh->do(q{
+        ALTER TABLE old_reserves ADD COLUMN itemtype VARCHAR(10) NULL DEFAULT NULL AFTER suspend_until;
+    });
+    $dbh->do(q{
+        ALTER TABLE old_reserves ADD KEY `itemtype` (`itemtype`);
+    });
+    $dbh->do(q{
+        ALTER TABLE old_reserves ADD CONSTRAINT `old_reserves_ibfk_4` FOREIGN KEY (`itemtype`) REFERENCES `itemtypes` (`itemtype`) ON DELETE CASCADE ON UPDATE CASCADE;
+    });
+
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('AllowHoldItemTypeSelection','0','','If enabled, patrons and staff will be able to select the itemtype when placing a hold','YesNo');
+    });
+
+    print "Upgrade to $DBversion done (Bug 15533 - Allow patrons and librarians to select itemtype when placing hold)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.056";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('NoIssuesChargeGuarantees','','','Define maximum amount withstanding before check outs are blocked','Integer');
+    });
+
+    print "Upgrade to $DBversion done (Bug 14577 - Allow restriction of checkouts based on fines of guarantor/guarantee)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.057";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE aqbasket ADD COLUMN is_standing TINYINT(1) NOT NULL DEFAULT 0 AFTER branch;
+    });
+
+    print "Upgrade to $DBversion done (Bug 15531 - Add support for standing orders)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.058";
+if ( CheckVersion($DBversion) ) {
+
+    my ($count_imageurl) = $dbh->selectrow_array(q|
+        SELECT COUNT(*)
+        FROM authorised_values
+        WHERE imageurl IS NOT NULL
+            AND imageurl <> ""
+    |);
+
+    unless ($count_imageurl) {
+        if (   C4::Context->preference('AuthorisedValueImages')
+            or C4::Context->preference('StaffAuthorisedValueImages') )
+        {
+            $dbh->do(q|
+                UPDATE systempreferences
+                SET value = 0
+                WHERE variable = "AuthorisedValueImages"
+                   or variable = "StaffAuthorisedValueImages"
+            |);
+            warn "The system preferences AuthorisedValueImages and StaffAuthorisedValueImages have been turned off\n";
+            warn "authorised_values.imageurl is not populated, that means you are not using this feature\n";
+        }
+    }
+    else {
+        warn "At least one authorised value has an icon defined (imageurl)\n";
+        warn "The system preference AuthorisedValueImages or StaffAuthorisedValueImages could be turned off if you are not aware of this feature\n";
+    }
+
+    print "Upgrade to $DBversion done (Bug 16041 - StaffAuthorisedValueImages & AuthorisedValueImages preferences - impact on search performance)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.059";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        DELETE FROM systempreferences WHERE variable="AuthorisedValueImages" OR variable="StaffAuthorisedValueImages";
+    });
+
+    print "Upgrade to $DBversion done (Bug 16167 - Remove prefs to drive authorised value images)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.060";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( value, variable, options, explanation,type )
+        SELECT value ,'EnhancedMessagingPreferencesOPAC', NULL, 'If ON, allows patrons to select to receive additional messages about items due or nearly due.', 'YesNo' FROM systempreferences WHERE variable = 'EnhancedMessagingPreferences';
+    });
+
+    print "Upgrade to $DBversion done (Bug 12528 - Enable staff to deny message setting access to patrons on the OPAC)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.061";
+if ( CheckVersion($DBversion) ) {
+    my ( $cnt ) = $dbh->selectrow_array( q|
+        SELECT COUNT(*) FROM items it
+        LEFT JOIN biblio bi ON bi.biblionumber=it.biblionumber
+        LEFT JOIN biblioitems bii USING (biblioitemnumber)
+        WHERE bi.biblionumber IS NULL
+    |);
+    if( $cnt ) {
+        print "WARNING: You have corrupted data in your items table!! The table contains $cnt references to biblio records that do not exist.\nPlease correct your data IMMEDIATELY after this upgrade and manually add the foreign key constraint for biblionumber in the items table.\n";
+    } else {
+        # now add FK
+        $dbh->do( q|
+            ALTER TABLE items
+            ADD FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE CASCADE ON UPDATE CASCADE
+        |);
+        print "Upgrade to $DBversion done (Bug 16170 - Add FK for biblionumber in items)\n";
+    }
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.062";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do( q|
+            ALTER TABLE aqorders DROP COLUMN budgetgroup_id;
+            |);
+    print "Upgrade to $DBversion done (Bug 16414 - aqorders.budgetgroup_id has never been used and can be removed)\n";
+SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.063";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE letter MODIFY COLUMN branchcode varchar(10) NOT NULL DEFAULT ''
+    });
+    $dbh->do(q{
+        ALTER TABLE permissions MODIFY COLUMN code varchar(64) NOT NULL DEFAULT '';
+    });
+    print "Upgrade to $DBversion done (Bug 16402: Fix DB structure to work on MySQL 5.7)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.23.00.064";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE creator_layouts MODIFY layout_name char(25) NOT NULL DEFAULT 'DEFAULT';
+    });
+    print "Upgrade to $DBversion done (Bug 15086 - Creators layout and template sql has warnings)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.05.00.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.05)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.056.00.000";
+if ( CheckVersion($DBversion) ) {
+        print "Upgrade to $DBversion done (Koha 16.06 - starting a new dev line at KohaCon16 in Thessaloniki, Greece! Koha is great!)\n";
+            SetVersion($DBversion);
+}
+
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068

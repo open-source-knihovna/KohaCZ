@@ -32,12 +32,13 @@
 [% END %]
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
-<script type="text/javascript" src="[% themelang %]/js/background-job-progressbar.js"></script>
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/background-job-progressbar.js"></script>
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript">
 //<![CDATA[
 var MSG_CONFIRM_CLEAN = _("Clear all reservoir records staged in this batch?  This cannot be undone.");
+var MSG_CONFIRM_UNDO_IMPORT = _("Are you sure you want to undo the import of this batch into the catalog?");
 
 $(document).ready(function(){
   $("#staged-record-matching-rules select").change(function(){
@@ -363,7 +364,7 @@ $(document).ready(function(){
     <input type="hidden" name="runinbackground" value="" />
     <input type="hidden" name="completedJobID" value="" />
     <input type="hidden" name="import_batch_id" value="[% import_batch_id %]" />
-    <fieldset class="action"><input type="submit" class="button" name="mainformsubmit" value="Undo import into catalog" onclick="return submitBackgroundJob(this.form);" /></fieldset>
+    <fieldset class="action"><input type="submit" class="button" name="mainformsubmit" value="Undo import into catalog" onclick="return confirm(MSG_CONFIRM_UNDO_IMPORT) && submitBackgroundJob(this.form);" /></fieldset>
   </form>
   <div id="jobpanel"><div id="jobstatus">Job progress: <div id="jobprogress"></div> <span id="jobprogresspercent">0</span>%</div>
      <div id="jobfailed"></div></div>
@@ -452,7 +453,7 @@ Page
           <form method="post" action="[% batch_lis.script_name %]" name="clean_batch_[% batch_lis.import_batch_id %]" id="clean_batch_[% batch_lis.import_batch_id %]" >
             <input type="hidden" name="import_batch_id" value="[% batch_lis.import_batch_id %]" />
             <input type="hidden" name="op" value="clean-batch" />
-            <input type="submit" class="button" value="Clean" onclick="return confirm(MSG_CONFIRM_CLEAN);" />
+            <button class="btn btn-small" onclick="return confirm(MSG_CONFIRM_CLEAN);">Clean</button>
           </form>
         [% END %]
     </td>

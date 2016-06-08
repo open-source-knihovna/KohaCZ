@@ -8,7 +8,7 @@ use C4::TTParser;
 use VerboseWarnings qw( pedantic_p error_normal warn_normal warn_pedantic );
 require Exporter;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 ###############################################################################
 
@@ -24,7 +24,6 @@ A wrapper for the functionality found in TTParser to allow an easier transition 
 
 ###############################################################################
 
-$VERSION = 0.02;
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw();

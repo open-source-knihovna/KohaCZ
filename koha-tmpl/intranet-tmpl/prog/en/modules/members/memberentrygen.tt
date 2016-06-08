@@ -7,7 +7,6 @@
 <script type="text/javascript">
 //<![CDATA[
 $(document).ready(function() {
-
 	[% IF categorycode %]
 		update_category_code( "[% categorycode %]" );
 	[% ELSE %]
@@ -16,145 +15,7 @@ $(document).ready(function() {
 			update_category_code( category_code );
 		}
 	[% END %]
-	$("#dateofbirth").datepicker({ maxDate: "-1D", yearRange: "c-120:" });
-	dateformat = $("#dateofbirth").siblings(".hint").first().html();
-	write_age();
-	$("#entryform").validate({
-		rules: {
-			email: {
-				email: true
-			},
-			emailpro: {
-				email: true
-			},
-			B_email: {
-				email: true
-			}
-		},
-		submitHandler: function(form) {
-			$("body, form input[type='submit'], form button[type='submit'], form a").addClass('waiting');
-			if (form.beenSubmitted)
-				return false;
-			else
-				form.beenSubmitted = true;
-				form.submit();
-			}
-	});
-
-	var mrform = $("#manual_restriction_form");
-	var mrlink = $("#add_manual_restriction");
-	mrform.hide();
-	mrlink.on("click",function(e){
-		$(this).hide();
-		mrform.show();
-		e.preventDefault();
-	});
-	$("#cancel_manual_restriction").on("click",function(e){
-		$('#debarred_expiration').val('');
-		$('#add_debarment').val(0);
-		$('#debarred_comment').val('');
-		mrlink.show();
-		mrform.hide();
-		e.preventDefault();
-	});
 });
-
-function clear_entry(node) {
-	var original = $(node).parent();
-	$("textarea", original).attr('value', '');
-	$("select", original).attr('value', '');
-}
-
-function clone_entry(node) {
-	var original = $(node).parent();
-	var clone = original.clone();
-
-	var newId = 50 + parseInt(Math.random() * 100000);
-	$("input,select,textarea", clone).attr('id', function() {
-		return this.id.replace(/patron_attr_\d+/, 'patron_attr_' + newId);
-	});
-	$("input,select,textarea", clone).attr('name', function() {
-		return this.name.replace(/patron_attr_\d+/, 'patron_attr_' + newId);
-	});
-	$("label", clone).attr('for', function() {
-		return $(this).attr("for").replace(/patron_attr_\d+/, 'patron_attr_' + newId);
-	});
-	$("input#patron_attr_" + newId, clone).attr('value','');
-	$("select#patron_attr_" + newId, clone).attr('value','');
-	$(original).after(clone);
-	return false;
-}
-
-function update_category_code(category_code) {
-	if ( $(category_code).is("select") ) {
-		category_code = $("#categorycode_entry").find("option:selected").val();
-	}
-	var mytables = $(".attributes_table");
-	$(mytables).find("li").hide();
-	$(mytables).find(" li[data-category_code='"+category_code+"']").show();
-	$(mytables).find(" li[data-category_code='']").show();
-}
-
-function select_user(borrowernumber, borrower) {
-	var form = $('#entryform').get(0);
-	if (form.guarantorid.value) {
-		$("#contact-details").find('a').remove();
-		$("#contactname, #contactfirstname").parent().find('span').remove();
-	}
-
-	var id = borrower.borrowernumber;
-	form.guarantorid.value = id;
-	$('#contact-details')
-		.show()
-		.find('span')
-		.after('<a target="blank" href="/cgi-bin/koha/members/moremember.pl?borrowernumber=' + id + '">' + id + '</a>');
-
-	$(form.contactname)
-		.val(borrower.surname)
-		.before('<span>' + borrower.surname + '</span>').get(0).type = 'hidden';
-	$(form.contactfirstname)
-		.val(borrower.firstname)
-		.before('<span>' + borrower.firstname + '</span>').get(0).type = 'hidden';
-
-	form.streetnumber.value = borrower.streetnumber;
-	form.address.value = borrower.address;
-	form.address2.value = borrower.address2;
-	form.city.value = borrower.city;
-	form.state.value = borrower.state;
-	form.zipcode.value = borrower.zipcode;
-	form.country.value = borrower.country;
-	form.branchcode.value = borrower.branchcode;
-
-	form.guarantorsearch.value = _("Change");
-
-	return 0;
-}
-
-    function write_age() {
-        var hint = $("#dateofbirth").siblings(".hint").first();
-        hint.html(dateformat);
-
-        var age = CalculateAge(document.form.dateofbirth.value);
-
-        if (!age.year && !age.month) {
-            return;
-        }
-
-        var age_string;
-        if (age.year || age.month) {
-            age_string = _('Age: ');
-        }
-
-        if (age.year) {
-            age_string += age.year > 1 ? _('%s years ').format(age.year) : _('%s year ').format(age.year);
-        }
-
-        if (age.month) {
-            age_string += age.month > 1 ? _('%s months ').format(age.month) : _('%s month ').format(age.month);
-        }
-
-        hint.html(age_string);
-    }
 
         var MSG_SEPARATOR = _("Separator must be / in field %s");
         var MSG_INCORRECT_DAY = _("Invalid day entered in field %s");
@@ -166,11 +27,17 @@ function select_user(borrowernumber, borrower) {
         var MSG_DUPLICATE_SUSPICION = _("Please confirm whether this is a duplicate patron");
         var MSG_PASSWORD_MISMATCH = _("The passwords entered do not match");
         var MSG_PASSWORD_CONTAINS_TRAILING_SPACES = _("Password contains leading and/or trailing spaces.");
+        var MSG_MONTH = _("%s month")
+        var MSG_MONTHS = _("%s months")
+        var MSG_YEAR = _("%s year")
+        var MSG_YEARS = _("%s years")
         var LABEL_CHANGE = _("Change");
         var LABEL_SET_TO_PATRON = _("Set to patron");
+        var LABEL_AGE = _("Age");
+
 //]]>
 </script>
-<script type="text/javascript" src="[% themelang %]/js/members.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/members.js"></script>
 </head>
 <body id="pat_memberentrygen" class="pat">
 [% INCLUDE 'header.inc' %]
@@ -423,8 +290,8 @@ function select_user(borrowernumber, borrower) {
 [% END # hide fieldset %]
 
 [% IF ( showguarantor ) %]<input type="hidden" id="guarantorid" name="guarantorid"   value="[% guarantorid %]" />
-    <fieldset class="rows">
-        <legend>Guarantor information</legend>
+    <fieldset id="memberentry_guarantor" class="rows">
+        <legend id="guarantor_lgd">Guarantor information</legend>
         <ol>
 [% IF ( P ) %]
 	        [% IF ( guarantorid ) %]
@@ -787,7 +654,7 @@ function select_user(borrowernumber, borrower) {
 			[% ELSE %]
             <label for="to">
 			[% END %]
-			Expiry date (leave blank for auto calc) </label>
+			Expiry date (leave blank for auto calc): </label>
             [% IF ( dateformat == "metric" ) %]
 				[% UNLESS ( opadd ) %]
                     <input type="text" id="to" name="dateexpiry" maxlength="10"  size="10" onchange="CheckDate(document.form.dateexpiry);check_manip_date('verify');" value="[% UNLESS opduplicate %][% dateexpiry %][% END %]" class="datepickerto" />
@@ -958,8 +825,8 @@ function select_user(borrowernumber, borrower) {
         [% END # hide fieldset %][% END %]
 		<!--this zones are not necessary in modif mode -->
         [% UNLESS ( opadd || opduplicate ) %]
-		<fieldset class="rows">
-            <legend>Patron account flags</legend>
+        <fieldset class="rows" id="memberentry_account_flags">
+            <legend id="account_flags_lgd">Patron account flags</legend>
 			<ol class="radio">
 			[% FOREACH flagloo IN flagloop %]
 				<li><label class="radio" for="yes[% flagloo.name %]">
@@ -989,8 +856,8 @@ function select_user(borrowernumber, borrower) {
 			</ol>
 			</fieldset>
 
-              <fieldset class="rows">
-                <legend>Patron restrictions</legend>
+              <fieldset class="rows" id="memberentry_restrictions">
+                <legend id="restrictions_lgd">Patron restrictions</legend>
 
                 [% IF ( debarments ) %]
                     <table>
@@ -1028,7 +895,7 @@ function select_user(borrowernumber, borrower) {
                     <p><a href="#" id="add_manual_restriction">Add manual restriction</a></p>
                     <fieldset id="manual_restriction_form">
                         <input type="hidden" id="add_debarment" name="add_debarment" value="0" />
-                        <legend>Add manual restriction</legend>
+                        <legend id="manual_restriction_lgd">Add manual restriction</legend>
                         <ol>
                             <li><label for="debarred_comment">Comment: </label><input type="text" id="debarred_comment" name="debarred_comment" onchange="$('#add_debarment').val(1);" /></li>
                             <li><label for="debarred_expiration">Expiration: </label><input name="debarred_expiration" id="debarred_expiration" size="10" readonly="readonly" value="" class="datepicker" onchange="$('#add_debarment').val(1);" />
@@ -1047,12 +914,12 @@ function select_user(borrowernumber, borrower) {
 
 [% IF ( step_4 ) %][% IF ( ExtendedPatronAttributes ) %][% UNLESS ( no_patron_attribute_types ) %]
   <fieldset class="rows" id="memberentry_patron_attributes">
-    <legend>Additional attributes and identifiers</legend>
+    <legend id="patron_attributes_lgd">Additional attributes and identifiers</legend>
     <input type="hidden" name="setting_extended_patron_attributes" value="1" />
     [% FOREACH pa_loo IN patron_attributes %]
         [% IF pa_loo.class %]
             <fieldset id="aai_[% pa_loo.class %]">
-            <legend>[% pa_loo.lib %]</legend>
+            <legend id="[% pa_loo.class %]_lgd">[% pa_loo.lib %]</legend>
         [% END %]
         <ol class="attributes_table">
             [% FOREACH patron_attribute IN pa_loo.items %]
@@ -1063,7 +930,7 @@ function select_user(borrowernumber, borrower) {
                             <select id="[% patron_attribute.form_id %]" name="[% patron_attribute.form_id %]">
                                 <option value=""></option>
                                 [% FOREACH auth_val_loo IN patron_attribute.auth_val_loop %]
-                                    [% IF ( auth_val_loo.selected ) %]
+                                    [% IF auth_val_loo.authorised_value == patron_attribute.value %]
                                         <option value="[% auth_val_loo.authorised_value %]" selected="selected">
                                             [% auth_val_loo.lib %]
                                         </option>
@@ -1077,13 +944,9 @@ function select_user(borrowernumber, borrower) {
                         [% ELSE %]
                             <textarea rows="2" cols="30" id="[% patron_attribute.form_id %]" name="[% patron_attribute.form_id %]">[% patron_attribute.value %]</textarea>
                         [% END %]
-                        [% IF ( patron_attribute.password_allowed ) %]
-                            (<label class="yesno" for="[% patron_attribute.form_id %]_password">Password:</label> <input type="password" maxlength="64" value="[% patron_attribute.password %]"
-                                   id="[% patron_attribute.form_id %]_password" name="[% patron_attribute.form_id %]_password" />)
-                        [% END %]
-                        <a href="#" class="clear-field" onclick="clear_entry(this); return false;">Clear</a>
+                        <a href="#" onclick="clear_entry(this); return false;"><i class="fa fa-fw fa-trash"></i> Clear</a>
                         [% IF ( patron_attribute.repeatable ) %]
-                        <a href="#" class="clone-field" onclick="clone_entry(this); return false;">New</a>
+                        <a href="#" onclick="clone_entry(this); return false;"><i class="fa fa-fw fa-plus"></i> New</a>
                         [% END %]
                 </li>
             [% END %]
@@ -1120,15 +983,15 @@ function select_user(borrowernumber, borrower) {
                             var transports = ['email', 'rss', 'sms'];
                             $.each(transports, function(j, transport) {
                                 if (item['transports_' + transport] == 1) {
-                                    $('#' + transport + attrid).attr('checked', 'checked');
+                                    $('#' + transport + attrid).prop('checked', true);
                                 } else {
-                                    $('#' + transport + attrid).removeAttr('checked');
+                                    $('#' + transport + attrid).prop('checked', false);
                                 }
                             });
                             if (item.digest && item.digest != ' ') {
-                                $('#digest' + attrid).attr('checked', item.digest);
+                                $('#digest' + attrid).prop('checked', true);
                             } else {
-                                $('#digest' + attrid).removeAttr('checked');
+                                $('#digest' + attrid).prop('checked', false);
                             }
                             if (item.takes_days == '1') {
                                 $('[name=' + attrid + '-DAYS]').val('' + item.days_in_advance);
@@ -1165,9 +1028,12 @@ function select_user(borrowernumber, borrower) {
   </fieldset>
 [% END %] [% END %]
 
+<fieldset class="rows" id="floating-save">
 [% UNLESS ( check_member ) %]
     <fieldset class="action">
-        <input type="submit" name="save" onclick="return check_form_borrowers();" value="Save" />
+        <button type="submit" name="save" onclick="return check_form_borrowers();">
+            <i class="fa fa-save"></i> Save
+        </button>
       [% IF ( opadd ) %]
        <a class="cancel" href="/cgi-bin/koha/members/member.pl">Cancel</a>
 	   [% ELSE %]
@@ -1175,6 +1041,7 @@ function select_user(borrowernumber, borrower) {
 	   [% END %]
     </fieldset>
 [% END %]
+</fieldset>
 </form>
   
 </div>

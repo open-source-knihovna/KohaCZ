@@ -7,13 +7,13 @@ function newDescField() {
     $("#adddescription").before(
         '<li><label>setDescription: </label>' +
         '<textarea style="vertical-align:middle" rows="2" cols="30" name="description"></textarea>' +
-        '<a onclick="delDescField(this); return false;" href="#"><i class="fa fa-fw fa-trash"></i> Remove</a>' +
+        '<a class="remove_description" href="#"><i class="fa fa-fw fa-trash"></i> Remove</a>' +
         '</li>'
     );
 }
 
 function delDescField(minusButton) {
-    var li = $(minusButton).parent('li');
+    var li = minusButton.parent('li');
     $(li).remove();
 }
 
@@ -25,6 +25,17 @@ $(document).ready(function() {
     $(".delete_oai_set").on("click",function(){
         return confirmDelete();
     });
+
+    $("body").on("click", ".remove_description", function(e){
+        e.preventDefault();
+        delDescField($(this));
+    });
+
+    $(".add_description").on("click", function(e){
+        e.preventDefault();
+        newDescField();
+    });
+
 });
 //]]>
 </script>
@@ -34,7 +45,7 @@ $(document).ready(function() {
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'cat-search.inc' %]
 
-<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a> &rsaquo; [% IF ( op_new ) %]<a href="/cgi-bin/koha/admin/oai_sets.pl">OAI sets configuration</a> &rsaquo; Add a new OAI set[% ELSIF ( op_mod ) %]<a href="/cgi-bin/koha/admin/oai_sets.pl">OAI sets configuration</a> &rsaquo; Modify OAI set '[% spec %]'[% ELSE %] OAI sets configuration[% END %]</div>
+<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/admin/admin-home.pl">Administration</a> &rsaquo; [% IF ( op_new ) %]<a href="/cgi-bin/koha/admin/oai_sets.pl">OAI sets configuration</a> &rsaquo; Add a new OAI set[% ELSIF ( op_mod ) %]<a href="/cgi-bin/koha/admin/oai_sets.pl">OAI sets configuration</a> &rsaquo; Edit OAI set '[% spec %]'[% ELSE %] OAI sets configuration[% END %]</div>
 
 <div id="doc3" class="yui-t2">
 
@@ -47,7 +58,7 @@ $(document).ready(function() {
                 <h2>Add a new OAI set</h2>
                 <input type="hidden" name="op" value="savenew" />
             [% ELSIF ( op_mod ) %]
-                <h2>Modify OAI set '[% spec %]'</h2>
+                <h2>Edit OAI set '[% spec %]'</h2>
                     <input type="hidden" name="op" value="savemod" />
                     <input type="hidden" name="id" value="[% id %]" />
             [% END %]
@@ -67,10 +78,10 @@ $(document).ready(function() {
                             <li>
                                 <label>setDescription: </label>
                                 <textarea style="vertical-align:middle" rows="2" cols="30" name="description">[% desc.description %]</textarea>
-                                <a onclick="delDescField(this); return false;" href="#"><i class="fa fa-fw fa-trash"></i> Remove</a>
+                                <a class="remove_description" href="#"><i class="fa fa-fw fa-trash"></i> Remove</a>
                             </li>
                         [% END %]
-                        <li id="adddescription"><span class="label">&nbsp;</span><a href="#" onclick='newDescField(); return false;'><i class="fa fa-fw fa-plus"></i> Add description</a></li>
+                        <li id="adddescription"><span class="label">&nbsp;</span><a href="#" class="add_description"><i class="fa fa-fw fa-plus"></i> Add description</a></li>
 
                     </ol>
                 </fieldset>
@@ -116,7 +127,7 @@ $(document).ready(function() {
                                 <a class="btn btn-mini dropdown-toggle" id="oaisetsactions[% set.id %]" role="button" data-toggle="dropdown" href="#">
                                   Actions <b class="caret"></b></a>
                                 <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="oaisetsactions[% set.id %]">
-                                  <li><a href="/cgi-bin/koha/admin/oai_sets.pl?op=mod&amp;id=[% set.id %]"><i class="fa fa-fw fa-pencil"></i> Modify</a></li>
+                                  <li><a href="/cgi-bin/koha/admin/oai_sets.pl?op=mod&amp;id=[% set.id %]"><i class="fa fa-fw fa-pencil"></i> Edit</a></li>
                                   <li><a class="delete_oai_set" href="/cgi-bin/koha/admin/oai_sets.pl?op=del&amp;id=[% set.id %]"><i class="fa fa-fw fa-trash"></i> Delete</a></li>
                                   <li><a href="/cgi-bin/koha/admin/oai_set_mappings.pl?id=[% set.id %]"><i class="fa fa-fw fa-info"></i> Define mappings</a></li>
                                 </ul>

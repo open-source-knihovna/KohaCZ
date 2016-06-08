@@ -22,6 +22,7 @@ use Modern::Perl;
 use Carp;
 
 use Koha::Database;
+use Koha::Patrons;
 use Koha::Patron::Images;
 
 use base qw(Koha::Object);
@@ -45,7 +46,7 @@ Returns a Koha::Patron object for this patron's guarantor
 sub guarantor {
     my ( $self ) = @_;
 
-    return undef unless $self->guarantorid();
+    return unless $self->guarantorid();
 
     return Koha::Patrons->find( $self->guarantorid() );
 }
@@ -65,7 +66,7 @@ Returns the guarantees (list of Koha::Patron) of this patron
 sub guarantees {
     my ( $self ) = @_;
 
-    return Koha::Patrons->search({ guarantorid => $self->borrowernumber });
+    return Koha::Patrons->search( { guarantorid => $self->borrowernumber } );
 }
 
 =head3 siblings
@@ -79,7 +80,7 @@ sub siblings {
 
     my $guarantor = $self->guarantor;
 
-    return undef unless $guarantor;
+    return unless $guarantor;
 
     return Koha::Patrons->search(
         {

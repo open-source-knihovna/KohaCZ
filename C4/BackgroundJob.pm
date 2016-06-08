@@ -24,12 +24,7 @@ use C4::Context;
 use C4::Auth qw/get_session/;
 use Digest::MD5;
 
-use vars qw($VERSION);
 
-BEGIN {
-	# set the version for version checking
-    $VERSION = 3.07.00.049;
-}
 
 =head1 NAME
 

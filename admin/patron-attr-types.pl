@@ -99,22 +99,19 @@ sub add_attribute_type_form {
         branches_loop => \@branches_loop,
     );
     authorised_value_category_list($template);
-    pa_classes($template);
+    $template->param(classes_val_loop => GetAuthorisedValues( 'PA_CLASS'));
 }
 
 sub error_add_attribute_type_form {
     my $template = shift;
 
-    $template->param(description => $input->param('description'));
+    $template->param(description => scalar $input->param('description'));
 
     if ($input->param('repeatable')) {
         $template->param(repeatable_checked => 1);
     }
     if ($input->param('unique_id')) {
         $template->param(unique_id_checked => 1);
-    }
-    if ($input->param('password_allowed')) {
-        $template->param(password_allowed_checked => 1);
     }
     if ($input->param('opac_display')) {
         $template->param(opac_display_checked => 1);
@@ -126,8 +123,8 @@ sub error_add_attribute_type_form {
         $template->param(display_checkout_checked => 'checked="checked"');
     }
 
-    $template->param( category_code => $input->param('category_code') );
-    $template->param( class => $input->param('class') );
+    $template->param( category_code => scalar $input->param('category_code') );
+    $template->param( class => scalar $input->param('class') );
 
     $template->param(
         attribute_type_form => 1,
@@ -167,13 +164,11 @@ sub add_update_attribute_type {
     $attr_type->staff_searchable($staff_searchable);
     my $authorised_value_category = $input->param('authorised_value_category');
     $attr_type->authorised_value_category($authorised_value_category);
-    my $password_allowed = $input->param('password_allowed');
-    $attr_type->password_allowed($password_allowed);
     my $display_checkout = $input->param('display_checkout');
     $attr_type->display_checkout($display_checkout);
-    $attr_type->category_code($input->param('category_code'));
-    $attr_type->class($input->param('class'));
-    my @branches = $input->param('branches');
+    $attr_type->category_code(scalar $input->param('category_code'));
+    $attr_type->class(scalar $input->param('class'));
+    my @branches = $input->multi_param('branches');
     $attr_type->branches( \@branches );
 
     if ($op eq 'edit') {
@@ -242,9 +237,6 @@ sub edit_attribute_type_form {
         $template->param(unique_id_checked => 1);
     }
     $template->param(unique_id_disabled => 1);
-    if ($attr_type->password_allowed()) {
-        $template->param(password_allowed_checked => 1);
-    }
     if ($attr_type->opac_display()) {
         $template->param(opac_display_checked => 1);
     }
@@ -255,7 +247,7 @@ sub edit_attribute_type_form {
         $template->param(display_checkout_checked => 'checked="checked"');
     }
     authorised_value_category_list($template, $attr_type->authorised_value_category());
-    pa_classes( $template, $attr_type->class );
+    $template->param(classes_val_loop => GetAuthorisedValues( 'PA_CLASS' ));
 
 
     my $branches = GetBranches;
@@ -271,8 +263,11 @@ sub edit_attribute_type_form {
     }
     $template->param( branches_loop => \@branches_loop );
 
-    $template->param ( category_code => $attr_type->category_code );
-    $template->param ( category_description => $attr_type->category_description );
+    $template->param(
+        category_code        => $attr_type->category_code,
+        category_class       => $attr_type->class,
+        category_description => $attr_type->category_description,
+    );
 
     $template->param(
         attribute_type_form => 1,
@@ -324,11 +319,4 @@ sub authorised_value_category_list {
         push @list, $entry;
     }
     $template->param(authorised_value_categories => \@list);
-}
-
-sub pa_classes {
-    my $template = shift;
-    my $selected = @_ ? shift : '';
-
-    $template->param(classes_val_loop => GetAuthorisedValues( 'PA_CLASS', $selected ) );
 }

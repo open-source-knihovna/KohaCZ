@@ -17,7 +17,7 @@ Package: koha-common
 Architecture: all
 Depends: ${misc:Depends}, ${koha:Depends},
  apache2,
- apache2-mpm-itk,
+ apache2-mpm-itk | libapache2-mpm-itk,
  at,
  cron-daemon,
  daemon,
@@ -35,7 +35,8 @@ Depends: ${misc:Depends}, ${koha:Depends},
  xmlstarlet,
  yaz
 Suggests: mysql-server | virtual-mysql-server,
- memcached
+ memcached,
+letsencrypt
 Homepage: http://koha-community.org/
 Description: integrated (physical) library management system
  Koha is an Integrated Library Management system for real-world libraries
@@ -65,7 +66,7 @@ Description: integrated (physical) library management system
 Package: koha-deps
 Depends: ${misc:Depends},
  apache2,
- apache2-mpm-itk,
+ apache2-mpm-itk | libapache2-mpm-itk,
  at,
  cron-daemon,
  daemon,

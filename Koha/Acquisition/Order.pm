@@ -26,6 +26,10 @@ sub fetch {
 sub insert {
     my ($self) = @_;
 
+    my $schema  = Koha::Database->new->schema;
+    # Override quantity for standing orders
+    $self->{quantity} = 1 if ( $self->{basketno} && $schema->resultset('Aqbasket')->find( $self->{basketno} )->is_standing );
+
     # if these parameters are missing, we can't continue
     for my $key (qw( basketno quantity biblionumber budget_id )) {
         croak "Cannot insert order: Mandatory parameter $key is missing"
@@ -36,7 +40,6 @@ sub insert {
     $self->{entrydate} ||=
       output_pref( { dt => dt_from_string, dateformat => 'iso' } );
 
-    my $schema  = Koha::Database->new->schema;
     my @columns = $schema->source('Aqorder')->columns;
 
     $self->{ordernumber} ||= undef;

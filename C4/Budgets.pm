@@ -22,11 +22,9 @@ use strict;
 use C4::Context;
 use Koha::Database;
 use C4::Debug;
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
 
 BEGIN {
-	# set the version for version checking
-    $VERSION = 3.07.00.049;
 	require Exporter;
 	@ISA    = qw(Exporter);
 	@EXPORT = qw(
@@ -35,6 +33,9 @@ BEGIN {
         &GetBudgetByOrderNumber
         &GetBudgetByCode
         &GetBudgets
+        &BudgetsByActivity
+        &GetBudgetsReport
+        &GetBudgetReport
         &GetBudgetHierarchy
 	    &AddBudget
         &ModBudget
@@ -72,7 +73,6 @@ BEGIN {
 }
 
 # ----------------------------BUDGETS.PM-----------------------------";
-
 
 =head1 FUNCTIONS ABOUT BUDGETS
 
@@ -397,7 +397,14 @@ sub GetBudgetName {
     return $sth->fetchrow_array;
 }
 
-# -------------------------------------------------------------------
+=head2 GetBudgetAuthCats
+
+  my $auth_cats = &GetBudgetAuthCats($budget_period_id);
+
+Return the list of authcat for a given budget_period_id
+
+=cut
+
 sub GetBudgetAuthCats  {
     my ($budget_period_id) = shift;
     # now, populate the auth_cats_loop used in the budget planning button
@@ -407,14 +414,10 @@ sub GetBudgetAuthCats  {
     $sth->execute($budget_period_id);
     my %authcats;
     while (my ($sort1_authcat,$sort2_authcat) = $sth->fetchrow) {
-        $authcats{$sort1_authcat}=1;
-        $authcats{$sort2_authcat}=1;
+        $authcats{$sort1_authcat}=1 if $sort1_authcat;
+        $authcats{$sort2_authcat}=1 if $sort2_authcat;
     }
-    my @auth_cats_loop;
-    foreach (sort keys %authcats) {
-        push @auth_cats_loop,{ authcat => $_ };
-    }
-    return \@auth_cats_loop;
+    return [ sort keys %authcats ];
 }
 
 # -------------------------------------------------------------------
@@ -453,7 +456,6 @@ sub GetBudgetPeriod {
 	return $data;
 }
 
-# -------------------------------------------------------------------
 sub DelBudgetPeriod{
 	my ($budget_period_id) = @_;
 	my $dbh = C4::Context->dbh;
@@ -597,6 +599,8 @@ sub DelBudget {
 }
 
 
+# -------------------------------------------------------------------
+
 =head2 GetBudget
 
   &GetBudget($budget_id);
@@ -605,7 +609,6 @@ get a specific budget
 
 =cut
 
-# -------------------------------------------------------------------
 sub GetBudget {
     my ( $budget_id ) = @_;
     my $dbh = C4::Context->dbh;
@@ -620,6 +623,8 @@ sub GetBudget {
     return $result;
 }
 
+# -------------------------------------------------------------------
+
 =head2 GetBudgetByOrderNumber
 
   &GetBudgetByOrderNumber($ordernumber);
@@ -628,7 +633,6 @@ get a specific budget by order number
 
 =cut
 
-# -------------------------------------------------------------------
 sub GetBudgetByOrderNumber {
     my ( $ordernumber ) = @_;
     my $dbh = C4::Context->dbh;
@@ -642,6 +646,117 @@ sub GetBudgetByOrderNumber {
     $sth->execute( $ordernumber );
     my $result = $sth->fetchrow_hashref;
     return $result;
+}
+
+=head2 GetBudgetReport
+
+  &GetBudgetReport( [$budget_id] );
+
+Get all orders for a specific budget, without cancelled orders.
+
+Returns an array of hashrefs.
+
+=cut
+
+# --------------------------------------------------------------------
+sub GetBudgetReport {
+    my ( $budget_id ) = @_;
+    my $dbh = C4::Context->dbh;
+    my $query = '
+        SELECT o.*, b.budget_name
+        FROM   aqbudgets b
+        INNER JOIN aqorders o
+        ON b.budget_id = o.budget_id
+        WHERE  b.budget_id=?
+        AND (o.orderstatus != "cancelled")
+        ORDER BY b.budget_name';
+
+    my $sth = $dbh->prepare($query);
+    $sth->execute( $budget_id );
+
+    my @results = ();
+    while ( my $data = $sth->fetchrow_hashref ) {
+        push( @results, $data );
+    }
+    return @results;
+}
+
+=head2 GetBudgetsByActivity
+
+  &GetBudgetsByActivity( $budget_period_active );
+
+Get all active or inactive budgets, depending of the value
+of the parameter.
+
+1 = active
+0 = inactive
+
+=cut
+
+# --------------------------------------------------------------------
+sub GetBudgetsByActivity {
+    my ( $budget_period_active ) = @_;
+    my $dbh = C4::Context->dbh;
+    my $query = "
+        SELECT DISTINCT b.*
+        FROM   aqbudgetperiods bp
+        INNER JOIN aqbudgets b
+        ON bp.budget_period_id = b.budget_period_id
+        WHERE  bp.budget_period_active=?
+        ";
+    my $sth = $dbh->prepare($query);
+    $sth->execute( $budget_period_active );
+    my @results = ();
+    while ( my $data = $sth->fetchrow_hashref ) {
+        push( @results, $data );
+    }
+    return @results;
+}
+# --------------------------------------------------------------------
+
+=head2 GetBudgetsReport
+
+  &GetBudgetsReport( [$activity] );
+
+Get all but cancelled orders for all funds.
+
+If the optionnal activity parameter is passed, returns orders for active/inactive budgets only.
+
+active = 1
+inactive = 0
+
+Returns an array of hashrefs.
+
+=cut
+
+sub GetBudgetsReport {
+    my ($activity) = @_;
+    my $dbh = C4::Context->dbh;
+    my $query = '
+        SELECT o.*, b.budget_name
+        FROM   aqbudgetperiods bp
+        INNER JOIN aqbudgets b
+        ON bp.budget_period_id = b.budget_period_id
+        INNER JOIN aqorders o
+        ON b.budget_id = o.budget_id ';
+    if($activity ne ''){
+        $query .= 'WHERE  bp.budget_period_active=? ';
+    }
+    $query .= 'AND (o.orderstatus != "cancelled")
+               ORDER BY b.budget_name';
+
+    my $sth = $dbh->prepare($query);
+    if($activity ne ''){
+        $sth->execute($activity);
+    }
+    else{
+        $sth->execute;
+    }
+    my @results = ();
+    while ( my $data = $sth->fetchrow_hashref ) {
+        push( @results, $data );
+    }
+    return @results;
 }
 
 =head2 GetBudgetByCode

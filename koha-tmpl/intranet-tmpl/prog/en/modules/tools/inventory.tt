@@ -3,7 +3,7 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Tools &rsaquo; Inventory</title>
 [% INCLUDE 'doc-head-close.inc' %]
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 [% INCLUDE 'calendar.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.checkboxes.min.js"></script>
@@ -101,7 +101,7 @@ $(document).ready(function(){
    <div id="bd">
     <div id="yui-main">
     <div class="yui-b">
-    <h1>Inventory/Stocktaking</h1>
+    <h1>Inventory</h1>
     [% IF (moddatecount) %]<div class="dialog message">[% moddatecount %] items modified : datelastseen set to [% date | $KohaDates %]</div>
     <div class="dialog alert">Number of potential barcodes read: [% LinesRead %]</div>[% END %]
     [% IF (errorfile) %]<div class="dialog alert">[% errorfile %] can't be opened</div>[% END %]
@@ -251,7 +251,7 @@ $(document).ready(function(){
             <th>Lost</th>
             <th>Damaged</th>
             <th>Withdrawn</th>
-            <th>Unseen since</th>
+            <th>Last seen</th>
             <th>Problems</th>
         </tr>
     </thead>

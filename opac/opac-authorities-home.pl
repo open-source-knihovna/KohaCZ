@@ -32,6 +32,8 @@ use C4::Koha;
 use C4::Search::History;
 
 use Koha::Authority::Types;
+use Koha::SearchEngine::Search;
+use Koha::SearchEngine::QueryBuilder;
 
 my $query        = new CGI;
 my $op           = $query->param('op') || '';
@@ -47,20 +49,30 @@ my $resultsperpage;
 my $authority_types = Koha::Authority::Types->search({}, { order_by => ['authtypetext']});
 
 if ( $op eq "do_search" ) {
-    my @marclist = ($query->param('marclist'));
-    my @and_or = ($query->param('and_or'));
-    my @excluding = ($query->param('excluding'),);
-    my @operator = ($query->param('operator'));
+    my @marclist = $query->multi_param('marclist');
+    my @and_or = $query->multi_param('and_or');
+    my @excluding = $query->multi_param('excluding');
+    my @operator = $query->multi_param('operator');
     my $orderby = $query->param('orderby');
-    my @value = ($query->param('value') || "",);
+    my @value = $query->multi_param('value');
+    $value[0] ||= q||;
 
     $resultsperpage = $query->param('resultsperpage');
     $resultsperpage = 20 if ( !defined $resultsperpage );
     my @tags;
-    my ( $results, $total, @fields ) =
-      SearchAuthorities( \@marclist, \@and_or, \@excluding, \@operator,
-        \@value, $startfrom * $resultsperpage,
-        $resultsperpage, $authtypecode, $orderby );
+    my $builder = Koha::SearchEngine::QueryBuilder->new(
+        { index => $Koha::SearchEngine::AUTHORITIES_INDEX } );
+    my $searcher = Koha::SearchEngine::Search->new(
+        { index => $Koha::SearchEngine::AUTHORITIES_INDEX } );
+    my $search_query = $builder->build_authorities_query_compat( \@marclist, \@and_or,
+        \@excluding, \@operator, \@value, $authtypecode, $orderby );
+#    use Data::Dumper;
+#    die Dumper(\@marclist, \@and_or,
+#        \@excluding, \@operator, \@value, $authtypecode, $orderby, $query);
+    # The searchengine API expects pages to start at page 1
+    $startfrom = $startfrom // 0;
+    my ( $results, $total ) =
+      $searcher->search_auth_compat( $search_query, $startfrom+1, $resultsperpage );
     ( $template, $loggedinuser, $cookie ) = get_template_and_user(
         {
             template_name   => "opac-authoritiessearchresultlist.tt",
@@ -115,8 +127,9 @@ if ( $op eq "do_search" ) {
         $to = ( ( $startfrom + 1 ) * $resultsperpage );
     }
     unless (C4::Context->preference('OPACShowUnusedAuthorities')) {
-        my @usedauths = grep { $_->{used} > 0 } @$results;
-        $results = \@usedauths;
+#        TODO implement usage counts
+#        my @usedauths = grep { $_->{used} > 0 } @$results;
+#        $results = \@usedauths;
     }
 
     # Opac search history
@@ -150,7 +163,6 @@ if ( $op eq "do_search" ) {
     }
 
     $template->param( result => $results ) if $results;
-    $template->param( FIELDS => \@fields );
     $template->param( orderby => $orderby );
     $template->param(
         startfrom      => $startfrom,

@@ -37,11 +37,9 @@ use Koha::DateUtils;
 use Koha::Account::Line;
 use Koha::Account::Lines;
 
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
 
 BEGIN {
-    # set the version for version checking
-    $VERSION = 3.07.00.049;
     require Exporter;
     @ISA = qw(Exporter);
 
@@ -587,7 +585,7 @@ sub UpdateFine {
                 {
                     date          => dt_from_string(),
                     amount        => $amount,
-                    outstanding   => $out,
+                    amountoutstanding   => $out,
                     lastincrement => $diff,
                     accounttype   => 'FU',
                 }
@@ -616,6 +614,7 @@ sub UpdateFine {
                     amountoutstanding => $amount,
                     lastincrement     => $amount,
                     accountno         => $nextaccntno,
+                    issue_id          => $issue_id,
                 }
             )->store();
         }

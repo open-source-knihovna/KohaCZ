@@ -92,12 +92,12 @@ if ( $op eq 'add_form' ) {
     if ( $shelf ) {
         $op = $referer;
         if ( $shelf->can_be_managed( $loggedinuser ) ) {
-            $shelf->shelfname( $query->param('shelfname') );
-            $shelf->sortfield( $query->param('sortfield') );
-            $shelf->allow_add( $query->param('allow_add') );
-            $shelf->allow_delete_own( $query->param('allow_delete_own') );
-            $shelf->allow_delete_other( $query->param('allow_delete_other') );
-            $shelf->category( $query->param('category') );
+            $shelf->shelfname( scalar $query->param('shelfname') );
+            $shelf->sortfield( scalar $query->param('sortfield') );
+            $shelf->allow_add( scalar $query->param('allow_add') );
+            $shelf->allow_delete_own( scalar $query->param('allow_delete_own') );
+            $shelf->allow_delete_other( scalar $query->param('allow_delete_other') );
+            $shelf->category( scalar $query->param('category') );
             eval { $shelf->store };
 
             if ($@) {
@@ -161,7 +161,7 @@ if ( $op eq 'add_form' ) {
 } elsif ( $op eq 'remove_biblios' ) {
     $shelfnumber = $query->param('shelfnumber');
     $shelf = Koha::Virtualshelves->find($shelfnumber);
-    my @biblionumbers = $query->param('biblionumber');
+    my @biblionumbers = $query->multi_param('biblionumber');
     if ($shelf) {
         if ( $shelf->can_biblios_be_removed( $loggedinuser ) ) {
             my $number_of_biblios_removed = eval {
@@ -215,18 +215,24 @@ if ( $op eq 'view' ) {
 
             my $borrower = GetMember( borrowernumber => $loggedinuser );
 
+            my $xslfile = C4::Context->preference('XSLTResultsDisplay');
+            my $lang   = $xslfile ? C4::Languages::getlanguage()  : undef;
+            my $sysxml = $xslfile ? C4::XSLT::get_xslt_sysprefs() : undef;
+
             my @items;
             while ( my $content = $contents->next ) {
                 my $this_item;
                 my $biblionumber = $content->biblionumber->biblionumber;
                 my $record       = GetMarcBiblio($biblionumber);
 
-                if ( C4::Context->preference("XSLTResultsDisplay") ) {
-                    $this_item->{XSLTBloc} = XSLTParse4Display( $biblionumber, $record, "XSLTResultsDisplay" );
+                if ( $xslfile ) {
+                    $this_item->{XSLTBloc} = XSLTParse4Display( $biblionumber, $record, "XSLTResultsDisplay",
+                                                                1, undef, $sysxml, $xslfile, $lang);
                 }
 
                 my $marcflavour = C4::Context->preference("marcflavour");
                 my $itemtypeinfo = getitemtypeinfo( $content->biblionumber->biblioitems->first->itemtype, 'intranet' );
+                $this_item->{title}             = $content->biblionumber->title;
                 $this_item->{author}            = $content->biblionumber->author;
                 $this_item->{dateadded}         = $content->dateadded;
                 $this_item->{imageurl}          = $itemtypeinfo->{imageurl};
@@ -302,7 +308,7 @@ $template->param(
     shelf    => $shelf,
     messages => \@messages,
     category => $category,
-    print    => $query->param('print') || 0,
+    print    => scalar $query->param('print') || 0,
     csv_profiles => GetCsvProfilesLoop('marc'),
 );
 

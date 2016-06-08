@@ -3,7 +3,7 @@
 <title>Koha &rsaquo; Administration &rsaquo; Budgets &rsaquo; Funds &rsaquo; Planning for [% budget_period_description %] by [% authcat %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.checkboxes.min.js"></script>
-<script type="text/javascript" src="[% themelang %]/js/acq.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/acq.js"></script>
 <script type="text/javascript">
 //<![CDATA[
     function Check(f) {
@@ -47,7 +47,7 @@
                 hideAllColumns();
                 e.stopPropagation();
             } else {
-                if($(this).attr("checked")){
+                if($(this).prop("checked")){
                     showColumn(num);
                 } else {
                     hideColumn(num);
@@ -239,6 +239,7 @@
 [%     CASE 'MONTHS'    %]<span>by months</span>
 [%     CASE 'ITEMTYPES' %]<span>by item types</span>
 [%     CASE 'BRANCHES'  %]<span>by libraries</span>
+[%     CASE             %]<span>by [% type %]</span>
 [%   END %]
 [% END %]
 <ol>

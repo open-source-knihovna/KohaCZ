@@ -27,7 +27,7 @@ OPAC:
               choices:
                   yes: Enable
                   no: Disable
-            - "Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
+            - "Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
         -
             - pref: HighlightOwnItemsOnOPAC
               choices:
@@ -175,12 +175,6 @@ OPAC:
             - pref: NotHighlightedWords
               class: multi
             - (separate columns with |)
-        -
-            - pref: AuthorisedValueImages
-              choices:
-                  yes: Show
-                  no: "Don't show"
-            - images for <a href="/cgi-bin/koha/admin/authorised_values.pl">authorized values</a> (such as lost statuses and locations) in search results and item detail pages on the OPAC.
         -
             - Use the image at
             - pref: OpacFavicon
@@ -489,6 +483,11 @@ OPAC:
                   yes: Display
                   no: Don't display
             - the acquisition details on OPAC detail pages.
+        -
+            - "Use the following as the OPAC ISBD template:"
+            - pref: OPACISBD
+              type: textarea
+              class: code
     Policy:
         -
             - pref: SearchMyLibraryFirst

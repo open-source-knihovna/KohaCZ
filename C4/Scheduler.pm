@@ -20,13 +20,11 @@ package C4::Scheduler;
 use strict;
 #use warnings; FIXME - Bug 2505
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 use C4::Context;
 use Schedule::At;
 
 BEGIN {
-	# set the version for version checking
-    $VERSION = 3.07.00.049;
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT =

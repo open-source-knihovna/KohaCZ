@@ -19,17 +19,11 @@ package Koha::Patron::Files;
 
 use Modern::Perl;
 
-use vars qw($VERSION);
 
 use C4::Context;
 use C4::Output;
 use C4::Debug;
 
-BEGIN {
-
-    # set the version for version checking
-    $VERSION = 0.01;
-}
 
 =head1 NAME
 

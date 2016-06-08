@@ -25,7 +25,7 @@ This script allows to do 2 things.
 
 =item * Anonymise the borrowers' issues if issue is older than a given date. see C<datefilter1>.
 
-=item * Delete the borrowers who has not borrowered since a given date. see C<datefilter2>.
+=item * Delete the borrowers who has not borrowed since a given date. see C<datefilter2>.
 
 =back
 
@@ -41,6 +41,7 @@ use C4::Members;        # GetBorrowersWhoHavexxxBorrowed.
 use C4::Circulation;    # AnonymiseIssueHistory.
 use Koha::DateUtils qw( dt_from_string output_pref );
 use Date::Calc qw/Today Add_Delta_YM/;
+use Koha::List::Patron;
 
 my $cgi = new CGI;
 
@@ -51,9 +52,9 @@ my $cgi = new CGI;
 my $params = $cgi->Vars;
 
 my $step = $params->{step} || 1;
-my $not_borrowered_since =    # the date which filter on issue history.
-  $params->{not_borrowered_since}
-  ? dt_from_string $params->{not_borrowered_since}
+my $not_borrowed_since =    # the date which filter on issue history.
+  $params->{not_borrowed_since}
+  ? dt_from_string $params->{not_borrowed_since}
   : undef;
 my $last_issue_date =         # the date which filter on borrowers last issue.
   $params->{last_issue_date}
@@ -63,6 +64,7 @@ my $borrower_dateexpiry =
   $params->{borrower_dateexpiry}
   ? dt_from_string $params->{borrower_dateexpiry}
   : undef;
+my $patron_list_id = $params->{patron_list_id};
 
 my $borrower_categorycode = $params->{'borrower_categorycode'} || q{};
 
@@ -80,28 +82,28 @@ if ( $step == 2 ) {
 
     my %checkboxes = map { $_ => 1 } split /\0/, $params->{'checkbox'};
 
-    my $totalDel;
-    my $membersToDelete;
+    my $patrons_to_delete;
     if ( $checkboxes{borrower} ) {
-        $membersToDelete = GetBorrowersToExpunge(
-            _get_selection_params($not_borrowered_since, $borrower_dateexpiry, $borrower_categorycode)
+        $patrons_to_delete = GetBorrowersToExpunge(
+             _get_selection_params(
+                  $not_borrowed_since,
+                  $borrower_dateexpiry,
+                  $borrower_categorycode,
+                  $patron_list_id,
+             )
         );
-        _skip_borrowers_with_nonzero_balance( $membersToDelete );
-        $totalDel = scalar @$membersToDelete;
-
     }
-    my $totalAno;
-    my $membersToAnonymize;
+    _skip_borrowers_with_nonzero_balance($patrons_to_delete);
+
+    my $members_to_anonymize;
     if ( $checkboxes{issue} ) {
-        $membersToAnonymize = GetBorrowersWithIssuesHistoryOlderThan($last_issue_date);
-        $totalAno           = scalar @$membersToAnonymize;
+        $members_to_anonymize = GetBorrowersWithIssuesHistoryOlderThan($last_issue_date);
     }
 
     $template->param(
-        totalToDelete           => $totalDel,
-        totalToAnonymize        => $totalAno,
-        memberstodelete_list    => $membersToDelete,
-        memberstoanonymize_list => $membersToAnonymize,
+        patrons_to_delete    => $patrons_to_delete,
+        patrons_to_anonymize => $members_to_anonymize,
+        patron_list_id          => $patron_list_id,
     );
 }
 
@@ -113,18 +115,22 @@ elsif ( $step == 3 ) {
 
     # delete members
     if ($do_delete) {
-        my $membersToDelete = GetBorrowersToExpunge(
-            _get_selection_params($not_borrowered_since, $borrower_dateexpiry, $borrower_categorycode)
-        );
-        _skip_borrowers_with_nonzero_balance( $membersToDelete );
-        $totalDel = scalar(@$membersToDelete);
+        my $patrons_to_delete = GetBorrowersToExpunge(
+                _get_selection_params(
+                    $not_borrowed_since, $borrower_dateexpiry,
+                    $borrower_categorycode, $patron_list_id
+                )
+            );
+        _skip_borrowers_with_nonzero_balance($patrons_to_delete);
+
+        $totalDel = scalar(@$patrons_to_delete);
         $radio    = $params->{'radio'};
         for ( my $i = 0 ; $i < $totalDel ; $i++ ) {
             $radio eq 'testrun' && last;
-            my $borrowernumber = $membersToDelete->[$i]->{'borrowernumber'};
-            $radio eq 'trash' && MoveMemberToDeleted( $borrowernumber );
-            C4::Members::HandleDelBorrower( $borrowernumber );
-            DelMember( $borrowernumber );
+            my $borrowernumber = $patrons_to_delete->[$i]->{'borrowernumber'};
+            $radio eq 'trash' && MoveMemberToDeleted($borrowernumber);
+            C4::Members::HandleDelBorrower($borrowernumber);
+            DelMember($borrowernumber);
         }
         $template->param(
             do_delete => '1',
@@ -145,11 +151,19 @@ elsif ( $step == 3 ) {
         trash => ( $radio eq "trash" ) ? (1) : (0),
         testrun => ( $radio eq "testrun" ) ? 1: 0,
     );
+} else { # $step == 1
+    my @all_lists = GetPatronLists();
+    my @non_empty_lists;
+    foreach my $list (@all_lists){
+    my @patrons = $list->patron_list_patrons();
+        if( scalar @patrons ) { push(@non_empty_lists,$list) }
+    }
+    $template->param( patron_lists => [ @non_empty_lists ] );
 }
 
 $template->param(
     step                   => $step,
-    not_borrowered_since   => $not_borrowered_since,
+    not_borrowed_since   => $not_borrowed_since,
     borrower_dateexpiry    => $borrower_dateexpiry,
     last_issue_date        => $last_issue_date,
     borrower_categorycodes => GetBorrowercategoryList(),
@@ -169,20 +183,21 @@ sub _skip_borrowers_with_nonzero_balance {
 }
 
 sub _get_selection_params {
-    my ($not_borrowered_since, $borrower_dateexpiry, $borrower_categorycode) = @_;
+    my ($not_borrowed_since, $borrower_dateexpiry, $borrower_categorycode, $patron_list_id) = @_;
 
     my $params = {};
-    $params->{not_borrowered_since} = output_pref({
-        dt         => $not_borrowered_since,
+    $params->{not_borrowed_since} = output_pref({
+        dt         => $not_borrowed_since,
         dateformat => 'iso',
         dateonly   => 1
-    }) if $not_borrowered_since;
+    }) if $not_borrowed_since;
     $params->{expired_before} = output_pref({
         dt         => $borrower_dateexpiry,
         dateformat => 'iso',
         dateonly   => 1
     }) if $borrower_dateexpiry;
     $params->{category_code} = $borrower_categorycode if $borrower_categorycode;
+    $params->{patron_list_id} = $patron_list_id if $patron_list_id;
 
     return $params;
 };

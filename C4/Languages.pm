@@ -26,7 +26,7 @@ use Carp;
 use CGI;
 use List::MoreUtils qw( any );
 use C4::Context;
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $DEBUG);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $DEBUG);
 
 eval {
     if (C4::Context->ismemcached) {
@@ -40,7 +40,6 @@ eval {
 };
 
 BEGIN {
-    $VERSION = 3.07.00.049;
     require Exporter;
     @ISA    = qw(Exporter);
     @EXPORT = qw(

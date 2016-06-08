@@ -24,9 +24,6 @@ use PDF::Reuse::Barcode;
 use File::Temp;
 use List::Util qw/first/;
 
-BEGIN {
-    use version; our $VERSION = qv('3.07.00.049');
-}
 
 sub _InitVars {
     my $self = shift;

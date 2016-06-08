@@ -15,7 +15,7 @@
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'calendar.inc' %]
-<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/en/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 [% INCLUDE 'columns_settings.inc' %]
 [% INCLUDE 'strings.inc' %]
@@ -23,9 +23,9 @@
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery-ui-timepicker-addon.min.js"></script>
 [% INCLUDE 'timepicker.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.dataTables.rowGrouping.js"></script>
-<script type="text/javascript" src="[% themelang %]/js/pages/circulation.js"></script>
-<script type="text/javascript" src="[% themelang %]/js/checkouts.js"></script>
-<script type="text/javascript" src="[% themelang %]/js/holds.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/pages/circulation.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/checkouts.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/holds.js"></script>
 <script type="text/JavaScript">
 //<![CDATA[
 /* Set some variable needed in circulation.js */
@@ -173,6 +173,10 @@ function validate1(date) {
 [% ELSE %]
     [% IF ( was_renewed ) %]<div class="dialog message">Patron's account has been renewed until [% dateexpiry | $KohaDates %]</div>[% END %]
 
+    [% IF fines %]
+        [% INCLUDE 'blocked-fines.inc' %]
+    [% END %]
+
     [% IF ( flagged ) %]
     <div id="circmessages" class="circmessage attention">
         <ul>
@@ -212,17 +216,17 @@ function validate1(date) {
 	<div class="rows">
 		<ol>
         [% IF ( I ) %]
-            [% IF ( phonepro ) %]<li><span class="label">Organization phone: </span>[% phonepro %]</li>[% END %]
+            [% IF ( phonepro ) %]<li><span class="label">Organization phone: </span><a href="tel:[% phonepro %]">[% phonepro %]</a></li>[% END %]
             [% IF ( emailpro ) %]<li class="email"><span class="label">Organization email: </span>[% emailpro %]</li>[% END %]
         [% ELSE %]
-            [% IF ( phone ) %]<li><span class="label">Primary phone: </span>[% phone %]</li>[% END %]
-            [% IF ( phonepro ) %]<li><span class="label">Secondary phone: </span>[% phonepro %]</li>[% END %]
-            [% IF ( mobile ) %]<li><span class="label">Other phone: </span>[% mobile %]</li>[% END %]
+            [% IF ( phone ) %]<li><span class="label">Primary phone: </span><a href="tel:[% phone %]">[% phone %]</a></li>[% END %]
+            [% IF ( phonepro ) %]<li><span class="label">Secondary phone: </span><a href="tel:[% phonepro %]">[% phonepro %]</a></li>[% END %]
+            [% IF ( mobile ) %]<li><span class="label">Other phone: </span><a href="tel:[% mobile %]">[% mobile %]</a></li>[% END %]
         [% END %]
 
     [% IF ( P ) %]
-        [% IF ( phone ) %]<li><span class="label">Primary phone: </span>[% phone %]</li>[% END %]
-        [% IF ( mobile ) %]<li><span class="label">Other phone: </span>[% mobile %]</li>[% END %]
+        [% IF ( phone ) %]<li><span class="label">Primary phone: </span><a href="tel:[% phone %]">[% phone %]</a></li>[% END %]
+        [% IF ( mobile ) %]<li><span class="label">Other phone: </span><a href="tel:[% mobile %]">[% mobile %]</a></li>[% END %]
     [% END %]   	
 	[% IF ( fax ) %]<li><span class="label">Fax: </span>[% fax %]</li>[% END %]
     [% UNLESS ( I ) %]
@@ -246,7 +250,11 @@ function validate1(date) {
     [% ELSIF guarantor %]
         <li>
             <span class="label">Guarantor:</span>
-            <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% guarantor.borrowernumber %]">[% guarantor.firstname %] [% guarantor.surname %]</a>
+            [% IF guarantor.borrowernumber %]
+                <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% guarantor.borrowernumber %]">[% guarantor.firstname %] [% guarantor.surname %]</a>
+            [% ELSE %]
+                [% guarantor.firstname %] [% guarantor.surname %]
+            [% END %]
         </li>
     [% END %]
 </ol>
@@ -332,7 +340,7 @@ function validate1(date) {
 <h3>Patron messaging preferences</h3>
 [% INCLUDE 'messaging-preference-form.inc' %]
  [% IF ( SMSSendDriver ) %]
-      <div class="rows"> <ol><li><span class="label">SMS number:</span>[% SMSnumber %]
+      <div class="rows"> <ol><li><span class="label">SMS number:</span><a href="sms:[% SMSnumber %]">[% SMSnumber %]</a>
      </li></ol></div>
  [% END %]
 </div>
@@ -419,7 +427,7 @@ function validate1(date) {
       [% IF ( B_state ) %]<li><span class="label">State: </span>[% B_state %]</li>[% END %]
       <li><span class="label">ZIP/Postal code: </span>[% B_zipcode %]</li>
       [% IF ( B_country ) %]<li><span class="label">Country: </span>[% B_country %]</li>[% END %]
-      [% IF ( B_phone ) %]<li><span class="label">Phone: </span>[% B_phone %]</li>[% END %]
+      [% IF ( B_phone ) %]<li><span class="label">Phone: </span><a href="tel:[% B_phone %]">[% B_phone %]</a></li>[% END %]
       [% IF ( B_email ) %]<li class="email"><span class="label">Email: </span><a title="[% B_email %]" href="mailto:[% B_email %]">[% B_email %]</a></li>[% END %]
       [% IF ( contactnote ) %]<li><span class="label">Contact note: </span> [% contactnote %]</li>[% END %]
       </ol>
@@ -438,7 +446,7 @@ function validate1(date) {
     [% IF ( altcontactstate ) %]<li><span class="label">State: </span>[% altcontactstate %]</li>[% END %]
     <li><span class="label">ZIP/Postal code: </span>[% altcontactzipcode %]</li>
 	[% IF ( altcontactcountry ) %]<li><span class="label">Country: </span>[% altcontactcountry %]</li>[% END %]
-    [% IF ( altcontactphone ) %]<li><span class="label">Phone: </span>[% altcontactphone %]</li>[% END %]
+    [% IF ( altcontactphone ) %]<li><span class="label">Phone: </span><a href="tel:[% altcontactphone %]">[% altcontactphone %]</a></li>[% END %]
     </ol></div>
 </div>
 <div class="action"><a href="memberentry.pl?op=modify&amp;borrowernumber=[% borrowernumber %]&amp;step=2">Edit</a></div>

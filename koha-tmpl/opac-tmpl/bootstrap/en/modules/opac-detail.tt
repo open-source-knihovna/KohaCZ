@@ -104,7 +104,7 @@
                     [% END %]
 
                     <div id="views">
-                        <span class="view"><span id="Normalview">Normal view</span></span>
+                        <span class="view current-view"><span id="Normalview">Normal view</span></span>
                         <span class="view"><a id="MARCview" href="/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=[% biblionumber %]">MARC view</a></span>
                         [% IF ( ISBD ) %]<span class="view"><a id="ISBDview" href="/cgi-bin/koha/opac-ISBDdetail.pl?biblionumber=[% biblionumber %]">ISBD view</a></span>[% END %]
                     </div>
@@ -348,7 +348,6 @@
                                                 <a href="[% MARCurl.MARCURL %]" title="[% MARCurl.MARCURL %]">
                                             [% END %]
                                         [% END %]
-
                                         [% MARCurl.linktext %]</a>
                                             [% IF ( MARCurl.notes ) %]
                                                 <ul>
@@ -363,14 +362,6 @@
                             </div>
                         [% END # / IF MARCURLS %]
                     [% END # / IF OPACXSLTDetailsDisplay %]
-
-                    [% IF ( AuthorisedValueImages && authorised_value_images ) %]
-                        <div class="authorised_value_images">
-                            [% FOREACH authorised_value_image IN authorised_value_images %]
-                                <img src="[% authorised_value_image.imageurl %]" alt="[% authorised_value_image.label %]" title="[% authorised_value_image.label %]" />
-                            [% END %]
-                        </div>
-                    [% END # / AuthorisedValueImages && authorised_value_images %]
 
                     <!-- This puts the LTFL reviews in, and if TabbedView is not set, puts the remaining content above the Tabs instead of in them -->
                     [% IF ( LibraryThingForLibrariesID ) %]
@@ -397,39 +388,36 @@
 
                     [% IF ( TagsShowEnabled ) %]
                         <div class="results_summary tags">
-                        [% IF ( TagLoop ) %]
-                            <span class="label">Tags from this library:</span>
-                            <ul id="tagslist">
-                                [% FOREACH TagLoo IN TagLoop %]
-                                    <li><a href="/cgi-bin/koha/opac-search.pl?tag=[% TagLoo.term |url %]&amp;q=[% TagLoo.term |url %]">[% TagLoo.term |html %]</a> <span class="weight">([% TagLoo.weight_total %])</span>
-                                    [% IF ( loop.last ) %][% ELSE %], [% END %]
-                                    </li>
+                            [% IF ( TagLoop ) %]
+                                <span class="label">Tags from this library:</span>
+                                <ul id="tagslist">
+                                    [% FOREACH TagLoo IN TagLoop %]
+                                        <li><a href="/cgi-bin/koha/opac-search.pl?tag=[% TagLoo.term |url %]&amp;q=[% TagLoo.term |url %]">[% TagLoo.term |html %]</a> <span class="weight">([% TagLoo.weight_total %])</span>
+                                        [% IF ( loop.last ) %][% ELSE %], [% END %]
+                                        </li>
+                                    [% END %]
+                                </ul>
+                            [% ELSE %]
+                                <span class="label">Tags from this library:</span> <span class="notags">No tags from this library for this title.</span>
+                            [% END %]
+                            [% IF ( TagsInputEnabled ) %]
+                                [% IF ( loggedinusername ) %]
+                                    <form id="tagform[% biblionumber %]" method="post" action="/cgi-bin/koha/opac-tags.pl" style="display:none;">
+                                        <label for="newtag[% biblionumber %]">New tag(s), separated by a comma:</label>
+                                        <input name="newtag[% biblionumber %]" id="newtag[% biblionumber %]" maxlength="100" type="text"/>
+                                        <input name="tagbutton" class="btn btn-small tagbutton" title="[% biblionumber %]" type="submit" value="Add" />
+                                        <a class="cancel_tag_add" id="cancel[% biblionumber %]" href="#">(done)</a>
+                                    </form>
+                                    <span id="newtag[% biblionumber %]_status" class="tagstatus" style="display:none;">
+                                        Tag status here.
+                                    </span>
+                                    <a class="tag_add" id="tag_add[% biblionumber %]" href="#">Add tag(s)</a>
+                                [% ELSE %]
+                                    <span id="login4tags"><a class="loginModal-trigger" data-toggle="modal" role="button" href="/cgi-bin/koha/opac-user.pl">Log in to add tags.</a></span>
                                 [% END %]
-                            </ul>
-                        [% ELSE %]
-                            <span class="label">Tags from this library:</span> <span class="notags">No tags from this library for this title.</span>
-                        [% END %]
-                        [% IF ( TagsInputEnabled ) %] <a class="tag_add" id="tag_add[% biblionumber %]" href="#">Add tag(s)</a> [% END %]
+                            [% END # / IF TagsInputEnabled %]
                         </div>
                     [% END # /IF TagsShowEnabled %]
-
-                    [% IF ( TagsInputEnabled ) %]
-                      <div class="results_summary tagsinput">
-                            [% IF ( loggedinusername ) %]
-                                <form id="tagform[% biblionumber %]" method="post" action="/cgi-bin/koha/opac-tags.pl" style="display:none;">
-                                    <label for="newtag[% biblionumber %]">New tag(s), separated by a comma:</label>
-                                    <input name="newtag[% biblionumber %]" id="newtag[% biblionumber %]" maxlength="100" type="text"/>
-                                    <input name="tagbutton" class="btn btn-small tagbutton" title="[% biblionumber %]" type="submit" value="Add" />
-                                    <a class="cancel_tag_add" id="cancel[% biblionumber %]" href="#">(done)</a>
-                                </form>
-                                <span id="newtag[% biblionumber %]_status" class="tagstatus" style="display:none;">
-                                    Tag status here.
-                                </span>
-                            [% ELSE %]
-                                <span id="login4tags">Log in to add tags.</span>
-                            [% END %]
-                        </div>
-                    [% END # / IF TagsInputEnabled %]
 
                     [% IF ( SyndeticsEnabled ) %]
                         [% IF ( SyndeticsSeries && SyndeticsSERIES1Exists ) %]
@@ -561,16 +549,18 @@
                             [% IF ( SyndeticsExcerpt && SYNDETICS_EXCERPT ) %]
                                 <li id="tab_excerpt"> <a href="#excerpt">Excerpt</a></li>
                             [% END %]
-                            [% IF ( SyndeticsReviews && SYNDETICS_REVIEWS ) %]
+                            [% IF ( ( SyndeticsReviews && SYNDETICS_REVIEWS ) || ( LibraryThingForLibrariesTabbedView && LibraryThingForLibrariesID) ) %]
                                 <li id="tab_reviews"> <a href="#reviews">Reviews</a></li>
-                                <li id="tab_LTFLreviews">
-                                    [% IF ( using_https ) %]
-                                        <script src="https://www.librarything.com/forlibraries/widget.js?id=[% LibraryThingForLibrariesID %]" type="text/javascript"></script>
-                                        <noscript>This page contains enriched content visible when JavaScript is enabled or by clicking <a href="https://www.librarything.com/forlibraries/noscript.php?id=[% LibraryThingForLibrariesID %]&amp;accessibility=1">here</a>.</noscript>
-                                    [% ELSE %]
-                                        <script src="http://www.librarything.com/forlibraries/widget.js?id=[% LibraryThingForLibrariesID %]" type="text/javascript"></script>
-                                        <noscript>This page contains enriched content visible when JavaScript is enabled or by clicking <a href="http://www.librarything.com/forlibraries/noscript.php?id=[% LibraryThingForLibrariesID %]&amp;accessibility=1">here</a>.</noscript>
-                                    [% END %]
+                                [% IF ( LibraryThingForLibrariesID ) %]
+                                    <li id="tab_LTFLreviews">
+                                        [% IF ( using_https ) %]
+                                            <script src="https://www.librarything.com/forlibraries/widget.js?id=[% LibraryThingForLibrariesID %]" type="text/javascript"></script>
+                                            <noscript>This page contains enriched content visible when JavaScript is enabled or by clicking <a href="https://www.librarything.com/forlibraries/noscript.php?id=[% LibraryThingForLibrariesID %]&amp;accessibility=1">here</a>.</noscript>
+                                        [% ELSE %]
+                                            <script src="http://www.librarything.com/forlibraries/widget.js?id=[% LibraryThingForLibrariesID %]" type="text/javascript"></script>
+                                            <noscript>This page contains enriched content visible when JavaScript is enabled or by clicking <a href="http://www.librarything.com/forlibraries/noscript.php?id=[% LibraryThingForLibrariesID %]&amp;accessibility=1">here</a>.</noscript>
+                                        [% END %]
+                                [% END %]
                                 </li>
                             [% END %]
                             [% IF ( SyndeticsAuthorNotes && SYNDETICS_ANOTES ) %]
@@ -1004,14 +994,14 @@
 
                         [% IF ( HTML5MediaEnabled ) %]
                             <div id="html5media">
-                                    <p>
-                                        <[% HTML5MediaParent %] controls preload=none>
-                                          [% FOREACH HTML5MediaSet IN HTML5MediaSets %]
-                                            <[% HTML5MediaSet.child  %] src="[% HTML5MediaSet.srcblock %]"[% HTML5MediaSet.typeblock %] />
-                                          [% END %]
-                                            [[% HTML5MediaParent %] tag not supported by your browser.]
-                                        </[% HTML5MediaParent %]>
-                                    </p>
+                              [% FOREACH HTML5MediaSet IN HTML5MediaSets %]
+                                <p>
+                                  <[% HTML5MediaParent %] controls preload=none>
+                                    <[% HTML5MediaSet.child  %] src="[% HTML5MediaSet.srcblock %]"[% HTML5MediaSet.typeblock %] />
+                                    [[% HTML5MediaParent %] tag not supported by your browser.]
+                                  </[% HTML5MediaParent %]>
+                                </p>
+                              [% END %]
                             </div>
                         [% END # / IF HTML5MediaEnabled %]
 
@@ -1287,10 +1277,11 @@
                             [% IF ITEM_RESULT.uri %]
                                 [% IF trackclicks == 'track' || trackclicks == 'anonymous' %]
                                     [% IF Koha.Preference("OPACURLOpenInNewWindow") %]
-                                    <a target="_blank" rel="noreferrer" href="/cgi-bin/koha/tracklinks.pl?uri=[% ITEM_RESULT.uri | url %]&amp;biblionumber=[% biblionumber |url %]&amp;itemnumber=[% ITEM_RESULT.itemnumber | url %]" property="url"> Link to resource </a>
+                                    <a target="_blank" rel="noreferrer" href="/cgi-bin/koha/tracklinks.pl?uri=[% ITEM_RESULT.uri | uri %]&amp;biblionumber=[% biblionumber |url %]&amp;itemnumber=[% ITEM_RESULT.itemnumber | url %]" property="url"> Link to resource </a>
                                     [% ELSE %]
-                                    <a href="/cgi-bin/koha/tracklinks.pl?uri=[% ITEM_RESULT.uri | url %]&amp;biblionumber=[% biblionumber |url %]&amp;itemnumber=[% ITEM_RESULT.itemnumber | url %]" property="url"> Link to resource </a>
+                                    <a href="/cgi-bin/koha/tracklinks.pl?uri=[% ITEM_RESULT.uri | uri %]&amp;biblionumber=[% biblionumber |url %]&amp;itemnumber=[% ITEM_RESULT.itemnumber | url %]" property="url"> Link to resource </a>
                                     [% END %]
+
                                 [% ELSE %]
                                     [% IF Koha.Preference("OPACURLOpenInNewWindow") %]
                                     <a target="_blank" rel="noreferrer" href="[% ITEM_RESULT.uri %]" property="url">[% ITEM_RESULT.uri %]</a>

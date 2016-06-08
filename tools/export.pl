@@ -48,7 +48,7 @@ my @record_ids;
 # biblionumbers is sent from circulation.pl only
 if ( $query->param("biblionumbers") ) {
     $record_type = 'bibs';
-    @record_ids = $query->param("biblionumbers");
+    @record_ids = $query->multi_param("biblionumbers");
 }
 
 # Default value for output_format is 'iso2709'
@@ -67,7 +67,7 @@ my ( $template, $loggedinuser, $cookie, $flags ) = get_template_and_user(
     }
 );
 
-my @branch = $query->param("branch");
+my @branch = $query->multi_param("branch");
 my $only_my_branch;
 # Limit to local branch if IndependentBranches and not superlibrarian
 if (
@@ -89,8 +89,8 @@ my %branchmap = map { $_ => 1 } @branch; # for quick lookups
 if ( $op eq "export" ) {
 
     my $export_remove_fields = $query->param("export_remove_fields") || q||;
-    my @biblionumbers      = $query->param("biblionumbers");
-    my @itemnumbers        = $query->param("itemnumbers");
+    my @biblionumbers      = $query->multi_param("biblionumbers");
+    my @itemnumbers        = $query->multi_param("itemnumbers");
     my @sql_params;
     my $sql_query;
 
@@ -105,11 +105,11 @@ if ( $op eq "export" ) {
                 my $end_callnumber       = $query->param("end_callnumber");
                 my $start_accession =
                   ( $query->param("start_accession") )
-                  ? dt_from_string( $query->param("start_accession") )
+                  ? dt_from_string( scalar $query->param("start_accession") )
                   : '';
                 my $end_accession =
                   ( $query->param("end_accession") )
-                  ? dt_from_string( $query->param("end_accession") )
+                  ? dt_from_string( scalar $query->param("end_accession") )
                   : '';
 
 

@@ -27,12 +27,11 @@ use C4::Debug;
 
 use Koha::DateUtils qw( dt_from_string output_pref );
 
-use vars qw($VERSION @ISA);
+use vars qw(@ISA);
 use vars qw($debug $cgi_debug);	# from C4::Debug, of course
 use vars qw($branch $width);
 
 BEGIN {
-    $VERSION = 3.07.00.049;
     @ISA = qw(C4::Barcodes);
 }
 
@@ -45,7 +44,7 @@ INIT {
 
 sub db_max {
 	my $self = shift;
-	my $query = "SELECT MAX(SUBSTRING(barcode,-$width)), barcode FROM items WHERE barcode REGEXP ? GROUP BY barcode";
+    my $query = "SELECT SUBSTRING(barcode,-$width) AS chunk, barcode FROM items WHERE barcode REGEXP ?  ORDER BY chunk DESC LIMIT 1";
 	$debug and print STDERR "(hbyymmincr) db_max query: $query\n";
 	my $sth = C4::Context->dbh->prepare($query);
 	my ($iso);
@@ -76,6 +75,7 @@ sub initial {
 	my $self = shift;
 	# FIXME: populated branch?
     my $iso = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }); # like "2008-07-02"
+    warn "HBYYMM Barcode was not passed a branch, default is blank" if ( $self->branch eq '' );
 	return $self->branch . substr($iso,2,2) . substr($iso,5,2) . sprintf('%' . "$width.$width" . 'd',1);
 }
 
@@ -110,17 +110,27 @@ sub process_head {	# (self,head,whole,specific)
 }
 
 sub new_object {
-	$debug and warn "hbyymmincr: new_object called";
-	my $class_or_object = shift;
-	my $type = ref($class_or_object) || $class_or_object;
-	my $from_obj = ref($class_or_object) ? 1 : 0;   # are we building off another Barcodes object?
-	my $self = $class_or_object->default_self('hbyymmincr');
-	bless $self, $type;
-	$self->branch(@_ ? shift : $from_obj ? $class_or_object->branch : $branch);
-		# take the branch from argument, or existing object, or default
-	use Data::Dumper;
-	$debug and print STDERR "(hbyymmincr) new_object: ", Dumper($self), "\n";
-	return $self;
+    $debug and warn "hbyymmincr: new_object called";
+    my $class_or_object = shift;
+
+    my $type = ref($class_or_object) || $class_or_object;
+
+    my $from_obj =
+      ref($class_or_object)
+      ? 1
+      : 0;    # are we building off another Barcodes object?
+
+      my $self = $class_or_object->default_self('hbyymmincr');
+    bless $self, $type;
+
+    $self->branch( @_ ? shift : $from_obj ? $class_or_object->branch : $branch );
+    warn "HBYYMM Barcode created with no branchcode, default is blank" if ( $self->branch() eq '' );
+
+    # take the branch from argument, or existing object, or default
+    use Data::Dumper;
+    $debug and print STDERR "(hbyymmincr) new_object: ", Dumper($self), "\n";
+
+    return $self;
 }
 
 1;

@@ -28,10 +28,9 @@ use C4::Context;
 
 use Koha::Database;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 BEGIN {
-    $VERSION = 3.07.00.049;
     @ISA     = qw(Exporter);
 
     @EXPORT = qw(

@@ -1,9 +1,10 @@
+[% USE AuthorisedValues %]
 [% USE Branches %]
 [% USE KohaDates %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Serials &rsaquo; Serial collection information for [% bibliotitle %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.checkboxes.min.js"></script>
 
@@ -77,7 +78,7 @@ $(document).ready(function() {
 //]]>
 </script>
 </head>
-<body id="ser_serials-collection" class="yui-skin-sam ser">
+<body id="ser_serials-collection" class="ser">
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'serials-search.inc' %]
 
@@ -94,7 +95,7 @@ $(document).ready(function() {
 	[% INCLUDE 'serials-toolbar.inc' %]
 
 	<h1>Serial collection information for  <i>[% bibliotitle %]</i>
-        [% IF location %] ([% location %] ) [% END %]
+        [% IF location %] ([% AuthorisedValues.GetByCode( 'LOC', location ) %]) [% END %]
 		[% IF ( callnumber ) %]callnumber: [% callnumber %][% END %]</h1>
 [% END %]
 
@@ -269,14 +270,14 @@ $(document).ready(function() {
                     </span>
                 </td>
                 <td>
-                    [% IF ( matches = serial.serialseq.match('Spring(.*)') ) %]
-                        Spring[% matches.join("") %]
-                    [% ELSIF ( matches = serial.serialseq.match('Summer(.*)') ) %]
-                        Summer[% matches.join("") %]
-                    [% ELSIF ( matches = serial.serialseq.match('Fall(.*)') ) %]
-                        Fall[% matches.join("") %]
-                    [% ELSIF ( matches = serial.serialseq.match('Winter(.*)') ) %]
-                        Winter[% matches.join("") %]
+                    [% IF ( matches = serial.serialseq.match('(.*)Spring(.*)') ) %]
+                        [% matches.0 %]Spring[% matches.1 %]
+                    [% ELSIF ( matches = serial.serialseq.match('(.*)Summer(.*)') ) %]
+                        [% matches.0 %]Summer[% matches.1 %]
+                    [% ELSIF ( matches = serial.serialseq.match('(.*)Fall(.*)') ) %]
+                        [% matches.0 %]Fall[% matches.1 %]
+                    [% ELSIF ( matches = serial.serialseq.match('(.*)Winter(.*)') ) %]
+                        [% matches.0 %]Winter[% matches.1 %]
                     [% ELSE %]
                         [% serial.serialseq %]
                     [% END %]

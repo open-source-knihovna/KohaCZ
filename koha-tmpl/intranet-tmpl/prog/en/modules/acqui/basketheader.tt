@@ -7,7 +7,7 @@
 [% END %]
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
-<script type="text/javascript" src="[% themelang %]/js/acq.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/acq.js"></script>
 </head>
 <body id="acq_basketheader" class="acq">
 [% INCLUDE 'header.inc' %]
@@ -113,12 +113,25 @@
                         </select>
                     </li>
                 [% END %]
+                <li>
+                    <label for="is_standing">Orders are standing:</label>
+                    [% IF is_standing %]
+                        <input type="checkbox" id="is_standing" name="is_standing" checked="checked" />
+                    [% ELSE %]
+                        <input type="checkbox" id="is_standing" name="is_standing"/>
+                    [% END %]
+                    <div class="hint">Standing orders do not close when received.</div>
+                </li>
             </ol>
         </fieldset>
         <fieldset class="action">
             <input type="hidden" name="op" value="add_validate" />
             <input type="submit" value="Save" />
-            <a class="cancel" href="/cgi-bin/koha/acqui/supplier.pl?booksellerid=[% booksellerid %]">Cancel</a>
+            [% IF ( basketno ) %]
+                <a class="cancel" href="/cgi-bin/koha/acqui/basket.pl?basketno=[% basketno %]">Cancel</a>
+            [% ELSE %]
+                <a class="cancel" href="/cgi-bin/koha/acqui/supplier.pl?booksellerid=[% booksellerid %]">Cancel</a>
+            [% END %]
         </fieldset>
     </form>
     [% END %]

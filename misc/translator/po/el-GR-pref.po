@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-01-15 16:33+0000\n"
-"Last-Translator: kyr.stefanidis <kyr.stefanidis@gmail.com>\n"
+"PO-Revision-Date: 2016-05-25 13:25+0000\n"
+"Last-Translator: Dimitris <dimantonak@gmail.com>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1421339597.000000\n"
+"X-POOTLE-MTIME: 1464182720.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -43,11 +43,11 @@ msgstr "παραλαβή παραγγελίας."
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqEnableFiles# Do"
-msgstr ""
+msgstr "Ενεργοποίηση"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqEnableFiles# Don't"
-msgstr ""
+msgstr "Απενεργοποίηση"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqEnableFiles# enable the ability to upload and attach arbitrary files to invoices."
@@ -100,6 +100,18 @@ msgstr "πάντα να ζητείται επιβεβαίωση."
 # Acquisitions > Policy
 msgid "acquisitions.pref#BasketConfirmations# do not ask for confirmation."
 msgstr "να μη ζητείται επιβεβαίωση."
+
+# Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# Don't send"
+msgstr ""
+
+# Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# Send"
+msgstr "Αποστολή"
+
+# Acquisitions > Policy
+msgid "acquisitions.pref#ClaimsBccCopy# blind copy (BCC) to logged in user when sending serial or acquisitions claims notices."
+msgstr ""
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#CurrencyFormat# 360 000,00 (FR)"
@@ -169,9 +181,13 @@ msgstr ""
 msgid "admin.pref"
 msgstr "Διαχείριση"
 
-# Administration > CAS Authentication
-msgid "admin.pref CAS Authentication"
-msgstr "Πιστοποίηση Ταυτότητας CAS"
+# Administration > CAS authentication
+msgid "admin.pref CAS authentication"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref Google OpenID Connect"
+msgstr ""
 
 # Administration > Interface options
 msgid "admin.pref Interface options"
@@ -185,29 +201,37 @@ msgstr "Επιλογές σύνδεσης"
 msgid "admin.pref Mozilla Persona"
 msgstr "admin.pref Mozilla Persona"
 
+# Administration > SSL client certificate authentication
+msgid "admin.pref SSL client certificate authentication"
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref Search Engine"
+msgstr ""
+
 # Administration > Share anonymous usage statistics
 msgid "admin.pref Share anonymous usage statistics"
 msgstr ""
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# Use"
-msgstr "Χρήση"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# Use"
+msgstr ""
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# field for SSL client certificate authentication"
-msgstr "πεδίο για πιστοποιητικό αυθεντικοποίησης SSH client"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# field for SSL client certificate authentication"
+msgstr ""
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# no"
-msgstr "όχι"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# no"
+msgstr ""
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# the Common Name"
-msgstr "Κοινή Ονομασία"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# the Common Name"
+msgstr ""
 
-# Administration > CAS Authentication
-msgid "admin.pref#AllowPkiAuth# the emailAddress"
-msgstr "διεύθυνση email"
+# Administration > SSL client certificate authentication
+msgid "admin.pref#AllowPKIAuth# the emailAddress"
+msgstr ""
 
 # Administration > Login options
 msgid "admin.pref#AutoLocation# Don't require"
@@ -240,6 +264,86 @@ msgstr "κανένα"
 # Administration > Interface options
 msgid "admin.pref#DebugLevel# some"
 msgstr "μερικά"
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# When editing circulation rules show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryCircRules# rules by default."
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# When editing notices and slips show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryNoticesSlips# notices and slips by default."
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# When editing overdue notice/status triggers show the"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# all libraries"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# logged in library's"
+msgstr ""
+
+# Administration > Interface options
+msgid "admin.pref#DefaultToLoggedInLibraryOverdueTriggers# rules by default."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOAuth2ClientID# Google OAuth2 Client ID"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOAuth2ClientSecret# Google OAuth2 Client Secret"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Don't Use"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Google OpenID Connect login."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# Use"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnect# You will need to select OAuth2 when creating an app in the google cloud console, and set the web origin to your_opac_url and the redirect url to your_opac_url/cgi-bin/koha/svc/auth/googleopenidconnect ."
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnectDomain# . Leave blank for all google domains"
+msgstr ""
+
+# Administration > Google OpenID Connect
+msgid "admin.pref#GoogleOpenIDConnectDomain# Google OpenID Connect Restrict to domain (or subdomain of this domain)"
+msgstr ""
 
 # Administration > Login options
 msgid "admin.pref#IndependentBranches# Don't prevent"
@@ -299,6 +403,18 @@ msgstr ""
 
 # Administration > Interface options
 msgid "admin.pref#ReturnpathDefault# as the return path or bounce address for undeliverable mail messages. If you leave this empty, the From address will be used (often defaulting to the admin address)."
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# Elasticsearch"
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# Zebra"
+msgstr ""
+
+# Administration > Search Engine
+msgid "admin.pref#SearchEngine# is the search engine used."
 msgstr ""
 
 # Administration > Login options
@@ -437,31 +553,31 @@ msgstr ""
 msgid "admin.pref#UsageStatsLibraryUrl# will be shown on the <a href=\"http://hea.koha-community.org\">Hea Koha community website</a>."
 msgstr ""
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# CAS for login authentication."
 msgstr "CAS για πιστοποίηση ταυτότητας σύνδεσης."
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# Don't use"
 msgstr "Να μη χρησιμοποιείται"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casAuthentication# Use"
 msgstr "Να χρησιμοποιείται"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# Don't Logout"
 msgstr "Να μη γίνει Αποσύνδεση"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# Logout"
 msgstr "Αποσύνδεση"
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casLogout# of CAS when logging out of Koha."
 msgstr "του CAS όταν γίνεται αποσύνδεση από το Koha."
 
-# Administration > CAS Authentication
+# Administration > CAS authentication
 msgid "admin.pref#casServerUrl# The CAS Authentication Server can be found at"
 msgstr "H CAS Πιστοποίηση Ταυτότητας Διακομιστή μπορεί να βρεθεί σε"
 
@@ -812,8 +928,8 @@ msgid "cataloguing.pref#EasyAnalyticalRecords# easy ways to create analytical re
 msgstr "εύκολοι τρόποι για τη δημιουργία αναλυτικών σχέσεων εγγραφών"
 
 # Cataloging > Display
-msgid "cataloguing.pref#ISBD# Use the following as the ISBD template:"
-msgstr "Να χρησιμοποιηθεί το ακόλουθο ISBD πρότυπο:"
+msgid "cataloguing.pref#ISBD# Use the following as the staff ISBD template:"
+msgstr ""
 
 # Cataloging > Display
 msgid "cataloguing.pref#IntranetBiblioDefaultView# By default, display biblio records in"
@@ -928,7 +1044,7 @@ msgid "cataloguing.pref#OpacSuppression# an explanatory page ('This record is bl
 msgstr ""
 
 # Cataloging > Display
-msgid "cataloguing.pref#OpacSuppression# items marked as suppressed from OPAC search results. Note that you must have the <code>Suppress</code> index set up in Zebra and at least one suppressed biblio record, or your searches will be broken."
+msgid "cataloguing.pref#OpacSuppression# items marked as suppressed from OPAC search results."
 msgstr ""
 
 # Cataloging > Display
@@ -1324,6 +1440,18 @@ msgstr "Να μην επιτρέπεται"
 # Circulation > Holds Policy
 msgid "circulation.pref#AllowHoldDateInFuture# hold requests to be placed that do not enter the waiting list until a certain future date."
 msgstr "να γίνονται αιτήματα κράτησης που δεν μπορούν να μπουν στη λίστα αναμονής μέχρι μία συγκεκριμένη ημερομηνία στο μέλλον."
+
+# Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# Allow"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# Don't allow"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#AllowHoldItemTypeSelection# hold fulfillment to be limited by itemtype."
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#AllowHoldPolicyOverride# Allow"
@@ -1801,6 +1929,18 @@ msgstr "circulation.pref#FinesIncludeGracePeriod# Να συμπεριληφθε�
 msgid "circulation.pref#FinesIncludeGracePeriod# the grace period when calculating the fine for an overdue item."
 msgstr "circulation.pref#FinesIncludeGracePeriod# η περίοδος χάριτος όταν γίνεται ο υπολογισμός του προστίμου για μια εκπρόθεσμη επιστροφή τεκμηρίου."
 
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# Charge a hold fee"
+msgstr ""
+
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# any time a hold is placed."
+msgstr ""
+
+# Circulation > Fines Policy
+msgid "circulation.pref#HoldFeeMode# only if all items are checked out and the record has at least one hold already."
+msgstr ""
+
 # Circulation > Checkout Policy
 msgid "circulation.pref#HoldsInNoissuesCharge# Don't include"
 msgstr ""
@@ -1916,6 +2056,30 @@ msgstr ""
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#ManInvInNoissuesCharge# MANUAL_INV charges when summing up charges for noissuescharge."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoIssuesChargeGuarantees# Prevent a patron from checking out if the patron has guarantees owing in total more than"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoIssuesChargeGuarantees# [% local_currency %] in fines."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# Calculate \"No renewal before\" based on"
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# Only relevant for loans calculated in days, hourly loans are not affected."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# date."
+msgstr ""
+
+# Circulation > Checkout Policy
+msgid "circulation.pref#NoRenewalBeforePrecision# exact time."
 msgstr ""
 
 # Circulation > Interface
@@ -2226,6 +2390,18 @@ msgstr "Τα μέλη να συνδέονται στο διαδικτυακό σ
 msgid "circulation.pref#SelfCheckoutByLogin# Username and Password"
 msgstr "Όνομα χρήστη και τον Κωδικό Πρόσβασής τους"
 
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Do not show"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# Show"
+msgstr ""
+
+# Circulation > Interface
+msgid "circulation.pref#ShowAllCheckins# all items in the \"Checked-in items\" list, even items that were not checked out."
+msgstr ""
+
 # Circulation > Self Checkout
 msgid "circulation.pref#ShowPatronImageInWebBasedSelfCheck# Don't show"
 msgstr "Να μην εμφανίζεται"
@@ -2279,8 +2455,8 @@ msgid "circulation.pref#StaticHoldsQueueWeight# (as branchcodes, separated by co
 msgstr "(ως branchcodes, διαχωρισμένα με κόμματα, αν είναι κενό, χρησιμοποιεί όλες τις βιβλιοθήκες)"
 
 # Circulation > Holds Policy
-msgid "circulation.pref#StaticHoldsQueueWeight# Satisfy holds from the libraries"
-msgstr "Να γίνονται κρατήσεις από όλες τις βιβλιοθήκες"
+msgid "circulation.pref#StaticHoldsQueueWeight# Satisfy holds using items from the libraries"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#StaticHoldsQueueWeight# in random order."
@@ -2289,6 +2465,18 @@ msgstr "σε τυχαία σειρά."
 # Circulation > Holds Policy
 msgid "circulation.pref#StaticHoldsQueueWeight# in that order."
 msgstr "σε αυτή τη σειρά."
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# open"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# open or closed"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#StaticHoldsQueueWeight# when they are"
+msgstr ""
 
 # Circulation > Holds Policy
 msgid "circulation.pref#SuspendHoldsIntranet# Allow"
@@ -2467,6 +2655,10 @@ msgid "circulation.pref#canreservefromotherbranches# a user from one library to 
 msgstr "σε έναν χρήστη από μία βιβλιοθήκη να κάνει κράτηση σε ένα τεκμήριο από άλλη βιβλιοθήκη"
 
 # Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# . Ignore items with the following statuses when counting items"
+msgstr ""
+
+# Circulation > Holds Policy
 msgid "circulation.pref#decreaseLoanHighHolds# Don't enable"
 msgstr ""
 
@@ -2479,7 +2671,15 @@ msgid "circulation.pref#decreaseLoanHighHolds# days for items with more than"
 msgstr ""
 
 # Circulation > Holds Policy
-msgid "circulation.pref#decreaseLoanHighHolds# holds."
+msgid "circulation.pref#decreaseLoanHighHolds# holds"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# on the record"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#decreaseLoanHighHolds# over the number of holdable items on the record"
 msgstr ""
 
 # Circulation > Holds Policy
@@ -2914,6 +3114,18 @@ msgstr ""
 msgid "enhanced_content.pref#HTML5MediaExtensions# Media file extensions"
 msgstr ""
 
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# Don't embed"
+msgstr ""
+
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# Embed"
+msgstr ""
+
+# Enhanced Content > HTML5 Media
+msgid "enhanced_content.pref#HTML5MediaYouTube# YouTube links as videos."
+msgstr ""
+
 # Enhanced Content > IDreamLibraries
 msgid "enhanced_content.pref#IDreamBooksReadometer# Add"
 msgstr ""
@@ -3101,6 +3313,18 @@ msgstr "Να μην προστεθούν"
 # Enhanced Content > Open Library
 msgid "enhanced_content.pref#OpenLibraryCovers# cover images from Open Library to search results and item detail pages on the OPAC."
 msgstr "εξώφυλλα από το Open Library στα αποτελέσματα αναζήτησης και στις σελίδες στοιχείων τεκμηρίου στον OPAC."
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# Don't show"
+msgstr ""
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# Show"
+msgstr ""
+
+# Enhanced Content > Open Library
+msgid "enhanced_content.pref#OpenLibrarySearch# search results from Open Library on the OPAC."
+msgstr ""
 
 # Enhanced Content > OverDrive
 msgid "enhanced_content.pref#OverDriveClientKey# ."
@@ -3387,11 +3611,11 @@ msgid "i18n_l10n.pref#AddressFormat# Format postal addresses using"
 msgstr "Μορφή ημερομηνιών όπως"
 
 # I18N/L10N
-msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [Zip/Postal Code] [City] - [Country])"
+msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [ZIP/Postal Code] [City] - [Country])"
 msgstr ""
 
 # I18N/L10N
-msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [Zip/Postal Code], [Country])"
+msgid "i18n_l10n.pref#AddressFormat# US style ([Street number], [Address] - [City], [ZIP/Postal Code], [Country])"
 msgstr ""
 
 # I18N/L10N
@@ -3710,6 +3934,10 @@ msgstr "Εμφάνιση"
 msgid "opac.pref Features"
 msgstr "Χαρακτηριστικά"
 
+# OPAC > Payments
+msgid "opac.pref Payments"
+msgstr ""
+
 # OPAC > Policy
 msgid "opac.pref Policy"
 msgstr "Πολιτική"
@@ -3729,6 +3957,18 @@ msgstr ""
 # OPAC > Shelf Browser
 msgid "opac.pref Shelf Browser"
 msgstr "Περιήγηση στο Ράφι"
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# Allow"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# Don't allow"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#AllowPatronToSetCheckoutsVisibilityForGuarantor# patrons to choose their own privacy settings for showing the patron's checkouts to the patron's guarantor\"."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#AllowPurchaseSuggestionBranchChoice# Allow"
@@ -3761,18 +4001,6 @@ msgstr "Να χρησιμοποιείται ο αριθμός μέλους"
 # OPAC > Privacy
 msgid "opac.pref#AnonymousPatron# as the Anonymous Patron (for anonymous suggestions and reading history)"
 msgstr "για το Ανώνυμο Μέλος (για ανώνυμες προτάσεις και ιστορικό ανάγνωσης)"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# Don't show"
-msgstr "Να μην εμφανίζονται"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# Show"
-msgstr "Να εμφανίζονται"
-
-# OPAC > Appearance
-msgid "opac.pref#AuthorisedValueImages# images for <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">authorized values</a> (such as lost statuses and locations) in search results and item detail pages on the OPAC."
-msgstr "εικόνες για τις <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">καθιερωμένες τιμές</a> (όπως καταστάσεις απολεσθέντων και τοποθεσίες) στα αποτελέσματα αναζήτησης και στις σελίδες στοιχείων τεκμηρίου στον OPAC."
 
 # OPAC > Appearance
 msgid "opac.pref#BiblioDefaultView# By default, show bib records"
@@ -3838,6 +4066,30 @@ msgstr "Να κρατείται"
 msgid "opac.pref#EnableOpacSearchHistory# patron search history in the OPAC."
 msgstr "το ιστορικό αναζήτησης των μελών στον OPAC."
 
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Allow"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Don't allow"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Production"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# Sandbox"
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# mode."
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#EnablePayPalOpacPayments# patrons to make payments from the OPAC via PayPal in"
+msgstr ""
+
 # OPAC > Appearance
 msgid "opac.pref#GoogleIndicTransliteration# Don't show"
 msgstr ""
@@ -3876,11 +4128,11 @@ msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#LibraryName# Show"
-msgstr "Να εμφανίζεται το"
+msgstr "opac.pref#LibraryName# Προβολή"
 
 # OPAC > Appearance
 msgid "opac.pref#LibraryName# as the name of the library on the OPAC."
-msgstr "ως το όνομα της βιβλιοθήκης στον OPAC."
+msgstr "opac.pref#LibraryName# το όνομα της Βιβλιοθήκης στον OPAC."
 
 # OPAC > Appearance
 msgid "opac.pref#NoLoginInstructions# Show the following HTML on the OPAC login form when a patron is not logged in:"
@@ -3965,6 +4217,10 @@ msgstr "Να μην επιτρέπεται"
 # OPAC > Features
 msgid "opac.pref#OPACFinesTab# patrons to access the Fines tab on the My Account page on the OPAC."
 msgstr "στα μέλη να έχουν πρόσβαση στην καρτέλα Προστίμων στη σελίδα του Λογαριασμού τους στον OPAC."
+
+# OPAC > Features
+msgid "opac.pref#OPACISBD# Use the following as the OPAC ISBD template:"
+msgstr ""
 
 # OPAC > Appearance
 msgid "opac.pref#OPACMySummaryHTML# <br />Note: The placeholders {BIBLIONUMBER}, {TITLE}, {ISBN} and {AUTHOR} will be replaced with information from the displayed record."
@@ -4419,6 +4675,10 @@ msgid "opac.pref#OpacMaintenance# a warning that the OPAC is under maintenance, 
 msgstr "μία προειδοποίηση ότι ο OPAC είναι υπό συντήρηση, αντί για τον ίδιο τον OPAC. Σημείωση: αυτό δείχνει την ίδια προειδοποίηση όταν η βάση χρειάζεται αναβάθμιση, αλλά άνευ όρων."
 
 # OPAC > Appearance
+msgid "opac.pref#OpacMaintenanceNotice# Show the following HTML when OpacMaintenance is enabled:"
+msgstr ""
+
+# OPAC > Appearance
 msgid "opac.pref#OpacMaxItemsToDisplay# Display up to"
 msgstr ""
 
@@ -4459,8 +4719,8 @@ msgid "opac.pref#OpacPublic# Enable"
 msgstr "Να είναι"
 
 # OPAC > Appearance
-msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentification before accessing the OPAC."
-msgstr "ο OPAC δημόσιος. Ο ιδιωτικός OPAC απαιτεί πιστοποίηση ταυτότητας πριν την πρόσβαση σε αυτόν."
+msgid "opac.pref#OpacPublic# Koha OPAC as public. Private OPAC requires authentication before accessing the OPAC."
+msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalAllowed# Allow"
@@ -4500,6 +4760,22 @@ msgstr ""
 
 # OPAC > Policy
 msgid "opac.pref#OpacRenewalBranch# the patron's home library"
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword#  to recover their password via e-mail in the OPAC"
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# Library users are "
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# allowed"
+msgstr ""
+
+# OPAC > Features
+msgid "opac.pref#OpacResetPassword# not allowed"
 msgstr ""
 
 # OPAC > Appearance
@@ -4583,6 +4859,14 @@ msgid "opac.pref#OpacTopissue# patrons to access a list of the most checked out 
 msgstr "στα μέλη να έχουν πρόσβαση σε μία λίστα με τα τεκμήρια με τους περισσότερους δανεισμούς στον OPAC. Σημειώστε ότι αυτό είναι πειραματικό και πρέπει να αποφεύγεται αν η συλλογή σας αποτελείται από μεγάλο αριθμό τεκμηρίων."
 
 # OPAC > Self Registration
+msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# (separate columns with |)"
+msgstr ""
+
+# OPAC > Self Registration
+msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-modification screen:"
+msgstr ""
+
+# OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistration# Allow"
 msgstr ""
 
@@ -4591,7 +4875,7 @@ msgid "opac.pref#PatronSelfRegistration# Don't allow"
 msgstr ""
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfRegistration# library patrons to register an account via the OPAC."
+msgid "opac.pref#PatronSelfRegistration# library patrons to register or modify their account via the OPAC."
 msgstr ""
 
 # OPAC > Self Registration
@@ -4611,7 +4895,7 @@ msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# (separate columns 
 msgstr ""
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron entry screen:"
+msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-registration screen:"
 msgstr ""
 
 # OPAC > Self Registration
@@ -4640,6 +4924,22 @@ msgstr ""
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationVerifyByEmail# that a self-registering patron verify his or herself via email."
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalChargeDescription# The patron should see the charge description as "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalPwd# The password for the PayPal account to receive payments is "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalSignature# The signature for the PayPal account to receive payments is "
+msgstr ""
+
+# OPAC > Payments
+msgid "opac.pref#PayPalUser# The email address to receive PayPal payments is "
 msgstr ""
 
 # OPAC > Features
@@ -4791,6 +5091,18 @@ msgid "opac.pref#SocialNetworks# social network links in opac detail pages"
 msgstr ""
 
 # OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# Don't store"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# Store"
+msgstr ""
+
+# OPAC > Privacy
+msgid "opac.pref#StoreLastBorrower# the last patron to return an item. This setting is independent of opacreadinghistory/AnonymousPatron."
+msgstr ""
+
+# OPAC > Privacy
 msgid "opac.pref#TrackClicks# Don't track"
 msgstr ""
 
@@ -4898,18 +5210,6 @@ msgstr "Να μην επιτρέπεται"
 msgid "opac.pref#reviewson# patrons to make comments on items on the OPAC."
 msgstr "στα μέλη να κάνουν σχόλια σε τεκμήρια στον OPAC."
 
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# Allow"
-msgstr "Να επιτρέπεται"
-
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# Don't allow"
-msgstr "Να μην επιτρέπεται"
-
-# OPAC > Policy
-msgid "opac.pref#singleBranchMode# patrons to select their branch on the OPAC or show branch names with callnumbers."
-msgstr ""
-
 # OPAC > Features
 msgid "opac.pref#suggestion# Allow"
 msgstr "Να επιτρέπεται"
@@ -4932,6 +5232,18 @@ msgstr ""
 
 # Patrons > Norwegian patron database
 msgid "patrons.pref Norwegian patron database"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# Allow"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# Don't allow"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#AllowStaffToSetCheckoutsVisibilityForGuarantor# staff to set the ability for a patron's checkouts to be viewed by linked patrons in the OPAC."
 msgstr ""
 
 # Patrons > General
@@ -5043,8 +5355,20 @@ msgid "patrons.pref#EnhancedMessagingPreferences# Don't allow"
 msgstr "Να μην επιτρέπεται"
 
 # Patrons > General
-msgid "patrons.pref#EnhancedMessagingPreferences# patrons to choose which notices they receive and when they receive them. Note that this only applies to certain kinds of notices."
-msgstr "στα μέλη να επιλέξουν ποιες ειδοποιήσεις θα παραλαμβάνουν και πότε. Σημειώστε ότι αυτό εφαρμόζεται μόνο σε συγκεκριμένα είδη ειδοποιήσεων."
+msgid "patrons.pref#EnhancedMessagingPreferences# Staff to manage which notices patrons will receive and when they will receive them. Note: this only applies to courtesy notices. To manage if patrons have also access to these settings, use EnhancedMessagingPreferencesOPAC."
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# Don't show"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# Show"
+msgstr ""
+
+# Patrons > General
+msgid "patrons.pref#EnhancedMessagingPreferencesOPAC# patron messaging setting on the OPAC (note: EnhancedMessagingPreferences must be enabled)."
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#ExtendedPatronAttributes# Don't enable"
@@ -5163,7 +5487,7 @@ msgid "patrons.pref#SMSSendDriver# driver to send SMS messages."
 msgstr "οδηγός για την αποστολή μηνυμάτων SMS."
 
 # Patrons > General
-msgid "patrons.pref#StatisticsFields# (separate fields with |)"
+msgid "patrons.pref#StatisticsFields# (separate fields with |, without trailing |). Default if empty: location|itype|ccode"
 msgstr ""
 
 # Patrons > General
@@ -5223,8 +5547,8 @@ msgid "patrons.pref#intranetreadinghistory# Don't allow"
 msgstr "Να μην επιτρέπεται"
 
 # Patrons > General
-msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (it is stored regardless)."
-msgstr "στο προσωπικό να έχει πρόσβαση στο ιστορικό δανεισμών των μελών (αποθηκεύεται ανεξάρτητα από την επιλογή)."
+msgid "patrons.pref#intranetreadinghistory# staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
+msgstr ""
 
 # Patrons > General
 msgid "patrons.pref#minPasswordLength# Login passwords for staff and patrons must be at least"
@@ -5380,6 +5704,22 @@ msgstr ""
 
 # Searching > Search Form
 msgid "searching.pref#IntranetNumbersPreferPhrase# use"
+msgstr ""
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>If a record has more than this number of items, they availability statuses may be incorrect in the search results, but will be correct in the record details."
+msgstr ""
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>Leave empty for no limit on the number of items for which to check the status."
+msgstr ""
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# For records with many items, only check the availability status for the first"
+msgstr ""
+
+# Searching > Results Display
+msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# items."
 msgstr ""
 
 # Searching > Results Display
@@ -5879,6 +6219,10 @@ msgid "staff_client.pref#HidePatronName# the names of patrons that have items ch
 msgstr "τα ονόματα των μελών που έχουν δανειστεί ή έχουν σε κράτηση τεκμήρια στις σελίδες στοιχείων της οθόνης \"Κράτηση\"."
 
 # Staff Client > Appearance
+msgid "staff_client.pref#IntranetCirculationHomeHTML# Show the following HTML in its own div on the bottom of the home page of the circulation module:"
+msgstr ""
+
+# Staff Client > Appearance
 msgid "staff_client.pref#IntranetFavicon# Use the image at"
 msgstr "Να χρησιμοποιηθεί η εικόνα"
 
@@ -5889,6 +6233,10 @@ msgstr "ως η favicon στη Διεπαφή Προσωπικού (Αυτό π�
 # Staff Client > Appearance
 msgid "staff_client.pref#IntranetNav# Show the following HTML to the left of the More menu at the top of each page on the staff client (should be a list of links or blank):"
 msgstr "Να εμφανίζεται η ακόλουθη HTML στα αριστερά του μενού Περισσότερα στην κορυφή κάθε σελίδας στη διεπαφή προσωπικού (πρέπει να είναι μία λίστα συνδέσμων ή κενό):"
+
+# Staff Client > Appearance
+msgid "staff_client.pref#IntranetReportsHomeHTML# Show the following HTML in its own div on the bottom of the home page of the reports module:"
+msgstr ""
 
 # Staff Client > Appearance
 msgid "staff_client.pref#IntranetSlipPrinterJS# Use the following JavaScript for printing slips. Define at least function printThenClose(). For use e.g. with Firefox PlugIn jsPrintSetup, see http://jsprintsetup.mozdev.org/:"
@@ -5911,20 +6259,8 @@ msgid "staff_client.pref#SlipCSS# Include the stylesheet at"
 msgstr "staff_client.pref#SlipCSS# Ajouter la feuille de style de"
 
 # Staff Client > Appearance
-msgid "staff_client.pref#SlipCSS# on Issue and Reserve Slips. (This should be a complete URL, starting with <code>http://</code>.)"
-msgstr "staff_client.pref#SlipCSS# Pour les bordereaux de prêt et de réservation. (Doit être une  URL complète, commençant par <code>http://</code>.)"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# Don't show"
-msgstr "Να μην εμφανίζονται"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# Show"
-msgstr "Να εμφανίζονται"
-
-# Staff Client > Appearance
-msgid "staff_client.pref#StaffAuthorisedValueImages# images for <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">authorized values</a> (such as lost statuses and locations) in search results."
-msgstr "εικόνες για <a href=\"/cgi-bin/koha/admin/authorised_values.pl\">τις καθιερωμένες τιμές</a> (όπως κατάσταση απολεσθέντων και τοποθεσίες) στα αποτελέσματα αναζήτησης."
+msgid "staff_client.pref#SlipCSS# on Issue and Hold Slips. (This should be a complete URL, starting with <code>http://</code>.)"
+msgstr ""
 
 # Staff Client > Options
 msgid "staff_client.pref#StaffDetailItemSelection# Disable"
@@ -6241,4 +6577,3 @@ msgstr ""
 # Web services > Reporting
 msgid "web_services.pref#SvcMaxReportRows# rows of a report requested via the reports web service."
 msgstr ""
-

@@ -71,12 +71,10 @@ my $op                   = $input->param('op')||"else";
 
 # get only the columns of aqbudgetperiods in budget_period_hashref
 my @columns = Koha::Database->new()->schema->source('Aqbudgetperiod')->columns;
-my $budget_period_hashref = { map { join(' ',@columns) =~ /$_/ ? ( $_ => $input->param($_) )  : () } keys( %{$input->Vars()} ) } ;
-$budget_period_hashref->{budget_period_startdate} = dt_from_string( $input->param('budget_period_startdate') );
-$budget_period_hashref->{budget_period_enddate}   = dt_from_string( $input->param('budget_period_enddate') );
+my $budget_period_hashref = { map { join(' ',@columns) =~ /$_/ ? ( $_ => scalar $input->param($_) )  : () } keys( %{$input->Vars()} ) } ;
+$budget_period_hashref->{budget_period_startdate} = dt_from_string( scalar $input->param('budget_period_startdate') );
+$budget_period_hashref->{budget_period_enddate}   = dt_from_string( scalar $input->param('budget_period_enddate') );
 
-my $activepagesize = 20;
-my $inactivepagesize = 20;
 $searchfield =~ s/\,//g;
 
 my ($template, $borrowernumber, $cookie, $staff_flags ) = get_template_and_user(
@@ -161,8 +159,8 @@ elsif ( $op eq 'duplicate_form'){
 elsif ( $op eq 'duplicate_budget' ){
     die "please specify a budget period id\n" if( !defined $budget_period_id || $budget_period_id eq '' );
 
-    my $budget_period_startdate = dt_from_string $input->param('budget_period_startdate');
-    my $budget_period_enddate   = dt_from_string $input->param('budget_period_enddate');
+    my $budget_period_startdate = dt_from_string scalar $input->param('budget_period_startdate');
+    my $budget_period_enddate   = dt_from_string scalar $input->param('budget_period_enddate');
     my $budget_period_description = $input->param('budget_period_description');
     my $amount_change_percentage = $input->param('amount_change_percentage');
     my $amount_change_round_increment = $input->param('amount_change_round_increment');
@@ -261,18 +259,14 @@ my $results = GetBudgetPeriods(
     { budget_period_active => 1 },
     { -asc => 'budget_period_description' },
 );
-my $first = ( $activepage - 1 ) * $activepagesize;
-my $last = min( $first + $activepagesize - 1, scalar @{$results} - 1, );
+
 my @period_active_loop;
 
-foreach my $result ( @{$results}[ $first .. $last ] ) {
+foreach my $result ( @{$results} ) {
     my $budgetperiod = $result;
     $budgetperiod->{budget_active} = 1;
     push( @period_active_loop, $budgetperiod );
 }
-my $url = "aqbudgetperiods.pl";
-$url .=  "?ipage=$inactivepage" if($inactivepage != 1);
-my $active_pagination_bar = pagination_bar ($url, getnbpages( scalar(@$results), $activepagesize), $activepage, "apage");
 
 # Get inactive budget periods
 $results = GetBudgetPeriods(
@@ -280,17 +274,12 @@ $results = GetBudgetPeriods(
     { -desc => 'budget_period_enddate' },
 );
 
-$first = ( $inactivepage - 1 ) * $inactivepagesize;
-$last = min( $first + $inactivepagesize - 1, scalar @{$results} - 1, );
 my @period_inactive_loop;
-foreach my $result ( @{$results}[ $first .. $last ] ) {
+foreach my $result ( @{$results} ) {
     my $budgetperiod = $result;
     $budgetperiod->{budget_active} = 1;
     push( @period_inactive_loop, $budgetperiod );
 }
-$url = "aqbudgetperiods.pl?tab=2";
-$url .= "&apage=$activepage" if($activepage != 1);
-my $inactive_pagination_bar = pagination_bar ($url, getnbpages( scalar(@$results), $inactivepagesize), $inactivepage, "ipage");
 
 my $branchloop = C4::Branch::GetBranchesLoop();
 
@@ -298,8 +287,6 @@ my $tab = $input->param('tab') ? $input->param('tab') - 1 : 0;
 $template->param(
     period_active_loop      => \@period_active_loop,
     period_inactive_loop    => \@period_inactive_loop,
-    active_pagination_bar   => $active_pagination_bar,
-    inactive_pagination_bar => $inactive_pagination_bar,
     tab                     => $tab,
     branchloop              => $branchloop,
 );

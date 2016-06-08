@@ -4,7 +4,7 @@ use strict;
 #use warnings; FIXME - Bug 2505
 require Exporter;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 ###############################################################################
 
@@ -21,7 +21,6 @@ verbose warnings.
 
 ###############################################################################
 
-$VERSION = 0.01;
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(

@@ -2,7 +2,7 @@
 
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Acquisitions &rsaquo; Invoices</title>
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'datatables.inc' %]
 [% INCLUDE 'calendar.inc' %]
@@ -18,10 +18,10 @@ $(document).ready(function() {
         ]
     }));
 
-    $("#show_only_subscription").attr("checked", false);
+    $("#show_only_subscription").prop("checked", false);
 
     $("#show_only_subscription").click(function(){
-        if ( $(this).attr("checked") ) {
+        if ( $(this).prop("checked") ) {
             resultst.fnFilter( "1", 0, true );
         } else {
             resultst.fnFilter( '', 0 );

@@ -36,7 +36,7 @@ use Koha::Serial;
 use Koha::Subscriptions;
 use Koha::Subscription::Histories;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 # Define statuses
 use constant {
@@ -61,7 +61,6 @@ use constant MISSING_STATUSES => (
 );
 
 BEGIN {
-    $VERSION = 3.07.00.049;    # set version for version checking
     require Exporter;
     @ISA    = qw(Exporter);
     @EXPORT = qw(

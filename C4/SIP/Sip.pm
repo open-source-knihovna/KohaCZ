@@ -16,10 +16,9 @@ use IO::Handle;
 use C4::SIP::Sip::Constants qw(SIP_DATETIME FID_SCREEN_MSG);
 use C4::SIP::Sip::Checksum qw(checksum);
 
-use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT_OK %EXPORT_TAGS);
 
 BEGIN {
-    $VERSION = 3.07.00.049;
 	@ISA = qw(Exporter);
 
 	@EXPORT_OK = qw(y_or_n timestamp add_field maybe_add add_count

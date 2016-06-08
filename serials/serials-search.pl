@@ -53,7 +53,7 @@ my $location      = $query->param('location_filter') || '';
 my $expiration_date = $query->param('expiration_date_filter') || '';
 my $routing       = $query->param('routing') || C4::Context->preference("RoutingSerials");
 my $searched      = $query->param('searched') || 0;
-my @subscriptionids = $query ->param('subscriptionid');
+my @subscriptionids = $query->multi_param('subscriptionid');
 my $op            = $query->param('op');
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
@@ -155,7 +155,7 @@ $template->param(
     publisher_filter => $publisher,
     bookseller_filter  => $bookseller,
     branch_filter => $branch,
-    locations     => C4::Koha::GetAuthorisedValues('LOC', $location),
+    location_filter => $location,
     expiration_date_filter => $expiration_date_dt,
     branches_loop => \@branches_loop,
     done_searched => $searched,

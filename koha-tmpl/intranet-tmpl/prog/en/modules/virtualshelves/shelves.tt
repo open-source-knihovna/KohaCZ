@@ -5,7 +5,7 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; [% IF op == 'view' %]Lists &rsaquo; Contents of [% shelf.shelfname | html %][% ELSE %]Lists[% END %][% IF op == 'add_form' %] &rsaquo; Create new list[% END %][% IF op == 'edit_form' %] &rsaquo; Edit list [% shelf.shelfname | html %][% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.dataTables.columnFilter.js"></script>
 
@@ -76,7 +76,7 @@ $(document).ready(function(){
             { 'mDataProp': 'dt_sortby' },
             { 'mDataProp': 'dt_created_on' },
             { 'mDataProp': 'dt_modification_time' },
-            { 'mDataProp': 'dt_action', 'bSortable': false }
+            { 'mDataProp': 'dt_action', 'bSortable': false, 'sClass': 'actions' }
         ],
         "aoColumnDefs": [
             { "bVisible": false, "aTargets": [ 'NoVisible' ] }
@@ -106,6 +106,9 @@ $(document).ready(function(){
                 dtListResults.fnDraw();
             }
         }
+    });
+    $("body").on("click", ".deleteshelf", function(){
+        return confirmDelete(MSG_CONFIRM_DELETE_LIST);
     });
 });
 [% END %]
@@ -199,15 +202,15 @@ $(document).ready(function(){
      */
     function MergeItems() {
         var checkboxes = $("input:checkbox:checked");
-        if (checkboxes.length > 0) {
+        if (checkboxes.length < 2) {
+            alert(_("At least two records must be selected for merging."));
+        } else {
             var params = [];
             $(checkboxes).each(function() {
                 params.push('biblionumber=' + $(this).val());
             });
             var url = '/cgi-bin/koha/cataloguing/merge.pl?' + params.join('&');
             location.href = url;
-        } else {
-            alert(_("You must select at least one record"));
         }
         return false;
     }
@@ -326,7 +329,7 @@ function placeHold () {
         [% CASE 'error_on_update' %]
             <span>An error occurred when updating this list.</span>
         [% CASE 'error_on_insert' %]
-            <span>An error occurred when creating this list./span>
+            <span>An error occurred when creating this list.</span>
         [% CASE 'error_on_delete' %]
             <span>An error occurred when deleting this list.</span>
         [% CASE 'error_on_add_biblio' %]
@@ -526,7 +529,7 @@ function placeHold () {
             <legend>Edit list <i>[% shelf.shelfname | html %]</i></legend>
             <input type="hidden" name="op" value="edit" />
         [% END %]
-        <input type="hidden" name="referer" value="[% referer %]" />
+        <input type="hidden" name="referer" value="[% referer | html %]" />
         <input type="hidden" name="shelfnumber" value="[% shelf.shelfnumber %]" />
         <ol>
             <li>

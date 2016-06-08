@@ -63,7 +63,7 @@
     [%- CASE 'edit_quotes' -%]<span>Edit quotes for quote-of-the-day feature</span>
     [%- CASE 'export_catalog' -%]<span>Export bibliographic and holdings data</span>
     [%- CASE 'import_patrons' -%]<span>Import patron data</span>
-    [%- CASE 'inventory' -%]<span>Perform inventory (stocktaking) of your catalog</span>
+    [%- CASE 'inventory' -%]<span>Perform inventory of your catalog</span>
     [%- CASE 'items_batchdel' -%]<span>Perform batch deletion of items</span>
     [%- CASE 'items_batchmod' -%]<span>Perform batch modification of items</span>
     [%- CASE 'items_batchmod_restricted' -%]<span>Limit batch item modification to subfields defined in the SubfieldsToAllowForRestrictedBatchmod preference (please note that items_batchmod is still required)</span>
@@ -100,5 +100,7 @@
     [%- CASE 'report' -%]<span>Use report plugins</span>
     [%- CASE 'tool' -%]<span>Use tool plugins</span>
     [%- CASE 'delete_public_lists' -%]<span>Delete public lists</span>
+    [%- CASE 'upload_general_files' -%]<span>Upload any file</span>
+    [%- CASE 'upload_manage' -%]<span>Manage uploaded files (<i>Useless without upload_general_files</i>)</span>
     [%- END -%]
 [%- END -%]

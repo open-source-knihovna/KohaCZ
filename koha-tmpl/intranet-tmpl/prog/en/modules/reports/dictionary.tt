@@ -3,6 +3,23 @@
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'calendar.inc' %]
 <style type="text/css">fieldset.rows table { clear: none; margin: 0;}</style>
+<script type="text/javascript">
+    var MSG_CONFIRM_DELETE = _("Are you sure you want to delete this dictionary definition? This cannot be undone.");
+
+    $(document).ready(function() {
+        $("#delete").on("click",function(){
+            return confirmDelete(MSG_CONFIRM_DELETE);
+        });
+
+        $("#date_range").change(function(){
+            $("input#from").parents('li').show();
+        });
+        $("#all_dates").change(function(){
+            $("input#from").parents('li').hide();
+        });
+        $("#all_dates").click().change();
+    });
+</script>
 </head>
 <body id="rep_dictionary" class="rep">
 [% INCLUDE 'header.inc' %]
@@ -62,13 +79,13 @@
   [% END %]
       </form>
       <br />
-		<table border="1" cellspacing="0" cellpadding="5">
+        <table>
 		<tr>
 		<th>Name</th>
 		<th>Description</th>
 		<th>Area</th>
 		<th>Definition</th>
-		<th>&nbsp;</th>
+                <th>Action</th>
 		</tr>
 		[% FOREACH definition IN definitions %]
         <tr>
@@ -76,14 +93,16 @@
 			<td>[% definition.description %]</td>
 			<td>[% definition.areaname %]</td>
 			<td>[% definition.saved_sql %]</td>
-			<td><form method="post" action="/cgi-bin/koha/reports/dictionary.pl">
+                        <td class="actions"><form method="post" action="/cgi-bin/koha/reports/dictionary.pl">
 			<input type="hidden" name="id" value="[% definition.id %]" />
 			<input type="hidden" name="phase" value="Delete Definition" />
-			<input type="submit" name="submit" value="Delete Definition" />
+                        <button type="submit" name="submit" class="btn btn-mini" id="delete"><i class="fa fa-trash"></i> Delete</button>
 			</form></td>
 			</tr>
 		[% END %]
 		</table>
+                [% ELSE %]
+                <div class="dialog message">There are no saved definitions. <a id="newdictionary" href="/cgi-bin/koha/reports/dictionary.pl?phase=Add%20New%20Definition">Add a definition to the dictionary.</a></div>
 		[% END %]
 [% END %]
 
@@ -116,7 +135,7 @@
         <input type="hidden" name="phase" value="New Term step 3" />
         <input type="hidden" name="definition_name" value="[% definition_name %]" />
         <input type="hidden" name="definition_description" value="[% definition_description %]" />
-        <label for="area">Select table </label><select name="area" id="area">
+        <label for="area">Select table:</label><select name="area" id="area">
       [%- FOREACH area IN areas -%]
         <option value="[%- area.id -%]">[%- PROCESS area_name area=area.id -%]</option>
       [%- END -%]

@@ -22,10 +22,7 @@ use strict;
 use warnings;
 use Library::CallNumber::LC;
 
-use vars qw($VERSION);
 
-# set the version for version checking
-$VERSION = 3.07.00.049;
 
 =head1 NAME 
 

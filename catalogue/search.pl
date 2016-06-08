@@ -154,6 +154,8 @@ use C4::Search::History;
 
 use Koha::LibraryCategories;
 use Koha::Virtualshelves;
+use Koha::SearchEngine::Search;
+use Koha::SearchEngine::QueryBuilder;
 
 use URI::Escape;
 
@@ -166,7 +168,7 @@ my $cgi = new CGI;
 # decide which template to use
 my $template_name;
 my $template_type;
-my @params = $cgi->param("limit");
+my @params = $cgi->multi_param("limit");
 if ((@params>=1) || ($cgi->param("q")) || ($cgi->param('multibranchlimit')) || ($cgi->param('limit-yr')) ) {
     $template_name = 'catalogue/results.tt';
 }
@@ -202,30 +204,6 @@ if($cgi->cookie("holdfor")){
         holdfor_cardnumber => $holdfor_patron->{'cardnumber'},
     );
 }
-
-## URI Re-Writing
-# Deprecated, but preserved because it's interesting :-)
-# The same thing can be accomplished with mod_rewrite in
-# a more elegant way
-#
-#my $rewrite_flag;
-#my $uri = $cgi->url(-base => 1);
-#my $relative_url = $cgi->url(-relative=>1);
-#$uri.="/".$relative_url."?";
-#warn "URI:$uri";
-#my @cgi_params_list = $cgi->param();
-#my $url_params = $cgi->Vars;
-#
-#for my $each_param_set (@cgi_params_list) {
-#    $uri.= join "",  map "\&$each_param_set=".$_, split("\0",$url_params->{$each_param_set}) if $url_params->{$each_param_set};
-#}
-#warn "New URI:$uri";
-# Only re-write a URI if there are params or if it already hasn't been re-written
-#unless (($cgi->param('r')) || (!$cgi->param()) ) {
-#    print $cgi->redirect(     -uri=>$uri."&r=1",
-#                            -cookie => $cookie);
-#    exit;
-#}
 
 # load the branches
 my $branches = GetBranches();
@@ -295,6 +273,9 @@ foreach my $advanced_srch_type (@advanced_search_types) {
     }
 }
 $template->param(advancedsearchesloop => \@advancedsearchesloop);
+my $types = C4::Context->preference("AdvancedSearchTypes") || "itemtypes";
+my $advancedsearchesloop = prepare_adv_search_types($types);
+$template->param(advancedsearchesloop => $advancedsearchesloop);
 
 # The following should only be loaded if we're bringing up the advanced search template
 if ( $template_type eq 'advsearch' ) {
@@ -384,7 +365,7 @@ if (   C4::Context->preference('defaultSortField')
       . C4::Context->preference('defaultSortOrder');
 }
 
-@sort_by = $cgi->param('sort_by');
+@sort_by = $cgi->multi_param('sort_by');
 $sort_by[0] = $default_sort_by unless $sort_by[0];
 foreach my $sort (@sort_by) {
     $template->param($sort => 1) if $sort;
@@ -392,7 +373,7 @@ foreach my $sort (@sort_by) {
 $template->param('sort_by' => $sort_by[0]);
 
 # Use the servers defined, or just search our local catalog(default)
-my @servers = $cgi->param('server');
+my @servers = $cgi->multi_param('server');
 unless (@servers) {
     #FIXME: this should be handled using Context.pm
     @servers = ("biblioserver");
@@ -400,11 +381,11 @@ unless (@servers) {
 }
 # operators include boolean and proximity operators and are used
 # to evaluate multiple operands
-my @operators = map uri_unescape($_), $cgi->param('op');
+my @operators = map uri_unescape($_), $cgi->multi_param('op');
 
 # indexes are query qualifiers, like 'title', 'author', etc. They
 # can be single or multiple parameters separated by comma: kw,right-Truncation 
-my @indexes = map uri_unescape($_), $cgi->param('idx');
+my @indexes = map uri_unescape($_), $cgi->multi_param('idx');
 
 # if a simple index (only one)  display the index used in the top search box
 if ($indexes[0] && (!$indexes[1] || $params->{'scan'})) {
@@ -414,11 +395,11 @@ if ($indexes[0] && (!$indexes[1] || $params->{'scan'})) {
 }
 
 # an operand can be a single term, a phrase, or a complete ccl query
-my @operands = map uri_unescape($_), $cgi->param('q');
+my @operands = map uri_unescape($_), $cgi->multi_param('q');
 
 # limits are use to limit to results to a pre-defined category such as branch or language
-my @limits = map uri_unescape($_), $cgi->param('limit');
-my @nolimits = map uri_unescape($_), $cgi->param('nolimit');
+my @limits = map uri_unescape($_), $cgi->multi_param('limit');
+my @nolimits = map uri_unescape($_), $cgi->multi_param('nolimit');
 my %is_nolimit = map { $_ => 1 } @nolimits;
 @limits = grep { not $is_nolimit{$_} } @limits;
 
@@ -486,8 +467,19 @@ my $expanded_facet = $params->{'expand'};
 # Define some global variables
 my ( $error,$query,$simple_query,$query_cgi,$query_desc,$limit,$limit_cgi,$limit_desc,$query_type);
 
+my $builder = Koha::SearchEngine::QueryBuilder->new(
+    { index => $Koha::SearchEngine::BIBLIOS_INDEX } );
+my $searcher = Koha::SearchEngine::Search->new(
+    { index => $Koha::SearchEngine::BIBLIOS_INDEX } );
+
 ## I. BUILD THE QUERY
-( $error,$query,$simple_query,$query_cgi,$query_desc,$limit,$limit_cgi,$limit_desc,$query_type) = buildQuery(\@operators,\@operands,\@indexes,\@limits,\@sort_by,$scan,$lang);
+(
+    $error,             $query, $simple_query, $query_cgi,
+    $query_desc,        $limit, $limit_cgi,    $limit_desc,
+    $query_type
+  )
+  = $builder->build_query_compat( \@operators, \@operands, \@indexes, \@limits,
+    \@sort_by, $scan, $lang );
 
 ## parse the query_cgi string and put it into a form suitable for <input>s
 my @query_inputs;
@@ -529,15 +521,14 @@ my $facets; # this object stores the faceted results that display on the left-ha
 my $results_hashref;
 
 eval {
-    ($error, $results_hashref, $facets) = getRecords($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,$branches,$itemtypes,$query_type,$scan);
+    my $itemtypes = GetItemTypes;
+    ( $error, $results_hashref, $facets ) = $searcher->search_compat(
+        $query,            $simple_query, \@sort_by,       \@servers,
+        $results_per_page, $offset,       $expanded_facet, $branches,
+        $itemtypes,        $query_type,   $scan
+    );
 };
 
-# This sorts the facets into alphabetical order
-if ($facets) {
-    foreach my $f (@$facets) {
-        $f->{facets} = [ sort { uc($a->{facet_label_value}) cmp uc($b->{facet_label_value}) } @{ $f->{facets} } ];
-    }
-}
 if ($@ || $error) {
     $template->param(query_error => $error.$@);
     output_html_with_http_headers $cgi, $cookie, $template->output;
@@ -767,3 +758,86 @@ $template->param(
 );
 
 output_html_with_http_headers $cgi, $cookie, $template->output;
+
+
+=head2 prepare_adv_search_types
+
+    my $type = C4::Context->preference("AdvancedSearchTypes") || "itemtypes";
+    my @advanced_search_types = prepare_adv_search_types($type);
+
+Different types can be searched for in the advanced search. This takes the
+system preference that defines these types and parses it into an arrayref for
+the template.
+
+"itemtypes" is handled specially, as itemtypes aren't an authorised value.
+It also accounts for the "item-level_itypes" system preference.
+
+=cut
+
+sub prepare_adv_search_types {
+    my ($types) = @_;
+
+    my @advanced_search_types = split( /\|/, $types );
+
+    # the index parameter is different for item-level itemtypes
+    my $itype_or_itemtype =
+      ( C4::Context->preference("item-level_itypes") ) ? 'itype' : 'itemtype';
+    my $itemtypes = GetItemTypes;
+
+    my ( $cnt, @result );
+    foreach my $advanced_srch_type (@advanced_search_types) {
+        $advanced_srch_type =~ s/^\s*//;
+        $advanced_srch_type =~ s/\s*$//;
+        if ( $advanced_srch_type eq 'itemtypes' ) {
+
+       # itemtype is a special case, since it's not defined in authorized values
+            my @itypesloop;
+            foreach my $thisitemtype (
+                sort {
+                    $itemtypes->{$a}->{'description'}
+                      cmp $itemtypes->{$b}->{'description'}
+                } keys %$itemtypes
+              )
+            {
+                my %row = (
+                    number      => $cnt++,
+                    ccl         => "$itype_or_itemtype,phr",
+                    code        => $thisitemtype,
+                    description => $itemtypes->{$thisitemtype}->{'description'},
+                    imageurl    => getitemtypeimagelocation(
+                        'intranet', $itemtypes->{$thisitemtype}->{'imageurl'}
+                    ),
+                );
+                push @itypesloop, \%row;
+            }
+            my %search_code = (
+                advanced_search_type => $advanced_srch_type,
+                code_loop            => \@itypesloop
+            );
+            push @result, \%search_code;
+        }
+        else {
+            # covers all the other cases: non-itemtype authorized values
+            my $advsearchtypes = GetAuthorisedValues($advanced_srch_type);
+            my @authvalueloop;
+            for my $thisitemtype (@$advsearchtypes) {
+                my %row = (
+                    number      => $cnt++,
+                    ccl         => $advanced_srch_type,
+                    code        => $thisitemtype->{authorised_value},
+                    description => $thisitemtype->{'lib'},
+                    imageurl    => getitemtypeimagelocation(
+                        'intranet', $thisitemtype->{'imageurl'}
+                    ),
+                );
+                push @authvalueloop, \%row;
+            }
+            my %search_code = (
+                advanced_search_type => $advanced_srch_type,
+                code_loop            => \@authvalueloop
+            );
+            push @result, \%search_code;
+        }
+    }
+    return \@result;
+}

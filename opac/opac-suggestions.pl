@@ -142,7 +142,7 @@ if ( $op eq "add_confirm" ) {
 }
 
 if ( $op eq "delete_confirm" ) {
-    my @delete_field = $input->param("delete_field");
+    my @delete_field = $input->multi_param("delete_field");
     foreach my $delete_field (@delete_field) {
         &DelSuggestion( $borrowernumber, $delete_field );
     }
@@ -150,7 +150,12 @@ if ( $op eq "delete_confirm" ) {
     print $input->redirect("/cgi-bin/koha/opac-suggestions.pl?op=else");
     exit;
 }
-map{ $_->{'branchcodesuggestedby'} = Koha::Libraries->find($_->{'branchcodesuggestedby'})->branchname} @$suggestions_loop;
+
+map{
+    my $s = $_;
+    my $library = Koha::Libraries->find($s->{branchcodesuggestedby});
+    $library ? $s->{branchcodesuggestedby} = $library->branchname : ()
+} @$suggestions_loop;
 
 foreach my $suggestion(@$suggestions_loop) {
     if($suggestion->{'suggestedby'} == $borrowernumber) {

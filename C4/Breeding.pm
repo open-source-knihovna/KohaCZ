@@ -31,11 +31,9 @@ use C4::Languages;
 use Koha::Database;
 use Koha::XSLT_Handler;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 BEGIN {
-	# set the version for version checking
-    $VERSION = 3.07.00.049;
 	require Exporter;
 	@ISA = qw(Exporter);
     @EXPORT = qw(&BreedingSearch &Z3950Search &Z3950SearchAuth);

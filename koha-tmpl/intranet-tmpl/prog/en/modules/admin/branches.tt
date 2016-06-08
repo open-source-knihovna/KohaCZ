@@ -11,7 +11,7 @@
 [% END %]
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/tiny_mce/tiny_mce.js"></script>
 <script type="text/javascript">
@@ -40,7 +40,7 @@
 tinyMCE.init({
     mode : "textareas",
     theme : "advanced",
-    content_css : "[% themelang %]/css/tinymce.css",
+    content_css : "[% interface %]/[% theme %]/css/tinymce.css",
     plugins : "table,save,advhr,advlink,contextmenu",
     theme_advanced_buttons1 : "save,|,bold,italic,|,cut,copy,paste,|,justifyleft,justifycenter,justifyright,justifyfull,|,formatselect,|,link,unlink,anchor,cleanup,help,code,advhr,",
     theme_advanced_buttons2 : "tablecontrols,|,bullist,numlist,|,outdent,indent,|,undo,redo,|,removeformat,|,visualaid,|,sub,sup,|,charmap",
@@ -79,7 +79,7 @@ tinyMCE.init({
     <div id="yui-main">
     <div class="yui-b">
 
-[% FOR m IN messages %]
+[% FOREACH m IN messages %]
     <div class="dialog [% m.type %]">
         [% SWITCH m.code %]
         [% CASE 'error_on_update' %]
@@ -381,13 +381,15 @@ tinyMCE.init({
 [% END %]
 
 [% IF op == 'delete_confirm_category' %]
-    <div class="dialog message">
-    Are you sure you want to delete the group '[% category.codedescription %]' ([% category.categorycode %])?
+    <div class="dialog alert">
+    <h3>Are you sure you want to delete the group '[% category.codedescription %]' ([% category.categorycode %])?</h3>
     <form action="/cgi-bin/koha/admin/branches.pl" method="post">
         <input type="hidden" name="op" value="delete_confirmed_category" />
         <input type="hidden" name="categorycode" value="[% category.categorycode |html %]" />
-        <input type="submit" value="Delete" />
-        <a class="cancel" href="/cgi-bin/koha/admin/branches.pl">Cancel</a>
+        <button type="submit" class="approve"><i class="fa fa-fw fa-check"></i> Yes, delete</button>
+    </form>
+    <form action="/cgi-bin/koha/admin/branches.pl" method="get">
+        <button type="submit" class="deny"><i class="fa fa-fw fa-remove"></i> No, do not delete</button>
     </form>
     </div>
 [% END %]

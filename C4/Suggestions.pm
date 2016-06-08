@@ -32,7 +32,6 @@ use Koha::DateUtils;
 use List::MoreUtils qw(any);
 use base qw(Exporter);
 
-our $VERSION = 3.07.00.049;
 our @EXPORT  = qw(
   ConnectSuggestionAndBiblio
   CountSuggestion
@@ -161,7 +160,10 @@ sub SearchSuggestion {
         if ( exists $suggestion->{$field}
                 and defined $suggestion->{$field}
                 and $suggestion->{$field} ne '__ANY__'
-                and $suggestion->{$field} ne q||
+                and (
+                    $suggestion->{$field} ne q||
+                        or $field eq 'STATUS'
+                )
         ) {
             if ( $suggestion->{$field} eq '__NONE__' ) {
                 push @query, qq{ AND (suggestions.$field = '' OR suggestions.$field IS NULL) };

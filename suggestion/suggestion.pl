@@ -78,7 +78,7 @@ my $input           = CGI->new;
 my $redirect  = $input->param('redirect');
 my $suggestedbyme   = (defined $input->param('suggestedbyme')? $input->param('suggestedbyme'):1);
 my $op              = $input->param('op')||'else';
-my @editsuggestions = $input->param('edit_field');
+my @editsuggestions = $input->multi_param('edit_field');
 my $suggestedby     = $input->param('suggestedby');
 my $returnsuggestedby = $input->param('returnsuggestedby');
 my $returnsuggested = $input->param('returnsuggested');
@@ -326,7 +326,7 @@ $template->param( branchloop => \@branchloop,
 
 $template->param( returnsuggestedby => $returnsuggestedby );
 
-my $patron_reason_loop = GetAuthorisedValues("OPAC_SUG",$$suggestion_ref{'patronreason'});
+my $patron_reason_loop = GetAuthorisedValues("OPAC_SUG");
 $template->param(patron_reason_loop=>$patron_reason_loop);
 
 #Budgets management

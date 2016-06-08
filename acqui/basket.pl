@@ -37,6 +37,8 @@ use C4::Items;
 use C4::Suggestions;
 use C4::Csv;
 use Date::Calc qw/Add_Delta_Days/;
+use Koha::Database;
+use Koha::EDI qw( create_edi_order get_edifact_ean );
 
 =head1 NAME
 
@@ -68,6 +70,7 @@ the supplier this script have to display the basket.
 
 my $query        = new CGI;
 our $basketno     = $query->param('basketno');
+my $ean          = $query->param('ean');
 my $booksellerid = $query->param('booksellerid');
 my $duplinbatch =  $query->param('duplinbatch');
 
@@ -85,6 +88,10 @@ my ( $template, $loggedinuser, $cookie, $userflags ) = get_template_and_user(
 my $basket = GetBasket($basketno);
 $booksellerid = $basket->{booksellerid} unless $booksellerid;
 my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
+my $schema = Koha::Database->new()->schema();
+my $rs = $schema->resultset('VendorEdiAccount')->search(
+    { vendor_id => $booksellerid, } );
+$template->param( ediaccount => ($rs->count > 0));
 
 unless (CanUserManageBasket($loggedinuser, $basket, $userflags)) {
     $template->param(
@@ -202,6 +209,9 @@ if ( $op eq 'delete_confirm' ) {
 } elsif ($op eq 'reopen') {
     ReopenBasket($query->param('basketno'));
     print $query->redirect('/cgi-bin/koha/acqui/basket.pl?basketno='.$basket->{'basketno'})
+}
+elsif ( $op eq 'ediorder' ) {
+    edi_close_and_order()
 } elsif ( $op eq 'mod_users' ) {
     my $basketusers_ids = $query->param('users_ids');
     my @basketusers = split( /:/, $basketusers_ids );
@@ -362,6 +372,7 @@ if ( $op eq 'delete_confirm' ) {
 
     $template->param(
         basketno             => $basketno,
+        basket               => $basket,
         basketname           => $basket->{'basketname'},
         basketbranchname     => C4::Branch::GetBranchName($basket->{branch}),
         basketnote           => $basket->{note},
@@ -376,6 +387,7 @@ if ( $op eq 'delete_confirm' ) {
         users                => \@basketusers,
         closedate            => $basket->{closedate},
         estimateddeliverydate=> $estimateddeliverydate,
+        is_standing          => $basket->{is_standing},
         deliveryplace        => C4::Branch::GetBranchName( $basket->{deliveryplace} ),
         billingplace         => C4::Branch::GetBranchName( $basket->{billingplace} ),
         active               => $bookseller->{'active'},
@@ -393,7 +405,12 @@ if ( $op eq 'delete_confirm' ) {
         basketgroups         => $basketgroups,
         basketgroup          => $basketgroup,
         grouped              => $basket->{basketgroupid},
-        unclosable           => @orders ? 0 : 1, 
+        # The double negatives and booleans here mean:
+        # "A basket cannot be closed if there are no orders in it or it's a standing order basket."
+        #
+        # (The template has another implicit restriction that the order cannot be closed if there
+        # are any orders with uncertain prices.)
+        unclosable           => @orders ? $basket->{is_standing} : 1,
         has_budgets          => $has_budgets,
         duplinbatch          => $duplinbatch,
         csv_profiles         => C4::Csv::GetCsvProfiles( "sql" ),
@@ -407,10 +424,12 @@ sub get_order_infos {
     if ( !defined $order->{quantityreceived} ) {
         $order->{quantityreceived} = 0;
     }
-    my $budget = GetBudget( $order->{'budget_id'} );
+    my $budget = GetBudget($order->{budget_id});
+    my $basket = GetBasket($order->{basketno});
 
     my %line = %{ $order };
-    $line{order_received} = ( $qty == $order->{'quantityreceived'} );
+    # Don't show unreceived standing orders as received
+    $line{order_received} = ( $qty == $order->{'quantityreceived'} && ( $basket->{is_standing} ? $qty : 1 ) );
     $line{basketno}       = $basketno;
     $line{budget_name}    = $budget->{budget_name};
 
@@ -460,7 +479,6 @@ sub get_order_infos {
     foreach my $key (qw(transferred_from transferred_to)) {
         if ($line{$key}) {
             my $order = GetOrder($line{$key});
-            my $basket = GetBasket($order->{basketno});
             my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $basket->{booksellerid} });
             $line{$key} = {
                 order => $order,
@@ -475,3 +493,70 @@ sub get_order_infos {
 }
 
 output_html_with_http_headers $query, $cookie, $template->output;
+
+
+sub edi_close_and_order {
+    my $confirm = $query->param('confirm') || $confirm_pref eq '2';
+    if ($confirm) {
+            my $edi_params = {
+                basketno => $basketno,
+                ean    => $ean,
+            };
+            if ( $basket->{branch} ) {
+                $edi_params->{branchcode} = $basket->{branch};
+            }
+            if ( create_edi_order($edi_params) ) {
+                #$template->param( edifile => 1 );
+            }
+        CloseBasket($basketno);
+
+        # if requested, create basket group, close it and attach the basket
+        if ( $query->param('createbasketgroup') ) {
+            my $branchcode;
+            if (    C4::Context->userenv
+                and C4::Context->userenv->{'branch'}
+                and C4::Context->userenv->{'branch'} ne "NO_LIBRARY_SET" )
+            {
+                $branchcode = C4::Context->userenv->{'branch'};
+            }
+            my $basketgroupid = NewBasketgroup(
+                {
+                    name          => $basket->{basketname},
+                    booksellerid  => $booksellerid,
+                    deliveryplace => $branchcode,
+                    billingplace  => $branchcode,
+                    closed        => 1,
+                }
+            );
+            ModBasket(
+                {
+                    basketno      => $basketno,
+                    basketgroupid => $basketgroupid
+                }
+            );
+            print $query->redirect(
+"/cgi-bin/koha/acqui/basketgroup.pl?booksellerid=$booksellerid&closed=1"
+            );
+        }
+        else {
+            print $query->redirect(
+                "/cgi-bin/koha/acqui/booksellers.pl?booksellerid=$booksellerid"
+            );
+        }
+        exit;
+    }
+    else {
+        $template->param(
+            edi_confirm     => 1,
+            booksellerid    => $booksellerid,
+            basketno        => $basket->{basketno},
+            basketname      => $basket->{basketname},
+            basketgroupname => $basket->{basketname},
+        );
+        if ($ean) {
+            $template->param( ean => $ean );
+        }
+
+    }
+    return;
+}

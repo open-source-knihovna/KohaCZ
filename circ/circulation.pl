@@ -49,6 +49,9 @@ use Koha::DateUtils;
 use Koha::Database;
 use Koha::Patron::Messages;
 use Koha::Patron::Images;
+use Koha::SearchEngine;
+use Koha::SearchEngine::Search;
+use Koha::Patron::Modifications;
 
 use Date::Calc qw(
   Today
@@ -62,26 +65,12 @@ use List::MoreUtils qw/uniq/;
 #
 my $query = new CGI;
 
+my $override_high_holds     = $query->param('override_high_holds');
+my $override_high_holds_tmp = $query->param('override_high_holds_tmp');
+
 my $sessionID = $query->cookie("CGISESSID") ;
 my $session = get_session($sessionID);
-
-# branch and printer are now defined by the userenv
-# but first we have to check if someone has tried to change them
-
-my $branch = $query->param('branch');
-if ($branch){
-    # update our session so the userenv is updated
-    $session->param('branch', $branch);
-    $session->param('branchname', GetBranchName($branch));
-}
-
-my $printer = $query->param('printer');
-if ($printer){
-    # update our session so the userenv is updated
-    $session->param('branchprinter', $printer);
-}
-
-if (!C4::Context->userenv && !$branch){
+if (!C4::Context->userenv){
     if ($session->param('branch') eq 'NO_LIBRARY_SET'){
         # no branch set we can't issue
         print $query->redirect("/cgi-bin/koha/circ/selectbranchprinter.pl");
@@ -92,7 +81,7 @@ if (!C4::Context->userenv && !$branch){
 my $barcodes = [];
 my $barcode =  $query->param('barcode');
 # Barcode given by user could be '0'
-if ( $barcode || $barcode eq '0' ) {
+if ( $barcode || ( defined($barcode) && $barcode eq '0' ) ) {
     $barcodes = [ $barcode ];
 } else {
     my $filefh = $query->upload('uploadfile');
@@ -105,7 +94,7 @@ if ( $barcode || $barcode eq '0' ) {
         push @$barcodes, split( /\s\n/, $list );
         $barcodes = [ map { $_ =~ /^\s*$/ ? () : $_ } @$barcodes ];
     } else {
-        @$barcodes = $query->param('barcodes');
+        @$barcodes = $query->multi_param('barcodes');
     }
 }
 
@@ -145,19 +134,18 @@ if (!C4::Auth::haspermission( C4::Context->userenv->{id} , { circulate => 'force
 
 my $onsite_checkout = $query->param('onsite_checkout');
 
-my @failedrenews = $query->param('failedrenew');    # expected to be itemnumbers
+my @failedrenews = $query->multi_param('failedrenew');    # expected to be itemnumbers
 our %renew_failed = ();
 for (@failedrenews) { $renew_failed{$_} = 1; }
 
-my @failedreturns = $query->param('failedreturn');
+my @failedreturns = $query->multi_param('failedreturn');
 our %return_failed = ();
 for (@failedreturns) { $return_failed{$_} = 1; }
 
 my $findborrower = $query->param('findborrower') || q{};
 $findborrower =~ s|,| |g;
 
-$branch  = C4::Context->userenv->{'branch'};  
-$printer = C4::Context->userenv->{'branchprinter'};
+my $branch = C4::Context->userenv->{'branch'};
 
 # If AutoLocation is not activated, we show the Circulation Parameters to chage settings of librarian
 if (C4::Context->preference("AutoLocation") != 1) {
@@ -179,7 +167,7 @@ my $duedatespec    = $query->param('duedatespec')   || $session->param('stickydu
 $duedatespec = eval { output_pref( { dt => dt_from_string( $duedatespec ), dateformat => 'iso' }); }
     if ( $duedatespec );
 my $restoreduedatespec  = $query->param('restoreduedatespec') || $session->param('stickyduedate') || $duedatespec;
-if ($restoreduedatespec eq "highholds_empty") {
+if ( $restoreduedatespec && $restoreduedatespec eq "highholds_empty" ) {
     undef $restoreduedatespec;
 }
 my $issueconfirmed = $query->param('issueconfirmed');
@@ -196,7 +184,7 @@ if ( @$barcodes ) {
         $stickyduedate  = $query->param('stickyduedate');
         $duedatespec    = $query->param('duedatespec');
     }
-    $session->param('auto_renew', $query->param('auto_renew'));
+    $session->param('auto_renew', scalar $query->param('auto_renew'));
 }
 else {
     $session->clear('auto_renew');
@@ -288,7 +276,6 @@ if ($borrowernumber) {
     {
         #borrowercard expired, no issues
         $template->param(
-            flagged  => "1",
             noissues => ($force_allow_issue) ? 0 : "1",
             forceallow => $force_allow_issue,
             expired => "1",
@@ -301,7 +288,6 @@ if ($borrowernumber) {
     {
         # borrower card soon to expire warn librarian
         $template->param( "warndeparture" => $borrower->{dateexpiry} ,
-                          flagged         => "1"
                         );
         if (C4::Context->preference('ReturnBeforeExpiry')){
             $template->param("returnbeforeexpiry" => 1);
@@ -335,8 +321,17 @@ if (@$barcodes) {
   for my $barcode ( @$barcodes ) {
     my $template_params = { barcode => $barcode };
     # always check for blockers on issuing
-    my ( $error, $question, $alerts ) =
-    CanBookBeIssued( $borrower, $barcode, $datedue , $inprocess, undef, { onsite_checkout => $onsite_checkout } );
+    my ( $error, $question, $alerts ) = CanBookBeIssued(
+        $borrower,
+        $barcode, $datedue,
+        $inprocess,
+        undef,
+        {
+            onsite_checkout     => $onsite_checkout,
+            override_high_holds => $override_high_holds || $override_high_holds_tmp || 0,
+        }
+    );
+
     my $blocker = $invalidduedate ? 1 : 0;
 
     $template_params->{alert} = $alerts;
@@ -355,16 +350,16 @@ if (@$barcodes) {
     {
      $template_params->{FALLBACK} = 1;
 
+        my $searcher = Koha::SearchEngine::Search->new({index => $Koha::SearchEngine::BIBLIOS_INDEX});
         my $query = "kw=" . $barcode;
-        my ( $searcherror, $results, $total_hits ) = SimpleSearch($query);
+        my ( $searcherror, $results, $total_hits ) = $searcher->simple_search_compat($query, 0, 10);
 
         # if multiple hits, offer options to librarian
         if ( $total_hits > 0 ) {
             my @options = ();
             foreach my $hit ( @{$results} ) {
                 my $chosen =
-                  TransformMarcToKoha( C4::Context->dbh,
-                    C4::Search::new_record_from_zebra('biblioserver',$hit) );
+                  TransformMarcToKoha( C4::Search::new_record_from_zebra('biblioserver',$hit) );
 
                 # offer all barcodes individually
                 if ( $chosen->{barcode} ) {
@@ -392,7 +387,12 @@ if (@$barcodes) {
         my $confirm_required = 0;
         unless($issueconfirmed){
             #  Get the item title for more information
-            $template_params->{additional_materials} = $iteminfo->{'materials'};
+            my $materials = $iteminfo->{'materials'};
+            my $avcode = GetAuthValCode('items.materials');
+            if ($avcode) {
+                $materials = GetKohaAuthorisedValueLib($avcode, $materials);
+            }
+            $template_params->{additional_materials} = $materials;
             $template_params->{itemhomebranch} = $iteminfo->{'homebranch'};
 
             # pass needsconfirmation to template if issuing is possible and user hasn't yet confirmed.
@@ -407,7 +407,7 @@ if (@$barcodes) {
         }
         unless($confirm_required) {
             my $issue = AddIssue( $borrower, $barcode, $datedue, $cancelreserve, undef, undef, { onsite_checkout => $onsite_checkout, auto_renew => $session->param('auto_renew') } );
-            $template->param( issue => $issue );
+            $template_params->{issue} = $issue;
             $session->clear('auto_renew');
             $inprocess = 1;
         }
@@ -470,7 +470,6 @@ if ($borrowernumber) {
 #title
 my $flags = $borrower->{'flags'};
 foreach my $flag ( sort keys %$flags ) {
-    $template->param( flagged=> 1);
     $flags->{$flag}->{'message'} =~ s#\n#<br />#g;
     if ( $flags->{$flag}->{'noissues'} ) {
         $template->param(
@@ -494,6 +493,14 @@ foreach my $flag ( sort keys %$flags ) {
                 charges_is_blocker => 1
             );
         }
+        elsif ( $flag eq 'CHARGES_GUARANTEES' ) {
+            $template->param(
+                charges_guarantees    => 'true',
+                chargesmsg_guarantees => $flags->{'CHARGES_GUARANTEES'}->{'message'},
+                chargesamount_guarantees => $flags->{'CHARGES_GUARANTEES'}->{'amount'},
+                charges_guarantees_is_blocker => 1
+            );
+        }
         elsif ( $flag eq 'CREDITS' ) {
             $template->param(
                 credits    => 'true',
@@ -508,6 +515,13 @@ foreach my $flag ( sort keys %$flags ) {
                 charges    => 'true',
                 chargesmsg => $flags->{'CHARGES'}->{'message'},
                 chargesamount => $flags->{'CHARGES'}->{'amount'},
+            );
+        }
+        elsif ( $flag eq 'CHARGES_GUARANTEES' ) {
+            $template->param(
+                charges_guarantees    => 'true',
+                chargesmsg_guarantees => $flags->{'CHARGES_GUARANTEES'}->{'message'},
+                chargesamount_guarantees => $flags->{'CHARGES_GUARANTEES'}->{'amount'},
             );
         }
         elsif ( $flag eq 'CREDITS' ) {
@@ -562,10 +576,6 @@ my $patron_messages = Koha::Patron::Messages->search(
         message_type => 'B',
     }
 );
-
-if( $librarian_messages->count or $patron_messages->count ) {
-    $template->param(flagged => 1)
-}
 
 my $fast_cataloging = 0;
 if (defined getframeworkinfo('FA')) {
@@ -622,9 +632,7 @@ $template->param(
     categoryname      => $borrower->{'description'},
     branch            => $branch,
     branchname        => GetBranchName($borrower->{'branchcode'}),
-    printer           => $printer,
-    printername       => $printer,
-    was_renewed       => $query->param('was_renewed') ? 1 : 0,
+    was_renewed       => scalar $query->param('was_renewed') ? 1 : 0,
     expiry            => $borrower->{'dateexpiry'},
     roadtype          => $roadtype,
     amountold         => $amountold,
@@ -663,6 +671,9 @@ $template->param(
     canned_bor_notes_loop     => $canned_notes,
     debarments                => GetDebarments({ borrowernumber => $borrowernumber }),
     todaysdate                => output_pref( { dt => dt_from_string()->set(hour => 23)->set(minute => 59), dateformat => 'sql' } ),
+    modifications             => Koha::Patron::Modifications->GetModifications({ borrowernumber => $borrowernumber }),
+    override_high_holds       => $override_high_holds,
+    nopermission              => $query->param('nopermission'),
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

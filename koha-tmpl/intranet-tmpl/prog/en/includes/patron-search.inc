@@ -22,6 +22,11 @@
               [% ELSE %]
                 <option value='standard'>Standard</option>
               [% END %]
+              [% IF searchfieldstype == "surname" %]
+                <option selected="selected" value='surname'>Surname</option>
+              [% ELSE %]
+                <option value='surname'>Surname</option>
+              [% END %]
               [% IF searchfieldstype == "email" %]
                 <option selected="selected" value='email'>Email</option>
               [% ELSE %]
@@ -68,12 +73,12 @@
         <p>
             <label for="searchtype">Search type:</label>
             <select name="searchtype" id="searchtype">
-              [% IF searchtype != 'start_with' %]
-                  <option value='start_with'>Starts with</option>
-                  <option selected="selected" value='contain'>Contains</option>
-              [% ELSE %]
+              [% IF searchtype == 'start_with' %]
                   <option selected="selected" value='start_with'>Starts with</option>
                   <option value='contain'>Contains</option>
+              [% ELSE %]
+                  <option value='start_with'>Starts with</option>
+                  <option selected="selected" value='contain'>Contains</option>
               [% END %]
             </select>
         </p>

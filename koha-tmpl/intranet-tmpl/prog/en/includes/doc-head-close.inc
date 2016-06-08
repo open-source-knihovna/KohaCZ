@@ -18,15 +18,16 @@
 
 <link rel="shortcut icon" href="[% IF ( IntranetFavicon ) %][% IntranetFavicon %][% ELSE %][% interface %]/[% theme %]/img/favicon.ico[% END %]" type="image/x-icon" />
 
-<link rel="stylesheet" type="text/css" href="[% interface %]/lib/jquery/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/lib/jquery/jquery-ui-1.11.4.min.css" />
 <link rel="stylesheet" type="text/css" href="[% interface %]/lib/bootstrap/bootstrap.min.css" />
 <link rel="stylesheet" type="text/css" href="[% interface %]/lib/font-awesome/css/font-awesome.min.css" />
-<link rel="stylesheet" type="text/css" media="print" href="[% themelang %]/css/print.css" />
+<link rel="stylesheet" type="text/css" media="print" href="[% interface %]/[% theme %]/css/print.css" />
 [% INCLUDE intranetstylesheet.inc %]
-[% IF ( bidi )            %]<link rel="stylesheet" type="text/css" href="[% themelang %]/css/right-to-left.css" />[% END %]
+[% IF ( bidi )            %]<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/right-to-left.css" />[% END %]
 
-<script type="text/javascript" src="[% interface %]/lib/jquery/jquery.js"></script>
-<script type="text/javascript" src="[% interface %]/lib/jquery/jquery-ui.js"></script>
+<script type="text/javascript" src="[% interface %]/lib/jquery/jquery-2.2.3.min.js"></script>
+<script type="text/javascript" src="[% interface %]/lib/jquery/jquery-migrate-1.3.0.min.js"></script>
+<script type="text/javascript" src="[% interface %]/lib/jquery/jquery-ui-1.11.4.min.js"></script>
 <script type="text/javascript" src="[% interface %]/lib/shortcut/shortcut.js"></script>
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.cookie.min.js"></script>
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.highlight-3.js"></script>
@@ -34,12 +35,12 @@
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.validate.min.js"></script>
 
 [% IF ( login ) %]
-    <link rel="stylesheet" type="text/css" href="[% themelang %]/css/login.css" />
+    <link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/login.css" />
 [% END %]
 [% IF ( IntranetUserCSS ) %]<style type="text/css">[% IntranetUserCSS %]</style>[% END %]
 
 <!-- koha core js -->
-<script type="text/javascript" src="[% themelang %]/js/staff-global.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/staff-global.js"></script>
 
 [% INCLUDE 'validator-strings.inc' %]
 [% IF ( IntranetUserJS ) %]
@@ -67,11 +68,11 @@
     //]]>
     </script>
 
-    <script type="text/javascript" src="[% themelang %]/js/basket.js"></script>
+    <script type="text/javascript" src="[% interface %]/[% theme %]/js/basket.js"></script>
 [% END %]
 
 [% IF LocalCoverImages %]
-    <script type="text/javascript" src="[% themelang %]/js/localcovers.js"></script>
+    <script type="text/javascript" src="[% interface %]/[% theme %]/js/localcovers.js"></script>
     <script type="text/javascript">
         //<![CDATA[
             var NO_LOCAL_JACKET = _("No cover image available");

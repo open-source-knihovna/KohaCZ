@@ -2,10 +2,10 @@
 
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Cataloging &rsaquo; [% title |html %] [% IF ( author ) %] by [% author %][% END %] (Record #[% biblionumber %]) &rsaquo; Items</title>
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'datatables.inc' %]
-<script type="text/javascript" src="[% themelang %]/js/cataloging.js"></script>
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/cataloging.js"></script>
 [% INCLUDE 'columns_settings.inc' %]
 [% INCLUDE 'browser-strings.inc' %]
 <!--[if lt IE 9]>
@@ -62,7 +62,25 @@ $(document).ready(function(){
         "bKohaColumnsUseNames": true
     }, columns_settings);
 
+    var multiCopyControl = $("#add_multiple_copies_span");
+    var addMultipleBlock = $("#addmultiple");
+    var addSingleBlock = $("#addsingle");
+    multiCopyControl.hide();
+    $("#add_multiple_copies").on("click",function(e){
+        e.preventDefault;
+        addMultipleBlock.toggle();
+        addSingleBlock.toggle();
+        multiCopyControl.toggle();
+        $('body,html').animate({ scrollTop: $('body').height() }, 100);
+    });
+    $("#cancel_add_multiple").on("click",function(e){
+        e.preventDefault();
+        addMultipleBlock.toggle();
+        addSingleBlock.toggle();
+        multiCopyControl.toggle();
+    });
 });
+
 function Check(f) {
     var total_errors = CheckMandatorySubfields(f);
     if (total_errors==0) {
@@ -72,7 +90,7 @@ function Check(f) {
         // So we use disabled instead. But disabled prevent values from being passed through the form at submit.
         // So we "un-disable" the elements just before submitting.
         // That's a bit clumsy, and if someone comes up with a better solution, feel free to improve that.
-        $("select[name=field_value]").removeAttr("disabled");
+        $("select[name=field_value]").prop('disabled', false);
         return true;
     } else {
         var alertString2 = _("Form not submitted because of the following problem(s)");
@@ -105,9 +123,9 @@ function confirm_deletion() {
 
 //]]>
 </script>
-<link type="text/css" rel="stylesheet" href="[% themelang %]/css/addbiblio.css" />
+<link type="text/css" rel="stylesheet" href="[% interface %]/[% theme %]/css/addbiblio.css" />
 [% IF ( bidi ) %]
-   <link rel="stylesheet" type="text/css" href="[% themelang %]/css/right-to-left.css" />
+   <link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/right-to-left.css" />
 [% END %]
 </head>
 <body id="cat_additem" class="cat">
@@ -288,14 +306,19 @@ function confirm_deletion() {
 		when pressing the enter key, while in fact it is the first submit button that is validated, in our case the "add (single) item" button.
 		It is a bit tricky, but necessary in the sake of UI correctness.
     -->
-
-    <input type="submit" name="add_submit" value="Add item" onclick="return Check(this.form)" />
-    <input type="submit" name="add_duplicate_submit" value="Add &amp; duplicate" onclick="return Check(this.form)" />
-    <input type="submit" name="add_multiple_copies" value="Add multiple items" onclick="javascript:this.nextSibling.style.visibility='visible';document.f.number_of_copies.focus(); return false;" /><span id="add_multiple_copies_span" style="visibility:hidden">
-    <label for="number_of_copies">Number of items to add : </label>
-    <input type="text" id="number_of_copies" name="number_of_copies" value="" />
-	<input type="submit" id="add_multiple_copies_submit" name="add_multiple_copies_submit" value="Add" onclick="javascript:return Check(this.form) &amp;&amp; CheckMultipleAdd(this.form.number_of_copies.value);" />
+    <span id="addsingle">
+        <input type="submit" name="add_submit" value="Add item" onclick="return Check(this.form)" />
+        <input type="submit" name="add_duplicate_submit" value="Add &amp; duplicate" onclick="return Check(this.form)" />
     </span>
+    <span id="addmultiple">
+        <input type="button" name="add_multiple_copies" id="add_multiple_copies" value="Add multiple copies of this item" />
+    </span>
+    <fieldset id="add_multiple_copies_span">
+        <label for="number_of_copies">Number of copies of this item to add: </label>
+        <input type="text" id="number_of_copies" name="number_of_copies" value="" size="2" />
+        <input type="submit" id="add_multiple_copies_submit" name="add_multiple_copies_submit" value="Add" onclick="javascript:return Check(this.form) && CheckMultipleAdd(this.form.number_of_copies.value);" /> <a href="#" id="cancel_add_multiple" class="cancel">Cancel</a>
+        <div class="hint"><p>The barcode you enter will be incremented for each additional item.</p></div>
+    </fieldset>
 
     [% ELSE %]
     <input type="hidden" name="tag" value="[% itemtagfield %]" />

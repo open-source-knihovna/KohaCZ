@@ -8,9 +8,6 @@ use autouse 'Data::Dumper' => qw(Dumper);
 use C4::Context;
 use C4::Debug;
 
-BEGIN {
-    use version; our $VERSION = qv('3.07.00.049');
-}
 
 sub _check_params {
     my $given_params = {};

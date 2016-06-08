@@ -87,13 +87,13 @@ if ( $op eq 'add_form' ) {
     if ($is_a_modif) {
         my $library = Koha::Libraries->find($branchcode);
         for my $field (@fields) {
-            $library->$field( $input->param($field) );
+            $library->$field( scalar $input->param($field) );
         }
         $library->update_categories( \@categories );
 
         eval { $library->store; };
         if ($@) {
-            push @messages, { type => 'error', code => 'error_on_update' };
+            push @messages, { type => 'alert', code => 'error_on_update' };
         } else {
             push @messages, { type => 'message', code => 'success_on_update' };
         }
@@ -101,13 +101,13 @@ if ( $op eq 'add_form' ) {
         $branchcode =~ s|\s||g;
         my $library = Koha::Library->new(
             {   branchcode => $branchcode,
-                ( map { $_ => $input->param($_) || undef } @fields )
+                ( map { $_ => scalar $input->param($_) || undef } @fields )
             }
         );
         eval { $library->store; };
         $library->add_to_categories( \@categories );
         if ($@) {
-            push @messages, { type => 'error', code => 'error_on_insert' };
+            push @messages, { type => 'alert', code => 'error_on_insert' };
         } else {
             push @messages, { type => 'message', code => 'success_on_insert' };
         }
@@ -126,7 +126,7 @@ if ( $op eq 'add_form' ) {
 
     if ( $items_count or $patrons_count ) {
         push @messages,
-          { type => 'error',
+          { type => 'alert',
             code => 'cannot_delete_library',
             data => {
                 items_count   => $items_count,
@@ -147,7 +147,7 @@ if ( $op eq 'add_form' ) {
     my $deleted = eval { $library->delete; };
 
     if ( $@ or not $deleted ) {
-        push @messages, { type => 'error', code => 'error_on_delete' };
+        push @messages, { type => 'alert', code => 'error_on_delete' };
     } else {
         push @messages, { type => 'message', code => 'success_on_delete' };
     }
@@ -168,25 +168,25 @@ if ( $op eq 'add_form' ) {
     if ($is_a_modif) {
         my $category = Koha::LibraryCategories->find($categorycode);
         for my $field (@fields) {
-            $category->$field( $input->param($field) );
+            $category->$field( scalar $input->param($field) );
         }
-        $category->show_in_pulldown( $input->param('show_in_pulldown') eq 'on' );
+        $category->show_in_pulldown( scalar $input->param('show_in_pulldown') eq 'on' );
         eval { $category->store; };
         if ($@) {
-            push @messages, { type => 'error', code => 'error_on_update_category' };
+            push @messages, { type => 'alert', code => 'error_on_update_category' };
         } else {
             push @messages, { type => 'message', code => 'success_on_update_category' };
         }
     } else {
         my $category = Koha::LibraryCategory->new(
             {   categorycode => $categorycode,
-                ( map { $_ => $input->param($_) || undef } @fields )
+                ( map { $_ => scalar $input->param($_) || undef } @fields )
             }
         );
-        $category->show_in_pulldown( $input->param('show_in_pulldown') eq 'on' );
+        $category->show_in_pulldown( scalar $input->param('show_in_pulldown') eq 'on' );
         eval { $category->store; };
         if ($@) {
-            push @messages, { type => 'error', code => 'error_on_insert_category' };
+            push @messages, { type => 'alert', code => 'error_on_insert_category' };
         } else {
             push @messages, { type => 'message', code => 'success_on_insert_category' };
         }
@@ -196,7 +196,7 @@ if ( $op eq 'add_form' ) {
     my $category = Koha::LibraryCategories->find($categorycode);
     if ( my $libraries_count = $category->libraries->count ) {
         push @messages,
-          { type => 'error',
+          { type => 'alert',
             code => 'cannot_delete_category',
             data => { libraries_count => $libraries_count, },
           };
@@ -209,7 +209,7 @@ if ( $op eq 'add_form' ) {
     my $deleted = eval { $category->delete; };
 
     if ( $@ or not $deleted ) {
-        push @messages, { type => 'error', code => 'error_on_delete_category' };
+        push @messages, { type => 'alert', code => 'error_on_delete_category' };
     } else {
         push @messages, { type => 'message', code => 'success_on_delete_category' };
     }

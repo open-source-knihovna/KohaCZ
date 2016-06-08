@@ -22,7 +22,7 @@
 
 #you can use any PDF::API2 module, all you need to do is return the stringifyed pdf object from the printpdf sub.
 package pdfformat::layout2pagesde;
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
 use MIME::Base64;
 use strict;
 use warnings;
@@ -34,9 +34,7 @@ use Koha::Libraries;
 
 BEGIN {
          use Exporter   ();
-         our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-	# set the version for version checking
-         $VERSION     = 1.00;
+         our (@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 	@ISA    = qw(Exporter);
 	@EXPORT = qw(printpdf);
 }

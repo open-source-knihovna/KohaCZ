@@ -37,15 +37,17 @@ use C4::ClassSource;
 use C4::Charset;
 use C4::Linker;
 use C4::OAI::Sets;
+use C4::Debug;
 
 use Koha::Cache;
 use Koha::Authority::Types;
 use Koha::Acquisition::Currencies;
+use Koha::SearchEngine;
 
-use vars qw($VERSION @ISA @EXPORT);
+use vars qw(@ISA @EXPORT);
+use vars qw($debug $cgi_debug);
 
 BEGIN {
-    $VERSION = 3.07.00.049;
 
     require Exporter;
     @ISA = qw( Exporter );
@@ -258,7 +260,7 @@ sub AddBiblio {
 
     # transform the data into koha-table style data
     SetUTF8Flag($record);
-    my $olddata = TransformMarcToKoha( $dbh, $record, $frameworkcode );
+    my $olddata = TransformMarcToKoha( $record, $frameworkcode );
     ( $biblionumber, $error ) = _koha_add_biblio( $dbh, $olddata, $frameworkcode );
     $olddata->{'biblionumber'} = $biblionumber;
     ( $biblioitemnumber, $error ) = _koha_add_biblioitem( $dbh, $olddata );
@@ -341,7 +343,7 @@ sub ModBiblio {
     _koha_marc_update_bib_ids( $record, $frameworkcode, $biblionumber, $biblioitemnumber );
 
     # load the koha-table data object
-    my $oldbiblio = TransformMarcToKoha( $dbh, $record, $frameworkcode );
+    my $oldbiblio = TransformMarcToKoha( $record, $frameworkcode );
 
     # update MARC subfield that stores biblioitems.cn_sort
     _koha_marc_update_biblioitem_cn_sort( $record, $oldbiblio, $frameworkcode );
@@ -925,12 +927,14 @@ Return the ISBD view which can be included in opac and intranet
 sub GetISBDView {
     my ( $biblionumber, $template ) = @_;
     my $record   = GetMarcBiblio($biblionumber, 1);
+    $template ||= '';
+    my $sysprefname = $template eq 'opac' ? 'opacisbd' : 'isbd';
     return unless defined $record;
     my $itemtype = &GetFrameworkCode($biblionumber);
     my ( $holdingbrtagf, $holdingbrtagsubf ) = &GetMarcFromKohaField( "items.holdingbranch", $itemtype );
     my $tagslib = &GetMarcStructure( 1, $itemtype );
 
-    my $ISBD = C4::Context->preference('isbd');
+    my $ISBD = C4::Context->preference($sysprefname);
     my $bloc = $ISBD;
     my $res;
     my $blocres;
@@ -1115,7 +1119,6 @@ $frameworkcode : the framework code to read
 
 sub GetMarcStructure {
     my ( $forlibrarian, $frameworkcode ) = @_;
-    my $dbh = C4::Context->dbh;
     $frameworkcode = "" unless $frameworkcode;
 
     $forlibrarian = $forlibrarian ? 1 : 0;
@@ -1124,6 +1127,7 @@ sub GetMarcStructure {
     my $cached = $cache->get_from_cache($cache_key);
     return $cached if $cached;
 
+    my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare(
         "SELECT tagfield,liblibrarian,libopac,mandatory,repeatable 
         FROM marc_tag_structure 
@@ -1668,7 +1672,6 @@ descriptions rather than normal ones when they exist.
 
 sub GetAuthorisedValueDesc {
     my ( $tag, $subfield, $value, $framework, $tagslib, $category, $opac ) = @_;
-    my $dbh = C4::Context->dbh;
 
     if ( !$category ) {
 
@@ -1688,6 +1691,7 @@ sub GetAuthorisedValueDesc {
         $category = $tagslib->{$tag}->{$subfield}->{'authorised_value'};
     }
 
+    my $dbh = C4::Context->dbh;
     if ( $category ne "" ) {
         my $sth = $dbh->prepare( "SELECT lib, lib_opac FROM authorised_values WHERE category = ? AND authorised_value = ?" );
         $sth->execute( $category, $value );
@@ -2512,7 +2516,7 @@ sub _default_ind_to_space {
 sub TransformHtmlToMarc {
     my ($cgi, $isbiblio) = @_;
 
-    my @params = $cgi->param();
+    my @params = $cgi->multi_param();
 
     # explicitly turn on the UTF-8 flag for all
     # 'tag_' parameters to avoid incorrect character
@@ -2607,7 +2611,7 @@ our $inverted_field_map;
 
 =head2 TransformMarcToKoha
 
-  $result = TransformMarcToKoha( $dbh, $record, $frameworkcode )
+  $result = TransformMarcToKoha( $record, $frameworkcode )
 
 Extract data from a MARC bib record into a hashref representing
 Koha biblio, biblioitems, and items fields. 
@@ -2618,7 +2622,7 @@ hash_ref
 =cut
 
 sub TransformMarcToKoha {
-    my ( $dbh, $record, $frameworkcode, $limit_table ) = @_;
+    my ( $record, $frameworkcode, $limit_table ) = @_;
 
     my $result = {};
     if (!defined $record) {
@@ -2887,31 +2891,60 @@ sub TransformMarcToKohaOneField {
 
 =head2 ModZebra
 
-  ModZebra( $biblionumber, $op, $server );
+  ModZebra( $biblionumber, $op, $server, $record );
 
 $biblionumber is the biblionumber we want to index
 
-$op is specialUpdate or delete, and is used to know what we want to do
+$op is specialUpdate or recordDelete, and is used to know what we want to do
 
 $server is the server that we want to update
+
+$record is the update MARC record if it's available. If it's not supplied
+and is needed, it'll be loaded from the database.
 
 =cut
 
 sub ModZebra {
 ###Accepts a $server variable thus we can use it for biblios authorities or other zebra dbs
-    my ( $biblionumber, $op, $server ) = @_;
+    my ( $biblionumber, $op, $server, $record ) = @_;
+    $debug && warn "ModZebra: update requested for: $biblionumber $op $server\n";
+    if ( C4::Context->preference('SearchEngine') eq 'Elasticsearch' ) {
+
+        # TODO abstract to a standard API that'll work for whatever
+        require Koha::ElasticSearch::Indexer;
+        my $indexer = Koha::ElasticSearch::Indexer->new(
+            {
+                index => $server eq 'biblioserver'
+                ? $Koha::SearchEngine::BIBLIOS_INDEX
+                : $Koha::SearchEngine::AUTHORITIES_INDEX
+            }
+        );
+        if ( $op eq 'specialUpdate' ) {
+            unless ($record) {
+                $record = GetMarcBiblio($biblionumber, 1);
+            }
+            my $records = [$record];
+            $indexer->update_index_background( [$biblionumber], [$record] );
+        }
+        elsif ( $op eq 'recordDelete' ) {
+            $indexer->delete_index_background( [$biblionumber] );
+        }
+        else {
+            croak "ModZebra called with unknown operation: $op";
+        }
+    }
+
     my $dbh = C4::Context->dbh;
 
     # true ModZebra commented until indexdata fixes zebraDB crashes (it seems they occur on multiple updates
     # at the same time
     # replaced by a zebraqueue table, that is filled with ModZebra to run.
     # the table is emptied by rebuild_zebra.pl script (using the -z switch)
-
     my $check_sql = "SELECT COUNT(*) FROM zebraqueue
-                     WHERE server = ?
-                     AND   biblio_auth_number = ?
-                     AND   operation = ?
-                     AND   done = 0";
+    WHERE server = ?
+        AND   biblio_auth_number = ?
+        AND   operation = ?
+        AND   done = 0";
     my $check_sth = $dbh->prepare_cached($check_sql);
     $check_sth->execute( $server, $biblionumber, $op );
     my ($count) = $check_sth->fetchrow_array;
@@ -3467,70 +3500,8 @@ sub ModBiblioMarc {
     $sth = $dbh->prepare("UPDATE biblioitems SET marc=?,marcxml=? WHERE biblionumber=?");
     $sth->execute( $record->as_usmarc(), $record->as_xml_record($encoding), $biblionumber );
     $sth->finish;
-    ModZebra( $biblionumber, "specialUpdate", "biblioserver" );
+    ModZebra( $biblionumber, "specialUpdate", "biblioserver", $record );
     return $biblionumber;
-}
-
-=head2 get_biblio_authorised_values
-
-find the types and values for all authorised values assigned to this biblio.
-
-parameters:
-    biblionumber
-    MARC::Record of the bib
-
-returns: a hashref mapping the authorised value to the value set for this biblionumber
-
-  $authorised_values = {
-                       'Scent'     => 'flowery',
-                       'Audience'  => 'Young Adult',
-                       'itemtypes' => 'SER',
-                        };
-
-Notes: forlibrarian should probably be passed in, and called something different.
-
-=cut
-
-sub get_biblio_authorised_values {
-    my $biblionumber = shift;
-    my $record       = shift;
-
-    my $forlibrarian  = 1;                                 # are we in staff or opac?
-    my $frameworkcode = GetFrameworkCode($biblionumber);
-
-    my $authorised_values;
-
-    my $tagslib = GetMarcStructure( $forlibrarian, $frameworkcode )
-      or return $authorised_values;
-
-    # assume that these entries in the authorised_value table are bibliolevel.
-    # ones that start with 'item%' are item level.
-    my $query = q(SELECT distinct authorised_value, kohafield
-                    FROM marc_subfield_structure
-                    WHERE authorised_value !=''
-                      AND (kohafield like 'biblio%'
-                       OR  kohafield like '') );
-    my $bibliolevel_authorised_values = C4::Context->dbh->selectall_hashref( $query, 'authorised_value' );
-
-    foreach my $tag ( keys(%$tagslib) ) {
-        foreach my $subfield ( keys( %{ $tagslib->{$tag} } ) ) {
-
-            # warn "checking $subfield. type is: " . ref $tagslib->{ $tag }{ $subfield };
-            if ( 'HASH' eq ref $tagslib->{$tag}{$subfield} ) {
-                if ( defined $tagslib->{$tag}{$subfield}{'authorised_value'} && exists $bibliolevel_authorised_values->{ $tagslib->{$tag}{$subfield}{'authorised_value'} } ) {
-                    if ( defined $record->field($tag) ) {
-                        my $this_subfield_value = $record->field($tag)->subfield($subfield);
-                        if ( defined $this_subfield_value ) {
-                            $authorised_values->{ $tagslib->{$tag}{$subfield}{'authorised_value'} } = $this_subfield_value;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    # warn ( Data::Dumper->Dump( [ $authorised_values ], [ 'authorised_values' ] ) );
-    return $authorised_values;
 }
 
 =head2 CountBiblioInOrders

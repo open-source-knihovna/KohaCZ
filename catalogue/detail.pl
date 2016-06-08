@@ -16,8 +16,7 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 
-use strict;
-use warnings;
+use Modern::Perl;
 
 use CGI qw ( -utf8 );
 use C4::Acquisition qw( GetHistory );
@@ -42,7 +41,6 @@ use Koha::DateUtils;
 use C4::HTML5Media;
 use C4::CourseReserves qw(GetItemCourseReservesInfo);
 use C4::Acquisition qw(GetOrdersByBiblionumber);
-
 use Koha::Virtualshelves;
 
 my $query = CGI->new();
@@ -85,9 +83,18 @@ my $showallitems = $query->param('showallitems');
 my $marcflavour  = C4::Context->preference("marcflavour");
 
 # XSLT processing of some stuff
-if (C4::Context->preference("XSLTDetailsDisplay") ) {
-    $template->param('XSLTDetailsDisplay' =>'1',
-        'XSLTBloc' => XSLTParse4Display($biblionumber, $record, "XSLTDetailsDisplay") );
+my $xslfile = C4::Context->preference('XSLTDetailsDisplay');
+my $lang   = $xslfile ? C4::Languages::getlanguage()  : undef;
+my $sysxml = $xslfile ? C4::XSLT::get_xslt_sysprefs() : undef;
+
+if ( $xslfile ) {
+    $template->param(
+        XSLTDetailsDisplay => '1',
+        XSLTBloc => XSLTParse4Display(
+                        $biblionumber, $record, "XSLTDetailsDisplay",
+                        1, undef, $sysxml, $xslfile, $lang
+                    )
+    );
 }
 
 $template->param( 'SpineLabelShowPrintOnBibDetails' => C4::Context->preference("SpineLabelShowPrintOnBibDetails") );
@@ -187,8 +194,24 @@ my $collections    = GetKohaAuthorisedValues('items.ccode'   , $fw);
 my $copynumbers    = GetKohaAuthorisedValues('items.copynumber', $fw);
 my (@itemloop, @otheritemloop, %itemfields);
 my $norequests = 1;
-my $authvalcode_items_itemlost = GetAuthValCode('items.itemlost',$fw);
-my $authvalcode_items_damaged  = GetAuthValCode('items.damaged', $fw);
+
+if ( my $lost_av = GetAuthValCode('items.itemlost', $fw) ) {
+    $template->param( itemlostloop => GetAuthorisedValues( $lost_av ) );
+}
+if ( my $damaged_av = GetAuthValCode('items.damaged', $fw) ) {
+    $template->param( itemdamagedloop => GetAuthorisedValues( $damaged_av ) );
+}
+
+my $materials_authvalcode = GetAuthValCode('items.materials', $fw);
+my %materials_map;
+if ($materials_authvalcode) {
+    my $materials_authvals = GetAuthorisedValues($materials_authvalcode);
+    if ($materials_authvals) {
+        foreach my $value (@$materials_authvals) {
+            $materials_map{$value->{authorised_value}} = $value->{lib};
+        }
+    }
+}
 
 my $analytics_flag;
 my $materials_flag; # set this if the items have anything in the materials field
@@ -207,11 +230,7 @@ foreach my $item (@items) {
                                                : '';
 
     $item->{datedue} = format_sqldatetime($item->{datedue});
-    # item damaged, lost, withdrawn loops
-    $item->{itemlostloop} = GetAuthorisedValues($authvalcode_items_itemlost, $item->{itemlost}) if $authvalcode_items_itemlost;
-    if ($item->{damaged}) {
-        $item->{itemdamagedloop} = GetAuthorisedValues($authvalcode_items_damaged, $item->{damaged}) if $authvalcode_items_damaged;
-    }
+
     #get shelf location and collection code description if they are authorised value.
     # same thing for copy number
     my $shelfcode = $item->{'location'};
@@ -220,7 +239,7 @@ foreach my $item (@items) {
     $item->{'ccode'} = $collections->{$ccode} if ( defined( $ccode ) && defined($collections) && exists( $collections->{$ccode} ) );
     my $copynumber = $item->{'copynumber'};
     $item->{'copynumber'} = $copynumbers->{$copynumber} if ( defined($copynumber) && defined($copynumbers) && exists( $copynumbers->{$copynumber} ) );
-    foreach (qw(ccode enumchron copynumber stocknumber itemnotes uri)) {
+    foreach (qw(ccode enumchron copynumber stocknumber itemnotes itemnotes_nonpublic uri)) {
         $itemfields{$_} = 1 if ( $item->{$_} );
     }
 
@@ -254,7 +273,15 @@ foreach my $item (@items) {
         $item->{nocancel} = 1;
     }
 
-    # item has a host number if its biblio number does not match the current bib
+    foreach my $f (qw( itemnotes )) {
+        if ($item->{$f}) {
+            $item->{$f} =~ s|\n|<br />|g;
+            $itemfields{$f} = 1;
+        }
+    }
+
+    #item has a host number if its biblio number does not match the current bib
+
     if ($item->{biblionumber} ne $biblionumber){
         $item->{hostbiblionumber} = $item->{biblionumber};
 	$item->{hosttitle} = GetBiblioData($item->{biblionumber})->{title};
@@ -268,7 +295,10 @@ foreach my $item (@items) {
     }
 
     if (defined($item->{'materials'}) && $item->{'materials'} =~ /\S/){
-	$materials_flag = 1;
+        $materials_flag = 1;
+        if (defined $materials_map{ $item->{materials} }) {
+            $item->{materials} = $materials_map{ $item->{materials} };
+        }
     }
 
     if ( C4::Context->preference('UseCourseReserves') ) {
@@ -319,7 +349,8 @@ $template->param(
 	itemdata_copynumber => $itemfields{copynumber},
 	itemdata_stocknumber => $itemfields{stocknumber},
 	volinfo				=> $itemfields{enumchron},
-    itemdata_itemnotes  => $itemfields{itemnotes},
+        itemdata_itemnotes  => $itemfields{itemnotes},
+        itemdata_nonpublicnotes => $itemfields{itemnotes_nonpublic},
 	z3950_search_params	=> C4::Search::z3950_search_args($dat),
         hostrecords         => $hostrecords,
 	analytics_flag	=> $analytics_flag,
@@ -370,7 +401,7 @@ $template->param(
     subscriptions       => \@subs,
     subscriptionsnumber => $subscriptionsnumber,
     subscriptiontitle   => $dat->{title},
-    searchid            => $query->param('searchid'),
+    searchid            => scalar $query->param('searchid'),
 );
 
 # $debug and $template->param(debug_display => 1);

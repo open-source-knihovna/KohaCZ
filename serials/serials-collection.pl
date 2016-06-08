@@ -46,7 +46,7 @@ my ($template, $loggedinuser, $cookie)
                             debug => 1,
                             });
 my $biblionumber = $query->param('biblionumber');
-my @subscriptionid = $query->param('subscriptionid');
+my @subscriptionid = $query->multi_param('subscriptionid');
 
 @subscriptionid= uniq @subscriptionid;
 @subscriptionid= sort @subscriptionid;
@@ -119,7 +119,7 @@ if (@subscriptionid){
     $subs->{'abouttoexpire'}=abouttoexpire($subs->{'subscriptionid'});
     $subs->{'subscriptionexpired'}=HasSubscriptionExpired($subs->{'subscriptionid'});
     $subs->{'subscriptionid'} = $subscriptionid;  # FIXME - why was this lost ?
-	$location = GetAuthorisedValues('LOC', $subs->{'location'});
+    $location = $subs->{'location'};
 	$callnumber = $subs->{callnumber};
     my $frequency = C4::Serials::Frequency::GetSubscriptionFrequency($subs->{periodicity});
     my $numberpattern = C4::Serials::Numberpattern::GetSubscriptionNumberpattern($subs->{numberpattern});
@@ -148,14 +148,6 @@ foreach my $subscription (@$subscriptiondescs){
   $biblionumber = $subscription->{'bibnum'} unless ($biblionumber);
 }
 
-# warn "title : $title yearmax : $yearmax nombre d'elements dans le tableau :".scalar(@$subscriptions);
-#  use Data::Dumper; warn Dumper($subscriptions);
-my $locationlib;
-foreach (@$location) {
-    $locationlib = $_->{'lib'} if $_->{'selected'};
-}
-
-
 chop $subscriptionidlist;
 $template->param(
           subscriptionidlist => $subscriptionidlist,
@@ -168,9 +160,9 @@ $template->param(
           suggestion => C4::Context->preference("suggestion"),
           virtualshelves => C4::Context->preference("virtualshelves"),
           routing => C4::Context->preference("RoutingSerials"),
-          subscr=>$query->param('subscriptionid'),
+          subscr=>scalar $query->param('subscriptionid'),
           subscriptioncount => $subscriptioncount,
-          location	       => $locationlib,
+          location => $location,
           callnumber	       => $callnumber,
           uc(C4::Context->preference("marcflavour")) => 1,
           serialsadditems   => $subscriptiondescs->[0]{'serialsadditems'},

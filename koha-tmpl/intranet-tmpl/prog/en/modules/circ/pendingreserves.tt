@@ -7,7 +7,7 @@
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'calendar.inc' %]
 <!-- Plugin datatables -->
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 <script type="text/JavaScript">
 //<![CDATA[
@@ -28,9 +28,9 @@ $(document).ready(function() {
     for ( j=0 ; j<cD.length ; j++ ) {
         var split_array = cD[j].split(/<br>/gi);
         for ( k=0 ; k<split_array.length ; k++ ){
-            var check_array = $.inArray(split_array[k], new_array);
-            if (check_array == -1) {
-                new_array.push(split_array[k]);
+            var str = $.trim(split_array[k].replace(/[\n\r]/g, ''));
+            if ($.inArray(str, new_array) == -1 && str.length > 0 ) {
+                new_array.push(str);
             }
         }
     }
@@ -50,9 +50,6 @@ $(document).ready(function() {
       $(this).html( createSelect( holdst.fnGetColumnData(4) ) );
       $('select', this).change( function () {
           var filter_value = $(this).val();
-          if(filter_value){
-                filter_value = "(^|>)"+filter_value+"($|<)";
-          }
           holdst.fnFilter( filter_value, 4, true );
       } );
   } );

@@ -23,12 +23,8 @@ use warnings;
 use C4::Context;
 use MARC::Record;
 
-use vars qw($VERSION);
-
-BEGIN {
-	# set the version for version checking
-    $VERSION = 3.07.00.049;
-}
+use Koha::SearchEngine;
+use Koha::SearchEngine::Search;
 
 =head1 NAME
 
@@ -656,13 +652,13 @@ sub get_matches {
             else {
                 my $phr = C4::Context->preference('AggressiveMatchOnISBN') ? ',phr' : q{};
                 $query = join( " or ",
-                    map { "$matchpoint->{'index'}$phr=$_" } @source_keys );
+                    map { "$matchpoint->{'index'}$phr=\"$_\"" } @source_keys );
+                    #NOTE: double-quote the values so you don't get a "Embedded truncation not supported" error when a term has a ? in it.
             }
 
-            require C4::Search;
-
+            my $searcher = Koha::SearchEngine::Search->new({index => $Koha::SearchEngine::BIBLIOS_INDEX});
             ( $error, $searchresults, $total_hits ) =
-              C4::Search::SimpleSearch( $query, 0, $max_matches );
+              $searcher->simple_search_compat( $query, 0, $max_matches );
         }
         elsif ( $self->{'record_type'} eq 'authority' ) {
             my $authresults;
@@ -712,7 +708,7 @@ sub get_matches {
         foreach my $marcblob (keys %matches) {
             my $target_record = C4::Search::new_record_from_zebra('biblioserver',$marcblob);
             my $record_number;
-            my $result = C4::Biblio::TransformMarcToKoha(C4::Context->dbh, $target_record, '');
+            my $result = C4::Biblio::TransformMarcToKoha($target_record, '');
             $record_number = $result->{'biblionumber'};
             push @results, { 'record_id' => $record_number, 'score' => $matches{$marcblob} };
         }
@@ -812,7 +808,7 @@ sub _get_match_keys {
             } else {
                 foreach my $subfield ($field->subfields()) {
                     if (exists $component->{'subfields'}->{$subfield->[0]}) {
-                        $string .= " " . $subfield->[1];
+                        $string .= " " . $subfield->[1]; #FIXME: It would be better to create an array and join with a space later...
                     }
                 }
 			}

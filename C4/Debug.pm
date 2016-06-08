@@ -23,11 +23,10 @@ use warnings;
 use Exporter;
 
 # use CGI qw ( -utf8 );
-use vars qw($VERSION @ISA @EXPORT $debug $cgi_debug);
+use vars qw(@ISA @EXPORT $debug $cgi_debug);
 # use vars qw(@EXPORT_OK %EXPORT_TAGS);
 
 BEGIN {
-    $VERSION = 3.07.00.049;	# set the version for version checking
 	@ISA       = qw(Exporter);
 	@EXPORT    = qw($debug $cgi_debug);
 	# @EXPOR_OK    = qw();

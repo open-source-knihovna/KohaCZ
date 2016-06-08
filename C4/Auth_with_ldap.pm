@@ -33,11 +33,10 @@ use List::MoreUtils qw( any );
 use Net::LDAP;
 use Net::LDAP::Filter;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $debug);
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $debug);
 
 BEGIN {
 	require Exporter;
-    $VERSION = 3.07.00.049;	# set the version for version checking
 	@ISA    = qw(Exporter);
 	@EXPORT = qw( checkpw_ldap );
 }
@@ -65,6 +64,15 @@ my @mapkeys = keys %mapping;
 $debug and print STDERR "Got ", scalar(@mapkeys), " ldap mapkeys (  total  ): ", join ' ', @mapkeys, "\n";
 @mapkeys = grep {defined $mapping{$_}->{is}} @mapkeys;
 $debug and print STDERR "Got ", scalar(@mapkeys), " ldap mapkeys (populated): ", join ' ', @mapkeys, "\n";
+
+my %categorycode_conversions;
+my $default_categorycode;
+if(defined $ldap->{categorycode_mapping}) {
+    $default_categorycode = $ldap->{categorycode_mapping}->{default};
+    foreach my $cat (@{$ldap->{categorycode_mapping}->{categorycode}}) {
+        $categorycode_conversions{$cat->{value}} = $cat->{content};
+    }
+}
 
 my %config = (
 	anonymous => ($ldapname and $ldappassword) ? 0 : 1,
@@ -207,25 +215,19 @@ sub checkpw_ldap {
         return 0;   # B2, D2
     }
     if (C4::Context->preference('ExtendedPatronAttributes') && $borrowernumber && ($config{update} ||$config{replicate})) {
-        my @extended_patron_attributes;
         foreach my $attribute_type ( C4::Members::AttributeTypes::GetAttributeTypes() ) {
             my $code = $attribute_type->{code};
-            if ( exists($borrower{$code}) && $borrower{$code} !~ m/^\s*$/ ) { # skip empty values
-                push @extended_patron_attributes, { code => $code, value => $borrower{$code} };
+            unless (exists($borrower{$code}) && $borrower{$code} !~ m/^\s*$/ ) {
+                next;
             }
-        }
-        #Check before add
-        my @unique_attr;
-        foreach my $attr ( @extended_patron_attributes ) {
-            if (C4::Members::Attributes::CheckUniqueness($attr->{code}, $attr->{value}, $borrowernumber)) {
-                push @unique_attr, $attr;
+            if (C4::Members::Attributes::CheckUniqueness($code, $borrower{$code}, $borrowernumber)) {
+                C4::Members::Attributes::UpdateBorrowerAttribute($borrowernumber, {code => $code, value => $borrower{$code}});
             } else {
-                warn "ERROR_extended_unique_id_failed $attr->{code} $attr->{value}";
+                warn "ERROR_extended_unique_id_failed $code $borrower{$code}";
             }
         }
-        C4::Members::Attributes::SetBorrowerAttributes($borrowernumber, \@unique_attr, 'no_branch_limit');
     }
-return(1, $cardnumber, $userid);
+    return(1, $cardnumber, $userid);
 }
 
 # Pass LDAP entry object and local cardnumber (userid).
@@ -262,6 +264,14 @@ sub ldap_entry_2_hash {
 		( substr($borrower{'firstname'},0,1)
   		. substr($borrower{ 'surname' },0,1)
   		. " ");
+
+    # categorycode conversions
+    if(defined $categorycode_conversions{$borrower{categorycode}}) {
+        $borrower{categorycode} = $categorycode_conversions{$borrower{categorycode}};
+    }
+    elsif($default_categorycode) {
+        $borrower{categorycode} = $default_categorycode;
+    }
 
 	# check if categorycode exists, if not, fallback to default from koha-conf.xml
 	my $dbh = C4::Context->dbh;

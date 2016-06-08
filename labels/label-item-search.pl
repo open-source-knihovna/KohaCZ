@@ -36,6 +36,8 @@ use C4::Creators::Lib qw(html_table);
 use C4::Debug;
 use Koha::DateUtils;
 
+use Koha::SearchEngine::Search;
+
 BEGIN {
     $debug = $debug || $cgi_debug;
     if ($debug) {
@@ -107,14 +109,14 @@ if ( $op eq "do_search" ) {
     }
 
     my $offset = $startfrom > 1 ? $startfrom - 1 : 0;
-    ( $error, $marcresults, $total_hits ) =
-      SimpleSearch( $ccl_query, $offset, $resultsperpage );
+    my $searcher = Koha::SearchEngine::Search->new({index => 'biblios'});
+    ( $error, $marcresults, $total_hits ) = $searcher->simple_search_compat($ccl_query, $offset, $resultsperpage);
 
     if (!defined $error && @{$marcresults} ) {
         $show_results = @{$marcresults};
     }
     else {
-        $debug and warn "ERROR label-item-search: no results from SimpleSearch";
+        $debug and warn "ERROR label-item-search: no results from simple_search_compat";
 
         # leave $show_results undef
     }
@@ -132,7 +134,7 @@ if ($show_results) {
         #DEBUG Notes: Decode the MARC record from each resulting MARC record...
         my $marcrecord = C4::Search::new_record_from_zebra( 'biblioserver', $marcresults->[$i] );
         #DEBUG Notes: Transform it to Koha form...
-        my $biblio = TransformMarcToKoha( C4::Context->dbh, $marcrecord, '' );
+        my $biblio = TransformMarcToKoha( $marcrecord, '' );
         #DEBUG Notes: Stuff the bib into @biblio_data...
         push (@results_set, $biblio);
         my $biblionumber = $biblio->{'biblionumber'};

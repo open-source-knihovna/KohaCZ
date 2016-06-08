@@ -228,12 +228,15 @@ $orderinfo->{'list_price'}    ||=  0;
 $orderinfo->{'uncertainprice'} ||= 0;
 $orderinfo->{subscriptionid} ||= undef;
 
+my $basketno=$$orderinfo{basketno};
+my $basket = GetBasket($basketno);
+
 my $user = $input->remote_user;
 
 # create, modify or delete biblio
 # create if $quantity>0 and $existing='no'
 # modify if $quantity>0 and $existing='yes'
-if ( $orderinfo->{quantity} ne '0' ) {
+if ( $basket->{is_standing} || $orderinfo->{quantity} ne '0' ) {
     #TODO:check to see if biblio exists
     unless ( $$orderinfo{biblionumber} ) {
         #if it doesn't create it
@@ -280,13 +283,13 @@ if ( $orderinfo->{quantity} ne '0' ) {
     # now, add items if applicable
     if (C4::Context->preference('AcqCreateItem') eq 'ordering') {
 
-        my @tags         = $input->param('tag');
-        my @subfields    = $input->param('subfield');
-        my @field_values = $input->param('field_value');
-        my @serials      = $input->param('serial');
-        my @itemid       = $input->param('itemid');
-        my @ind_tag      = $input->param('ind_tag');
-        my @indicator    = $input->param('indicator');
+        my @tags         = $input->multi_param('tag');
+        my @subfields    = $input->multi_param('subfield');
+        my @field_values = $input->multi_param('field_value');
+        my @serials      = $input->multi_param('serial');
+        my @itemid       = $input->multi_param('itemid');
+        my @ind_tag      = $input->multi_param('ind_tag');
+        my @indicator    = $input->multi_param('indicator');
         #Rebuilding ALL the data for items into a hash
         # parting them on $itemid.
 
@@ -319,7 +322,6 @@ if ( $orderinfo->{quantity} ne '0' ) {
 
 }
 
-my $basketno=$$orderinfo{basketno};
 my $booksellerid=$$orderinfo{booksellerid};
 if (my $import_batch_id=$$orderinfo{import_batch_id}) {
     print $input->redirect("/cgi-bin/koha/acqui/addorderiso2709.pl?import_batch_id=$import_batch_id&basketno=$basketno&booksellerid=$booksellerid");

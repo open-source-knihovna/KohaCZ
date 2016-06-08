@@ -16,14 +16,14 @@
             <input type="text" size="40" id="contact_email[% contact.id %]" name="contact_email" value="[% contact.email %]" /></li>
         <li><label for="contact_notes[% contact.id %]">Notes: </label>
             <textarea id="contact_notes[% contact.id %]" name="contact_notes" cols="40" rows="4">[% contact.notes %]</textarea></li>
-        <li><label for="contact_acqprimary[% contact.id %]">Primary acquisitions contact</label>
+        <li><label for="contact_acqprimary[% contact.id %]">Primary acquisitions contact:</label>
             [% IF contact.acqprimary %]
                 <input type="checkbox" id="contact_acqprimary[% contact.id %]" class="contact_acqprimary" checked="checked"></input>
             [% ELSE %]
                 <input type="checkbox" id="contact_acqprimary[% contact.id %]" class="contact_acqprimary"></input>
             [% END %]
             <input type="hidden" class="contact_acqprimary_hidden" name="contact_acqprimary" value="[% contact.acqprimary %]"></input>
-        <li><label for="contact_serialsprimary[% contact.id %]">Primary serials contact</label>
+        <li><label for="contact_serialsprimary[% contact.id %]">Primary serials contact:</label>
             [% IF contact.serialsprimary %]
                 <input type="checkbox" id="contact_serialsprimary[% contact.id %]" class="contact_serialsprimary" checked="checked"></input>
             [% ELSE %]
@@ -77,7 +77,7 @@
 
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Vendor [% bookselname %]</title>
-<link rel="stylesheet" type="text/css" href="[% themelang %]/css/datatables.css" />
+<link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'doc-head-close.inc' %]
 [% INCLUDE 'datatables.inc' %]
 
@@ -125,8 +125,8 @@ function delete_contact(ev) {
     $('body').on('click', '.delete-contact', null, delete_contact);
     $('#add-contact').click(add_contact);
     $('body').on('click', '.contact_acqprimary', null, function () {
-        if ($(this).attr('checked') === 'checked') {
-            $('.contact_acqprimary').filter(':checked').not(this).removeAttr('checked');
+        if ($(this).is(':checked')) {
+            $('.contact_acqprimary').filter(':checked').not(this).prop('checked', false);
             $('.contact_acqprimary_hidden').each(function () {
                 $(this).val('0');
             });
@@ -134,19 +134,19 @@ function delete_contact(ev) {
         $(this).next('.contact_acqprimary_hidden').val('1');
     });
     $('body').on('click', '.contact_serialsprimary', null, function () {
-        if ($(this).attr('checked') === 'checked') {
-            $('.contact_serialsprimary').filter(':checked').not(this).removeAttr('checked');
+        if ($(this).is(':checked')) {
+            $('.contact_serialsprimary').filter(':checked').not(this).prop('checked', false);
             $('.contact_serialsprimary_hidden').each(function () {
                 $(this).val('0');
             });
         }
-        $(this).next('.contact_serialsprimary_hidden').val($(this).attr('checked') === 'checked' ? '1' : '0');
+        $(this).next('.contact_serialsprimary_hidden').val($(this).is(':checked') ? '1' : '0');
     });
     $('body').on('click', '.contact_claimacquisition', null, function () {
-        $(this).next('.contact_claimacquisition_hidden').val($(this).attr('checked') === 'checked' ? '1' : '0');
+        $(this).next('.contact_claimacquisition_hidden').val($(this).is(':checked') ? '1' : '0');
     });
     $('body').on('click', '.contact_claimissues', null, function () {
-        $(this).next('.contact_claimissues_hidden').val($(this).attr('checked') === 'checked' ? '1' : '0');
+        $(this).next('.contact_claimissues_hidden').val($(this).is(':checked') ? '1' : '0');
     });
  });
 //]]>
@@ -222,22 +222,22 @@ function delete_contact(ev) {
             <ol>
             <li><label for="list_currency">List prices are: </label>
                 <select name="list_currency" id="list_currency">
-                    [% FOREACH currency IN currencies %]
-                        [% IF booksellerid and currency.currency == listprice or not booksellerid and currency.active %]
-                            <option value="[% currency.currency %]" selected="selected">[% currency.currency %]</option>
-                        [% ELSIF not currency.archived %]
-                            <option value="[% currency.currency %]" selected="selected">[% currency.currency %]</option>
+                    [% FOREACH c IN currencies %]
+                        [% IF booksellerid and c.currency == listprice or not booksellerid and c.active %]
+                            <option value="[% c.currency %]" selected="selected">[% c.currency %]</option>
+                        [% ELSIF not c.archived %]
+                            <option value="[% c.currency %]">[% c.currency %]</option>
                         [% END %]
                     [% END %]
                 </select>
             </li>
             <li><label for="invoice_currency">Invoice prices are: </label>
                 <select name="invoice_currency" id="invoice_currency">
-                    [% FOREACH currency IN currencies %]
-                        [% IF booksellerid and currency.currency == invoiceprice or not booksellerid and currency.active %]
-                            <option value="[% currency.currency %]" selected="selected">[% currency.currency %]</option>
-                        [% ELSIF not currency.archived %]
-                            <option value="[% currency.currency %]" selected="selected">[% currency.currency %]</option>
+                    [% FOREACH c IN currencies %]
+                        [% IF booksellerid and c.currency == invoiceprice or not booksellerid and c.active %]
+                            <option value="[% c.currency %]" selected="selected">[% c.currency %]</option>
+                        [% ELSIF not c.archived %]
+                            <option value="[% c.currency %]">[% c.currency %]</option>
                         [% END %]
                     [% END %]
                 </select>
