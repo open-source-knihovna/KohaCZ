@@ -11,6 +11,9 @@
   "holds": {
     "$ref": "definitions/holds.json"
   },
+  "item": {
+    "$ref": "definitions/item.json"
+  },
   "library": {
     "$ref": "definitions/library.json"
   },

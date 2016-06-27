@@ -47,7 +47,8 @@
       "description": "date and time the hold was last updated"
     },
     "itemnumber": {
-      "$ref": "../x-primitives.json#/itemnumber"
+      "type": "integer",
+      "description": "internally assigned item identifier"
     },
     "waitingdate": {
       "type": ["string", "null"],

@@ -1,4 +1,8 @@
 {
+  "biblioitemnumber": {
+    "type": "integer",
+    "description": "internally assigned biblioitem identifier"
+  },
   "biblionumber": {
     "type": "integer",
     "description": "internally assigned biblio identifier"
@@ -31,7 +35,7 @@
     "description": "patron's first name"
   },
   "itemnumber": {
-    "type": ["integer", "null"],
+    "type": "integer",
     "description": "internally assigned item identifier"
   },
   "phone": {

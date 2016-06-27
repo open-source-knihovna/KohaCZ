@@ -17,6 +17,9 @@
   "/holds/{reserve_id}": {
     "$ref": "paths/holds.json#/~1holds~1{reserve_id}"
   },
+  "/items/{itemnumber}": {
+    "$ref": "paths/items.json#/~1items~1{itemnumber}"
+  },
   "/libraries": {
     "$ref": "paths/libraries.json#/~1libraries"
   },
