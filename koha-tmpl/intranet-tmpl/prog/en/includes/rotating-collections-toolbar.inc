@@ -25,7 +25,7 @@
                         <a class="btn btn-small" href="/cgi-bin/koha/rotating_collections/editCollections.pl?action=edit&amp;colId=[% colId %]"><i class="fa fa-pencil"></i> Edit</a>
                     </div>
                     <div class="btn-group">
-                        <a class="btn btn-small confirmdelete" href="/cgi-bin/koha/rotating_collections/editCollections.pl?action=delete&amp;colId=[% colId %]"><i class="fa fa-remove"></i> Delete</a>
+                        <a class="btn btn-small confirmdelete" href="/cgi-bin/koha/rotating_collections/editCollections.pl?action=delete&amp;colId=[% colId %]"><i class="fa fa-trash"></i> Delete</a>
                     </div>
                 [% END %]
             </div>

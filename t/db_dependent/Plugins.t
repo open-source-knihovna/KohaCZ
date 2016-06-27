@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 21;
+use Test::More tests => 22;
 use File::Basename;
 use FindBin qw($Bin);
 use Archive::Extract;
@@ -34,22 +34,23 @@ ok( $plugin->can('configure'), 'Test plugin can configure' );
 ok( $plugin->can('install'), 'Test plugin can install' );
 ok( $plugin->can('uninstall'), 'Test plugin can install' );
 
-ok( Koha::Plugins::Handler->run({ class => "Koha::Plugin::Test", method => 'report', enable_plugins => 1 }) eq "Koha::Plugin::Test::report", 'Test run plugin report method' );
+is( Koha::Plugins::Handler->run({ class => "Koha::Plugin::Test", method => 'report', enable_plugins => 1 }), "Koha::Plugin::Test::report", 'Test run plugin report method' );
 
 my $metadata = $plugin->get_metadata();
-ok( $metadata->{'name'} eq 'Test Plugin', 'Test $plugin->get_metadata()' );
+is( $metadata->{'name'}, 'Test Plugin', 'Test $plugin->get_metadata()' );
 
-ok( $plugin->get_qualified_table_name('mytable') eq 'koha_plugin_test_mytable', 'Test $plugin->get_qualified_table_name()' );
-ok( $plugin->get_plugin_http_path() eq '/plugin/Koha/Plugin/Test', 'Test $plugin->get_plugin_http_path()' );
+is( $plugin->get_qualified_table_name('mytable'), 'koha_plugin_test_mytable', 'Test $plugin->get_qualified_table_name()' );
+is( $plugin->get_plugin_http_path(), '/plugin/Koha/Plugin/Test', 'Test $plugin->get_plugin_http_path()' );
 
 my @plugins = Koha::Plugins->new({ enable_plugins => 1 })->GetPlugins( 'report' );
-ok( $plugins[0]->get_metadata()->{'name'} eq 'Test Plugin', "Koha::Plugins::GetPlugins functions correctly" );
+my @names = map { $_->get_metadata()->{'name'} } @plugins;
+is( scalar grep( /^Test Plugin$/, @names), 1, "Koha::Plugins::GetPlugins functions correctly" );
 
 SKIP: {
     my $plugins_dir = C4::Context->config("pluginsdir");
-    skip "plugindir not set", 3 unless defined $plugins_dir;
-    skip "plugindir not writable", 3 unless -w $plugins_dir;
-    skip "KitchenSink plugin already installed", 3 if (-f "$plugins_dir/Koha/Plugin/Com/ByWaterSolutions/KitchenSink.pm");
+    skip "plugindir not set", 4 unless defined $plugins_dir;
+    skip "plugindir not writable", 4 unless -w $plugins_dir;
+    # no need to skip further tests if KitchenSink would already exist
 
     my $ae = Archive::Extract->new( archive => "$Bin/KitchenSinkPlugin.kpz", type => 'zip' );
     unless ( $ae->extract( to => $plugins_dir ) ) {
@@ -57,9 +58,12 @@ SKIP: {
     }
     use_ok('Koha::Plugin::Com::ByWaterSolutions::KitchenSink');
     $plugin = Koha::Plugin::Com::ByWaterSolutions::KitchenSink->new({ enable_plugins => 1});
+    my $table = $plugin->get_qualified_table_name( 'mytable' );
 
     ok( -f $plugins_dir . "/Koha/Plugin/Com/ByWaterSolutions/KitchenSink.pm", "KitchenSink plugin installed successfully" );
-    Koha::Plugins::Handler->delete({ class => "Koha::Plugin::Com::ByWaterSolutions::KitchenSink" });
+    Koha::Plugins::Handler->delete({ class => "Koha::Plugin::Com::ByWaterSolutions::KitchenSink", enable_plugins => 1 });
+    my $sth = C4::Context->dbh->table_info( undef, undef, $table, 'TABLE' );
+    my $info = $sth->fetchall_arrayref;
+    is( @$info, 0, "Table $table does no longer exist" );
     ok( !( -f $plugins_dir . "/Koha/Plugin/Com/ByWaterSolutions/KitchenSink.pm" ), "Koha::Plugins::Handler::delete works correctly." );
 }
-

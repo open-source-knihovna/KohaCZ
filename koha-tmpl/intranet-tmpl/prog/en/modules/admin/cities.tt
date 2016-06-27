@@ -146,7 +146,7 @@
         Searching: [% searchfield %]
     [% END %]
 
-    [% IF cities %]
+    [% IF cities.count %]
         <table id="table_cities">
             <thead>
                 <th>City ID</th>
@@ -154,8 +154,7 @@
                 <th>State</th>
                 <th>ZIP/Postal code</th>
                 <th>Country</th>
-                <th>&nbsp;</th>
-                <th>&nbsp;</th>
+                <th>Actions</th>
             </thead>
             <tbody>
                 [% FOREACH city IN cities %]
@@ -165,14 +164,18 @@
                     <td>[% city.city_state %]</td>
                     <td>[% city.city_zipcode %]</td>
                     <td>[% city.city_country %]</td>
-                    <td><a href="/cgi-bin/koha/admin/cities.pl?op=add_form&amp;cityid=[% city.cityid %]">Edit</a></td>
-                    <td><a href="/cgi-bin/koha/admin/cities.pl?op=delete_confirm&amp;cityid=[% city.cityid %]">Delete</a></td>
+                    <td class="actions">
+                        <a class="btn btn-mini" href="/cgi-bin/koha/admin/cities.pl?op=add_form&amp;cityid=[% city.cityid %]"><i class="fa fa-pencil"></i> Edit</a>
+                        <a class="btn btn-mini" href="/cgi-bin/koha/admin/cities.pl?op=delete_confirm&amp;cityid=[% city.cityid %]"><i class="fa fa-trash"></i> Delete</a>
+                    </td>
                 </tr>
                 [% END %]
             </tbody>
         </table>
     [% ELSE %]
-        There is no city defined. <a href="/cgi-bin/koha/admin/cities.pl?op=add_form">Create a new city</a>.
+        <div class="dialog message">
+            There are no cities defined. <a href="/cgi-bin/koha/admin/cities.pl?op=add_form">Create a new city</a>.
+        </div>
     [% END %]
 [% END %]
 

@@ -11495,7 +11495,10 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
             ## We cannot split on multiple values at once,
             ## so let's replace each of those values with __SPLIT__
             if (@splits) {
-                map( $serialseq =~ s/$_/__SPLIT__/, @splits );
+                for my $split_item (@splits) {
+                    my $quoted_split = quotemeta($split_item);
+                    $serialseq =~ s/$quoted_split/__SPLIT__/;
+                }
                 (
                     undef,
                     $enumeration_data{ $indexes[0] // q{} },
@@ -12676,12 +12679,40 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
-$DBversion = "16.056.00.000";
+$DBversion = "16.05.00.001";
 if ( CheckVersion($DBversion) ) {
-        print "Upgrade to $DBversion done (Koha 16.06 - starting a new dev line at KohaCon16 in Thessaloniki, Greece! Koha is great!)\n";
-            SetVersion($DBversion);
+    $dbh->do(q{
+        UPDATE accountlines SET accounttype='HE', description=itemnumber WHERE (description REGEXP '^Hold waiting too long [0-9]+') AND accounttype='F';
+    });
+
+    print "Upgrade to $DBversion done (Bug 16200 - 'Hold waiting too long' fee has a translation problem)\n";
+    SetVersion($DBversion);
 }
 
+$DBversion = "16.05.00.002";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE borrowers
+            ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
+            ON UPDATE CURRENT_TIMESTAMP
+            AFTER privacy_guarantor_checkouts;
+    });
+    $dbh->do(q{
+        ALTER TABLE deletedborrowers
+            ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
+            ON UPDATE CURRENT_TIMESTAMP
+            AFTER privacy_guarantor_checkouts;
+    });
+
+    print "Upgrade to $DBversion done (Bug 10459 - borrowers should have a timestamp)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.05.01.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.05.01)\n";
+    SetVersion($DBversion);
+}
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068

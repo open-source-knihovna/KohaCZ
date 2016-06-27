@@ -11,7 +11,7 @@
                   <a href="[% script_name %]?op=add_form&amp;budget_period_id=[% block_budget_id |html %]"><i class="fa fa-pencil"></i> Edit</a>
               </li>
               <li>
-                  <a href="[% script_name %]?op=delete_confirm&amp;budget_period_id=[% block_budget_id %]"><i class="fa fa-remove"></i> Delete</a>
+                  <a href="[% script_name %]?op=delete_confirm&amp;budget_period_id=[% block_budget_id %]"><i class="fa fa-trash"></i> Delete</a>
               </li>
               <li>
                   <a href="[% script_name %]?op=duplicate_form&amp;budget_period_id=[% block_budget_id %]"><i class="fa fa-copy"></i> Duplicate</a>
@@ -378,9 +378,13 @@
     <fieldset class="action">
         <!-- "save changes" button -->
         <!-- ###################################### -->
-        <input type="button" value="Save changes"  onclick="Check(this.form)"    />
+        <input type="button" value="Save"  onclick="Check(this.form)" />
         <!--             <input type="submit" value="Save Changes"  />  -->
-        [% IF ( budget_period_id ) %]<a href="/cgi-bin/koha/admin/aqbudgets.pl?budget_period_id=[% budget_period_id %]" class="cancel">Cancel</a>[% END %]
+        [% IF ( budget_period_id ) %]
+            <a href="/cgi-bin/koha/admin/aqbudgets.pl?budget_period_id=[% budget_period_id %]" class="cancel">Cancel</a>
+        [% ELSE %]
+            <a href="/cgi-bin/koha/admin/aqbudgetperiods.pl" class="cancel">Cancel</a>
+        [% END %]
     </fieldset>
 
 </form>

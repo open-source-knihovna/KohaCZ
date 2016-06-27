@@ -620,6 +620,7 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `privacy` integer(11) DEFAULT '1' NOT NULL, -- patron/borrower's privacy settings related to their reading history  KEY `borrowernumber` (`borrowernumber`),
   `checkprevissue` varchar(7) NOT NULL default 'inherit', -- produce a warning for this borrower if this item has previously been issued to this borrower if 'yes', not if 'no', defer to category setting if 'inherit'.
   `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
+  `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
   KEY borrowernumber (borrowernumber),
   KEY `cardnumber` (`cardnumber`),
   KEY `sms_provider_id` (`sms_provider_id`)
@@ -1630,6 +1631,7 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `privacy` integer(11) DEFAULT '1' NOT NULL, -- patron/borrower's privacy settings related to their reading history
   `checkprevissue` varchar(7) NOT NULL default 'inherit', -- produce a warning for this borrower if this item has previously been issued to this borrower if 'yes', not if 'no', defer to category setting if 'inherit'.
   `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
+  `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
   UNIQUE KEY `cardnumber` (`cardnumber`),
   PRIMARY KEY `borrowernumber` (`borrowernumber`),
   KEY `categorycode` (`categorycode`),
@@ -3589,6 +3591,7 @@ CREATE TABLE discharges (
 -- This table add the ability to add new fields for a record
 --
 
+DROP TABLE IF EXISTS additional_fields;
 CREATE TABLE `additional_fields` (
   `id` int(11) NOT NULL AUTO_INCREMENT, -- primary key identifier
   `tablename` varchar(255) NOT NULL DEFAULT '', -- tablename of the new field
@@ -3605,6 +3608,7 @@ CREATE TABLE `additional_fields` (
 -- This table store values for additional fields
 --
 
+DROP TABLE IF EXISTS additional_field_values;
 CREATE TABLE `additional_field_values` (
   `id` int(11) NOT NULL AUTO_INCREMENT, -- primary key identifier
   `field_id` int(11) NOT NULL, -- foreign key references additional_fields(id)
