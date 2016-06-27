@@ -38,6 +38,7 @@ The first, traditional OO interface provides the following functions:
 use strict;
 use warnings;
 use Carp;
+use Storable qw(dclone);
 use Module::Load::Conditional qw(can_load);
 use Koha::Cache::Object;
 
@@ -45,6 +46,8 @@ use base qw(Class::Accessor);
 
 __PACKAGE__->mk_ro_accessors(
     qw( cache memcached_cache fastmmap_cache memory_cache ));
+
+our %L1_cache;
 
 =head2 get_instance
 
@@ -225,12 +228,12 @@ The possible options are:
 
 Expiry time of this cached entry in seconds.
 
-=item deepcopy
+=item unsafe
 
-If set, this will perform a deep copy of the item when it's retrieved. This
-means that it'll be safe if something later modifies the result of the
-function. Will be ignored in situations where the same behaviour comes from
-the caching layer anyway.
+If set, this will avoid performing a deep copy of the item. This
+means that it won't be safe if something later modifies the result of the
+function. It should be used with caution, and could save processing time
+in some situations where is safe to use it.
 
 =item cache
 
@@ -250,6 +253,7 @@ sub set_in_cache {
         $new_options->{cache} = $_cache if defined $_cache;
         $options = $new_options;
     }
+    my $unsafe = $options->{unsafe} || 0;
 
     # the key mustn't contain whitespace (or control characters) for memcache
     # but shouldn't be any harm in applying it globally.
@@ -263,7 +267,15 @@ sub set_in_cache {
     my $expiry = $options->{expiry};
     $expiry //= $self->{timeout};
     my $set_sub = $self->{ref($self->{$cache}) . "_set"};
-    # We consider an expiry of 0 to be inifinite
+
+    # Deep copy if it's not a scalar and unsafe is not passed
+    $value = dclone( $value ) if ref($value) and not $unsafe;
+
+    # Set in L1 cache; exit if we are caching an undef
+    $L1_cache{ $key } = $value;
+    return if !defined $value;
+
+    # We consider an expiry of 0 to be infinite
     if ( $expiry ) {
         return $set_sub
           ? $set_sub->( $key, $value, $expiry )
@@ -278,21 +290,58 @@ sub set_in_cache {
 
 =head2 get_from_cache
 
-    my $value = $cache->get_from_cache($key);
+    my $value = $cache->get_from_cache($key, [ $options ]);
 
 Retrieve the value stored under the specified key in the default cache.
+
+The possible options are:
+
+=over
+
+=item unsafe
+
+If set, this will avoid performing a deep copy of the item. This
+means that it won't be safe if something later modifies the result of the
+function. It should be used with caution, and could save processing time
+in some situations where is safe to use it. Make sure you know what you are doing!
+
+=item cache
+
+The cache object to use if you want to provide your own. It should be an
+instance of C<Cache::*> and follow the same interface as L<Cache::Memcache>.
+
+=back
 
 =cut
 
 sub get_from_cache {
-    my ( $self, $key, $cache ) = @_;
+    my ( $self, $key, $options ) = @_;
+    my $cache  = $options->{cache}  || 'cache';
+    my $unsafe = $options->{unsafe} || 0;
     $key =~ s/[\x00-\x20]/_/g;
-    $cache ||= 'cache';
     croak "No key" unless $key;
     $ENV{DEBUG} && carp "get_from_cache for $key";
     return unless ( $self->{$cache} && ref( $self->{$cache} ) =~ m/^Cache::/ );
+
+    # Return L1 cache value if exists
+    if ( exists $L1_cache{$key} ) {
+        # No need to deep copy if it's a scalar
+        # Or if we do not need to deep copy
+        return $L1_cache{$key}
+            if not ref $L1_cache{$key} or $unsafe;
+        return dclone $L1_cache{$key};
+    }
+
     my $get_sub = $self->{ref($self->{$cache}) . "_get"};
-    return $get_sub ? $get_sub->($key) : $self->{$cache}->get($key);
+    my $value = $get_sub ? $get_sub->($key) : $self->{$cache}->get($key);
+
+    # Update the L1 cache when fetching the L2 cache
+    # Otherwise the L1 cache won't ever be populated
+    $L1_cache{$key} = $value;
+
+    $value = dclone $value if ref $L1_cache{$key} and not $unsafe;
+
+    return $value;
 }
 
 =head2 clear_from_cache
@@ -309,6 +358,10 @@ sub clear_from_cache {
     $cache ||= 'cache';
     croak "No key" unless $key;
     return unless ( $self->{$cache} && ref( $self->{$cache} ) =~ m/^Cache::/ );
+
+    # Clear from L1 cache
+    delete $L1_cache{$key};
+
     return $self->{$cache}->delete($key)
       if ( ref( $self->{$cache} ) =~ m'^Cache::Memcached' );
     return $self->{$cache}->remove($key);
@@ -326,9 +379,17 @@ sub flush_all {
     my ( $self, $cache ) = shift;
     $cache ||= 'cache';
     return unless ( $self->{$cache} && ref( $self->{$cache} ) =~ m/^Cache::/ );
+
+    $self->flush_L1_cache();
+
     return $self->{$cache}->flush_all()
       if ( ref( $self->{$cache} ) =~ m'^Cache::Memcached' );
     return $self->{$cache}->clear();
+}
+
+sub flush_L1_cache {
+    my( $self ) = @_;
+    %L1_cache = ();
 }
 
 =head1 TIED INTERFACE

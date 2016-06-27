@@ -453,7 +453,6 @@ sub _build_default_values_for_mod_marc {
     my ($frameworkcode) = @_;
     return $default_values_for_mod_from_marc{$frameworkcode}
       if exists $default_values_for_mod_from_marc{$frameworkcode};
-    my $marc_structure = C4::Biblio::GetMarcStructure( 1, $frameworkcode );
     my $default_values = {
         barcode                  => undef,
         booksellerid             => undef,
@@ -507,7 +506,7 @@ sub ModItemFromMarc {
     my $localitemmarc = MARC::Record->new;
     $localitemmarc->append_fields( $item_marc->field($itemtag) );
     my $item = &TransformMarcToKoha( $dbh, $localitemmarc, $frameworkcode, 'items' );
-    my $default_values = _build_default_values_for_mod_marc();
+    my $default_values = _build_default_values_for_mod_marc($frameworkcode);
     foreach my $item_field ( keys %$default_values ) {
         $item->{$item_field} = $default_values->{$item_field}
           unless exists $item->{$item_field};

@@ -78,11 +78,7 @@ $VERSION = 3.07.00.049;
   &marc2ris
 );
 
-our $utf;
-our $intype;
-our $marcprint;
-our $protoyear;
-
+our $marcprint = 0; # Debug flag;
 
 =head1 marc2bibtex - Convert from UNIMARC to RIS
 
@@ -99,8 +95,7 @@ sub marc2ris {
     my $output;
 
     my $marcflavour = C4::Context->preference("marcflavour");
-    $intype = lc($marcflavour);
-    my $marcprint = 0; # Debug flag;
+    my $intype = lc($marcflavour);
 
     # Let's redirect stdout
     open my $oldout, ">&STDOUT";
@@ -115,7 +110,6 @@ sub marc2ris {
     if ( $intype eq "marc21" ) {
         if ( $leader =~ /^.{9}a/ ) {
             print "<marc>---\r\n<marc>UTF-8 data\r\n" if $marcprint;
-            $utf = 1;
         }
         else {
             print "<marc>---\r\n<marc>MARC-8 data\r\n" if $marcprint;
@@ -167,7 +161,7 @@ sub marc2ris {
 	foreach my $field (@author_fields) {
 	    if (length($field)) {
 		my $author = &get_author($field);
-		print "AU  - ",&charconv($author),"\r\n";
+		print "AU  - ",$author,"\r\n";
 	    }
 	}
 
@@ -193,7 +187,7 @@ sub marc2ris {
 	foreach my $field (@editor_fields) {
 	    if (length($field)) {
 		my $editor = &get_editor($field);
-		print "ED  - ",&charconv($editor),"\r\n";
+		print "ED  - ",$editor,"\r\n";
 	    }
 	}
 
@@ -268,7 +262,7 @@ sub marc2ris {
     @kwpool = uniq @kwpool;
 
     for my $kw ( @kwpool ) {
-        print "KW  - ", &charconv($kw), "\r\n";
+        print "KW  - ", $kw, "\r\n";
     }
 
 	## 5XX have various candidates for notes and abstracts. We pool
@@ -295,7 +289,7 @@ sub marc2ris {
 	my $allnotes = join "; ", @notepool;
 
 	if (length($allnotes) > 0) {
-	    print "N1  - ", &charconv($allnotes), "\r\n";
+	    print "N1  - ", $allnotes, "\r\n";
 	}
 
 	## 320/520 have the abstract
@@ -397,21 +391,13 @@ sub print_typetag {
     ## hints
 
     my %typehash;
-    
-    ## the ukmarc here is just a guess
-    if (! defined $intype) {
-        ## assume MARC21 as default
-        %typehash = %ustypehash;
-    }
-    elsif ($intype eq "marc21" || $intype eq "ukmarc") {
-	%typehash = %ustypehash;
-    }
-    elsif ($intype eq "unimarc") {
-	%typehash = %unitypehash;
+    my $marcflavour = C4::Context->preference("marcflavour");
+    my $intype = lc($marcflavour);
+    if ($intype eq "unimarc") {
+        %typehash = %unitypehash;
     }
     else {
-	## assume MARC21 as default
-	%typehash = %ustypehash;
+        %typehash = %ustypehash;
     }
 
     if (!defined $typeofrecord || !exists $typehash{$typeofrecord}) {
@@ -484,6 +470,8 @@ sub get_author {
 
     ## the sequence of the name parts is encoded either in indicator
     ## 1 (marc21) or 2 (unimarc)
+    my $marcflavour = C4::Context->preference("marcflavour");
+    my $intype = lc($marcflavour);
     if ($intype eq "unimarc") {
 	$indicator = 2;
     }
@@ -554,13 +542,15 @@ $clean_subtitle ||= q{};
 	$clean_title =~ s% *[/:;.]$%%;
 	$clean_subtitle =~ s%^ *(.*) *[/:;.]$%$1%;
 
+    my $marcflavour = C4::Context->preference("marcflavour");
+    my $intype = lc($marcflavour);
 	if (length($clean_title) > 0
 	    || (length($clean_subtitle) > 0 && $intype ne "unimarc")) {
-	    print "TI  - ", &charconv($clean_title);
+	    print "TI  - ", $clean_title;
 
 	    ## subfield $b is relevant only for marc21/ukmarc
 	    if (length($clean_subtitle) > 0 && $intype ne "unimarc") {
-		print ": ",&charconv($clean_subtitle);
+		print ": ",$clean_subtitle;
 	    }
 	    print "\r\n";
 	}
@@ -570,6 +560,7 @@ $clean_subtitle ||= q{};
 	## be written and designated. The field is free-form and resistant
 	## to all parsing efforts, so this information is lost on me
     }
+    return;
 }
 
 ##********************************************************************
@@ -590,16 +581,19 @@ sub print_stitle {
 	$clean_title =~ s% *[/:;.]$%%;
 
 	if (length($clean_title) > 0) {
-	    print "T2  - ", &charconv($clean_title),"\r\n";
+	    print "T2  - ", $clean_title,"\r\n";
 	}
 
+    my $marcflavour = C4::Context->preference("marcflavour");
+    my $intype = lc($marcflavour);
 	if ($intype eq "unimarc") {
 	    print "<marc>Series vol(\$v): ",$titlefield->subfield('v'),"\r\n" if $marcprint;
 	    if (length($titlefield->subfield('v')) > 0) {
-		print "VL  - ", &charconv($titlefield->subfield('v')),"\r\n";
+		print "VL  - ", $titlefield->subfield('v'),"\r\n";
 	    }
 	}
     }
+    return;
 }
 
 ##********************************************************************
@@ -620,7 +614,7 @@ sub print_isbn {
 	}
 
     my $isbn = $isbnfield->subfield('a');
-	print "SN  - ", &charconv($isbn), "\r\n";
+	print "SN  - ", $isbn, "\r\n";
     }
 }
 
@@ -642,7 +636,7 @@ sub print_issn {
 	}
 
 	my $issn = substr($issnfield->subfield('a'), 0, 9);
-	print "SN  - ", &charconv($issn), "\r\n";
+	print "SN  - ", $issn, "\r\n";
     }
 }
 
@@ -654,7 +648,7 @@ sub print_uri {
 
     foreach my $f856 (@f856s) {
         if (my $uri = $f856->subfield('u')) {
-	        print "UR  - ", charconv($uri), "\r\n";
+	        print "UR  - ", $uri, "\r\n";
         }
     }
 }
@@ -671,7 +665,7 @@ sub print_loc_callno {
 	warn("no LOC call number found") if $marcprint;
     }
     else {
-	print "AV  - ", &charconv($callnofield->subfield('a')), " ", &charconv($callnofield->subfield('b')), "\r\n";
+	print "AV  - ", $callnofield->subfield('a'), " ", $callnofield->subfield('b'), "\r\n";
     }
 }
 
@@ -687,7 +681,7 @@ sub print_dewey {
 	warn("no Dewey number found") if $marcprint;
     }
     else {
-	print "U1  - ", &charconv($deweyfield->subfield('a')), " ", &charconv($deweyfield->subfield('2')), "\r\n";
+	print "U1  - ", $deweyfield->subfield('a'), " ", $deweyfield->subfield('2'), "\r\n";
     }
 }
 
@@ -728,6 +722,8 @@ sub print_pubinfo {
 	my $pubsub_publisher;
 	my $pubsub_date;
 
+    my $marcflavour = C4::Context->preference("marcflavour");
+    my $intype = lc($marcflavour);
 	if ($intype eq "unimarc") {
 	    $pubsub_place = "a";
 	    $pubsub_publisher = "c";
@@ -760,7 +756,7 @@ sub print_pubinfo {
 		## the dates are free-form, so we want to extract
 		## a four-digit year and leave the rest as
 		## "other info"
-		$protoyear = @$tuple[1];
+        my $protoyear = @$tuple[1];
 		print "<marc>Year (260\$c): $protoyear\r\n" if $marcprint;
 
 		## strip any separator chars at the end
@@ -801,10 +797,10 @@ sub print_pubinfo {
 
 	## now dump the collected CY and PB lists
 	if (@cities > 0) {
-	    print "CY  - ", &charconv(join(", ", @cities)), "\r\n";
+	    print "CY  - ", join(", ", @cities), "\r\n";
 	}
 	if (@publishers > 0) {
-	    print "PB  - ", &charconv(join(", ", @publishers)), "\r\n";
+	    print "PB  - ", join(", ", @publishers), "\r\n";
 	}
     }
 }
@@ -1004,30 +1000,9 @@ sub print_abstract {
     my $allabs = join "; ", @abstrings;
 
     if (length($allabs) > 0) {
-	print "N2  - ", &charconv($allabs), "\r\n";
+	print "N2  - ", $allabs, "\r\n";
     }
 
 }
 
-    
-    
-##********************************************************************
-## charconv(): converts to a different charset based on a global var
-## Arguments: string
-## Returns: string
-##********************************************************************
-sub charconv {
-    if ($utf) {
-	## return unaltered if already utf-8
-	return @_;
-    }
-    elsif (my $uniout eq "t") {
-	## convert to utf-8
-	return marc8_to_utf8("@_");
-    }
-    else {
-	## return unaltered if no utf-8 requested
-	return @_;
-    }
-}
 1;
