@@ -126,10 +126,12 @@ function addRecord(val, selection,NoMsgAlert) {
     if (write) {
         writeCookie(nameCookie, valCookie);
         if (selection) { // when adding a selection of records
+            updateLink(val,"add");
             return 1;
         }
         if (! NoMsgAlert ) {
             showCartUpdate(MSG_RECORD_ADDED);
+            updateLink(val,"add");
         }
     }
 }
@@ -227,6 +229,18 @@ function selRecord(num, status) {
     document.myform.records.value = str;
 }
 
+function delSingleRecord(biblionumber){
+    var valCookie = readCookie(nameCookie);
+    var arrayRecords = valCookie.split("/");
+    var pos = jQuery.inArray(biblionumber,arrayRecords);
+    arrayRecords.splice(pos,1);
+    valCookie = arrayRecords.join("/");
+    writeCookie( nameCookie, valCookie );
+    updateBasket( arrayRecords.length-1 );
+    updateLink(biblionumber,"del");
+    showCartUpdate(MSG_RECORD_REMOVED);
+}
+
 function delSelRecords() {
     var recordsSel = 0;
     var end = 0;
@@ -243,6 +257,7 @@ function delSelRecords() {
                     num = str.substring(0, s);
                     str = delRecord(num,str);
                     str2 = delRecord(num,str2);
+                    updateLink(num,"del",top.opener);
                 } else {
                     end = 1;
                 }
@@ -308,6 +323,7 @@ function delBasket(context,rep) {
     if (rep) {
         if(context == "popup"){
             delCookie(nameCookie);
+            updateAllLinks(top.opener);
             document.location = "about:blank";
             updateBasket(0,top.opener);
             window.close();
@@ -388,8 +404,7 @@ function updateBasket(updated_value,target) {
 	var basketcount = updated_value;
 }
 
-function openBiblio(dest,biblionumber) {
-    openerURL=dest+"?biblionumber="+biblionumber;
+function openBiblio(openerURL) {
     opener.document.location = openerURL;
     opener.focus();
 }
@@ -439,9 +454,30 @@ function hideCart(){
     $("#cartDetails").fadeOut("fast");
 }
 
+function updateLink(val, op, target){
+    var cart = target ? target.$("#cart" + val) : $("#cart" + val);
+    var cartR = target ? target.$("#cartR" + val) : $("#cartR" + val);
+
+    if(op == "add"){
+        cart.html(MSG_ITEM_IN_CART).addClass("incart");
+        cartR.show();
+    } else {
+        cart.html(MSG_ITEM_NOT_IN_CART).removeClass("incart").addClass("addtocart");
+        cartR.hide();
+    }
+}
+
+function updateAllLinks(target){
+    if(target){
+        target.$("a.incart").html(MSG_ITEM_NOT_IN_CART).removeClass("incart").addClass("addtocart");
+        target.$(".cartRemove").hide();
+    } else {
+        $("a.incart").html(MSG_ITEM_NOT_IN_CART).removeClass("incart").addClass("addtocart");
+        $(".cartRemove").hide();
+    }
+}
+
 $(document).ready(function(){
 	$("#cartmenulink").click(function(){ openBasket(); return false; });
 	if(basketcount){ updateBasket(basketcount); }
 });
-
-

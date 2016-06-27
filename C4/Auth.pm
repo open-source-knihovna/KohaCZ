@@ -1737,8 +1737,13 @@ sub get_session {
     return $session;
 }
 
+
+# FIXME no_set_userenv may be replaced with force_branchcode_for_userenv
+# (or something similar)
+# Currently it's only passed from C4::SIP::ILS::Patron::check_password, but
+# not having a userenv defined could cause a crash.
 sub checkpw {
-    my ( $dbh, $userid, $password, $query, $type ) = @_;
+    my ( $dbh, $userid, $password, $query, $type, $no_set_userenv ) = @_;
     $type = 'opac' unless $type;
     if ($ldap) {
         $debug and print STDERR "## checkpw - checking LDAP\n";
@@ -1778,11 +1783,11 @@ sub checkpw {
     }
 
     # INTERNAL AUTH
-    return checkpw_internal(@_)
+    return checkpw_internal( $dbh, $userid, $password, $no_set_userenv);
 }
 
 sub checkpw_internal {
-    my ( $dbh, $userid, $password ) = @_;
+    my ( $dbh, $userid, $password, $no_set_userenv ) = @_;
 
     $password = Encode::encode( 'UTF-8', $password )
       if Encode::is_utf8($password);
@@ -1812,7 +1817,7 @@ sub checkpw_internal {
         if ( checkpw_hash( $password, $stored_hash ) ) {
 
             C4::Context->set_userenv( "$borrowernumber", $userid, $cardnumber,
-                $firstname, $surname, $branchcode, $branchname, $flags );
+                $firstname, $surname, $branchcode, $branchname, $flags ) unless $no_set_userenv;
             return 1, $cardnumber, $userid;
         }
     }
@@ -1829,7 +1834,7 @@ sub checkpw_internal {
         if ( checkpw_hash( $password, $stored_hash ) ) {
 
             C4::Context->set_userenv( $borrowernumber, $userid, $cardnumber,
-                $firstname, $surname, $branchcode, $branchname, $flags );
+                $firstname, $surname, $branchcode, $branchname, $flags ) unless $no_set_userenv;
             return 1, $cardnumber, $userid;
         }
     }

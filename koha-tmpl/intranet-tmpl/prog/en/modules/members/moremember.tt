@@ -42,7 +42,6 @@ var relatives_borrowernumbers = new Array();
     relatives_borrowernumbers.push("[% b %]");
 [% END %]
 
-var MSG_ADD_MESSAGE = _("Add a new message");
 var MSG_EXPORT_SELECT_CHECKOUTS = _("You must select checkout(s) to export");
 
 columns_settings = [% ColumnsSettings.GetColumns( 'members', 'moremember', 'issues-table', 'json' ) %]
@@ -89,6 +88,9 @@ $(document).ready(function() {
         minDate: 1, // require that renewal date is after today
         hour: 23,
         minute: 59
+    });
+    $("#view_restrictions").on("click",function(){
+        $('#debarments-tab-link').click();
     });
  });
 function uncheck_sibling(me){
@@ -189,7 +191,7 @@ function validate1(date) {
                [% IF ( debarredcomment ) %]
                    with the explanation: <i>[% debarredcomment | html_line_break %]</i>
                [% END %]
-                <a href="#reldebarments" onclick="$('#debarments-tab-link').click()">View restrictions</a>
+                <a href="#reldebarments" id="view_restrictions">View restrictions</a>
             </li>
         [% END %]
         [% IF ( gonenoaddress ) %]<li class="blocker">Patron's address is in doubt.</li>[% END %]

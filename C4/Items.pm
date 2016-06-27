@@ -449,13 +449,14 @@ Returns item record
 
 =cut
 
-our %default_values_for_mod_from_marc;
-
 sub _build_default_values_for_mod_marc {
     my ($frameworkcode) = @_;
-    return $default_values_for_mod_from_marc{$frameworkcode}
-      if exists $default_values_for_mod_from_marc{$frameworkcode};
-    my $marc_structure = C4::Biblio::GetMarcStructure( 1, $frameworkcode );
+
+    my $cache     = Koha::Cache->get_instance();
+    my $cache_key = "default_value_for_mod_marc-$frameworkcode";
+    my $cached    = $cache->get_from_cache($cache_key);
+    return $cached if $cached;
+
     my $default_values = {
         barcode                  => undef,
         booksellerid             => undef,
@@ -487,15 +488,18 @@ sub _build_default_values_for_mod_marc {
         uri                      => undef,
         withdrawn                => 0,
     };
+    my %default_values_for_mod_from_marc;
     while ( my ( $field, $default_value ) = each %$default_values ) {
         my $kohafield = $field;
         $kohafield =~ s|^([^\.]+)$|items.$1|;
-        $default_values_for_mod_from_marc{$frameworkcode}{$field} =
+        $default_values_for_mod_from_marc{$field} =
           $default_value
           if C4::Koha::IsKohaFieldLinked(
             { kohafield => $kohafield, frameworkcode => $frameworkcode } );
     }
-    return $default_values_for_mod_from_marc{$frameworkcode};
+
+    $cache->set_in_cache($cache_key, \%default_values_for_mod_from_marc);
+    return \%default_values_for_mod_from_marc;
 }
 
 sub ModItemFromMarc {
@@ -510,7 +514,7 @@ sub ModItemFromMarc {
     my $localitemmarc = MARC::Record->new;
     $localitemmarc->append_fields( $item_marc->field($itemtag) );
     my $item = &TransformMarcToKoha( $localitemmarc, $frameworkcode, 'items' );
-    my $default_values = _build_default_values_for_mod_marc();
+    my $default_values = _build_default_values_for_mod_marc($frameworkcode);
     foreach my $item_field ( keys %$default_values ) {
         $item->{$item_field} = $default_values->{$item_field}
           unless exists $item->{$item_field};

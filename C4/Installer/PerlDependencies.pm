@@ -101,8 +101,8 @@ our $PERL_DEPS = {
     },
     'Exception::Class' => {
         'usage'    => 'Core',
-        'required' => '1.39',
-        'min_ver'  => '1.39'
+        'required' => '1.38',
+        'min_ver'  => '1.38'
     },
     'HTML::Scrubber' => {
         'usage'    => 'Core',
@@ -251,11 +251,6 @@ our $PERL_DEPS = {
         'usage'    => 'Core',
         'required' => '1',
         'min_ver'  => '0.98'
-    },
-    'Memoize::Memcached' => {
-        'usage'    => 'Memcached Feature (Experimental)',
-        'required' => '0',
-        'min_ver'  => '0.03'
     },
     'Cache::Memcached::Fast' => {
         'usage'    => 'Caching',
@@ -801,6 +796,16 @@ our $PERL_DEPS = {
         'usage'    => 'Load SQL files',
         'required' => '1',
         'min_ver'  => '0.14',
+    },
+    'Lingua::Ispell' => {
+        'usage'    => 'Enhanced Content - Tagging',
+        'required' => '0',
+        'min_ver'  => '0.07'
+    },
+    'WWW::CSRF' => {
+        usage => 'Core',
+        required => 1,
+        min_ver => '1.00',
     },
 };
 

@@ -125,8 +125,6 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user (
     }
 );
 
-my $branches = GetBranches();
-
 my $force_allow_issue = $query->param('forceallow') || 0;
 if (!C4::Auth::haspermission( C4::Context->userenv->{id} , { circulate => 'force_checkout' } )) {
     $force_allow_issue = 0;
@@ -166,7 +164,7 @@ my $stickyduedate  = $query->param('stickyduedate') || $session->param('stickydu
 my $duedatespec    = $query->param('duedatespec')   || $session->param('stickyduedate');
 $duedatespec = eval { output_pref( { dt => dt_from_string( $duedatespec ), dateformat => 'iso' }); }
     if ( $duedatespec );
-my $restoreduedatespec  = $query->param('restoreduedatespec') || $session->param('stickyduedate') || $duedatespec;
+my $restoreduedatespec  = $query->param('restoreduedatespec') || $duedatespec || $session->param('stickyduedate');
 if ( $restoreduedatespec && $restoreduedatespec eq "highholds_empty" ) {
     undef $restoreduedatespec;
 }
@@ -646,6 +644,7 @@ $template->param(
     is_child          => ($borrowernumber && $borrower->{'category_type'} eq 'C'),
     $view             => 1,
     batch_allowed     => $batch_allowed,
+    batch             => $batch,
     AudioAlerts           => C4::Context->preference("AudioAlerts"),
     fast_cataloging   => $fast_cataloging,
     CircAutoPrintQuickSlip   => C4::Context->preference("CircAutoPrintQuickSlip"),
@@ -660,15 +659,10 @@ $template->param(
 my $patron_image = Koha::Patron::Images->find($borrower->{borrowernumber});
 $template->param( picture => 1 ) if $patron_image;
 
-# get authorised values with type of BOR_NOTES
-
-my $canned_notes = GetAuthorisedValues("BOR_NOTES");
-
 $template->param(
     debt_confirmed            => $debt_confirmed,
     SpecifyDueDate            => $duedatespec_allow,
     CircAutocompl             => C4::Context->preference("CircAutocompl"),
-    canned_bor_notes_loop     => $canned_notes,
     debarments                => GetDebarments({ borrowernumber => $borrowernumber }),
     todaysdate                => output_pref( { dt => dt_from_string()->set(hour => 23)->set(minute => 59), dateformat => 'sql' } ),
     modifications             => Koha::Patron::Modifications->GetModifications({ borrowernumber => $borrowernumber }),

@@ -56,6 +56,15 @@
                             [% IF ( cannotedit ) %] <li class="disabled"> [% ELSE %]
                             <li> [% END %]
                             <a href="/cgi-bin/koha/serials/subscription-add.pl?op=dup&amp;subscriptionid=[% subscriptionid %]">Edit as new (duplicate)</a></li>
+
+                            [% IF CAN_user_editcatalogue_edit_catalogue %]
+                                <li><a id="editbiblio" href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% biblionumber %]">Edit record</a></li>
+                            [% END %]
+
+                            [% IF serialsadditems && CAN_user_editcatalogue_edit_items %]
+                                <li><a id="edititems" href="/cgi-bin/koha/cataloguing/additem.pl?biblionumber=[% biblionumber %]">Edit items</a></li>
+                            [% END %]
+
                             [% IF ( CAN_user_serials_delete_subscription ) %]
                             [% IF ( cannotedit ) %] <li class="disabled"> [% ELSE %]
                             <li> [% END %]
@@ -67,7 +76,7 @@
 
         [% IF not cannotedit or CAN_user_serials_receive_serials %]
             [% IF CAN_user_serials_renew_subscription and not closed %]
-                <div class="btn-group"><a id="renew" class="btn btn-small" href="#" onclick="popup([% subscriptionid %])"><i class="fa fa-refresh"></i> Renew</a></div>
+                <div class="btn-group"><a id="renew" class="btn btn-small" href="#"><i class="fa fa-refresh"></i> Renew</a></div>
             [% END %]
             [% IF CAN_user_serials_receive_serials and not closed %]
                 <div class="btn-group"><a id="receive" class="btn btn-small" href="/cgi-bin/koha/serials/serials-edit.pl?subscriptionid=[% subscriptionid %]&amp;serstatus=1,3"><i class="fa fa-inbox"></i> Receive</a></div>

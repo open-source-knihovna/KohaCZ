@@ -11495,7 +11495,10 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
             ## We cannot split on multiple values at once,
             ## so let's replace each of those values with __SPLIT__
             if (@splits) {
-                map( $serialseq =~ s/$_/__SPLIT__/, @splits );
+                for my $split_item (@splits) {
+                    my $quoted_split = quotemeta($split_item);
+                    $serialseq =~ s/$quoted_split/__SPLIT__/;
+                }
                 (
                     undef,
                     $enumeration_data{ $indexes[0] // q{} },
@@ -11625,7 +11628,7 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "3.23.00.012";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
-	INSERT IGNORE INTO systempreferences ( `variable`, `value`, `explanation`, `options`, `type` ) VALUES('MaxSearchResultsItemsPerRecordStatusCheck','20','Max number of items per record for which to check transit and hold status','','Integer')
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `explanation`, `options`, `type` ) VALUES('MaxSearchResultsItemsPerRecordStatusCheck','20','Max number of items per record for which to check transit and hold status','','Integer')
     });
 
     print "Upgrade to $DBversion done (Bug 15380 - Move the authority types related code to Koha::Authority::Type[s] - part 1)\n";
@@ -11635,7 +11638,7 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "3.23.00.013";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
-	INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('StoreLastBorrower','0','','If ON, the last borrower to return an item will be stored in items.last_returned_by','YesNo')
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('StoreLastBorrower','0','','If ON, the last borrower to return an item will be stored in items.last_returned_by','YesNo')
     });
     $dbh->do(q{
 	CREATE TABLE IF NOT EXISTS `items_last_borrower` (
@@ -11659,7 +11662,7 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "3.23.00.014";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
-        INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` )
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` )
 VALUES ('ClaimsBccCopy','0','','Bcc the ClaimAcquisition and ClaimIssues alerts','YesNo')
     });
 
@@ -12046,7 +12049,7 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
 $DBversion = "3.23.00.036";
 if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
     $dbh->do(q{
-    INSERT INTO systempreferences (variable,value,explanation,type) VALUES ('HoldsQueueSkipClosed', '0', 'If enabled, any libraries that are closed when the holds queue is built will be ignored for the purpose of filling holds.', 'YesNo');
+    INSERT IGNORE INTO systempreferences (variable,value,explanation,type) VALUES ('HoldsQueueSkipClosed', '0', 'If enabled, any libraries that are closed when the holds queue is built will be ignored for the purpose of filling holds.', 'YesNo');
     });
     print "Upgrade to $DBversion done (Bug 12803 - Add ability to skip closed libraries when generating the holds queue)\n";
     SetVersion($DBversion);
@@ -12080,7 +12083,7 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
 $DBversion = "3.23.00.038";
 if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
     $dbh->do(q{
-    INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('decreaseLoanHighHoldsControl', 'static', 'static|dynamic', "Chooses between static and dynamic high holds checking", 'Choice'), ('decreaseLoanHighHoldsIgnoreStatuses', '', 'damaged|itemlost|notforloan|withdrawn', "Ignore items with these statuses for dynamic high holds checking", 'Choice');
+    INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('decreaseLoanHighHoldsControl', 'static', 'static|dynamic', "Chooses between static and dynamic high holds checking", 'Choice'), ('decreaseLoanHighHoldsIgnoreStatuses', '', 'damaged|itemlost|notforloan|withdrawn', "Ignore items with these statuses for dynamic high holds checking", 'Choice');
     });
     print "Upgrade to $DBversion done (Bug 14694 - Make decreaseloanHighHolds more flexible)\n";
     SetVersion($DBversion);
@@ -12159,7 +12162,7 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
 $DBversion = "3.23.00.044";
 if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
     $dbh->do(q{
-            INSERT INTO systempreferences (variable,value,explanation,options,type) VALUES
+            INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES
             ('GoogleOpenIDConnect', '0', NULL, 'if ON, allows the use of Google OpenID Connect for login', 'YesNo'),
             ('GoogleOAuth2ClientID', '', NULL, 'Client ID for the web app registered with Google', 'Free'),
             ('GoogleOAuth2ClientSecret', '', NULL, 'Client Secret for the web app registered with Google', 'Free'),
@@ -12547,7 +12550,7 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "3.23.00.056";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
-        INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
         ('NoIssuesChargeGuarantees','','','Define maximum amount withstanding before check outs are blocked','Integer');
     });
 
@@ -12678,17 +12681,83 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "16.06.00.000";
 if ( CheckVersion($DBversion) ) {
-        print "Upgrade to $DBversion done (Koha 16.06 - starting a new dev line at KohaCon16 in Thessaloniki, Greece! Koha is great!)\n";
-            SetVersion($DBversion);
+    print "Upgrade to $DBversion done (Koha 16.06 - starting a new dev line at KohaCon16 in Thessaloniki, Greece! Koha is great!)\n";
+    SetVersion($DBversion);
 }
 
 $DBversion = "16.06.00.001";
 if ( CheckVersion($DBversion) ) {
-        $dbh->do(q{
-                UPDATE accountlines SET accounttype='HE', description=itemnumber WHERE (description REGEXP '^Hold waiting too long [0-9]+') AND accounttype='F';
+    $dbh->do(q{
+        UPDATE accountlines SET accounttype='HE', description=itemnumber WHERE (description REGEXP '^Hold waiting too long [0-9]+') AND accounttype='F';
     });
-            print "Upgrade to $DBversion done (Bug 16200 - 'Hold waiting too long' fee has a translation problem)\n";
-                SetVersion($DBversion);
+
+    print "Upgrade to $DBversion done (Bug 16200 - 'Hold waiting too long' fee has a translation problem)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.002";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE borrowers
+            ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
+            ON UPDATE CURRENT_TIMESTAMP
+            AFTER privacy_guarantor_checkouts;
+    });
+    $dbh->do(q{
+        ALTER TABLE deletedborrowers
+            ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
+            ON UPDATE CURRENT_TIMESTAMP
+            AFTER privacy_guarantor_checkouts;
+    });
+
+    print "Upgrade to $DBversion done (Bug 10459 - borrowers should have a timestamp)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.003";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+        SELECT 'MaxItemsToProcessForBatchMod', value, NULL, 'Process up to a given number of items in a single item modification batch.', 'Integer' FROM systempreferences WHERE variable='MaxItemsForBatch';
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+        SELECT 'MaxItemsToDisplayForBatchDel', value, NULL, 'Display up to a given number of items in a single item deletionbatch.', 'Integer' FROM systempreferences WHERE variable='MaxItemsForBatch';
+    });
+    $dbh->do(q{
+        DELETE FROM systempreferences WHERE variable="MaxItemsForBatch";
+    });
+
+    print "Upgrade to $DBversion done (Bug 11490 - MaxItemsForBatch should be split into two new prefs)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.004';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+         SELECT 'OPACXSLTListsDisplay', COALESCE(value,''), '', 'Enable XSLT stylesheet control over lists pages display on OPAC', 'Free'
+         FROM systempreferences WHERE variable='OPACXSLTResultsDisplay';
+    });
+
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+         SELECT 'XSLTListsDisplay', COALESCE(value,''), '', 'Enable XSLT stylesheet control over lists pages display on intranet', 'Free'
+         FROM systempreferences WHERE variable='XSLTResultsDisplay';
+    });
+
+    print "Upgrade to $DBversion done (Bug 15485: Allow choosing different XSLTs for lists)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.005';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE `systempreferences` set options = 'US|FR|CH' where variable = 'CurrencyFormat';
+    });
+
+    print "Upgrade to $DBversion done (Bug 16768 - Add official number format for Switzerland: 1'234'567.89)\n";
+    SetVersion($DBversion);
 }
 
 

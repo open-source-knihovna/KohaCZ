@@ -1174,8 +1174,9 @@ sub ModSerialStatus {
         }
     }
 
-    # create new waited entry if needed (ie : was a "waited" and has changed)
-    if ( $oldstatus == EXPECTED && $status != EXPECTED ) {
+    # create new expected entry if needed (ie : was "expected" and has changed)
+    my $otherIssueExpected = scalar findSerialsByStatus(EXPECTED, $subscriptionid);
+    if ( !$otherIssueExpected && $oldstatus == EXPECTED && $status != EXPECTED ) {
         my $subscription = GetSubscription($subscriptionid);
         my $pattern = C4::Serials::Numberpattern::GetSubscriptionNumberpattern($subscription->{numberpattern});
 
@@ -1599,7 +1600,7 @@ sub NewIssue {
 
     $subscription_history->recievedlist($recievedlist);
     $subscription_history->missinglist($missinglist);
-    $subscription_history->update();
+    $subscription_history->store();
 
     return $serialid;
 }
@@ -2483,8 +2484,11 @@ sub GetNextDate {
 _numeration returns the string corresponding to $value in the num_type
 num_type can take :
     -dayname
+    -dayabrv
     -monthname
+    -monthabrv
     -season
+    -seasonabrv
 =cut
 
 #'
@@ -2495,7 +2499,7 @@ sub _numeration {
     $num_type //= '';
     $locale ||= 'en';
     my $string;
-    if ( $num_type =~ /^dayname$/ ) {
+    if ( $num_type =~ /^dayname$/ or $num_type =~ /^dayabrv$/ ) {
         # 1970-11-01 was a Sunday
         $value = $value % 7;
         my $dt = DateTime->new(
@@ -2504,19 +2508,27 @@ sub _numeration {
             day     => $value + 1,
             locale  => $locale,
         );
-        $string = $dt->strftime("%A");
-    } elsif ( $num_type =~ /^monthname$/ ) {
+        $string = $num_type =~ /^dayname$/
+            ? $dt->strftime("%A")
+            : $dt->strftime("%a");
+    } elsif ( $num_type =~ /^monthname$/ or $num_type =~ /^monthabrv$/ ) {
         $value = $value % 12;
         my $dt = DateTime->new(
             year    => 1970,
             month   => $value + 1,
             locale  => $locale,
         );
-        $string = $dt->strftime("%B");
+        $string = $num_type =~ /^monthname$/
+            ? $dt->strftime("%B")
+            : $dt->strftime("%b");
     } elsif ( $num_type =~ /^season$/ ) {
         my @seasons= qw( Spring Summer Fall Winter );
         $value = $value % 4;
         $string = $seasons[$value];
+    } elsif ( $num_type =~ /^seasonabrv$/ ) {
+        my @seasonsabrv= qw( Spr Sum Fal Win );
+        $value = $value % 4;
+        $string = $seasonsabrv[$value];
     } else {
         $string = $value;
     }
@@ -2684,6 +2696,25 @@ sub _can_do_on_subscription {
         ;
     }
     return 0;
+}
+
+=head2 findSerialsByStatus
+
+    @serials = findSerialsByStatus($status, $subscriptionid);
+
+    Returns an array of serials matching a given status and subscription id.
+
+=cut
+
+sub findSerialsByStatus {
+    my ( $status, $subscriptionid ) = @_;
+    my $dbh   = C4::Context->dbh;
+    my $query = q| SELECT * from serial
+                    WHERE status = ?
+                    AND subscriptionid = ?
+                |;
+    my $serials = $dbh->selectall_arrayref( $query, { Slice => {} }, $status, $subscriptionid );
+    return @$serials;
 }
 
 1;

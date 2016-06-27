@@ -15,7 +15,7 @@ use C4::Bookseller;
 use C4::Biblio;
 use C4::Budgets;
 use Koha::DateUtils;
-use Test::More tests => 45;
+use Test::More tests => 48;
 
 BEGIN {
     use_ok('C4::Serials');
@@ -173,6 +173,8 @@ is(C4::Serials::ModSubscriptionHistory(), undef, 'test modding subscription hist
 
 is(C4::Serials::ModSerialStatus(),undef, 'test modding serials');
 
+is(C4::Serials::findSerialsByStatus(), 0, 'test finding serial by status with no parameters');
+
 is(C4::Serials::NewIssue(), undef, 'test getting 0 when nothing is entered');
 
 is(C4::Serials::HasSubscriptionStrictlyExpired(), undef, 'test if the subscriptions has expired');
@@ -218,6 +220,8 @@ for my $status ( @statuses ) {
     $counter++;
 }
 # Here we have 15 serials with statuses : 2*2 + 5*3 + 2*4 + 1*41 + 1*42 + 1*43 + 1*44 + 1*5 + 1*1
+my @serialsByStatus = C4::Serials::findSerialsByStatus(2,$subscriptionid);
+is(@serialsByStatus,2,"findSerialsByStatus returns all serials with chosen status");
 ( $total_issues, @serials ) = C4::Serials::GetSerials( $subscriptionid );
 is( $total_issues, @statuses + 1, "GetSerials returns total_issues" );
 my @arrived_missing = map { my $status = $_->{status}; ( grep { /^$status$/ } qw( 2 4 41 42 43 44 5 ) ) ? $_ : () } @serials;
@@ -243,5 +247,29 @@ for my $am ( @arrived_missing ) {
     }
 }
 is( $subscription->{missinglist}, join('; ', @serialseqs), "subscription missinglist is updated after ModSerialStatus" );
+
+subtest "Do not generate an expected if one already exists" => sub {
+    plan tests => 2;
+    my ($expected_serial) = GetSerials2( $subscriptionid, [1] );
+
+    #Find serialid for serial with status Expected
+    my $serialexpected = ( C4::Serials::findSerialsByStatus( 1, $subscriptionid ) )[0];
+
+    #delete serial with status Expected
+    C4::Serials::ModSerialStatus( $serialexpected->{serialid}, $serialexpected->{serialseq}, $publisheddate, $publisheddate, $publisheddate, '1', 'an useless note' );
+    @serialsByStatus = C4::Serials::findSerialsByStatus( 1, $subscriptionid );
+    is( @serialsByStatus, 1, "ModSerialStatus delete corectly serial expected and create another if not exist" );
+
+    # add 1 serial with status=Expected 1
+    C4::Serials::ModSerialStatus( $expected_serial->{serialid}, 'NO.20', $publisheddate, $publisheddate, $publisheddate, '1', 'an useless note' );
+
+    #Now we have two serials it have status expected
+    #put status delete for last serial
+    C4::Serials::ModSerialStatus( $serialexpected->{serialid}, $serialexpected->{serialseq}, $publisheddate, $publisheddate, $publisheddate, '1', 'an useless note' );
+
+    #try if create or not another serial with status is expected
+    @serialsByStatus = C4::Serials::findSerialsByStatus( 1, $subscriptionid );
+    is( @serialsByStatus, 1, "ModSerialStatus delete corectly serial expected and not create another if exists" );
+};
 
 $dbh->rollback;

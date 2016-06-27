@@ -200,12 +200,6 @@ sub GetLettersAvailableForALibrary {
 
 }
 
-# FIXME: using our here means that a Plack server will need to be
-#        restarted fairly regularly when working with this routine.
-#        A better option would be to use Koha::Cache and use a cache
-#        that actually works in a persistent environment, but as a
-#        short-term fix, our will work.
-our %letter;
 sub getletter {
     my ( $module, $code, $branchcode, $message_transport_type ) = @_;
     $message_transport_type //= '%';
@@ -217,10 +211,6 @@ sub getletter {
         $branchcode = C4::Context->userenv->{'branch'};
     }
     $branchcode //= '';
-
-    if ( my $l = $letter{$module}{$code}{$branchcode}{$message_transport_type} ) {
-        return { %$l }; # deep copy
-    }
 
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare(q{
@@ -234,7 +224,6 @@ sub getletter {
     my $line = $sth->fetchrow_hashref
       or return;
     $line->{'content-type'} = 'text/html; charset="UTF-8"' if $line->{is_html};
-    $letter{$module}{$code}{$branchcode}{$message_transport_type} = $line;
     return { %$line };
 }
 
@@ -854,13 +843,13 @@ sub _parseletter {
                     $filter_string_used = $1 || q{};
                     $dateonly = $1 unless $dateonly;
                 }
-                eval {
-                    $replacedby = output_pref({ dt => dt_from_string( $replacedby ), dateonly => $dateonly });
+                my $replacedby_date = eval {
+                    output_pref({ dt => dt_from_string( $replacedby ), dateonly => $dateonly });
                 };
 
                 if ( $letter->{ $letter_field } ) {
-                    $letter->{ $letter_field } =~ s/\Q<<$table.$field$filter_string_used>>\E/$replacedby/g;
-                    $letter->{ $letter_field } =~ s/\Q<<$field$filter_string_used>>\E/$replacedby/g;
+                    $letter->{ $letter_field } =~ s/\Q<<$table.$field$filter_string_used>>\E/$replacedby_date/g;
+                    $letter->{ $letter_field } =~ s/\Q<<$field$filter_string_used>>\E/$replacedby_date/g;
                 }
             }
         }
