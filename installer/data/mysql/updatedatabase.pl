@@ -12816,6 +12816,17 @@ INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `
     SetVersion($DBversion);
 }
 
+$DBversion = '16.06.00.007';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('PatronQuickAddFields', '', 'A list of fields separated by "|" to be displayed along with mandatory fields in the patron quick add form if chosen at patron entry', NULL, 'Free');
+    });
+
+    print "Upgrade to $DBversion done (Bug 3534 - Patron quick add form)\n";
+    SetVersion($DBversion);
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.
