@@ -116,7 +116,7 @@ __PACKAGE__->table("categories");
   extra: {list => ["default","never","forever"]}
   is_nullable: 0
 
-=head2 checkprevissue
+=head2 checkprevcheckout
 
   data_type: 'varchar'
   default_value: 'inherit'
@@ -168,7 +168,7 @@ __PACKAGE__->add_columns(
     extra => { list => ["default", "never", "forever"] },
     is_nullable => 0,
   },
-  "checkprevissue",
+  "checkprevcheckout",
   {
     data_type => "varchar",
     default_value => "inherit",
@@ -267,8 +267,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-01-11 10:41:34
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:5kK5P9C2CvsZkBlQpVjNmA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-07-08 13:37:33
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:LH3DdDDYXaGsNsILAUZzng
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
