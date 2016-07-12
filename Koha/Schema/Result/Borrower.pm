@@ -673,21 +673,6 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 accountoffsets
-
-Type: has_many
-
-Related object: L<Koha::Schema::Result::Accountoffset>
-
-=cut
-
-__PACKAGE__->has_many(
-  "accountoffsets",
-  "Koha::Schema::Result::Accountoffset",
-  { "foreign.borrowernumber" => "self.borrowernumber" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
 =head2 aqbasketusers
 
 Type: has_many
@@ -1334,8 +1319,8 @@ Composing rels: L</aqorder_users> -> ordernumber
 __PACKAGE__->many_to_many("ordernumbers", "aqorder_users", "ordernumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-10-31 10:39:35
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Lc6GQ2E7d+tyzTk3v2sWjQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-07-12 13:45:54
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:AeU4me6MM3qpKLzJryVeQw
 
 __PACKAGE__->belongs_to(
     "guarantor",
