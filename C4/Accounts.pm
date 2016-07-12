@@ -26,6 +26,9 @@ use C4::Members;
 use C4::Circulation qw(ReturnLostItem);
 use C4::Log qw(logaction);
 use Koha::Account;
+use Koha::Account::Line;
+use Koha::Account::Lines;
+use Koha::Account::Offset;
 
 use Data::Dumper qw(Dumper);
 
@@ -118,33 +121,61 @@ EOT
 
 =cut
 
+=head2 chargelostitem
+
+In a default install of Koha the following lost values are set
+1 = Lost
+2 = Long overdue
+3 = Lost and paid for
+
+FIXME: itemlost should be set to 3 after payment is made, should be a warning to the interface that a charge has been added
+FIXME : if no replacement price, borrower just doesn't get charged?
+
+=cut
+
 sub chargelostitem{
-# lost ==1 Lost, lost==2 longoverdue, lost==3 lost and paid for
-# FIXME: itemlost should be set to 3 after payment is made, should be a warning to the interface that
-# a charge has been added
-# FIXME : if no replacement price, borrower just doesn't get charged?
     my $dbh = C4::Context->dbh();
     my ($borrowernumber, $itemnumber, $amount, $description) = @_;
 
     # first make sure the borrower hasn't already been charged for this item
-    my $sth1=$dbh->prepare("SELECT * from accountlines
-    WHERE borrowernumber=? AND itemnumber=? and accounttype='L'");
-    $sth1->execute($borrowernumber,$itemnumber);
-    my $existing_charge_hashref=$sth1->fetchrow_hashref();
+    my $existing_charges = Koha::Account::Lines->search(
+        {
+            borrowernumber => $borrowernumber,
+            itemnumber     => $itemnumber,
+            accounttype    => 'L',
+        }
+    )->count();
 
     # OK, they haven't
-    unless ($existing_charge_hashref) {
+    unless ($existing_charges) {
         my $manager_id = 0;
         $manager_id = C4::Context->userenv->{'number'} if C4::Context->userenv;
         # This item is on issue ... add replacement cost to the borrower's record and mark it returned
         #  Note that we add this to the account even if there's no replacement price, allowing some other
         #  process (or person) to update it, since we don't handle any defaults for replacement prices.
         my $accountno = getnextacctno($borrowernumber);
-        my $sth2=$dbh->prepare("INSERT INTO accountlines
-        (borrowernumber,accountno,date,amount,description,accounttype,amountoutstanding,itemnumber,manager_id)
-        VALUES (?,?,now(),?,?,'L',?,?,?)");
-        $sth2->execute($borrowernumber,$accountno,$amount,
-        $description,$amount,$itemnumber,$manager_id);
+
+        my $accountline = Koha::Account::Line->new(
+            {
+                borrowernumber    => $borrowernumber,
+                accountno         => $accountno,
+                date              => \'NOW()',
+                amount            => $amount,
+                description       => $description,
+                accounttype       => 'L',
+                amountoutstanding => $amount,
+                itemnumber        => $itemnumber,
+                manager_id        => $manager_id,
+            }
+        )->store();
+
+        my $account_offset = Koha::Account::Offset->new(
+            {
+                debit_id => $accountline->id,
+                type     => 'Lost Item',
+                amount   => $amount,
+            }
+        )->store();
 
         if ( C4::Context->preference("FinesLog") ) {
             logaction("FINES", 'CREATE', $borrowernumber, Dumper({
@@ -208,21 +239,29 @@ sub manualinvoice {
         $notifyid = 1;
     }
 
-    if ( $itemnum ) {
-        $desc .= ' ' . $itemnum;
-        my $sth = $dbh->prepare(
-            'INSERT INTO  accountlines
-                        (borrowernumber, accountno, date, amount, description, accounttype, amountoutstanding, itemnumber,notify_id, note, manager_id)
-        VALUES (?, ?, now(), ?,?, ?,?,?,?,?,?)');
-     $sth->execute($borrowernumber, $accountno, $amount, $desc, $type, $amountleft, $itemnum,$notifyid, $note, $manager_id) || return $sth->errstr;
-  } else {
-    my $sth=$dbh->prepare("INSERT INTO  accountlines
-            (borrowernumber, accountno, date, amount, description, accounttype, amountoutstanding,notify_id, note, manager_id)
-            VALUES (?, ?, now(), ?, ?, ?, ?,?,?,?)"
-        );
-        $sth->execute( $borrowernumber, $accountno, $amount, $desc, $type,
-            $amountleft, $notifyid, $note, $manager_id );
-    }
+    my $accountline = Koha::Account::Line->new(
+        {
+            borrowernumber    => $borrowernumber,
+            accountno         => $accountno,
+            date              => \'NOW()',
+            amount            => $amount,
+            description       => $desc,
+            accounttype       => $type,
+            amountoutstanding => $amountleft,
+            itemnumber        => $itemnum || undef,
+            notify_id         => $notifyid,
+            note              => $note,
+            manager_id        => $manager_id,
+        }
+    )->store();
+
+    my $account_offset = Koha::Account::Offset->new(
+        {
+            debit_id => $accountline->id,
+            type     => 'Manual Debit',
+            amount   => $amount,
+        }
+    )->store();
 
     if ( C4::Context->preference("FinesLog") ) {
         logaction("FINES", 'CREATE',$borrowernumber,Dumper({
@@ -308,45 +347,50 @@ sub getrefunds {
     return (@results);
 }
 
+#FIXME: ReversePayment should be replaced with a Void Payment feature
 sub ReversePayment {
-    my ( $accountlines_id ) = @_;
+    my ($accountlines_id) = @_;
     my $dbh = C4::Context->dbh;
 
-    my $sth = $dbh->prepare('SELECT * FROM accountlines WHERE accountlines_id = ?');
-    $sth->execute( $accountlines_id );
-    my $row = $sth->fetchrow_hashref();
-    my $amount_outstanding = $row->{'amountoutstanding'};
+    my $accountline        = Koha::Account::Lines->find($accountlines_id);
+    my $amount_outstanding = $accountline->amountoutstanding;
 
-    if ( $amount_outstanding <= 0 ) {
-        $sth = $dbh->prepare('UPDATE accountlines SET amountoutstanding = amount * -1, description = CONCAT( description, " Reversed -" ) WHERE accountlines_id = ?');
-        $sth->execute( $accountlines_id );
-    } else {
-        $sth = $dbh->prepare('UPDATE accountlines SET amountoutstanding = 0, description = CONCAT( description, " Reversed -" ) WHERE accountlines_id = ?');
-        $sth->execute( $accountlines_id );
-    }
+    my $new_amountoutstanding =
+      $amount_outstanding <= 0 ? $accountline->amount * -1 : 0;
+
+    $accountline->description( $accountline->description . " Reversed -" );
+    $accountline->amountoutstanding($new_amountoutstanding);
+    $accountline->store();
+
+    my $account_offset = Koha::Account::Offset->new(
+        {
+            credit_id => $accountline->id,
+            type      => 'Reverse Payment',
+            amount    => $amount_outstanding - $new_amountoutstanding,
+        }
+    )->store();
 
     if ( C4::Context->preference("FinesLog") ) {
         my $manager_id = 0;
         $manager_id = C4::Context->userenv->{'number'} if C4::Context->userenv;
 
-        if ( $amount_outstanding <= 0 ) {
-            $row->{'amountoutstanding'} *= -1;
-        } else {
-            $row->{'amountoutstanding'} = '0';
-        }
-        $row->{'description'} .= ' Reversed -';
-        logaction("FINES", 'MODIFY', $row->{'borrowernumber'}, Dumper({
-            action                => 'reverse_fee_payment',
-            borrowernumber        => $row->{'borrowernumber'},
-            old_amountoutstanding => $row->{'amountoutstanding'},
-            new_amountoutstanding => 0 - $amount_outstanding,,
-            accountlines_id       => $row->{'accountlines_id'},
-            accountno             => $row->{'accountno'},
-            manager_id            => $manager_id,
-        }));
-
+        logaction(
+            "FINES", 'MODIFY',
+            $accountline->borrowernumber,
+            Dumper(
+                {
+                    action                => 'reverse_fee_payment',
+                    borrowernumber        => $accountline->borrowernumber,
+                    old_amountoutstanding => $amount_outstanding,
+                    new_amountoutstanding => $new_amountoutstanding,
+                    ,
+                    accountlines_id => $accountline->id,
+                    accountno       => $accountline->accountno,
+                    manager_id      => $manager_id,
+                }
+            )
+        );
     }
-
 }
 
 =head2 WriteOffFee
@@ -366,60 +410,89 @@ C<$payment_note> is the note to attach to this payment
 
 sub WriteOffFee {
     my ( $borrowernumber, $accountlines_id, $itemnum, $accounttype, $amount, $branch, $payment_note ) = @_;
+
     $payment_note //= "";
-    $branch ||= C4::Context->userenv->{branch};
     my $manager_id = 0;
-    $manager_id = C4::Context->userenv->{'number'} if C4::Context->userenv;
+
+    if ( C4::Context->userenv ) {
+        $manager_id = C4::Context->userenv->{number};
+        $branch ||= C4::Context->userenv->{branch};
+    }
 
     # if no item is attached to fine, make sure to store it as a NULL
     $itemnum ||= undef;
 
-    my ( $sth, $query );
-    my $dbh = C4::Context->dbh();
-
-    $query = "
-        UPDATE accountlines SET amountoutstanding = 0
-        WHERE accountlines_id = ? AND borrowernumber = ?
-    ";
-    $sth = $dbh->prepare( $query );
-    $sth->execute( $accountlines_id, $borrowernumber );
+    my $accountline = Koha::Account::Lines->find($accountlines_id);
+    return unless $accountline;
+    $accountline->amountoutstanding(0);
+    $accountline->store();
 
     if ( C4::Context->preference("FinesLog") ) {
-        logaction("FINES", 'MODIFY', $borrowernumber, Dumper({
-            action                => 'fee_writeoff',
-            borrowernumber        => $borrowernumber,
-            accountlines_id       => $accountlines_id,
-            manager_id            => $manager_id,
-        }));
+        logaction(
+            "FINES", 'MODIFY',
+            $borrowernumber,
+            Dumper(
+                {
+                    action          => 'fee_writeoff',
+                    borrowernumber  => $borrowernumber,
+                    accountlines_id => $accountlines_id,
+                    manager_id      => $manager_id,
+                }
+            )
+        );
     }
 
-    $query ="
-        INSERT INTO accountlines
-        ( borrowernumber, accountno, itemnumber, date, amount, description, accounttype, manager_id, note )
-        VALUES ( ?, ?, ?, NOW(), ?, 'Writeoff', 'W', ?, ? )
-    ";
-    $sth = $dbh->prepare( $query );
     my $acct = getnextacctno($borrowernumber);
-    $sth->execute( $borrowernumber, $acct, $itemnum, $amount, $manager_id, $payment_note );
+
+    my $writeoff = Koha::Account::Line->new(
+        {
+            borrowernumber => $borrowernumber,
+            accountno      => $acct,
+            itemnumber     => $itemnum || undef,
+            date           => \'NOW()',
+            amount         => $amount * -1,
+            description    => 'Writeoff',
+            accounttype    => 'W',
+            manager_id     => $manager_id,
+            note           => $payment_note,
+        }
+    )->store();
+
+    Koha::Account::Offset->new(
+        {
+            debit_id  => $accountline->id,
+            credit_id => $writeoff->id,
+            type      => 'Writeoff',
+            amount    => $amount * -1,
+        }
+    )->store();
 
     if ( C4::Context->preference("FinesLog") ) {
-        logaction("FINES", 'CREATE',$borrowernumber,Dumper({
-            action            => 'create_writeoff',
-            borrowernumber    => $borrowernumber,
-            accountno         => $acct,
-            amount            => 0 - $amount,
-            accounttype       => 'W',
-            itemnumber        => $itemnum,
-            accountlines_paid => [ $accountlines_id ],
-            manager_id        => $manager_id,
-        }));
+        logaction(
+            "FINES", 'CREATE',
+            $borrowernumber,
+            Dumper(
+                {
+                    action            => 'create_writeoff',
+                    borrowernumber    => $borrowernumber,
+                    accountno         => $acct,
+                    amount            => 0 - $amount,
+                    accounttype       => 'W',
+                    itemnumber        => $itemnum,
+                    accountlines_paid => [$accountlines_id],
+                    manager_id        => $manager_id,
+                }
+            )
+        );
     }
 
-    UpdateStats({
-                branch => $branch,
-                type => 'writeoff',
-                amount => $amount,
-                borrowernumber => $borrowernumber}
+    UpdateStats(
+        {
+            branch         => $branch,
+            type           => 'writeoff',
+            amount         => $amount,
+            borrowernumber => $borrowernumber
+        }
     );
 
 }
