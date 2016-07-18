@@ -1308,8 +1308,7 @@ table of the Koha database.
 sub ModOrder {
     my $orderinfo = shift;
 
-    die "Ordernumber is required"     if $orderinfo->{'ordernumber'} eq  '' ;
-    die "Biblionumber is required"  if  $orderinfo->{'biblionumber'} eq '';
+    die "Ordernumber is required" if $orderinfo->{'ordernumber'} eq '';
 
     my $dbh = C4::Context->dbh;
     my @params;
