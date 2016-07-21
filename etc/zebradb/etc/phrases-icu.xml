@@ -10,6 +10,26 @@
   <transform rule="NFD"/>
   <transform rule="[:Nonspacing Mark:] Remove"/>
   <transform rule="NFC"/>
+  <transliterate rule="{ á > a "/>
+  <transliterate rule="{ Á > a "/>
+  <transliterate rule="{ Ď > d "/>
+  <transliterate rule="{ ď > d "/>
+  <transliterate rule="{ é > e "/>
+  <transliterate rule="{ É > e "/>
+  <transliterate rule="{ ě > e "/>
+  <transliterate rule="{ Ě > e "/>
+  <transliterate rule="{ ň > n "/>
+  <transliterate rule="{ Ň > n "/>
+  <transliterate rule="{ í > i "/>
+  <transliterate rule="{ Í > i "/>
+  <transliterate rule="{ ť > t "/>
+  <transliterate rule="{ Ť > t "/>
+  <transliterate rule="{ ó > o "/>
+  <transliterate rule="{ Ó > s "/>
+  <transliterate rule="{ ú > u "/>
+  <transliterate rule="{ ů > u "/>
+  <transliterate rule="{ Ů > u "/>
+  <transliterate rule="{ Ú > u "/>
   <display/>
   <casemap rule="l"/>
 </icu_chain>

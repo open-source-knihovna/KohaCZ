@@ -1,0 +1,39 @@
+# Koha's Zebra character map file for czech
+#
+encoding utf-8
+# Character sort order definition
+lowercase {0-9}abcčdefgh(ch)ijklmnopqrřsštuvwxyzž
+uppercase {0-9}ABCČDEFGH(Ch)IJKLMNOPQRŘSŠTUVWXYZŽ
+
+# Breaking characters
+space {\001-\040}!"#$%&'\()*+,-./:;<=>?@\[\\]^_`\{|}~{\x88-\x89}
+
+# Characters to be considered equivalent for searching purposes.
+equivalent aáä
+equivalent eéěë
+equivalent dď
+equivalent ií
+equivalent lľ
+equivalent nň
+equivalent oóö
+equivalent tť
+equivalent uůúü
+equivalent yý
+
+# Supplemental mappings
+map (&auml;)        a
+map (&aring;)       a
+map (&ouml;)        o
+map (&Auml;)        A
+map (&Aring;)       A
+map (&Ouml;)        O
+map âàáäÂÀÁÄ        a
+map êèéëÊÈÉË        e
+map îïíÎÏÍ          i
+map ôöóÔÖÓ          o
+map ûùúüÛÜÙÚ        u
+map çÇ              c
+map ñňŇ             n
+map ďĎ              d
+map ťŤ              t
+
