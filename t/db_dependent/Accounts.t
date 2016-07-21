@@ -27,6 +27,7 @@ use t::lib::TestBuilder;
 use Koha::Account;
 use Koha::Account::Lines;
 use Koha::Account::Line;
+use Koha::Account::Offsets;
 
 BEGIN {
     use_ok('C4::Accounts');
@@ -260,7 +261,7 @@ subtest "Koha::Account::pay tests" => sub {
 
 subtest "More Koha::Account::pay tests" => sub {
 
-    plan tests => 6;
+    plan tests => 8;
 
     # Create a borrower
     my $category   = $builder->build({ source => 'Category' })->{ categorycode };
@@ -290,6 +291,10 @@ subtest "More Koha::Account::pay tests" => sub {
     # make the full payment
     $account->pay({ lines => [$line], amount => $amount, library_id => $branch, note => 'A payment note' });
 
+    my $offset = Koha::Account::Offsets->search({ debit_id => $accountline->{accountlines_id} })->next();
+    is( $offset->amount(), '-100.000000', 'Offset amount is -100.00' );
+    is( $offset->type(), 'Payment', 'Offset type is Payment' );
+
     my $stat = $schema->resultset('Statistic')->search({
         branch  => $branch,
         type    => 'payment'
@@ -309,7 +314,7 @@ subtest "More Koha::Account::pay tests" => sub {
 
 subtest "Even more Koha::Account::pay tests" => sub {
 
-    plan tests => 6;
+    plan tests => 8;
 
     # Create a borrower
     my $category   = $builder->build({ source => 'Category' })->{ categorycode };
@@ -339,6 +344,10 @@ subtest "Even more Koha::Account::pay tests" => sub {
     my $line = Koha::Account::Lines->find( $accountline->{ accountlines_id } );
     # make the full payment
     $account->pay({ lines => [$line], amount => $partialamount, library_id => $branch, note => 'A payment note' });
+
+    my $offset = Koha::Account::Offsets->search( { debit_id => $accountline->{ accountlines_id } } )->next();
+    is( $offset->amount, '-60.000000', 'Offset amount is -60.00' );
+    is( $offset->type, 'Payment', 'Offset type is payment' );
 
     my $stat = $schema->resultset('Statistic')->search({
         branch  => $branch,
