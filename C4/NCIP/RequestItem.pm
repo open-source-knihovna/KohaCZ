@@ -21,6 +21,8 @@ package C4::NCIP::RequestItem;
 
 use Modern::Perl;
 
+use Try::Tiny;
+
 =head1 NAME
 
 C4::NCIP::RequestItem - NCIP module for effective processing of RequestItem NCIP service
@@ -188,11 +190,20 @@ sub placeHold {
     C4::NCIP::NcipUtils::print404($query, "User not found..")
         unless $userExists;
 
-    my $reserveId = C4::Reserves::AddReserve(
-        $branch, $userId, $bibId,     'a',
-        undef,   $rank,   $startdate, $expirationdate,
-        $notes,  undef,   $itemId,    $found
-    );
+    my $reserveId;
+    
+    try {
+            $reserveId = C4::Reserves::AddReserve(
+                            $branch, $userId, $bibId,     'a',
+                            undef,   $rank,   $startdate, $expirationdate,
+                            $notes,  undef,   $itemId,    $found
+                            );
+    } catch {
+
+            $reserveId = C4::Reserves::AddReserve(
+                            $branch, $userId, $bibId, 'a'
+                            );
+    };
 
     my $results;
 
