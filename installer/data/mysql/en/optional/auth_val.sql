@@ -40,6 +40,12 @@ INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('CCODE
 -- withdrawn status of an item, linked to items.withdrawn
 INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN','1','Withdrawn');
 
+-- withdrawn reasons for advanced withdrawing mode
+INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','focus','Does not match the focus of the library');
+INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','multi','Multiplicates document');
+INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','damaged','Worn or damaged');
+INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','lost','Lost by reader');
+
 -- loanability status of an item, linked to items.notforloan
 INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('NOT_LOAN','-1','Ordered');
 INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('NOT_LOAN','1','Not For Loan');

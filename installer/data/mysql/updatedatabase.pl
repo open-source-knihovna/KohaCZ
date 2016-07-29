@@ -12760,6 +12760,35 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
+$DBversion = '16.06.00.006';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        DROP TABLE IF EXISTS default_permanent_withdrawal_reason;
+    });
+    $dbh->do(q{
+        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','FOCUS','Does not match the focus of the library');
+    });
+    $dbh->do(q{
+        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','MULTI','Multiplicates document');
+    });
+    $dbh->do(q{
+        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','DAMAGED','Worn or damaged');
+    });
+    $dbh->do(q{
+        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','LOST','Lost by reader');
+    });
+    $dbh->do(q{
+        ALTER TABLE `items`
+        ADD INDEX `booksellerid` (`booksellerid`(32)),
+        ADD INDEX `withdrawn_permanent` (`withdrawn_permanent`);
+    });
+    $dbh->do(q{
+INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('PermanentWithdrawnNumberItemsColumns', 'homebranch', NULL, 'Which columns of items table use to determinate the new withdraw number', 'Free'),
+    });
+
+    print "Upgrade to $DBversion done (Make wihtdrawal reason authorised value)\n";
+    SetVersion($DBversion);
+}
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068

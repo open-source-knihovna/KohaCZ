@@ -60,7 +60,7 @@ if (!defined $op) {
     $op = q{};
 } elsif ($withdrawal) {
     $template_name = "tools/batchMod-withdrawal.tt";
-    $template_flag = { tools => 'items_batchdel' };
+    $template_flag = { tools => 'items_batchmod' };
 } else {
     $template_name = ($del) ? "tools/batchMod-del.tt" : "tools/batchMod-edit.tt";
     $template_flag = ($del) ? { tools => 'items_batchdel' }   : { tools => 'items_batchmod' };
@@ -83,11 +83,6 @@ $restrictededition = 0 if ($restrictededition != 0 && C4::Context->IsSuperLibrar
 
 $template->param(del       => $del);
 $template->param(withdrawal=> $withdrawal);
-
-my $sth = C4::Context->dbh->prepare("SELECT * FROM `default_permanent_withdrawal_reason`");
-$sth->execute();
-
-$template->param(withdrawal_options => $sth->fetchall_arrayref({}));
 $template->param(withdrawn_categorycode => $withdrawn_categorycode);
 
 my $itemrecord;
@@ -97,7 +92,7 @@ my $items_display_hashref;
 our $tagslib = &GetMarcStructure(1);
 
 my $deleted_items = 0;     # Number of deleted items
-my $withdrawn_items = 0;     # Number of deleted items
+my $withdrawn_items = 0;     # Number of withdrawned items
 my $deleted_records = 0;   # Number of deleted records ( with no items attached )
 my $not_deleted_items = 0; # Number of items that could not be deleted
 my @not_deleted;           # List of the itemnumbers that could not be deleted
@@ -206,11 +201,19 @@ if ($op eq "action") {
 
 		     $item_changes->{'withdrawn'} = 1;
 
-	             my $sth = $dbh->prepare("
-                             SELECT MAX(CAST( withdrawn_permanent AS UNSIGNED INT)) AS max
+	             my $sql="SELECT MAX(CAST( withdrawn_permanent AS UNSIGNED INT)) AS max
                              FROM items
-                             WHERE withdrawn_permanent IS NOT NULL;");
-                     $sth->execute();
+                             WHERE withdrawn_permanent IS NOT NULL";
+
+                     my @columns = split('\|', C4::Context->preference('PermanentWithdrawnNumberItemsColumns'));
+                     my @params;
+                     foreach my $column ( @columns ) {
+                         $sql = $sql." AND ".$column." = ?";
+                         push @params, $itemdata->{$column};
+                     }
+
+                     my $sth = $dbh->prepare($sql);
+                     $sth->execute(@params);
 
                      my $max = $sth->fetchrow;
                      if (!$max) {
