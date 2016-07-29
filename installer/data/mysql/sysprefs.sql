@@ -358,6 +358,7 @@ INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `
 ('PatronSelfRegistrationExpireTemporaryAccountsDelay','0',NULL,'If PatronSelfRegistrationDefaultCategory is enabled, this system preference controls how long a patron can have a temporary status before the account is deleted automatically. It is an integer value representing a number of days to wait before deleting a temporary patron account. Setting it to 0 disables the deleting of temporary accounts.','Integer'),
 ('PatronSelfRegistrationVerifyByEmail','0',NULL,'If enabled, any patron attempting to register themselves via the OPAC will be required to verify themselves via email to activate his or her account.','YesNo'),
 ('PatronsPerPage','20','20','Number of Patrons Per Page displayed by default','Integer'),
+('PermanentWithdrawnNumberItemsColumns', 'homebranch', NULL, 'Which columns of items table use to determinate the new withdraw number', 'Free'),
 ('Persona','0','','Use Mozilla Persona for login','YesNo'),
 ('PrefillItem','0','','When a new item is added, should it be prefilled with last created item values?','YesNo'),
 ('previousIssuesDefaultSortOrder','asc','asc|desc','Specify the sort order of Previous Issues on the circulation page','Choice'),

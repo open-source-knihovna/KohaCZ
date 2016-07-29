@@ -21,7 +21,7 @@ for( x=0; x<allColumns.length; x++ ){
 <style type="text/css">#selections { display: none; }</style>
 <![endif]-->
 </head>
-<body id="tools_batchMod-del" class="tools">
+<body id="tools_batchMod-withdraw" class="tools">
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'cat-search.inc' %]
 
@@ -126,15 +126,10 @@ for( x=0; x<allColumns.length; x++ ){
 [% END %]
 
 [% IF ( itemresults ) %]
-		<div id="cataloguing_additem_newitem">
+        <div>
 	     <input type="hidden" name="op" value="[% op %]" />
 	     <p>This will withdraw [% IF ( too_many_items ) %]all the[% ELSE %]the selected[% END %] items.</p>
-             <p>Selected withdrawal type is <b>
-		[% FOREACH withdrawal_option IN withdrawal_options %]
-			[% IF withdrawal_option.categorycode == withdrawn_categorycode %]
-				[% withdrawal_option.description %]
-			[% END %]
-		[% END %]
+             <p>Selected withdrawal type is <b>	[% withdrawn_categorycode %]
              </b></p>
 	     <input type="hidden" name="withdrawn_categorycode" value="[% withdrawn_categorycode %]" />
 	     <input type="hidden" name="withdrawal" value="1" />
@@ -143,7 +138,6 @@ for( x=0; x<allColumns.length; x++ ){
 		    <div id="jobstatus">Job progress: <div id="jobprogress"></div> <span id="jobprogresspercent">0</span>%</div>
 		    <div id="jobfailed"></div>
 		</div>
-        <input type="checkbox" name="del_records" id="del_records" /> <label for="del_records">Withdraw records if no items remain.</label>
         [% IF too_many_items %]
             <input type="submit" name="mainformsubmit" value="Withdraw ALL submitted items" onclick="return submitBackgroundJob(this.form);" />
         [% ELSE %]
@@ -163,7 +157,6 @@ for( x=0; x<allColumns.length; x++ ){
 [% IF ( action ) %]
 	<div class="dialog message">
             <p>[% withdrawn_items %] item(s) withdrawn.</p>
-            [% IF delete_records %] <p>[% deleted_records %] record(s) deleted.</p> [% END %]
         </div>
 	[% IF ( not_deleted_items ) %]
 	<div style="width:55%;margin:auto;">

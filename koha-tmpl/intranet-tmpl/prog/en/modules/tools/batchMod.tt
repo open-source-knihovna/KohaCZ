@@ -48,14 +48,10 @@
 
                             [% IF withdrawal %]
                                 <fieldset class="rows">
-                                    <legend>Common withdrawal reason</legend>
+                                    <legend>Withdrawal reason</legend>
 					<ol><li>
 					<label>Withdrawal reason:</label>
-                                        <select name="withdrawn_categorycode">
-                                                [% FOREACH withdrawal_option IN withdrawal_options %]
-                                                        <option value="[% withdrawal_option.categorycode %]">[% withdrawal_option.description %]</option>
-                                                [% END %]
-                                        <select>
+                                        [% PROCESS 'av-build-dropbox.inc' name="withdrawn_categorycode", category="WITHDRAWN_REASON", default="focus", all=0 %]
 					</li></ol>
                                 </fieldset>
                             [% ELSIF ! del %]
