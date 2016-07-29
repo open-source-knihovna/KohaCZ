@@ -142,6 +142,10 @@ Cataloging:
                   no: "Don't use"
             - permanent withdrawal mode for withdrawing items. This generates an unique withdrawal number.
         -
+            - Use these
+            - pref: PermanentWithdrawnNumberItemsColumns
+            - "items table columns to determine which withdrawn number should be set to withdrawned item (use '|' for dividing more then on column)."
+        -
             - pref: UseControlNumber
               choices:
                   yes: Use
