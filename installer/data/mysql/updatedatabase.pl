@@ -11726,7 +11726,7 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
-$DBversion = '16.06.00.006';
+$DBversion = '3.22.08.001';
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
         DROP TABLE IF EXISTS default_permanent_withdrawal_reason;
