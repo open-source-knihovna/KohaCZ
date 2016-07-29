@@ -912,7 +912,7 @@ CREATE TABLE `items` ( -- holdings/item information
   KEY `itemcallnumber` (`itemcallnumber`),
   KEY `items_location` (`location`),
   KEY `items_ccode` (`ccode`),
-  KEY `itype_idx` (`itype`,,
+  KEY `itype_idx` (`itype`),
   KEY `booksellerid` (`booksellerid`(32)),
   KEY `withdrawn_permanent` (`withdrawn_permanent`),
   CONSTRAINT `items_ibfk_1` FOREIGN KEY (`biblioitemnumber`) REFERENCES `biblioitems` (`biblioitemnumber`) ON DELETE CASCADE ON UPDATE CASCADE,
