@@ -11726,22 +11726,22 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
-$DBversion = '3.22.08.001';
+$DBversion = "3.22.08.001";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
         DROP TABLE IF EXISTS default_permanent_withdrawal_reason;
     });
     $dbh->do(q{
-        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','FOCUS','Does not match the focus of the library');
+        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','focus','Does not match the focus of the library');
     });
     $dbh->do(q{
-        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','MULTI','Multiplicates document');
+        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','multi','Multiplicates document');
     });
     $dbh->do(q{
-        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','DAMAGED','Worn or damaged');
+        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','damaged','Worn or damaged');
     });
     $dbh->do(q{
-        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','LOST','Lost by reader');
+        INSERT INTO `authorised_values` (category, authorised_value, lib) VALUES ('WITHDRAWN_REASON','lost','Lost by reader');
     });
     $dbh->do(q{
         ALTER TABLE `items`
