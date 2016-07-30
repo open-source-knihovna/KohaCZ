@@ -11723,11 +11723,6 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "3.22.08.000";
 if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Koha 3.22.8)\n";
-    SetVersion($DBversion);
-}
-
-$DBversion = "3.22.08.001";
-if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
         DROP TABLE IF EXISTS default_permanent_withdrawal_reason;
     });
@@ -11749,7 +11744,7 @@ if ( CheckVersion($DBversion) ) {
         ADD INDEX `withdrawn_permanent` (`withdrawn_permanent`);
     });
     $dbh->do(q{
-INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('PermanentWithdrawnNumberItemsColumns', 'homebranch', NULL, 'Which columns of items table use to determinate the new withdraw number', 'Free'),
+INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('PermanentWithdrawnNumberItemsColumns', 'homebranch', NULL, 'Which columns of items table use to determinate the new withdraw number', 'Free');
     });
 
     print "Upgrade to $DBversion done (Make wihtdrawal reason authorised value)\n";
