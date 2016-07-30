@@ -26,7 +26,6 @@ use C4::Koha;
 use C4::Charset;
 use MARC::File::USMARC;
 use C4::ImportBatch;
-use C4::AuthoritiesMarc qw(GuessAuthTypeCode FindDuplicateAuthority);
 use C4::Languages;
 use Koha::Database;
 use Koha::XSLT_Handler;
@@ -454,7 +453,7 @@ sub ImportBreedingAuth {
             $heading = C4::AuthoritiesMarc::GetAuthorizedHeading({ record => $marcrecord });
 
             my $heading_authtype_code;
-            $heading_authtype_code = GuessAuthTypeCode($marcrecord);
+            $heading_authtype_code = C4::AuthoritiesMarc::GuessAuthTypeCode($marcrecord);
 
             my $controlnumber;
             $controlnumber = $marcrecord->field('001')->data;
@@ -462,7 +461,7 @@ sub ImportBreedingAuth {
             #Check if the authority record already exists in the database...
             my ($duplicateauthid,$duplicateauthvalue);
             if ($marcrecord && $heading_authtype_code) {
-                ($duplicateauthid,$duplicateauthvalue) = FindDuplicateAuthority( $marcrecord, $heading_authtype_code);
+                ($duplicateauthid,$duplicateauthvalue) = C4::AuthoritiesMarc::FindDuplicateAuthority( $marcrecord, $heading_authtype_code);
             }
 
             if ($duplicateauthid && $overwrite_auth ne 2) {
@@ -665,7 +664,7 @@ sub Z3950SearchAuth {
 
                             my $heading;
                             my $heading_authtype_code;
-                            $heading_authtype_code = GuessAuthTypeCode($marcrecord);
+                            $heading_authtype_code = C4::AuthoritiesMarc::GuessAuthTypeCode($marcrecord);
                             $heading = C4::AuthoritiesMarc::GetAuthorizedHeading({ record => $marcrecord });
 
                             my ($notmarcrecord, $alreadyindb, $alreadyinfarm, $imported, $breedingid)= ImportBreedingAuth( $marcdata, 2, $serverhost[$k], $encoding[$k], $random, 'z3950' );
