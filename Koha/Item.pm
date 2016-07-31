@@ -24,6 +24,11 @@ use Carp;
 use Koha::Database;
 
 use Koha::Item::Transfer;
+use C4::Context;
+use Koha::Holds;
+use Koha::Issues;
+use Koha::Item::Availability;
+use Koha::ItemTypes;
 use Koha::Patrons;
 use Koha::Libraries;
 
@@ -39,6 +44,160 @@ Koha::Item - Koha Item object class
 
 =cut
 
+=head3 availabilities
+
+my $available = $item->availabilities();
+
+Gets different availability types, generally, without considering patron status.
+
+Returns HASH containing Koha::Item::Availability objects for each availability
+type. Currently implemented availabilities are:
+    * hold
+    * checkout
+    * local_use
+    * onsite_checkout
+
+=cut
+
+sub availabilities {
+    my ( $self, $params ) = @_;
+
+    my $availabilities; # HASH containing different types of availabilities
+    my $availability = Koha::Item::Availability->new->set_available;
+
+    $availability->set_unavailable("withdrawn") if $self->withdrawn;
+    $availability->set_unavailable("itemlost") if $self->itemlost;
+    $availability->set_unavailable("restricted") if $self->restricted;
+
+    if ($self->damaged) {
+        if (C4::Context->preference('AllowHoldsOnDamagedItems')) {
+            $availability->add_description("damaged");
+        } else {
+            $availability->set_unavailable("damaged");
+        }
+    }
+
+    my $itemtype;
+    if (C4::Context->preference('item-level_itypes')) {
+        $itemtype = Koha::ItemTypes->find( $self->itype );
+    } else {
+        my $biblioitem = Koha::Biblioitems->find( $self->biblioitemnumber );
+        $itemtype = Koha::ItemTypes->find( $biblioitem->itemype );
+    }
+
+    if ($self->notforloan > 0 || $itemtype && $itemtype->notforloan) {
+        $availability->set_unavailable("notforloan");
+    } elsif ($self->notforloan < 0) {
+        $availability->set_unavailable("ordered");
+    }
+
+    # Hold
+    $availabilities->{'hold'} = $availability->clone;
+
+    # Checkout
+    if ($self->onloan) {
+        my $issue = Koha::Issues->search({ itemnumber => $self->itemnumber })->next;
+        $availability->set_unavailable("onloan", $issue->date_due) if $issue;
+    }
+
+    if (Koha::Holds->search( [
+            { itemnumber => $self->itemnumber },
+            { found => [ '=', 'W', 'T' ] }
+            ])->count()) {
+        $availability->set_unavailable("reserved");
+    }
+
+    $availabilities->{'checkout'} = $availability->clone;
+
+    # Local Use,
+    if (grep(/^notforloan$/, @{$availability->{description}})
+        && @{$availability->{description}} == 1) {
+        $availabilities->{'local_use'} = $availability->clone->set_available
+                                            ->del_description("notforloan");
+    } else {
+        $availabilities->{'local_use'} = $availability->clone
+                                            ->del_description("notforloan");
+    }
+
+    # On-site checkout
+    if (!C4::Context->preference('OnSiteCheckouts')) {
+        $availabilities->{'onsite_checkout'}
+        = Koha::Item::Availability->new
+        ->set_unavailable("onsite_checkouts_disabled");
+    } else {
+        $availabilities->{'onsite_checkout'}
+        = $availabilities->{'local_use'}->clone;
+    }
+
+    return $availabilities;
+}
+
+=head3 availability_for_checkout
+
+my $available = $item->availability_for_checkout();
+
+Gets checkout availability of the item. This subroutine does not check patron
+status, instead the purpose is to check general availability for this item.
+
+Returns Koha::Item::Availability object.
+
+=cut
+
+sub availability_for_checkout {
+    my ( $self ) = @_;
+
+    return $self->availabilities->{'checkout'};
+}
+
+=head3 availability_for_local_use
+
+my $available = $item->availability_for_local_use();
+
+Gets local use availability of the item.
+
+Returns Koha::Item::Availability object.
+
+=cut
+
+sub availability_for_local_use {
+    my ( $self ) = @_;
+
+    return $self->availabilities->{'local_use'};
+}
+
+=head3 availability_for_onsite_checkout
+
+my $available = $item->availability_for_onsite_checkout();
+
+Gets on-site checkout availability of the item.
+
+Returns Koha::Item::Availability object.
+
+=cut
+
+sub availability_for_onsite_checkout {
+    my ( $self ) = @_;
+
+    return $self->availabilities->{'onsite_checkout'};
+}
+
+=head3 availability_for_reserve
+
+my $available = $item->availability_for_reserve();
+
+Gets reserve availability of the item. This subroutine does not check patron
+status, instead the purpose is to check general availability for this item.
+
+Returns Koha::Item::Availability object.
+
+=cut
+
+sub availability_for_reserve {
+    my ( $self ) = @_;
+
+    return $self->availabilities->{'hold'};
+}
+
 =head3 effective_itemtype
 
 Returns the itemtype for the item based on whether item level itemtypes are set or not.
@@ -49,6 +208,18 @@ sub effective_itemtype {
     my ( $self ) = @_;
 
     return $self->_result()->effective_itemtype();
+}
+
+=head3 hold_queue_length
+
+=cut
+
+sub hold_queue_length {
+    my ( $self ) = @_;
+
+    my $reserves = Koha::Holds->search({ itemnumber => $self->itemnumber });
+    return $reserves->count() if $reserves;
+    return 0;
 }
 
 =head3 home_branch

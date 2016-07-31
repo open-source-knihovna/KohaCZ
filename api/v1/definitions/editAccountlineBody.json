@@ -1,0 +1,17 @@
+{
+    "type": "object",
+        "properties": {
+            "amount": {
+                "description": "Amount"
+            },
+            "amountoutstanding": {
+                "description": "Amount outstanding"
+            },
+            "note": {
+                "description": "Accountline note"
+            },
+            "meansofpayment": {
+                "description": "Means of payment"
+            }
+      }
+}

@@ -1,0 +1,51 @@
+{
+    "type": "object",
+    "properties": {
+        "issue_id": {
+          "type": "string",
+          "description": "internally assigned checkout identifier"
+        },
+        "borrowernumber": {
+            "type": ["string", "null"],
+            "description": "internally assigned user identifier"
+        },
+        "itemnumber": {
+            "type": ["string", "null"],
+            "description": "internally assigned item identifier"
+        },
+        "date_due": {
+            "description": "Due date"
+        },
+        "branchcode": {
+            "type": ["string", "null"],
+            "description": "code of patron's home branch"
+        },
+        "issuingbranch": {
+            "description": "Code of the branch where issue was made"
+        },
+        "returndate": {
+            "description": "Date the item was returned"
+        },
+        "lastreneweddate": {
+            "description": "Date the item was last renewed"
+        },
+        "return": {
+            "description": "?"
+        },
+        "renewals": {
+            "description": "Number of renewals"
+        },
+        "auto_renew": {
+            "description": "Auto renewal"
+        },
+        "timestamp": {
+            "description": "Last update time"
+        },
+        "issuedate": {
+            "description": "Date the item was issued"
+        },
+        "onsite_checkout": {
+            "description": "On site checkout"
+        }
+    }
+}

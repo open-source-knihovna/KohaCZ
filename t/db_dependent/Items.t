@@ -20,7 +20,12 @@ use Modern::Perl;
 
 use MARC::Record;
 use C4::Biblio;
+use C4::Circulation;
+use C4::Reserves;
 use Koha::Database;
+use Koha::Hold;
+use Koha::Issue;
+use Koha::Item::Availability;
 use Koha::Library;
 
 use t::lib::Mocks;
@@ -432,7 +437,7 @@ subtest 'SearchItems test' => sub {
 
 subtest 'Koha::Item(s) tests' => sub {
 
-    plan tests => 5;
+    plan tests => 40;
 
     $schema->storage->txn_begin();
 
@@ -442,6 +447,15 @@ subtest 'Koha::Item(s) tests' => sub {
     });
     my $library2 = $builder->build({
         source => 'Branch',
+    });
+    my $borrower = $builder->build({
+        source => 'Borrower',
+    });
+    my $itemtype = $builder->build({
+        source => 'Itemtype',
+        value => {
+            notforloan => 1
+        }
     });
 
     # Create a biblio and item for testing
@@ -460,6 +474,101 @@ subtest 'Koha::Item(s) tests' => sub {
     my $holdingbranch = $item->holding_branch();
     is( ref($holdingbranch), 'Koha::Library', "Got Koha::Library from holding_branch method" );
     is( $holdingbranch->branchcode(), $library2->{branchcode}, "Home branch code matches holdingbranch" );
+
+    # Availability tests
+    my $availability = $item->availability_for_checkout();
+    is (ref($availability), 'Koha::Item::Availability', 'Got Koha::Item::Availability');
+    is( $availability->{available}, 1, "Item is available" );
+    $availability = $item->availability_for_local_use();
+    is( $availability->{available}, 1, "Item is available for local use" );
+    t::lib::Mocks::mock_preference('OnSiteCheckouts', 0);
+    $availability = $item->availability_for_onsite_checkout();
+    is( $availability->{available}, 0, "Not available for on-site checkouts" );
+    is( $availability->{description}[0], "onsite_checkouts_disabled", "Availability description is 'onsite_checkouts_disabled'" );
+    t::lib::Mocks::mock_preference('OnSiteCheckouts', 1);
+    $availability = $item->availability_for_onsite_checkout();
+    is( $availability->{available}, 1, "Available for on-site checkouts" );
+
+    $item->set({ onloan => "", damaged => 1 })->store();
+    t::lib::Mocks::mock_preference('AllowHoldsOnDamagedItems', 0);
+    $availability = $item->availability_for_checkout();
+    is( $availability->{available}, 0, "Damaged item unavailable" );
+    is( $availability->{description}[0], "damaged", "Availability description is 'damaged'" );
+    $availability = $item->availability_for_local_use();
+    is( $availability->{available}, 0, "Item is not available for local use" );
+    $availability = $item->availability_for_onsite_checkout();
+    is( $availability->{available}, 0, "Item is not available for on-site checkouts" );
+    t::lib::Mocks::mock_preference('AllowHoldsOnDamagedItems', 1);
+    $availability = $item->availability_for_checkout();
+    is( $availability->{available}, 1, "Damaged item available" );
+    is( $availability->{description}[0], "damaged", "Availability description is 'damaged'" );
+    $availability = $item->availability_for_local_use();
+    is( $availability->{available}, 1, "Item is available for local use" );
+    $availability = $item->availability_for_onsite_checkout();
+    is( $availability->{available}, 1, "Item is available for on-site checkouts" );
+
+    $item->set({ damaged => 0, withdrawn => 1 })->store();
+    $availability = $item->availability_for_checkout();
+    is( $availability->{available}, 0, "Item is not available" );
+    is( $availability->{description}[0], "withdrawn", "Availability description is 'withdrawn'" );
+
+    $item->set({ withdrawn => 0, itemlost => 1 })->store();
+    $availability = $item->availability_for_checkout();
+    is( $availability->{available}, 0, "Item is not available" );
+    is( $availability->{description}[0], "itemlost", "Availability description is 'itemlost'" );
+
+    $item->set({ itemlost => 0, restricted => 1 })->store();
+    $availability = $item->availability_for_checkout();
+    is( $availability->{available}, 0, "Item is not available" );
+    is( $availability->{description}[0], "restricted", "Availability description is 'restricted'" );
+
+    $item->set({ restricted => 0, notforloan => 1 })->store();
+    $availability = $item->availability_for_checkout();
+    is( $availability->{available}, 0, "Item is not available" );
+    is( $availability->{description}[0], "notforloan", "Availability description is 'notforloan'" );
+    $availability = $item->availability_for_local_use();
+    is( $availability->{available}, 1, "Item is available for local use" );
+    $availability = $item->availability_for_onsite_checkout();
+    is( $availability->{available}, C4::Context->preference('OnSiteCheckouts'), "Good availability for on-site checkouts" );
+
+    $item->set({ notforloan => 0, itype => $itemtype->{itemtype} })->store();
+    $availability = $item->availability_for_checkout();
+    is( $availability->{available}, 0, "Item is not available" );
+    is( $availability->{description}[0], "notforloan", "Availability description is 'notforloan' (itemtype)" );
+    $availability = $item->availability_for_local_use();
+    is( $availability->{available}, 1, "Item is available for local use" );
+    $availability = $item->availability_for_onsite_checkout();
+    is( $availability->{available}, C4::Context->preference('OnSiteCheckouts'), "Good availability for on-site checkouts" );
+
+    $item->set({ itype => undef, barcode => "test" })->store();
+    my $reserve = Koha::Hold->new(
+        {
+            biblionumber   => $item->biblionumber,
+            itemnumber     => $item->itemnumber,
+            waitingdate    => '2000-01-01',
+            borrowernumber => $borrower->{borrowernumber},
+            branchcode     => $item->homebranch,
+            suspend        => 0,
+        }
+    )->store();
+    $availability = $item->availability_for_checkout();
+    is( $availability->{available}, 0, "Item is not available" );
+    is( $availability->{description}[0], "reserved", "Availability description is 'reserved'" );
+    $availability = $item->availability_for_reserve();
+    is( $availability->{available}, 1, "Item is available for reserve" );
+    CancelReserve({ reserve_id => $reserve->reserve_id });
+
+    $availability = $item->availability_for_checkout();
+    is( $availability->{available}, 1, "Item is available" );
+
+    my $module = new Test::MockModule('C4::Context');
+    $module->mock( 'userenv', sub { { branch => $borrower->{branchcode} } } );
+    my $issue = AddIssue($borrower, $item->barcode, undef, 1);
+    $item = Koha::Items->find($item->itemnumber); # refresh item
+    $availability = $item->availability_for_checkout();
+    is( $availability->{available}, 0, "Item is not available" );
+    is( $availability->{description}[0], "onloan", "Availability description is 'onloan'" );
+    is( $availability->{expected_available}, $issue->date_due, "Expected to be available '".$issue->date_due."'");
 
     $schema->storage->txn_rollback;
 };

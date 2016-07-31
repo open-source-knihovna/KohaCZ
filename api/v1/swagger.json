@@ -14,6 +14,90 @@
   },
   "basePath": "/api/v1",
   "paths": {
+    "/availability/items": {
+      "get": {
+        "operationId": "itemsAvailability",
+        "tags": ["items", "availability"],
+        "parameters": [
+          { "$ref": "#/parameters/itemnumbersQueryParam" },
+          { "$ref": "#/parameters/biblionumbersQueryParam" }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Availability information on item(s)",
+            "schema": {
+              "$ref": "#/definitions/availabilities"
+            }
+          },
+          "400": {
+            "description": "Missing or wrong parameters",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "No item(s) found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    },
+    "/auth/session": {
+      "post": {
+        "operationId": "loginAuth",
+        "tags": ["auth"],
+        "summary": "Login to Koha and get a session cookie",
+        "description": "Makes a 'normal' username + password login to Koha, and returns the sessionid you need put to the CGISESSID-cookie. Koha uses this cookie to track a session.\nBe aware that the authenticated session most probably is IP-locked so authenticating from one IP and passing the session to another wont work.",
+        "parameters": [
+          { "$ref": "#/parameters/cardnumberPostParam" },
+          { "$ref": "#/parameters/useridPostParam" },
+          { "$ref": "#/parameters/passwordPostParam" }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "A borrower with SSO-relevant fields",
+            "schema": {
+              "$ref": "#/definitions/session"
+            }
+          },
+          "401": {
+            "description": "Bad username/cardnumber and/or password",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "logoutAuth",
+        "tags": ["auth"],
+        "summary": "Logout from Koha.",
+        "description": "Logouts user from Koha by marking session as expired. sessionid is optional, if not given, logs out currently logged in user",
+        "parameters": [
+          { "$ref": "#/parameters/sessionidBodyParam" }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully logged out",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Bad session id",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
     "/patrons": {
       "get": {
         "operationId": "listPatrons",
@@ -33,6 +117,55 @@
           },
           "403": {
             "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "addPatron",
+        "tags": ["patrons"],
+        "parameters": [{
+          "name": "body",
+          "in": "body",
+          "description": "A JSON object containing information about the new patron",
+          "required": true,
+          "schema": {
+            "$ref": "#/definitions/patron"
+          }
+        }],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "201": {
+            "description": "A successfully created patron",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/patron"
+              }
+            }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "409": {
+            "description": "Conflict in creating resource",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
             "schema": {
               "$ref": "#/definitions/error"
             }
@@ -72,12 +205,100 @@
             }
           }
         }
+      },
+      "put": {
+        "operationId": "editPatron",
+        "tags": ["patrons"],
+        "parameters": [
+          { "$ref": "#/parameters/borrowernumberPathParam" },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "A JSON object containing new information about existing patron",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/patron"
+            }
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "A successfully updated patron",
+            "schema": {
+              "items": {
+                "$ref": "#/definitions/patron"
+              }
+            }
+          },
+          "204": {
+            "description": "No Content",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "Resource not found",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "409": {
+            "description": "Conflict in updating resource",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "500": {
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePatron",
+        "tags": ["patrons"],
+        "parameters": [
+          { "$ref": "#/parameters/borrowernumberPathParam" }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Patron deleted successfully",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Patron deletion failed",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "Patron not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
       }
     },
     "/holds": {
       "get": {
         "operationId": "listHolds",
-        "tags": ["borrowers", "holds"],
+        "tags": ["patrons", "holds"],
         "parameters": [
           {
             "name": "reserve_id",
@@ -202,7 +423,7 @@
       },
       "post": {
         "operationId": "addHold",
-        "tags": ["borrowers", "holds"],
+        "tags": ["patrons", "holds"],
         "parameters": [
           {
             "name": "body",
@@ -332,12 +553,489 @@
           }
         }
       }
+    },
+    "/accountlines": {
+      "get": {
+        "operationId": "listAccountlines",
+        "tags": ["accountlines"],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of accountlines",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/accountline"
+              }
+            }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
+    "/libraries": {
+      "get": {
+        "operationId": "listLibrary",
+        "tags": ["libraries"],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of libraries",
+            "schema": {
+              "$ref": "#/definitions/libraries"
+            }
+          }
+        }
+      }
+    },
+    "/libraries/{branchcode}": {
+      "get": {
+        "operationId": "getLibrary",
+        "tags": ["libraries"],
+        "parameters": [
+          { "$ref": "#/parameters/branchcodePathParam" }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A library",
+            "schema": {
+              "$ref": "#/definitions/library"
+            }
+          },
+          "404": {
+            "description": "Library not found",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
+    "/checkouts": {
+      "get": {
+        "operationId": "listCheckouts",
+        "tags": ["patrons", "checkouts"],
+        "parameters": [
+          {
+            "name": "borrowernumber",
+            "in": "query",
+            "description": "Internal patron identifier",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of checkouts",
+            "schema": {
+              "$ref": "#/definitions/checkouts"
+            }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "Borrower not found",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
+    "/checkouts/{checkout_id}": {
+      "get": {
+        "operationId": "getCheckout",
+        "tags": ["patrons", "checkouts"],
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "description": "Internal checkout identifier",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Updated borrower's checkout",
+            "schema": { "$ref": "#/definitions/checkout" }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "Checkout not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      },
+      "put": {
+        "operationId": "renewCheckout",
+        "tags": ["patrons", "checkouts"],
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "description": "Internal checkout identifier",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Updated borrower's checkout",
+            "schema": { "$ref": "#/definitions/checkout" }
+          },
+          "403": {
+            "description": "Cannot renew checkout",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "Checkout not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    },
+    "/checkouts/history": {
+      "get": {
+        "operationId": "listhistoryCheckouts",
+        "tags": ["patrons", "checkouts"],
+        "parameters": [
+          {
+            "name": "borrowernumber",
+            "in": "query",
+            "description": "Internal patron identifier",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of checkouts history",
+            "schema": {
+              "$ref": "#/definitions/checkouts"
+            }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "Borrower not found",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          }
+        }
+      }
+    },
+    "/checkouts/history/{checkout_id}": {
+      "get": {
+        "operationId": "gethistoryCheckout",
+        "tags": ["patrons", "checkouts"],
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "description": "Internal checkout identifier",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Got borrower's checkout",
+            "schema": { "$ref": "#/definitions/checkout" }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "Checkout not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    },
+    "/items/{itemnumber}": {
+      "get": {
+        "operationId": "getItem",
+        "tags": ["items"],
+        "parameters": [
+          { "$ref": "#/parameters/itemnumberPathParam" }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "An item",
+            "schema": { "$ref": "#/definitions/item" }
+          },
+          "400": {
+            "description": "Missing or wrong parameters",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "Item not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    },
+    "/biblios/{biblionumber}": {
+      "get": {
+        "operationId": "getBiblio",
+        "tags": ["biblios"],
+        "parameters": [
+          { "$ref": "#/parameters/biblionumberPathParam" }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "An biblio",
+            "schema": { "$ref": "#/definitions/biblio" }
+          },
+          "400": {
+            "description": "Missing or wrong parameters",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "Biblio not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    },
+    "/accountlines/{accountlines_id}": {
+      "put": {
+        "operationId": "editAccountlines",
+        "tags": ["accountlines"],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          { "$ref": "#/parameters/accountlinesIdPathParam" },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "A JSON object containing fields to modify",
+            "required": true,
+            "schema": { "$ref": "#/definitions/editAccountlineBody" }
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Updated accountline",
+            "schema": { "$ref": "#/definitions/accountline" }
+          },
+          "400": {
+            "description": "Missing or wrong parameters",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "Accountline not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    },
+    "/accountlines/{accountlines_id}/payment": {
+      "put": {
+        "operationId": "payAccountlines",
+        "tags": ["accountlines"],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          { "$ref": "#/parameters/accountlinesIdPathParam" }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Paid accountline",
+            "schema": { "$ref": "#/definitions/accountline" }
+          },
+          "400": {
+            "description": "Missing or wrong parameters",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "Accountline not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    },
+    "/accountlines/{accountlines_id}/partialpayment": {
+      "put": {
+        "operationId": "partialpayAccountlines",
+        "tags": ["accountlines"],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          { "$ref": "#/parameters/accountlinesIdPathParam" },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "A JSON object containing fields to modify",
+            "required": true,
+            "schema": { "$ref": "#/definitions/partialpayAccountlineBody" }
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Paid accountline",
+            "schema": { "$ref": "#/definitions/accountline" }
+          },
+          "400": {
+            "description": "Missing or wrong parameters",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "Accountline not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    },
+    "/accountlines/{borrowernumber}/amountpayment": {
+      "put": {
+        "operationId": "payamountAccountlines",
+        "tags": ["accountlines"],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          { "$ref": "#/parameters/borrowernumberPathParam" },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "A JSON object containing fields to modify",
+            "required": true,
+            "schema": { "$ref": "#/definitions/partialpayAccountlineBody" }
+          }
+        ],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Amount paid",
+            "schema": { "$ref": "#/definitions/amountpaid" }
+          },
+          "400": {
+            "description": "Missing or wrong parameters",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "403": {
+            "description": "Access forbidden",
+            "schema": {
+              "$ref": "#/definitions/error"
+            }
+          },
+          "404": {
+            "description": "Borrower not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
+    },
+    "/checkouts/{checkout_id}/renewability": {
+      "get": {
+        "operationId": "renewabilityCheckout",
+        "tags": ["patrons", "checkouts"],
+        "parameters": [
+          {
+            "name": "checkout_id",
+            "in": "path",
+            "description": "Internal checkout identifier",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Checkout is renewable",
+            "schema": {
+                "type": "object"
+            }
+          },
+          "403": {
+            "description": "Checkout is not renewable",
+            "schema": { "$ref": "#/definitions/error" }
+          },
+          "404": {
+            "description": "Checkout not found",
+            "schema": { "$ref": "#/definitions/error" }
+          }
+        }
+      }
     }
   },
   "definitions": {
     "$ref": "./definitions/index.json"
   },
   "parameters": {
+    "biblionumbersQueryParam": {
+      "name": "biblionumber",
+      "in": "query",
+      "description": "Internal biblios identifier",
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "collectionFormat": "ssv"
+    },
     "borrowernumberPathParam": {
       "name": "borrowernumber",
       "in": "path",
@@ -349,6 +1047,73 @@
       "name": "reserve_id",
       "in": "path",
       "description": "Internal hold identifier",
+      "required": true,
+      "type": "integer"
+    },
+    "branchcodePathParam": {
+      "name": "branchcode",
+      "in": "path",
+      "description": "Internal library identifier",
+      "required": true,
+      "type": "string"
+    },
+    "itemnumberPathParam": {
+      "name": "itemnumber",
+      "in": "path",
+      "description": "Internal item identifier",
+      "required": true,
+      "type": "integer"
+    },
+    "biblionumberPathParam": {
+        "name": "biblionumber",
+        "in": "path",
+        "description": "Internal biblio identifier",
+        "required": true,
+        "type": "integer"
+    },
+    "itemnumbersQueryParam": {
+      "name": "itemnumber",
+      "in": "query",
+      "description": "Internal items identifier",
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "collectionFormat": "ssv"
+    },
+    "cardnumberPostParam": {
+      "name": "cardnumber",
+      "in": "formData",
+      "description": "Borrower's card's barcode/identifier",
+      "required": false,
+      "type": "string"
+    },
+    "passwordPostParam": {
+      "name": "password",
+      "in": "formData",
+      "required": true,
+      "type": "string"
+    },
+    "sessionidBodyParam": {
+      "name": "session",
+      "description": "The CGISESSID Cookie used to authenticate a session",
+      "in": "body",
+      "required": false,
+      "schema" : {
+        "$ref": "definitions/sessionid.json"
+      }
+    },
+    "useridPostParam": {
+      "name": "userid",
+      "in": "formData",
+      "description": "The userid of the Borrower, unique value",
+      "required": false,
+      "type": "string"
+    },
+    "accountlinesIdPathParam": {
+      "name": "accountlines_id",
+      "in": "path",
+      "description": "Internal accountline identifier",
       "required": true,
       "type": "integer"
     }

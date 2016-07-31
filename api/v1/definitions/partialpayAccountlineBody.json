@@ -1,0 +1,11 @@
+{
+    "type": "object",
+        "properties": {
+            "amount": {
+                "description": "Amount to pay"
+            },
+            "note": {
+                "description": "Payment note"
+            }
+      }
+}

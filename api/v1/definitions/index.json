@@ -1,6 +1,19 @@
 {
+    "availability": { "$ref": "availability.json" },
+    "availabilities": { "$ref": "availabilities.json" },
+    "amountpaid": { "$ref": "amountpaid.json" },
+    "accountline": { "$ref": "accountline.json" },
+    "editAccountlineBody": { "$ref": "editAccountlineBody.json" },
+    "partialpayAccountlineBody": { "$ref": "partialpayAccountlineBody.json" },
     "patron": { "$ref": "patron.json" },
+    "checkouts": { "$ref": "checkouts.json" },
+    "checkout": { "$ref": "checkout.json" },
     "holds": { "$ref": "holds.json" },
     "hold": { "$ref": "hold.json" },
+    "libraries": { "$ref": "libraries.json" },
+    "library": { "$ref": "library.json" },
+    "item": { "$ref": "item.json" },
+    "biblio": { "$ref": "biblio.json" },
+    "session": { "$ref": "session.json" },
     "error": { "$ref": "error.json" }
 }

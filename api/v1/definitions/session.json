@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "borrowernumber": {
+      "type": "string",
+      "description": "internally assigned user identifier"
+    },
+    "email": {
+      "type": ["string", "null"],
+      "description": "primary email address for patron's primary address"
+    },
+    "surname": {
+      "type": "string",
+      "description": "patron's last name"
+    },
+    "firstname": {
+      "type": ["string", "null"],
+      "description": "patron's first name"
+    },
+    "sessionid": {
+      "description": "Koha Session identifier",
+      "type": "string"
+    }
+  }
+}

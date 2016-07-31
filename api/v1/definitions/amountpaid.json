@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "amount": {
+      "type": "number",
+      "description": "Amount paid"
+    }
+  }
+}
