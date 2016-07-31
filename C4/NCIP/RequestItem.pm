@@ -194,14 +194,14 @@ sub placeHold {
     
     try {
             $reserveId = C4::Reserves::AddReserve(
-                            $branch, $userId, $bibId,     'a',
-                            undef,   $rank,   $startdate, $expirationdate,
+                            $branch, $userId, $bibId, undef,
+                            $rank,   $startdate, $expirationdate,
                             $notes,  undef,   $itemId,    $found
                             );
     } catch {
 
             $reserveId = C4::Reserves::AddReserve(
-                            $branch, $userId, $bibId, 'a'
+                            $branch, $userId, $bibId, undef
                             );
     };
 
