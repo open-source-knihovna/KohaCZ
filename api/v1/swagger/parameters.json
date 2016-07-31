@@ -22,5 +22,8 @@
   },
   "checkoutIdPathParam": {
     "$ref": "parameters/checkout.json#/checkoutIdPathParam"
+  },
+  "branchcodePathParam": {
+    "$ref": "parameters/library.json#/branchcodePathParam"
   }
 }
