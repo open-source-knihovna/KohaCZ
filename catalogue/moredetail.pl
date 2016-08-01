@@ -204,10 +204,6 @@ foreach my $item (@items){
 
     $item->{reservescount} = GetReserveCountFromItemnumber($item->{itemnumber});
 
-    my $sth = C4::Context->dbh->prepare("SELECT * FROM `default_permanent_withdrawal_reason`");
-    $sth->execute();
-
-    $item->{withdrawal_desc_options} = $sth->fetchall_arrayref({});
 #    $item->{json} = to_json($item);
 }
 $template->param(count => $data->{'count'},
