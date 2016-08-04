@@ -8,6 +8,9 @@
   "/cities/{cityid}": {
     "$ref": "paths/cities.json#/~1cities~1{cityid}"
   },
+  "/auth/session": {
+    "$ref": "paths/auth.json#/~1auth~1session"
+  },
   "/holds": {
     "$ref": "paths/holds.json#/~1holds"
   },

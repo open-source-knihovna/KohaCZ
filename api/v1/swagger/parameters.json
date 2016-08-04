@@ -25,5 +25,17 @@
   },
   "branchcodePathParam": {
     "$ref": "parameters/library.json#/branchcodePathParam"
+  },
+  "cardnumberPostParam": {
+    "$ref": "parameters/auth.json#/cardnumberPostParam"
+  },
+  "passwordPostParam": {
+   "$ref": "parameters/auth.json#/passwordPostParam"
+  },
+  "useridPostParam": {
+   "$ref": "parameters/auth.json#/useridPostParam"
+  },
+  "sessionidBodyParam": {
+   "$ref": "parameters/auth.json#/sessionidBodyParam"
   }
 }

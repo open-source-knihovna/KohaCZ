@@ -8,6 +8,9 @@
   "city": {
     "$ref": "definitions/city.json"
   },
+  "session": {
+    "$ref": "definitions/session.json"
+  },
   "patron": {
     "$ref": "definitions/patron.json"
   },
