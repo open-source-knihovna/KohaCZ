@@ -1172,8 +1172,9 @@ sub ModSerialStatus {
         }
     }
 
-    # create new waited entry if needed (ie : was a "waited" and has changed)
-    if ( $oldstatus == EXPECTED && $status != EXPECTED ) {
+    # create new expected entry if needed (ie : was "expected" and has changed)
+    my $otherIssueExpected = scalar findSerialsByStatus(EXPECTED, $subscriptionid);
+    if ( !$otherIssueExpected && $oldstatus == EXPECTED && $status != EXPECTED ) {
         my $subscription = GetSubscription($subscriptionid);
         my $pattern = C4::Serials::Numberpattern::GetSubscriptionNumberpattern($subscription->{numberpattern});
 
@@ -2668,6 +2669,25 @@ sub _can_do_on_subscription {
         ;
     }
     return 0;
+}
+
+=head2 findSerialsByStatus
+
+    @serials = findSerialsByStatus($status, $subscriptionid);
+
+    Returns an array of serials matching a given status and subscription id.
+
+=cut
+
+sub findSerialsByStatus {
+    my ( $status, $subscriptionid ) = @_;
+    my $dbh   = C4::Context->dbh;
+    my $query = q| SELECT * from serial
+                    WHERE status = ?
+                    AND subscriptionid = ?
+                |;
+    my $serials = $dbh->selectall_arrayref( $query, { Slice => {} }, $status, $subscriptionid );
+    return @$serials;
 }
 
 1;

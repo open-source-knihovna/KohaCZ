@@ -393,6 +393,13 @@ __PACKAGE__->table("deletedborrowers");
   default_value: 1
   is_nullable: 0
 
+=head2 updated_on
+
+  data_type: 'timestamp'
+  datetime_undef_if_invalid: 1
+  default_value: current_timestamp
+  is_nullable: 1
+
 =head2 checkprevissue
 
   data_type: 'varchar'
@@ -559,6 +566,13 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 50 },
   "privacy",
   { data_type => "integer", default_value => 1, is_nullable => 0 },
+  "updated_on",
+  {
+    data_type => "timestamp",
+    datetime_undef_if_invalid => 1,
+    default_value => \"current_timestamp",
+    is_nullable => 1,
+  },
   "checkprevissue",
   {
     data_type => "varchar",
@@ -571,8 +585,8 @@ __PACKAGE__->add_columns(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-02-15 09:38:20
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:DpjPk3Oc2m/926sIXcnbBA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-07-01 08:14:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XFvL47Af2HNisQA37/DIcA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -11751,6 +11751,30 @@ INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `
     SetVersion($DBversion);
 }
 
+$DBversion = "3.22.08.001";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE borrowers
+            ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
+            ON UPDATE CURRENT_TIMESTAMP
+            AFTER privacy;
+    });
+    $dbh->do(q{
+        ALTER TABLE deletedborrowers
+            ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
+            ON UPDATE CURRENT_TIMESTAMP
+            AFTER privacy;
+    });
+    print "Upgrade to $DBversion done (Bug 10459 - borrowers should have a timestamp)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.09.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 3.22.9)\n";
+    SetVersion($DBversion);
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.
