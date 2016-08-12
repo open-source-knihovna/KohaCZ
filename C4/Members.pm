@@ -41,6 +41,7 @@ use Koha::Patron::Debarments qw(IsDebarred);
 use Text::Unaccent qw( unac_string );
 use Koha::AuthUtils qw(hash_password);
 use Koha::Database;
+use Koha::Holds;
 use Koha::List::Patron;
 
 our (@ISA,@EXPORT,@EXPORT_OK,$debug);
@@ -59,7 +60,6 @@ BEGIN {
     push @EXPORT, qw(
         &Search
         &GetMemberDetails
-        &GetMemberRelatives
         &GetMember
 
         &GetMemberIssuesAndFines
@@ -71,7 +71,6 @@ BEGIN {
 
         &GetAge
         &GetSortDetails
-        &GetTitles
 
         &GetHideLostItemsPreference
 
@@ -1423,7 +1422,7 @@ sub GetborCatFromCatType {
     my $dbh     = C4::Context->dbh;
 
     my $request = qq{
-        SELECT categories.categorycode, categories.description
+        SELECT DISTINCT categories.categorycode, categories.description
         FROM categories
     };
     $request .= qq{
@@ -1431,9 +1430,9 @@ sub GetborCatFromCatType {
     } if $branch_limit;
     if($action) {
         $request .= " $action ";
-        $request .= " AND (branchcode = ? OR branchcode IS NULL) GROUP BY description" if $branch_limit;
+        $request .= " AND (branchcode = ? OR branchcode IS NULL)" if $branch_limit;
     } else {
-        $request .= " WHERE branchcode = ? OR branchcode IS NULL GROUP BY description" if $branch_limit;
+        $request .= " WHERE branchcode = ? OR branchcode IS NULL" if $branch_limit;
     }
     $request .= " ORDER BY categorycode";
 
@@ -1660,18 +1659,16 @@ sub DelMember {
     my $borrowernumber = shift;
     #warn "in delmember with $borrowernumber";
     return unless $borrowernumber;    # borrowernumber is mandatory.
+    # Delete Patron's holds
+    my @holds = Koha::Holds->search({ borrowernumber => $borrowernumber });
+    $_->delete for @holds;
 
-    my $query = qq|DELETE 
-          FROM  reserves 
-          WHERE borrowernumber=?|;
-    my $sth = $dbh->prepare($query);
-    $sth->execute($borrowernumber);
-    $query = "
+    my $query = "
        DELETE
        FROM borrowers
        WHERE borrowernumber = ?
    ";
-    $sth = $dbh->prepare($query);
+    my $sth = $dbh->prepare($query);
     $sth->execute($borrowernumber);
     logaction("MEMBERS", "DELETE", $borrowernumber, "") if C4::Context->preference("BorrowersLog");
     return $sth->rows;
@@ -1742,26 +1739,6 @@ EOF
     logaction("MEMBERS", "RENEW", $borrower->{'borrowernumber'}, "Membership renewed")if C4::Context->preference("BorrowersLog");
     return $date if ($sth);
     return 0;
-}
-
-=head2 GetTitles (OUEST-PROVENCE)
-
-  ($borrowertitle)= &GetTitles();
-
-Looks up the different title . Returns array  with all borrowers title
-
-=cut
-
-sub GetTitles {
-    my @borrowerTitle = split (/,|\|/,C4::Context->preference('BorrowersTitles'));
-    unshift( @borrowerTitle, "" );
-    my $count=@borrowerTitle;
-    if ($count == 1){
-        return ();
-    }
-    else {
-        return ( \@borrowerTitle);
-    }
 }
 
 =head2 GetHideLostItemsPreference
@@ -1988,27 +1965,6 @@ sub GetBorrowersNamesAndLatestIssue {
     $sth->execute;
     my $results = $sth->fetchall_arrayref({});
     return $results;
-}
-
-=head2 ModPrivacy
-
-  my $success = ModPrivacy( $borrowernumber, $privacy );
-
-Update the privacy of a patron.
-
-return :
-true on success, false on failure
-
-=cut
-
-sub ModPrivacy {
-    my $borrowernumber = shift;
-    my $privacy = shift;
-    return unless defined $borrowernumber;
-    return unless $borrowernumber =~ /^\d+$/;
-
-    return ModMember( borrowernumber => $borrowernumber,
-                      privacy        => $privacy );
 }
 
 =head2 IssueSlip

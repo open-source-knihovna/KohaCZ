@@ -10,6 +10,17 @@ var xhr;
 $(document).ready(function(){
     $("#enqueuefile").hide();
     $("#processfile").hide();
+    $("#upload_file").on("click",function(){
+        StartUpload();
+    });
+    $("#queueformsubmit").on("click",function(){
+        var processfile = document.getElementById("processfile");
+        return CheckForm( processfile );
+    });
+    $("#mainformsubmit").on("click",function(){
+        var enqueuefile = document.getElementById("enqueuefile");
+        return CheckForm( enqueuefile );
+    });
 });
 
 function StartUpload() {
@@ -55,10 +66,6 @@ function CheckForm(f) {
 
 //]]>
 </script>
-<style type="text/css">
-	#fileuploadstatus,#jobstatus { margin:.4em; }
-    #fileuploadprogress,#jobprogress{ width:200px;height:10px;border:1px solid #666;background:url('[% interface %]/[% theme %]/img/progress.png') -300px 0px no-repeat; }
-</style>
 </head>
 <body id="ocirc_process_koc" class="circ ocirc">
 [% INCLUDE 'header.inc' %]
@@ -89,14 +96,16 @@ function CheckForm(f) {
    <h2>Upload offline circulation data</h2>
 
    <div id="fileuploadform">
-     <form method="post" action="[% SCRIPT_NAME %]" enctype="multipart/form-data">
+     <form method="post" action="/cgi-bin/koha/offline_circ/process_koc.pl" enctype="multipart/form-data" class="validated">
 		<fieldset class="brief">
        <ol><li><label for="fileToUpload">Choose .koc file: </label>
-       <input type="file" id="fileToUpload" size="50" name="fileToUpload" /></li></ol>
-       <fieldset class="action"><input type="button" class="submit" value="Upload file" onclick="StartUpload();return false;" /></fieldset>
+            <input class="required" required="required" type="file" id="fileToUpload" size="50" name="fileToUpload" />
+            <span class="required">Required</span>
+       </li></ol>
+       <fieldset class="action"><input type="button" class="submit" value="Upload file" id="upload_file" /></fieldset>
 	   </fieldset>
      </form>
-     <div id="fileuploadstatus" style="display:none">Upload progress: <progress id="fileuploadprogress" min="0" max="100" value="0"></progress> <span class="fileuploadpercent">0</span>%</div>
+     <div id="fileuploadstatus" class="progress_panel" style="display:none">Upload progress: <progress id="fileuploadprogress" max="100" value="0"></progress> <span class="fileuploadpercent">0</span>%</div>
      <div id="fileuploadfailed" style="display:none"></div>
    </div>
 

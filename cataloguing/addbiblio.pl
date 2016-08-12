@@ -35,6 +35,7 @@ use C4::Branch;
 use C4::ClassSource;
 use C4::ImportBatch;
 use C4::Charset;
+use Koha::BiblioFrameworks;
 
 use Date::Calc qw(Today);
 use MARC::File::USMARC;
@@ -745,22 +746,8 @@ if ($frameworkcode eq 'FA'){
     print $input->redirect( '/cgi-bin/koha/cataloguing/editor.pl' . ( $biblionumber ? ( '#catalog/' . $biblionumber ) : '' ) );
 }
 
-
-# Getting the list of all frameworks
-# get framework list
-my $frameworks = getframeworks;
-my @frameworkcodeloop;
-foreach my $thisframeworkcode ( keys %$frameworks ) {
-	my %row = (
-		value         => $thisframeworkcode,
-		frameworktext => $frameworks->{$thisframeworkcode}->{'frameworktext'},
-	);
-	if ($frameworkcode eq $thisframeworkcode){
-		$row{'selected'} = 1;
-		}
-	push @frameworkcodeloop, \%row;
-} 
-$template->param( frameworkcodeloop => \@frameworkcodeloop,
+my $frameworkcodeloop = Koha::BiblioFrameworks->search({}, { order_by => ['frameworktext'] });
+$template->param( frameworkcodeloop => $frameworkcodeloop ,
 	breedingid => $breedingid );
 
 # ++ Global

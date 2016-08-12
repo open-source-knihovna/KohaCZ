@@ -17,6 +17,11 @@
                 mrform.hide();
                 e.preventDefault();
             });
+            $(".clear-date").on("click",function(e){
+                e.preventDefault();
+                var fieldID = this.id.replace("clear-date-","");
+                $("#" + fieldID).val("");
+            });
         })
     //]]>
 </script>
@@ -51,12 +56,18 @@
                                     Discharge
                             [% END %]
                         </td>
-                        <td>[% d.comment %]</td>
+                        <td>
+			    [% IF d.comment.search('OVERDUES_PROCESS') %]
+				Restriction added by overdues process [% d.comment.remove('OVERDUES_PROCESS ') %]
+			    [% ELSE %]
+				[% d.comment %]
+			    [% END %]
+			</td>
                         <td>[% IF d.expiration %] [% d.expiration | $KohaDates %] [% ELSE %] <i>Indefinite</i> [% END %]</td>
                         [% IF CAN_user_borrowers && CAN_user_circulate_manage_restrictions %]
                             <td>
-                                <a class="remove_restriction" href="/cgi-bin/koha/members/mod_debarment.pl?borrowernumber=[% borrowernumber %]&amp;borrower_debarment_id=[% d.borrower_debarment_id %]&amp;action=del">
-                                    Remove
+                                <a class="remove_restriction btn btn-mini" href="/cgi-bin/koha/members/mod_debarment.pl?borrowernumber=[% borrowernumber %]&amp;borrower_debarment_id=[% d.borrower_debarment_id %]&amp;action=del">
+                                    <i class="fa fa-trash"></i> Remove
                                 </a>
                             </td>
                         [% END %]
@@ -66,7 +77,7 @@
         </table>
     [% END %]
     [% IF CAN_user_borrowers && CAN_user_circulate_manage_restrictions %]
-        <p><a href="#" id="add_manual_restriction">Add manual restriction</a></p>
+        <p><a href="#" id="add_manual_restriction"><i class="fa fa-plus"></i> Add manual restriction</a></p>
         <form method="post" action="/cgi-bin/koha/members/mod_debarment.pl" class="clearfix">
             <input type="hidden" name="borrowernumber" value="[% borrowernumber %]" />
             <input type="hidden" name="action" value="add" />
@@ -75,7 +86,7 @@
                 <ol>
                     <li><label for="rcomment">Comment:</label> <input type="text" id="rcomment" name="comment" /></li>
                     <li><label for="rexpiration">Expiration:</label> <input name="expiration" id="rexpiration" size="10" readonly="readonly" value="" class="datepicker" />
-                        <a href='#' onclick="document.getElementById('expiration').value='';">Clear date</a></li>
+                        <a href="#" class="clear-date" id="clear-date-rexpiration">Clear date</a></li>
                 </ol>
             <fieldset class="action"><input type="submit" value="Add restriction" /> <a href="#" class="cancel" id="cancel_manual_restriction">Cancel</a></fieldset>
             </fieldset>

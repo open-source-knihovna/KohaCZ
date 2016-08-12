@@ -172,6 +172,17 @@
                 </form>
                 [% END %]
 
+                [% IF ( op == 'show') && (!borrowers) && (!notfoundcardnumbers) # Alert if no patrons given%]
+                    [% op = 'noshow' # Change op to prevent display in code below %]
+                    <h1>Batch patrons modification</h1>
+                    <div class="dialog alert">
+                        <p>No patron card numbers given.</p>
+                        <form action="/cgi-bin/koha/tools/modborrowers.pl" method="get">
+                         <button type="submit" class="approve"><i class="fa fa-fw fa-check"></i> OK</button>
+                        </form>
+                    </div>
+                [% END #Alert if no patrons %]
+
                 [% IF ( op == 'show' or op == 'show_results' ) %]
                     [% IF ( op == 'show' ) %]
                         <h1>Batch patrons modification</h1>
@@ -216,7 +227,7 @@
                     <form name="f" action="modborrowers.pl" method="post">
                         <input type="hidden" name="op" value="do" />
                         [% IF ( borrowers ) %]
-                            <div id="toolbar"><a id="selectallbutton" href="#">Select all</a> | <a id="clearallbutton" href="#">Clear all</a></div>
+                            <div id="toolbar"><a id="selectallbutton" href="#"><i class="fa fa-check"></i> Select all</a> | <a id="clearallbutton" href="#"><i class="fa fa-remove"></i> Clear all</a></div>
                         [% END %]
                     [% END %]
                         [% IF borrowers %]
@@ -239,6 +250,8 @@
                                                 <th>Country</th>
                                                 <th class="title-string">Registration date</th>
                                                 <th class="title-string">Expiry date</th>
+                                                <th>Circulation note</th>
+                                                <th>Opac Note</th>
                                                 [% FOREACH attrh IN attributes_header %]
                                                     <th>[% attrh.attribute %]</th>
                                                 [% END %]
@@ -261,6 +274,8 @@
                                                     <td>[% borrower.country %]</td>
                                                     <td><span title="[% borrower.dateenrolled %]">[% borrower.dateenrolled | $KohaDates %]</span></td>
                                                     <td><span title="[% borrower.dateexpiry %]">[% borrower.dateexpiry | $KohaDates %]</span></td>
+                                                    <td>[% borrower.borrowernotes %]</td>
+                                                    <td>[% borrower.opacnote %]</td>
                                                     [% FOREACH pa IN borrower.patron_attributes %]
                                                         [% IF ( pa.code ) %]
                                                             <td>[% pa.code %]=[% pa.value %]</td>
@@ -315,6 +330,8 @@
                                                 Expiry date:
                                                 [% CASE 'borrowernotes' %]
                                                 Circulation note:
+                                                [% CASE 'opacnote' %]
+                                                OPAC note:
                                             [% END %]
                                             </label>
                                             [% IF field.mandatory %]

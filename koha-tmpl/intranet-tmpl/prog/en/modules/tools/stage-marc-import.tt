@@ -7,8 +7,6 @@
 
 <style type="text/css">
     #fileuploadstatus,#fileuploadfailed,#fileuploadcancel,#jobpanel,#jobstatus,#jobfailed { display : none; }
-	#fileuploadstatus,#jobstatus { margin:.4em; }
-    #fileuploadprogress,#jobprogress { width:150px;height:10px;border:1px solid #666;background:url('[% interface %]/[% theme %]/img/progress.png') -300px 0px no-repeat; }
 </style>
 
 <script type="text/javascript">
@@ -30,6 +28,9 @@ $(document).ready(function(){
     $("#fileuploadcancel").on("click",function(e){
         e.preventDefault();
         CancelUpload();
+    });
+    $("#mainformsubmit").on("click",function(){
+        return CheckForm( document.getElementById("processfile"));
     });
 });
 function CheckForm(f) {
@@ -151,8 +152,8 @@ function cbUpload( status, fileid ) {
 </fieldset>
 		
     <div id="fileuploadpanel">
-        <div id="fileuploadstatus">Upload progress:
-            <progress id="fileuploadprogress" min="0" max="100" value="0">
+        <div id="fileuploadstatus" class="progress_panel">Upload progress:
+            <progress id="fileuploadprogress" max="100" value="0">
             </progress>
             <span class="fileuploadpercent">0</span>%
         </div>
@@ -179,7 +180,14 @@ function cbUpload( status, fileid ) {
     </li>
 	<li>
 		<label for="encoding">Character encoding: </label>
-            <select name="encoding" id="encoding"><option value="utf8" selected="selected">UTF-8 (Default)</option><option value="MARC-8">MARC 8</option><option value="ISO_5426">ISO 5426</option><option value="ISO_6937">ISO 6937</option><option value=ISO_8859-1">ISO 8859-1</option><option value="EUC-KR">EUC-KR</option></select>
+            <select name="encoding" id="encoding">
+                <option value="utf8" selected="selected">UTF-8 (Default)</option>
+                <option value="MARC-8">MARC 8</option>
+                <option value="ISO_5426">ISO 5426</option>
+                <option value="ISO_6937">ISO 6937</option>
+                <option value="ISO_8859-1">ISO 8859-1</option>
+                <option value="EUC-KR">EUC-KR</option>
+            </select>
 	</li>
 </ol></fieldset>
 
@@ -254,9 +262,9 @@ function cbUpload( status, fileid ) {
       </li>
     </ol>
   </fieldset>
-  <fieldset class="action"><input type="button" id="mainformsubmit" onclick="return CheckForm(this.form);" value="Stage for import" /></fieldset>
+  <fieldset class="action"><input type="button" id="mainformsubmit" value="Stage for import" /></fieldset>
  
-       <div id="jobpanel"><div id="jobstatus">Job progress: <div id="jobprogress"></div> <span id="jobprogresspercent">0</span>%</div>
+       <div id="jobpanel"><div id="jobstatus" class="progress_panel">Job progress: <div id="jobprogress"></div> <span id="jobprogresspercent">0</span>%</div>
      <div id="jobfailed"></div></div>
   
 </form>

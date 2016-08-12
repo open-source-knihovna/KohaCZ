@@ -182,7 +182,32 @@ $('#sort_by').change(function() {
         [% END %]
     [% END %]
 
-[% IF LocalCoverImages %]KOHA.LocalCover.LoadResultsCovers();[% END %]
+    [% IF LocalCoverImages %]
+        KOHA.LocalCover.LoadResultsCovers();
+    [% END %]
+
+    $("#select_all").on("click",function(e){
+        e.preventDefault();
+        selectAll();
+    });
+    $("#clear_all").on("click",function(e){
+        e.preventDefault();
+        clearAll();
+    });
+
+    $("#searchresults").on("click",".addtocart",function(e){
+        e.preventDefault();
+        var selection_id = this.id;
+        var biblionumber = selection_id.replace("cart","");
+        addRecord(biblionumber);
+    });
+
+    $("#searchresults").on("click",".cartRemove",function(e){
+        e.preventDefault();
+        var selection_id = this.id;
+        var biblionumber = selection_id.replace("cartR","");
+        delSingleRecord(biblionumber);
+    });
 
 });
 
@@ -338,9 +363,9 @@ var holdForPatron = function () {
                 [% total %] result(s) found [% IF ( query_desc ) %]for <span style="font-weight: bold;">'[% query_desc |html %]'</span>[% END %][% IF limit_desc  %]&nbsp;with limit(s): <span style="font-weight: bold;">'[% limit_desc | html %]'</span>[% END %][% IF ( LibraryName ) %] in [% LibraryName %] Catalog[% END %].<br />&nbsp;
             </h3>
             <div id="selection_ops" class="cartlist" style="display:none">
-                <a href="#" onclick="selectAll(); return false;">Select all</a>
+                <a href="#" id="select_all"><i class="fa fa-check"></i> Select all</a>
                 |
-                <a href="#" onclick="clearAll(); return false;">Clear all</a>
+                <a href="#" id="clear_all"><i class="fa fa-remove"></i> Clear all</a>
                 |
                 <a href="#" class="highlight_toggle" id="highlight_toggle_off">Unhighlight</a>
                 <a href="#" class="highlight_toggle" id="highlight_toggle_on">Highlight</a>
@@ -553,18 +578,37 @@ var holdForPatron = function () {
 
                                 [% END %]
                                 [% END %]
-                                  <p class="hold">[% IF ( SEARCH_RESULT.norequests ) %]
-                                  <span class="noholdstext">No holds allowed</span>
-                              [% ELSE %]
-                                  <a id="reserve_[% SEARCH_RESULT.biblionumber %]" href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% SEARCH_RESULT.biblionumber %]">Holds</a>
-                                  [% IF ( holdfor ) %] <span class="holdforlink">| <a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% SEARCH_RESULT.biblionumber %]&amp;findborrower=[% holdfor_cardnumber %]">Place hold for [% holdfor_firstname %] [% holdfor_surname %] ([% holdfor_cardnumber %])</a></span>[% END %]
-                              [% END %]
+                                  <p class="hold">
+
+                            [% IF ( SEARCH_RESULT.norequests ) %]
+                                <span class="noholdstext">No holds allowed</span>
+                            [% ELSE %]
+                                <a id="reserve_[% SEARCH_RESULT.biblionumber %]" href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% SEARCH_RESULT.biblionumber %]">Holds</a>
+                                [% IF ( holdfor ) %] <span class="holdforlink">| <a href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% SEARCH_RESULT.biblionumber %]&amp;findborrower=[% holdfor_cardnumber %]">Place hold for [% holdfor_firstname %] [% holdfor_surname %] ([% holdfor_cardnumber %])</a></span>[% END %]
+                            [% END %]
+
+                                [% IF Koha.Preference('intranetbookbag') == 1 %]
+                                    [% IF ( SEARCH_RESULT.incart ) %]
+                                        | <a class="addtocart" id="cart[% SEARCH_RESULT.biblionumber %]" href="#">In your cart</a> <a class="cartRemove" id="cartR[% SEARCH_RESULT.biblionumber %]" href="#">(remove)</a>
+                                    [% ELSE %]
+                                        | <a class="addtocart" id="cart[% SEARCH_RESULT.biblionumber %]" href="#">Add to cart</a> <a style="display:none;" class="cartRemove" id="cartR[% SEARCH_RESULT.biblionumber %]" href="#">(remove)</a>
+                                    [% END %]
+                                [% END # / IF intranetbookbag %]
+
                           [% IF ( CAN_user_editcatalogue_edit_catalogue ) %]
                           | <a href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% SEARCH_RESULT.biblionumber %]">Edit record</a>
                           [% END %]
                           [% IF ( CAN_user_editcatalogue_edit_items ) %]
                           | <a href="/cgi-bin/koha/cataloguing/additem.pl?biblionumber=[% SEARCH_RESULT.biblionumber %]">Edit items</a>
-                          [% END %]</p>
+                          [% END %]
+
+                          [% IF ( OPACBaseURL ) %]
+                              <span class="view-in-opac">
+                                | <a href="[% Koha.Preference('OPACBaseURL') %]/cgi-bin/koha/opac-detail.pl?biblionumber=[% SEARCH_RESULT.biblionumber %]" target="_blank">OPAC view</a>
+                              </span>
+                          [% END %]
+
+                                </p>
                                 </td>
 
                                 <td><div class="availability">

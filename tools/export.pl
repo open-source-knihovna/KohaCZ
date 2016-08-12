@@ -122,17 +122,19 @@ if ( $op eq "export" ) {
                             }
                         )
                         : (),
+
                     ( $start_callnumber or $end_callnumber )
                         ? (
-                            callnumber => {
+                            'items.itemcallnumber' => {
                                 ( $start_callnumber ? ( '>=' => $start_callnumber ) : () ),
                                 ( $end_callnumber   ? ( '<=' => $end_callnumber   ) : () ),
                             }
                         )
                         : (),
+
                     ( $start_accession or $end_accession )
                         ? (
-                            dateaccessioned => {
+                            'items.dateaccessioned' => {
                                 ( $start_accession ? ( '>=' => $start_accession ) : () ),
                                 ( $end_accession   ? ( '<=' => $end_accession   ) : () ),
                             }
@@ -148,7 +150,7 @@ if ( $op eq "export" ) {
                     ),
 
                 };
-                my $biblioitems = Koha::Biblioitems->search( $conditions, { join => 'items' } );
+                my $biblioitems = Koha::Biblioitems->search( $conditions, { join => 'items', columns => 'biblionumber' } );
                 while ( my $biblioitem = $biblioitems->next ) {
                     push @record_ids, $biblioitem->biblionumber;
                 }

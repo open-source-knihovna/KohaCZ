@@ -15,7 +15,6 @@ use C4::SIP::Sip::Constants qw(:all);
 use C4::SIP::Sip::Configuration;
 use C4::SIP::Sip::Checksum qw(checksum verify_cksum);
 use C4::SIP::Sip::MsgType qw( handle login_core );
-use C4::SIP::Sip qw( read_SIP_packet );
 
 use base qw(Net::Server::PreFork);
 
@@ -116,6 +115,7 @@ sub process_request {
     } else {
 		&$transport($self);
     }
+    return;
 }
 
 #
@@ -124,28 +124,45 @@ sub process_request {
 
 sub raw_transport {
     my $self = shift;
-    my ($input);
+    my $input;
     my $service = $self->{service};
+    # If using Net::Server::PreFork you may already have account set from a previous session
+    # Ensure you dont
+    if ($self->{account}) {
+        delete $self->{account};
+    }
 
+    # Timeout the while loop if we get stuck in it
+    # In practice it should only iterate once but be prepared
+    local $SIG{ALRM} = sub { die 'raw transport Timed Out!' };
+    my $timeout = $self->get_timeout({ transport => 1 });
+    syslog('LOG_DEBUG', "raw_transport: timeout is $timeout");
+    alarm $timeout;
     while (!$self->{account}) {
-    local $SIG{ALRM} = sub { die "raw_transport Timed Out!\n"; };
-    syslog("LOG_DEBUG", "raw_transport: timeout is %d", $service->{timeout});
-    $input = read_SIP_packet(*STDIN);
-    if (!$input) {
-        # EOF on the socket
-        syslog("LOG_INFO", "raw_transport: shutting down: EOF during login");
-        return;
+        $input = read_request();
+        if (!$input) {
+            # EOF on the socket
+            syslog("LOG_INFO", "raw_transport: shutting down: EOF during login");
+            return;
+        }
+        $input =~ s/[\r\n]+$//sm; # Strip off trailing line terminator(s)
+        my $reg = qr/^${\(LOGIN)}/;
+        last if $input !~ $reg ||
+            C4::SIP::Sip::MsgType::handle($input, $self, LOGIN);
     }
-    $input =~ s/[\r\n]+$//sm;	# Strip off trailing line terminator(s)
-    last if C4::SIP::Sip::MsgType::handle($input, $self, LOGIN);
-    }
+    alarm 0;
 
     syslog("LOG_DEBUG", "raw_transport: uname/inst: '%s/%s'",
-	   $self->{account}->{id},
-	   $self->{account}->{institution});
+        $self->{account}->{id},
+        $self->{account}->{institution});
+    if (! $self->{account}->{id}) {
+        syslog("LOG_ERR","Login failed shutting down");
+        return;
+    }
 
     $self->sip_protocol_loop();
     syslog("LOG_INFO", "raw_transport: shutting down");
+    return;
 }
 
 sub get_clean_string {
@@ -179,8 +196,8 @@ sub telnet_transport {
     my $account = undef;
     my $input;
     my $config  = $self->{config};
-	my $timeout = $self->{service}->{timeout} || $config->{timeout} || 30;
-	syslog("LOG_DEBUG", "telnet_transport: timeout is %s", $timeout);
+    my $timeout = $self->get_timeout({ transport => 1 });
+    syslog("LOG_DEBUG", "telnet_transport: timeout is $timeout");
 
     eval {
 	local $SIG{ALRM} = sub { die "telnet_transport: Timed Out ($timeout seconds)!\n"; };
@@ -230,6 +247,7 @@ sub telnet_transport {
     syslog("LOG_DEBUG", "telnet_transport: uname/inst: '%s/%s'", $account->{id}, $account->{institution});
     $self->sip_protocol_loop();
     syslog("LOG_INFO", "telnet_transport: shutting down");
+    return;
 }
 
 #
@@ -238,15 +256,14 @@ sub telnet_transport {
 # telnet transport.  From that point on, both the raw and the telnet
 # processes are the same:
 sub sip_protocol_loop {
-	my $self = shift;
-	my $service = $self->{service};
-	my $config  = $self->{config};
-    my $timeout = $self->{service}->{timeout} || $config->{timeout} || 30;
-	my $input;
+    my $self = shift;
+    my $service = $self->{service};
+    my $config  = $self->{config};
+    my $timeout = $self->get_timeout({ client => 1 });
 
     # The spec says the first message will be:
-	# 	SIP v1: SC_STATUS
-	# 	SIP v2: LOGIN (or SC_STATUS via telnet?)
+    #     SIP v1: SC_STATUS
+    #     SIP v2: LOGIN (or SC_STATUS via telnet?)
     # But it might be SC_REQUEST_RESEND.  As long as we get
     # SC_REQUEST_RESEND, we keep waiting.
 
@@ -254,42 +271,124 @@ sub sip_protocol_loop {
     # constraint, so we'll relax about it too.
     # Using the SIP "raw" login process, rather than telnet,
     # requires the LOGIN message and forces SIP 2.00.  In that
-	# case, the LOGIN message has already been processed (above).
-	# 
-	# In short, we'll take any valid message here.
-	#my $expect = SC_STATUS;
-    local $SIG{ALRM} = sub { die "SIP Timed Out!\n"; };
-    my $expect = '';
-    while (1) {
-        alarm $timeout;
-        $input = read_SIP_packet(*STDIN);
-        unless ($input) {
-            return;		# EOF
+    # case, the LOGIN message has already been processed (above).
+
+    # In short, we'll take any valid message here.
+    eval {
+        local $SIG{ALRM} = sub {
+            syslog( 'LOG_DEBUG', 'Inactive: timed out' );
+            die "Timed Out!\n";
+        };
+        my $previous_alarm = alarm($timeout);
+
+        while ( my $inputbuf = read_request() ) {
+            if ( !defined $inputbuf ) {
+                return;    #EOF
+            }
+            alarm($timeout);
+
+            unless ($inputbuf) {
+                syslog( "LOG_ERR", "sip_protocol_loop: empty input skipped" );
+                print("96$CR");
+                next;
+            }
+
+            my $status = C4::SIP::Sip::MsgType::handle( $inputbuf, $self, q{} );
+            if ( !$status ) {
+                syslog(
+                    "LOG_ERR",
+                    "sip_protocol_loop: failed to handle %s",
+                    substr( $inputbuf, 0, 2 )
+                );
+            }
+            next if $status eq REQUEST_ACS_RESEND;
         }
-		# begin input hacks ...  a cheap stand in for better Telnet layer
-		$input =~ s/^[^A-z0-9]+//s;	# Kill leading bad characters... like Telnet handshakers
-		$input =~ s/[^A-z0-9]+$//s;	# Same on the end, should get DOSsy ^M line-endings too.
-		while (chomp($input)) {warn "Extra line ending on input";}
-		unless ($input) {
-            syslog("LOG_ERR", "sip_protocol_loop: empty input skipped");
-            print("96$CR");
-            next;
-		}
-		# end cheap input hacks
-		my $status = handle($input, $self, $expect);
-		if (!$status) {
-			syslog("LOG_ERR", "sip_protocol_loop: failed to handle %s",substr($input,0,2));
-		}
-		next if $status eq REQUEST_ACS_RESEND;
-		if ($expect && ($status ne $expect)) {
-			# We received a non-"RESEND" that wasn't what we were expecting.
-		    syslog("LOG_ERR", "sip_protocol_loop: expected %s, received %s, exiting", $expect, $input);
-		}
-		# We successfully received and processed what we were expecting
-		$expect = '';
-    alarm 0;
-	}
+        alarm($previous_alarm);
+        return;
+    };
+    if ( $@ =~ m/timed out/i ) {
+        return;
+    }
+    return;
+}
+
+sub read_request {
+      my $raw_length;
+      local $/ = "\015";
+
+    # proper SPEC: (octal) \015 = (hex) x0D = (dec) 13 = (ascii) carriage return
+      my $buffer = <STDIN>;
+      if ( defined $buffer ) {
+          STDIN->flush();    # clear an extra linefeed
+          chomp $buffer;
+          $raw_length = length $buffer;
+          $buffer =~ s/^\s*[^A-z0-9]+//s;
+# Every line must start with a "real" character.  Not whitespace, control chars, etc.
+          $buffer =~ s/[^A-z0-9]+$//s;
+
+# Same for the end.  Note this catches the problem some clients have sending empty fields at the end, like |||
+          $buffer =~ s/\015?\012//g;    # Extra line breaks must die
+          $buffer =~ s/\015?\012//s;    # Extra line breaks must die
+          $buffer =~ s/\015*\012*$//s;
+
+    # treat as one line to include the extra linebreaks we are trying to remove!
+      }
+      else {
+          syslog( 'LOG_DEBUG', 'EOF returned on read' );
+          return;
+      }
+      my $len = length $buffer;
+      if ( $len != $raw_length ) {
+          my $trim = $raw_length - $len;
+          syslog( 'LOG_DEBUG', "read_request trimmed $trim character(s) " );
+      }
+
+      syslog( 'LOG_INFO', "INPUT MSG: '$buffer'" );
+      return $buffer;
+}
+
+# $server->get_timeout({ $type => 1, fallback => $fallback });
+#     where $type is transport | client | policy
+#
+# Centralizes all timeout logic.
+# Transport refers to login process, client to active connections.
+# Policy timeout is transaction timeout (used in ACS status message).
+#
+# Fallback is optional. If you do not pass transport, client or policy,
+# you will get fallback or hardcoded default.
+
+sub get_timeout {
+    my ( $server, $params ) = @_;
+    my $fallback = $params->{fallback} || 30;
+    my $service = $server->{service} // {};
+    my $config = $server->{config} // {};
+
+    if( $params->{transport} ||
+        ( $params->{client} && !exists $service->{client_timeout} )) {
+        # We do not allow zero values here.
+        # Note: config/timeout seems to be deprecated.
+        return $service->{timeout} || $config->{timeout} || $fallback;
+
+    } elsif( $params->{client} ) {
+        # We know that client_timeout exists now.
+        # We do allow zero values here to indicate no timeout.
+        return 0 if $service->{client_timeout} =~ /^0+$|\D/;
+        return $service->{client_timeout};
+
+    } elsif( $params->{policy} ) {
+        my $policy = $server->{policy} // {};
+        my $rv = sprintf( "%03d", $policy->{timeout} // 0 );
+        if( length($rv) != 3 ) {
+            syslog( "LOG_ERR", "Policy timeout has wrong size: '%s'", $rv );
+            return '000';
+        }
+        return $rv;
+
+    } else {
+        return $fallback;
+    }
 }
 
 1;
+
 __END__

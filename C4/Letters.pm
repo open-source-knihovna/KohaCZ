@@ -312,21 +312,20 @@ sub delalert {
 sub getalert {
     my ( $borrowernumber, $type, $externalid ) = @_;
     my $dbh   = C4::Context->dbh;
-    my $query = "SELECT a.*, b.branchcode FROM alert a JOIN borrowers b USING(borrowernumber) WHERE";
+    my $query = "SELECT a.*, b.branchcode FROM alert a JOIN borrowers b USING(borrowernumber) WHERE 1";
     my @bind;
     if ($borrowernumber and $borrowernumber =~ /^\d+$/) {
-        $query .= " borrowernumber=? AND ";
+        $query .= " AND borrowernumber=?";
         push @bind, $borrowernumber;
     }
     if ($type) {
-        $query .= " type=? AND ";
+        $query .= " AND type=?";
         push @bind, $type;
     }
     if ($externalid) {
-        $query .= " externalid=? AND ";
+        $query .= " AND externalid=?";
         push @bind, $externalid;
     }
-    $query =~ s/ AND $//;
     my $sth = $dbh->prepare($query);
     $sth->execute(@bind);
     return $sth->fetchall_arrayref({});
@@ -843,13 +842,13 @@ sub _parseletter {
                     $filter_string_used = $1 || q{};
                     $dateonly = $1 unless $dateonly;
                 }
-                eval {
-                    $replacedby = output_pref({ dt => dt_from_string( $replacedby ), dateonly => $dateonly });
+                my $replacedby_date = eval {
+                    output_pref({ dt => dt_from_string( $replacedby ), dateonly => $dateonly });
                 };
 
                 if ( $letter->{ $letter_field } ) {
-                    $letter->{ $letter_field } =~ s/\Q<<$table.$field$filter_string_used>>\E/$replacedby/g;
-                    $letter->{ $letter_field } =~ s/\Q<<$field$filter_string_used>>\E/$replacedby/g;
+                    $letter->{ $letter_field } =~ s/\Q<<$table.$field$filter_string_used>>\E/$replacedby_date/g;
+                    $letter->{ $letter_field } =~ s/\Q<<$field$filter_string_used>>\E/$replacedby_date/g;
                 }
             }
         }

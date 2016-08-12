@@ -252,11 +252,6 @@ our $PERL_DEPS = {
         'required' => '1',
         'min_ver'  => '0.98'
     },
-    'Memoize::Memcached' => {
-        'usage'    => 'Memcached Feature (Experimental)',
-        'required' => '0',
-        'min_ver'  => '0.03'
-    },
     'Cache::Memcached::Fast' => {
         'usage'    => 'Caching',
         'required' => '0',
@@ -806,6 +801,21 @@ our $PERL_DEPS = {
         'usage'    => 'Enhanced Content - Tagging',
         'required' => '0',
         'min_ver'  => '0.07'
+    },
+    'IO::Socket::IP' => {
+        'usage'    => 'Rest API',
+        'required' => '0',
+        'min_ver'  => '0.16'
+    },
+    'Readonly' => {
+        'usage'    => 'No idea',
+        'required' => '0',
+        'min_ver'  => '0.01'
+    },
+    'Readonly::XS' => {
+        'usage'    => 'No idea',
+        'required' => '0',
+        'min_ver'  => '0.01'
     },
 };
 
