@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 21;
+use Test::More tests => 39;
 use Test::Mojo;
 use t::lib::TestBuilder;
 use t::lib::Mocks;
@@ -25,6 +25,7 @@ use t::lib::Mocks;
 use C4::Auth;
 use C4::Context;
 
+use Koha::AuthUtils;
 use Koha::Database;
 use Koha::Patron;
 
@@ -42,6 +43,7 @@ my $t = Test::Mojo->new('Koha::REST::V1');
 
 my $categorycode = $builder->build({ source => 'Category' })->{ categorycode };
 my $branchcode = $builder->build({ source => 'Branch' })->{ branchcode };
+
 my $guarantor = $builder->build({
     source => 'Borrower',
     value => {
@@ -50,6 +52,8 @@ my $guarantor = $builder->build({
         flags        => 0,
     }
 });
+
+my $password = "secret";
 my $borrower = $builder->build({
     source => 'Borrower',
     value => {
@@ -86,6 +90,7 @@ $tx->req->cookies({name => 'CGISESSID', value => $session->id});
 $t->request_ok($tx)
   ->status_is(403);
 
+
 $tx = $t->ua->build_tx(GET => "/api/v1/patrons/" . ($borrower->{ borrowernumber }-1));
 $tx->req->cookies({name => 'CGISESSID', value => $session->id});
 $t->request_ok($tx)
@@ -105,12 +110,32 @@ $t->request_ok($tx)
   ->status_is(200)
   ->json_is('/guarantorid', $guarantor->{borrowernumber});
 
+my $password_obj = {
+    current_password    => $password,
+    new_password        => "new password",
+};
+
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/-100/password' => json => $password_obj);
+$t->request_ok($tx)
+  ->status_is(401);
+
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$borrower->{borrowernumber}.'/password');
+$tx->req->cookies({name => 'CGISESSID', value => $session->id});
+$t->request_ok($tx)
+  ->status_is(400);
+
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$guarantor->{borrowernumber}.'/password' => json => $password_obj);
+$tx->req->cookies({name => 'CGISESSID', value => $session->id});
+$t->request_ok($tx)
+  ->status_is(403);
+
 my $loggedinuser = $builder->build({
     source => 'Borrower',
     value => {
         branchcode   => $branchcode,
         categorycode => $categorycode,
-        flags        => 16 # borrowers flag
+        flags        => 16, # borrowers flag
+        password     => Koha::AuthUtils::hash_password($password),
     }
 });
 
@@ -134,5 +159,34 @@ $t->request_ok($tx)
   ->json_is('/borrowernumber' => $borrower->{ borrowernumber })
   ->json_is('/surname' => $borrower->{ surname })
   ->json_is('/lost' => Mojo::JSON->true );
+
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/-100/password' => json => $password_obj);
+$tx->req->cookies({name => 'CGISESSID', value => $session->id});
+$t->request_ok($tx)
+  ->status_is(404);
+
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$loggedinuser->{borrowernumber}.'/password' => json => $password_obj);
+$tx->req->cookies({name => 'CGISESSID', value => $session->id});
+$t->request_ok($tx)
+  ->status_is(200);
+
+ok(C4::Auth::checkpw_hash($password_obj->{'new_password'}, Koha::Patrons->find($loggedinuser->{borrowernumber})->password), "New password in database.");
+is(C4::Auth::checkpw_hash($password_obj->{'current_password'}, Koha::Patrons->find($loggedinuser->{borrowernumber})->password), "", "Old password is gone.");
+
+$password_obj->{'current_password'} = $password_obj->{'new_password'};
+$password_obj->{'new_password'} = "a";
+t::lib::Mocks::mock_preference("minPasswordLength", 5);
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$loggedinuser->{borrowernumber}.'/password' => json => $password_obj);
+$tx->req->cookies({name => 'CGISESSID', value => $session->id});
+$t->request_ok($tx)
+  ->status_is(400)
+  ->json_like('/error', qr/Password is too short/, "Password too short");
+
+$password_obj->{'new_password'} = " abcdef ";
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$loggedinuser->{borrowernumber}.'/password' => json => $password_obj);
+$tx->req->cookies({name => 'CGISESSID', value => $session->id});
+$t->request_ok($tx)
+  ->status_is(400)
+  ->json_is('/error', "Password cannot contain trailing whitespaces.");
 
 $schema->storage->txn_rollback;

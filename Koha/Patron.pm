@@ -25,6 +25,7 @@ use List::Util qw(any);
 
 use C4::Context;
 use C4::Log;
+use Koha::AuthUtils;
 use Koha::Checkouts;
 use Koha::Database;
 use Koha::DateUtils;
@@ -683,6 +684,32 @@ sub account_locked {
     return ( $FailedLoginAttempts
           and $self->login_attempts
           and $self->login_attempts >= $FailedLoginAttempts )? 1 : 0;
+}
+
+=head3 change_password_to
+
+my $changed = $patron->change_password_to($cleartext_password);
+
+Changes patron's password to C<$cleartext_password>. This subroutine
+also makes validations for new password, but does not check the old
+one.
+
+=cut
+
+sub change_password_to {
+    my ($self, $cleartext_password) = @_;
+
+    my $min_length = C4::Context->preference("minPasswordLength");
+    if ($min_length > length($cleartext_password)) {
+        return (undef, "Password is too short. Minimum length: $min_length.");
+    }
+    if ($cleartext_password =~ m|^\s+| or $cleartext_password =~ m|\s+$|) {
+        return (undef, "Password cannot contain trailing whitespaces.");
+    }
+    my $hashed_password = Koha::AuthUtils::hash_password($cleartext_password);
+    $self->set({ password => $hashed_password })->store;
+    logaction( "MEMBERS", "CHANGE PASS", $self->borrowernumber, "" ) if C4::Context->preference("BorrowersLog");
+    return 1;
 }
 
 =head3 type
