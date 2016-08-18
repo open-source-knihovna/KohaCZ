@@ -18,6 +18,9 @@ package Koha::REST::V1::Patron;
 use Modern::Perl;
 
 use Mojo::Base 'Mojolicious::Controller';
+
+use C4::Auth qw( haspermission checkpw_internal );
+
 use Koha::AuthUtils qw(hash_password);
 use Koha::Patrons;
 use Koha::Patron::Categories;
@@ -141,6 +144,26 @@ sub delete {
     } else {
         return $c->$cb({}, 400);
     }
+}
+
+sub changepassword {
+    my ($c, $args, $cb) = @_;
+
+    my $user = $c->stash('koha.user');
+    my $patron = Koha::Patrons->find($args->{borrowernumber});
+    return $c->$cb({ error => "Patron not found." }, 404) unless $patron;
+
+    my $pw = $args->{'body'};
+    my $dbh = C4::Context->dbh;
+    unless (checkpw_internal($dbh, $user->userid, $pw->{'current_password'})) {
+        return $c->$cb({ error => "Wrong current password." }, 400);
+    }
+
+    my ($success, $errmsg) = $user->change_password_to($pw->{'new_password'});
+    if ($errmsg) {
+        return $c->$cb({ error => $errmsg }, 400);
+    }
+    return $c->$cb({}, 200);
 }
 
 1;

@@ -46,5 +46,8 @@
   },
   "/libraries/{branchcode}": {
     "$ref": "paths/libraries.json#/~1libraries~1{branchcode}"
+  },
+  "/patrons/{borrowernumber}/password": {
+    "$ref": "paths/patrons.json#/~1patrons~1{borrowernumber}~1password"
   }
 }
