@@ -28,5 +28,8 @@
   },
   "error": {
     "$ref": "definitions/error.json"
+  },
+  "renewability": {
+    "$ref": "definitions/renewability.json"
   }
 }

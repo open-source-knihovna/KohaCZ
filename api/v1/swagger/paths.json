@@ -23,6 +23,9 @@
   "/checkouts/{checkout_id}": {
     "$ref": "paths/checkouts.json#/~1checkouts~1{checkout_id}"
   },
+  "/checkouts/{checkout_id}/renewability": {
+    "$ref": "paths/checkouts.json#/~1checkouts~1{checkout_id}~1renewability"
+  },
   "/patrons": {
     "$ref": "paths/patrons.json#/~1patrons"
   },
