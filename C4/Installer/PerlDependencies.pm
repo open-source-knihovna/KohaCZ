@@ -660,7 +660,7 @@ our $PERL_DEPS = {
     'Test::WWW::Mechanize' => {
         'usage'    => 'Testing suite',
         'required' => '0',
-        'min_ver'  => '1.44',
+        'min_ver'  => '1.42',
     },
     'Library::CallNumber::LC' => {
         'usage'    => 'Core',
@@ -814,6 +814,21 @@ our $PERL_DEPS = {
     },
     'Readonly::XS' => {
         'usage'    => 'No idea',
+        'required' => '0',
+        'min_ver'  => '0.01'
+    },
+    'HTML::Entities' => {
+        usage => 'Core',
+        required => 1,
+        min_ver => '3.69', # same for Wheezy/Jessie
+    },
+    'Readonly' => {
+        'usage'    => 'Make script happy',
+        'required' => '0',
+        'min_ver'  => '0.01'
+    },
+    'Readonly::XS' => {
+        'usage'    => 'Make script happy',
         'required' => '0',
         'min_ver'  => '0.01'
     },

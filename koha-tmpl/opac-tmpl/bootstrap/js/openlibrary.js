@@ -25,7 +25,7 @@ KOHA.OpenLibrary = new function() {
         var scriptElement = document.createElement("script");
         scriptElement.setAttribute("id", "jsonScript");
         scriptElement.setAttribute("src",
-            "http://openlibrary.org/api/books?bibkeys=" + escape(bibkeys) +
+            "https://openlibrary.org/api/books?bibkeys=" + escape(bibkeys) +
             "&callback=KOHA.OpenLibrary.olCallBack&jscmd=data");
         scriptElement.setAttribute("type", "text/javascript");
         document.documentElement.firstChild.appendChild(scriptElement);
@@ -120,7 +120,7 @@ var ol_button_classname = 'ol_readapi_button';
 // Find all book divs and concatenate ids from them to create a read
 // API query url
 function create_query() {
-    var q = 'http://openlibrary.org/api/volumes/brief/json/';
+    var q = 'https://openlibrary.org/api/volumes/brief/json/';
 
     function add_el(i, el) {
         // tag with number found so it's easy to discover later

@@ -1,6 +1,13 @@
 OPAC:
     Appearance:
         -
+            - For search results in the OPAC, show the item's
+            - pref: OPACResultsLibrary
+              choices:
+                  holdingbranch: "current location"
+                  homebranch: "home library"
+            - . Please note that this feature is currently available for MARC21 and UNIMARC.
+        -
             - Use the
             - pref: opacthemes
               choices: opac-templates
