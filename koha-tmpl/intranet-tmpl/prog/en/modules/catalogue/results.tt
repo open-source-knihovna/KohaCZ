@@ -152,7 +152,7 @@ $('#sort_by').change(function() {
     $(".selection").show();
     [% IF ( query_desc ) %]
     toHighlight = $("p,span.results_summary,a.title");
-        var query_desc = "[% query_desc |replace("'", "\'") |replace('"', '\"') |replace('\n', '\\n') |replace('\r', '\\r') %]";
+        var query_desc = "[% query_desc |replace("'", "\'") |replace('"', '\"') |replace('\n', '\\n') |replace('\r', '\\r') | html %]";
         q_array = query_desc.split(" ");
         // ensure that we don't have "" at the end of the array, which can
         // break the highlighter
@@ -397,7 +397,11 @@ var holdForPatron = function () {
             <table>
                 <tr>
                     <td>
-                        Scan Index for: <input type="text" name="q" id="scan-index" size="35" value="" />
+                        [% IF ( scan_search_term_to_use ) %]
+                            Scan Index for: <input type="text" name="q" id="scan-index" size="35" value="[% scan_search_term_to_use | html %]" />
+                        [% ELSE %]
+                            Scan Index for: <input type="text" name="q" id="scan-index" size="35" value="" />
+                        [% END %]
                     </td>
                 </tr>
                 <tr>
@@ -443,7 +447,7 @@ var holdForPatron = function () {
                 [% FOREACH SEARCH_RESULT IN SEARCH_RESULTS %]
                     <tr>
                         <td>
-                            <a href="/cgi-bin/koha/catalogue/search.pl?idx=[% SEARCH_RESULT.scan_index_to_use %]&amp;q=[% SEARCH_RESULT.scan_use |url %]&quot;[% SEARCH_RESULT.title %]&quot;">[% SEARCH_RESULT.title |html %]</a>
+                            <a href="/cgi-bin/koha/catalogue/search.pl?idx=[% scan_index_to_use %]&amp;q=[% SEARCH_RESULT.scan_use |url %]&quot;[% SEARCH_RESULT.title %]&quot;">[% SEARCH_RESULT.title |html %]</a>
                         </td>
                         <td>
                             [% SEARCH_RESULT.author %]

@@ -252,11 +252,6 @@ our $PERL_DEPS = {
         'required' => '1',
         'min_ver'  => '0.98'
     },
-    'Memoize::Memcached' => {
-        'usage'    => 'Memcached Feature (Experimental)',
-        'required' => '0',
-        'min_ver'  => '0.03'
-    },
     'Cache::Memcached::Fast' => {
         'usage'    => 'Caching',
         'required' => '0',
@@ -670,7 +665,7 @@ our $PERL_DEPS = {
     'Test::WWW::Mechanize' => {
         'usage'    => 'Testing suite',
         'required' => '0',
-        'min_ver'  => '1.44',
+        'min_ver'  => '1.42',
     },
     'Library::CallNumber::LC' => {
         'usage'    => 'Core',
@@ -796,6 +791,11 @@ our $PERL_DEPS = {
         'usage'    => 'Enhanced Content - Tagging',
         'required' => '0',
         'min_ver'  => '0.07'
+    },
+    'HTML::Entities' => {
+        usage => 'Core',
+        required => 1,
+        min_ver => '3.69', # same for Wheezy/Jessie
     },
 };
 

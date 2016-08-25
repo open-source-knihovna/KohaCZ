@@ -249,7 +249,7 @@ $(document).ready(function () {
                 <input type="hidden" name="itemnumber" value="[% itemnumber %]" />
                 <input type="hidden" name="borrowernumber" value="[% borrowernumber %]" />
                 <input type="hidden" name="biblionumber" value="[% itembiblionumber %]" />
-                <input type="hidden" name="resbarcode" value="[% barcode %]" />
+                <input type="hidden" name="resbarcode" value="[% barcode | html %]" />
                 <input type="hidden" name="diffBranch" value="[% destbranch %]" />
                 <input type="hidden" name="exemptfine" value="[% exemptfine %]" />
                 <input type="hidden" name="dropboxmode" value="[% dropboxmode %]" />
@@ -411,7 +411,7 @@ $(document).ready(function () {
             <input type="hidden" name="itemnumber" value="[% itemnumber %]" />
             <input type="hidden" name="borrowernumber" value="[% borrowernumber %]" />
             <input type="hidden" name="biblionumber" value="[% itembiblionumber %]" />
-            <input type="hidden" name="resbarcode" value="[% barcode %]" />
+            <input type="hidden" name="resbarcode" value="[% barcode | html %]" />
             <input type="hidden" name="diffBranch" value="[% destbranch %]" />
             <input type="hidden" name="exemptfine" value="[% exemptfine %]" />
             <input type="hidden" name="dropboxmode" value="[% dropboxmode %]" />
@@ -448,7 +448,7 @@ $(document).ready(function () {
                         </p>
                     [% END %]
                     [% IF ( errmsgloo.badbarcode ) %]
-                        <p class="problem">No item with barcode: [% errmsgloo.msg %]</p>
+                        <p class="problem">No item with barcode: [% errmsgloo.msg | html %]</p>
                     [% END %]
                     [% IF ( errmsgloo.ispermanent ) %]
                         <p class="problem">Please return item to: [% errmsgloo.msg %]</p>
@@ -617,9 +617,9 @@ $(document).ready(function () {
                 </a>
             [% ELSE %]Not checked out[% END %]</td>
             <td class="ci-note">
-                [% IF ( riloo.bornote ) %]<p><span class="circ-hlt">[% riloo.bornote %]</p></span>[% END %]
-                [% IF ( riloo.itemnote ) %]<p><span class="circ-hlt">[% riloo.itemnote %]</p></span>[% END %]
-                [% IF ( riloo.itemnotes_nonpublic ) %]<p><span class="circ-hlt">[% riloo.itemnotes_nonpublic %]</p></span>[% END %]
+                [% IF ( riloo.bornote ) %]<p><span class="circ-hlt patron-note">[% riloo.bornote %]</p></span>[% END %]
+                [% IF ( riloo.itemnote ) %]<p><span class="circ-hlt item-note-public">[% riloo.itemnote %]</p></span>[% END %]
+                [% IF ( riloo.itemnotes_nonpublic ) %]<p><span class="circ-hlt item-note-nonpublic">[% riloo.itemnotes_nonpublic %]</p></span>[% END %]
             </td>
            </tr>
         [% END %]

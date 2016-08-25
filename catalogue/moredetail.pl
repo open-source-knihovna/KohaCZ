@@ -23,6 +23,7 @@ use strict;
 #use warnings; FIXME - Bug 2505
 use C4::Koha;
 use CGI qw ( -utf8 );
+use HTML::Entities;
 use C4::Biblio;
 use C4::Items;
 use C4::Branch;
@@ -30,7 +31,6 @@ use C4::Acquisition;
 use C4::Output;
 use C4::Auth;
 use C4::Serials;
-use C4::Circulation;  # to use itemissues
 use C4::Members; # to use GetMember
 use C4::Search;		# enabled_staff_search_views
 use C4::Members qw/GetHideLostItemsPreference/;
@@ -44,15 +44,9 @@ use Koha::DateUtils;
 
 my $query=new CGI;
 
-# FIXME  subject is not exported to the template?
-my $subject=$query->param('subject');
-
-# if its a subject we need to use the subject.tt
 my ($template, $loggedinuser, $cookie) = get_template_and_user(
     {
-        template_name   => ( $subject
-                                ? 'catalogue/subject.tt'
-                                : 'catalogue/moredetail.tt'),
+        template_name   => 'catalogue/moredetail.tt',
         query           => $query,
         type            => "intranet",
         authnotrequired => 0,
@@ -75,6 +69,7 @@ my $hidepatronname = C4::Context->preference("HidePatronName");
 # get variables
 
 my $biblionumber=$query->param('biblionumber');
+$biblionumber = HTML::Entities::encode($biblionumber);
 my $title=$query->param('title');
 my $bi=$query->param('bi');
 $bi = $biblionumber unless $bi;

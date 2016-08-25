@@ -10387,7 +10387,7 @@ $DBversion = "3.19.00.038";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q|
         ALTER TABLE virtualshelves
-        ADD COLUMN created_on TIMESTAMP NOT NULL AFTER lastmodified
+        ADD COLUMN created_on DATETIME NOT NULL AFTER lastmodified
     |);
     # Set created_on = lastmodified
     # I would say it's better than 0000-00-00
@@ -11774,6 +11774,58 @@ if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Koha 3.22.9)\n";
     SetVersion($DBversion);
 }
+
+$DBversion = "3.22.09.001";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done. (Bug 15006: Distinguish SIP2 client timeout from login timeout.)\nWarning to Koha System Administrators: If you're using SIP2 Server, and encounter 'instability' after upgrade, you may have to tweak your SIP2 config file, and use 'client_timeout' new parameter.";
+    SetVersion($DBversion);
+}
+
+$DBversion = '3.22.09.002';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE virtualshelves MODIFY COLUMN created_on DATETIME not NULL;
+    });
+
+    print "Upgrade to $DBversion done (Bug 16573 - Web installer fails to load structure and sample data on MySQL 5.7)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '3.22.09.003';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+        SELECT 'MaxItemsToProcessForBatchMod', value, NULL, 'Process up to a given number of items in a single item modification batch.', 'Integer' FROM systempreferences WHERE variable='MaxItemsForBatch';
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+        SELECT 'MaxItemsToDisplayForBatchDel', value, NULL, 'Display up to a given number of items in a single item deletionbatch.', 'Integer' FROM systempreferences WHERE variable='MaxItemsForBatch';
+    });
+    $dbh->do(q{
+        DELETE FROM systempreferences WHERE variable="MaxItemsForBatch";
+    });
+
+    print "Upgrade to $DBversion done (Bug 11490 - MaxItemsForBatch should be split into two new prefs)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '3.22.09.004';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT INTO systempreferences (variable, value, options, explanation, type) VALUES
+        ('OPACResultsLibrary', 'homebranch', 'homebranch|holdingbranch', 'Defines whether the OPAC displays the holding or home branch in search results when using XSLT', 'Choice');
+    });
+
+    print "Upgrade to $DBversion done (Bug 7441 - Search results showing wrong branch)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "3.22.10.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 3.22.10)\n";
+    SetVersion($DBversion);
+}
+
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068

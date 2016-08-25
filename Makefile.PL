@@ -260,7 +260,7 @@ my $target_map = {
   './about.pl'                  => 'INTRANET_CGI_DIR',
   './acqui'                     => 'INTRANET_CGI_DIR',
   './admin'                     => 'INTRANET_CGI_DIR',
-  './api'                       => 'API_CGI_DIR',
+  './api'                       => { target => 'API_CGI_DIR', trimdir => -1 },
   './authorities'               => 'INTRANET_CGI_DIR',
   './basket'                    => 'INTRANET_CGI_DIR',
   './C4'                        => 'PERL_MODULE_DIR',
@@ -274,7 +274,7 @@ my $target_map = {
   './circ'                      => 'INTRANET_CGI_DIR',
   './course_reserves'           => 'INTRANET_CGI_DIR',
   './docs/history.txt'          => { target => 'DOC_DIR', trimdir => -1 },
-  './offline_circ'		=> 'INTRANET_CGI_DIR',
+  './offline_circ'              => 'INTRANET_CGI_DIR',
   './edithelp.pl'               => 'INTRANET_CGI_DIR',
   './etc'                       => { target => 'KOHA_CONF_DIR', trimdir => -1 },
   './etc/zebradb'               => { target => 'ZEBRA_CONF_DIR', trimdir => -1 },
@@ -1070,7 +1070,7 @@ PazPar2 port?);
     }
 
   $msg = q(
-Use memcached and memoize to cache the results of some function calls?
+Use memcached to cache the results of some function calls?
 This provides a signficant performance improvement.
 You will need a Memcached server running.);
   $msg .= _add_valid_values_disp('USE_MEMCACHED', $valid_values);
