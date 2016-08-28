@@ -97,6 +97,8 @@ sub lookupItem {
             $result->{'circulationStatus'}
                 = C4::NCIP::NcipUtils::parseCirculationStatus($iteminfo,
                 $holds);
+
+            $result->{'dueDate'} = $iteminfo->{'datedue'};
         }
     }
     if (defined $query->param('itemUseRestrictionTypeDesired')) {
