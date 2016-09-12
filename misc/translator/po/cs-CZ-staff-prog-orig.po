@@ -6,17 +6,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2016-08-16 18:55-0300\n"
-"PO-Revision-Date: 2016-07-05 08:26+0000\n"
+"PO-Revision-Date: 2016-09-08 09:59+0000\n"
 "Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
-"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
-">\n"
+"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/>"
+"\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1467707167.000000\n"
+"X-POOTLE-MTIME: 1473328795.000000\n"
 
 #. %1$s:  UNLESS loop.last 
 #. %2$s:  END 
@@ -3681,7 +3681,7 @@ msgstr "%s Nalezena rezervace pro %s ("
 #: intranet-tmpl/prog/en/modules/members/memberentrygen.tt:975
 #, c-format
 msgid "%s Restriction added by overdues process %s %s %s %s "
-msgstr ""
+msgstr "%s Omezení bylo vloženo při zpracování upomínek %s %s %s %s "
 
 #. For the first occurrence,
 #. %1$s:  IF debarredcomment.search('OVERDUES_PROCESS') 
@@ -3694,7 +3694,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/members/moremember.tt:186
 #, c-format
 msgid "%s Restriction added by overdues process %s %s %s %s %s "
-msgstr ""
+msgstr "%s Omezení bylo vloženo při zpracování upomínek %s %s %s %s %s "
 
 #. For the first occurrence,
 #. %1$s:  debarments.size 
@@ -8224,9 +8224,9 @@ msgid "&rsaquo; Transfers"
 msgstr "&rsaquo; Přesuny"
 
 #: intranet-tmpl/prog/en/modules/circ/transferstoreceive.tt:30
-#, fuzzy, c-format
+#, c-format
 msgid "&rsaquo; Transfers to receive"
-msgstr "Příchozí přesuny"
+msgstr "&rsaquo;  Příchozí přesuny"
 
 #: intranet-tmpl/prog/en/modules/admin/transport-cost-matrix.tt:54
 #, c-format
@@ -9449,9 +9449,9 @@ msgid "Account fines and payments"
 msgstr "Poplatky a platby"
 
 #: intranet-tmpl/prog/en/modules/reserve/request.tt:335
-#, fuzzy, c-format
+#, c-format
 msgid "Account has expired"
-msgstr "účet vypršel"
+msgstr "Účet vypršel"
 
 #: intranet-tmpl/prog/en/modules/members/maninvoice.tt:62
 #, c-format
@@ -12409,7 +12409,7 @@ msgstr "BSD licence"
 #: intranet-tmpl/prog/en/includes/authorities-search-results.inc:15
 #, c-format
 msgid "BT"
-msgstr ""
+msgstr "ŠT"
 
 #: intranet-tmpl/prog/en/modules/admin/aqbudgetperiods.tt:420
 #: intranet-tmpl/prog/en/modules/admin/aqbudgetperiods.tt:423
@@ -13363,9 +13363,8 @@ msgstr "Brig C. McCoy"
 
 #. ABBR
 #: intranet-tmpl/prog/en/includes/authorities-search-results.inc:15
-#, fuzzy
 msgid "Broader Term"
-msgstr "%sg - Rozšířený výraz"
+msgstr "Širší termín"
 
 #: intranet-tmpl/prog/en/modules/about.tt:661
 #, c-format
@@ -19474,7 +19473,7 @@ msgid "Discharge requests pending"
 msgstr "Čekající požadavky na uzavření konta"
 
 #: intranet-tmpl/prog/en/includes/circ-menu.inc:106
-#, fuzzy, c-format
+#, c-format
 msgid "Discharges"
 msgstr "Uzavření konta"
 
@@ -21983,7 +21982,7 @@ msgstr "Filtr dne:"
 #. SCRIPT
 #: intranet-tmpl/prog/en/modules/members/boraccount.tt:8
 msgid "Filter paid transactions"
-msgstr "Filtrovat seznam operací"
+msgstr "Skrýt uhrazené poplatky"
 
 #: intranet-tmpl/prog/en/modules/serials/checkexpiration.tt:48
 #: intranet-tmpl/prog/en/modules/acqui/lateorders.tt:222
@@ -27588,9 +27587,9 @@ msgid "Koha &rsaquo; Circulation &rsaquo; Transfers print receipt"
 msgstr "Koha &rsaquo; Výpůjčky &rsaquo; Tisk dokladu o přesunu"
 
 #: intranet-tmpl/prog/en/modules/circ/transferstoreceive.tt:4
-#, fuzzy, c-format
+#, c-format
 msgid "Koha &rsaquo; Circulation &rsaquo; Transfers to receive"
-msgstr "Koha &rsaquo; Výpůjčky &rsaquo; Tisk dokladu o přesunu"
+msgstr "Koha &rsaquo; Výpůjčky &rsaquo; Příchozí přesuny"
 
 #: intranet-tmpl/prog/en/modules/course_reserves/course-reserves.tt:3
 #: intranet-tmpl/prog/en/modules/course_reserves/invalid-course.tt:2
@@ -31778,7 +31777,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/includes/authorities-search-results.inc:17
 #, c-format
 msgid "NT"
-msgstr ""
+msgstr "UT"
 
 #: intranet-tmpl/prog/en/modules/about.tt:537
 #, c-format
@@ -31916,9 +31915,8 @@ msgstr "Pod názvem: "
 
 #. ABBR
 #: intranet-tmpl/prog/en/includes/authorities-search-results.inc:17
-#, fuzzy
 msgid "Narrower Term"
-msgstr "%sh - Zúžený výraz"
+msgstr "Užší termín"
 
 #: intranet-tmpl/prog/en/modules/about.tt:373
 #, c-format
@@ -35347,9 +35345,9 @@ msgid "Patron has pending modifications. %s "
 msgstr "Čtenáři požadující změny v osobních údajích. %s "
 
 #: intranet-tmpl/prog/en/modules/reserve/request.tt:339
-#, fuzzy, c-format
+#, c-format
 msgid "Patron has restrictions"
-msgstr "Omezení čtenáře"
+msgstr "Čtenáři byly omezeny služby"
 
 #. INPUT type=text
 #: intranet-tmpl/prog/en/modules/circ/pendingreserves.tt:155
@@ -35615,9 +35613,9 @@ msgstr "Platnost registrace brzy vyprší. Registrace vyprší dne %s "
 #. %1$s:  borrower_branchname 
 #. %2$s:  borrower_branchcode 
 #: intranet-tmpl/prog/en/modules/reserve/request.tt:347
-#, fuzzy, c-format
+#, c-format
 msgid "Patron's home library: (%s / %s )"
-msgstr "domovská knihovna (%s / %s )"
+msgstr "Domovská knihovna čtenáře (%s / %s )"
 
 #: intranet-tmpl/prog/en/modules/members/deletemem.tt:27
 #, c-format
@@ -36123,9 +36121,9 @@ msgid "Pickup library"
 msgstr "Knihovna vyzvednutí"
 
 #: intranet-tmpl/prog/en/modules/reserve/request.tt:347
-#, fuzzy, c-format
+#, c-format
 msgid "Pickup library is different. "
-msgstr "Knihovna vyzvednutí je jiná"
+msgstr "Knihovna pro vyzvednutí se liší. "
 
 #: intranet-tmpl/prog/en/modules/about.tt:448
 #, c-format
@@ -37901,7 +37899,7 @@ msgstr "Včetně daně z doporučené ceny."
 #: intranet-tmpl/prog/en/includes/authorities-search-results.inc:21
 #, c-format
 msgid "RT"
-msgstr ""
+msgstr "ST"
 
 #: intranet-tmpl/prog/en/modules/about.tt:425
 #, c-format
@@ -38250,7 +38248,7 @@ msgstr "Odmítnuté štítky"
 #. ABBR
 #: intranet-tmpl/prog/en/includes/authorities-search-results.inc:21
 msgid "Related Term"
-msgstr ""
+msgstr "Související termín"
 
 #: intranet-tmpl/prog/en/columns.def:9
 #, c-format
@@ -41557,7 +41555,7 @@ msgstr "Zobrazit všechny návrhy"
 #. SCRIPT
 #: intranet-tmpl/prog/en/modules/members/boraccount.tt:8
 msgid "Show all transactions"
-msgstr "Zobrazit všechny akce"
+msgstr "Zobrazit všechny poplatky"
 
 #: intranet-tmpl/prog/en/modules/circ/overdue.tt:261
 #, c-format
@@ -43920,66 +43918,72 @@ msgstr ""
 "Použije se kompatibilní (starší) způsob výpočtu facet. "
 
 #: intranet-tmpl/prog/en/modules/about.tt:187
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "The &lt;zebra_auth_index_mode&gt; entry is missing in your configuration "
 "file. It should be set to 'dom' or 'grs1' (deprecated). It will default to "
 "'dom'. "
 msgstr ""
-"&lt;zebra_auth_index_mode&gt; ve vašem konfiguračním souboru chybí tento "
-"vstup. Měl by být nastaven na "
+"V konfiguračním souboru chybí nastavení &lt;zebra_auth_index_mode&gt;. To "
+"může mít hodnotu 'dom' nebo 'grs1' (zastaralé). Bude použita výchozí hodnota "
+"'dom'. "
 
 #: intranet-tmpl/prog/en/modules/about.tt:228
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "The &lt;zebra_auth_index_mode&gt; entry is set to 'dom', but your system "
 "still appears to be set up for 'grs1' indexing."
 msgstr ""
-"&lt;zebra_auth_index_mode&gt; ve vašem konfiguračním souboru chybí tento "
-"vstup. Měl by být nastaven na "
+"V konfiguračním souboru je nastaveno &lt;zebra_auth_index_mode&gt; na "
+"hodnotu 'dom', ale zdá se, že váš systém je nastaven na indexování v režimu "
+"'grs1'."
 
 #: intranet-tmpl/prog/en/modules/about.tt:219
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "The &lt;zebra_auth_index_mode&gt; entry is set to 'grs1'. GRS-1 support is "
 "now deprecated and will be removed in future releases. Please use DOM "
 "instead by setting &lt;zebra_auth_index_mode&gt; to 'dom' (full reindex "
 "required). "
 msgstr ""
-". Podpora GRS-1 byla označena jako zastaralá a v příští verzi bude "
-"odstraněna. Použijte DOM indexování nastavením &lt;zebra_auth_index_mode&gt; "
-"na hodnotu "
+"V konfiguračním souboru je nastaveno &lt;zebra_auth_index_mode&gt; na "
+"hodnotu 'grs1'. Podpora GRS-1 byla označena jako zastaralá a v některé z "
+"příštích verzí bude odstraněna. Použijte DOM indexování nastavením "
+"&lt;zebra_auth_index_mode&gt; na hodnotu  'dom' (poté bude potřeba provést "
+"kompletní reindexaci). "
 
 #: intranet-tmpl/prog/en/modules/about.tt:169
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "The &lt;zebra_bib_index_mode&gt; entry is missing in your configuration "
 "file. It should be set to 'dom' or 'grs1' (deprecated). It will default to "
 "'dom'. "
 msgstr ""
-"&lt;zebra_bib_index_mode&gt; Ve vašem konfuguračním souboru chybí tento "
-"vstup. Měl by být nastaven na "
+"V konfiguračním souboru chybí záznam &lt;zebra_bib_index_mode&gt;. Ten může "
+"nabývat hodnot 'dom' nebo 'grs1' (zastaralé). Jako výchozí hodnota bude "
+"použito 'dom'. "
 
 #: intranet-tmpl/prog/en/modules/about.tt:214
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "The &lt;zebra_bib_index_mode&gt; entry is set to 'dom', but your system "
 "still appears to be set up for 'grs1' indexing."
 msgstr ""
-"&lt;zebra_bib_index_mode&gt; Ve vašem konfuguračním souboru chybí tento "
-"vstup. Měl by být nastaven na "
+"Záznam &lt;zebra_bib_index_mode&gt; v konfiguračním souboru má hodnotu "
+"'dom', ale zdá se, že v systému je nastaveno 'grs1' indexování."
 
 #: intranet-tmpl/prog/en/modules/about.tt:205
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "The &lt;zebra_bib_index_mode&gt; entry is set to 'grs1'. GRS-1 support is "
 "now deprecated and will be removed in future releases. Please use DOM "
 "instead by setting &lt;zebra_bib_index_mode&gt; to 'dom' (full reindex "
 "required). "
 msgstr ""
-". Podpora GRS-1 byla označena jako zastaralá a v příští verzi bude "
+"Záznam &lt;zebra_bib_index_mode&gt; v konfiguračním souboru má hodnotu "
+"'grs1'. Podpora GRS-1 ale byla označena jako zastaralá a v příští verzi bude "
 "odstraněna. Použijte DOM indexování nastavením &lt;zebra_bib_index_mode&gt; "
-"na hodnotu "
+"na hodnotu 'dom' (poté bude třeba provést kompletní reindexaci). "
 
 #: intranet-tmpl/prog/en/modules/acqui/neworderempty.tt:621
 #: intranet-tmpl/prog/en/modules/acqui/addorderiso2709.tt:370
@@ -45176,9 +45180,9 @@ msgstr "Jednotka musí být vrácena v knihovně: "
 
 #. %1$s:  Branches.GetName( branch_to_return ) 
 #: intranet-tmpl/prog/en/modules/circ/circulation.tt:522
-#, fuzzy, c-format
+#, c-format
 msgid "This item must be returned to %s."
-msgstr "Tuto jednotku je nutné převézt do %s"
+msgstr "Tuto jednotku je nutné převézt do %s."
 
 #. %1$s:  Branches.GetName( returnbranch ) 
 #: intranet-tmpl/prog/en/modules/circ/returns.tt:320
@@ -46598,7 +46602,7 @@ msgstr "Typ: "
 #: intranet-tmpl/prog/en/includes/authorities-search-results.inc:19
 #, c-format
 msgid "UF"
-msgstr ""
+msgstr "Viz"
 
 #: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:153
 #, c-format
@@ -47339,9 +47343,8 @@ msgstr "Použito"
 
 #. ABBR
 #: intranet-tmpl/prog/en/includes/authorities-search-results.inc:19
-#, fuzzy
 msgid "Used For"
-msgstr "Počet propojených záznamů"
+msgstr "Viz"
 
 #: intranet-tmpl/prog/en/modules/catalogue/detail.tt:606
 #: intranet-tmpl/prog/en/modules/authorities/searchresultlist.tt:70
@@ -48560,25 +48563,27 @@ msgstr ""
 "nastavení by mělo ukazovat na soubor log4perl.conf pro vaši instanci. "
 
 #: intranet-tmpl/prog/en/modules/about.tt:261
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "You are missing the &lt;upload_path&gt; entry in your koha-conf.xml file. "
 "Please add it, pointing to the configured file upload directory for your "
 "Koha instance. "
 msgstr ""
-"v souboru koha-conf.xml. Toto nastavení určuje cestu, kam se mají ukládat "
-"nahrané soubory pro tuto instanci Kohy. "
+"V konfiguračním souboru koha-conf.xml chybí nastavení &lt;upload_path&gt;. "
+"Toto nastavení určuje cestu, kam se mají ukládat nahrané soubory pro tuto "
+"instanci Kohy. "
 
 #: intranet-tmpl/prog/en/modules/about.tt:268
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "You are missing the &lt;upload_path&gt; entry in your koha-conf.xml file. "
 "Please add it, pointing to the configured file upload directory for your "
 "Koha instance. Also note that you need to properly set the OPACBaseURL "
 "preference for the file upload plugin to work. "
 msgstr ""
-"v souboru koha-conf.xml. Toto nastavení určuje cestu, kam se mají ukládat "
-"nahrané soubory pro tuto instanci Kohy. Také je potřeba správně nastavit "
+"V konfiguračním souboru koha-conf.xml chybí nastavení &lt;upload_path&gt;. "
+"Nastavte tuto hodnotu na adresář, kam se mají ukládat všechny nahrané "
+"soubory pro tuto instanci. Také je potřeba správně nastavit OPACBaseURL."
 
 #: intranet-tmpl/prog/en/modules/circ/circulation_batch_checkouts.tt:64
 #, c-format
@@ -48870,23 +48875,24 @@ msgid "You have not selected any patrons to add to a list!"
 msgstr "Nevybrali jste žádné čtenáře!"
 
 #: intranet-tmpl/prog/en/modules/about.tt:247
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "You have set &lt;use_zebra_facets&gt; but the &lt;zebra_bib_index_mode&gt; "
 "is not set to 'dom'. Falling back to legacy facet calculation. "
 msgstr ""
-"Nastavení &lt;use_zebra_facets&gt; je zapnuto, ale &lt;"
-"zebra_bib_index_mode&gt; není nastaveno na "
+"Nastavení &lt;use_zebra_facets&gt; je zapnuto, ale "
+"&lt;zebra_bib_index_mode&gt; není nastaveno na 'dom'. Facety se i nadále "
+"budou vytvářet původním způsobem (analýzou vrácených výsledků). "
 
 #. %1$s:  config_entry.file 
 #: intranet-tmpl/prog/en/modules/about.tt:233
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "You have set UseQueryParser but the 'queryparser_config' entry is missing in "
 "your configuration file. %s is used as a fallback. "
 msgstr ""
 "Máte nastaveno UseQueryParser, ale záznam 'queryparser_config' v "
-"konfiguračním souboru chybí. "
+"konfiguračním souboru chybí. Jako záloha je použito %s. "
 
 #. %1$s:  IF QueryParserError.fallback 
 #. %2$s:  QueryParserError.file 
@@ -48894,7 +48900,7 @@ msgstr ""
 #. %4$s:  QueryParserError.file 
 #. %5$s:  END 
 #: intranet-tmpl/prog/en/modules/about.tt:138
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "You have set UseQueryParser but there was a problem inititializing "
 "QueryParser. %s The 'queryparser_config' entry is missing in your "
@@ -48902,9 +48908,8 @@ msgid ""
 "success: %s. %s The following configuration file was used without success: "
 "%s. %s "
 msgstr ""
-"Máte nastaveno UseQueryParser, ale QueryParser se nepodařilo inicializovat. "
-"%s Nastavení 'queryparser_config' nebylo ve vašem konfiguračním souboru "
-"nalezeno. "
+"Máte nastaveno UseQueryParser, ale QueryParser se nepodařilo inicializovat. %"
+"s V konfiguračním souboru nebylo nalezeno nastavení 'queryparser_config'."
 
 #: intranet-tmpl/prog/en/modules/circ/circulation.tt:756
 #, c-format
@@ -49177,15 +49182,15 @@ msgstr "Vaše historie ledání v katalogu je prázdná."
 
 #: intranet-tmpl/prog/en/modules/about.tt:182
 #: intranet-tmpl/prog/en/modules/about.tt:200
-#, fuzzy, c-format
+#, c-format
 msgid "Your configuration file seems to be set up for 'dom'."
-msgstr "Vypadá to, že ve Vašem konfiguračním souboru je nastaveno "
+msgstr "Vypadá to, že v konfiguračním souboru je nastaveno 'dom'."
 
 #: intranet-tmpl/prog/en/modules/about.tt:177
 #: intranet-tmpl/prog/en/modules/about.tt:195
-#, fuzzy, c-format
+#, c-format
 msgid "Your configuration file still seems to be set up for 'grs1'."
-msgstr "Vypadá to, že ve Vašem konfiguračním souboru je stále nastaveno "
+msgstr "Vypadá to, že v konfiguračním souboru je nastaveno 'grs1'. "
 
 #: intranet-tmpl/prog/en/modules/offline_circ/process_koc.tt:75
 #, c-format

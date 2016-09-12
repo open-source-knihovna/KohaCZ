@@ -3,16 +3,17 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-05-23 08:15+0200\n"
-"PO-Revision-Date: 2016-06-20 18:39+0000\n"
-"Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
-"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/>\n"
+"PO-Revision-Date: 2016-09-01 09:00+0000\n"
+"Last-Translator: Radek <radek.siman@centrum.cz>\n"
+"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/>"
+"\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1466447991.000000\n"
+"X-POOTLE-MTIME: 1472720458.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -5001,7 +5002,7 @@ msgstr "Následující <a href='http://schema.koha-community.org/tables/borrower
 
 # Patrons > General
 msgid "patrons.pref#BorrowerRenewalPeriodBase# When renewing borrowers, base the new expiry date on"
-msgstr "Při prodloužování, nový výpůjční termín odvodit z"
+msgstr "Při prodlužování odvodit datum konce registrace z"
 
 # Patrons > General
 msgid "patrons.pref#BorrowerRenewalPeriodBase# current date."
@@ -5009,7 +5010,7 @@ msgstr "aktuálního data."
 
 # Patrons > General
 msgid "patrons.pref#BorrowerRenewalPeriodBase# current membership expiry date."
-msgstr "datumu ukončení registrace."
+msgstr "původního data platnosti."
 
 # Patrons > General
 msgid "patrons.pref#BorrowerUnwantedField# (separate columns with |)"
@@ -5402,10 +5403,15 @@ msgstr "používat"
 # Searching > Results Display
 msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>Availability statuses may show incorrectly in search results if a record has more items than the limit set. Statuses will display correctly in the record details."
 msgstr ""
+"<br/>Pokud má záznam více jednotek, než je definováno v tomto nastavení, "
+"může být status dostupnosti zobrazen ve výsledcích vyhledávání nesprávně. Na "
+"podrobném záznamu ale bude tato informace správná vždy."
 
 # Searching > Results Display
 msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# <br/>Leave empty for no limit."
 msgstr ""
+"<br/>Pokud nechcete toto zjišťování nijak limitovat, nechte toto nastavení "
+"prázdné."
 
 # Searching > Results Display
 msgid "searching.pref#MaxSearchResultsItemsPerRecordStatusCheck# For records with many items, only check the availability status for the first"
@@ -5897,7 +5903,9 @@ msgstr "Zobrazovat"
 
 # Staff Client > Appearance
 msgid "staff_client.pref#DisplayIconsXSLT# the format, audience, and material type icons in XSLT MARC21 results and detail pages in the staff client."
-msgstr "formát, cílovou skupinu a typ materiálu v XSLT MARC21 výsledcích a na stránkách s podrobným záznamem v intranetu."
+msgstr ""
+"v rozhraní obsluhy ikonky formátu, cílové skupiny a typu materiálu ve "
+"výsledcích XSLT MARC21 a na stránkách s detaily."
 
 # Staff Client > Options
 msgid "staff_client.pref#HidePatronName# Don't show"
@@ -6274,4 +6282,3 @@ msgstr "Vracet maximálně"
 # Web services > Reporting
 msgid "web_services.pref#SvcMaxReportRows# rows of a report requested via the reports web service."
 msgstr "řádků z výstupů vyžádaných pomocí webové služby."
-

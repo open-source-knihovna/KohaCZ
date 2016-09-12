@@ -6,17 +6,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2016-08-16 18:55-0300\n"
-"PO-Revision-Date: 2016-06-20 19:22+0000\n"
+"PO-Revision-Date: 2016-08-23 12:39+0000\n"
 "Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
-"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
-">\n"
+"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/>"
+"\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1466450528.000000\n"
+"X-POOTLE-MTIME: 1471955996.000000\n"
 
 #. %1$s:  IF debarred_comment.search('OVERDUES_PROCESS') 
 #. %2$s:  debarred_comment.remove('OVERDUES_PROCESS ') | html_line_break 
@@ -26,7 +26,7 @@ msgstr ""
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:43
 #, c-format
 msgid "\" %s Restriction added by overdues process %s %s %s %s "
-msgstr ""
+msgstr "\" %s Omezení bylo vloženo při zpracování upomínek %s %s %s %s "
 
 #. A
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:304
@@ -42,7 +42,7 @@ msgstr "$[% SUBFIELD.code %] [% SUBFIELD.value %]"
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:106
 #, c-format
 msgid "%s \"Restriction added by overdues process %s\" %s %s %s "
-msgstr ""
+msgstr "%s \"Omezení bylo vloženo při zpracování upomínek %s\" %s %s %s "
 
 #. %1$s:  IF holds_count.defined 
 #. %2$s:  ITEM_RESULT.holds_count 
@@ -378,7 +378,7 @@ msgstr "%s %s štítek byl úspěšně přidán%sštítky byly úspěšně přid
 #. %1$s:  END 
 #. %2$s:  IF ( BORROWER_INFO.debarredcomment ) 
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:104
-#, fuzzy, c-format
+#, c-format
 msgid "%s %s with the comment "
 msgstr "%s%s s poznámkou "
 
@@ -2058,14 +2058,15 @@ msgstr "%sSbírka%sTyp jednotky%s"
 #. %23$s:  IF ( serial.status8 ) 
 #. %24$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-full-serial-issues.tt:110
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%sExpected%s %sArrived%s %sLate%s %sMissing%s %sMissing (never received)%s "
 "%sMissing (sold out)%s %sMissing (damaged)%s %sMissing (lost)%s %sNot "
 "available%s %sDelete%s %sClaimed%s %sStopped%s "
 msgstr ""
-"%sOčekáváno%s %sDodáno%s %sOpožděno%s %sChybějící%s %sNedostupné%s %sOdepsáno"
-"%s %sReklamováno%s %sZastaveno%s "
+"%sOčekáváno%s %sDodáno%s %sOpožděno%s %sChybějící%s %sChybějící (nebylo "
+"dodáno)%s %sChybějící (vyprodáno)%s %sChybějící (poškozeno)%s %sChybějící "
+"(ztraceno)%s %sNedostupné%s %sOdstraněno%s %sReklamováno%s %sOdvoláno%s "
 
 #. %1$s:  IF (latestserial.status1 ) 
 #. %2$s:  END 
@@ -2092,14 +2093,15 @@ msgstr ""
 #. %23$s:  IF (latestserial.status8 ) 
 #. %24$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:843
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%sExpected%s %sArrived%s %sLate%s %sMissing%s %sMissing (never received)%s "
 "%sMissing (sold out)%s %sMissing (damaged)%s %sMissing (lost)%s %sNot issued"
 "%s %sDelete%s %sClaimed%s %sStopped%s "
 msgstr ""
-"%sOčekáváno%s %sDodáno%s %sOpožděno%s %sChybějící%s %sNedostupné%s %sOdepsáno"
-"%s %sReklamováno%s %sZastaveno%s "
+"%sOčekáváno%s %sDodáno%s %sOpožděno%s %sChybějící%s %sChybějící (nebylo "
+"dodáno)%s %sChybějící (vyprodáno)%s %sChybějící (poškozeno)%s %sChybějící "
+"(ztraceno)%s %sNevydáno%s %sOdstraněno%s %sReklamováno%s %sOdvoláno%s "
 
 #. %1$s:  IF ( messaging_preference.Item_Due ) 
 #. %2$s:  ELSIF ( messaging_preference.Advance_Notice ) 
@@ -3749,7 +3751,7 @@ msgstr "BUĎTE OPATRNÍ"
 #: opac-tmpl/bootstrap/en/includes/authorities-search-results.inc:14
 #, c-format
 msgid "BT"
-msgstr ""
+msgstr "ŠT"
 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelfform.tt:18
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelfform.tt:30
@@ -3837,7 +3839,7 @@ msgstr "Stručná historie"
 #. ABBR
 #: opac-tmpl/bootstrap/en/includes/authorities-search-results.inc:14
 msgid "Broader Term"
-msgstr ""
+msgstr "Širší termín"
 
 #: opac-tmpl/bootstrap/en/includes/masthead.inc:272
 #, c-format
@@ -6377,9 +6379,9 @@ msgid "Log in to your account:"
 msgstr "Přihlaste se do svého účtu:"
 
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:35
-#, fuzzy, c-format
+#, c-format
 msgid "Log out"
-msgstr "%s Odhlásit se"
+msgstr "Odhlásit se"
 
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:33
 #, c-format
@@ -6669,7 +6671,7 @@ msgstr "Hudební nahrávka"
 #: opac-tmpl/bootstrap/en/includes/authorities-search-results.inc:16
 #, c-format
 msgid "NT"
-msgstr ""
+msgstr "UT"
 
 #: opac-tmpl/bootstrap/en/modules/opac-course-reserves.tt:30
 #, c-format
@@ -6679,7 +6681,7 @@ msgstr "Jméno"
 #. ABBR
 #: opac-tmpl/bootstrap/en/includes/authorities-search-results.inc:16
 msgid "Narrower Term"
-msgstr ""
+msgstr "Užší termín"
 
 #: opac-tmpl/bootstrap/en/modules/opac-privacy.tt:65
 #: opac-tmpl/bootstrap/en/modules/opac-privacy.tt:67
@@ -7793,7 +7795,7 @@ msgstr "RSS kanál pro veřejný seznam %s"
 #: opac-tmpl/bootstrap/en/includes/authorities-search-results.inc:20
 #, c-format
 msgid "RT"
-msgstr ""
+msgstr "ST"
 
 #. INPUT type=submit name=rate_button
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:505
@@ -7883,7 +7885,7 @@ msgstr "Běžný tisk"
 #. ABBR
 #: opac-tmpl/bootstrap/en/includes/authorities-search-results.inc:20
 msgid "Related Term"
-msgstr ""
+msgstr "Související termín"
 
 #: opac-tmpl/bootstrap/en/includes/resort_form.inc:1
 #, c-format
@@ -9895,7 +9897,7 @@ msgstr "Typ:"
 #: opac-tmpl/bootstrap/en/includes/authorities-search-results.inc:18
 #, c-format
 msgid "UF"
-msgstr ""
+msgstr "Viz"
 
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:196
 #, c-format
@@ -9969,7 +9971,7 @@ msgstr ""
 #. ABBR
 #: opac-tmpl/bootstrap/en/includes/authorities-search-results.inc:18
 msgid "Used For"
-msgstr ""
+msgstr "Viz"
 
 #: opac-tmpl/bootstrap/en/modules/opac-auth-detail.tt:64
 #, c-format
@@ -9987,6 +9989,8 @@ msgid ""
 "Using this account is not recommended because some parts of Koha will not "
 "function as expected. Instead, please log in with a different account. "
 msgstr ""
+"Použití tohoto účtu nelze doporučit, protože některé části systému nebudou "
+"fungovat jak očekáváte. Přihlaste se pomocí jiného účtu. "
 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:53
 #, c-format
@@ -10075,9 +10079,9 @@ msgid "Warning"
 msgstr "Varování"
 
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:32
-#, fuzzy, c-format
+#, c-format
 msgid "Warning:"
-msgstr "Varování"
+msgstr "Varování:"
 
 #. SCRIPT
 #: opac-tmpl/bootstrap/en/includes/opac-bottom.inc:111
