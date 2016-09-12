@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2016-08-16 18:55-0300\n"
-"PO-Revision-Date: 2016-09-08 09:59+0000\n"
+"PO-Revision-Date: 2016-09-12 11:33+0000\n"
 "Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/>"
 "\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1473328795.000000\n"
+"X-POOTLE-MTIME: 1473679981.000000\n"
 
 #. %1$s:  UNLESS loop.last 
 #. %2$s:  END 
@@ -48909,7 +48909,9 @@ msgid ""
 "%s. %s "
 msgstr ""
 "Máte nastaveno UseQueryParser, ale QueryParser se nepodařilo inicializovat. %"
-"s V konfiguračním souboru nebylo nalezeno nastavení 'queryparser_config'."
+"s V konfiguračním souboru nebylo nalezeno nastavení 'queryparser_config'. "
+"Systém se pokusil nastavení načíst z tohoto souboru: %s . %s Systém se "
+"pokusil nastavení načíst z tohoto souboru: %s %s "
 
 #: intranet-tmpl/prog/en/modules/circ/circulation.tt:756
 #, c-format
