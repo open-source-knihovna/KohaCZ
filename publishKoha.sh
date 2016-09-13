@@ -27,9 +27,6 @@ ssh root@$SERVER <<ENDSSH
     aptly repo add kohacz kohadeb/koha-perldeps_${VERSION}_all.deb
     aptly repo add kohacz kohadeb/koha-common_${VERSION}_all.deb
     aptly snapshot create $VERSION from repo kohacz
-    aptly publish drop jessie
-    aptly publish snapshot -architectures="i386,amd64" $VERSION
-    cp -r .aptly/public/* /var/www/debian/
 ENDSSH
 
 rm misc/translator/po/cs-CZ-opac-bootstrap.po
