@@ -252,6 +252,11 @@ our $PERL_DEPS = {
         'required' => '1',
         'min_ver'  => '0.98'
     },
+    'Cache::Memcached' => {
+        'usage'    => 'Caching',
+        'required' => '0',
+        'min_ver'  => '1.30'
+    },
     'Cache::Memcached::Fast' => {
         'usage'    => 'Caching',
         'required' => '0',
@@ -796,6 +801,11 @@ our $PERL_DEPS = {
         usage => 'Core',
         required => 1,
         min_ver => '3.69', # same for Wheezy/Jessie
+    },
+    'IO::Socket::IP' => {
+        'usage'    => 'Rest API',
+        'required' => '0',
+        'min_ver'  => '0.16'
     },
 };
 

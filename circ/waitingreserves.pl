@@ -157,10 +157,11 @@ $template->param(
     overloop    => \@overloop,
     overcount   => $overcount,
     show_date   => output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }),
-    ReservesMaxPickUpDelay => C4::Context->preference('ReservesMaxPickUpDelay')
+    ReservesMaxPickUpDelay => C4::Context->preference('ReservesMaxPickUpDelay'),
+    tab => $tab,
 );
 
-if ($item && $tab eq 'holdsover') {
+if ($item && $tab eq 'holdsover' && !@cancel_result) {
     print $input->redirect("/cgi-bin/koha/circ/waitingreserves.pl#holdsover");
 } elsif ($cancelall) {
     print $input->redirect("/cgi-bin/koha/circ/waitingreserves.pl");

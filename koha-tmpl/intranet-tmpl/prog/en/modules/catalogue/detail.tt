@@ -521,7 +521,7 @@ function verify_images() {
             </li>
         [% END %]
         <!--This grabs all of the lists a bib record appears in -->
-        [% IF shelves %]
+        [% IF shelves.count %]
             <li><strong>Lists that include this title: </strong>
             <ul>
             [% FOREACH s IN shelves %]
@@ -702,7 +702,7 @@ function verify_images() {
                                     [% IF ( item.hidepatronname ) %]
                                         [% item.Reservedcardnumber %]
                                     [% ELSE %]
-                                        [% item.ReservedForFirstname _ item.ReservedForSurname _ " (" _ item.Reservedcardnumber _ ")" %]
+                                        [% item.ReservedForFirstname _ " " _ item.ReservedForSurname _ " (" _ item.Reservedcardnumber _ ")" %]
                                     [% END %]
                                 </a>
                             [% END %]
