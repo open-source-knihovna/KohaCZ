@@ -5,6 +5,9 @@
   "borrowernumberQueryParam": {
     "$ref": "parameters/patron.json#/borrowernumberQueryParam"
   },
+  "biblionumberPathParam": {
+    "$ref": "parameters/biblio.json#/biblionumberPathParam"
+  },
   "branchcodePathParam": {
     "$ref": "parameters/library.json#/branchcodePathParam"
   },

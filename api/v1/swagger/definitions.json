@@ -1,4 +1,10 @@
 {
+  "biblios": {
+    "$ref": "definitions/biblios.json"
+   },
+  "biblio": {
+    "$ref": "definitions/biblio.json"
+  },
   "city": {
     "$ref": "definitions/city.json"
   },
