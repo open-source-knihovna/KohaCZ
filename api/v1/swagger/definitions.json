@@ -40,5 +40,11 @@
   },
   "renewability": {
     "$ref": "definitions/renewability.json"
+  },
+  "biblios": {
+    "$ref": "definitions/biblios.json"
+  },
+  "biblio": {
+    "$ref": "definitions/biblio.json"
   }
 }

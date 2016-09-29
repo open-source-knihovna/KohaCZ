@@ -8,5 +8,12 @@
       "type": "integer"
     },
     "collectionFormat": "ssv"
+  },
+   "biblionumberPathParam": {
+     "name": "biblionumber",
+     "in": "path",
+     "description": "Internal biblio identifier",
+     "required": true,
+     "type": "integer"
   }
 }
