@@ -12,12 +12,13 @@ use Koha::AuthUtils;
 use C4::Output;
 use C4::Context;
 use C4::Members;
-use C4::Branch;
 use C4::Circulation;
 use CGI qw ( -utf8 );
 use C4::Members::Attributes qw(GetBorrowerAttributes);
 use Koha::Patron::Images;
 use Koha::Token;
+
+use Koha::Patron::Categories;
 
 use Digest::MD5 qw(md5_base64);
 
@@ -72,7 +73,7 @@ if ( $newpassword && !scalar(@errors) ) {
             token  => scalar $input->param('csrf_token'),
         });
 
-    my $digest = Koha::AuthUtils::hash_password( $input->param('newpassword') );
+    my $digest = Koha::AuthUtils::hash_password( scalar $input->param('newpassword') );
     my $uid    = $input->param('newuserid') || $bor->{userid};
     my $dbh    = C4::Context->dbh;
     if ( Koha::Patrons->find( $member )->update_password($uid, $digest) ) {
@@ -101,11 +102,10 @@ else {
     $template->param( defaultnewpassword => $defaultnewpassword );
 }
 
-if ( $bor->{'category_type'} eq 'C' ) {
-    my ( $catcodes, $labels ) = GetborCatFromCatType( 'A', 'WHERE category_type = ?' );
-    my $cnt = scalar(@$catcodes);
-    $template->param( 'CATCODE_MULTI' => 1 ) if $cnt > 1;
-    $template->param( 'catcode' => $catcodes->[0] ) if $cnt == 1;
+if ( $bor->{'category_type'} eq 'C') {
+    my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
+    $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
+    $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
 }
 
 $template->param( adultborrower => 1 ) if ( $bor->{'category_type'} eq 'A' );
@@ -143,7 +143,6 @@ $template->param(
     email                      => $bor->{'email'},
     emailpro                   => $bor->{'emailpro'},
     branchcode                 => $bor->{'branchcode'},
-    branchname                 => GetBranchName( $bor->{'branchcode'} ),
     userid                     => $bor->{'userid'},
     destination                => $destination,
     is_child                   => ( $bor->{'category_type'} eq 'C' ),

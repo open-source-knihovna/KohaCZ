@@ -67,7 +67,10 @@ $(document).ready(function(){
     $("#searchtohold").click(function(){
         searchToHold();
         return false;
-    })
+    });
+    $("#select_patron_messages").on("change",function(){
+        $("#borrower_message").val( $(this).val() );
+    });
 });
 function confirm_local_deletion() {
     var is_confirmed = window.confirm(_("Are you sure you want to delete this patron from the local database? This cannot be undone."));
@@ -131,7 +134,7 @@ function searchToHold(){
 <div id="toolbar" class="btn-toolbar">
     [% IF ( CAN_user_borrowers ) %]
         [% IF ( guarantor ) %]
-            <a id="editpatron" class="btn btn-small" href="/cgi-bin/koha/members/memberentry.pl?op=modify&amp;destination=circ&amp;borrowernumber=[% borrowernumber %]&amp;guarantorid=[% guarantorborrowernumber %]&amp;categorycode=[% categorycode %]">
+            <a id="editpatron" class="btn btn-small" href="/cgi-bin/koha/members/memberentry.pl?op=modify&amp;destination=circ&amp;borrowernumber=[% borrowernumber %]&amp;guarantorid=[% guarantor.borrowernumber %]&amp;categorycode=[% categorycode %]">
         [% ELSE %]
             <a id="editpatron" class="btn btn-small" href="/cgi-bin/koha/members/memberentry.pl?op=modify&amp;destination=circ&amp;borrowernumber=[% borrowernumber %]&amp;categorycode=[% categorycode %]">
         [% END %]
@@ -226,8 +229,8 @@ function searchToHold(){
                 [% bor_notes = AuthorisedValues.Get( 'BOR_NOTES' ) %]
                 [% IF bor_notes %]
                     <li>
-                        <label for="type">Predefined notes: </label>
-                        <select name="type" id="type" onchange="this.form.borrower_message.value=this.options[this.selectedIndex].value;">
+                        <label for="select_patron_messages">Predefined notes: </label>
+                        <select name="type" id="select_patron_messages">
                             <option value="">Select note</option>
                             [% FOREACH bor_note IN bor_notes %]
                                 <option value="[% bor_note.lib %]">[% bor_note.lib %]</option>

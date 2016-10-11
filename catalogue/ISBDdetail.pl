@@ -33,8 +33,7 @@ This script needs a biblionumber as parameter
 
 =cut
 
-use strict;
-#use warnings; FIXME - Bug 2505
+use Modern::Perl;
 
 use HTML::Entities;
 use C4::Auth;
@@ -48,9 +47,7 @@ use C4::Members; # to use GetMember
 use C4::Serials;    # CountSubscriptionFromBiblionumber
 use C4::Search;		# enabled_staff_search_views
 use C4::Acquisition qw(GetOrdersByBiblionumber);
-
-
-#---- Internal function
+use Koha::RecordProcessor;
 
 
 my $query = new CGI;
@@ -70,15 +67,41 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
-my $res = GetISBDView($biblionumber, "intranet");
-if ( not defined $res ) {
+if ( not defined $biblionumber ) {
        # biblionumber invalid -> report and exit
        $template->param( unknownbiblionumber => 1,
-                               biblionumber => $biblionumber
+                                biblionumber => $biblionumber
        );
        output_html_with_http_headers $query, $cookie, $template->output;
        exit;
 }
+
+my $record = GetMarcBiblio($biblionumber,1);
+
+if ( not defined $record ) {
+       # biblionumber invalid -> report and exit
+       $template->param( unknownbiblionumber => 1,
+                                biblionumber => $biblionumber
+       );
+       output_html_with_http_headers $query, $cookie, $template->output;
+       exit;
+}
+
+my $framework = GetFrameworkCode( $biblionumber );
+my $record_processor = Koha::RecordProcessor->new({
+    filters => 'ViewPolicy',
+    options => {
+        interface => 'intranet',
+        frameworkcode => $framework
+    },
+});
+$record_processor->process($record);
+
+my $res = GetISBDView({
+    'record'    => $record,
+    'template'  => 'intranet',
+    'framework' => $framework,
+});
 
 if($query->cookie("holdfor")){ 
     my $holdfor_patron = GetMember('borrowernumber' => $query->cookie("holdfor"));
@@ -103,7 +126,6 @@ if ($subscriptionsnumber) {
         subscriptiontitle   => $subscriptiontitle,
     );
 }
-my $record = GetMarcBiblio($biblionumber);
 
 $template->param (
     ISBD                => $res,

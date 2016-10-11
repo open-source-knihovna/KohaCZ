@@ -1,0 +1,63 @@
+{
+  "type": "object",
+  "properties": {
+    "reserve_id": {
+      "$ref": "../x-primitives.json#/reserve_id"
+    },
+    "borrowernumber": {
+      "$ref": "../x-primitives.json#/borrowernumber"
+    },
+    "reservedate": {
+      "description": "the date the hold was placed"
+    },
+    "biblionumber": {
+      "$ref": "../x-primitives.json#/biblionumber"
+    },
+    "branchcode": {
+      "$ref": "../x-primitives.json#/branchcode"
+    },
+    "notificationdate": {
+      "description": "currently unused"
+    },
+    "reminderdate": {
+      "description": "currently unused"
+    },
+    "cancellationdate": {
+      "description": "the date the hold was cancelled"
+    },
+    "reservenotes": {
+      "description": "notes related to this hold"
+    },
+    "priority": {
+      "description": "where in the queue the patron sits"
+    },
+    "found": {
+      "description": "a one letter code defining what the status of the hold is after it has been confirmed"
+    },
+    "timestamp": {
+      "description": "date and time the hold was last updated"
+    },
+    "itemnumber": {
+      "$ref": "../x-primitives.json#/itemnumber"
+    },
+    "waitingdate": {
+      "description": "the date the item was marked as waiting for the patron at the library"
+    },
+    "expirationdate": {
+      "description": "the date the hold expires"
+    },
+    "lowestPriority": {
+      "description": ""
+    },
+    "suspend": {
+      "description": ""
+    },
+    "suspend_until": {
+      "description": ""
+    },
+    "itemtype": {
+      "type": ["string", "null"],
+      "description": "If record level hold, the optional itemtype of the item the patron is requesting"
+    }
+  }
+}

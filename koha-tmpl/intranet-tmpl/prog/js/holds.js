@@ -100,7 +100,26 @@ $(document).ready(function() {
                     },
                     {
                         "mDataProp": function( oObj ) {
-                            return oObj.branchcode || "";
+                            if( oObj.branches.length > 1 && oObj.found !== 'W' && oObj.found !== 'T' ){
+                                var branchSelect='<select priority='+oObj.priority+' class="hold_location_select" reserve_id="'+oObj.reserve_id+'" name="pick-location">';
+                                for ( var i=0; i < oObj.branches.length; i++ ){
+                                    var selectedbranch;
+                                    var setbranch;
+                                    if( oObj.branches[i].selected ){
+
+                                        selectedbranch = " selected='selected' ";
+                                        setbranch = CURRENT;
+                                    }
+                                    else{
+                                        selectedbranch = '';
+                                        setbranch = '';
+                                    }
+                                    branchSelect += '<option value="'+ oObj.branches[i].branchcode +'"'+selectedbranch+'>'+oObj.branches[i].branchname+setbranch+'</option>';
+                                }
+                                branchSelect +='</select>';
+                                return branchSelect;
+                            }
+                            else { return oObj.branchcode || ""; }
                         }
                     },
                     { "mDataProp": "expirationdate_formatted" },
@@ -176,6 +195,28 @@ $(document).ready(function() {
                       }
                     });
                 });
+
+                $(".hold_location_select").change(function(){
+                    $(this).prop("disabled",true);
+                    var cur_select = $(this);
+                    var res_id = $(this).attr('reserve_id');
+                    $(this).after('<div id="updating_reserveno'+res_id+'" class="waiting"><img src="/intranet-tmpl/prog/img/loading-small.gif" alt="" /><span class="waiting_msg"></span></div>');
+                    var api_url = '/api/v1/holds/'+res_id;
+                    var update_info = JSON.stringify({ branchcode: $(this).val(), priority: parseInt($(this).attr("priority"),10) });
+                    $.ajax({
+                        method: "PUT",
+                        url: api_url,
+                        data: update_info ,
+                        success: function( data ){ holdsTable.api().ajax.reload(); },
+                        error: function( jqXHR, textStatus, errorThrown) {
+                            alert('There was an error:'+textStatus+" "+errorThrown);
+                            cur_select.prop("disabled",false);
+                            $("#updating_reserveno"+res_id).remove();
+                            cur_select.val( cur_select.children('option[selected="selected"]').val() );
+                        },
+                    });
+                });
+
             });
 
             if ( $("#holds-table").length ) {

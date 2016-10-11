@@ -56,6 +56,7 @@ my $borrower = GetMember( 'borrowernumber' => $borrowernumber );
 my $multi_hold = $input->param('multi_hold');
 my $biblionumbers = $multi_hold ? $input->param('biblionumbers') : ($biblionumber . '/');
 my $bad_bibs = $input->param('bad_bibs');
+my $holds_to_place_count = $input->param('holds_to_place_count') || 1;
 
 my %bibinfos = ();
 my @biblionumbers = split '/', $biblionumbers;
@@ -71,6 +72,7 @@ my $found;
 # if we have an item selectionned, and the pickup branch is the same as the holdingbranch
 # of the document, we force the value $rank and $found .
 if (defined $checkitem && $checkitem ne ''){
+    $holds_to_place_count = 1;
     $rank[0] = '0' unless C4::Context->preference('ReservesNeedReturns');
     my $item = $checkitem;
     $item = GetItem($item);
@@ -79,30 +81,28 @@ if (defined $checkitem && $checkitem ne ''){
     }
 }
 
-if ($type eq 'str8' && $borrower){
+if ( $type eq 'str8' && $borrower ) {
 
-    foreach my $biblionumber (keys %bibinfos) {
-        my $count=@bibitems;
-        @bibitems=sort @bibitems;
-        my $i2=1;
+    foreach my $biblionumber ( keys %bibinfos ) {
+        my $count = @bibitems;
+        @bibitems = sort @bibitems;
+        my $i2 = 1;
         my @realbi;
-        $realbi[0]=$bibitems[0];
-        for (my $i=1;$i<$count;$i++) {
-            my $i3=$i2-1;
-            if ($realbi[$i3] ne $bibitems[$i]) {
-                $realbi[$i2]=$bibitems[$i];
+        $realbi[0] = $bibitems[0];
+        for ( my $i = 1 ; $i < $count ; $i++ ) {
+            my $i3 = $i2 - 1;
+            if ( $realbi[$i3] ne $bibitems[$i] ) {
+                $realbi[$i2] = $bibitems[$i];
                 $i2++;
             }
         }
 
-    if (defined $checkitem && $checkitem ne ''){
-		my $item = GetItem($checkitem);
-        	if ($item->{'biblionumber'} ne $biblionumber) {
-                	$biblionumber = $item->{'biblionumber'};
-        	}
-	}
-
-
+        if ( defined $checkitem && $checkitem ne '' ) {
+            my $item = GetItem($checkitem);
+            if ( $item->{'biblionumber'} ne $biblionumber ) {
+                $biblionumber = $item->{'biblionumber'};
+            }
+        }
 
         if ($multi_hold) {
             my $bibinfo = $bibinfos{$biblionumber};
@@ -110,7 +110,11 @@ if ($type eq 'str8' && $borrower){
                        $bibinfo->{rank},$startdate,$expirationdate,$notes,$bibinfo->{title},$checkitem,$found);
         } else {
             # place a request on 1st available
-            AddReserve($branch,$borrower->{'borrowernumber'},$biblionumber,\@realbi,$rank[0],$startdate,$expirationdate,$notes,$title,$checkitem,$found, $itemtype);
+            for ( my $i = 0 ; $i < $holds_to_place_count ; $i++ ) {
+                AddReserve( $branch, $borrower->{'borrowernumber'},
+                    $biblionumber, \@realbi, $rank[0], $startdate, $expirationdate, $notes, $title,
+                    $checkitem, $found, $itemtype );
+            }
         }
     }
 
@@ -119,13 +123,16 @@ if ($type eq 'str8' && $borrower){
             $biblionumbers .= $bad_bibs;
         }
         print $input->redirect("request.pl?biblionumbers=$biblionumbers&multi_hold=1");
-    } else {
+    }
+    else {
         print $input->redirect("request.pl?biblionumber=$biblionumber");
     }
-} elsif ($borrower eq ''){
-	print $input->header();
-	print "Invalid borrower number please try again";
-# Not sure that Dump() does HTML escaping. Use firebug or something to trace
-# instead.
-#	print $input->Dump;
+}
+elsif ( $borrower eq '' ) {
+    print $input->header();
+    print "Invalid borrower number please try again";
+
+    # Not sure that Dump() does HTML escaping. Use firebug or something to trace
+    # instead.
+    #print $input->Dump;
 }

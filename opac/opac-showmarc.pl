@@ -4,21 +4,20 @@
 #
 # This file is part of Koha.
 #
-# Koha is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 3 of the License, or (at your option) any later
-# version.
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
 #
-# Koha is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along
-# with Koha; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-use warnings;
+use Modern::Perl;
 
 # standard or CPAN modules used
 use CGI qw ( -utf8 );
@@ -32,6 +31,7 @@ use C4::Biblio;
 use C4::ImportBatch;
 use C4::XSLT ();
 use C4::Templates;
+use Koha::RecordProcessor;
 
 my $input       = new CGI;
 my $biblionumber = $input->param('id');
@@ -39,22 +39,32 @@ $biblionumber   = int($biblionumber);
 my $importid= $input->param('importid');
 my $view= $input->param('viewas') || 'marc';
 
+my $record_processor = Koha::RecordProcessor->new({ filters => 'ViewPolicy' });
+
 my $record;
 if ($importid) {
     my ($marc) = GetImportRecordMarc($importid);
     $record = MARC::Record->new_from_usmarc($marc);
 }
 else {
-    $record =GetMarcBiblio($biblionumber);
+    $record = GetMarcBiblio($biblionumber);
+    my $framework = GetFrameworkCode($biblionumber);
+    $record_processor->options({
+        interface => 'opac',
+        frameworkcode => $framework
+    });
 }
+
 if(!ref $record) {
     print $input->redirect("/cgi-bin/koha/errors/404.pl");
     exit;
 }
 
+$record_processor->process($record);
+
 if ($view eq 'card' || $view eq 'html') {
-    my $xml = $importid ? $record->as_xml(): GetXmlBiblio($biblionumber);
-    my $xsl =  $view eq 'card' ? 'compact.xsl' : 'plainMARC.xsl';
+    my $xml = $record->as_xml;
+    my $xsl = $view eq 'card' ? 'compact.xsl' : 'plainMARC.xsl';
     my $htdocs = C4::Context->config('opachtdocs');
     my ($theme, $lang) = C4::Templates::themelanguage($htdocs, $xsl, 'opac', $input);
     $xsl = "$htdocs/$theme/$lang/xslt/$xsl";

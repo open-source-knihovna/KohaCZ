@@ -1,0 +1,15 @@
+{
+  "borrowernumberPathParam": {
+    "name": "borrowernumber",
+    "in": "path",
+    "description": "Internal patron identifier",
+    "required": true,
+    "type": "integer"
+  },
+  "borrowernumberQueryParam": {
+    "name": "borrowernumber",
+    "in": "query",
+    "description": "Internal borrower identifier",
+    "type": "integer"
+  }
+}

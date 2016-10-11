@@ -208,6 +208,65 @@ sub update_password {
     return 1;
 }
 
+=head3 renew_account
+
+my $new_expiry_date = $patron->renew_account
+
+Extending the subscription to the expiry date.
+
+=cut
+
+sub renew_account {
+    my ($self) = @_;
+
+    my $date =
+      C4::Context->preference('BorrowerRenewalPeriodBase') eq 'dateexpiry'
+      ? dt_from_string( $self->dateexpiry )
+      : dt_from_string;
+    my $patron_category = Koha::Patron::Categories->find( $self->categorycode );    # FIXME Should be $self->category
+    my $expiry_date     = $patron_category->get_expiry_date($date);
+
+    $self->dateexpiry($expiry_date)->store;
+
+    C4::Members::AddEnrolmentFeeIfNeeded( $self->categorycode, $self->borrowernumber );
+
+    logaction( "MEMBERS", "RENEW", $self->borrowernumber, "Membership renewed" ) if C4::Context->preference("BorrowersLog");
+    return dt_from_string( $expiry_date )->truncate( to => 'day' );
+}
+
+=head2 has_overdues
+
+my $has_overdues = $patron->has_overdues;
+
+Returns the number of patron's overdues
+
+=cut
+
+sub has_overdues {
+    my ($self) = @_;
+    my $dtf = Koha::Database->new->schema->storage->datetime_parser;
+    return $self->_result->issues->search({ date_due => { '<' => $dtf->format_datetime( dt_from_string() ) } })->count;
+}
+
+=head2 track_login
+
+    $patron->track_login;
+    $patron->track_login({ force => 1 });
+
+    Tracks a (successful) login attempt.
+    The preference TrackLastPatronActivity must be enabled. Or you
+    should pass the force parameter.
+
+=cut
+
+sub track_login {
+    my ( $self, $params ) = @_;
+    return if
+        !$params->{force} &&
+        !C4::Context->preference('TrackLastPatronActivity');
+    $self->lastseen( dt_from_string() )->store;
+}
+
 =head3 type
 
 =cut

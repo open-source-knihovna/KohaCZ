@@ -23,21 +23,20 @@ use CGI qw ( -utf8 );
 use C4::Auth;
 use C4::Output;
 use C4::Context;
-use C4::Branch; # GetBranches
 use C4::Koha;
 use C4::Circulation;
 use C4::Members;
 use C4::Reports;
 use C4::Debug;
+
 use Koha::DateUtils;
+use Koha::Patron::Categories;
 
 =head1 NAME
 
 plugin that shows a stats on borrowers
 
 =head1 DESCRIPTION
-
-=over 2
 
 =cut
 
@@ -110,16 +109,6 @@ my @values;
 # here each element returned by map is a hashref, get it?
 my @mime  = ( map { {type =>$_} } (split /[;:]/, 'CSV') ); # FIXME translation
 my $delims = GetDelimiterChoices;
-my $branches = GetBranches;
-my @branchloop;
-foreach (sort keys %$branches) {
-# 	my $selected = 1 if $thisbranch eq $branch;
-	my %row = ( value => $_,
-#				selected => $selected,
-				branchname => $branches->{$_}->{branchname},
-			);
-	push @branchloop, \%row;
-}
 
 my $itemtypes = GetItemTypes;
 my @itemtypeloop;
@@ -129,22 +118,14 @@ foreach (sort {$itemtypes->{$a}->{translated_description} cmp $itemtypes->{$b}->
               );
     push @itemtypeloop, \%row;
 }
-    
-my ($codes,$labels) = GetborCatFromCatType(undef,undef);
-my @borcatloop;
-foreach (sort keys %$labels) {
-	my %row =(value => $_,
-              description => $labels->{$_},
-             );
-    push @borcatloop, \%row;
-}
-    
+
+my $patron_categories = Koha::Patron::Categories->search_limited({}, {order_by => ['categorycode']});
+
 $template->param(
 	    mimeloop => \@mime,
 	  CGIseplist => $delims,
-	  branchloop => \@branchloop,
 	itemtypeloop => \@itemtypeloop,
-	  borcatloop => \@borcatloop,
+patron_categories => $patron_categories,
 );
 output_html_with_http_headers $input, $cookie, $template->output;
 

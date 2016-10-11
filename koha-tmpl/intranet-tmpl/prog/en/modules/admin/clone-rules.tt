@@ -1,3 +1,4 @@
+[% USE Branches %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Administration &rsaquo; Circulation and fine rules &rsaquo; Clone circulation and fine rules</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -14,10 +15,8 @@
     <div id="yui-main">
     <div class="yui-b">
     <h2>Cloning circulation and fine rules
-        [% IF ( frombranchname || tobranchname ) %]
-            [% IF ( frombranchname ) %] from "[% frombranchname %]"[% END %]
-	    [% IF ( tobranchname ) %] to "[% tobranchname %]"[% END %]
-	[% END %]
+        [% IF frombranch %] from "[% Branches.GetName( frombranch ) %]"[% END %]
+        [% IF tobranch %] to "[% Branches.GetName( tobranch ) %]"[% END %]
     </h2>
 
     [% IF ( result ) %]
@@ -30,45 +29,32 @@
     [% ELSE %]
 
     <p class="help">Use carefully! If the destination library already has circulation and fine rules, they will be deleted without warning!</p>
-	<form action="/cgi-bin/koha/admin/clone-rules.pl" method="post">
-	    [% UNLESS ( frombranch ) %]
-	    <fieldset>
-		<legend>Please choose a library to clone rules from:</legend> 
-		<label for="frombranch">Source library:</label>
-		<select name="frombranch" id="frombranch">
-			<option value="">Default</option>
-			[% FOREACH branchloo IN branchloop %]
-				[% IF ( branchloo.selected ) %]
-					<option value="[% branchloo.value %]" selected="selected">[% branchloo.branchname %]</option>
-				[% ELSE %]
-					<option value="[% branchloo.value %]">[% branchloo.branchname %]</option>
-				[% END %]
-			[% END %]
-		</select>
-		[% IF ( tobranch ) %]<input type="hidden" name="tobranch" value="[% tobranch %]" />[% END %]
-	    </fieldset>
-	    [% END %]
+    <form action="/cgi-bin/koha/admin/clone-rules.pl" method="post">
+        [% UNLESS ( frombranch ) %]
+            <fieldset>
+                <legend>Please choose a library to clone rules from:</legend>
+                <label for="frombranch">Source library:</label>
+                <select name="frombranch" id="frombranch">
+                    <option value="">Default</option>
+                    [% PROCESS options_for_libraries libraries => Branches.all() %]
+                </select>
+                [% IF ( tobranch ) %]<input type="hidden" name="tobranch" value="[% tobranch %]" />[% END %]
+            </fieldset>
+        [% END %]
 
-	    [% UNLESS ( tobranch ) %]
-	    <fieldset>
-		<legend>Please choose the library to clone the rules to:</legend> 
-		<label for="tobranch">Destination library:</label>
-		<select name="tobranch" id="tobranch">
-			<option value="">Default</option>
-			[% FOREACH branchloo IN branchloop %]
-				[% IF ( branchloo.selected ) %]
-					<option value="[% branchloo.value %]" selected="selected">[% branchloo.branchname %]</option>
-				[% ELSE %]
-					<option value="[% branchloo.value %]">[% branchloo.branchname %]</option>
-				[% END %]
-			[% END %]
-		</select>
-		[% IF ( frombranch ) %]<input type="hidden" name="frombranch" value="[% frombranch %]" />[% END %]
-	    </fieldset>
-	[% END %]
-	<input type="submit" value="Submit" />
-    <a href="/cgi-bin/koha/admin/smart-rules.pl" class="cancel">Cancel</a>
-	</form>
+        [% UNLESS ( tobranch ) %]
+            <fieldset>
+            <legend>Please choose the library to clone the rules to:</legend>
+            <label for="tobranch">Destination library:</label>
+            <select name="tobranch" id="tobranch">
+                <option value="">Default</option>
+                [% PROCESS options_for_libraries libraries => Branches.all() %]
+            </select>
+            [% IF ( frombranch ) %]<input type="hidden" name="frombranch" value="[% frombranch %]" />[% END %]
+            </fieldset>
+        [% END %]
+        <input type="submit" value="Submit" />
+    </form>
 
     [% END %]
     </div>

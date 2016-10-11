@@ -23,6 +23,7 @@ use Carp;
 
 use Koha::Database;
 
+use Koha::Item::Transfer;
 use Koha::Patrons;
 use Koha::Libraries;
 
@@ -72,6 +73,21 @@ sub holding_branch {
     $self->{_holding_branch} ||= Koha::Libraries->find( $self->holdingbranch() );
 
     return $self->{_holding_branch};
+}
+
+=head3 get_transfer
+
+my $transfer = $item->get_transfer;
+
+Return the transfer if the item is in transit or undef
+
+=cut
+
+sub get_transfer {
+    my ( $self ) = @_;
+    my $transfer_rs = $self->_result->branchtransfers->search({ datearrived => undef })->first;
+    return unless $transfer_rs;
+    return Koha::Item::Transfer->_new_from_dbic( $transfer_rs );
 }
 
 =head3 last_returned_by

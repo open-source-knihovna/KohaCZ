@@ -345,9 +345,12 @@ sub GetBasketAsCSV {
                 notes => $order->{'order_vendornote'},
                 quantity => $order->{'quantity'},
                 rrp => $order->{'rrp'},
-                deliveryplace => C4::Branch::GetBranchName( $basket->{'deliveryplace'} ),
-                billingplace => C4::Branch::GetBranchName( $basket->{'billingplace'} ),
             };
+            for my $place ( qw( deliveryplace billingplace ) ) {
+                if ( my $library = Koha::Libraries->find( $row->{deliveryplace} ) ) {
+                    $row->{$place} = $library->branchname
+                }
+            }
             foreach(qw(
                 contractname author title publishercode collectiontitle notes
                 deliveryplace billingplace
@@ -419,11 +422,18 @@ sub GetBasketGroupAsCSV {
                 booksellerpostal => $bookseller->{postal},
                 contractnumber => $contract->{contractnumber},
                 contractname => $contract->{contractname},
-                basketgroupdeliveryplace => C4::Branch::GetBranchName( $basketgroup->{deliveryplace} ),
-                basketgroupbillingplace => C4::Branch::GetBranchName( $basketgroup->{billingplace} ),
-                basketdeliveryplace => C4::Branch::GetBranchName( $basket->{deliveryplace} ),
-                basketbillingplace => C4::Branch::GetBranchName( $basket->{billingplace} ),
             };
+            my $temp = {
+                basketgroupdeliveryplace => $basketgroup->{deliveryplace},
+                basketgroupbillingplace  => $basketgroup->{billingplace},
+                basketdeliveryplace      => $basket->{deliveryplace},
+                basketbillingplace       => $basket->{billingplace},
+            };
+            for my $place (qw( basketgroupdeliveryplace basketgroupbillingplace basketdeliveryplace basketbillingplace )) {
+                if ( my $library = Koha::Libraries->find( $temp->{$place} ) ) {
+                    $row->{$place} = $library->branchname;
+                }
+            }
             foreach(qw(
                 basketname author title publishercode collectiontitle notes
                 booksellername bookselleraddress booksellerpostal contractname
@@ -1845,7 +1855,7 @@ sub DelOrder {
 
     my @itemnumbers = GetItemnumbersFromOrder( $ordernumber );
     foreach my $itemnumber (@itemnumbers){
-        my $delcheck = C4::Items::DelItemCheck( $dbh, $bibnum, $itemnumber );
+        my $delcheck = C4::Items::DelItemCheck( $bibnum, $itemnumber );
 
         if($delcheck != 1) {
             $error->{'delitem'} = 1;
@@ -3045,7 +3055,7 @@ If the field does not exist, it will be created too.
 
 sub FillWithDefaultValues {
     my ($record) = @_;
-    my $tagslib = C4::Biblio::GetMarcStructure( 1, 'ACQ' );
+    my $tagslib = C4::Biblio::GetMarcStructure( 1, 'ACQ', { unsafe => 1 } );
     if ($tagslib) {
         my ($itemfield) =
           C4::Biblio::GetMarcFromKohaField( 'items.itemnumber', '' );

@@ -622,6 +622,7 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
   `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron if this item has previously been checked out to this patron if 'yes', not if 'no', defer to category setting if 'inherit'.
   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
+  `lastseen` datetime default NULL, -- last time a patron has been seed (connected at the OPAC or staff interface)
   KEY borrowernumber (borrowernumber),
   KEY `cardnumber` (`cardnumber`),
   KEY `sms_provider_id` (`sms_provider_id`)
@@ -862,6 +863,7 @@ CREATE TABLE `issuingrules` ( -- circulation and fine rules
   `norenewalbefore` int(4) default NULL, -- no renewal allowed until X days or hours before due date.
   `auto_renew` BOOLEAN default FALSE, -- automatic renewal
   `reservesallowed` smallint(6) NOT NULL default "0", -- how many holds are allowed
+  `holds_per_record` SMALLINT(6) NOT NULL DEFAULT 1, -- How many holds a patron can have on a given bib
   `branchcode` varchar(10) NOT NULL default '', -- the branch this rule is for (branches.branchcode)
   overduefinescap decimal(28,6) default NULL, -- the maximum amount of an overdue fine
   cap_fine_to_replacement_price BOOLEAN NOT NULL DEFAULT  '0', -- cap the fine based on item's replacement price
@@ -1647,6 +1649,7 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
   `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron if this item has previously been checked out to this patron if 'yes', not if 'no', defer to category setting if 'inherit'.
   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
+  `lastseen` datetime default NULL, -- last time a patron has been seed (connected at the OPAC or staff interface)
   UNIQUE KEY `cardnumber` (`cardnumber`),
   PRIMARY KEY `borrowernumber` (`borrowernumber`),
   KEY `categorycode` (`categorycode`),
@@ -1940,7 +1943,7 @@ CREATE TABLE `reviews` ( -- patron opac comments
   `borrowernumber` int(11) default NULL, -- foreign key from the borrowers table defining which patron left this comment
   `biblionumber` int(11) default NULL, -- foreign key from the biblio table defining which bibliographic record this comment is for
   `review` text, -- the body of the comment
-  `approved` tinyint(4) default NULL, -- whether this comment has been approved by a librarian (1 for yes, 0 for no)
+  `approved` tinyint(4) default 0, -- whether this comment has been approved by a librarian (1 for yes, 0 for no)
   `datereviewed` datetime default NULL, -- the date the comment was left
   PRIMARY KEY  (`reviewid`),
   CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE,
@@ -2087,6 +2090,8 @@ CREATE TABLE `subscription` ( -- information related to the subscription
   `enddate` date default NULL, -- subscription end date
   `closed` INT(1) NOT NULL DEFAULT 0, -- yes / no if the subscription is closed
   `reneweddate` date default NULL, -- date of last renewal for the subscription
+  `itemtype` VARCHAR( 10 ) NULL,
+  `previousitemtype` VARCHAR( 10 ) NULL,
   PRIMARY KEY  (`subscriptionid`),
   CONSTRAINT subscription_ibfk_1 FOREIGN KEY (periodicity) REFERENCES subscription_frequencies (id) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT subscription_ibfk_2 FOREIGN KEY (numberpattern) REFERENCES subscription_numberpatterns (id) ON DELETE SET NULL ON UPDATE CASCADE

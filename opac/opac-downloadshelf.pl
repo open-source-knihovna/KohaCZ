@@ -28,8 +28,8 @@ use C4::Items;
 use C4::Output;
 use C4::Record;
 use C4::Ris;
-
 use Koha::CsvProfiles;
+use Koha::RecordProcessor;
 use Koha::Virtualshelves;
 
 use utf8;
@@ -53,7 +53,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user (
 my $shelfnumber = $query->param('shelfnumber');
 my $format  = $query->param('format');
 my $context = $query->param('context');
-my $dbh     = C4::Context->dbh;
 
 my $shelf = Koha::Virtualshelves->find( $shelfnumber );
 if ( $shelf and $shelf->can_be_viewed( $borrowernumber ) ) {
@@ -62,7 +61,7 @@ if ( $shelf and $shelf->can_be_viewed( $borrowernumber ) ) {
 
 
         my $contents = $shelf->get_contents;
-        my $marcflavour         = C4::Context->preference('marcflavour');
+        my $marcflavour = C4::Context->preference('marcflavour');
         my $output;
         my $extension;
         my $type;
@@ -76,10 +75,19 @@ if ( $shelf and $shelf->can_be_viewed( $borrowernumber ) ) {
             $output = marc2csv(\@biblios, $format);
         # Other formats
         } else {
+            my $record_processor = Koha::RecordProcessor->new({
+                filters => 'ViewPolicy'
+            });
             while ( my $content = $contents->next ) {
                 my $biblionumber = $content->biblionumber->biblionumber;
 
                 my $record = GetMarcBiblio($biblionumber, 1);
+                my $framework = &GetFrameworkCode( $biblionumber );
+                $record_processor->options({
+                    interface => 'opac',
+                    frameworkcode => $framework
+                });
+                $record_processor->process($record);
                 next unless $record;
 
                 if ($format eq 'iso2709') {
@@ -92,7 +100,11 @@ if ( $shelf and $shelf->can_be_viewed( $borrowernumber ) ) {
                     $output .= marc2bibtex($record, $biblionumber);
                 }
                 elsif ( $format eq 'isbd' ) {
-                    $output   .= GetISBDView($biblionumber, "opac");
+                    $output   .= GetISBDView({
+                        'record'    => $record,
+                        'template'  => 'opac',
+                        'framework' => $framework,
+                    });
                     $extension = "txt";
                     $type      = "text/plain";
                 }

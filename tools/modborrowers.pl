@@ -28,7 +28,6 @@
 use Modern::Perl;
 use CGI qw ( -utf8 );
 use C4::Auth;
-use C4::Branch;
 use C4::Koha;
 use C4::Members;
 use C4::Members::Attributes;
@@ -37,6 +36,8 @@ use C4::Output;
 use List::MoreUtils qw /any uniq/;
 use Koha::DateUtils qw( dt_from_string );
 use Koha::List::Patron;
+use Koha::Libraries;
+use Koha::Patron::Categories;
 
 my $input = new CGI;
 my $op = $input->param('op') || 'show_form';
@@ -104,7 +105,7 @@ if ( $op eq 'show' ) {
     my @patron_attributes_values;
     my @patron_attributes_codes;
     my $patron_attribute_types = C4::Members::AttributeTypes::GetAttributeTypes_hashref('all');
-    my $patron_categories = C4::Members::GetBorrowercategoryList;
+    my @patron_categories = Koha::Patron::Categories->search_limited({}, {order_by => ['description']});
     for ( values %$patron_attribute_types ) {
         my $attr_type = C4::Members::AttributeTypes->fetch( $_->{code} );
         # TODO Repeatable attributes are not correctly managed and can cause data lost.
@@ -122,8 +123,8 @@ if ( $op eq 'show' ) {
 
         my $category_code = $_->{category_code};
         my ( $category_lib ) = map {
-            ( defined $category_code and $_->{categorycode} eq $category_code ) ? $_->{description} : ()
-        } @$patron_categories;
+            ( defined $category_code and $_->categorycode eq $category_code ) ? $_->description : ()
+        } @patron_categories;
         push @patron_attributes_codes,
             {
                 attribute_code => $_->{code},
@@ -144,13 +145,12 @@ if ( $op eq 'show' ) {
         if @notfoundcardnumbers;
 
     # Construct drop-down list values
-    my $branches = GetBranchesLoop;
+    my $branches = Koha::Libraries->search({}, { order_by => ['branchname'] })->unblessed;
     my @branches_option;
     push @branches_option, { value => $_->{value}, lib => $_->{branchname} } for @$branches;
     unshift @branches_option, { value => "", lib => "" };
-    my $categories = GetBorrowercategoryList;
     my @categories_option;
-    push @categories_option, { value => $_->{categorycode}, lib => $_->{description} } for @$categories;
+    push @categories_option, { value => $_->categorycode, lib => $_->description } for @patron_categories;
     unshift @categories_option, { value => "", lib => "" };
     my $bsort1 = GetAuthorisedValues("Bsort1");
     my @sort1_option;
@@ -368,7 +368,6 @@ sub GetBorrowerInfos {
     my ( %info ) = @_;
     my $borrower = GetMember( %info );
     if ( $borrower ) {
-        $borrower->{branchname} = GetBranchName( $borrower->{branchcode} );
         for ( qw(dateenrolled dateexpiry) ) {
             my $userdate = $borrower->{$_};
             unless ($userdate && $userdate ne "0000-00-00" and $userdate ne "9999-12-31") {
@@ -377,7 +376,7 @@ sub GetBorrowerInfos {
             }
             $borrower->{$_} = $userdate || '';
         }
-        $borrower->{category_description} = GetBorrowercategory( $borrower->{categorycode} )->{description};
+        $borrower->{category_description} = Koha::Patron::Categories->find( $borrower->{categorycode} )->{description};
         my $attr_loop = C4::Members::Attributes::GetBorrowerAttributes( $borrower->{borrowernumber} );
         $borrower->{patron_attributes} = $attr_loop;
     }

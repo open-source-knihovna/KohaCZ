@@ -33,11 +33,11 @@ use C4::Output;
 use C4::Biblio;
 use C4::Items;
 use C4::Letters;
-use C4::Branch; # GetBranches
 use Koha::DateUtils;
 use Koha::Holds;
 use Koha::Database;
 use Koha::Patron::Messages;
+use Koha::Patron::Discharge;
 
 use constant ATTRIBUTE_SHOW_BARCODE => 'SHOW_BCODE';
 
@@ -98,6 +98,13 @@ if ($debar) {
     if ( $debar ne "9999-12-31" ) {
         $borr->{'userdebarreddate'} = $debar;
     }
+    # FIXME looks like $available is not needed
+    # If a patron is discharged he has a validated discharge available
+    my $available = Koha::Patron::Discharge::count({
+        borrowernumber => $borrowernumber,
+        validated      => 1,
+    });
+    $template->param( 'discharge_available' => $available && Koha::Patron::Discharge::is_discharged({borrowernumber => $borrowernumber}) );
 }
 
 if ( $userdebarred || $borr->{'gonenoaddress'} || $borr->{'lost'} ) {
@@ -264,24 +271,6 @@ if ($show_barcode) {
 }
 $template->param( show_barcode => 1 ) if $show_barcode;
 
-# load the branches
-my $branches = GetBranches();
-my @branch_loop;
-for my $branch_hash ( sort keys %{$branches} ) {
-    my $selected;
-    if ( C4::Context->preference('SearchMyLibraryFirst') ) {
-        $selected =
-          ( C4::Context->userenv
-              && ( $branch_hash eq C4::Context->userenv->{branch} ) );
-    }
-    push @branch_loop,
-      { value      => "branch: $branch_hash",
-        branchname => $branches->{$branch_hash}->{'branchname'},
-        selected   => $selected,
-      };
-}
-$template->param( branchloop => \@branch_loop );
-
 # now the reserved items....
 my $reserves = Koha::Holds->search( { borrowernumber => $borrowernumber } );
 
@@ -319,16 +308,6 @@ my $patron_messages = Koha::Patron::Messages->search(
         message_type => 'B',
     }
 );
-if ( $patron_messages->count ) {
-    $template->param( bor_messages => 1 );
-}
-
-if ( $borr->{'opacnote'} ) {
-  $template->param( 
-    bor_messages => 1,
-    opacnote => $borr->{'opacnote'},
-  );
-}
 
 if (   C4::Context->preference('AllowPatronToSetCheckoutsVisibilityForGuarantor')
     || C4::Context->preference('AllowStaffToSetCheckoutsVisibilityForGuarantor') )
@@ -347,6 +326,7 @@ if (   C4::Context->preference('AllowPatronToSetCheckoutsVisibilityForGuarantor'
 $template->param(
     borrower                 => $borr,
     patron_messages          => $patron_messages,
+    opacnote                 => $borr->{opacnote},
     patronupdate             => $patronupdate,
     OpacRenewalAllowed       => C4::Context->preference("OpacRenewalAllowed"),
     userview                 => 1,

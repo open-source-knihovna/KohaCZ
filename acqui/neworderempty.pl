@@ -81,7 +81,6 @@ use C4::Biblio;			# GetBiblioData GetMarcPrice
 use C4::Items; #PrepareItemRecord
 use C4::Output;
 use C4::Koha;
-use C4::Branch;			# GetBranches
 use C4::Members;
 use C4::Search qw/FindDuplicate/;
 
@@ -210,24 +209,6 @@ $suggestion = GetSuggestionInfo($suggestionid) if $suggestionid;
 my @currencies = Koha::Acquisition::Currencies->search;
 my $active_currency = Koha::Acquisition::Currencies->get_active;
 
-# build branches list
-my $onlymine =
-     C4::Context->preference('IndependentBranches')
-  && C4::Context->userenv
-  && !C4::Context->IsSuperLibrarian()
-  && C4::Context->userenv->{branch};
-my $branches = GetBranches($onlymine);
-my @branchloop;
-foreach my $thisbranch ( sort {$branches->{$a}->{'branchname'} cmp $branches->{$b}->{'branchname'}} keys %$branches ) {
-    my %row = (
-        value      => $thisbranch,
-        branchname => $branches->{$thisbranch}->{'branchname'},
-    );
-    $row{'selected'} = 1 if( $thisbranch && $data->{branchcode} && $thisbranch eq $data->{branchcode}) ;
-    push @branchloop, \%row;
-}
-$template->param( branchloop => \@branchloop );
-
 # build bookfund list
 my $borrower= GetMember('borrowernumber' => $loggedinuser);
 my ( $flags, $homebranch )= ($borrower->{'flags'},$borrower->{'branchcode'});
@@ -265,7 +246,7 @@ $template->param( sort2 => $data->{'sort2'} );
 
 if (C4::Context->preference('AcqCreateItem') eq 'ordering' && !$ordernumber) {
     # Check if ACQ framework exists
-    my $marc = GetMarcStructure(1, 'ACQ');
+    my $marc = GetMarcStructure(1, 'ACQ', { unsafe => 1 } );
     unless($marc) {
         $template->param('NoACQframework' => 1);
     }

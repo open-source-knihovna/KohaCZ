@@ -25,7 +25,7 @@ use strict;
 use C4::Context;
 use String::Random qw( random_string );
 use Scalar::Util qw( looks_like_number );
-use Date::Calc qw/Today Add_Delta_YM check_date Date_to_Days/;
+use Date::Calc qw/Today check_date Date_to_Days/;
 use C4::Log; # logaction
 use C4::Overdues;
 use C4::Reserves;
@@ -43,6 +43,7 @@ use Koha::Database;
 use Koha::Holds;
 use Koha::List::Patron;
 use Koha::Patrons;
+use Koha::Patron::Categories;
 
 our (@ISA,@EXPORT,@EXPORT_OK,$debug);
 
@@ -70,7 +71,7 @@ BEGIN {
         &GetNoticeEmailAddress
 
         &GetAge
-        &GetSortDetails
+        &GetTitles
 
         &GetHideLostItemsPreference
 
@@ -78,22 +79,17 @@ BEGIN {
         &GetMemberAccountRecords
         &GetBorNotifyAcctRecord
 
-        &GetborCatFromCatType
-        &GetBorrowercategory
         GetBorrowerCategorycode
-        &GetBorrowercategoryList
 
         &GetBorrowersToExpunge
         &GetBorrowersWhoHaveNeverBorrowed
         &GetBorrowersWithIssuesHistoryOlderThan
 
-        &GetExpiryDate
         &GetUpcomingMembershipExpires
 
         &IssueSlip
         GetBorrowersWithEmail
 
-        HasOverdues
         GetOverduesForPatron
     );
 
@@ -113,7 +109,6 @@ BEGIN {
         &AddMember
         &AddMember_Opac
         &MoveMemberToDeleted
-        &ExtendMemberSubscriptionTo
     );
 
     #Check data
@@ -657,9 +652,7 @@ sub AddMember {
       if ( $data{'userid'} eq '' || !Check_Userid( $data{'userid'} ) );
 
     # add expiration date if it isn't already there
-    unless ( $data{'dateexpiry'} ) {
-        $data{'dateexpiry'} = GetExpiryDate( $data{'categorycode'}, output_pref( { dt => dt_from_string, dateonly => 1, dateformat => 'iso' } ) );
-    }
+    $data{dateexpiry} ||= Koha::Patron::Categories->find( $data{categorycode} )->get_expiry_date;
 
     # add enrollment date if it isn't already there
     unless ( $data{'dateenrolled'} ) {
@@ -1223,33 +1216,6 @@ sub GetNoticeEmailAddress {
     return $data->{'primaryemail'} || '';
 }
 
-=head2 GetExpiryDate 
-
-  $expirydate = GetExpiryDate($categorycode, $dateenrolled);
-
-Calculate expiry date given a categorycode and starting date.  Date argument must be in ISO format.
-Return date is also in ISO format.
-
-=cut
-
-sub GetExpiryDate {
-    my ( $categorycode, $dateenrolled ) = @_;
-    my $enrolments;
-    if ($categorycode) {
-        my $dbh = C4::Context->dbh;
-        my $sth = $dbh->prepare("SELECT enrolmentperiod,enrolmentperioddate FROM categories WHERE categorycode=?");
-        $sth->execute($categorycode);
-        $enrolments = $sth->fetchrow_hashref;
-    }
-    # die "GetExpiryDate: for enrollmentperiod $enrolmentperiod (category '$categorycode') starting $dateenrolled.\n";
-    my @date = split (/-/,$dateenrolled);
-    if($enrolments->{enrolmentperiod}){
-        return sprintf("%04d-%02d-%02d", Add_Delta_YM(@date,0,$enrolments->{enrolmentperiod}));
-    }else{
-        return $enrolments->{enrolmentperioddate};
-    }
-}
-
 =head2 GetUpcomingMembershipExpires
 
     my $expires = GetUpcomingMembershipExpires({
@@ -1297,88 +1263,6 @@ sub GetUpcomingMembershipExpires {
     return $results;
 }
 
-=head2 GetborCatFromCatType
-
-  ($codes_arrayref, $labels_hashref) = &GetborCatFromCatType();
-
-Looks up the different types of borrowers in the database. Returns two
-elements: a reference-to-array, which lists the borrower category
-codes, and a reference-to-hash, which maps the borrower category codes
-to category descriptions.
-
-=cut
-
-#'
-sub GetborCatFromCatType {
-    my ( $category_type, $action, $no_branch_limit ) = @_;
-
-    my $branch_limit = $no_branch_limit
-        ? 0
-        : C4::Context->userenv ? C4::Context->userenv->{"branch"} : "";
-
-    # FIXME - This API  seems both limited and dangerous.
-    my $dbh     = C4::Context->dbh;
-
-    my $request = qq{
-        SELECT DISTINCT categories.categorycode, categories.description
-        FROM categories
-    };
-    $request .= qq{
-        LEFT JOIN categories_branches ON categories.categorycode = categories_branches.categorycode
-    } if $branch_limit;
-    if($action) {
-        $request .= " $action ";
-        $request .= " AND (branchcode = ? OR branchcode IS NULL)" if $branch_limit;
-    } else {
-        $request .= " WHERE branchcode = ? OR branchcode IS NULL" if $branch_limit;
-    }
-    $request .= " ORDER BY categorycode";
-
-    my $sth = $dbh->prepare($request);
-    $sth->execute(
-        $action ? $category_type : (),
-        $branch_limit ? $branch_limit : ()
-    );
-
-    my %labels;
-    my @codes;
-
-    while ( my $data = $sth->fetchrow_hashref ) {
-        push @codes, $data->{'categorycode'};
-        $labels{ $data->{'categorycode'} } = $data->{'description'};
-    }
-    $sth->finish;
-    return ( \@codes, \%labels );
-}
-
-=head2 GetBorrowercategory
-
-  $hashref = &GetBorrowercategory($categorycode);
-
-Given the borrower's category code, the function returns the corresponding
-data hashref for a comprehensive information display.
-
-=cut
-
-sub GetBorrowercategory {
-    my ($catcode) = @_;
-    my $dbh       = C4::Context->dbh;
-    if ($catcode){
-        my $sth       =
-        $dbh->prepare(
-    "SELECT description,dateofbirthrequired,upperagelimit,category_type 
-    FROM categories 
-    WHERE categorycode = ?"
-        );
-        $sth->execute($catcode);
-        my $data =
-        $sth->fetchrow_hashref;
-        return $data;
-    } 
-    return;  
-}    # sub getborrowercategory
-
-
 =head2 GetBorrowerCategorycode
 
     $categorycode = &GetBorrowerCategoryCode( $borrowernumber );
@@ -1398,32 +1282,6 @@ sub GetBorrowerCategorycode {
     $sth->execute( $borrowernumber );
     return $sth->fetchrow;
 }
-
-=head2 GetBorrowercategoryList
-
-  $arrayref_hashref = &GetBorrowercategoryList;
-If no category code provided, the function returns all the categories.
-
-=cut
-
-sub GetBorrowercategoryList {
-    my $no_branch_limit = @_ ? shift : 0;
-    my $branch_limit = $no_branch_limit
-        ? 0
-        : C4::Context->userenv ? C4::Context->userenv->{"branch"} : "";
-    my $dbh       = C4::Context->dbh;
-    my $query = "SELECT categories.* FROM categories";
-    $query .= qq{
-        LEFT JOIN categories_branches ON categories.categorycode = categories_branches.categorycode
-        WHERE branchcode = ? OR branchcode IS NULL GROUP BY description
-    } if $branch_limit;
-    $query .= " ORDER BY description";
-    my $sth = $dbh->prepare( $query );
-    $sth->execute( $branch_limit ? $branch_limit : () );
-    my $data = $sth->fetchall_arrayref( {} );
-    $sth->finish;
-    return $data;
-}    # sub getborrowercategory
 
 =head2 GetAge
 
@@ -1494,31 +1352,6 @@ sub SetAge{
 
     return $borrower;
 }    # sub SetAge
-
-=head2 GetSortDetails (OUEST-PROVENCE)
-
-  ($lib) = &GetSortDetails($category,$sortvalue);
-
-Returns the authorized value  details
-C<&$lib>return value of authorized value details
-C<&$sortvalue>this is the value of authorized value 
-C<&$category>this is the value of authorized value category
-
-=cut
-
-sub GetSortDetails {
-    my ( $category, $sortvalue ) = @_;
-    my $dbh   = C4::Context->dbh;
-    my $query = qq|SELECT lib 
-        FROM authorised_values 
-        WHERE category=?
-        AND authorised_value=? |;
-    my $sth = $dbh->prepare($query);
-    $sth->execute( $category, $sortvalue );
-    my $lib = $sth->fetchrow;
-    return ($lib) if ($lib);
-    return ($sortvalue) unless ($lib);
-}
 
 =head2 MoveMemberToDeleted
 
@@ -1606,39 +1439,6 @@ sub HandleDelBorrower {
     #Koha::Virtualshelf->new->delete too.
 }
 
-=head2 ExtendMemberSubscriptionTo (OUEST-PROVENCE)
-
-    $date = ExtendMemberSubscriptionTo($borrowerid, $date);
-
-Extending the subscription to a given date or to the expiry date calculated on ISO date.
-Returns ISO date.
-
-=cut
-
-sub ExtendMemberSubscriptionTo {
-    my ( $borrowerid,$date) = @_;
-    my $dbh = C4::Context->dbh;
-    my $borrower = GetMember('borrowernumber'=>$borrowerid);
-    unless ($date){
-      $date = (C4::Context->preference('BorrowerRenewalPeriodBase') eq 'dateexpiry') ?
-                                        eval { output_pref( { dt => dt_from_string( $borrower->{'dateexpiry'}  ), dateonly => 1, dateformat => 'iso' } ); }
-                                        :
-                                        output_pref( { dt => dt_from_string, dateonly => 1, dateformat => 'iso' } );
-      $date = GetExpiryDate( $borrower->{'categorycode'}, $date );
-    }
-    my $sth = $dbh->do(<<EOF);
-UPDATE borrowers 
-SET  dateexpiry='$date' 
-WHERE borrowernumber='$borrowerid'
-EOF
-
-    AddEnrolmentFeeIfNeeded( $borrower->{categorycode}, $borrower->{borrowernumber} );
-
-    logaction("MEMBERS", "RENEW", $borrower->{'borrowernumber'}, "Membership renewed")if C4::Context->preference("BorrowersLog");
-    return $date if ($sth);
-    return 0;
-}
-
 =head2 GetHideLostItemsPreference
 
   $hidelostitemspref = &GetHideLostItemsPreference($borrowernumber);
@@ -1677,6 +1477,7 @@ sub GetBorrowersToExpunge {
     my $params = shift;
     my $filterdate       = $params->{'not_borrowed_since'};
     my $filterexpiry     = $params->{'expired_before'};
+    my $filterlastseen   = $params->{'last_seen'};
     my $filtercategory   = $params->{'category_code'};
     my $filterbranch     = $params->{'branchcode'} ||
                         ((C4::Context->preference('IndependentBranches')
@@ -1716,6 +1517,10 @@ sub GetBorrowersToExpunge {
     if ( $filterexpiry ) {
         $query .= " AND dateexpiry < ? ";
         push( @query_params, $filterexpiry );
+    }
+    if ( $filterlastseen ) {
+        $query .= ' AND lastseen < ? ';
+        push @query_params, $filterlastseen;
     }
     if ( $filtercategory ) {
         $query .= " AND categorycode = ? ";
@@ -2037,21 +1842,6 @@ sub AddEnrolmentFeeIfNeeded {
         # insert fee in patron debts
         C4::Accounts::manualinvoice( $borrowernumber, '', '', 'A', $enrolmentfee );
     }
-}
-
-=head2 HasOverdues
-
-=cut
-
-sub HasOverdues {
-    my ( $borrowernumber ) = @_;
-
-    my $sql = "SELECT COUNT(*) FROM issues WHERE date_due < NOW() AND borrowernumber = ?";
-    my $sth = C4::Context->dbh->prepare( $sql );
-    $sth->execute( $borrowernumber );
-    my ( $count ) = $sth->fetchrow_array();
-
-    return $count;
 }
 
 =head2 DeleteExpiredOpacRegistrations

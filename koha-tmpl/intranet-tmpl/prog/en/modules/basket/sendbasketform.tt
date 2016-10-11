@@ -28,10 +28,11 @@
             <label for="comment">Comment:</label>
             <textarea id="comment" name="comment" rows="4" cols="40"></textarea>
     </li>
-    <li>
-        <input type="hidden" name="bib_list" value="[% bib_list %]" />
-    </li></ol></fieldset>
-       <fieldset class="action"> <input type="submit" value="Send" /> <a class="cancel close" href="#">Cancel</a> </fieldset>
+    </ol>
+    </fieldset>
+    <fieldset class="action"> <input type="submit" value="Send" /> <a class="cancel close" href="#">Cancel</a> </fieldset>
+    <input type="hidden" name="bib_list" value="[% bib_list %]" />
+    <input type="hidden" name="csrf_token" value="[% csrf_token %]" />
 </form>
 
 [% END %]</div>

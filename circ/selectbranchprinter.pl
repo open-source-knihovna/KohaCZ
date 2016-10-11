@@ -26,7 +26,8 @@ use C4::Output;
 use C4::Auth qw/:DEFAULT get_session/;
 use C4::Print;  # GetPrinters
 use C4::Koha;
-use C4::Branch; # GetBranches GetBranchesLoop
+
+use Koha::Libraries;
 
 # this will be the script that chooses branch and printer settings....
 
@@ -45,7 +46,6 @@ my $sessionID = $query->cookie("CGISESSID");
 my $session = get_session($sessionID);
 
 # try to get the branch and printer settings from http, fallback to userenv
-my $branches = GetBranches();
 my $printers = GetPrinters();
 my $branch   = $query->param('branch' );
 my $printer  = $query->param('printer');
@@ -56,9 +56,9 @@ my $userenv_printer = C4::Context->userenv->{'branchprinter'} || '';
 my @updated;
 
 # $session lddines here are doing the updating
-if ($branch and $branches->{$branch}) {
+if ( $branch and my $library = Koha::Libraries->find($branch) ) {
     if (! $userenv_branch or $userenv_branch ne $branch ) {
-        my $branchname = GetBranchName($branch);
+        my $branchname = $library->branchname;
         $template->param(LoginBranchname => $branchname);   # update template for new branch
         $template->param(LoginBranchcode => $branch);       # update template for new branch
         $session->param('branchname', $branchname);         # update sesssion in DB
@@ -91,10 +91,6 @@ if ($printer) {
 }
 
 $template->param(updated => \@updated) if (scalar @updated);
-
-unless ($branches->{$branch}) {
-    $branch = (keys %$branches)[0];  # if branch didn't really exist, then replace it w/ one that does
-}
 
 my @printkeys = sort keys %$printers;
 if (scalar(@printkeys) == 1 or not $printers->{$printer}) {
@@ -134,7 +130,7 @@ if (scalar @updated and not scalar @recycle_loop) {
 $template->param(
     referer     => $referer,
     printerloop => \@printerloop,
-    branchloop  => GetBranchesLoop($branch),
+    branch      => $branch,
     recycle_loop=> \@recycle_loop,
 );
 

@@ -29,12 +29,14 @@ use C4::Auth qw/:DEFAULT get_session/;
 use C4::Output;
 use C4::Debug;
 use C4::Koha qw/GetFrameworksLoop/;
-use C4::Branch;
 use C4::Context;
+use Koha::Caches;
 use C4::Log;
 use Koha::DateUtils qw/dt_from_string output_pref/;
 use Koha::AuthorisedValue;
 use Koha::AuthorisedValues;
+use Koha::Libraries;
+use Koha::Patron::Categories;
 
 =head1 NAME
 
@@ -47,16 +49,20 @@ Script to control the guided report creation
 =cut
 
 my $input = new CGI;
-my $usecache = C4::Context->ismemcached;
+my $usecache = Koha::Caches->get_instance->memcached_cache;
 
 my $phase = $input->param('phase') // '';
 my $flagsrequired;
-if ( $phase eq 'Build new' or $phase eq 'Delete Saved' ) {
+if ( $phase eq 'Build new' ) {
     $flagsrequired = 'create_reports';
 }
 elsif ( $phase eq 'Use saved' ) {
     $flagsrequired = 'execute_reports';
-} else {
+}
+elsif ( $phase eq 'Delete Saved' ) {
+    $flagsrequired = 'delete_reports';
+}
+else {
     $flagsrequired = '*';
 }
 
@@ -106,9 +112,13 @@ elsif ( $phase eq 'Build new' ) {
     my $subgroup = $input->param('subgroup');
     $filter->{group} = $group;
     $filter->{subgroup} = $subgroup;
+    my $reports = get_saved_reports($filter);
+    for my $report ( @$reports ) {
+        $report->{results} = C4::Reports::Guided::get_results( $report->{id} );
+    }
     $template->param(
         'saved1' => 1,
-        'savedreports' => get_saved_reports($filter),
+        'savedreports' => $reports,
         'usecache' => $usecache,
         'groups_with_subgroups'=> groups_with_subgroups($group, $subgroup),
         filters => $filter,
@@ -254,14 +264,13 @@ elsif ( $phase eq 'Update SQL'){
 }
 
 elsif ($phase eq 'retrieve results') {
-	my $id = $input->param('id');
-	my ($results,$name,$notes) = format_results($id);
-	# do something
-	$template->param(
-		'retresults' => 1,
-		'results' => $results,
-		'name' => $name,
-		'notes' => $notes,
+    my $id = $input->param('id');
+    my $result = format_results( $id );
+    $template->param(
+        report_name   => $result->{report_name},
+        notes         => $result->{notes},
+        saved_results => $result->{results},
+        date_run      => $result->{date_run},
     );
 }
 
@@ -632,9 +641,9 @@ elsif ($phase eq 'Run this report'){
         'report_id' => $report_id,
     );
 
-    my ( $sql, $type, $name, $notes );
+    my ( $sql, $original_sql, $type, $name, $notes );
     if (my $report = get_saved_report($report_id)) {
-        $sql   = $report->{savedsql};
+        $sql   = $original_sql = $report->{savedsql};
         $name  = $report->{report_name};
         $notes = $report->{notes};
 
@@ -662,10 +671,10 @@ elsif ($phase eq 'Run this report'){
                     my %authorised_lib;
                     # builds list, depending on authorised value...
                     if ( $authorised_value eq "branches" ) {
-                        my $branches = GetBranchesLoop();
-                        foreach my $thisbranch (@$branches) {
-                            push @authorised_values, $thisbranch->{value};
-                            $authorised_lib{$thisbranch->{value}} = $thisbranch->{branchname};
+                        my $libraries = Koha::Libraries->search( {}, { order_by => ['branchname'] } );
+                        while ( my $library = $libraries->next ) {
+                            push @authorised_values, $library->branchcode;
+                            $authorised_lib{$library->branchcode} = $library->branchname;
                         }
                     }
                     elsif ( $authorised_value eq "itemtypes" ) {
@@ -697,14 +706,9 @@ elsif ($phase eq 'Run this report'){
                         }
                     }
                     elsif ( $authorised_value eq "categorycode" ) {
-                        my $sth = $dbh->prepare("SELECT categorycode, description FROM categories ORDER BY description");
-                        $sth->execute;
-                        while ( my ( $categorycode, $description ) = $sth->fetchrow_array ) {
-                            push @authorised_values, $categorycode;
-                            $authorised_lib{$categorycode} = $description;
-                        }
-
-                        #---- "true" authorised value
+                        my @patron_categories = Koha::Patron::Categories->search({}, { order_by => ['description']});
+                        %authorised_lib = map { $_->categorycode => $_->description } @patron_categories;
+                        push @authorised_values, $_->categorycode for @patron_categories;
                     }
                     else {
                         if ( Koha::AuthorisedValues->search({ category => $authorised_value })->count ) {
@@ -789,6 +793,7 @@ elsif ($phase eq 'Run this report'){
             $template->param(
                 'results' => \@rows,
                 'sql'     => $sql,
+                original_sql => $original_sql,
                 'id'      => $report_id,
                 'execute' => 1,
                 'name'    => $name,

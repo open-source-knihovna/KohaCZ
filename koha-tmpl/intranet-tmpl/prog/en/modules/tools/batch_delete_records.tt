@@ -60,6 +60,14 @@ $(document).ready(function() {
     "aaSorting": [],
     "bPaginate": false
   }));
+
+  $("#selectrecords").on("submit",function(){
+    var nb_checked = $("#selectrecords").find("input[type='checkbox'][name='record_id']:checked").size();
+    if (nb_checked == 0){
+      alert(_("No records have been selected."));
+      return false;
+    }
+  });
 });
 //]]>
 </script>
@@ -150,7 +158,7 @@ $(document).ready(function() {
           | <a id="selectwithoutitems" href="#">Select without items</a>
           | <a id="selectnotreserved" href="#">Select without holds</a>
         </div>
-        <form action="/cgi-bin/koha/tools/batch_delete_records.pl" method="post">
+        <form action="/cgi-bin/koha/tools/batch_delete_records.pl" method="post" id="selectrecords">
           <table id="biblios" class="records">
             <thead>
               <tr>

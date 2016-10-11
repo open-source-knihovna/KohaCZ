@@ -26,12 +26,12 @@ use C4::Output;
 use Koha::Biblios;
 use Koha::BiblioFramework;
 use Koha::BiblioFrameworks;
-use Koha::Cache;
+use Koha::Caches;
 
 my $input         = new CGI;
 my $frameworkcode = $input->param('frameworkcode') || q||;
 my $op            = $input->param('op') || q|list|;
-my $cache         = Koha::Cache->get_instance();
+my $cache         = Koha::Caches->get_instance();
 my @messages;
 
 my ( $template, $borrowernumber, $cookie ) = get_template_and_user(

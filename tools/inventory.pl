@@ -32,7 +32,6 @@ use C4::Output;
 use C4::Biblio;
 use C4::Items;
 use C4::Koha;
-use C4::Branch; # GetBranches
 use C4::Circulation;
 use C4::Reports::Guided;    #_get_column_defs
 use C4::Charset;
@@ -64,16 +63,6 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
     }
 );
 
-
-my $branches = GetBranches();
-my @branch_loop;
-for my $branch_hash (keys %$branches) {
-    push @branch_loop, {value => "$branch_hash",
-                       branchname => $branches->{$branch_hash}->{'branchname'},
-                       selected => ($branch_hash eq $branchcode?1:0)};
-}
-
-@branch_loop = sort {$a->{branchname} cmp $b->{branchname}} @branch_loop;
 my @authorised_value_list;
 my $authorisedvalue_categories = '';
 
@@ -128,7 +117,6 @@ for my $authvfield (@$statuses) {
 }
 $statussth =~ s, and $,,g;
 $template->param(
-    branchloop               => \@branch_loop,
     authorised_values        => \@authorised_value_list,
     today                    => dt_from_string,
     minlocation              => $minlocation,

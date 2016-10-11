@@ -19,9 +19,11 @@
 
 use Modern::Perl;
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 
+use C4::Context;
 use Koha::Database;
+use Koha::DateUtils;
 use Koha::Patron::Category;
 use Koha::Patron::Categories;
 use t::lib::TestBuilder;
@@ -34,11 +36,13 @@ my $branch = $builder->build({ source => 'Branch', });
 my $nb_of_categories = Koha::Patron::Categories->search->count;
 my $new_category_1 = Koha::Patron::Category->new({
     categorycode => 'mycatcodeX',
+    category_type => 'A',
     description  => 'mycatdescX',
 })->store;
 $new_category_1->add_branch_limitation( $branch->{branchcode} );
 my $new_category_2 = Koha::Patron::Category->new({
     categorycode => 'mycatcodeY',
+    category_type => 'S',
     description  => 'mycatdescY',
     checkprevcheckout => undef,
 })->store;
@@ -53,6 +57,31 @@ is_deeply( $retrieved_category_1->default_messaging, [], 'By default there is no
 my $retrieved_category_2 = Koha::Patron::Categories->find( $new_category_2->categorycode );
 is( $retrieved_category_1->checkprevcheckout, 'inherit', 'Koha::Patron::Category->store should default checkprevcheckout to inherit' );
 is( $retrieved_category_2->checkprevcheckout, 'inherit', 'Koha::Patron::Category->store should default checkprevcheckout to inherit' );
+
+subtest 'get_expiry_date' => sub {
+    plan tests => 5;
+    my $next_month = dt_from_string->add( months => 1 );
+    my $next_year = dt_from_string->add( months => 12 );
+    my $yesterday = dt_from_string->add( days => -1 );
+    my $category = Koha::Patron::Category->new({
+        categorycode => 'mycat',
+        category_type => 'A',
+        description  => 'mycatdesc',
+        enrolmentperiod => undef,
+        enrolmentperioddate => $next_month,
+    })->store;
+    is( $category->get_expiry_date, $next_month, 'Without enrolmentperiod and parameter, ->get_expiry_date should return enrolmentperioddate' );
+    is( $category->get_expiry_date( $next_year ), $next_month, 'Without enrolmentperiod, ->get_expiry_date should return enrolmentperiodadate even if a parameter is given' );
+
+    $category->enrolmentperiod( 12 )->store;
+    is( $category->get_expiry_date, $next_year, 'With enrolmentperiod defined and no parameter, ->get_expiry_date should return today + enrolmentperiod' );
+    is( $category->get_expiry_date( $yesterday ), $next_year->clone->add( days => -1 ), 'With enrolmentperiod defined and a date given in parameter, ->get_expiry_date should take this date + enrolmentperiod' );
+
+    my $hardcoded_date = '2000-01-31';
+    is( $category->get_expiry_date( $hardcoded_date ), dt_from_string( $hardcoded_date )->add( months => 12 ), 'get_expiry_date accepts strings as well'  );
+
+    $category->delete;
+};
 
 $retrieved_category_1->delete;
 is( Koha::Patron::Categories->search->count, $nb_of_categories + 1, 'Delete should have deleted the patron category' );

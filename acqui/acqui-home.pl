@@ -35,7 +35,6 @@ use C4::Output;
 use C4::Acquisition;
 use C4::Budgets;
 use C4::Members;
-use C4::Branch;
 use C4::Debug;
 use C4::Suggestions;
 use Koha::Acquisition::Currencies;
@@ -50,9 +49,6 @@ my ( $template, $loggedinuser, $cookie, $userflags ) = get_template_and_user(
         debug           => 1,
     }
 );
-
-my $user = GetMember( 'borrowernumber' => $loggedinuser );
-my $branchname = GetBranchName($user->{branchcode});
 
 my $status           = $query->param('status') || "ASKED";
 my $suggestions_count       = CountSuggestion($status);
@@ -73,9 +69,6 @@ my $totavail_active     = 0;
 my @budget_loop;
 foreach my $budget ( @{$budget_arr} ) {
     next unless (CanUserUseBudget($loggedinuser, $budget, $userflags));
-
-    $budget->{'budget_branchname'} =
-      GetBranchName( $budget->{'budget_branchcode'} );
 
     my $member = GetMember( borrowernumber => $budget->{budget_owner_id} );
     if ($member) {
@@ -117,7 +110,6 @@ foreach my $budget ( @{$budget_arr} ) {
 $template->param(
     type          => 'intranet',
     loop_budget   => \@budget_loop,
-    branchname    => $branchname,
     total         => $total,
     totspent      => $totspent,
     totordered    => $totordered,

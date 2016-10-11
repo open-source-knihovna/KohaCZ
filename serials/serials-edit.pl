@@ -74,6 +74,7 @@ use C4::Context;
 use C4::Serials;
 use C4::Search qw/enabled_staff_search_views/;
 use Koha::DateUtils;
+use Koha::Serial::Items;
 
 use List::MoreUtils qw/uniq/;
 
@@ -250,6 +251,25 @@ if ( $op and $op eq 'serialchangestatus' ) {
                 $notes[$i]
             );
         }
+        my $makePreviousSerialAvailable = C4::Context->preference('makePreviousSerialAvailable');
+        if ($makePreviousSerialAvailable && $serialids[$i] ne "NEW") {
+            # We already have created the new expected serial at this point, so we get the second previous serial
+            my $previous = GetPreviousSerialid($subscriptionids[$i]);
+            if ($previous) {
+
+                my $serialitem = Koha::Serial::Items->search( {serialid => $previous} )->next;
+                my $itemnumber = $serialitem ? $serialitem->itemnumber : undef;
+                if ($itemnumber) {
+
+                    # Getting the itemtype to set from the database
+                    my $subscriptioninfos = GetSubscription($subscriptionids[$i]);
+
+                    # Changing the status to "available" and the itemtype according to the previousitemtype db field
+                    ModItem({notforloan => 0, itype => $subscriptioninfos->{'previousitemtype'} }, undef, $itemnumber);
+                }
+            }
+        }
+
     }
     my @moditems = $query->multi_param('moditem');
     if ( scalar(@moditems) ) {

@@ -1,0 +1,11 @@
+{
+  "borrowernumberPathParam": {
+    "$ref": "parameters/patron.json#/borrowernumberPathParam"
+  },
+  "borrowernumberQueryParam": {
+    "$ref": "parameters/patron.json#/borrowernumberQueryParam"
+  },
+  "holdIdPathParam": {
+    "$ref": "parameters/hold.json#/holdIdPathParam"
+  }
+}

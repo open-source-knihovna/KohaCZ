@@ -23,7 +23,6 @@ use warnings;
 use C4::Members;
 use C4::Items;
 use C4::Circulation;
-use C4::Branch;
 use C4::Accounts;
 use C4::Biblio;
 use C4::Reserves qw(AddReserve GetReservesFromBiblionumber GetReservesFromBorrowernumber CanBookBeReserved CanItemBeReserved IsAvailableForItemLevelRequest);
@@ -35,6 +34,8 @@ use CGI qw ( -utf8 );
 use DateTime;
 use C4::Auth;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
+
+use Koha::Libraries;
 
 =head1 NAME
 
@@ -220,8 +221,10 @@ sub GetRecords {
             delete $item->{'more_subfields_xml'};
 
             # Display branch names instead of branch codes
-            $item->{'homebranchname'}    = GetBranchName( $item->{'homebranch'} );
-            $item->{'holdingbranchname'} = GetBranchName( $item->{'holdingbranch'} );
+            my $home_library    = Koha::Libraries->find( $item->{homebranch} );
+            my $holding_library = Koha::Libraries->find( $item->{holdingbranch} );
+            $item->{'homebranchname'}    = $home_library    ? $home_library->branchname    : '';
+            $item->{'holdingbranchname'} = $holding_library ? $holding_library->branchname : '';
         }
 
         # Hashref building...
@@ -366,7 +369,8 @@ sub GetPatronInfo {
 
     # Cleaning the borrower hashref
     $borrower->{'charges'}    = $borrower->{'flags'}->{'CHARGES'}->{'amount'};
-    $borrower->{'branchname'} = GetBranchName( $borrower->{'branchcode'} );
+    my $library = Koha::Libraries->find( $borrower->{branchcode} );
+    $borrower->{'branchname'} = $library ? $library->branchname : '';
     delete $borrower->{'flags'};
     delete $borrower->{'userid'};
     delete $borrower->{'password'};
@@ -406,7 +410,8 @@ sub GetPatronInfo {
 
             # Get additional informations
             my $item = GetBiblioFromItemNumber( $reserve->{'itemnumber'}, undef );
-            my $branchname = GetBranchName( $reserve->{'branchcode'} );
+            my $library = Koha::Libraries->find( $reserve->{branchcode} );
+            my $branchname = $library ? $library->branchname : '';
 
             # Remove unwanted fields
             delete $item->{'marc'};
@@ -624,8 +629,7 @@ sub HoldTitle {
     # Pickup branch management
     if ( $cgi->param('pickup_location') ) {
         $branch = $cgi->param('pickup_location');
-        my $branches = GetBranches;
-        return { code => 'LocationNotFound' } unless $$branches{$branch};
+        return { code => 'LocationNotFound' } unless Koha::Libraries->find($branch);
     } else { # if the request provide no branch, use the borrower's branch
         $branch = $$borrower{branchcode};
     }
@@ -640,7 +644,8 @@ sub HoldTitle {
     # Hashref building
     my $out;
     $out->{'title'}           = $title;
-    $out->{'pickup_location'} = GetBranchName($branch);
+    my $library = Koha::Libraries->find( $branch );
+    $out->{'pickup_location'} = $library ? $library->branchname : '';
 
     # TODO $out->{'date_available'}  = '';
 
@@ -701,8 +706,7 @@ sub HoldItem {
     my $branch;
     if ( $cgi->param('pickup_location') ) {
         $branch = $cgi->param('pickup_location');
-        my $branches = GetBranches();
-        return { code => 'LocationNotFound' } unless $$branches{$branch};
+        return { code => 'LocationNotFound' } unless Koha::Libraries->find($branch);
     } else { # if the request provide no branch, use the borrower's branch
         $branch = $$borrower{branchcode};
     }
@@ -716,7 +720,8 @@ sub HoldItem {
 
     # Hashref building
     my $out;
-    $out->{'pickup_location'} = GetBranchName($branch);
+    my $library = Koha::Libraries->find( $branch );
+    $out->{'pickup_location'} = $library ? $library->branchname : '';
 
     # TODO $out->{'date_available'} = '';
 
@@ -772,7 +777,8 @@ sub _availability {
     }
 
     my $biblionumber = $item->{'biblioitemnumber'};
-    my $location     = GetBranchName( $item->{'holdingbranch'} );
+    my $library = Koha::Libraries->find( $item->{holdingbranch} );
+    my $location = $library ? $library->branchname : '';
 
     if ( $item->{'notforloan'} ) {
         return ( $biblionumber, 'not available', 'Not for loan', $location );

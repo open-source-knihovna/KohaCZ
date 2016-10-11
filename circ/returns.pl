@@ -45,7 +45,6 @@ use C4::Biblio;
 use C4::Items;
 use C4::Members;
 use C4::Members::Messaging;
-use C4::Branch; # GetBranches GetBranchName
 use C4::Koha;   # FIXME : is it still useful ?
 use C4::RotatingCollections;
 use Koha::DateUtils;
@@ -83,7 +82,6 @@ if ( $query->param('print_slip') ) {
 
 #####################
 #Global vars
-my $branches = GetBranches();
 my $printers = GetPrinters();
 my $userenv = C4::Context->userenv;
 my $userenv_branch = $userenv->{'branch'} // '';
@@ -143,10 +141,10 @@ if ($query->param('WT-itemNumber')){
 	updateWrongTransfer ($query->param('WT-itemNumber'),$query->param('WT-waitingAt'),$query->param('WT-From'));
 }
 
-if ( $query->param('resbarcode') ) {
+if ( $query->param('reserve_id') ) {
     my $item           = $query->param('itemnumber');
     my $borrowernumber = $query->param('borrowernumber');
-    my $resbarcode     = $query->param('resbarcode');
+    my $reserve_id     = $query->param('reserve_id');
     my $diffBranchReturned = $query->param('diffBranch');
     my $iteminfo   = GetBiblioFromItemNumber($item);
     my $cancel_reserve = $query->param('cancel_reserve');
@@ -154,12 +152,12 @@ if ( $query->param('resbarcode') ) {
     $iteminfo->{'itemtype'} = C4::Context->preference('item-level_itypes') ? $iteminfo->{'itype'} : $iteminfo->{'itemtype'};
 
     if ( $cancel_reserve ) {
-        CancelReserve({ borrowernumber => $borrowernumber, itemnumber => $item, charge_cancel_fee => !$forgivemanualholdsexpire });
+        CancelReserve({ reserve_id => $reserve_id, charge_cancel_fee => !$forgivemanualholdsexpire });
     } else {
         my $diffBranchSend = ($userenv_branch ne $diffBranchReturned) ? $diffBranchReturned : undef;
         # diffBranchSend tells ModReserveAffect whether document is expected in this library or not,
         # i.e., whether to apply waiting status
-        ModReserveAffect( $item, $borrowernumber, $diffBranchSend);
+        ModReserveAffect( $item, $borrowernumber, $diffBranchSend, $reserve_id );
     }
 #   check if we have other reserves for this document, if we have a return send the message of transfer
     my ( $messages, $nextreservinfo ) = GetOtherReserves($item);
@@ -172,12 +170,12 @@ if ( $query->param('resbarcode') ) {
             itemnumber     => $iteminfo->{'itemnumber'},
             itembiblionumber => $iteminfo->{'biblionumber'},
             iteminfo       => $iteminfo->{'author'},
-            tobranchname   => GetBranchName($messages->{'transfert'}),
             name           => $name,
             borrowernumber => $borrowernumber,
             borcnum        => $borr->{'cardnumber'},
             borfirstname   => $borr->{'firstname'},
             borsurname     => $borr->{'surname'},
+            borcategory    => $borr->{'description'},
             diffbranch     => 1,
         );
     }
@@ -402,13 +400,13 @@ if ( $messages->{'WrongTransfer'} and not $messages->{'WasTransfered'}) {
     );
 
     my $reserve    = $messages->{'ResFound'};
-    my $branchname = $branches->{ $reserve->{'branchcode'} }->{'branchname'};
     my $borr = C4::Members::GetMember( borrowernumber => $reserve->{'borrowernumber'} );
     my $name = $borr->{'surname'} . ", " . $borr->{'title'} . " " . $borr->{'firstname'};
     $template->param(
             wname           => $name,
             wborfirstname   => $borr->{'firstname'},
             wborsurname     => $borr->{'surname'},
+            wborcategory    => $borr->{'description'},
             wbortitle       => $borr->{'title'},
             wborphone       => $borr->{'phone'},
             wboremail       => $borr->{'email'},
@@ -428,7 +426,6 @@ if ( $messages->{'WrongTransfer'} and not $messages->{'WasTransfered'}) {
 #
 if ( $messages->{'ResFound'}) {
     my $reserve    = $messages->{'ResFound'};
-    my $branchname = $branches->{ $reserve->{'branchcode'} }->{'branchname'};
     my $borr = C4::Members::GetMember( borrowernumber => $reserve->{'borrowernumber'} );
     my $holdmsgpreferences =  C4::Members::Messaging::GetMessagingPreferences( { borrowernumber => $reserve->{'borrowernumber'}, message_name   => 'Hold_Filled' } );
     if ( $reserve->{'ResFound'} eq "Waiting" or $reserve->{'ResFound'} eq "Reserved" ) {
@@ -440,7 +437,7 @@ if ( $messages->{'ResFound'}) {
             $template->param(
                 intransit    => ($userenv_branch eq $reserve->{'branchcode'} ? 0 : 1 ),
                 transfertodo => ($userenv_branch eq $reserve->{'branchcode'} ? 0 : 1 ),
-                resbarcode   => $barcode,
+                reserve_id   => $reserve->{reserve_id},
                 reserved     => 1,
             );
         }
@@ -448,11 +445,10 @@ if ( $messages->{'ResFound'}) {
         # same params for Waiting or Reserved
         $template->param(
             found          => 1,
-            currentbranch  => $branches->{$userenv_branch}->{'branchname'},
-            destbranchname => $branches->{ $reserve->{'branchcode'} }->{'branchname'},
             name           => $borr->{'surname'} . ", " . $borr->{'title'} . " " . $borr->{'firstname'},
             borfirstname   => $borr->{'firstname'},
             borsurname     => $borr->{'surname'},
+            borcategory    => $borr->{'description'},
             bortitle       => $borr->{'title'},
             borphone       => $borr->{'phone'},
             boremail       => $borr->{'email'},
@@ -486,7 +482,7 @@ foreach my $code ( keys %$messages ) {
     elsif ( $code eq 'NotIssued' ) {
         $err{notissued} = 1;
         $err{msg} = '';
-        $err{msg} = $branches->{ $messages->{'IsPermanent'} }->{'branchname'} if $messages->{'IsPermanent'};
+        $err{msg} = $messages->{'IsPermanent'} if $messages->{'IsPermanent'};
     }
     elsif ( $code eq 'LocalUse' ) {
         $err{localuse} = 1;
@@ -513,8 +509,7 @@ foreach my $code ( keys %$messages ) {
     elsif ( ( $code eq 'IsPermanent' ) && ( not $messages->{'ResFound'} ) ) {
         if ( $messages->{'IsPermanent'} ne $userenv_branch ) {
             $err{ispermanent} = 1;
-            $err{msg}         =
-              $branches->{ $messages->{'IsPermanent'} }->{'branchname'};
+            $err{msg}         = $messages->{'IsPermanent'};
         }
     }
     elsif ( $code eq 'WrongTransfer' ) {
@@ -618,18 +613,9 @@ foreach ( sort { $a <=> $b } keys %returneditems ) {
     }
     push @riloop, \%ri;
 }
-my ($genbrname, $genprname);
-if (my $b = $branches->{$userenv_branch}) {
-    $genbrname = $b->{'branchname'};
-}
-if (my $p = $printers->{$printer}) {
-    $genprname = $p->{'printername'};
-}
+
 $template->param(
     riloop         => \@riloop,
-    genbrname      => $genbrname,
-    genprname      => $genprname,
-    branchname     => $genbrname,
     printer        => $printer,
     errmsgloop     => \@errmsgloop,
     exemptfine     => $exemptfine,
@@ -650,7 +636,6 @@ if ( $itemnumber ) {
         if ( ! ( $holdingBranch eq $collectionBranch ) ) {
             $template->param(
               collectionItemNeedsTransferred => 1,
-              collectionBranchName => GetBranchName($collectionBranch),
               collectionBranch => $collectionBranch,
               itemnumber => $itemnumber,
             );

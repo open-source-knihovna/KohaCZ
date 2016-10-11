@@ -26,11 +26,11 @@ use C4::Auth;
 use C4::Koha;
 use C4::Output;
 use C4::Circulation;
-use C4::Review;
 use C4::Biblio;
 use C4::Members qw/GetMemberDetails/;
 use Koha::DateUtils;
-use POSIX qw(ceil strftime);
+use Koha::Reviews;
+use POSIX qw(ceil floor strftime);
 
 my $template_name;
 my $query = new CGI;
@@ -38,8 +38,7 @@ my $format = $query->param("format") || '';
 my $count = C4::Context->preference('OPACnumSearchResults') || 20;
 my $results_per_page = $query->param('count') || $count;
 my $offset = $query->param('offset') || 0;
-my $page = $query->param('page') || 1;
-$offset = ($page-1)*$results_per_page if $page>1;
+my $page = floor( $offset / $results_per_page ) + 1;
 
 if ($format eq "rss") {
     $template_name = "opac-showreviews-rss.tt";
@@ -76,9 +75,16 @@ if ( C4::Context->preference('ShowReviewer') and C4::Context->preference('ShowRe
     }
 }
 
-my $reviews = getallreviews(1,$offset,$results_per_page);
+my $reviews = Koha::Reviews->search(
+    { approved => 1 },
+    {
+        rows => $results_per_page,
+        page => $page,
+        order_by => { -desc => 'datereviewed' },
+    }
+)->unblessed;
 my $marcflavour      = C4::Context->preference("marcflavour");
-my $hits = numberofreviews(1);
+my $hits = Koha::Reviews->search({ approved => 1 })->count;
 my $i = 0;
 my $latest_comment_date;
 for my $result (@$reviews){
@@ -174,6 +180,7 @@ $template->param(next_page_offset => $next_page_offset) unless $pages eq $curren
 
 $template->param(
     reviews => $reviews,
+    results_per_page => $results_per_page,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

@@ -1,4 +1,5 @@
 [% USE KohaDates %]
+[% USE Branches %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Tools &rsaquo; News</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -19,8 +20,26 @@
         $(".delete_news").on("click", function(){
             return confirmDelete( _("Are you sure you want to delete this news item? This cannot be undone.") );
         });
+
+        function Checkbox(){
+            var form = document.getElementById('del_form');
+            var inputs = form.getElementsByTagName('input');
+            var checked = false;
+            for (var i=0; i<inputs.length; i++) {
+                if (inputs[i].type == 'checkbox' && inputs[i].name == 'ids') {
+                    checked = inputs[i].checked;
+                    if (checked) return true;
+                }
+            }
+        }
+
         $("#del_form").on("submit",function(){
-            return confirmDelete( _("Are you sure you want to delete the selected news?") );
+            if ( Checkbox() ) {
+                return confirmDelete( _("Are you sure you want to delete the selected news?") );
+            } else {
+                alert(_("Please select a news item to delete."));
+                return false;
+            }
         });
     });
     //]]>
@@ -112,18 +131,12 @@ Edit news item[% ELSE %]Add news item[% END %][% ELSE %]News[% END %]</div>
             <li>
                 <label for="branch">Library: </label>
                 <select id="branch" name="branch">
-                [% IF ( new_detail.branchcode == '' ) %]
-                    <option value="" selected="selected">All libraries</option>
-                [% ELSE %]
-                    <option value=""         >All libraries</option>
-                [% END %]
-                [% FOREACH branch_item IN branch_list %]
-                [% IF ( branch_item.value.branchcode == new_detail.branchcode ) %]
-                    <option value="[% branch_item.value.branchcode %]" selected="selected">[% branch_item.value.branchname %]</option>
-                [% ELSE %]
-                    <option value="[% branch_item.value.branchcode %]">[% branch_item.value.branchname %]</option>
-                [% END %]
-                [% END %]
+                    [% IF ( new_detail.branchcode == '' ) %]
+                        <option value="" selected="selected">All libraries</option>
+                    [% ELSE %]
+                        <option value=""         >All libraries</option>
+                    [% END %]
+                    [% PROCESS options_for_libraries libraries => Branches.all( selected => new_detail.branchcode, unfiltered => 1, ) %]
                 </select>
             </li>
             <li>
@@ -191,17 +204,7 @@ Edit news item[% ELSE %]Add news item[% END %][% ELSE %]News[% END %]</div>
                 [% ELSE %]
                 <option value=""         >All libraries</option>
                 [% END %]
-                [% FOREACH branch_item IN branch_list %]
-                [% IF ( branch_item.value.branchcode == branchcode ) %]
-                    <option value="[% branch_item.value.branchcode %]"
-                            selected="selected">[% branch_item.value.branchname %]
-                    </option>
-                [% ELSE %]
-                    <option value="[% branch_item.value.branchcode %]"
-                                    >[% branch_item.value.branchname %]
-                    </option>
-                [% END %]
-                [% END %]
+                [% PROCESS options_for_libraries libraries => Branches.all( selected => branchcode, unfiltered => 1, ) %]
             </select>
             <input type="submit" class="button" value="Filter" />
         </form>

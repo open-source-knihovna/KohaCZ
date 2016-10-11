@@ -36,6 +36,7 @@
 use strict;
 #use warnings; FIXME - Bug 2505
 use CGI qw ( -utf8 );
+use Digest::MD5 qw(md5_base64);
 use C4::Context;
 use C4::Auth;
 use C4::Output;
@@ -47,7 +48,6 @@ use C4::Circulation;
 use C4::Koha;
 use C4::Letters;
 use C4::Biblio;
-use C4::Branch; # GetBranchName
 use C4::Form::MessagingPreferences;
 use List::MoreUtils qw/uniq/;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
@@ -62,6 +62,8 @@ if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preferen
 use DateTime;
 use Koha::DateUtils;
 use Koha::Database;
+use Koha::Patron::Categories;
+use Koha::Token;
 
 use vars qw($debug);
 
@@ -156,11 +158,9 @@ if ( Koha::Patrons->find( $borrowernumber )->is_debarred ) {
 $data->{ "sex_".$data->{'sex'}."_p" } = 1 if defined $data->{sex};
 
 if ( $category_type eq 'C') {
-   my  ( $catcodes, $labels ) =  GetborCatFromCatType( 'A', 'WHERE category_type = ?' );
-   my $cnt = scalar(@$catcodes);
-
-   $template->param( 'CATCODE_MULTI' => 1) if $cnt > 1;
-   $template->param( 'catcode' =>    $catcodes->[0])  if $cnt == 1;
+    my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
+    $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
+    $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
 }
 
 my $patron = Koha::Patrons->find($data->{borrowernumber});
@@ -209,10 +209,6 @@ my $library = Koha::Libraries->find( $data->{branchcode})->unblessed;
 @{$data}{keys %$library} = values %$library; # merge in all branch columns
 
 my ( $total, $accts, $numaccts) = GetMemberAccountRecords( $borrowernumber );
-my $lib1 = &GetSortDetails( "Bsort1", $data->{'sort1'} );
-my $lib2 = &GetSortDetails( "Bsort2", $data->{'sort2'} );
-$template->param( lib1 => $lib1 ) if ($lib1);
-$template->param( lib2 => $lib2 ) if ($lib2);
 
 # If printing a page, send the account informations to the template
 if ($print eq "page") {
@@ -274,8 +270,14 @@ if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preferen
 # patronimage related interface on
 my $patron_image = Koha::Patron::Images->find($data->{borrowernumber});
 $template->param( picture => 1 ) if $patron_image;
+# Generate CSRF token for upload and delete image buttons
+$template->param(
+    csrf_token => Koha::Token->new->generate_csrf({
+        id     => C4::Context->userenv->{id},
+        secret => md5_base64( C4::Context->config('pass') ),
+    }),
+);
 
-my $branch=C4::Context->userenv->{'branch'};
 
 $template->param(%$data);
 
@@ -325,7 +327,6 @@ $template->param(
     othernames      => $data->{'othernames'},
     categoryname    => $data->{'description'},
     was_renewed     => scalar $input->param('was_renewed') ? 1 : 0,
-    branch          => $branch,
     todaysdate      => output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }),
     totalprice      => sprintf("%.2f", $totalprice),
     totaldue        => sprintf("%.2f", $total),

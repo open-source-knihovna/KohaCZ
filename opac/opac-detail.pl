@@ -25,7 +25,6 @@ use Modern::Perl;
 use CGI qw ( -utf8 );
 use C4::Acquisition qw( SearchOrders );
 use C4::Auth qw(:DEFAULT get_session);
-use C4::Branch;
 use C4::Koha;
 use C4::Serials;    #uses getsubscriptionfrom biblionumber
 use C4::Output;
@@ -36,8 +35,6 @@ use C4::Tags qw(get_tags);
 use C4::XISBN qw(get_xisbns get_biblionumber_from_isbn);
 use C4::External::Amazon;
 use C4::External::Syndetics qw(get_syndetics_index get_syndetics_summary get_syndetics_toc get_syndetics_excerpt get_syndetics_reviews get_syndetics_anotes );
-use C4::Review;
-use C4::Ratings;
 use C4::Members;
 use C4::XSLT;
 use C4::ShelfBrowser;
@@ -50,8 +47,10 @@ use C4::Images;
 use Koha::DateUtils;
 use C4::HTML5Media;
 use C4::CourseReserves qw(GetItemCourseReservesInfo);
-
+use Koha::RecordProcessor;
 use Koha::Virtualshelves;
+use Koha::Ratings;
+use Koha::Reviews;
 
 BEGIN {
 	if (C4::Context->preference('BakerTaylorEnabled')) {
@@ -84,11 +83,20 @@ if (scalar @all_items >= 1) {
     }
 }
 
-my $record       = GetMarcBiblio($biblionumber);
+my $record = GetMarcBiblio($biblionumber);
 if ( ! $record ) {
     print $query->redirect("/cgi-bin/koha/errors/404.pl"); # escape early
     exit;
 }
+my $framework = &GetFrameworkCode( $biblionumber );
+my $record_processor = Koha::RecordProcessor->new({
+    filters => 'ViewPolicy',
+    options => {
+        interface => 'opac',
+        frameworkcode => $framework
+    }
+});
+$record_processor->process($record);
 
 # redirect if opacsuppression is enabled and biblio is suppressed
 if (C4::Context->preference('OpacSuppression')) {
@@ -196,7 +204,6 @@ if ($session->param('busc')) {
         my ($arrParamsBusc, $offset, $results_per_page) = @_;
 
         my $expanded_facet = $arrParamsBusc->{'expand'};
-        my $branches = GetBranches();
         my $itemtypes = GetItemTypes;
         my @servers;
         @servers = @{$arrParamsBusc->{'server'}} if $arrParamsBusc->{'server'};
@@ -208,7 +215,7 @@ if ($session->param('busc')) {
         $sort_by[0] = $default_sort_by if !$sort_by[0] && defined($default_sort_by);
         my ($error, $results_hashref, $facets);
         eval {
-            ($error, $results_hashref, $facets) = getRecords($arrParamsBusc->{'query'},$arrParamsBusc->{'simple_query'},\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,$branches,$itemtypes,$arrParamsBusc->{'query_type'},$arrParamsBusc->{'scan'});
+            ($error, $results_hashref, $facets) = getRecords($arrParamsBusc->{'query'},$arrParamsBusc->{'simple_query'},\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,undef,$itemtypes,$arrParamsBusc->{'query_type'},$arrParamsBusc->{'scan'});
         };
         my $hits;
         my @newresults;
@@ -488,7 +495,6 @@ if ($hideitems) {
     @items = @all_items;
 }
 
-my $branches = GetBranches();
 my $branch = '';
 if (C4::Context->userenv){
     $branch = C4::Context->userenv->{branch};
@@ -499,19 +505,19 @@ if ( C4::Context->preference('HighlightOwnItemsOnOPAC') ) {
         ||
         C4::Context->preference('HighlightOwnItemsOnOPACWhich') eq 'OpacURLBranch'
     ) {
-        my $branchname;
+        my $branchcode;
         if ( C4::Context->preference('HighlightOwnItemsOnOPACWhich') eq 'PatronBranch' ) {
-            $branchname = $branches->{$branch}->{'branchname'};
+            $branchcode = $branch;
         }
         elsif (  C4::Context->preference('HighlightOwnItemsOnOPACWhich') eq 'OpacURLBranch' ) {
-            $branchname = $branches->{ $ENV{'BRANCHCODE'} }->{'branchname'};
+            $branchcode = $ENV{'BRANCHCODE'};
         }
 
         my @our_items;
         my @other_items;
 
         foreach my $item ( @items ) {
-           if ( $item->{'branchname'} eq $branchname ) {
+           if ( $item->{branchcode} eq $branchcode ) {
                $item->{'this_branch'} = 1;
                push( @our_items, $item );
            } else {
@@ -524,6 +530,11 @@ if ( C4::Context->preference('HighlightOwnItemsOnOPAC') ) {
 }
 
 my $dat = &GetBiblioData($biblionumber);
+my $HideMARC = $record_processor->filters->[0]->should_hide_marc(
+    {
+        frameworkcode => $dat->{'frameworkcode'},
+        interface     => 'opac',
+    } );
 
 my $itemtypes = GetItemTypes();
 # imageurl:
@@ -552,7 +563,6 @@ foreach my $subscription (@subscriptions) {
     $cell{histstartdate}     = $subscription->{histstartdate};
     $cell{histenddate}       = $subscription->{histenddate};
     $cell{branchcode}        = $subscription->{branchcode};
-    $cell{branchname}        = GetBranchName($subscription->{branchcode});
     $cell{hasalert}          = $subscription->{hasalert};
     $cell{callnumber}        = $subscription->{callnumber};
     $cell{closed}            = $subscription->{closed};
@@ -667,8 +677,8 @@ if ( not $viewallitems and @items > $max_items_to_display ) {
      my ( $transfertwhen, $transfertfrom, $transfertto ) = GetTransfers($itm->{itemnumber});
      if ( defined( $transfertwhen ) && $transfertwhen ne '' ) {
         $itm->{transfertwhen} = $transfertwhen;
-        $itm->{transfertfrom} = $branches->{$transfertfrom}{branchname};
-        $itm->{transfertto}   = $branches->{$transfertto}{branchname};
+        $itm->{transfertfrom} = $transfertfrom;
+        $itm->{transfertto}   = $transfertto;
      }
     
     if (    C4::Context->preference('OPACAcquisitionDetails')
@@ -762,7 +772,9 @@ if (C4::Context->preference("AlternateHoldingsField") && scalar @items == 0) {
         );
 }
 
+# FIXME: The template uses this hash directly. Need to filter.
 foreach ( keys %{$dat} ) {
+    next if ( $HideMARC->{$_} );
     $template->param( "$_" => defined $dat->{$_} ? $dat->{$_} : '' );
 }
 
@@ -789,39 +801,45 @@ $template->param(
     ocoins => GetCOinSBiblio($record),
 );
 
-my $libravatar_enabled = 0;
-if ( C4::Context->preference('ShowReviewer') and C4::Context->preference('ShowReviewerPhoto')) {
-    eval {
-        require Libravatar::URL;
-        Libravatar::URL->import();
-    };
-    if (!$@ ) {
-        $libravatar_enabled = 1;
+my ( $loggedincommenter, $reviews );
+if ( C4::Context->preference('reviewson') ) {
+    $reviews = Koha::Reviews->search(
+        {
+            biblionumber => $biblionumber,
+            -or => { approved => 1, borrowernumber => $borrowernumber }
+        },
+        {
+            order_by => { -desc => 'datereviewed' }
+        }
+    )->unblessed;
+    my $libravatar_enabled = 0;
+    if ( C4::Context->preference('ShowReviewer') and C4::Context->preference('ShowReviewerPhoto') ) {
+        eval {
+            require Libravatar::URL;
+            Libravatar::URL->import();
+        };
+        if ( !$@ ) {
+            $libravatar_enabled = 1;
+        }
     }
-}
+    for my $review (@$reviews) {
+        my $borrowerData = GetMember( 'borrowernumber' => $review->{borrowernumber} );
 
-my $reviews = getreviews( $biblionumber, 1 );
-my $loggedincommenter;
+        # setting some borrower info into this hash
+        $review->{title}     = $borrowerData->{'title'};
+        $review->{surname}   = $borrowerData->{'surname'};
+        $review->{firstname} = $borrowerData->{'firstname'};
+        if ( $libravatar_enabled and $borrowerData->{'email'} ) {
+            $review->{avatarurl} = libravatar_url( email => $borrowerData->{'email'}, https => $ENV{HTTPS} );
+        }
+        $review->{userid}     = $borrowerData->{'userid'};
+        $review->{cardnumber} = $borrowerData->{'cardnumber'};
 
-
-
-
-foreach ( @$reviews ) {
-    my $borrowerData   = GetMember('borrowernumber' => $_->{borrowernumber});
-    # setting some borrower info into this hash
-    $_->{title}     = $borrowerData->{'title'};
-    $_->{surname}   = $borrowerData->{'surname'};
-    $_->{firstname} = $borrowerData->{'firstname'};
-    if ($libravatar_enabled and $borrowerData->{'email'}) {
-        $_->{avatarurl} = libravatar_url(email => $borrowerData->{'email'}, https => $ENV{HTTPS});
+        if ( $borrowerData->{'borrowernumber'} eq $borrowernumber ) {
+            $review->{your_comment} = 1;
+            $loggedincommenter = 1;
+        }
     }
-    $_->{userid}    = $borrowerData->{'userid'};
-    $_->{cardnumber}    = $borrowerData->{'cardnumber'};
-
-    if ($borrowerData->{'borrowernumber'} eq $borrowernumber) {
-		$_->{your_comment} = 1;
-		$loggedincommenter = 1;
-	}
 }
 
 if ( C4::Context->preference("OPACISBD") ) {
@@ -1068,12 +1086,11 @@ if (C4::Context->preference("OPACURLOpenInNewWindow")) {
 }
 
 if ( C4::Context->preference('OpacStarRatings') !~ /disable/ ) {
-    my $rating = GetRating( $biblionumber, $borrowernumber );
+    my $ratings = Koha::Ratings->search({ biblionumber => $biblionumber });
+    my $my_rating = $borrowernumber ? $ratings->search({ borrowernumber => $borrowernumber })->next : undef;
     $template->param(
-        rating_value   => $rating->{'rating_value'},
-        rating_total   => $rating->{'rating_total'},
-        rating_avg     => $rating->{'rating_avg'},
-        rating_avg_int => $rating->{'rating_avg_int'},
+        ratings => $ratings,
+        my_rating => $my_rating,
         borrowernumber => $borrowernumber
     );
 }
@@ -1123,6 +1140,8 @@ my $defaulttab =
         ? 'serialcollection' :
     $opac_serial_default eq 'holdings' && scalar (@itemloop) > 0
         ? 'holdings' :
+    scalar (@itemloop) == 0
+        ? 'media' :
     $subscriptionsnumber
         ? 'subscriptions' :
     @serialcollections > 0 

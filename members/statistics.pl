@@ -26,7 +26,6 @@ use Modern::Perl;
 
 use CGI qw ( -utf8 );
 use C4::Auth;
-use C4::Branch;
 use C4::Context;
 use C4::Members;
 use C4::Members::Statistics;
@@ -61,7 +60,6 @@ foreach my $key ( keys %$borrower ) {
 }
 $template->param(
     categoryname    => $borrower->{'description'},
-    branchname      => GetBranchName($borrower->{'branchcode'}),
 );
 # Construct column names
 my $fields = C4::Members::Statistics::get_fields();

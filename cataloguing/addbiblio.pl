@@ -31,11 +31,13 @@ use C4::Context;
 use MARC::Record;
 use C4::Log;
 use C4::Koha;
-use C4::Branch;
 use C4::ClassSource;
 use C4::ImportBatch;
 use C4::Charset;
 use Koha::BiblioFrameworks;
+use Koha::DateUtils;
+
+use Koha::Libraries;
 
 use Date::Calc qw(Today);
 use MARC::File::USMARC;
@@ -172,18 +174,11 @@ sub build_authorized_values_list {
 
     #---- branch
     if ( $tagslib->{$tag}->{$subfield}->{'authorised_value'} eq "branches" ) {
-        #Use GetBranches($onlymine)
-        my $onlymine =
-             C4::Context->preference('IndependentBranches')
-          && C4::Context->userenv
-          && !C4::Context->IsSuperLibrarian()
-          && C4::Context->userenv->{branch};
-        my $branches = GetBranches($onlymine);
-        foreach my $thisbranch ( sort keys %$branches ) {
-            push @authorised_values, $thisbranch;
-            $authorised_lib{$thisbranch} = $branches->{$thisbranch}->{'branchname'};
+        my $libraries = Koha::Libraries->search_filtered({}, {order_by => ['branchname']});
+        while ( my $l = $libraries->next ) {
+            push @authorised_values, $l->branchcode;;
+            $authorised_lib{$l->branchcode} = $l->branchname;
         }
-
     }
     elsif ( $tagslib->{$tag}->{$subfield}->{authorised_value} eq "itemtypes" ) {
         push @authorised_values, ""
@@ -294,15 +289,17 @@ sub create_input {
     if ( $value eq '' ) {
         $value = $tagslib->{$tag}->{$subfield}->{defaultvalue};
 
-        # get today date & replace YYYY, MM, DD if provided in the default value
-        my ( $year, $month, $day ) = Today();
-        $month = sprintf( "%02d", $month );
-        $day   = sprintf( "%02d", $day );
-        $value =~ s/YYYY/$year/g;
-        $value =~ s/MM/$month/g;
-        $value =~ s/DD/$day/g;
-        my $username=(C4::Context->userenv?C4::Context->userenv->{'surname'}:"superlibrarian");    
-        $value=~s/user/$username/g;
+        # get today date & replace <<YYYY>>, <<MM>>, <<DD>> if provided in the default value
+        my $today_dt = dt_from_string;
+        my $year = $today_dt->year;
+        my $month = $today_dt->month;
+        my $day = $today_dt->day;
+        $value =~ s/<<YYYY>>/$year/g;
+        $value =~ s/<<MM>>/$month/g;
+        $value =~ s/<<DD>>/$day/g;
+        # And <<USER>> with surname (?)
+        my $username=(C4::Context->userenv?C4::Context->userenv->{'surname'}:"superlibrarian");
+        $value=~s/<<USER>>/$username/g;
     
     }
     my $dbh = C4::Context->dbh;
@@ -713,7 +710,7 @@ my $userflags = 'edit_catalogue';
 
 my $changed_framework = $input->param('changed_framework');
 $frameworkcode = &GetFrameworkCode($biblionumber)
-  if ( $biblionumber and not($frameworkcode) and $op ne 'addbiblio' );
+  if ( $biblionumber and not( defined $frameworkcode) and $op ne 'addbiblio' );
 
 if ($frameworkcode eq 'FA'){
     $userflags = 'fast_cataloging';

@@ -29,12 +29,13 @@ require Exporter;
 use C4::Context;
 use C4::Templates;    # to get the template
 use C4::Languages;
-use C4::Branch;       # GetBranches
 use C4::Search::History;
 use Koha;
+use Koha::Caches;
 use Koha::AuthUtils qw(get_script_name hash_password);
-use Koha::LibraryCategories;
 use Koha::Libraries;
+use Koha::LibraryCategories;
+use Koha::Patrons;
 use POSIX qw/strftime/;
 use List::MoreUtils qw/ any /;
 use Encode qw( encode is_utf8);
@@ -512,7 +513,6 @@ sub get_template_and_user {
         $template->param(
             OpacAdditionalStylesheet                   => C4::Context->preference("OpacAdditionalStylesheet"),
             AnonSuggestions                       => "" . C4::Context->preference("AnonSuggestions"),
-            BranchesLoop                          => GetBranchesLoop($opac_name),
             BranchCategoriesLoop                  => $library_categories,
             opac_name                             => $opac_name,
             LibraryName                           => "" . C4::Context->preference("LibraryName"),
@@ -1076,9 +1076,10 @@ sub checkauth {
                     # if they specify at login, use that
                     if ( $query->param('branch') ) {
                         $branchcode = $query->param('branch');
-                        $branchname = GetBranchName($branchcode);
+                        my $library = Koha::Libraries->find($branchcode);
+                        $branchname = $library? $library->branchname: '';
                     }
-                    my $branches = GetBranches();
+                    my $branches = { map { $_->branchcode => $_->unblessed } Koha::Libraries->search };
                     if ( C4::Context->boolean_preference('IndependentBranches') && C4::Context->boolean_preference('Autolocation') ) {
 
                         # we have to check they are coming from the right ip range
@@ -1089,7 +1090,6 @@ sub checkauth {
                         }
                     }
 
-                    my @branchesloop;
                     foreach my $br ( keys %$branches ) {
 
                         #     now we work with the treatment of ip
@@ -1182,6 +1182,13 @@ sub checkauth {
                 -HttpOnly => 1
             );
         }
+
+        if ( $userid ) {
+            # track_login also depends on pref TrackLastPatronActivity
+            my $patron = Koha::Patrons->search({ userid => $userid })->next;
+            $patron->track_login if $patron;
+        }
+
         return ( $userid, $cookie, $sessionID, $flags );
     }
 
@@ -1206,7 +1213,6 @@ sub checkauth {
     my $template_name = ( $type eq 'opac' ) ? 'opac-auth.tt' : 'auth.tt';
     my $template = C4::Templates::gettemplate( $template_name, $type, $query );
     $template->param(
-        branchloop                            => GetBranchesLoop(),
         OpacAdditionalStylesheet                   => C4::Context->preference("OpacAdditionalStylesheet"),
         opaclayoutstylesheet                  => C4::Context->preference("opaclayoutstylesheet"),
         login                                 => 1,
@@ -1528,10 +1534,10 @@ sub check_api_auth {
                 # if they specify at login, use that
                 if ( $query->param('branch') ) {
                     $branchcode = $query->param('branch');
-                    $branchname = GetBranchName($branchcode);
+                    my $library = Koha::Libraries->find($branchcode);
+                    $branchname = $library? $library->branchname: '';
                 }
-                my $branches = GetBranches();
-                my @branchesloop;
+                my $branches = { map { $_->branchcode => $_->unblessed } Koha::Libraries->search };
                 foreach my $br ( keys %$branches ) {
 
                     #     now we work with the treatment of ip
@@ -1727,8 +1733,9 @@ sub get_session {
     elsif ( $storage_method eq 'Pg' ) {
         $session = new CGI::Session( "driver:PostgreSQL;serializer:yaml;id:md5", $sessionID, { Handle => $dbh } );
     }
-    elsif ( $storage_method eq 'memcached' && C4::Context->ismemcached ) {
-        $session = new CGI::Session( "driver:memcached;serializer:yaml;id:md5", $sessionID, { Memcached => C4::Context->memcached } );
+    elsif ( $storage_method eq 'memcached' && Koha::Caches->get_instance->memcached_cache ) {
+        my $memcached = Koha::Caches->get_instance()->memcached_cache;
+        $session = new CGI::Session( "driver:memcached;serializer:yaml;id:md5", $sessionID, { Memcached => $memcached } );
     }
     else {
         # catch all defaults to tmp should work on all systems

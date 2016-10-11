@@ -40,10 +40,12 @@ use Koha::DateUtils;
 use Koha::Calendar;
 use Koha::Database;
 use Koha::Hold;
+use Koha::Old::Hold;
 use Koha::Holds;
 use Koha::Libraries;
 use Koha::Items;
 use Koha::ItemTypes;
+use Koha::Patrons;
 
 use List::MoreUtils qw( firstidx any );
 use Carp;
@@ -146,6 +148,8 @@ BEGIN {
         &GetReservesControlBranch
 
         IsItemOnHoldAndFound
+
+        GetMaxPatronHoldsForRecord
     );
     @EXPORT_OK = qw( MergeHolds );
 }
@@ -173,12 +177,7 @@ sub AddReserve {
         $title,    $checkitem,      $found,        $itemtype
     ) = @_;
 
-    if ( Koha::Holds->search( { borrowernumber => $borrowernumber, biblionumber => $biblionumber } )->count() > 0 ) {
-        carp("AddReserve: borrower $borrowernumber already has a hold for biblionumber $biblionumber");
-        return;
-    }
-
-    my $dbh     = C4::Context->dbh;
+    my $dbh = C4::Context->dbh;
 
     $resdate = output_pref( { str => dt_from_string( $resdate ), dateonly => 1, dateformat => 'iso' })
         or output_pref({ dt => dt_from_string, dateonly => 1, dateformat => 'iso' });
@@ -462,74 +461,83 @@ sub CanBookBeReserved{
 
 =cut
 
-sub CanItemBeReserved{
-    my ($borrowernumber, $itemnumber) = @_;
+sub CanItemBeReserved {
+    my ( $borrowernumber, $itemnumber ) = @_;
 
-    my $dbh             = C4::Context->dbh;
-    my $ruleitemtype; # itemtype of the matching issuing rule
-    my $allowedreserves = 0;
-            
+    my $dbh = C4::Context->dbh;
+    my $ruleitemtype;    # itemtype of the matching issuing rule
+    my $allowedreserves  = 0; # Total number of holds allowed across all records
+    my $holds_per_record = 1; # Total number of holds allowed for this one given record
+
     # we retrieve borrowers and items informations #
     # item->{itype} will come for biblioitems if necessery
-    my $item = GetItem($itemnumber);
+    my $item       = GetItem($itemnumber);
     my $biblioData = C4::Biblio::GetBiblioData( $item->{biblionumber} );
-    my $borrower = C4::Members::GetMember('borrowernumber'=>$borrowernumber);
+    my $borrower   = C4::Members::GetMember( 'borrowernumber' => $borrowernumber );
 
     # If an item is damaged and we don't allow holds on damaged items, we can stop right here
-    return 'damaged' if ( $item->{damaged} && !C4::Context->preference('AllowHoldsOnDamagedItems') );
+    return 'damaged'
+      if ( $item->{damaged}
+        && !C4::Context->preference('AllowHoldsOnDamagedItems') );
 
-    #Check for the age restriction
-    my ($ageRestriction, $daysToAgeRestriction) = C4::Circulation::GetAgeRestriction( $biblioData->{agerestriction}, $borrower );
+    # Check for the age restriction
+    my ( $ageRestriction, $daysToAgeRestriction ) =
+      C4::Circulation::GetAgeRestriction( $biblioData->{agerestriction}, $borrower );
     return 'ageRestricted' if $daysToAgeRestriction && $daysToAgeRestriction > 0;
+
+    # Check that the patron doesn't have an item level hold on this item already
+    return 'itemAlreadyOnHold'
+      if Koha::Holds->search( { borrowernumber => $borrowernumber, itemnumber => $itemnumber } )->count();
 
     my $controlbranch = C4::Context->preference('ReservesControlBranch');
 
-    # we retrieve user rights on this itemtype and branchcode
-    my $sth = $dbh->prepare("SELECT categorycode, itemtype, branchcode, reservesallowed
-                             FROM issuingrules
-                             WHERE (categorycode in (?,'*') )
-                             AND (itemtype IN (?,'*'))
-                             AND (branchcode IN (?,'*'))
-                             ORDER BY
-                               categorycode DESC,
-                               itemtype     DESC,
-                               branchcode   DESC;"
-                           );
+    my $querycount = q{
+        SELECT count(*) AS count
+          FROM reserves
+     LEFT JOIN items USING (itemnumber)
+     LEFT JOIN biblioitems ON (reserves.biblionumber=biblioitems.biblionumber)
+     LEFT JOIN borrowers USING (borrowernumber)
+         WHERE borrowernumber = ?
+    };
 
-    my $querycount ="SELECT
-                            count(*) as count
-                            FROM reserves
-                                LEFT JOIN items USING (itemnumber)
-                                LEFT JOIN biblioitems ON (reserves.biblionumber=biblioitems.biblionumber)
-                                LEFT JOIN borrowers USING (borrowernumber)
-                            WHERE borrowernumber = ?
-                                ";
-    
-    
-    my $branchcode   = "";
-    my $branchfield  = "reserves.branchcode";
+    my $branchcode  = "";
+    my $branchfield = "reserves.branchcode";
 
-    if( $controlbranch eq "ItemHomeLibrary" ){
+    if ( $controlbranch eq "ItemHomeLibrary" ) {
         $branchfield = "items.homebranch";
-        $branchcode = $item->{homebranch};
-    }elsif( $controlbranch eq "PatronLibrary" ){
-        $branchfield = "borrowers.branchcode";
-        $branchcode = $borrower->{branchcode};
+        $branchcode  = $item->{homebranch};
     }
-    
-    # we retrieve rights 
-    $sth->execute($borrower->{'categorycode'}, $item->{'itype'}, $branchcode);
-    if(my $rights = $sth->fetchrow_hashref()){
-        $ruleitemtype    = $rights->{itemtype};
-        $allowedreserves = $rights->{reservesallowed}; 
-    }else{
+    elsif ( $controlbranch eq "PatronLibrary" ) {
+        $branchfield = "borrowers.branchcode";
+        $branchcode  = $borrower->{branchcode};
+    }
+
+    # we retrieve rights
+    if ( my $rights = GetHoldRule( $borrower->{'categorycode'}, $item->{'itype'}, $branchcode ) ) {
+        $ruleitemtype     = $rights->{itemtype};
+        $allowedreserves  = $rights->{reservesallowed};
+        $holds_per_record = $rights->{holds_per_record};
+    }
+    else {
         $ruleitemtype = '*';
+    }
+
+    $item = Koha::Items->find( $itemnumber );
+    my $holds = Koha::Holds->search(
+        {
+            borrowernumber => $borrowernumber,
+            biblionumber   => $item->biblionumber,
+            found          => undef, # Found holds don't count against a patron's holds limit
+        }
+    );
+    if ( $holds->count() >= $holds_per_record ) {
+        return "tooManyHoldsForThisRecord";
     }
 
     # we retrieve count
 
     $querycount .= "AND $branchfield = ?";
-    
+
     # If using item-level itypes, fall back to the record
     # level itemtype if the hold has no associated item
     $querycount .=
@@ -539,35 +547,37 @@ sub CanItemBeReserved{
       if ( $ruleitemtype ne "*" );
 
     my $sthcount = $dbh->prepare($querycount);
-    
-    if($ruleitemtype eq "*"){
-        $sthcount->execute($borrowernumber, $branchcode);
-    }else{
-        $sthcount->execute($borrowernumber, $branchcode, $ruleitemtype);
+
+    if ( $ruleitemtype eq "*" ) {
+        $sthcount->execute( $borrowernumber, $branchcode );
+    }
+    else {
+        $sthcount->execute( $borrowernumber, $branchcode, $ruleitemtype );
     }
 
     my $reservecount = "0";
-    if(my $rowcount = $sthcount->fetchrow_hashref()){
+    if ( my $rowcount = $sthcount->fetchrow_hashref() ) {
         $reservecount = $rowcount->{count};
     }
+
     # we check if it's ok or not
-    if( $reservecount >= $allowedreserves ){
+    if ( $reservecount >= $allowedreserves ) {
         return 'tooManyReserves';
     }
 
-    my $circ_control_branch = C4::Circulation::_GetCircControlBranch($item,
-        $borrower);
-    my $branchitemrule = C4::Circulation::GetBranchItemRule($circ_control_branch,
-        $item->{itype});
+    my $circ_control_branch =
+      C4::Circulation::_GetCircControlBranch( $item->unblessed(), $borrower );
+    my $branchitemrule =
+      C4::Circulation::GetBranchItemRule( $circ_control_branch, $item->itype );
 
     if ( $branchitemrule->{holdallowed} == 0 ) {
         return 'notReservable';
     }
 
     if (   $branchitemrule->{holdallowed} == 1
-        && $borrower->{branchcode} ne $item->{homebranch} )
+        && $borrower->{branchcode} ne $item->homebranch )
     {
-          return 'cannotReserveFromOtherBranches';
+        return 'cannotReserveFromOtherBranches';
     }
 
     # If reservecount is ok, we check item branch if IndependentBranches is ON
@@ -576,7 +586,7 @@ sub CanItemBeReserved{
         and !C4::Context->preference('canreservefromotherbranches') )
     {
         my $itembranch = $item->{homebranch};
-        if ($itembranch ne $borrower->{branchcode}) {
+        if ( $itembranch ne $borrower->{branchcode} ) {
             return 'cannotReserveFromOtherBranches';
         }
     }
@@ -777,8 +787,8 @@ sub GetReservesToBranch {
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare(
         "SELECT reserve_id,borrowernumber,reservedate,itemnumber,timestamp
-         FROM reserves 
-         WHERE priority='0' 
+         FROM reserves
+         WHERE priority='0'
            AND branchcode=?"
     );
     $sth->execute( $frombranch );
@@ -826,7 +836,7 @@ sub GetReservesForBranch {
 
     my $query = "
         SELECT reserve_id,borrowernumber,reservedate,itemnumber,waitingdate
-        FROM   reserves 
+        FROM   reserves
         WHERE   priority='0'
         AND found='W'
     ";
@@ -1269,56 +1279,31 @@ whose keys are fields from the reserves table in the Koha database.
 
 sub ModReserveFill {
     my ($res) = @_;
-    my $dbh = C4::Context->dbh;
-    # fill in a reserve record....
     my $reserve_id = $res->{'reserve_id'};
-    my $biblionumber = $res->{'biblionumber'};
-    my $borrowernumber    = $res->{'borrowernumber'};
-    my $resdate = $res->{'reservedate'};
+
+    my $dbh = C4::Context->dbh;
+
+    my $hold = Koha::Holds->find($reserve_id);
 
     # get the priority on this record....
-    my $priority;
-    my $query = "SELECT priority
-                 FROM   reserves
-                 WHERE  biblionumber   = ?
-                  AND   borrowernumber = ?
-                  AND   reservedate    = ?";
-    my $sth = $dbh->prepare($query);
-    $sth->execute( $biblionumber, $borrowernumber, $resdate );
-    ($priority) = $sth->fetchrow_array;
+    my $priority = $hold->priority;
 
-    # update the database...
-    $query = "UPDATE reserves
-                  SET    found            = 'F',
-                         priority         = 0
-                 WHERE  biblionumber     = ?
-                    AND reservedate      = ?
-                    AND borrowernumber   = ?
-                ";
-    $sth = $dbh->prepare($query);
-    $sth->execute( $biblionumber, $resdate, $borrowernumber );
+    # update the hold statuses, no need to store it though, we will be deleting it anyway
+    $hold->set(
+        {
+            found    => 'F',
+            priority => 0,
+        }
+    );
 
-    # move to old_reserves
-    $query = "INSERT INTO old_reserves
-                 SELECT * FROM reserves
-                 WHERE  biblionumber     = ?
-                    AND reservedate      = ?
-                    AND borrowernumber   = ?
-                ";
-    $sth = $dbh->prepare($query);
-    $sth->execute( $biblionumber, $resdate, $borrowernumber );
-    $query = "DELETE FROM reserves
-                 WHERE  biblionumber     = ?
-                    AND reservedate      = ?
-                    AND borrowernumber   = ?
-                ";
-    $sth = $dbh->prepare($query);
-    $sth->execute( $biblionumber, $resdate, $borrowernumber );
+    my $old_hold = Koha::Old::Hold->new( $hold->unblessed() )->store();
+
+    $hold->delete();
 
     # now fix the priority on the others (if the priority wasn't
     # already sorted!)....
     unless ( $priority == 0 ) {
-        _FixPriority({ reserve_id => $reserve_id, biblionumber => $biblionumber });
+        _FixPriority( { reserve_id => $reserve_id, biblionumber => $hold->biblionumber } );
     }
 }
 
@@ -1365,7 +1350,7 @@ take care of the waiting status
 =cut
 
 sub ModReserveAffect {
-    my ( $itemnumber, $borrowernumber,$transferToDo ) = @_;
+    my ( $itemnumber, $borrowernumber, $transferToDo, $reserve_id ) = @_;
     my $dbh = C4::Context->dbh;
 
     # we want to attach $itemnumber to $borrowernumber, find the biblionumber
@@ -1376,44 +1361,52 @@ sub ModReserveAffect {
 
     # get request - need to find out if item is already
     # waiting in order to not send duplicate hold filled notifications
-    my $reserve_id = GetReserveId({
-        borrowernumber => $borrowernumber,
-        biblionumber   => $biblionumber,
-    });
-    return unless defined $reserve_id;
-    my $request = GetReserveInfo($reserve_id);
-    my $already_on_shelf = ($request && $request->{found} eq 'W') ? 1 : 0;
+
+    my $hold;
+    # Find hold by id if we have it
+    $hold = Koha::Holds->find( $reserve_id ) if $reserve_id;
+    # Find item level hold for this item if there is one
+    $hold ||= Koha::Holds->search( { borrowernumber => $borrowernumber, itemnumber => $itemnumber } )->next();
+    # Find record level hold if there is no item level hold
+    $hold ||= Koha::Holds->search( { borrowernumber => $borrowernumber, biblionumber => $biblionumber } )->next();
+
+    return unless $hold;
+
+    $reserve_id = $hold->id();
+
+    my $already_on_shelf = $hold->found && $hold->found eq 'W';
 
     # If we affect a reserve that has to be transferred, don't set to Waiting
     my $query;
     if ($transferToDo) {
-    $query = "
-        UPDATE reserves
-        SET    priority = 0,
-               itemnumber = ?,
-               found = 'T'
-        WHERE borrowernumber = ?
-          AND biblionumber = ?
-    ";
+        $hold->set(
+            {
+                priority   => 0,
+                itemnumber => $itemnumber,
+                found      => 'T',
+            }
+        );
     }
     else {
-    # affect the reserve to Waiting as well.
-        $query = "
-            UPDATE reserves
-            SET     priority = 0,
-                    found = 'W',
-                    waitingdate = NOW(),
-                    itemnumber = ?
-            WHERE borrowernumber = ?
-              AND biblionumber = ?
-        ";
+        # affect the reserve to Waiting as well.
+        $hold->set(
+            {
+                priority    => 0,
+                itemnumber  => $itemnumber,
+                found       => 'W',
+                waitingdate => dt_from_string(),
+            }
+        );
     }
-    $sth = $dbh->prepare($query);
-    $sth->execute( $itemnumber, $borrowernumber,$biblionumber);
-    _koha_notify_reserve( $itemnumber, $borrowernumber, $biblionumber ) if ( !$transferToDo && !$already_on_shelf );
+    $hold->store();
+
+    _koha_notify_reserve( $itemnumber, $borrowernumber, $biblionumber )
+      if ( !$transferToDo && !$already_on_shelf );
+
     _FixPriority( { biblionumber => $biblionumber } );
+
     if ( C4::Context->preference("ReturnToShelvingCart") ) {
-      CartToShelf( $itemnumber );
+        CartToShelf($itemnumber);
     }
 
     return;
@@ -1456,7 +1449,7 @@ sub ModReserveMinusPriority {
     my $dbh   = C4::Context->dbh;
     my $query = "
         UPDATE reserves
-        SET    priority = 0 , itemnumber = ? 
+        SET    priority = 0 , itemnumber = ?
         WHERE  reserve_id = ?
     ";
     my $sth_upd = $dbh->prepare($query);
@@ -1693,7 +1686,7 @@ sub ToggleLowestPriority {
 
     my $sth = $dbh->prepare( "UPDATE reserves SET lowestPriority = NOT lowestPriority WHERE reserve_id = ?");
     $sth->execute( $reserve_id );
-    
+
     _FixPriority({ reserve_id => $reserve_id, rank => '999999' });
 }
 
@@ -1877,7 +1870,7 @@ sub _FixPriority {
             $priority[$j]->{'reserve_id'}
         );
     }
-    
+
     $sth = $dbh->prepare( "SELECT reserve_id FROM reserves WHERE lowestPriority = 1 ORDER BY priority" );
     $sth->execute();
 
@@ -2076,7 +2069,7 @@ sub _koha_notify_reserve {
             'biblio'         => $biblionumber,
             'biblioitems'    => $biblionumber,
             'reserves'       => $reserve,
-            'items', $reserve->{'itemnumber'},
+            'items'          => $reserve->{'itemnumber'},
         },
         substitute => { today => output_pref( { dt => dt_from_string, dateonly => 1 } ) },
     );
@@ -2115,7 +2108,7 @@ sub _koha_notify_reserve {
     if (! $notification_sent) {
         &$send_notification('print', 'HOLD');
     }
-    
+
 }
 
 =head2 _ShiftPriorityByDateAndPriority
@@ -2383,26 +2376,15 @@ sub GetReserveId {
 
     return unless ( ( $params->{'biblionumber'} || $params->{'itemnumber'} ) && $params->{'borrowernumber'} );
 
-    my $dbh = C4::Context->dbh();
-
-    my $sql = "SELECT reserve_id FROM reserves WHERE ";
-
-    my @params;
-    my @limits;
     foreach my $key ( keys %$params ) {
-        if ( defined( $params->{$key} ) ) {
-            push( @limits, "$key = ?" );
-            push( @params, $params->{$key} );
-        }
+        delete $params->{$key} unless defined( $params->{$key} );
     }
 
-    $sql .= join( " AND ", @limits );
+    my $hold = Koha::Holds->search( $params )->next();
 
-    my $sth = $dbh->prepare( $sql );
-    $sth->execute( @params );
-    my $row = $sth->fetchrow_hashref();
+    return unless $hold;
 
-    return $row->{'reserve_id'};
+    return $hold->id();
 }
 
 =head2 ReserveSlip
@@ -2542,6 +2524,76 @@ sub IsItemOnHoldAndFound {
     );
 
     return $found;
+}
+
+=head2 GetMaxPatronHoldsForRecord
+
+my $holds_per_record = ReservesControlBranch( $borrowernumber, $biblionumber );
+
+For multiple holds on a given record for a given patron, the max
+number of record level holds that a patron can be placed is the highest
+value of the holds_per_record rule for each item if the record for that
+patron. This subroutine finds and returns the highest holds_per_record
+rule value for a given patron id and record id.
+
+=cut
+
+sub GetMaxPatronHoldsForRecord {
+    my ( $borrowernumber, $biblionumber ) = @_;
+
+    my $patron = Koha::Patrons->find($borrowernumber);
+    my @items = Koha::Items->search( { biblionumber => $biblionumber } );
+
+    my $controlbranch = C4::Context->preference('ReservesControlBranch');
+
+    my $categorycode = $patron->categorycode;
+    my $branchcode;
+    $branchcode = $patron->branchcode if ( $controlbranch eq "PatronLibrary" );
+
+    my $max = 0;
+    foreach my $item (@items) {
+        my $itemtype = $item->effective_itemtype();
+
+        $branchcode = $item->homebranch if ( $controlbranch eq "ItemHomeLibrary" );
+
+        my $rule = GetHoldRule( $categorycode, $itemtype, $branchcode );
+        my $holds_per_record = $rule ? $rule->{holds_per_record} : 0;
+        $max = $holds_per_record if $holds_per_record > $max;
+    }
+
+    return $max;
+}
+
+=head2 GetHoldRule
+
+my $rule = GetHoldRule( $categorycode, $itemtype, $branchcode );
+
+Returns the matching hold related issuingrule fields for a given
+patron category, itemtype, and library.
+
+=cut
+
+sub GetHoldRule {
+    my ( $categorycode, $itemtype, $branchcode ) = @_;
+
+    my $dbh = C4::Context->dbh;
+
+    my $sth = $dbh->prepare(
+        q{
+         SELECT categorycode, itemtype, branchcode, reservesallowed, holds_per_record
+           FROM issuingrules
+          WHERE (categorycode in (?,'*') )
+            AND (itemtype IN (?,'*'))
+            AND (branchcode IN (?,'*'))
+       ORDER BY categorycode DESC,
+                itemtype     DESC,
+                branchcode   DESC
+        }
+    );
+
+    $sth->execute( $categorycode, $itemtype, $branchcode );
+
+    return $sth->fetchrow_hashref();
 }
 
 =head1 AUTHOR

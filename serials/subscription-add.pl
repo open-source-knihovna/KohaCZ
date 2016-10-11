@@ -26,7 +26,6 @@ use C4::Auth;
 use C4::Acquisition;
 use C4::Output;
 use C4::Context;
-use C4::Branch; # GetBranches
 use C4::Serials;
 use C4::Serials::Frequency;
 use C4::Serials::Numberpattern;
@@ -126,29 +125,10 @@ if ($op eq 'modify' || $op eq 'dup' || $op eq 'modsubscription') {
 
 }
 
-my $onlymine =
-     C4::Context->preference('IndependentBranches')
-  && C4::Context->userenv
-  && !C4::Context->IsSuperLibrarian
-  && (
-    not C4::Auth::haspermission( C4::Context->userenv->{id}, { serials => 'superserials' } )
-  )
-  && C4::Context->userenv->{branch};
-my $branches = GetBranches($onlymine);
-my $branchloop;
-for my $thisbranch (sort { $branches->{$a}->{branchname} cmp $branches->{$b}->{branchname} } keys %{$branches}) {
-    my $selected = 0;
-    $selected = 1 if (defined($subs) && $thisbranch eq $subs->{'branchcode'});
-    push @{$branchloop}, {
-        value => $thisbranch,
-        selected => $selected,
-        branchname => $branches->{$thisbranch}->{'branchname'},
-    };
-}
-
 my $locations_loop = GetAuthorisedValues("LOC");
 
-$template->param(branchloop => $branchloop,
+$template->param(
+    branchcode => $subs->{branchcode},
     locations_loop=>$locations_loop,
 );
 
@@ -161,7 +141,22 @@ for my $field ( @$additional_fields ) {
 }
 $template->param( additional_fields_for_subscription => $additional_fields );
 
+my $typeloop = GetItemTypes();
+
+my @typearg =
+    map { { code => $_, value => $typeloop->{$_}{'description'}, selected => ( ( $subs->{itemtype} and $_ eq $subs->{itemtype} ) ? "selected=\"selected\"" : "" ), } } sort keys %{$typeloop};
+my @previoustypearg =
+    map { { code => $_, value => $typeloop->{$_}{'description'}, selected => ( ( $subs->{previousitemtype} and $_ eq $subs->{previousitemtype} ) ? "selected=\"selected\"" : "" ), } } sort keys %{$typeloop};
+
+$template->param(
+    typeloop                 => \@typearg,
+    previoustypeloop         => \@previoustypearg,
+    locations_loop=>$locations_loop,
+);
+
 # prepare template variables common to all $op conditions:
+$template->param('makePreviousSerialAvailable' => 1) if (C4::Context->preference('makePreviousSerialAvailable'));
+
 if ($op!~/^mod/) {
     my $letters = get_letter_loop();
     $template->param( letterloop => $letters );
@@ -321,6 +316,8 @@ sub redirect_add_subscription {
     my $staffdisplaycount = $query->param('staffdisplaycount');
     my $opacdisplaycount  = $query->param('opacdisplaycount');
     my $location          = $query->param('location');
+    my $itemtype          = $query->param('itemtype');
+    my $previousitemtype  = $query->param('previousitemtype');
     my $skip_serialseq    = $query->param('skip_serialseq');
 
     my $startdate      = output_pref( { str => scalar $query->param('startdate'),      dateonly => 1, dateformat => 'iso' } );
@@ -398,6 +395,8 @@ sub redirect_mod_subscription {
 	my $opacdisplaycount = $query->param('opacdisplaycount');
     my $graceperiod     = $query->param('graceperiod') || 0;
     my $location = $query->param('location');
+    my $itemtype          = $query->param('itemtype');
+    my $previousitemtype  = $query->param('previousitemtype');
     my $skip_serialseq    = $query->param('skip_serialseq');
 
     # Guess end date
@@ -425,7 +424,7 @@ sub redirect_mod_subscription {
         $status, $biblionumber, $callnumber, $notes, $letter,
         $manualhistory, $internalnotes, $serialsadditems, $staffdisplaycount,
         $opacdisplaycount, $graceperiod, $location, $enddate, $subscriptionid,
-        $skip_serialseq
+        $skip_serialseq, $itemtype, $previousitemtype
     );
 
     my $additional_fields = Koha::AdditionalField->all( { tablename => 'subscription' } );

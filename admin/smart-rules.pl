@@ -25,7 +25,6 @@ use C4::Output;
 use C4::Auth;
 use C4::Koha;
 use C4::Debug;
-use C4::Branch; # GetBranches
 use Koha::DateUtils;
 use Koha::Database;
 use Koha::IssuingRule;
@@ -34,6 +33,7 @@ use Koha::Logger;
 use Koha::RefundLostItemFeeRule;
 use Koha::RefundLostItemFeeRules;
 use Koha::Libraries;
+use Koha::Patron::Categories;
 
 my $input = CGI->new;
 my $dbh = C4::Context->dbh;
@@ -54,10 +54,10 @@ my $type=$input->param('type');
 my $branch = $input->param('branch');
 unless ( $branch ) {
     if ( C4::Context->preference('DefaultToLoggedInLibraryCircRules') ) {
-        $branch = Koha::Libraries->search->count() == 1 ? undef : C4::Branch::mybranch();
+        $branch = Koha::Libraries->search->count() == 1 ? undef : C4::Context::mybranch();
     }
     else {
-        $branch = C4::Branch::onlymine() ? ( C4::Branch::mybranch() || '*' ) : '*';
+        $branch = C4::Context::only_my_library() ? ( C4::Context::mybranch() || '*' ) : '*';
     }
 }
 $branch = '*' if $branch eq 'NO_LIBRARY_SET';
@@ -137,6 +137,7 @@ elsif ($op eq 'add') {
     $norenewalbefore = undef if $norenewalbefore =~ /^\s*$/;
     my $auto_renew = $input->param('auto_renew') eq 'yes' ? 1 : 0;
     my $reservesallowed  = $input->param('reservesallowed');
+    my $holds_per_record  = $input->param('holds_per_record');
     my $onshelfholds     = $input->param('onshelfholds') || 0;
     $maxissueqty =~ s/\s//g;
     $maxissueqty = undef if $maxissueqty !~ /^\d+/;
@@ -172,6 +173,7 @@ elsif ($op eq 'add') {
         norenewalbefore               => $norenewalbefore,
         auto_renew                    => $auto_renew,
         reservesallowed               => $reservesallowed,
+        holds_per_record              => $holds_per_record,
         issuelength                   => $issuelength,
         lengthunit                    => $lengthunit,
         hardduedate                   => $hardduedate,
@@ -458,24 +460,8 @@ $template->param(
     defaultRefundRule     => Koha::RefundLostItemFeeRules->_default_rule
 );
 
-my $branches = GetBranches();
-my @branchloop;
-for my $thisbranch (sort { $branches->{$a}->{branchname} cmp $branches->{$b}->{branchname} } keys %$branches) {
-    push @branchloop, {
-        value      => $thisbranch,
-        selected   => $thisbranch eq $branch,
-        branchname => $branches->{$thisbranch}->{'branchname'},
-    };
-}
+my $patron_categories = Koha::Patron::Categories->search({}, { order_by => ['description'] });
 
-my $sth=$dbh->prepare("SELECT description,categorycode FROM categories ORDER BY description");
-$sth->execute;
-my @category_loop;
-while (my $data=$sth->fetchrow_hashref){
-    push @category_loop,$data;
-}
-
-$sth->finish;
 my @row_loop;
 my @itemtypes = @{ GetItemTypes( style => 'array' ) };
 @itemtypes = sort { lc $a->{translated_description} cmp lc $b->{translated_description} } @itemtypes;
@@ -515,7 +501,6 @@ while (my $row = $sth2->fetchrow_hashref) {
     }
     push @row_loop, $row;
 }
-$sth->finish;
 
 my @sorted_row_loop = sort by_category_and_itemtype @row_loop;
 
@@ -624,11 +609,11 @@ if ($defaults) {
 
 $template->param(default_rules => ($defaults ? 1 : 0));
 
-$template->param(categoryloop => \@category_loop,
+$template->param(
+    patron_categories => $patron_categories,
                         itemtypeloop => \@itemtypes,
                         rules => \@sorted_row_loop,
-                        branchloop => \@branchloop,
-                        humanbranch => ($branch ne '*' ? $branches->{$branch}->{branchname} : ''),
+                        humanbranch => ($branch ne '*' ? $branch : ''),
                         current_branch => $branch,
                         definedbranch => scalar(@sorted_row_loop)>0
                         );

@@ -30,6 +30,8 @@
 use strict;
 use warnings;
 
+use feature 'say';
+
 # CPAN modules
 use DBI;
 use Getopt::Long;
@@ -45,6 +47,7 @@ use MARC::File::XML ( BinaryEncoding => 'utf8' );
 
 use File::Path qw[remove_tree]; # perl core module
 use File::Spec;
+use Path::Tiny;
 
 # FIXME - The user might be installing a new database, so can't rely
 # on /etc/koha.conf anyway.
@@ -11466,13 +11469,20 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
         ADD serialseq_z VARCHAR( 100 ) NULL DEFAULT NULL AFTER serialseq_y
    ");
 
-    my $schema        = Koha::Database->new()->schema();
-    my @subscriptions = $schema->resultset('Subscription')->all();
+    my $sth = $dbh->prepare("SELECT * FROM subscription");
+    $sth->execute();
 
-    foreach my $subscription (@subscriptions) {
+    my $sth2 = $dbh->prepare("SELECT * FROM subscription_numberpatterns WHERE id = ?");
+
+    my $sth3 = $dbh->prepare("UPDATE serials SET serialseq_x = ?, serialseq_y = ?, serialseq_z = ? WHERE serialid = ?");
+
+    foreach my $subscription ( $sth->fetchrow_hashref() ) {
+        next if !defined($subscription);
         my $number_pattern = $subscription->numberpattern();
+        $sth2->execute( $subscription->{numberpattern} );
+        $number_pattern = $sth2->fetchrow_hashref();
 
-        my $numbering_method = $number_pattern->numberingmethod();
+        my $numbering_method = $number_pattern->{numberingmethod};
         # Get all the data between the enumeration values, we need
         # to split each enumeration string based on these values.
         my @splits = split( /\{[XYZ]\}/, $numbering_method );
@@ -11484,12 +11494,15 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
         }
         my @indexes = sort { $indexes{$a} <=> $indexes{$b} } keys(%indexes);
 
-        my @serials =
-          $schema->resultset('Serial')
-          ->search( { subscriptionid => $subscription->subscriptionid() } );
+        my @serials = @{
+            $dbh->selectall_arrayref(
+                "SELECT * FROM serial WHERE subscriptionid = $subscription->{subscriptionid}",
+                { Slice => {} }
+            )
+        };
 
         foreach my $serial (@serials) {
-            my $serialseq = $serial->serialseq();
+            my $serialseq = $serial->{serialseq};
             my %enumeration_data;
 
             ## We cannot split on multiple values at once,
@@ -11511,12 +11524,11 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
                 $enumeration_data{ $indexes[0] } = $serialseq;
             }
 
-            $serial->update(
-                {
-                    serialseq_x => $enumeration_data{'X'},
-                    serialseq_y => $enumeration_data{'Y'},
-                    serialseq_z => $enumeration_data{'Z'},
-                }
+            $sth3->execute(
+                    $enumeration_data{'X'},
+                    $enumeration_data{'Y'},
+                    $enumeration_data{'Z'},
+                    $serial->{serialid},
             );
         }
     }
@@ -12655,6 +12667,9 @@ SetVersion($DBversion);
 $DBversion = "3.23.00.063";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
+        UPDATE letter SET branchcode='' WHERE branchcode IS NULL;
+    });
+    $dbh->do(q{
         ALTER TABLE letter MODIFY COLUMN branchcode varchar(10) NOT NULL DEFAULT ''
     });
     $dbh->do(q{
@@ -12933,6 +12948,256 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
+$DBversion = "16.06.00.016";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        update marc_subfield_structure set defaultvalue=REPLACE(defaultvalue, 'YYYY', '<<YYYY>>') where defaultvalue like "%YYYY%" and defaultvalue not like "%<<YYYY>>%";
+    });
+    $dbh->do(q{
+        update marc_subfield_structure set defaultvalue=REPLACE(defaultvalue, 'MM', '<<MM>>') where defaultvalue like "%MM%" and defaultvalue not like "%<<MM>>%";
+    });
+    $dbh->do(q{
+        update marc_subfield_structure set defaultvalue=REPLACE(defaultvalue, 'DD', '<<DD>>') where defaultvalue like "%DD%" and defaultvalue not like "%<<DD>>%";
+    });
+    $dbh->do(q{
+        update marc_subfield_structure set defaultvalue=REPLACE(defaultvalue, 'user', '<<USER>>') where defaultvalue like "%user%" and defaultvalue not like "%<<USER>>%";
+    });
+
+    print "Upgrade to $DBversion done (Bug 7045 - Default-value substitution inconsistent)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.017";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (`variable`, `value`, `options`, `explanation`, `type`) VALUES ('OPACSuggestionMandatoryFields','title','','Define the mandatory fields for a patron purchase suggestions made via OPAC.','multiple');
+    });
+
+    print "Upgrade to $DBversion done (Bug 10848 - Allow configuration of mandatory/required fields on the suggestion form in OPAC)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.018";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE issuingrules ADD COLUMN holds_per_record SMALLINT(6) NOT NULL DEFAULT 1 AFTER reservesallowed;
+    });
+
+    print "Upgrade to $DBversion done (Bug 14695 - Add ability to place multiple item holds on a given record per patron)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.019";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE reviews CHANGE COLUMN approved approved tinyint(4) DEFAULT 0;
+    });
+    $dbh->do(q{
+        UPDATE reviews SET approved=0 WHERE approved IS NULL;
+    });
+
+    print "Upgrade to $DBversion done (Bug 15839 - Move the reviews related code to Koha::Reviews)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.020";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('SwitchOnSiteCheckouts', '0', 'Automatically switch an on-site checkout to a normal checkout', NULL, 'YesNo');
+    });
+
+    print "Upgrade to $DBversion done (Bug 16272 - Transform checkout from on-site checkout to regular checkout)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.021";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('PatronSelfRegistrationEmailMustBeUnique', '0', 'If set, the field borrowers.email will be considered as a unique field on self registering', NULL, 'YesNo');
+    });
+
+    print "Upgrade to $DBversion done (Bug 16275 - Prevent patron self registration if the email already filled in borrowers.email)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.022";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO `permissions`
+        (module_bit, code,             description) VALUES
+        (16,         'delete_reports', 'Delete SQL reports');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO user_permissions
+        (borrowernumber,      module_bit,code)
+        SELECT borrowernumber,module_bit,'delete_reports'
+            FROM user_permissions
+            WHERE module_bit=16 AND code='create_reports';
+    });
+
+    print "Upgrade to $DBversion done (Bug 16978 - Add delete reports user permission)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.023";
+if ( CheckVersion($DBversion) ) {
+    my $pref = C4::Context->preference('timeout');
+    if( !$pref || $pref eq '12000000' ) {
+        # update if pref is null or equals old default value
+        $dbh->do(q|
+            UPDATE systempreferences SET value = '1d', type = 'Free'
+            WHERE variable = 'timeout'
+        |);
+        print "Upgrade to $DBversion done (Bug 17187)\nNote: Pref value for timeout has been adjusted.\n";
+    } else {
+        # only update pref type
+        $dbh->do(q|
+            UPDATE systempreferences SET type = 'Free'
+            WHERE variable = 'timeout'
+        |);
+        print "Upgrade to $DBversion done (Bug 17187)\nNote: Pref value for timeout has not been adjusted.\n";
+    }
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.024";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE language_descriptions SET description = 'Română' WHERE subtag = 'ro' AND type = 'language' AND lang = 'ro';
+    });
+
+    print "Upgrade to $DBversion done (Bug 16311 - Advanced search language limit typo for Romanian)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.025";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE `subscription` ADD `itemtype` VARCHAR( 10 ) NULL AFTER reneweddate, ADD `previousitemtype` VARCHAR( 10 ) NULL AFTER itemtype;
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES
+        ('makePreviousSerialAvailable','0','make previous serial automatically available when collecting a new serial. Please note that the item-level_itypes syspref must be set to specific item.','','YesNo');
+    });
+
+    print "Upgrade to $DBversion done (Bug 7677 - Subscriptions: Ability to define default itemtype and automatically change itemtype of older issues on receive of next issue)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.026";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('PatronSelfRegistrationLibraryList', '', 'Only display libraries listed. If empty, all libraries are displayed.', NULL, 'Free');
+    });
+
+    print "Upgrade to $DBversion done (Bug 16274 - Make the selfregistration branchcode selection configurable)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.027";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER IGNORE TABLE borrowers ADD COLUMN lastseen datetime default NULL AFTER updated_on;
+    });
+    $dbh->do(q{
+        ALTER IGNORE TABLE deletedborrowers ADD COLUMN lastseen datetime default NULL AFTER updated_on;
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('TrackLastPatronActivity', '0', 'If set, the field borrowers.lastseen will be updated everytime a patron is seen', NULL, 'YesNo');
+    });
+
+    print "Upgrade to $DBversion done (Bug 16274 - Make the selfregistration branchcode selection configurable)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.028';
+if (C4::Context->preference("Version") < TransformToNum($DBversion)) {
+    {
+        print "Attempting upgrade to $DBversion (Bug 17135) ...\n";
+        my $maintenance_script = C4::Context->config("intranetdir") . "/installer/data/mysql/fix_unclosed_nonaccruing_fines_bug17135.pl";
+        system("perl $maintenance_script --confirm");
+
+        print "Upgrade to $DBversion done (Bug 17135 - Fine for the previous overdue may get overwritten by the next one)\n";
+
+        unless ($original_version < TransformToNum("3.23.00.032")) { ## Bug 15675
+            print "WARNING: There is a possibility (= just a possibility, it's configuration dependent etc.) that - due to regression introduced by Bug 15675 - some old fine records for overdued items (items which got renewed 1+ time while being overdue) may have been overwritten in your production 16.05+ database. See Bugzilla reports for Bug 14390 and Bug 17135 for more details.\n";
+            print "WARNING: Please note that this upgrade does not try to recover such overwitten old fine records (if any) - it's just an follow-up for Bug 14390, its sole purpose is preventing eventual further-on overwrites from happening in the future. Optional recovery of the overwritten fines (again, if any) is like, totally outside of the scope of this particular upgrade!\n";
+        }
+        SetVersion ($DBversion);
+    }
+}
+
+$DBversion = "16.06.00.029";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE systempreferences SET type="Choice" WHERE variable="UsageStatsLibraryType";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Canada" WHERE variable="UsageStatsCountry" AND value="CANADA";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Czech Republic" WHERE variable="UsageStatsCountry" AND value="CZ";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="United Kingdom" WHERE variable="UsageStatsCountry" AND (value="England" OR value="UK");
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Spain" WHERE variable="UsageStatsCountry" AND value="España";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Greece" WHERE variable="UsageStatsCountry" AND value="GR";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Ireland" WHERE variable="UsageStatsCountry" AND value="Irelanbd";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Mexico" WHERE variable="UsageStatsCountry" AND value="México";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Peru" WHERE variable="UsageStatsCountry" AND value="Perú";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Dominican Rep." WHERE variable="UsageStatsCountry" AND value="República Dominicana";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Trinidad & Tob." WHERE variable="UsageStatsCountry" AND value="Trinidad";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Turkey" WHERE variable="UsageStatsCountry" AND value="Türkiye";
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="USA" WHERE variable="UsageStatsCountry" AND (value="United States" OR value="United States of America" OR value="US");
+    });
+    $dbh->do(q{
+        UPDATE systempreferences SET value="Zimbabwe" WHERE variable="UsageStatsCountry" AND value="Zimbabbwe";
+    });
+
+    print "Upgrade to $DBversion done (Bug 14707 - Change UsageStatsCountry from free text to a dropdown list)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.030";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('OPACHoldingsDefaultSortField','first_column','first_column|homebranch|holdingbranch','Default sort field for the holdings table at the OPAC','choice');
+    });
+
+    print "Upgrade to $DBversion done (Bug 16552 - Add the ability to change the default holdings sort)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.031";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('PatronSelfRegistrationPrefillForm', '1', 'Display password and prefill login form after a patron has self registered', NULL, 'YesNo');
+    });
+
+    print "Upgrade to $DBversion done (Bug 16273 - Prevent selfregistration from printing the borrower password and filling the logging form)\n";
+    SetVersion($DBversion);
+}
+
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.
@@ -12946,7 +13211,9 @@ foreach my $file ( sort readdir $dirh ) {
         my $installer = C4::Installer->new();
         my $rv = $installer->load_sql( $update_dir . $file ) ? 0 : 1;
     } elsif ( $file =~ /\.perl$/ ) {
-        do $update_dir . $file;
+        my $code = path( $update_dir . $file )->slurp_utf8;
+        eval $code;
+        say "Atomic update generated errors: $@" if $@;
     }
 }
 

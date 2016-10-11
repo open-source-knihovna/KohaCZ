@@ -30,7 +30,6 @@ use DateTime::Duration;
 use C4::Output;
 use C4::Print;
 use C4::Auth qw/:DEFAULT get_session haspermission/;
-use C4::Branch; # GetBranches
 use C4::Koha;   # GetPrinter
 use C4::Circulation;
 use C4::Utils::DataTables::Members;
@@ -140,6 +139,8 @@ my @failedreturns = $query->multi_param('failedreturn');
 our %return_failed = ();
 for (@failedreturns) { $return_failed{$_} = 1; }
 
+my $searchtype = $query->param('searchtype') || q{contain};
+
 my $findborrower = $query->param('findborrower') || q{};
 $findborrower =~ s|,| |g;
 
@@ -240,8 +241,8 @@ if ($findborrower) {
         my $results = C4::Utils::DataTables::Members::search(
             {
                 searchmember => $findborrower,
-                searchtype => 'contain',
-                dt_params => $dt_params,
+                searchtype   => $searchtype,
+                dt_params    => $dt_params,
             }
         );
         my $borrowers = $results->{patrons};
@@ -320,7 +321,7 @@ if (@$barcodes) {
   for my $barcode ( @$barcodes ) {
     my $template_params = { barcode => $barcode };
     # always check for blockers on issuing
-    my ( $error, $question, $alerts ) = CanBookBeIssued(
+    my ( $error, $question, $alerts, $messages ) = CanBookBeIssued(
         $borrower,
         $barcode, $datedue,
         $inprocess,
@@ -334,6 +335,7 @@ if (@$barcodes) {
     my $blocker = $invalidduedate ? 1 : 0;
 
     $template_params->{alert} = $alerts;
+    $template_params->{messages} = $messages;
 
     #  Get the item title for more information
     my $getmessageiteminfo = GetBiblioFromItemNumber(undef,$barcode);
@@ -405,7 +407,8 @@ if (@$barcodes) {
             }
         }
         unless($confirm_required) {
-            my $issue = AddIssue( $borrower, $barcode, $datedue, $cancelreserve, undef, undef, { onsite_checkout => $onsite_checkout, auto_renew => $session->param('auto_renew') } );
+            my $switch_onsite_checkout = exists $messages->{ONSITE_CHECKOUT_WILL_BE_SWITCHED};
+            my $issue = AddIssue( $borrower, $barcode, $datedue, $cancelreserve, undef, undef, { onsite_checkout => $onsite_checkout, auto_renew => $session->param('auto_renew'), switch_onsite_checkout => $switch_onsite_checkout, } );
             $template_params->{issue} = $issue;
             $session->clear('auto_renew');
             $inprocess = 1;
@@ -556,10 +559,9 @@ $amountold =~ s/^.*\$//;    # remove upto the $, if any
 my ( $total, $accts, $numaccts) = GetMemberAccountRecords( $borrowernumber );
 
 if ( $borrowernumber && $borrower->{'category_type'} eq 'C') {
-    my  ( $catcodes, $labels ) =  GetborCatFromCatType( 'A', 'WHERE category_type = ?' );
-    my $cnt = scalar(@$catcodes);
-    $template->param( 'CATCODE_MULTI' => 1) if $cnt > 1;
-    $template->param( 'catcode' =>    $catcodes->[0])  if $cnt == 1;
+    my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
+    $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
+    $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
 }
 
 my $librarian_messages = Koha::Patron::Messages->search(
@@ -629,7 +631,6 @@ $template->param(
     borrowernumber    => $borrowernumber,
     categoryname      => $borrower->{'description'},
     branch            => $branch,
-    branchname        => GetBranchName($borrower->{'branchcode'}),
     was_renewed       => scalar $query->param('was_renewed') ? 1 : 0,
     expiry            => $borrower->{'dateexpiry'},
     roadtype          => $roadtype,

@@ -33,6 +33,7 @@ use C4::Context;
 use C4::Auth;
 use C4::Output;
 use C4::Members;
+use Koha::Patron::Categories;
 
 # use Smart::Comments;
 
@@ -57,24 +58,14 @@ my $catcode_multi = $input->param('catcode_multi');
 my $op             = $input->param('op');
 
 if ( $op eq 'multi' ) {
-    my ( $catcodes, $labels ) =
-		# FIXME - what are the possible upgrade paths?  C -> A , C -> S ...
-		#   currently just allowing C -> A because of limitation of API.
-      GetborCatFromCatType( 'A', 'WHERE category_type = ?' );
-    my @rows;
-    foreach my $k ( keys %$labels ) {
-        my $row;
-        $row->{catcode} = $k;
-        $row->{catdesc} = $labels->{$k};
-        my $borcat = GetBorrowercategory( $row->{catcode} );
-        $row->{cattype} = $borcat->{'category_type'};
-        push @rows, $row;
-    }
+    # FIXME - what are the possible upgrade paths?  C -> A , C -> S ...
+    #   currently just allowing C -> A
+    my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
     $template->param(
-        MULTI          => 1,
-        CATCODE_MULTI          => 1,
-        borrowernumber => $borrowernumber,
-        CAT_LOOP       => \@rows,
+        MULTI             => 1,
+        CATCODE_MULTI     => 1,
+        borrowernumber    => $borrowernumber,
+        patron_categories => $patron_categories,
     );
     output_html_with_http_headers $input, $cookie, $template->output;
 }
@@ -83,9 +74,9 @@ elsif ( $op eq 'update' ) {
     my $member = GetMember('borrowernumber'=>$borrowernumber);
     $member->{'guarantorid'}  = 0;
     $member->{'categorycode'} = $catcode;
-    my $borcat = GetBorrowercategory($catcode);
-    $member->{'category_type'} = $borcat->{'category_type'};
-    $member->{'description'}   = $borcat->{'description'};
+    my $borcat = Koha::Patron::Categories->find($catcode);
+    $member->{'category_type'} = $borcat->category_type;
+    $member->{'description'}   = $borcat->description;
     delete $member->{password};
     ModMember(%$member);
 

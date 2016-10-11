@@ -37,7 +37,7 @@
     <div id="yui-main">
     <div class="yui-g">
 
-        <h2>Holds awaiting pickup for your library on: [% show_date %]
+        <h2>Holds awaiting pickup for your library on: [% show_date | $KohaDates %]
             [% IF ( all_branches_link ) %]
             <span style="margin-left:20px"><a href="[% all_branches_link %]">
             View all libraries</a></span>
@@ -47,12 +47,12 @@
         [% FOREACH cancel_result %]
             [% IF ( messagetransfert ) %]
                 <div class="dialog message">
-                    <h2>This item is on hold for pick-up at [% branchname %]</h2>
+                    <h2>This item is on hold for pick-up at [% Branches.GetName( branchname ) %]</h2>
                     <p><strong>[% nextreservtitle %]</strong> is on hold for <strong> [% nextreservsurname %], [% nextreservfirstname %]</strong>.
                     Please retain this item and check it in to process the hold.
                     </p>
-                    <form name="cancelReservewithtransfert" action="waitingreserves.pl" method="post">
-                        <input type="submit" class="submit" value="OK" />
+                    <form name="cancelReservewithtransfert" action="waitingreserves.p#[% tab %]" method="post">
+                        <button type="submit" class="approve"><i class="fa fa-fw fa-check"></i> OK</button>
                     </form>
                 </div>
             [% END %]
@@ -62,8 +62,8 @@
                     <p><strong>[% nextreservtitle %]</strong> is on hold for <strong>[% nextreservsurname %], [% nextreservfirstname %]</strong>.
                     Please retain this item and check it in to process the hold.
                     </p>
-                    <form name="cancelReservewithwaiting" action="waitingreserves.pl" method="post">
-                        <input type="submit" class="submit" value="OK"/>
+                    <form name="cancelReservewithwaiting" action="waitingreserves.pl#[% tab %]" method="post">
+                        <button type="submit" class="approve"><i class="fa fa-fw fa-check"></i> OK</button>
                     </form>
                 </div>
             [% END %]
@@ -85,7 +85,9 @@
                     <th class="title-string">Available since</th>
                     <th class="anti-the">Title</th>
                     <th>Patron</th>
-                    <th>Location</th>
+                    <th>Home branch</th>
+                    <th>Current location</th>
+                    <th>Call number</th>
                     <th>Copy number</th>
                     <th>Enumeration</th>
                     <th>Action</th>
@@ -104,7 +106,9 @@
                         [% IF ( reserveloo.borrowermail ) %]<br /><a href="mailto:[% reserveloo.borrowermail %]?subject=Hold waiting: [% reserveloo.title %]">
                         [% reserveloo.borrowermail %]</a>[% END %]
                     </td>
-                    <td>[% Branches.GetName( reserveloo.homebranch ) %]<br />[% reserveloo.itemcallnumber %]</td>
+                    <td>[% Branches.GetName( reserveloo.homebranch ) %]</td>
+                    <td>[% Branches.GetName( reserveloo.holdingbranch ) %]</td>
+                    <td>[% reserveloo.itemcallnumber %]</td>
                     <td>[% reserveloo.copynumber %]</td>
                     <td>[% reserveloo.enumchron %]</td>
                     <td>
@@ -115,7 +119,7 @@
                             <input type="hidden" name="tbr" value="[% reserveloo.homebranch %]" />
                             <input type="hidden" name="tab" value="holdswaiting">
                             [% IF ( reserveloo.dotransfer ) %]
-                            <input type="submit" value="Cancel hold and return to : [% reserveloo.branchname %]" /> 
+                            <input type="submit" value="Cancel hold and return to : [% Branches.GetName( reserveloo.homebranch ) %]" />
                             [% ELSE %]
                             <input type="submit" value="Cancel hold" />
                             [% END %]
@@ -147,7 +151,9 @@
                     <th class="title-string">Available since</th>
                     <th class="anti-the">Title</th>
                     <th>Patron</th>
-                    <th>Location</th>
+                    <th>Home branch</th>
+                    <th>Current location</th>
+                    <th>Call number</th>
                     <th>Copy number</th>
                     <th>Enumeration</th>
                     <th>Action</th>
@@ -165,7 +171,9 @@
                         [% IF ( overloo.borrowermail ) %]<a href="mailto:[% overloo.borrowermail %]?subject=Reservation: [% overloo.title |url %]">
         [% overloo.borrowermail %]</a>[% END %]
                     </td>
-                    <td>[% Branches.GetName( overloo.homebranch ) %] [% overloo.itemcallnumber %]</td>
+                    <td>[% Branches.GetName( overloo.homebranch ) %]</td>
+                    <td>[% Branches.GetName( overloo.holdingbranch ) %]</td>
+                    <td>[% overloo.itemcallnumber %]</td>
                     <td>[% overloo.copynumber %]</td>
                     <td>[% overloo.enumchron %]</td>
                     <td><form name="cancelReserve" action="waitingreserves.pl" method="post">
@@ -175,7 +183,7 @@
                             <input type="hidden" name="tbr" value="[% overloo.homebranch %]" />
                             <input type="hidden" name="tab" value="holdsover">
                             [% IF ( overloo.dotransfer ) %]
-                            <input type="submit" value="Cancel hold and return to : [% overloo.branchname %]" />
+                            <input type="submit" value="Cancel hold and return to : [% Branches.GetName( overloo.homebranch ) %]" />
                             [% ELSE %]
                             <input type="submit" value="Cancel hold" />
                             [% END %]

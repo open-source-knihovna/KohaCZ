@@ -4,7 +4,6 @@ use Modern::Perl;
 
 use t::lib::Mocks;
 use C4::Context;
-use C4::Branch;
 
 use Test::More tests => 3;
 use MARC::Record;
@@ -12,6 +11,8 @@ use C4::Biblio;
 use C4::Items;
 use C4::Members;
 use C4::Reserves;
+
+use Koha::Libraries;
 
 use t::lib::TestBuilder;
 
@@ -61,13 +62,12 @@ foreach my $i ( 1 .. $borrowers_count ) {
 
 my $biblionumber = $bibnum;
 
-my @branches = GetBranchesLoop();
-my $branch   = $branches[0][0]{value};
+my $branchcode = Koha::Libraries->search->next->branchcode;
 
 # Create five item level holds
 foreach my $borrowernumber (@borrowernumbers) {
     AddReserve(
-        $branch,
+        $branchcode,
         $borrowernumber,
         $biblionumber,
         my $bibitems   = q{},

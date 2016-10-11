@@ -29,10 +29,11 @@ use C4::Auth;
 use C4::Output;
 use CGI qw ( -utf8 );
 use C4::Members;
-use C4::Branch;
 use C4::Accounts;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
 use Koha::Patron::Images;
+
+use Koha::Patron::Categories;
 
 my $input=new CGI;
 
@@ -60,10 +61,9 @@ if ( $action eq 'reverse' ) {
 }
 
 if ( $data->{'category_type'} eq 'C') {
-   my  ( $catcodes, $labels ) =  GetborCatFromCatType( 'A', 'WHERE category_type = ?' );
-   my $cnt = scalar(@$catcodes);
-   $template->param( 'CATCODE_MULTI' => 1) if $cnt > 1;
-   $template->param( 'catcode' =>    $catcodes->[0])  if $cnt == 1;
+    my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
+    $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
+    $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
 }
 
 #get account details
@@ -110,7 +110,6 @@ $template->param(%$data);
 $template->param(
     finesview           => 1,
     borrowernumber      => $borrowernumber,
-    branchname          => GetBranchName($data->{'branchcode'}),
     total               => sprintf("%.2f",$total),
     totalcredit         => $totalcredit,
     is_child            => ($data->{'category_type'} eq 'C'),

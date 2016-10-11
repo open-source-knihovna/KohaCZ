@@ -25,12 +25,13 @@ use CGI qw ( -utf8 );
 use List::MoreUtils qw/uniq/;
 
 use C4::Auth;
-use C4::Branch;
 use C4::Context;
 use C4::Output;
 use C4::Koha;
-use C4::Members qw/GetBorrowercategoryList/;
 use C4::Members::AttributeTypes;
+
+use Koha::Libraries;
+use Koha::Patron::Categories;
 
 my $script_name = "/cgi-bin/koha/admin/patron-attr-types.pl";
 
@@ -83,19 +84,20 @@ exit 0;
 sub add_attribute_type_form {
     my $template = shift;
 
-    my $branches = GetBranches;
+    my $branches = Koha::Libraries->search( {}, { order_by => ['branchname'] } )->unblessed;
     my @branches_loop;
-    foreach my $branch (sort keys %$branches) {
+    foreach my $branch (@$branches) {
         push @branches_loop, {
-            branchcode => $$branches{$branch}{branchcode},
-            branchname => $$branches{$branch}{branchname},
+            branchcode => $branch->{branchcode},
+            branchname => $branch->{branchname},
         };
     }
 
+    my $patron_categories = Koha::Patron::Categories->search_limited({}, {order_by => ['description']});
     $template->param(
         attribute_type_form => 1,
         confirm_op => 'add_attribute_type_confirmed',
-        categories => GetBorrowercategoryList,
+        categories => $patron_categories,
         branches_loop => \@branches_loop,
     );
     authorised_value_category_list($template);
@@ -250,14 +252,14 @@ sub edit_attribute_type_form {
     $template->param(classes_val_loop => GetAuthorisedValues( 'PA_CLASS' ));
 
 
-    my $branches = GetBranches;
+    my $branches = Koha::Libraries->search( {}, { order_by => ['branchname'] } )->unblessed;
     my @branches_loop;
     my $selected_branches = $attr_type->branches;
-    foreach my $branch (sort keys %$branches) {
-        my $selected = ( grep {$$_{branchcode} eq $branch} @$selected_branches ) ? 1 : 0;
+    foreach my $branch (@$branches) {
+        my $selected = ( grep {$_->{branchcode} eq $branch->{branchcode}} @$selected_branches ) ? 1 : 0;
         push @branches_loop, {
-            branchcode => $branches->{$branch}{branchcode},
-            branchname => $branches->{$branch}{branchname},
+            branchcode => $branch->{branchcode},
+            branchname => $branch->{branchname},
             selected => $selected,
         };
     }
@@ -269,11 +271,12 @@ sub edit_attribute_type_form {
         category_description => $attr_type->category_description,
     );
 
+    my $patron_categories = Koha::Patron::Categories->search({}, {order_by => ['description']});
     $template->param(
         attribute_type_form => 1,
         edit_attribute_type => 1,
         confirm_op => 'edit_attribute_type_confirmed',
-        categories => GetBorrowercategoryList,
+        categories => $patron_categories,
     );
 
 }

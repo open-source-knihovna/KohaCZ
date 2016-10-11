@@ -33,7 +33,7 @@ use C4::Biblio;
 use C4::Items;
 use C4::Serials;
 use URI::Escape;
-use C4::Branch;
+use Koha::Libraries;
 
 my $query = new CGI;
 my $subscriptionid = $query->param('subscriptionid');
@@ -66,7 +66,7 @@ if($ok){
 	my ($count2,@bibitems) = GetBiblioItemByBiblioNumber($biblio);
 	my @itemresults = GetItemsInfo( $subs->{biblionumber} );
 	my $branch = $itemresults[0]->{'holdingbranch'};
-	my $branchname = GetBranchName($branch);
+    my $branchname = Koha::Libraries->find($branch)->branchname;
 
 	if (C4::Context->preference('RoutingListAddReserves')){
 		# get existing reserves .....

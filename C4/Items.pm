@@ -41,6 +41,7 @@ use Koha::Biblioitems;
 use Koha::Items;
 use Koha::SearchEngine;
 use Koha::SearchEngine::Search;
+use Koha::Libraries;
 
 use vars qw(@ISA @EXPORT);
 
@@ -80,6 +81,7 @@ BEGIN {
         GetItemnumberFromBarcode
         GetBarcodeFromItemnumber
         GetHiddenItemnumbers
+        ItemSafeToDelete
         DelItemCheck
     MoveItemFromBiblio
     GetLatestAcquisitions
@@ -281,40 +283,44 @@ the biblio items tag for display and indexing.
 =cut
 
 sub AddItem {
-    my $item = shift;
+    my $item         = shift;
     my $biblionumber = shift;
 
     my $dbh           = @_ ? shift : C4::Context->dbh;
-    my $frameworkcode = @_ ? shift : GetFrameworkCode( $biblionumber );
-    my $unlinked_item_subfields;  
+    my $frameworkcode = @_ ? shift : GetFrameworkCode($biblionumber);
+    my $unlinked_item_subfields;
     if (@_) {
-        $unlinked_item_subfields = shift
-    };
+        $unlinked_item_subfields = shift;
+    }
 
     # needs old biblionumber and biblioitemnumber
     $item->{'biblionumber'} = $biblionumber;
     my $sth = $dbh->prepare("SELECT biblioitemnumber FROM biblioitems WHERE biblionumber=?");
     $sth->execute( $item->{'biblionumber'} );
-    ($item->{'biblioitemnumber'}) = $sth->fetchrow;
+    ( $item->{'biblioitemnumber'} ) = $sth->fetchrow;
 
     _set_defaults_for_add($item);
     _set_derived_columns_for_add($item);
     $item->{'more_subfields_xml'} = _get_unlinked_subfields_xml($unlinked_item_subfields);
+
     # FIXME - checks here
-    unless ( $item->{itype} ) {  # default to biblioitem.itemtype if no itype
+    unless ( $item->{itype} ) {    # default to biblioitem.itemtype if no itype
         my $itype_sth = $dbh->prepare("SELECT itemtype FROM biblioitems WHERE biblionumber = ?");
         $itype_sth->execute( $item->{'biblionumber'} );
         ( $item->{'itype'} ) = $itype_sth->fetchrow_array;
     }
 
-	my ( $itemnumber, $error ) = _koha_new_item( $item, $item->{barcode} );
+    my ( $itemnumber, $error ) = _koha_new_item( $item, $item->{barcode} );
+    return if $error;
+
     $item->{'itemnumber'} = $itemnumber;
 
     ModZebra( $item->{biblionumber}, "specialUpdate", "biblioserver" );
-   
-    logaction("CATALOGUING", "ADD", $itemnumber, "item") if C4::Context->preference("CataloguingLog");
-    
-    return ($item->{biblionumber}, $item->{biblioitemnumber}, $itemnumber);
+
+    logaction( "CATALOGUING", "ADD", $itemnumber, "item" )
+      if C4::Context->preference("CataloguingLog");
+
+    return ( $item->{biblionumber}, $item->{biblioitemnumber}, $itemnumber );
 }
 
 =head2 AddItemBatchFromMarc
@@ -453,7 +459,7 @@ Returns item record
 sub _build_default_values_for_mod_marc {
     my ($frameworkcode) = @_;
 
-    my $cache     = Koha::Cache->get_instance();
+    my $cache     = Koha::Caches->get_instance();
     my $cache_key = "default_value_for_mod_marc-$frameworkcode";
     my $cached    = $cache->get_from_cache($cache_key);
     return $cached if $cached;
@@ -737,7 +743,6 @@ item that has a given branch code.
 
 sub CheckItemPreSave {
     my $item_ref = shift;
-    require C4::Branch;
 
     my %errors = ();
 
@@ -754,20 +759,16 @@ sub CheckItemPreSave {
 
     # check for valid home branch
     if (exists $item_ref->{'homebranch'} and defined $item_ref->{'homebranch'}) {
-        my $branch_name = C4::Branch::GetBranchName($item_ref->{'homebranch'});
-        unless (defined $branch_name) {
-            # relies on fact that branches.branchname is a non-NULL column,
-            # so GetBranchName returns undef only if branch does not exist
+        my $home_library = Koha::Libraries->find( $item_ref->{homebranch} );
+        unless (defined $home_library) {
             $errors{'invalid_homebranch'} = $item_ref->{'homebranch'};
         }
     }
 
     # check for valid holding branch
     if (exists $item_ref->{'holdingbranch'} and defined $item_ref->{'holdingbranch'}) {
-        my $branch_name = C4::Branch::GetBranchName($item_ref->{'holdingbranch'});
-        unless (defined $branch_name) {
-            # relies on fact that branches.branchname is a non-NULL column,
-            # so GetBranchName returns undef only if branch does not exist
+        my $holding_library = Koha::Libraries->find( $item_ref->{holdingbranch} );
+        unless (defined $holding_library) {
             $errors{'invalid_holdingbranch'} = $item_ref->{'holdingbranch'};
         }
     }
@@ -1339,6 +1340,7 @@ sub GetItemsInfo {
            COALESCE( localization.translation, itemtypes.description ) AS translated_description,
            itemtypes.notforloan as notforloan_per_itemtype,
            holding.branchurl,
+           holding.branchcode,
            holding.branchname,
            holding.opac_info as holding_branch_opac_info,
            home.opac_info as home_branch_opac_info
@@ -1643,36 +1645,42 @@ references on array of itemnumbers.
 
 
 sub get_hostitemnumbers_of {
-	my ($biblionumber) = @_;
-	my $marcrecord = GetMarcBiblio($biblionumber);
-        my (@returnhostitemnumbers,$tag, $biblio_s, $item_s);
-	
-	my $marcflavor = C4::Context->preference('marcflavour');
-	if ($marcflavor eq 'MARC21' || $marcflavor eq 'NORMARC') {
-        $tag='773';
-        $biblio_s='0';
-        $item_s='9';
-    } elsif ($marcflavor eq 'UNIMARC') {
-        $tag='461';
-        $biblio_s='0';
-        $item_s='9';
+    my ($biblionumber) = @_;
+    my $marcrecord = GetMarcBiblio($biblionumber);
+
+    return unless $marcrecord;
+
+    my ( @returnhostitemnumbers, $tag, $biblio_s, $item_s );
+
+    my $marcflavor = C4::Context->preference('marcflavour');
+    if ( $marcflavor eq 'MARC21' || $marcflavor eq 'NORMARC' ) {
+        $tag      = '773';
+        $biblio_s = '0';
+        $item_s   = '9';
+    }
+    elsif ( $marcflavor eq 'UNIMARC' ) {
+        $tag      = '461';
+        $biblio_s = '0';
+        $item_s   = '9';
     }
 
     foreach my $hostfield ( $marcrecord->field($tag) ) {
         my $hostbiblionumber = $hostfield->subfield($biblio_s);
         my $linkeditemnumber = $hostfield->subfield($item_s);
         my @itemnumbers;
-        if (my $itemnumbers = get_itemnumbers_of($hostbiblionumber)->{$hostbiblionumber})
+        if ( my $itemnumbers =
+            get_itemnumbers_of($hostbiblionumber)->{$hostbiblionumber} )
         {
             @itemnumbers = @$itemnumbers;
         }
-        foreach my $itemnumber (@itemnumbers){
-            if ($itemnumber eq $linkeditemnumber){
-                push (@returnhostitemnumbers,$itemnumber);
+        foreach my $itemnumber (@itemnumbers) {
+            if ( $itemnumber eq $linkeditemnumber ) {
+                push( @returnhostitemnumbers, $itemnumber );
                 last;
             }
         }
     }
+
     return @returnhostitemnumbers;
 }
 
@@ -2217,68 +2225,102 @@ sub MoveItemFromBiblio {
     return;
 }
 
-=head2 DelItemCheck
+=head2 ItemSafeToDelete
 
-   DelItemCheck($dbh, $biblionumber, $itemnumber);
+   ItemSafeToDelete( $biblionumber, $itemnumber);
 
-Exported function (core API) for deleting an item record in Koha if there no current issue.
+Exported function (core API) for checking whether an item record is safe to delete.
+
+returns 1 if the item is safe to delete,
+
+"book_on_loan" if the item is checked out,
+
+"not_same_branch" if the item is blocked by independent branches,
+
+"book_reserved" if the there are holds aganst the item, or
+
+"linked_analytics" if the item has linked analytic records.
 
 =cut
 
-sub DelItemCheck {
-    my ( $dbh, $biblionumber, $itemnumber ) = @_;
-
-    $dbh ||= C4::Context->dbh;
+sub ItemSafeToDelete {
+    my ( $biblionumber, $itemnumber ) = @_;
+    my $status;
+    my $dbh = C4::Context->dbh;
 
     my $error;
 
-        my $countanalytics=GetAnalyticsCount($itemnumber);
-
+    my $countanalytics = GetAnalyticsCount($itemnumber);
 
     # check that there is no issue on this item before deletion.
-    my $sth = $dbh->prepare(q{
+    my $sth = $dbh->prepare(
+        q{
         SELECT COUNT(*) FROM issues
         WHERE itemnumber = ?
-    });
+    }
+    );
     $sth->execute($itemnumber);
     my ($onloan) = $sth->fetchrow;
 
     my $item = GetItem($itemnumber);
 
-    if ($onloan){
-        $error = "book_on_loan" 
+    if ($onloan) {
+        $status = "book_on_loan";
     }
     elsif ( defined C4::Context->userenv
         and !C4::Context->IsSuperLibrarian()
         and C4::Context->preference("IndependentBranches")
         and ( C4::Context->userenv->{branch} ne $item->{'homebranch'} ) )
     {
-        $error = "not_same_branch";
+        $status = "not_same_branch";
     }
-	else{
+    else {
         # check it doesn't have a waiting reserve
-        $sth = $dbh->prepare(q{
+        $sth = $dbh->prepare(
+            q{
             SELECT COUNT(*) FROM reserves
             WHERE (found = 'W' OR found = 'T')
             AND itemnumber = ?
-        });
+        }
+        );
         $sth->execute($itemnumber);
         my ($reserve) = $sth->fetchrow;
-        if ($reserve){
-            $error = "book_reserved";
-        } elsif ($countanalytics > 0){
-		$error = "linked_analytics";
-	} else {
-            DelItem(
-                {
-                    biblionumber => $biblionumber,
-                    itemnumber   => $itemnumber
-                }
-            );
-            return 1;
+        if ($reserve) {
+            $status = "book_reserved";
+        }
+        elsif ( $countanalytics > 0 ) {
+            $status = "linked_analytics";
+        }
+        else {
+            $status = 1;
         }
     }
-    return $error;
+    return $status;
+}
+
+=head2 DelItemCheck
+
+   DelItemCheck( $biblionumber, $itemnumber);
+
+Exported function (core API) for deleting an item record in Koha if there no current issue.
+
+DelItemCheck wraps ItemSafeToDelete around DelItem.
+
+=cut
+
+sub DelItemCheck {
+    my ( $biblionumber, $itemnumber ) = @_;
+    my $status = ItemSafeToDelete( $biblionumber, $itemnumber );
+
+    if ( $status == 1 ) {
+        DelItem(
+            {
+                biblionumber => $biblionumber,
+                itemnumber   => $itemnumber
+            }
+        );
+    }
+    return $status;
 }
 
 =head2 _koha_modify_item
@@ -2437,7 +2479,7 @@ sub _get_unlinked_item_subfields {
     my $original_item_marc = shift;
     my $frameworkcode = shift;
 
-    my $marcstructure = GetMarcStructure(1, $frameworkcode);
+    my $marcstructure = GetMarcStructure(1, $frameworkcode, { unsafe => 1 });
 
     # assume that this record has only one field, and that that
     # field contains only the item information
@@ -2821,7 +2863,11 @@ sub PrepareItemrecordDisplay {
     my $dbh = C4::Context->dbh;
     $frameworkcode = &GetFrameworkCode($bibnum) if $bibnum;
     my ( $itemtagfield, $itemtagsubfield ) = &GetMarcFromKohaField( "items.itemnumber", $frameworkcode );
-    my $tagslib = &GetMarcStructure( 1, $frameworkcode );
+
+    # Note: $tagslib obtained from GetMarcStructure() in 'unsafe' mode is
+    # a shared data structure. No plugin (including custom ones) should change
+    # its contents. See also GetMarcStructure.
+    my $tagslib = &GetMarcStructure( 1, $frameworkcode, { unsafe => 1 } );
 
     # return nothing if we don't have found an existing framework.
     return q{} unless $tagslib;
@@ -2845,13 +2891,13 @@ sub PrepareItemrecordDisplay {
     $query .= qq{ ORDER BY lib};
     my $authorised_values_sth = $dbh->prepare( $query );
     foreach my $tag ( sort keys %{$tagslib} ) {
-        my $previous_tag = '';
         if ( $tag ne '' ) {
 
             # loop through each subfield
             my $cntsubf;
             foreach my $subfield ( sort keys %{ $tagslib->{$tag} } ) {
                 next if IsMarcStructureInternal($tagslib->{$tag}{$subfield});
+                next unless ( $tagslib->{$tag}->{$subfield}->{'tab'} );
                 next if ( $tagslib->{$tag}->{$subfield}->{'tab'} ne "10" );
                 my %subfield_data;
                 $subfield_data{tag}           = $tag;
@@ -2959,6 +3005,10 @@ sub PrepareItemrecordDisplay {
                             push @authorised_values, $itemtype->{itemtype};
                             $authorised_lib{$itemtype->{itemtype}} = $itemtype->{translated_description};
                         }
+                        if ($defaultvalues && $defaultvalues->{'itemtype'}) {
+                            $defaultvalue = $defaultvalues->{'itemtype'};
+                        }
+
                         #---- class_sources
                     } elsif ( $tagslib->{$tag}->{$subfield}->{authorised_value} eq "cn_source" ) {
                         push @authorised_values, "" unless ( $tagslib->{$tag}->{$subfield}->{mandatory} );

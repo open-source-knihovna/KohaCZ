@@ -28,8 +28,10 @@ use C4::Members;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
 use C4::Accounts;
 use C4::Koha;
-use C4::Branch;
 use Koha::Patron::Images;
+use Koha::Account;
+
+use Koha::Patron::Categories;
 
 my $input = CGI->new();
 
@@ -136,10 +138,9 @@ if ( $total_paid and $total_paid ne '0.00' ) {
                 recordpayment_selectaccts( $borrowernumber, $total_paid, \@acc, $note );
             } else {
                 my $note = $input->param('selected_accts_notes');
-                recordpayment( $borrowernumber, $total_paid, '', $note );
+                Koha::Account->new( { patron_id => $borrowernumber } )
+                  ->pay( { amount => $total_paid, note => $note } );
             }
-
-# recordpayment does not return success or failure so lets redisplay the boraccount
 
             print $input->redirect(
 "/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber"
@@ -173,15 +174,9 @@ sub borrower_add_additional_fields {
 # in a number of templates. It should not be the business of this script but in lieu of
 # a revised api here it is ...
     if ( $b_ref->{category_type} eq 'C' ) {
-        my ( $catcodes, $labels ) =
-          GetborCatFromCatType( 'A', 'WHERE category_type = ?' );
-        if ( @{$catcodes} ) {
-            if ( @{$catcodes} > 1 ) {
-                $b_ref->{CATCODE_MULTI} = 1;
-            } elsif ( @{$catcodes} == 1 ) {
-                $b_ref->{catcode} = $catcodes->[0];
-            }
-        }
+        my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
+        $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
+        $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
     } elsif ( $b_ref->{category_type} eq 'A' ) {
         $b_ref->{adultborrower} = 1;
     }
@@ -193,6 +188,5 @@ sub borrower_add_additional_fields {
         $b_ref->{extendedattributes} = GetBorrowerAttributes($b_ref->{borrowernumber});
     }
 
-    $b_ref->{branchname} = GetBranchName( $b_ref->{branchcode} );
     return;
 }

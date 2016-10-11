@@ -1,4 +1,5 @@
 [% USE KohaDates %]
+[% USE Branches %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Circulation &rsaquo; Circulation statistics for [% title |html %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -25,9 +26,9 @@ $(document).ready(function(){
 <h3>Barcode [% barcode %]</h3>
 <table>
         <tr><th>Home library</th><th>Current library</th><th>Date arrived<br />at current library </th><th>Number of checkouts<br />since last transfer</th></tr>
-		
-		<tr><td>[% homebranch %]</td>
-            <td>[% holdingbranch %]</td>
+
+        <tr><td>[% Branches.GetName( homebranch ) %]</td>
+            <td>[% Branches.GetName( holdingbranch ) %]</td>
             <td>[% IF ( lastdate ) %][% lastdate | $KohaDates %][% ELSE %]Item has no transfer record[% END %]</td>
             <td>[% count %]</td>
         </tr>
@@ -38,16 +39,16 @@ $(document).ready(function(){
         <th>No. of times checked out</th>
         <th>Last seen</th>
     </tr>
-    [% FOREACH branchloo IN branchloop %]
-    [% IF ( branchloo.selected ) %]
+    [% FOREACH library IN libraries %]
+    [% IF library.selected %]
         <tr class="mybranch">
     [% ELSE %]
         <tr>
     [% END %]
-            <td>[% branchloo.branchname %]</td>
-            <td>[% branchloo.issues %]</td>
-            <td>[% IF ( branchloo.seen ) %]
-                    [% branchloo.seen | $KohaDates with_hours => 1 %]
+            <td>[% library.branchname %]</td>
+            <td>[% library.issues %]</td>
+            <td>[% IF library.seen %]
+                    [% library.seen | $KohaDates with_hours => 1 %]
                 [% ELSE %]
                     <span>Never</span>
                 [% END %]

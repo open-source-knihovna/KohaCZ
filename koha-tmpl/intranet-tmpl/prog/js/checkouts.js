@@ -227,6 +227,10 @@ $(document).ready(function() {
                                   title += " " + value.subfield;
                         });
 
+                        if ( oObj.enumchron ) {
+                            title += " (" + oObj.enumchron + ")";
+                        }
+
                         title += "</a></span>";
 
                         if ( oObj.author ) {
@@ -272,6 +276,7 @@ $(document).ready(function() {
                 },
                 { "mDataProp": "itemtype_description" },
                 { "mDataProp": "location" },
+                { "mDataProp": "homebranch" },
                 { "mDataProp": "issuedate_formatted" },
                 { "mDataProp": "branchname" },
                 { "mDataProp": "itemcallnumber" },
@@ -498,6 +503,10 @@ $(document).ready(function() {
                             $.each(oObj.subtitle, function( index, value ) {
                                       title += " " + value.subfield;
                             });
+
+                            if ( oObj.enumchron ) {
+                                title += " (" + oObj.enumchron + ")";
+                            }
 
                             title += "</a></span>";
 

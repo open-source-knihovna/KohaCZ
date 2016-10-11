@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 use Modern::Perl;
 
-use Test::More tests => 46;
+use Test::More tests => 50;
 
 use MARC::Record;
 
@@ -243,6 +243,15 @@ is( C4::Serials::can_show_subscription($subscription_from_my_branch), 1,
 is( C4::Serials::can_show_subscription($subscription_from_another_branch), 1,
 "Without IndependentBranches, renew_subscription cannot show a subscription from another branch"
 );
+
+# GetPreviousSerialid
+my $serialid1 = NewIssue( 1, $subscriptionid_from_my_branch, $biblionumber, 2 );
+my $serialid2 = NewIssue( 2, $subscriptionid_from_my_branch, $biblionumber, 2 );
+my $serialid3 = NewIssue( 3, $subscriptionid_from_my_branch, $biblionumber, 2 );
+is( GetPreviousSerialid( $subscriptionid_from_my_branch ), $serialid2, "get previous serialid without parameter");
+is( GetPreviousSerialid( $subscriptionid_from_my_branch, 1 ), $serialid2, "get previous serialid with 1" );
+is( GetPreviousSerialid( $subscriptionid_from_my_branch, 2 ), $serialid1, "get previous serialid with 2" );
+is( GetPreviousSerialid( $subscriptionid_from_my_branch, 3 ), undef, "get previous serialid with 3, does not exist" );
 
 $schema->storage->txn_rollback;
 

@@ -7,7 +7,7 @@ use DateTime;
 use DateTime::Set;
 use DateTime::Duration;
 use C4::Context;
-use Koha::Cache;
+use Koha::Caches;
 use Carp;
 
 sub new {
@@ -55,7 +55,7 @@ sub _init {
 sub exception_holidays {
     my ( $self ) = @_;
 
-    my $cache  = Koha::Cache->get_instance();
+    my $cache  = Koha::Caches->get_instance();
     my $cached = $cache->get_from_cache('exception_holidays');
     return $cached if $cached;
 
@@ -84,7 +84,7 @@ sub exception_holidays {
 sub single_holidays {
     my ( $self, $date ) = @_;
     my $branchcode = $self->{branchcode};
-    my $cache           = Koha::Cache->get_instance();
+    my $cache           = Koha::Caches->get_instance();
     my $single_holidays = $cache->get_from_cache('single_holidays');
 
     # $single_holidays looks like:
@@ -125,7 +125,7 @@ sub single_holidays {
             $single_holidays->{$br} = \@ymd_arr;
         }    # br
         $cache->set_in_cache( 'single_holidays', $single_holidays,
-            76800 )    #24 hrs ;
+            { expiry => 76800 } )    #24 hrs ;
     }
     my $holidays  = ( $single_holidays->{$branchcode} );
     for my $hols  (@$holidays ) {

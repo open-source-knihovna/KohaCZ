@@ -1,5 +1,6 @@
 [% USE Categories %]
 [% USE Koha %]
+[% USE Branches %]
 [% USE KohaDates %]
 [% SET userupdateview = 1 %]
 
@@ -64,6 +65,9 @@
                                 [% IF field == "password_match" %]<li>Passwords do not match! <a href="#password">password</a></li>[% END %]
                                 [% IF field == "password_invalid" %]<li>Password does not meet minimum requirements! <a href="#password">password</a></li>[% END %]
                                 [% IF field == "password_spaces" %]<li>Password contains leading and/or trailing spaces! <a href="#password">password</a></li>[% END %]
+                                [% IF field == "duplicate_email" %]
+                                    <li>This email address already exists in our database.</li>
+                                [% END %]
                             [% END %]
                         </ul>
                         Please correct the errors and resubmit.
@@ -130,11 +134,26 @@
                                     [% END %]
                                     Library card number:
                                     </label>
-                                    [% IF borrower %]
+                                    [% IF borrower && !(cardnumber_wrong_length || cardnumber_already_exists) %]
                                         [% borrower.cardnumber %]
                                     [% ELSE %]
-                                        <input type="text" id="borrower_cardnumber" name="borrower_cardnumber" value="[% borrower.cardnumber %]" />
-                                        [% IF mandatory.defined('cardnumber') %]<span class="required">Required</span>[% END %]
+                                        [% IF minlength_cardnumber == maxlength_cardnumber %]
+                                            <input type="text" id="borrower_cardnumber" name="borrower_cardnumber" size="20" value="[% borrower.cardnumber %]" minlength="[% minlength_cardnumber %]" maxlength="[% maxlength_cardnumber %]" />
+                                            [% IF ( mandatory.defined('cardnumber') ) %]<span class="required">Required</span>[% END %]
+                                            <div class="hint">Card number must be exactly [% minlength_cardnumber %] characters.</div>
+                                        [% ELSIF minlength_cardnumber && maxlength_cardnumber %]
+                                            <input type="text" id="borrower_cardnumber" name="borrower_cardnumber" size="20" value="[% borrower.cardnumber %]" minlength="[% minlength_cardnumber %]" maxlength="[% maxlength_cardnumber %]" />
+                                            [% IF ( mandatory.defined('cardnumber') ) %]<span class="required">Required</span>[% END %]
+                                            <div class="hint">Card number must be between [% minlength_cardnumber %] and [% maxlength_cardnumber %] characters.</div>
+                                        [% ELSIF maxlength_cardnumber %]
+                                            <input type="text" id="borrower_cardnumber" name="borrower_cardnumber" size="20" value="[% borrower.cardnumber %]" maxlength="[% maxlength_cardnumber %]" />
+                                            [% IF ( mandatory.defined('cardnumber') ) %]<span class="required">Required</span>[% END %]
+                                            <div class="hint">Card number can be up to [% maxlength_cardnumber %] characters.</div>
+                                        [% ELSE %]
+                                            <input type="text" id="borrower_cardnumber" name="borrower_cardnumber" size="20" value="[% borrower.cardnumber %]" />
+                                            [% IF ( mandatory.defined('cardnumber') ) %]<span class="required">Required</span>[% END %]
+                                            <div class="hint">There is no minimum or maximum character length.</div>
+                                        [% END %]
                                     [% END %]
                                 </li>
                                 [% END %]
@@ -156,11 +175,11 @@
                                         Home library:</label>
 
                                         <select id="borrower_branchcode" name="borrower_branchcode">
-                                            [% FOREACH b IN branches %]
-                                                [% IF b.value == borrower.branchcode %]
-                                                    <option value="[% b.value %]" selected="selected">[% b.branchname %]</option>
+                                            [% FOREACH l IN libraries %]
+                                                [% IF l.branchcode == borrower.branchcode %]
+                                                    <option value="[% l.branchcode | html %]" selected="selected">[% l.branchname %]</option>
                                                 [% ELSE %]
-                                                    <option value="[% b.value %]">[% b.branchname %]</option>
+                                                    <option value="[% l.branchcode | html %]">[% l.branchname %]</option>
                                                 [% END %]
                                             [% END %]
                                         </select>
@@ -270,7 +289,7 @@
 
                                             [% UNLESS action == 'edit' && !OPACPatronDetails %]
                                                 [% UNLESS ( mandatory.defined('dateofbirth') ) %]
-                                                    <a href="#" style="font-size:85%;text-decoration:none;" onclick="document.getElementById('borrower_dateofbirth').value='';return false;">Clear date</a>
+                                                    <a href="#" style="font-size:85%;text-decoration:none;" class="cleardate">Clear date</a>
                                                 [% END %]
                                             [% END %]
 
@@ -988,6 +1007,11 @@
                 });
             [% END %]
         });
+
+    $(".cleardate").on("click", function(){
+        $('#borrower_dateofbirth').val('');
+        return false;
+    });
     //]]>
     </script>
 [% INCLUDE 'calendar.inc' %]

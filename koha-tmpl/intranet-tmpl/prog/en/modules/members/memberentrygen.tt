@@ -1,5 +1,6 @@
 [% USE Koha %]
 [% USE KohaDates %]
+[% USE Branches %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Patrons &rsaquo; [% IF ( opadd ) %]Add[% ELSIF ( opduplicate ) %]Duplicate[% ELSE %] Modify[% END %] patron [% IF (firstname) %][% firstname %] [% END %][% IF (surname) %][% surname %] [% END %]([%IF ( categoryname ) %][% categoryname %][% ELSE %][% IF ( I ) %]Organization[% END %][% IF ( A ) %]Adult[% END %][% IF ( C ) %]Child[% END %][% IF ( P ) %]Professional[% END %][% IF ( S ) %]Staff[% END %][% END %])</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -316,7 +317,7 @@ $(document).ready(function() {
                 [% END %]
                 Date of birth: </label>
 
-                <input type="text" id="dateofbirth" name="dateofbirth" size="20" onchange="write_age();" value="[% UNLESS opduplicate %][% dateofbirth %][% END %]" />
+                <input type="text" id="dateofbirth" name="dateofbirth" size="20" onchange="write_age();" value="[% UNLESS opduplicate %][% dateofbirth %][% END %]" class="datepicker" />
 
         [% IF ( mandatorydateofbirth ) %]<span class="required">Required</span>[% END %]
         [% IF ( ERROR_dateofbirth ) %]<span class="required">(Error)</span>[% END %]
@@ -628,15 +629,9 @@ $(document).ready(function() {
     <li>
         <label for="libraries" class="required">Library:</label>
         <select name="branchcode" size="1" id="libraries">
-        [%- FOREACH branchloo IN branchloop %]
-          [% IF ( branchloo.selected ) -%]
-            <option value="[% branchloo.branchcode %]" selected="selected">[% branchloo.branchname %]</option>
-          [%- ELSE -%]
-            <option value="[% branchloo.branchcode %]">[% branchloo.branchname %]</option>
-          [%- END -%]
-        [%- END %]
-      </select>
-      <span class="required">Required</span>
+            [% PROCESS options_for_libraries libraries => Branches.all( selected => userbranch ) %]
+        </select>
+        <span class="required">Required</span>
     </li>
         [% END %]
     <li>
@@ -1020,7 +1015,7 @@ $(document).ready(function() {
                         <legend id="manual_restriction_lgd">Add manual restriction</legend>
                         <ol>
                             <li><label for="debarred_comment">Comment: </label><input type="text" id="debarred_comment" name="debarred_comment" onchange="$('#add_debarment').val(1);" /></li>
-                            <li><label for="debarred_expiration">Expiration: </label><input name="debarred_expiration" id="debarred_expiration" size="10" readonly="readonly" value="" class="datepicker" onchange="$('#add_debarment').val(1);" />
+                            <li><label for="debarred_expiration">Expiration: </label><input name="debarred_expiration" id="debarred_expiration" size="10" value="" class="datepicker" onchange="$('#add_debarment').val(1);" />
                                     <a href='javascript:void(0)' onclick="$('#debarred_expiration').val('');">Clear date</a></li>
 
                         </ol>

@@ -26,7 +26,6 @@ use C4::Context;
 use C4::Output;
 use C4::Log;
 use C4::Debug;
-use C4::Branch;
 use C4::Members;
 use Koha::Patron::Discharge;
 use Koha::DateUtils;
@@ -92,6 +91,8 @@ else {
         borrowernumber => $loggedinuser,
         pending        => 1,
     });
+    # FIXME looks like $available is not needed
+    # If a patron is discharged he has a validated discharge available
     my $available = Koha::Patron::Discharge::count({
         borrowernumber => $loggedinuser,
         validated      => 1,

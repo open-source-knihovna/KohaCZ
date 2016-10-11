@@ -50,7 +50,6 @@ use warnings;
 use CGI qw ( -utf8 );
 use C4::Context;
 use C4::Auth;
-use C4::Branch;
 use C4::Output;
 use C4::Acquisition qw/GetBasket NewBasket ModBasketHeader/;
 use C4::Contract qw/GetContracts/;
@@ -72,7 +71,6 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 #parameters:
 my $booksellerid = $input->param('booksellerid');
 my $basketno = $input->param('basketno');
-my $branches = GetBranches;
 my $basket;
 my $op = $input ->param('op');
 my $is_an_edit= $input ->param('is_an_edit');
@@ -121,20 +119,14 @@ if ( $op eq 'add_form' ) {
                     booksellerid => $booksellerid,
                     basketno => $basketno,
                     booksellers => \@booksellers,
-                    deliveryplace => $basket->{deliveryplace},
-                    billingplace => $basket->{billingplace},
                     is_standing => $basket->{is_standing},
     );
 
     my $billingplace = $basket->{'billingplace'} || C4::Context->userenv->{"branch"};
     my $deliveryplace = $basket->{'deliveryplace'} || C4::Context->userenv->{"branch"};
 
-    # Build the combobox to select the billing place
-
-    my $branches = C4::Branch::GetBranchesLoop( $billingplace );
-    $template->param( billingplaceloop => $branches );
-    $branches = C4::Branch::GetBranchesLoop( $deliveryplace );
-    $template->param( deliveryplaceloop => $branches );
+    $template->param( billingplace => $billingplace );
+    $template->param( deliveryplace => $deliveryplace );
 
 #End Edit
 } elsif ( $op eq 'add_validate' ) {

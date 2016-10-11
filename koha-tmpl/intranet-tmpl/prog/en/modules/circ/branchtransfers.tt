@@ -1,4 +1,5 @@
 [% USE Koha %]
+[% USE Branches %]
 [% USE ItemTypes %]
 [% USE AuthorisedValues %]
 [% INCLUDE 'doc-head-open.inc' %]
@@ -110,7 +111,7 @@
                                   <li>No Item with barcode: [% errmsgloo.msg | html %]</li>
                               [% END %]
                               [% IF ( errmsgloo.errispermanent ) %]
-                                  <li>Please return item to home library: [% errmsgloo.msg %]</li>
+                                  <li>Please return item to home library: [% Branches.GetName( errmsgloo.msg ) %]</li>
                               [% END %]
                               [% IF ( errmsgloo.errnotallowed ) %]
                                   <li>Transfer is not allowed for:
@@ -120,7 +121,7 @@
                                           [% ELSE %]
                                               <li>Collection code: <b>[% AuthorisedValues.GetByCode( 'CCODE', errmsgloo.code ) %]</b></li>
                                           [% END %]
-                                          <li>Destination library: <b>[% errmsgloo.tbr %]</b></li>
+                                          <li>Destination library: <b>[% Branches.GetName( errmsgloo.tbr ) %]</b></li>
                                       </ol>
                                   </li>
                               [% END %]
@@ -145,15 +146,7 @@
 			<li>
                 <label for="tobranchcd">Destination library: </label>
                     <select name="tobranchcd" id="tobranchcd">
-                        [% FOREACH branchoptionloo IN branchoptionloop %]
-						[% IF ( branchoptionloo.selected ) %]
-                            <option value="[% branchoptionloo.value %]" selected="selected">
-						[% ELSE %]
-                            <option value="[% branchoptionloo.value %]">
-						[% END %]
-                                [% branchoptionloo.branchname %]
-                            </option>
-                        [% END %]
+                        [% PROCESS options_for_libraries libraries => Branches.all( selected => tobranchcd ) %]
                     </select>
             </li>
             <li>
@@ -194,7 +187,7 @@
                     <td class="tf-itemcallnumber">[% trsfitemloo.itemcallnumber %]</td>
                     <td class="tf-itemtype">[% ItemTypes.GetDescription( trsfitemloo.itemtype ) %]</td>
                     <td class="tf-ccode">[% AuthorisedValues.GetByCode( 'CCODE', trsfitemloo.ccode ) %]</td>
-                    <td class="tf-destination">[% trsfitemloo.tobrname %]</td>
+                    <td class="tf-destination">[% Branches.GetName( trsfitemloo.tobrcd ) %]</td>
                 </tr>
             [% END %]
         </table>

@@ -22,16 +22,15 @@ use C4::Context;
 use C4::Biblio;    # GetMarcFromKohaField, GetBiblioData
 use C4::Koha;      # getFacets
 use Koha::DateUtils;
+use Koha::Libraries;
 use Lingua::Stem;
 use C4::Search::PazPar2;
 use XML::Simple;
 use C4::Members qw(GetHideLostItemsPreference);
 use C4::XSLT;
-use C4::Branch;
 use C4::Reserves;    # GetReserveStatus
 use C4::Debug;
 use C4::Charset;
-use Koha::Libraries;
 use YAML;
 use URI::Escape;
 use Business::ISBN;
@@ -335,6 +334,9 @@ sub getRecords {
     my @zconns;
     my @results;
     my $results_hashref = ();
+
+    # TODO simplify this structure ( { branchcode => $branchname } is enought) and remove this parameter
+    $branches ||= { map { $_->branchcode => { branchname => $_->branchname } } Koha::Libraries->search };
 
     # Initialize variables for the faceted results objects
     my $facets_counter = {};
@@ -852,6 +854,7 @@ sub pazGetRecords {
         $results_per_page, $offset,       $expanded_facet, $branches,
         $query_type,       $scan
     ) = @_;
+    #NOTE: Parameter $branches is not used here !
 
     my $paz = C4::Search::PazPar2->new(C4::Context->config('pazpar2url'));
     $paz->init();
@@ -1712,9 +1715,9 @@ sub buildQuery {
             $limit_cgi  .= "&limit=" . uri_escape_utf8($this_limit);
             if ($this_limit =~ /^branch:(.+)/) {
                 my $branchcode = $1;
-                my $branchname = GetBranchName($branchcode);
-                if (defined $branchname) {
-                    $limit_desc .= " branch:$branchname";
+                my $library = Koha::Libraries->find( $branchcode );
+                if (defined $library) {
+                    $limit_desc .= " branch:" . $library->branchname;
                 } else {
                     $limit_desc .= " $this_limit";
                 }
@@ -1839,14 +1842,8 @@ sub searchResults {
     }
 
     #Build branchnames hash
-    #find branchname
-    #get branch information.....
-    my %branches;
-    my $bsth =$dbh->prepare("SELECT branchcode,branchname FROM branches"); # FIXME : use C4::Branch::GetBranches
-    $bsth->execute();
-    while ( my $bdata = $bsth->fetchrow_hashref ) {
-        $branches{ $bdata->{'branchcode'} } = $bdata->{'branchname'};
-    }
+    my %branches = map { $_->branchcode => $_->branchname } Koha::Libraries->search({}, { order_by => 'branchname' });
+
 # FIXME - We build an authorised values hash here, using the default framework
 # though it is possible to have different authvals for different fws.
 
@@ -2283,95 +2280,6 @@ sub searchResults {
     }
 
     return @newresults;
-}
-
-=head2 SearchAcquisitions
-    Search for acquisitions
-=cut
-
-sub SearchAcquisitions{
-    my ($datebegin, $dateend, $itemtypes,$criteria, $orderby) = @_;
-
-    my $dbh=C4::Context->dbh;
-    # Variable initialization
-    my $str=qq|
-    SELECT marcxml
-    FROM biblio
-    LEFT JOIN biblioitems ON biblioitems.biblionumber=biblio.biblionumber
-    LEFT JOIN items ON items.biblionumber=biblio.biblionumber
-    WHERE dateaccessioned BETWEEN ? AND ?
-    |;
-
-    my (@params,@loopcriteria);
-
-    push @params, $datebegin->output("iso");
-    push @params, $dateend->output("iso");
-
-    if (scalar(@$itemtypes)>0 and $criteria ne "itemtype" ){
-        if(C4::Context->preference("item-level_itypes")){
-            $str .= "AND items.itype IN (?".( ',?' x scalar @$itemtypes - 1 ).") ";
-        }else{
-            $str .= "AND biblioitems.itemtype IN (?".( ',?' x scalar @$itemtypes - 1 ).") ";
-        }
-        push @params, @$itemtypes;
-    }
-
-    if ($criteria =~/itemtype/){
-        if(C4::Context->preference("item-level_itypes")){
-            $str .= "AND items.itype=? ";
-        }else{
-            $str .= "AND biblioitems.itemtype=? ";
-        }
-
-        if(scalar(@$itemtypes) == 0){
-            my $itypes = GetItemTypes();
-            for my $key (keys %$itypes){
-                push @$itemtypes, $key;
-            }
-        }
-
-        @loopcriteria= @$itemtypes;
-    }elsif ($criteria=~/itemcallnumber/){
-        $str .= "AND (items.itemcallnumber LIKE CONCAT(?,'%')
-                 OR items.itemcallnumber is NULL
-                 OR items.itemcallnumber = '')";
-
-        @loopcriteria = ("AA".."ZZ", "") unless (scalar(@loopcriteria)>0);
-    }else {
-        $str .= "AND biblio.title LIKE CONCAT(?,'%') ";
-        @loopcriteria = ("A".."z") unless (scalar(@loopcriteria)>0);
-    }
-
-    if ($orderby =~ /date_desc/){
-        $str.=" ORDER BY dateaccessioned DESC";
-    } else {
-        $str.=" ORDER BY title";
-    }
-
-    my $qdataacquisitions=$dbh->prepare($str);
-
-    my @loopacquisitions;
-    foreach my $value(@loopcriteria){
-        push @params,$value;
-        my %cell;
-        $cell{"title"}=$value;
-        $cell{"titlecode"}=$value;
-
-        eval{$qdataacquisitions->execute(@params);};
-
-        if ($@){ warn "recentacquisitions Error :$@";}
-        else {
-            my @loopdata;
-            while (my $data=$qdataacquisitions->fetchrow_hashref){
-                push @loopdata, {"summary"=>GetBiblioSummary( $data->{'marcxml'} ) };
-            }
-            $cell{"loopdata"}=\@loopdata;
-        }
-        push @loopacquisitions,\%cell if (scalar(@{$cell{loopdata}})>0);
-        pop @params;
-    }
-    $qdataacquisitions->finish;
-    return \@loopacquisitions;
 }
 
 =head2 enabled_staff_search_views

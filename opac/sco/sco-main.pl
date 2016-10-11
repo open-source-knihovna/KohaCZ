@@ -47,6 +47,7 @@ use C4::Biblio;
 use C4::Items;
 use Koha::Acquisition::Currencies;
 use Koha::Patron::Images;
+use Koha::Patron::Messages;
 
 my $query = new CGI;
 
@@ -234,6 +235,7 @@ if ($borrower->{cardnumber}) {
             C4::Context->preference("AllowItemsOnHoldCheckout")
         );
         $it->{'norenew'} = 1 if $renewokay->{'NO_MORE_RENEWALS'};
+        $it->{date_due}  = $it->{date_due_sql};
         push @issues, $it;
     }
 
@@ -248,6 +250,18 @@ if ($borrower->{cardnumber}) {
         noitemlinks => 1 ,
         borrowernumber => $borrower->{'borrowernumber'},
     );
+
+    my $patron_messages = Koha::Patron::Messages->search(
+        {
+            borrowernumber => $borrower->{'borrowernumber'},
+            message_type => 'B',
+        }
+    );
+    $template->param(
+        patron_messages => $patron_messages,
+        opacnote => $borrower->{opacnote},
+    );
+
     my $inputfocus = ($return_only      == 1) ? 'returnbook' :
                      ($confirm_required == 1) ? 'confirm'    : 'barcode' ;
     $template->param(

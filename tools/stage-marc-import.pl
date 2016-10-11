@@ -56,7 +56,8 @@ my $parse_items                = $input->param('parse_items');
 my $item_action                = $input->param('item_action');
 my $comments                   = $input->param('comments');
 my $record_type                = $input->param('record_type');
-my $encoding                   = $input->param('encoding');
+my $encoding                   = $input->param('encoding') || 'UTF-8';
+my $format                     = $input->param('format') || 'ISO2709';
 my $to_marc_plugin             = $input->param('to_marc_plugin');
 my $marc_modification_template = $input->param('marc_modification_template_id');
 
@@ -84,22 +85,22 @@ if ($completedJobID) {
     my $results = $job->results();
     $template->param(map { $_ => $results->{$_} } keys %{ $results });
 } elsif ($fileID) {
-    my $upload = Koha::Upload->new->get({ id => $fileID, filehandle => 1 });
-    my $fh = $upload->{fh};
-    my $filename = $upload->{name}; # filename only, no path
-	my $marcrecord='';
-    $/ = "\035";
-	while (<$fh>) {
-        s/^\s+//;
-        s/\s+$//;
-		$marcrecord.=$_;
-	}
-    $fh->close;
+    my $upload = Koha::Upload->new->get({ id => $fileID });
+    my ( $file, $filename ) = ( $upload->{path}, $upload->{name} );
+    my ( $errors, $marcrecords );
+    if( $format eq 'MARCXML' ) {
+        ( $errors, $marcrecords ) = C4::ImportBatch::RecordsFromMARCXMLFile( $file, $encoding);
+    } else {
+        ( $errors, $marcrecords ) = C4::ImportBatch::RecordsFromISO2709File( $file, $record_type, $encoding );
+    }
+    warn "$filename: " . ( join ',', @$errors ) if @$errors;
+        # no need to exit if we have no records (or only errors) here
+        # BatchStageMarcRecords can handle that
 
     my $job = undef;
     my $dbh;
     if ($runinbackground) {
-        my $job_size = () = $marcrecord =~ /\035/g;
+        my $job_size = scalar(@$marcrecords);
         # if we're matching, job size is doubled
         $job_size *= 2 if ($matcher_id ne "");
         $job = C4::BackgroundJob->new($sessionID, $filename, '/cgi-bin/koha/tools/stage-marc-import.pl', $job_size);
@@ -137,7 +138,7 @@ if ($completedJobID) {
     my ( $batch_id, $num_valid, $num_items, @import_errors ) =
       BatchStageMarcRecords(
         $record_type,    $encoding,
-        $marcrecord,     $filename,
+        $marcrecords,    $filename,
         $to_marc_plugin, $marc_modification_template,
         $comments,       '',
         $parse_items,    0,
@@ -181,6 +182,7 @@ if ($completedJobID) {
     };
     if ($runinbackground) {
         $job->finish($results);
+        exit 0;
     } else {
 	    $template->param(staged => $num_valid,
  	                     matched => $num_with_matches,
@@ -208,7 +210,9 @@ if ($completedJobID) {
     if ( C4::Context->preference('UseKohaPlugins') &&
          C4::Context->config('enable_plugins') ) {
 
-        my @plugins = Koha::Plugins->new()->GetPlugins('to_marc');
+        my @plugins = Koha::Plugins->new()->GetPlugins({
+            method => 'to_marc',
+        });
         $template->param( plugins => \@plugins );
     }
 }

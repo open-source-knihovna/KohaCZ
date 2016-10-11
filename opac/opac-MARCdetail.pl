@@ -57,6 +57,7 @@ use C4::Members;
 use C4::Acquisition;
 use C4::Koha;
 use List::MoreUtils qw( any uniq );
+use Koha::RecordProcessor;
 
 my $query = new CGI;
 
@@ -64,6 +65,12 @@ my $dbh = C4::Context->dbh;
 
 my $biblionumber = $query->param('biblionumber');
 if ( ! $biblionumber ) {
+    print $query->redirect("/cgi-bin/koha/errors/404.pl");
+    exit;
+}
+
+my $record = GetMarcBiblio($biblionumber, 1);
+if ( ! $record ) {
     print $query->redirect("/cgi-bin/koha/errors/404.pl");
     exit;
 }
@@ -79,16 +86,20 @@ if (scalar @all_items >= 1) {
     }
 }
 
-my $itemtype     = &GetFrameworkCode($biblionumber);
-my $tagslib      = &GetMarcStructure( 0, $itemtype );
-my ($tag_itemnumber,$subtag_itemnumber) = &GetMarcFromKohaField('items.itemnumber',$itemtype);
+my $framework = &GetFrameworkCode( $biblionumber );
+my $tagslib = &GetMarcStructure( 0, $framework );
+my ($tag_itemnumber,$subtag_itemnumber) = &GetMarcFromKohaField('items.itemnumber',$framework);
 my $biblio = GetBiblioData($biblionumber);
-$biblionumber = $biblio->{biblionumber};
-my $record = GetMarcBiblio($biblionumber, 1);
-if ( ! $record ) {
-    print $query->redirect("/cgi-bin/koha/errors/404.pl");
-    exit;
-}
+
+my $record_processor = Koha::RecordProcessor->new({
+    filters => 'ViewPolicy',
+    options => {
+        interface => 'opac',
+        frameworkcode => $framework
+    }
+});
+$record_processor->process($record);
+
 # open template
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     {
@@ -100,10 +111,11 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
-my ($bt_tag,$bt_subtag) = GetMarcFromKohaField('biblio.title',$itemtype);
+my ($bt_tag,$bt_subtag) = GetMarcFromKohaField('biblio.title',$framework);
 $template->param(
     bibliotitle => $biblio->{title},
-) if $tagslib->{$bt_tag}->{$bt_subtag}->{hidden} <= 0; #<=0 is OPAC visible.
+) if $tagslib->{$bt_tag}->{$bt_subtag}->{hidden} <= 0 && # <=0 OPAC visible.
+     $tagslib->{$bt_tag}->{$bt_subtag}->{hidden} > -8;   # except -8;
 
 # get biblionumbers stored in the cart
 if(my $cart_list = $query->cookie("bib_list")){
@@ -286,7 +298,7 @@ foreach my $field (@fields) {
     push @item_loop, $item if $item;
 }
 my ( $holdingbrtagf, $holdingbrtagsubf ) =
-  &GetMarcFromKohaField( "items.holdingbranch", $itemtype );
+  &GetMarcFromKohaField( "items.holdingbranch", $framework );
 @item_loop =
   sort { ($a->{$holdingbrtagsubf}||'') cmp ($b->{$holdingbrtagsubf}||'') } @item_loop;
 

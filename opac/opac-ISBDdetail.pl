@@ -39,8 +39,7 @@ the items attached to the biblio
 
 =cut
 
-use strict;
-use warnings;
+use Modern::Perl;
 
 use C4::Auth;
 use C4::Context;
@@ -51,10 +50,11 @@ use C4::Biblio;
 use C4::Items;
 use C4::Reserves;
 use C4::Acquisition;
-use C4::Review;
 use C4::Serials;    # uses getsubscriptionfrom biblionumber
 use C4::Koha;
 use C4::Members;    # GetMember
+use Koha::RecordProcessor;
+
 
 my $query = CGI->new();
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
@@ -92,11 +92,21 @@ if (scalar @items >= 1) {
     }
 }
 
-my $record = GetMarcBiblio($biblionumber);
+my $record = GetMarcBiblio($biblionumber,1);
 if ( ! $record ) {
     print $query->redirect("/cgi-bin/koha/errors/404.pl");
     exit;
 }
+my $framework = GetFrameworkCode( $biblionumber );
+my $record_processor = Koha::RecordProcessor->new({
+    filters => 'ViewPolicy',
+    options => {
+        interface => 'opac',
+        frameworkcode => $framework
+    }
+});
+$record_processor->process($record);
+
 # some useful variables for enhanced content;
 # in each case, we're grabbing the first value we find in
 # the record and normalizing it
@@ -113,7 +123,7 @@ $template->param(
     normalized_ean => $ean,
     normalized_oclc => $oclc,
     normalized_isbn => $isbn,
-	content_identifier_exists => $content_identifier_exists,
+    content_identifier_exists => $content_identifier_exists,
 );
 
 #coping with subscriptions
@@ -146,7 +156,11 @@ $template->param(
 
 my $norequests = 1;
 my $allow_onshelf_holds;
-my $res = GetISBDView($biblionumber, "opac");
+my $res = GetISBDView({
+    'record'    => $record,
+    'template'  => 'opac',
+    'framework' => $framework
+});
 
 my $itemtypes = GetItemTypes();
 my $borrower = GetMember( 'borrowernumber' => $loggedinuser );
@@ -163,24 +177,12 @@ for my $itm (@items) {
       unless $allow_onshelf_holds;
 }
 
-my $reviews = getreviews( $biblionumber, 1 );
-foreach ( @$reviews ) {
-    my $borrower_number_review = $_->{borrowernumber};
-    my $borrowerData           = GetMember('borrowernumber' =>$borrower_number_review);
-    # setting some borrower info into this hash
-    $_->{title}     = $borrowerData->{'title'};
-    $_->{surname}   = $borrowerData->{'surname'};
-    $_->{firstname} = $borrowerData->{'firstname'};
-}
-
-
 $template->param(
     RequestOnOpac       => C4::Context->preference("RequestOnOpac"),
     AllowOnShelfHolds   => $allow_onshelf_holds,
     norequests   => $norequests,
     ISBD         => $res,
     biblionumber => $biblionumber,
-    reviews             => $reviews,
 );
 
 #Search for title in links

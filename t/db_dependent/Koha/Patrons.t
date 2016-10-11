@@ -19,12 +19,15 @@
 
 use Modern::Perl;
 
-use Test::More tests => 6;
+use Test::More tests => 8;
 use Test::Warn;
 
+use C4::Circulation;
 use Koha::Patron;
 use Koha::Patrons;
 use Koha::Database;
+use Koha::DateUtils;
+use Koha::Virtualshelves;
 
 use t::lib::TestBuilder;
 use t::lib::Mocks;
@@ -54,6 +57,9 @@ my $new_patron_2  = Koha::Patron->new(
         userid => 'a_nonexistent_userid_2',
     }
 )->store;
+
+C4::Context->_new_userenv('xxx');
+C4::Context->set_userenv(0,0,0,'firstname','surname', $library->{branchcode}, 'Midway Public Library', '', '', '');
 
 is( Koha::Patrons->search->count, $nb_of_patrons + 2, 'The 2 patrons should have been added' );
 
@@ -102,6 +108,36 @@ subtest 'siblings' => sub {
     $retrieved_guarantee_1->delete;
 };
 
+subtest 'has_overdues' => sub {
+    plan tests => 3;
+
+    my $biblioitem_1 = $builder->build( { source => 'Biblioitem' } );
+    my $item_1 = $builder->build(
+        {   source => 'Item',
+            value  => {
+                homebranch    => $library->{branchcode},
+                holdingbranch => $library->{branchcode},
+                notforloan    => 0,
+                itemlost      => 0,
+                withdrawn     => 0,
+                biblionumber  => $biblioitem_1->{biblionumber}
+            }
+        }
+    );
+    my $retrieved_patron = Koha::Patrons->find( $new_patron_1->borrowernumber );
+    is( $retrieved_patron->has_overdues, 0, );
+
+    my $tomorrow = DateTime->today( time_zone => C4::Context->tz() )->add( days => 1 );
+    my $issue = Koha::Issue->new({ borrowernumber => $new_patron_1->id, itemnumber => $item_1->{itemnumber}, date_due => $tomorrow, branchcode => $library->{branchcode} })->store();
+    is( $retrieved_patron->has_overdues, 0, );
+    $issue->delete();
+    my $yesterday = DateTime->today(time_zone => C4::Context->tz())->add( days => -1 );
+    $issue = Koha::Issue->new({ borrowernumber => $new_patron_1->id, itemnumber => $item_1->{itemnumber}, date_due => $yesterday, branchcode => $library->{branchcode} })->store();
+    $retrieved_patron = Koha::Patrons->find( $new_patron_1->borrowernumber );
+    is( $retrieved_patron->has_overdues, 1, );
+    $issue->delete();
+};
+
 subtest 'update_password' => sub {
     plan tests => 7;
 
@@ -125,6 +161,50 @@ subtest 'update_password' => sub {
     $retrieved_patron_1->update_password( 'yet_another_nonexistent_userid_1', 'another_password' );
     $number_of_logs = $schema->resultset('ActionLog')->search( { module => 'MEMBERS', action => 'CHANGE PASS', object => $new_patron_1->borrowernumber } )->count;
     is( $number_of_logs, 1, 'With BorrowerLogs, Koha::Patron->update_password should not have logged' );
+};
+
+subtest 'renew_account' => sub {
+    plan tests => 6;
+    my $a_month_ago                = dt_from_string->add( months => -1 )->truncate( to => 'day' );
+    my $a_year_later               = dt_from_string->add( months => 12 )->truncate( to => 'day' );
+    my $a_year_later_minus_a_month = dt_from_string->add( months => 11 )->truncate( to => 'day' );
+    my $patron_category = $builder->build(
+        {   source => 'Category',
+            value  => {
+                enrolmentperiod     => 12,
+                enrolmentperioddate => undef,
+            }
+        }
+    );
+    my $patron = $builder->build(
+        {   source => 'Borrower',
+            value  => {
+                dateexpiry   => $a_month_ago,
+                categorycode => $patron_category->{categorycode},
+            }
+        }
+    );
+    my $retrieved_patron = Koha::Patrons->find( $patron->{borrowernumber} );
+
+    t::lib::Mocks::mock_preference( 'BorrowerRenewalPeriodBase', 'dateexpiry' );
+    t::lib::Mocks::mock_preference( 'BorrowersLog',              1 );
+    my $expiry_date = $retrieved_patron->renew_account;
+    is( $expiry_date, $a_year_later_minus_a_month, );
+    my $retrieved_expiry_date = Koha::Patrons->find( $patron->{borrowernumber} )->dateexpiry;
+    is( dt_from_string($retrieved_expiry_date), $a_year_later_minus_a_month );
+    my $number_of_logs = $schema->resultset('ActionLog')->search( { module => 'MEMBERS', action => 'RENEW', object => $retrieved_patron->borrowernumber } )->count;
+    is( $number_of_logs, 1, 'With BorrowerLogs, Koha::Patron->renew_account should have logged' );
+
+    t::lib::Mocks::mock_preference( 'BorrowerRenewalPeriodBase', 'now' );
+    t::lib::Mocks::mock_preference( 'BorrowersLog',              0 );
+    $expiry_date = $retrieved_patron->renew_account;
+    is( $expiry_date, $a_year_later, );
+    $retrieved_expiry_date = Koha::Patrons->find( $patron->{borrowernumber} )->dateexpiry;
+    is( dt_from_string($retrieved_expiry_date), $a_year_later );
+    $number_of_logs = $schema->resultset('ActionLog')->search( { module => 'MEMBERS', action => 'RENEW', object => $retrieved_patron->borrowernumber } )->count;
+    is( $number_of_logs, 1, 'Without BorrowerLogs, Koha::Patron->renew_account should not have logged' );
+
+    $retrieved_patron->delete;
 };
 
 $retrieved_patron_1->delete;

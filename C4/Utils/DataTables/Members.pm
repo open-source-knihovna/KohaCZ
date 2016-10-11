@@ -1,7 +1,6 @@
 package C4::Utils::DataTables::Members;
 
 use Modern::Perl;
-use C4::Branch qw/onlymine/;
 use C4::Context;
 use C4::Members qw/GetMemberIssuesAndFines/;
 use C4::Utils::DataTables;
@@ -25,7 +24,7 @@ sub search {
 
     # If branches are independent and user is not superlibrarian
     # The search has to be only on the user branch
-    if ( C4::Branch::onlymine ) {
+    if ( C4::Context::only_my_library ) {
         my $userenv = C4::Context->userenv;
         $branchcode = $userenv->{'branch'};
 

@@ -1,4 +1,5 @@
 [% USE Koha %]
+[% USE Branches %]
 [% USE KohaDates %]
 [% USE AuthorisedValues %]
 [% USE ColumnsSettings %]
@@ -32,7 +33,7 @@
 var interface = "[% interface %]";
 var theme = "[% theme %]";
 var borrowernumber = "[% borrowernumber %]";
-var branchcode = "[% branch %]";
+var branchcode = "[% Branches.GetLoggedInBranchcode() %]";
 var exports_enabled = "[% exports_enabled %]";
 var AllowCirculate = [% (CAN_user_circulate_circulate_remaining_permissions)? 1 : 0 %]
 var AllowRenewalLimitOverride = [% (CAN_user_circulate_override_renewals && Koha.Preference('AllowRenewalLimitOverride') )? 1: 0 %];
@@ -83,12 +84,15 @@ $(document).ready(function() {
         return confirm(_("Are you sure you want to replace the current patron image? This cannot be undone."));
 	});[% END %]
 
-    $("#suspend_until").datepicker({ minDate: 1 }); // require that hold suspended until date is after today
-    $("#newduedate").datetimepicker({
-        minDate: 1, // require that renewal date is after today
-        hour: 23,
-        minute: 59
+    $("#suspend_until").datepicker({
+        onClose: function(dateText, inst) {
+            validate_date(dateText, inst);
+        },
+        minDate: 1, // require that hold suspended until date is after today
+    }).on("change", function(e, value) {
+        if ( ! is_valid_date( $(this).val() ) ) {$(this).val("");}
     });
+
     $("#view_restrictions").on("click",function(){
         $('#debarments-tab-link').click();
     });
@@ -268,8 +272,8 @@ function validate1(date) {
 </ol>
 </div>
       <div class="action">
-        [% IF ( guarantorborrowernumber ) %]
-        <a href="memberentry.pl?op=modify&amp;borrowernumber=[% borrowernumber %]&amp;step=1&amp;guarantorid=[% guarantorborrowernumber %]">Edit</a>
+        [% IF ( guarantor.borrowernumber ) %]
+        <a href="memberentry.pl?op=modify&amp;borrowernumber=[% borrowernumber %]&amp;step=1&amp;guarantorid=[% guarantor.borrowernumber %]">Edit</a>
         [% ELSE %]
         <a href="memberentry.pl?op=modify&amp;borrowernumber=[% borrowernumber %]&amp;step=1">Edit</a>
         [% END %]</div>
@@ -301,9 +305,10 @@ function validate1(date) {
                     </li>
                 </ol>
                 <fieldset class="action">
+                    <input type="hidden" name="csrf_token" value="[% csrf_token %]" />
                     <input type="submit" value="Upload" class="submit" />
                     <input name="op" type="hidden" value="Upload" />
-                    [% IF ( picture ) %]<a id="delpicture" href="/cgi-bin/koha/tools/picture-upload.pl?op=Delete&amp;borrowernumber=[% borrowernumber %]" class="delete">Delete</a>[% END %]
+                    [% IF ( picture ) %]<a id="delpicture" href="/cgi-bin/koha/tools/picture-upload.pl?op=Delete&amp;borrowernumber=[% borrowernumber %]&amp;csrf_token=[% csrf_token %]" class="delete">Delete</a>[% END %]
                 </fieldset>
             </fieldset>
         </form>
@@ -391,8 +396,8 @@ function validate1(date) {
         [% END %]
     </li>
 
-    [% IF ( sort1 ) %]<li><span class="label">Sort field 1:</span>[% lib1 %]</li>[% END %]
-    [% IF ( sort2 ) %]<li><span class="label">Sort field 2:</span>[% lib2 %]</li>[% END %]
+    [% IF ( sort1 ) %]<li><span class="label">Sort field 1:</span>[% AuthorisedValues.GetByCode('Bsort1', sort1) %]</li>[% END %]
+    [% IF ( sort2 ) %]<li><span class="label">Sort field 2:</span>[% AuthorisedValues.GetByCode('Bsort2', sort2) %]</li>[% END %]
     <li><span class="label">Username: </span>[% userid %]</li>
     <li><span class="label">Password: </span>
     [% IF ( password ) %]
@@ -552,7 +557,7 @@ function validate1(date) {
 
             [% IF AutoResumeSuspendedHolds %]
             <label for="suspend_until">until</label>
-            <input type="text" size="10" id="suspend_until" name="suspend_until"/>
+            <input type="text" size="10" id="suspend_until" name="suspend_until datepicker"/>
             <span class="hint">Specify date on which to resume [% INCLUDE 'date-format.inc' %]: </span>
             [% END %]
         </form>

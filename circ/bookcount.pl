@@ -29,21 +29,17 @@ use C4::Circulation;
 use C4::Output;
 use C4::Koha;
 use C4::Auth;
-use C4::Branch; # GetBranches
 use C4::Biblio; # GetBiblioItemData
 use Koha::DateUtils;
+use Koha::Libraries;
 
 my $input        = new CGI;
 my $itm          = $input->param('itm');
 my $bi           = $input->param('bi');
 my $biblionumber = $input->param('biblionumber');
-my $branches     = GetBranches;
 
 my $idata = itemdatanum($itm);
 my $data  = GetBiblioItemData($bi);
-
-my $homebranch    = $branches->{ $idata->{'homebranch'}    }->{'branchname'};
-my $holdingbranch = $branches->{ $idata->{'holdingbranch'} }->{'branchname'};
 
 my $lastmove = lastmove($itm);
 
@@ -69,10 +65,11 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
-my $branchloop = GetBranchesLoop(C4::Context->userenv->{branch});
-foreach (@$branchloop) {
-    $_->{issues}     = issuesat($itm, $_->{value});
-    $_->{seen}       = lastseenat( $itm, $_->{value} ) || undef;
+my $libraries = Koha::Libraries->search({}, { order_by => ['branchname'] })->unblessed;
+for my $library ( @$libraries ) {
+    $library->{selected} = 1 if $library->{branchcode} eq C4::Context->userenv->{branch};
+    $library->{issues}     = issuesat($itm, $library->{branchcode});
+    $library->{seen}       = lastseenat( $itm, $library->{branchcode} ) || undef;
 }
 
 $template->param(
@@ -81,11 +78,11 @@ $template->param(
     author                  => $data->{'author'},
     barcode                 => $idata->{'barcode'},
     biblioitemnumber        => $bi,
-    homebranch              => $homebranch,
-    holdingbranch           => $holdingbranch,
+    homebranch              => $idata->{homebranch},
+    holdingbranch           => $idata->{holdingbranch},
     lastdate                => $lastdate ? $lastdate : 0,
     count                   => $count,
-    branchloop              => $branchloop,
+    libraries               => $libraries,
 );
 
 output_html_with_http_headers $input, $cookie, $template->output;

@@ -49,12 +49,12 @@ use C4::Search::History;
 use C4::Biblio;  # GetBiblioData
 use C4::Koha;
 use C4::Tags qw(get_tags);
-use C4::Branch; # GetBranches
 use C4::SocialData;
-use C4::Ratings;
 use C4::External::OverDrive;
 
 use Koha::LibraryCategories;
+use Koha::Ratings;
+use Koha::Virtualshelves;
 
 use POSIX qw(ceil floor strftime);
 use URI::Escape;
@@ -213,7 +213,6 @@ if ($cgi->cookie("search_path_code")) {
     }
 }
 
-my $branches = GetBranches();   # used later in *getRecords, probably should be internalized by those functions after caching in C4::Branch is established
 my $library_categories = Koha::LibraryCategories->search( { categorytype => 'searchdomain' }, { order_by => [ 'categorytype', 'categorycode' ] } );
 $template->param( searchdomainloop => $library_categories );
 
@@ -608,7 +607,7 @@ if ($tag) {
     # FIXME: No facets for tags search.
 } elsif ($build_grouped_results) {
     eval {
-        ($error, $results_hashref, $facets) = C4::Search::pazGetRecords($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,$branches,$query_type,$scan);
+        ($error, $results_hashref, $facets) = C4::Search::pazGetRecords($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,undef,$query_type,$scan);
     };
 } else {
     $pasarParams .= '&amp;query=' . uri_escape_utf8($query);
@@ -616,7 +615,7 @@ if ($tag) {
     $pasarParams .= '&amp;simple_query=' . uri_escape_utf8($simple_query);
     $pasarParams .= '&amp;query_type=' . uri_escape_utf8($query_type) if ($query_type);
     eval {
-        ($error, $results_hashref, $facets) = $searcher->search_compat($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,$branches,$itemtypes,$query_type,$scan,1);
+        ($error, $results_hashref, $facets) = $searcher->search_compat($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,undef,$itemtypes,$query_type,$scan,1);
 };
 }
 
@@ -694,12 +693,17 @@ for (my $i=0;$i<@servers;$i++) {
                 }
             }
 
+            $res->{shelves} = Koha::Virtualshelves->get_shelves_containing_record(
+                {
+                    biblionumber   => $res->{biblionumber},
+                    borrowernumber => $borrowernumber
+                }
+            );
+
             if ( C4::Context->preference('OpacStarRatings') eq 'all' ) {
-                my $rating = GetRating( $res->{'biblionumber'}, $borrowernumber );
-                $res->{'rating_value'}  = $rating->{'rating_value'};
-                $res->{'rating_total'}  = $rating->{'rating_total'};
-                $res->{'rating_avg'}    = $rating->{'rating_avg'};
-                $res->{'rating_avg_int'} = $rating->{'rating_avg_int'};
+                my $ratings = Koha::Ratings->search({ biblionumber => $res->{biblionumber} });
+                $res->{ratings} = $ratings;
+                $res->{my_rating} = $borrowernumber ? $ratings->search({ borrowernumber => $borrowernumber })->next : undef;
             }
         }
 
@@ -798,12 +802,12 @@ for (my $i=0;$i<@servers;$i++) {
                     ||
                     C4::Context->preference('HighlightOwnItemsOnOPACWhich') eq 'OpacURLBranch'
                 ) {
-                    my $branchname;
+                    my $branchcode;
                     if ( C4::Context->preference('HighlightOwnItemsOnOPACWhich') eq 'PatronBranch' ) {
-                        $branchname = $branches->{$branch}->{'branchname'};
+                        $branchcode = $branch;
                     }
                     elsif (  C4::Context->preference('HighlightOwnItemsOnOPACWhich') eq 'OpacURLBranch' ) {
-                        $branchname = $branches->{ $ENV{'BRANCHCODE'} }->{'branchname'};
+                        $branchcode = $ENV{'BRANCHCODE'};
                     }
 
                     foreach my $res ( @newresults ) {
@@ -811,7 +815,7 @@ for (my $i=0;$i<@servers;$i++) {
                         my @top_loop;
                         my @old_loop = @{$res->{'available_items_loop'}};
                         foreach my $item ( @old_loop ) {
-                            if ( $item->{'branchname'} eq $branchname ) {
+                            if ( $item->{'branchcode'} eq $branchcode ) {
                                 $item->{'this_branch'} = 1;
                                 push( @top_loop, $item );
                             } else {

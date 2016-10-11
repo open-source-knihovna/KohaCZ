@@ -17,13 +17,14 @@
 
 use Modern::Perl;
 
-use Test::More tests => 42;
+use Test::More tests => 44;
 use Test::Warn;
 
 my $destructorcount = 0;
 
 BEGIN {
     use_ok('Koha::Cache');
+    use_ok('Koha::Caches');
     use_ok('Koha::Cache::Object');
     use_ok('Koha::Cache::Memory::Lite');
     use_ok('C4::Context');
@@ -33,7 +34,7 @@ SKIP: {
     # Set a special namespace for testing, to avoid breaking
     # if test is run with a different user than Apache's.
     $ENV{ MEMCACHED_NAMESPACE } = 'unit_tests';
-    my $cache = Koha::Cache->get_instance();
+    my $cache = Koha::Caches->get_instance();
 
     skip "Cache not enabled", 36
       unless ( $cache->is_cache_active() && defined $cache );
@@ -53,16 +54,16 @@ SKIP: {
     }
 
     # test expiry time in cache
-    $cache->set_in_cache( "timeout", "I AM DATA", 1 ); # expiry time of 1 second
+    $cache->set_in_cache( "timeout", "I AM DATA", { expiry => 1 } ); # expiry time of 1 second
     sleep 2;
     $cache->flush_L1_cache();
     is( $cache->get_from_cache("timeout"),
         undef, "fetching expired item from cache" );
 
     # test fetching a valid, non expired, item from cache
-    $cache->set_in_cache( "clear_me", "I AM MORE DATA", 1000 )
+    $cache->set_in_cache( "clear_me", "I AM MORE DATA", { expiry => 1000 } )
       ;    # overly large expiry time, clear below
-    $cache->set_in_cache( "dont_clear_me", "I AM MORE DATA22", 1000 )
+    $cache->set_in_cache( "dont_clear_me", "I AM MORE DATA22", { expiry => 1000 } )
       ;    # overly large expiry time, clear below
     is(
         $cache->get_from_cache("clear_me"),
@@ -256,10 +257,30 @@ subtest 'Koha::Cache::Memory::Lite' => sub {
         undef, "fetching flushed item from cache" );
 };
 
+subtest 'Koha::Caches' => sub {
+    plan tests => 8;
+    my $default_cache = Koha::Caches->get_instance();
+    my $another_cache = Koha::Caches->get_instance('another_cache');
+    $default_cache->set_in_cache('key_a', 'value_a');
+    $default_cache->set_in_cache('key_b', 'value_b');
+    $another_cache->set_in_cache('key_a', 'another_value_a');
+    $another_cache->set_in_cache('key_b', 'another_value_b');
+    is( $default_cache->get_from_cache('key_a'), 'value_a' );
+    is( $another_cache->get_from_cache('key_a'), 'another_value_a' );
+    is( $default_cache->get_from_cache('key_b'), 'value_b' );
+    is( $another_cache->get_from_cache('key_b'), 'another_value_b' );
+    $another_cache->clear_from_cache('key_b');
+    is( $default_cache->get_from_cache('key_b'), 'value_b' );
+    is( $another_cache->get_from_cache('key_b'), undef );
+    $another_cache->flush_all();
+    is( $default_cache->get_from_cache('key_a'), 'value_a' );
+    is( $another_cache->get_from_cache('key_a'), undef );
+};
+
 END {
   SKIP: {
         $ENV{ MEMCACHED_NAMESPACE } = 'unit_tests';
-        my $cache = Koha::Cache->get_instance();
+        my $cache = Koha::Caches->get_instance();
         skip "Cache not enabled", 1
           unless ( $cache->is_cache_active() );
         is( $destructorcount, 1, 'Destructor run exactly once' );

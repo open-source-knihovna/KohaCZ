@@ -67,8 +67,8 @@
                         [% IF ( COUNT.TCOUNTS ) %]<li>[% COUNT.TCOUNTS %] image(s) moved into the database:</li>[% END %]
                             [% FOREACH filename IN COUNT.filenames %]
                                 <tr>
-                                <td>[% filename.source %]</td>
-                                <td><a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% filename.cardnumber %]">[% filename.cardnumber %]</a></td>
+                                <td>[% filename.source | html %]</td>
+                                <td><a href="/cgi-bin/koha/circ/circulation.pl?findborrower=[% filename.cardnumber | url %]">[% filename.cardnumber | html %]</a></td>
                                 <td>
                                     [% IF ( filename.filerrors ) %]
                                     [% FOREACH filerror IN filename.filerrors %]
@@ -143,6 +143,7 @@
                         </ol>
 	            </fieldset>
                     <fieldset class="action">
+                        <input type="hidden" name="csrf_token" value="[% csrf_token %]" />
                         <input type="hidden" name="op" value="Upload" />
                         <input type="submit" value="Upload" class="submit" />
 						<a href="/cgi-bin/koha/tools/tools-home.pl" class="cancel">Cancel</a>

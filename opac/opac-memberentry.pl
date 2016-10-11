@@ -29,10 +29,10 @@ use C4::Form::MessagingPreferences;
 use Koha::Patrons;
 use Koha::Patron::Modification;
 use Koha::Patron::Modifications;
-use C4::Branch qw(GetBranchesLoop);
 use C4::Scrubber;
 use Email::Valid;
 use Koha::DateUtils;
+use Koha::Libraries;
 use Koha::Patron::Images;
 use Koha::Token;
 
@@ -66,11 +66,23 @@ if ( $action eq q{} ) {
 
 my $mandatory = GetMandatoryFields($action);
 
+my @libraries = Koha::Libraries->search;
+if ( my @libraries_to_display = split '\|', C4::Context->preference('PatronSelfRegistrationLibraryList') ) {
+    @libraries = map { my $b = $_; my $branchcode = $_->branchcode; grep( /^$branchcode$/, @libraries_to_display ) ? $b : () } @libraries;
+}
+my ( $min, $max ) = C4::Members::get_cardnumber_length();
+if ( defined $min ) {
+     $template->param(
+         minlength_cardnumber => $min,
+         maxlength_cardnumber => $max
+     );
+ }
+
 $template->param(
     action            => $action,
     hidden            => GetHiddenFields( $mandatory, 'registration' ),
     mandatory         => $mandatory,
-    branches          => GetBranchesLoop(),
+    libraries         => \@libraries,
     OPACPatronDetails => C4::Context->preference('OPACPatronDetails'),
 );
 
@@ -354,7 +366,14 @@ sub CheckForInvalidFields {
     my $borrower = shift;
     my @invalidFields;
     if ($borrower->{'email'}) {
-        push(@invalidFields, "email") if (!Email::Valid->address($borrower->{'email'}));
+        unless ( Email::Valid->address($borrower->{'email'}) ) {
+            push(@invalidFields, "email");
+        } elsif ( C4::Context->preference("PatronSelfRegistrationEmailMustBeUnique") ) {
+            my $patrons_with_same_email = Koha::Patrons->search( { email => $borrower->{email} })->count;
+            if ( $patrons_with_same_email ) {
+                push @invalidFields, "duplicate_email";
+            }
+        }
     }
     if ($borrower->{'emailpro'}) {
         push(@invalidFields, "emailpro") if (!Email::Valid->address($borrower->{'emailpro'}));

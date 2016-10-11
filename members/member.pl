@@ -27,8 +27,6 @@ use Modern::Perl;
 use C4::Auth;
 use C4::Output;
 use CGI qw( -utf8 );
-use C4::Branch;
-use C4::Category;
 use C4::Members qw( GetMember );
 use Koha::DateUtils;
 use Koha::List::Patron;
@@ -50,7 +48,7 @@ my $quicksearch = $input->param('quicksearch') // 0;
 
 if ( $quicksearch and $searchmember ) {
     my $branchcode;
-    if ( C4::Branch::onlymine ) {
+    if ( C4::Context::only_my_library ) {
         my $userenv = C4::Context->userenv;
         $branchcode = $userenv->{'branch'};
     }

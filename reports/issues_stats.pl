@@ -26,7 +26,6 @@ use Date::Manip;
 use C4::Auth;
 use C4::Debug;
 use C4::Context;
-use C4::Branch; # GetBranches
 use C4::Koha;
 use C4::Output;
 use C4::Circulation;
@@ -76,7 +75,7 @@ $template->param(do_it => $do_it,
 );
 
 our $itemtypes = GetItemTypes();
-our $categoryloop = GetBorrowercategoryList;
+our @patron_categories = Koha::Patron::Categories->search_limited({}, {order_by => ['description']});
 
 our $ccodes    = GetKohaAuthorisedValues("items.ccode");
 our $locations = GetKohaAuthorisedValues("items.location");
@@ -152,11 +151,10 @@ my $CGIextChoice = ( 'CSV' ); # FIXME translation
 my $CGIsepChoice=GetDelimiterChoices;
  
 $template->param(
-	categoryloop => $categoryloop,
+    categoryloop => \@patron_categories,
 	itemtypeloop => \@itemtypeloop,
 	locationloop => \@locations,
 	   ccodeloop => \@ccodes,
-	  branchloop => GetBranchesLoop(C4::Context->userenv->{'branch'}),
 	hassort1=> $hassort1,
 	hassort2=> $hassort2,
 	Bsort1 => $Bsort1,
@@ -322,12 +320,12 @@ sub calculate {
 				($celvalue eq $_->{authorised_value}) or next;
 				$cell{rowtitle_display} = $_->{lib} and last;
 			}
-		} elsif ($line =~ /category/) {
-			foreach (@$categoryloop) {
-				($celvalue eq $_->{categorycode}) or next;
-				$cell{rowtitle_display} = $_->{description} and last;
-			}
-		}
+        } elsif ($line =~ /category/) {
+            foreach my $patron_category ( @patron_categories ) {
+                ($celvalue eq $patron_category->categorycode) or next;
+                $cell{rowtitle_display} = $patron_category->description and last;
+            }
+        }
 		push @loopline, \%cell;
 	}
 
@@ -396,12 +394,12 @@ sub calculate {
 				($celvalue eq $_->{authorised_value}) or next;
 				$cell{coltitle_display} = $_->{lib} and last;
 			}
-		} elsif ($column =~ /category/) {
-			foreach (@$categoryloop) {
-				($celvalue eq $_->{categorycode}) or next;
-				$cell{coltitle_display} = $_->{description} and last;
-			}
-		}
+        } elsif ($column =~ /category/) {
+            foreach my $patron_category ( @patron_categories ) {
+                ($celvalue eq $patron_category->categorycode) or next;
+                $cell{coltitle_display} = $patron_category->description and last;
+            }
+        }
 		push @loopcol, \%cell;
 	}
 

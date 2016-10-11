@@ -40,7 +40,6 @@ use warnings;
 use C4::Auth;
 use C4::Output;
 use C4::Context;
-use C4::Branch qw/GetBranchesLoop GetBranchName/;
 use C4::Members;
 use C4::Members::Attributes qw(:all);
 use C4::Members::AttributeTypes;
@@ -50,6 +49,9 @@ use C4::Templates;
 use Koha::Patron::Debarments;
 use Koha::Patrons;
 use Koha::DateUtils;
+use Koha::Token;
+use Koha::Libraries;
+use Koha::Patron::Categories;
 
 use Text::CSV;
 # Text::CSV::Unicode, even in binary mode, fails to parse lines with these diacriticals:
@@ -58,6 +60,7 @@ use Text::CSV;
 
 use CGI qw ( -utf8 );
 # use encoding 'utf8';    # don't do this
+use Digest::MD5 qw(md5_base64);
 
 my (@errors, @feedback);
 my $extended = C4::Context->preference('ExtendedPatronAttributes');
@@ -81,12 +84,9 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user({
         debug           => 1,
 });
 
-# get the branches and pass them to the template
-my $branches = GetBranchesLoop();
-$template->param( branches => $branches ) if ( $branches );
 # get the patron categories and pass them to the template
-my $categories = GetBorrowercategoryList();
-$template->param( categories => $categories ) if ( $categories );
+my @patron_categories = Koha::Patron::Categories->search_limited({}, {order_by => ['description']});
+$template->param( categories => \@patron_categories );
 my $columns = C4::Templates::GetColumnDefs( $input )->{borrowers};
 $columns = [ grep { $_->{field} ne 'borrowernumber' ? $_ : () } @$columns ];
 $template->param( borrower_fields => $columns );
@@ -110,6 +110,13 @@ my $overwrite_cardnumber = $input->param('overwrite_cardnumber');
 $template->param( SCRIPT_NAME => '/cgi-bin/koha/tools/import_borrowers.pl' );
 
 if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
+    die "Wrong CSRF token"
+        unless Koha::Token->new->check_csrf({
+            id     => C4::Context->userenv->{id},
+            secret => md5_base64( C4::Context->config('pass') ),
+            token  => scalar $input->param('csrf_token'),
+        });
+
     push @feedback, {feedback=>1, name=>'filename', value=>$uploadborrowers, filename=>$uploadborrowers};
     my $handle = $input->upload('uploadborrowers');
     my $uploadinfo = $input->uploadInfo($uploadborrowers);
@@ -142,7 +149,7 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
     }
 
     push @feedback, {feedback=>1, name=>'headerrow', value=>join(', ', @csvcolumns)};
-    my $today_iso = output_pref( { dt => dt_from_string, dateonly => 1, dateformat => 'iso' });
+    my $today = output_pref;
     my @criticals = qw(surname branchcode categorycode);    # there probably should be others
     my @bad_dates;  # I've had a few.
     LINE: while ( my $borrowerline = <$handle> ) {
@@ -179,13 +186,13 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
         #warn join(':',%borrower);
         if ($borrower{categorycode}) {
             push @missing_criticals, {key=>'categorycode', line=>$. , lineraw=>$borrowerline, value=>$borrower{categorycode}, category_map=>1}
-                unless GetBorrowercategory($borrower{categorycode});
+                unless Koha::Patron::Categories->find($borrower{categorycode});
         } else {
             push @missing_criticals, {key=>'categorycode', line=>$. , lineraw=>$borrowerline};
         }
         if ($borrower{branchcode}) {
             push @missing_criticals, {key=>'branchcode', line=>$. , lineraw=>$borrowerline, value=>$borrower{branchcode}, branch_map=>1}
-                unless GetBranchName($borrower{branchcode});
+                unless Koha::Libraries->find($borrower{branchcode});
         } else {
             push @missing_criticals, {key=>'branchcode', line=>$. , lineraw=>$borrowerline};
         }
@@ -218,8 +225,8 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
                 push @missing_criticals, {key=>$_, line=>$. , lineraw=>$borrowerline, bad_date=>1};
             }
         }
-	$borrower{dateenrolled} = $today_iso unless $borrower{dateenrolled};
-	$borrower{dateexpiry} = GetExpiryDate($borrower{categorycode},$borrower{dateenrolled}) unless $borrower{dateexpiry}; 
+        $borrower{dateenrolled} ||= $today;
+        $borrower{dateexpiry}   ||= Koha::Patron::Categories->find( $borrower{categorycode} )->get_expiry_date( $borrower{dateenrolled} );
         my $borrowernumber;
         my $member;
         if ( ($matchpoint eq 'cardnumber') && ($borrower{'cardnumber'}) ) {
@@ -381,6 +388,15 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
         }
         $template->param(matchpoints => \@matchpoints);
     }
+
+    $template->param(
+        csrf_token => Koha::Token->new->generate_csrf(
+            {   id     => C4::Context->userenv->{id},
+                secret => md5_base64( C4::Context->config('pass') ),
+            }
+        ),
+    );
+
 }
 
 output_html_with_http_headers $input, $cookie, $template->output;

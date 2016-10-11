@@ -1,3 +1,4 @@
+[% USE Math %]
 [% USE Koha %]
 [% USE KohaDates %]
 [% USE Branches %]
@@ -468,10 +469,12 @@
                         <form method="post" action="/cgi-bin/koha/opac-ratings.pl">
                             <div class="results_summary ratings">
 
+                                [% SET rating_avg = ratings.get_avg_rating() %]
+                                [% rating_avg_int = BLOCK %][% rating_avg | format("%.0f") %][% END %]
                                 [% FOREACH i  IN [ 1 2 3 4 5  ] %]
-                                    [% IF rating_avg == i && borrowernumber %]
+                                    [% IF rating_avg_int == i && borrowernumber %]
                                         <input class="auto-submit-star" type="radio" name="rating"  value="[% i %]"  checked="checked" />
-                                    [% ELSIF rating_avg == i %]
+                                    [% ELSIF rating_avg_int == i %]
                                         <input class="auto-submit-star" type="radio" name="rating" value="[% i %]" checked="checked" disabled="disabled" />
                                     [% ELSIF borrowernumber  %]
                                         <input class="auto-submit-star" type="radio" name="rating" value="[% i %]" />
@@ -483,19 +486,17 @@
                                 <!-- define some hidden vars for ratings -->
 
                                 <input  type="hidden" name='biblionumber'  value="[% biblionumber %]" />
-                                <input  type="hidden" name='rating_value' id='rating_value' value="[% rating_value %]" />
-                                <input  type="hidden" name='rating_total' id='rating_total' value="[% rating_total %]" />
-                                <input  type="hidden" name='rating_avg_int' id='rating_avg_int' value="[% rating_avg_int %]" />
+                                <input  type="hidden" name='rating_value' id='rating_value' value="[% my_rating.rating_value %]" />
 
                                 [% UNLESS ( rating_readonly ) %]&nbsp;  <input name="rate_button" type="submit" value="Rate me" />[% END %]&nbsp;
 
-                                [% IF ( rating_value ) %]
-                                    <span id="rating_value_text">your rating: [% rating_value %], </span>
+                                [% IF my_rating %]
+                                    <span id="rating_value_text">your rating: [% my_rating.rating_value %], </span>
                                 [% ELSE %]
                                     <span id="rating_value_text"></span>
                                 [% END %]
 
-                                <span id="rating_text">average rating: [% rating_avg_int %] ([% rating_total %] votes)</span>
+                                <span id="rating_text">average rating: [% rating_avg %] ([% ratings.count %] votes)</span>
                             </div>
                         </form>
                     [% END # / IF OpacStarRatings != 'disable' %]
@@ -604,7 +605,7 @@
                         [% END %]
 
                         [% IF ( HTML5MediaEnabled && HTML5MediaSets ) %]
-                            <li id="tab_html5media"><a href="#html5media">Play media</a></li>
+                            [% IF ( defaulttab == 'media' ) %]<li id="tab_html5media" class="ui-tabs-active">[% ELSE %]<li id="tab_html5media">[% END %]<a href="#html5media">Play media</a></li>
                         [% END %]
 
                         [% IF ( IDreamBooksReviews ) %]
@@ -794,8 +795,8 @@
                             <h2>This is a serial</h2>
                             <p>There are [% subscriptionsnumber %] subscription(s) associated with this title.</p>
                             [% FOREACH subscription IN subscriptions %]
-                                [% IF ( subscription.branchname ) %]
-                                    <h3>At library: [% subscription.branchname %]</h3>
+                                [% IF ( subscription.branchcode ) %]
+                                    <h3>At library: [% Branches.GetName( subscription.branchname ) %]</h3>
                                 [% ELSE %]
                                     [% IF ( subscription.branchcode ) %]
                                         <h3>At library: [% subscription.branchcode %]</h3>
@@ -881,12 +882,16 @@
                             <div id="newcomment"></div>
                                 [% IF ( reviews ) %]
                                     [% FOREACH review IN reviews %]
-                                        [% IF ( review.your_comment ) %]
+                                        [% IF review.borrowernumber == borrowernumber %]
                                             <div class="commentline yours" id="c[% review.reviewid %]">
                                                 [% IF ( review.avatarurl ) %]
                                                     <img class="avatar" src="[% review.avatarurl %]" height="80" width="80" alt="" />
                                                 [% END %]
-                                                <h5>Your comment</h5>
+                                                [% IF review.approved %]
+                                                    <h5>Your comment</h5>
+                                                [% ELSE %]
+                                                    <h5>Your comment (preview, pending approval)</h5>
+                                                [% END %]
                                                 <small>[% review.datereviewed | $KohaDates %]</small>
                                                 <p>
                                                     [% FILTER html_break %]
@@ -923,7 +928,7 @@
                                                   [% END %]
                                                 </p>
                                             </div> <!-- / .commentline -->
-                                        [% END # / IF review.your_comment %]
+                                        [% END %]
                                     [% END # / FOREACH reviews %]
                                 [% ELSE %]
                                     <p>There are no comments for this item.</p>
@@ -932,7 +937,7 @@
                                 [% IF ( loggedinusername ) %]
                                     [% UNLESS ( loggedincommenter ) %]
                                        <div id="addcomment"> <a href="#" onclick="Dopop('/cgi-bin/koha/opac-review.pl?biblionumber=[% biblionumber %]'); return false;">
-                                            Post or edit your comments on this item.
+                                            Post your comments on this item.
                                         </a></div>
                                     [% END %]
                                 [% ELSE %]
@@ -1425,6 +1430,17 @@
         });
 [% END %]
 
+        [%# Note that there is no way atm to target a column with its class name to set it as the default sort order %]
+        [% IF Koha.Preference('OpacLocationBranchToDisplay') == 'home' AND Koha.Preference('OPACHoldingsDefaultSortField') == 'homebranch' AND item_level_itypes
+        OR Koha.Preference('OpacLocationBranchToDisplay') == 'holding' AND Koha.Preference('OPACHoldingsDefaultSortField') == 'holdingbranch' AND item_level_itypes
+        OR Koha.Preference('OpacLocationBranchToDisplay') == 'both' AND Koha.Preference('OPACHoldingsDefaultSortField') == 'homebranch' AND NOT item_level_itypes
+        OR Koha.Preference('OpacLocationBranchToDisplay') == 'both' AND Koha.Preference('OPACHoldingsDefaultSortField') == 'holdingbranch' AND item_level_itypes %]
+            var default_order_index = 1;
+        [% ELSIF Koha.Preference('OpacLocationBranchToDisplay') == 'both' AND Koha.Preference('OPACHoldingsDefaultSortField') == 'homebranch' AND item_level_itypes %]
+            var default_order_index = 2;
+        [% ELSE %]
+            var default_order_index = 0;
+        [% END %]
         $(".holdingst").dataTable($.extend(true, {}, dataTablesDefaults, {
             "aoColumns": [
                 [% IF ( item_level_itypes ) %]null,[% END %]
@@ -1447,7 +1463,8 @@
                     null,
                 [% END %]
                 [% IF ( ShowCourseReservesHeader ) %]null,[% END %]
-            ]
+            ],
+            "aaSorting": [[ default_order_index, 'asc' ]]
         }));
 
         [% IF ( query_desc ) %][% IF ( OpacHighlightedWords ) %]var query_desc = "[% query_desc |replace("'", "\'") |replace('\n', '\\n') |replace('\r', '\\r') |html %]";
@@ -1597,7 +1614,7 @@
                     $("#rating_value_text").text('');
                   }
 
-                  $("#rating_text").text(_("average rating: ") + data.rating_avg_int + " (" + data.rating_total + ' ' + _("votes") + ")");
+                  $("#rating_text").text(_("average rating: ") + data.rating_avg + " (" + data.rating_total + ' ' + _("votes") + ")");
 
                 }
               }, "json");

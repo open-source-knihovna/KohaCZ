@@ -28,11 +28,12 @@ use CGI qw ( -utf8 );
 use C4::Auth;
 use C4::Output;
 use C4::Members;
-use C4::Branch qw(GetBranches);
 use List::MoreUtils qw/any uniq/;
 use Koha::DateUtils;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
 use Koha::Patron::Images;
+
+use Koha::Patron::Categories;
 
 my $input = CGI->new;
 
@@ -72,8 +73,6 @@ if ( $borrowernumber eq C4::Context->preference('AnonymousPatron') ){
     $issues = GetAllIssues($borrowernumber,$order,$limit);
 }
 
-my $branches = GetBranches();
-
 #   barcode export
 if ( $op eq 'export_barcodes' ) {
     if ( $data->{'privacy'} < 2) {
@@ -97,10 +96,9 @@ if ( $op eq 'export_barcodes' ) {
 }
 
 if ( $data->{'category_type'} eq 'C') {
-    my  ( $catcodes, $labels ) =  GetborCatFromCatType( 'A', 'WHERE category_type = ?' );
-    my $cnt = scalar(@$catcodes);
-    $template->param( 'CATCODE_MULTI' => 1) if $cnt > 1;
-    $template->param( 'catcode' =>    $catcodes->[0])  if $cnt == 1;
+    my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
+    $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
+    $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
 }
 
 $template->param( adultborrower => 1 ) if ( $data->{'category_type'} eq 'A' );
@@ -127,7 +125,6 @@ $template->param(
     privacy           => $data->{'privacy'},
     categoryname      => $data->{description},
     is_child          => ( $data->{category_type} eq 'C' ),
-    branchname        => $branches->{ $data->{branchcode} }->{branchname},
     loop_reading      => $issues,
     activeBorrowerRelationship =>
       ( C4::Context->preference('borrowerRelationship') ne '' ),

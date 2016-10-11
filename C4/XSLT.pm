@@ -8,24 +8,22 @@ package C4::XSLT;
 #
 # This file is part of Koha.
 #
-# Koha is free software; you can redistribute it and/or modify it under the
-# terms of the GNU General Public License as published by the Free Software
-# Foundation; either version 3 of the License, or (at your option) any later
-# version.
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
 #
-# Koha is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-# A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along
-# with Koha; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-use warnings;
+use Modern::Perl;
 
 use C4::Context;
-use C4::Branch;
 use C4::Items;
 use C4::Koha;
 use C4::Biblio;
@@ -68,7 +66,7 @@ Is only used in this module currently.
 sub transformMARCXML4XSLT {
     my ($biblionumber, $record) = @_;
     my $frameworkcode = GetFrameworkCode($biblionumber) || '';
-    my $tagslib = &GetMarcStructure(1,$frameworkcode);
+    my $tagslib = &GetMarcStructure(1, $frameworkcode, { unsafe => 1 });
     my @fields;
     # FIXME: wish there was a better way to handle exceptions
     eval {
@@ -277,7 +275,8 @@ sub buildKohaItemsNamespace {
     my $shelflocations = GetKohaAuthorisedValues('items.location',GetFrameworkCode($biblionumber), 'opac');
     my $ccodes         = GetKohaAuthorisedValues('items.ccode',GetFrameworkCode($biblionumber), 'opac');
 
-    my $branches = GetBranches();
+    my %branches = map { $_->branchcode => $_->branchname } Koha::Libraries->search({}, { order_by => 'branchname' });
+
     my $itemtypes = GetItemTypes();
     my $location = "";
     my $ccode = "";
@@ -318,8 +317,8 @@ sub buildKohaItemsNamespace {
         } else {
             $status = "available";
         }
-        my $homebranch = $item->{homebranch}? xml_escape($branches->{$item->{homebranch}}->{'branchname'}):'';
-        my $holdingbranch = $item->{holdingbranch}? xml_escape($branches->{$item->{holdingbranch}}->{'branchname'}):'';
+        my $homebranch = $item->{homebranch}? xml_escape($branches{$item->{homebranch}}):'';
+        my $holdingbranch = $item->{holdingbranch}? xml_escape($branches{$item->{holdingbranch}}):'';
         $location = $item->{location}? xml_escape($shelflocations->{$item->{location}}||$item->{location}):'';
         $ccode = $item->{ccode}? xml_escape($ccodes->{$item->{ccode}}||$item->{ccode}):'';
         my $itemcallnumber = xml_escape($item->{itemcallnumber});

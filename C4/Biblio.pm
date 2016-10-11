@@ -19,8 +19,7 @@ package C4::Biblio;
 # You should have received a copy of the GNU General Public License
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-use warnings;
+use Modern::Perl;
 use Carp;
 
 use Encode qw( decode is_utf8 );
@@ -39,10 +38,11 @@ use C4::Linker;
 use C4::OAI::Sets;
 use C4::Debug;
 
-use Koha::Cache;
+use Koha::Caches;
 use Koha::Authority::Types;
 use Koha::Acquisition::Currencies;
 use Koha::SearchEngine;
+use Koha::Libraries;
 
 use vars qw(@ISA @EXPORT);
 use vars qw($debug $cgi_debug);
@@ -918,21 +918,29 @@ sub GetBiblioFromItemNumber {
 
 =head2 GetISBDView 
 
-  $isbd = &GetISBDView($biblionumber);
+  $isbd = &GetISBDView({
+      'record'    => $marc_record,
+      'template'  => $interface, # opac/intranet
+      'framework' => $framework,
+  });
 
 Return the ISBD view which can be included in opac and intranet
 
 =cut
 
 sub GetISBDView {
-    my ( $biblionumber, $template ) = @_;
-    my $record   = GetMarcBiblio($biblionumber, 1);
-    $template ||= '';
-    my $sysprefname = $template eq 'opac' ? 'opacisbd' : 'isbd';
+    my ( $params ) = @_;
+
+    # Expecting record WITH items.
+    my $record    = $params->{record};
     return unless defined $record;
-    my $itemtype = &GetFrameworkCode($biblionumber);
+
+    my $template  = $params->{template} // q{};
+    my $sysprefname = $template eq 'opac' ? 'opacisbd' : 'isbd';
+    my $framework = $params->{framework};
+    my $itemtype  = $framework;
     my ( $holdingbrtagf, $holdingbrtagsubf ) = &GetMarcFromKohaField( "items.holdingbranch", $itemtype );
-    my $tagslib = &GetMarcStructure( 1, $itemtype );
+    my $tagslib = &GetMarcStructure( 1, $itemtype, { unsafe => 1 } );
 
     my $ISBD = C4::Context->preference($sysprefname);
     my $bloc = $ISBD;
@@ -1109,22 +1117,28 @@ sub IsMarcStructureInternal {
 
 =head2 GetMarcStructure
 
-  $res = GetMarcStructure($forlibrarian,$frameworkcode);
+  $res = GetMarcStructure($forlibrarian, $frameworkcode, [ $params ]);
 
 Returns a reference to a big hash of hash, with the Marc structure for the given frameworkcode
 $forlibrarian  :if set to 1, the MARC descriptions are the librarians ones, otherwise it's the public (OPAC) ones
 $frameworkcode : the framework code to read
+$params allows you to pass { unsafe => 1 } for better performance.
+
+Note: If you call GetMarcStructure with unsafe => 1, do not modify or
+even autovivify its contents. It is a cached/shared data structure. Your
+changes c/would be passed around in subsequent calls.
 
 =cut
 
 sub GetMarcStructure {
-    my ( $forlibrarian, $frameworkcode ) = @_;
+    my ( $forlibrarian, $frameworkcode, $params ) = @_;
     $frameworkcode = "" unless $frameworkcode;
 
     $forlibrarian = $forlibrarian ? 1 : 0;
-    my $cache = Koha::Cache->get_instance();
+    my $unsafe = ($params && $params->{unsafe})? 1: 0;
+    my $cache = Koha::Caches->get_instance();
     my $cache_key = "MarcStructure-$forlibrarian-$frameworkcode";
-    my $cached = $cache->get_from_cache($cache_key);
+    my $cached = $cache->get_from_cache($cache_key, { unsafe => $unsafe });
     return $cached if $cached;
 
     my $dbh = C4::Context->dbh;
@@ -1230,7 +1244,7 @@ sub GetMarcSubfieldStructure {
 
     $frameworkcode //= '';
 
-    my $cache     = Koha::Cache->get_instance();
+    my $cache     = Koha::Caches->get_instance();
     my $cache_key = "MarcSubfieldStructure-$frameworkcode";
     my $cached    = $cache->get_from_cache($cache_key);
     return $cached if $cached;
@@ -1691,7 +1705,7 @@ sub GetAuthorisedValueDesc {
 
         #---- branch
         if ( $tagslib->{$tag}->{$subfield}->{'authorised_value'} eq "branches" ) {
-            return C4::Branch::GetBranchName($value);
+            return Koha::Libraries->find($value)->branchname;
         }
 
         #---- itemtypes
@@ -1926,7 +1940,7 @@ sub GetMarcSubjects {
         push @marcsubjects, {
             MARCSUBJECT_SUBFIELDS_LOOP => \@subfields_loop,
             authoritylink => $authoritylink,
-        };
+        } if $authoritylink || @subfields_loop;
 
     }
     return \@marcsubjects;
@@ -1949,10 +1963,11 @@ sub GetMarcAuthors {
     }
     my ( $mintag, $maxtag, $fields_filter );
 
-    # tagslib useful for UNIMARC author reponsabilities
-    my $tagslib =
-      &GetMarcStructure( 1, '' );    # FIXME : we don't have the framework available, we take the default framework. May be buggy on some setups, will be usually correct.
+    # tagslib useful only for UNIMARC author responsibilities
+    my $tagslib;
     if ( $marcflavour eq "UNIMARC" ) {
+        # FIXME : we don't have the framework available, we take the default framework. May be buggy on some setups, will be usually correct.
+        $tagslib = GetMarcStructure( 1, '', { unsafe => 1 });
         $mintag = "700";
         $maxtag = "712";
         $fields_filter = '7..';
@@ -2209,6 +2224,45 @@ sub GetMarcHosts {
         }
     my $marchostsarray = \@marchosts;
     return $marchostsarray;
+}
+
+=head2 UpsertMarcSubfield
+
+    my $record = C4::Biblio::UpsertMarcSubfield($MARC::Record, $fieldTag, $subfieldCode, $subfieldContent);
+
+=cut
+
+sub UpsertMarcSubfield {
+    my ($record, $tag, $code, $content) = @_;
+    my $f = $record->field($tag);
+
+    if ($f) {
+        $f->update( $code => $content );
+    }
+    else {
+        my $f = MARC::Field->new( $tag, '', '', $code => $content);
+        $record->insert_fields_ordered( $f );
+    }
+}
+
+=head2 UpsertMarcControlField
+
+    my $record = C4::Biblio::UpsertMarcControlField($MARC::Record, $fieldTag, $content);
+
+=cut
+
+sub UpsertMarcControlField {
+    my ($record, $tag, $content) = @_;
+    die "UpsertMarcControlField() \$tag '$tag' is not a control field\n" unless 0+$tag < 10;
+    my $f = $record->field($tag);
+
+    if ($f) {
+        $f->update( $content );
+    }
+    else {
+        my $f = MARC::Field->new($tag, $content);
+        $record->insert_fields_ordered( $f );
+    }
 }
 
 =head2 GetFrameworkCode
@@ -2558,9 +2612,9 @@ sub TransformHtmlToMarc {
         # if we are on biblionumber, store it in the MARC::Record (it may not be in the edited fields)
         if ( $param eq 'biblionumber' ) {
             if ( $biblionumbertagfield < 10 ) {
-                $newfield = MARC::Field->new( $biblionumbertagfield, $cgi->param($param), );
+                $newfield = MARC::Field->new( $biblionumbertagfield, scalar $cgi->param($param), );
             } else {
-                $newfield = MARC::Field->new( $biblionumbertagfield, '', '', "$biblionumbertagsubfield" => $cgi->param($param), );
+                $newfield = MARC::Field->new( $biblionumbertagfield, '', '', "$biblionumbertagsubfield" => scalar $cgi->param($param), );
             }
             push @fields, $newfield if ($newfield);
         } elsif ( $param =~ /^tag_(\d*)_indicator1_/ ) {    # new field start when having 'input name="..._indicator1_..."
@@ -2574,18 +2628,19 @@ sub TransformHtmlToMarc {
             if ( $tag < 10 ) {                              # no code for theses fields
                                                             # in MARC editor, 000 contains the leader.
                 next if $tag == $biblionumbertagfield;
+                my $fval= $cgi->param($params[$j+1]);
                 if ( $tag eq '000' ) {
                     # Force a fake leader even if not provided to avoid crashing
                     # during decoding MARC record containing UTF-8 characters
                     $record->leader(
-                        length( $cgi->param($params[$j+1]) ) == 24
-                        ? $cgi->param( $params[ $j + 1 ] )
+                        length( $fval ) == 24
+                        ? $fval
                         : '     nam a22        4500'
 			)
                     ;
                     # between 001 and 009 (included)
-                } elsif ( $cgi->param( $params[ $j + 1 ] ) ne '' ) {
-                    $newfield = MARC::Field->new( $tag, $cgi->param( $params[ $j + 1 ] ), );
+                } elsif ( $fval ne '' ) {
+                    $newfield = MARC::Field->new( $tag, $fval, );
                 }
 
                 # > 009, deal with subfields
@@ -2599,13 +2654,14 @@ sub TransformHtmlToMarc {
                     #if next param ne subfield, then it was probably empty
                     #try next param by incrementing j
                     if($params[$j+1]!~/_subfield_/) {$j++; next; }
+                    my $fkey= $cgi->param($params[$j]);
                     my $fval= $cgi->param($params[$j+1]);
                     #check if subfield value not empty and field exists
                     if($fval ne '' && $newfield) {
-                        $newfield->add_subfields( $cgi->param($params[$j]) => $fval);
+                        $newfield->add_subfields( $fkey => $fval);
                     }
                     elsif($fval ne '') {
-                        $newfield = MARC::Field->new( $tag, $ind1, $ind2, $cgi->param($params[$j]) => $fval );
+                        $newfield = MARC::Field->new( $tag, $ind1, $ind2, $fkey => $fval );
                     }
                     $j += 2;
                 } #end-of-while
@@ -3033,56 +3089,20 @@ the MARC XML.
 sub _koha_marc_update_bib_ids {
     my ( $record, $frameworkcode, $biblionumber, $biblioitemnumber ) = @_;
 
-    # we must add bibnum and bibitemnum in MARC::Record...
-    # we build the new field with biblionumber and biblioitemnumber
-    # we drop the original field
-    # we add the new builded field.
     my ( $biblio_tag,     $biblio_subfield )     = GetMarcFromKohaField( "biblio.biblionumber",          $frameworkcode );
     die qq{No biblionumber tag for framework "$frameworkcode"} unless $biblio_tag;
     my ( $biblioitem_tag, $biblioitem_subfield ) = GetMarcFromKohaField( "biblioitems.biblioitemnumber", $frameworkcode );
     die qq{No biblioitemnumber tag for framework "$frameworkcode"} unless $biblioitem_tag;
 
-    if ( $biblio_tag == $biblioitem_tag ) {
-
-        # biblionumber & biblioitemnumber are in the same field (can't be <10 as fields <10 have only 1 value)
-        my $new_field = MARC::Field->new(
-            $biblio_tag, '', '',
-            "$biblio_subfield"     => $biblionumber,
-            "$biblioitem_subfield" => $biblioitemnumber
-        );
-
-        # drop old field and create new one...
-        my $old_field = $record->field($biblio_tag);
-        $record->delete_field($old_field) if $old_field;
-        $record->insert_fields_ordered($new_field);
+    if ( $biblio_tag < 10 ) {
+        C4::Biblio::UpsertMarcControlField( $record, $biblio_tag, $biblionumber );
     } else {
-
-        # biblionumber & biblioitemnumber are in different fields
-
-        # deal with biblionumber
-        my ( $new_field, $old_field );
-        if ( $biblio_tag < 10 ) {
-            $new_field = MARC::Field->new( $biblio_tag, $biblionumber );
-        } else {
-            $new_field = MARC::Field->new( $biblio_tag, '', '', "$biblio_subfield" => $biblionumber );
-        }
-
-        # drop old field and create new one...
-        $old_field = $record->field($biblio_tag);
-        $record->delete_field($old_field) if $old_field;
-        $record->insert_fields_ordered($new_field);
-
-        # deal with biblioitemnumber
-        if ( $biblioitem_tag < 10 ) {
-            $new_field = MARC::Field->new( $biblioitem_tag, $biblioitemnumber, );
-        } else {
-            $new_field = MARC::Field->new( $biblioitem_tag, '', '', "$biblioitem_subfield" => $biblioitemnumber, );
-        }
-
-        # drop old field and create new one...
-        $old_field = $record->field($biblioitem_tag);
-        $record->delete_field($old_field) if $old_field;
-        $record->insert_fields_ordered($new_field);
+        C4::Biblio::UpsertMarcSubfield($record, $biblio_tag, $biblio_subfield, $biblionumber);
+    }
+    if ( $biblioitem_tag < 10 ) {
+        C4::Biblio::UpsertMarcControlField( $record, $biblioitem_tag, $biblioitemnumber );
+    } else {
+        C4::Biblio::UpsertMarcSubfield($record, $biblioitem_tag, $biblioitem_subfield, $biblioitemnumber);
     }
 }
 

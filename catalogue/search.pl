@@ -149,7 +149,6 @@ use C4::Koha;
 use C4::Members qw(GetMember);
 use URI::Escape;
 use POSIX qw(ceil floor);
-use C4::Branch; # GetBranches
 use C4::Search::History;
 
 use Koha::LibraryCategories;
@@ -214,25 +213,12 @@ if($cgi->cookie("intranet_bib_list")){
 }
 
 # load the branches
-my $branches = GetBranches();
-
-# Populate branch_loop with all branches sorted by their name.  If
-# IndependentBranches is activated, set the default branch to the borrower
-# branch, except for superlibrarian who need to search all libraries.
-my $user = C4::Context->userenv;
-my @branch_loop = map {
-     {
-        value      => $_,
-        branchname => $branches->{$_}->{branchname},
-        selected   => $user->{branch} eq $_ && C4::Branch::onlymine(),
-     }
-} sort {
-    $branches->{$a}->{branchname} cmp $branches->{$b}->{branchname}
-} keys %$branches;
-
 my $categories = Koha::LibraryCategories->search( { categorytype => 'searchdomain' }, { order_by => [ 'categorytype', 'categorycode' ] } );
 
-$template->param(branchloop => \@branch_loop, searchdomainloop => $categories);
+$template->param(
+    selected_branchcode => ( C4::Context->IsSuperLibrarian ? C4::Context->userenv : '' ),
+    searchdomainloop => $categories
+);
 
 # load the Type stuff
 my $itemtypes = GetItemTypes;
@@ -537,7 +523,7 @@ eval {
     my $itemtypes = GetItemTypes;
     ( $error, $results_hashref, $facets ) = $searcher->search_compat(
         $query,            $simple_query, \@sort_by,       \@servers,
-        $results_per_page, $offset,       $expanded_facet, $branches,
+        $results_per_page, $offset,       $expanded_facet, undef,
         $itemtypes,        $query_type,   $scan
     );
 };

@@ -18,6 +18,7 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
+
 use CGI qw ( -utf8 );
 use C4::Auth;
 use C4::Biblio;
@@ -28,6 +29,7 @@ use C4::Output;
 use C4::Tags qw( get_tags );
 use C4::XSLT;
 use Koha::Virtualshelves;
+use Koha::RecordProcessor;
 
 my $query = new CGI;
 
@@ -253,11 +255,18 @@ if ( $op eq 'view' ) {
             my $lang   = $xslfile ? C4::Languages::getlanguage()  : undef;
             my $sysxml = $xslfile ? C4::XSLT::get_xslt_sysprefs() : undef;
 
+            my $record_processor = Koha::RecordProcessor->new({ filters => 'ViewPolicy' });
             my @items;
             while ( my $content = $contents->next ) {
                 my $biblionumber = $content->biblionumber->biblionumber;
                 my $this_item    = GetBiblioData($biblionumber);
-                my $record       = GetMarcBiblio($biblionumber);
+                my $record = GetMarcBiblio($biblionumber);
+                my $framework = GetFrameworkCode( $biblionumber );
+                $record_processor->options({
+                    interface => 'opac',
+                    frameworkcode => $framework
+                });
+                $record_processor->process($record);
 
                 if ( $xslfile ) {
                     $this_item->{XSLTBloc} = XSLTParse4Display( $biblionumber, $record, "OPACXSLTListsDisplay",
@@ -330,6 +339,7 @@ if ( $op eq 'view' ) {
             }
         } else {
             push @messages, { type => 'error', code => 'unauthorized_on_view' };
+            undef $shelf;
         }
     } else {
         push @messages, { type => 'error', code => 'does_not_exist' };

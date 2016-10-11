@@ -19,16 +19,12 @@ use Modern::Perl;
 
 use Mojo::Base 'Mojolicious::Controller';
 
-use C4::Auth qw( haspermission );
 use Koha::Patrons;
 
 sub list {
     my ($c, $args, $cb) = @_;
 
     my $user = $c->stash('koha.user');
-    unless ($user && haspermission($user->userid, {borrowers => 1})) {
-        return $c->$cb({error => "You don't have the required permission"}, 403);
-    }
 
     my $patrons = Koha::Patrons->search;
 
@@ -39,13 +35,6 @@ sub get {
     my ($c, $args, $cb) = @_;
 
     my $user = $c->stash('koha.user');
-
-    unless ( $user
-        && ( $user->borrowernumber == $args->{borrowernumber}
-            || haspermission($user->userid, {borrowers => 1}) ) )
-    {
-        return $c->$cb({error => "You don't have the required permission"}, 403);
-    }
 
     my $patron = Koha::Patrons->find($args->{borrowernumber});
     unless ($patron) {

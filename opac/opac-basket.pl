@@ -15,17 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
+use Modern::Perl;
 
-use strict;
-use warnings;
 use CGI qw ( -utf8 );
 use C4::Koha;
 use C4::Biblio;
-use C4::Branch;
 use C4::Items;
 use C4::Circulation;
 use C4::Auth;
 use C4::Output;
+use Koha::RecordProcessor;
 
 my $query = new CGI;
 
@@ -57,13 +56,20 @@ if (C4::Context->preference('TagsEnabled')) {
 	}
 }
 
-
+my $record_processor = Koha::RecordProcessor->new({ filters => 'ViewPolicy' });
 foreach my $biblionumber ( @bibs ) {
     $template->param( biblionumber => $biblionumber );
 
     my $dat              = &GetBiblioData($biblionumber);
     next unless $dat;
-    my $record           = &GetMarcBiblio($biblionumber);
+
+    my $record = &GetMarcBiblio( $biblionumber );
+    my $framework = &GetFrameworkCode( $biblionumber );
+    $record_processor->options({
+        interface => 'opac',
+        frameworkcode => $framework
+    });
+    $record_processor->process($record);
     next unless $record;
     my $marcnotesarray   = GetMarcNotes( $record, $marcflavour );
     my $marcauthorsarray = GetMarcAuthors( $record, $marcflavour );
@@ -91,7 +97,6 @@ foreach my $biblionumber ( @bibs ) {
         $dat->{'even'} = 1;
     }
 
-my $branches = GetBranches();
     for my $itm (@items) {
         if ($itm->{'location'}){
             $itm->{'location_opac'} = $shelflocations->{$itm->{'location'} };
@@ -99,8 +104,8 @@ my $branches = GetBranches();
         my ( $transfertwhen, $transfertfrom, $transfertto ) = GetTransfers($itm->{itemnumber});
         if ( defined( $transfertwhen ) && $transfertwhen ne '' ) {
              $itm->{transfertwhen} = $transfertwhen;
-             $itm->{transfertfrom} = $branches->{$transfertfrom}{branchname};
-             $itm->{transfertto}   = $branches->{$transfertto}{branchname};
+             $itm->{transfertfrom} = $transfertfrom;
+             $itm->{transfertto}   = $transfertto;
         }
     }
     $num++;

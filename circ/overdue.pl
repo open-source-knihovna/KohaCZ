@@ -24,7 +24,6 @@ use C4::Context;
 use C4::Output;
 use CGI qw(-oldstyle_urls -utf8);
 use C4::Auth;
-use C4::Branch;
 use C4::Debug;
 use Text::CSV_XS;
 use Koha::DateUtils;
@@ -89,13 +88,6 @@ while (my ($itemtype, $description) =$req->fetchrow) {
         itemtypename => $description,
     };
 }
-my $onlymine =
-     C4::Context->preference('IndependentBranches')
-  && C4::Context->userenv
-  && !C4::Context->IsSuperLibrarian()
-  && C4::Context->userenv->{branch};
-
-$branchfilter = C4::Context->userenv->{'branch'} if ($onlymine && !$branchfilter);
 
 # Filtering by Patron Attributes
 #  @patron_attr_filter_loop        is non empty if there are any patron attribute filters
@@ -214,9 +206,6 @@ if (@patron_attr_filter_loop) {
 
 $template->param(
     patron_attr_header_loop => [ map { { header => $_->{description} } } grep { ! $_->{isclone} } @patron_attr_filter_loop ],
-    branchloop   => GetBranchesLoop($branchfilter, $onlymine),
-    homebranchloop => GetBranchesLoop( $homebranchfilter, $onlymine ),
-    holdingbranchloop => GetBranchesLoop( $holdingbranchfilter, $onlymine ),
     branchfilter => $branchfilter,
     homebranchfilter => $homebranchfilter,
     holdingbranchfilter => $homebranchfilter,

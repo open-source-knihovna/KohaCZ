@@ -7,10 +7,10 @@ use Test::MockModule;
 use C4::Biblio;
 use C4::Items;
 use C4::Members;
-use C4::Branch;
-use C4::Category;
 use C4::Circulation;
 use Koha::Library;
+use Koha::Libraries;
+use Koha::Patron::Categories;
 use MARC::Record;
 
 my $dbh = C4::Context->dbh;
@@ -21,9 +21,9 @@ $dbh->do(q|DELETE FROM issues|);
 
 my $branchcode;
 my $branch_created;
-my @branches = keys %{ GetBranches() };
-if (@branches) {
-    $branchcode = $branches[0];
+my @libraries = Koha::Libraries->search;
+if (@libraries) {
+    $branchcode = $libraries[0]->branchcode;
 } else {
     $branchcode = 'B';
     Koha::Library->new({ branchcode => $branchcode, branchname => 'Branch' })->store;
@@ -44,9 +44,9 @@ my $itemnumber3 = AddItem({ barcode => '0203', %item_branch_infos }, $biblionumb
 
 my $categorycode;
 my $category_created;
-my @categories = C4::Category->all;
+my @categories = Koha::Patron::Categories->search_limited;
 if (@categories) {
-    $categorycode = $categories[0]->{categorycode}
+    $categorycode = $categories[0]->categorycode
 } else {
     $categorycode = 'C';
     C4::Context->dbh->do(

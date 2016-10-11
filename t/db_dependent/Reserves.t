@@ -17,13 +17,13 @@
 
 use Modern::Perl;
 
-use Test::More tests => 74;
+use Test::More tests => 72;
+use Test::MockModule;
 use Test::Warn;
 
 use MARC::Record;
 use DateTime::Duration;
 
-use C4::Branch;
 use C4::Biblio;
 use C4::Items;
 use C4::Members;
@@ -32,6 +32,8 @@ use Koha::Holds;
 use t::lib::Mocks;
 
 use Koha::DateUtils;
+use Koha::Libraries;
+use Koha::Patron::Categories;
 
 use Data::Dumper;
 BEGIN {
@@ -39,9 +41,10 @@ BEGIN {
 }
 
 # a very minimal mack of userenv for use by the test of DelItemCheck
-*C4::Context::userenv = sub {
-    return {};
-};
+my $module = new Test::MockModule('C4::Context');
+$module->mock('userenv', sub {
+    { }
+});
 
 my $dbh = C4::Context->dbh;
 
@@ -56,12 +59,12 @@ $dbh->do("update marc_subfield_structure set kohafield='biblioitems.agerestricti
 
 # Add branches if not existing
 foreach my $addbra ('CPL', 'FPL', 'RPL') {
-    $dbh->do("INSERT INTO branches (branchcode,branchname) VALUES (?,?)", undef, ($addbra,"$addbra branch")) unless GetBranchName($addbra);
+    $dbh->do("INSERT INTO branches (branchcode,branchname) VALUES (?,?)", undef, ($addbra,"$addbra branch")) unless Koha::Libraries->find($addbra);
 }
 
 # Add categories if not existing
 foreach my $addcat ('S', 'PT') {
-    $dbh->do("INSERT INTO categories (categorycode,hidelostitems,category_type) VALUES (?,?,?)",undef,($addcat, 0, $addcat eq 'S'? 'S': 'A')) unless GetBorrowercategory($addcat);
+    $dbh->do("INSERT INTO categories (categorycode,hidelostitems,category_type) VALUES (?,?,?)",undef,($addcat, 0, $addcat eq 'S'? 'S': 'A')) unless Koha::Patron::Categories->find($addcat);
 }
 
 # Create a helper biblio
@@ -109,10 +112,9 @@ my $notes          = '';
 my $checkitem      = undef;
 my $found          = undef;
 
-my @branches = GetBranchesLoop();
-my $branch = $branches[0][0]{value};
+my $branchcode = Koha::Libraries->search->next->branchcode;
 
-AddReserve($branch,    $borrowernumber, $biblionumber,
+AddReserve($branchcode,    $borrowernumber, $biblionumber,
         $bibitems,  $priority, $resdate, $expdate, $notes,
         $title,      $checkitem, $found);
 
@@ -371,7 +373,7 @@ is($new_count, $hold_notice_count + 1, 'patron not notified a second time (bug 1
 # avoiding the not_same_branch error
 t::lib::Mocks::mock_preference('IndependentBranches', 0);
 is(
-    DelItemCheck($dbh, $bibnum, $itemnumber),
+    DelItemCheck( $bibnum, $itemnumber),
     'book_reserved',
     'item that is captured to fill a hold cannot be deleted',
 );
@@ -447,14 +449,6 @@ is($p, 2, 'CalculatePriority should now still return priority 2');
 $p = C4::Reserves::CalculatePriority($bibnum, $resdate);
 is($p, 3, 'CalculatePriority should now return priority 3');
 # End of tests for bug 8918
-
-# Test for bug 5144
-warning_is {
-    $reserve_id = AddReserve('CPL',  $requesters{'CPL3'}, $bibnum,
-           $bibitems,  $p, output_pref($resdate), $expdate, $notes,
-           $title,      $checkitem, $found)
-} "AddReserve: borrower $requesters{CPL3} already has a hold for biblionumber $bibnum";
-is( $reserve_id, undef, 'Attempt to add a second reserve on a given record for the same patron fails.' );
 
 # Tests for cancel reserves by users from OPAC.
 $dbh->do('DELETE FROM reserves', undef, ($bibnum));

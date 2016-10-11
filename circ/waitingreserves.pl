@@ -23,7 +23,6 @@ use warnings;
 use CGI qw ( -utf8 );
 use C4::Context;
 use C4::Output;
-use C4::Branch; # GetBranchName
 use C4::Auth;
 use C4::Circulation;
 use C4::Members;
@@ -119,7 +118,6 @@ foreach my $num (@getreserves) {
     $getreserv{'subtitle'}       = GetRecordValue('subtitle', GetMarcBiblio($gettitle->{'biblionumber'}), GetFrameworkCode($gettitle->{'biblionumber'}));
     $getreserv{'biblionumber'}   = $gettitle->{'biblionumber'};
     $getreserv{'barcode'}        = $gettitle->{'barcode'};
-    $getreserv{'branchname'}     = GetBranchName($gettitle->{'homebranch'});
     $getreserv{'homebranch'}     = $gettitle->{'homebranch'};
     $getreserv{'holdingbranch'}  = $gettitle->{'holdingbranch'};
     $getreserv{'itemcallnumber'} = $gettitle->{'itemcallnumber'};
@@ -162,9 +160,10 @@ $template->param(
     overcount   => $overcount,
     show_date   => output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }),
     ReservesMaxPickUpDelay => $max_pickup_delay,
+    tab => $tab,
 );
 
-if ($item && $tab eq 'holdsover') {
+if ($item && $tab eq 'holdsover' && !@cancel_result) {
     print $input->redirect("/cgi-bin/koha/circ/waitingreserves.pl#holdsover");
 } elsif ($cancelall) {
     print $input->redirect("/cgi-bin/koha/circ/waitingreserves.pl");
@@ -194,7 +193,7 @@ sub cancel {
         my $iteminfo = GetBiblioFromItemNumber($item);
         if ( $messages->{'transfert'} ) {
             $res{messagetransfert} = $messages->{'transfert'};
-            $res{branchname}       = GetBranchName($messages->{'transfert'});
+            $res{branchcode}       = $messages->{'transfert'};
         }
 
         $res{message}             = 1;

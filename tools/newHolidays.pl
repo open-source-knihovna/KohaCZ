@@ -10,7 +10,7 @@ use CGI qw ( -utf8 );
 use C4::Auth;
 use C4::Output;
 
-use Koha::Cache;
+use Koha::Caches;
 
 use C4::Calendar;
 use DateTime;
@@ -57,13 +57,12 @@ if ($end_dt){
 }
 
 if($allbranches) {
-	my $branch;
-	my @branchcodes = split(/\|/, $input->param('branchCodes')); 
-	foreach $branch (@branchcodes) {
-		add_holiday($newoperation, $branch, $weekday, $day, $month, $year, $title, $description);
-	}
+    my $libraries = Koha::Libraries->search;
+    while ( my $library = $libraries->next ) {
+        add_holiday($newoperation, $library->branchcode, $weekday, $day, $month, $year, $title, $description);
+    }
 } else {
-	add_holiday($newoperation, $branchcode, $weekday, $day, $month, $year, $title, $description);
+    add_holiday($newoperation, $branchcode, $weekday, $day, $month, $year, $title, $description);
 }
 
 print $input->redirect("/cgi-bin/koha/tools/holidays.pl?branch=$originalbranchcode&calendardate=$calendardate");
@@ -129,6 +128,6 @@ sub add_holiday {
         }
     }
     # we updated the single_holidays table, so wipe its cache
-    my $cache = Koha::Cache->get_instance();
+    my $cache = Koha::Caches->get_instance();
     $cache->clear_from_cache( 'single_holidays') ;
 }

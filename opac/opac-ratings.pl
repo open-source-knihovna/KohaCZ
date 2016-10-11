@@ -31,8 +31,9 @@ use CGI qw ( -utf8 );
 
 use C4::Auth;
 use C4::Context;
-use C4::Ratings;
 use C4::Debug;
+
+use Koha::Ratings;
 
 my $query = CGI->new();
 
@@ -43,7 +44,6 @@ my $loggedinuser = C4::Context->userenv->{'number'};
 my $biblionumber     = $query->param('biblionumber');
 my $rating_old_value = $query->param('rating_value');
 my $rating_value     = $query->param('rating');
-my $rating;
 
 # If JS is disabled and a user click on "Rate me" without selecting a rate
 unless ( $biblionumber and $rating_value ) {
@@ -53,10 +53,12 @@ unless ( $biblionumber and $rating_value ) {
 }
 
 if ( !$rating_old_value ) {
-    $rating = AddRating( $biblionumber, $loggedinuser, $rating_value );
+    my $rating = Koha::Rating->new( { biblionumber => $biblionumber, borrowernumber => $loggedinuser, rating_value => $rating_value, });
+    $rating->store if $rating;
 }
 else {
-    $rating = ModRating( $biblionumber, $loggedinuser, $rating_value );
+    my $rating = Koha::Ratings->find( { biblionumber => $biblionumber, borrowernumber => $loggedinuser });
+    $rating->rating_value($rating_value)->store if $rating;
 }
 print $query->redirect(
     "/cgi-bin/koha/opac-detail.pl?biblionumber=$biblionumber");

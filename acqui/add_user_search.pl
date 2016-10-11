@@ -21,10 +21,10 @@ use Modern::Perl;
 
 use CGI qw ( -utf8 );
 use C4::Auth;
-use C4::Branch qw( GetBranches );
-use C4::Category;
 use C4::Output;
 use C4::Members;
+
+use Koha::Patron::Categories;
 
 my $input = new CGI;
 
@@ -51,9 +51,7 @@ my $search_patrons_with_acq_perm_only =
     ( $referer =~ m|acqui/basket.pl| )
         ? 1 : 0;
 
-my $onlymine = C4::Branch::onlymine;
-my $branches = C4::Branch::GetBranches( $onlymine );
-
+my $patron_categories = Koha::Patron::Categories->search_limited;
 $template->param(
     patrons_with_acq_perm_only => $search_patrons_with_acq_perm_only,
     view => ( $input->request_method() eq "GET" ) ? "show_form" : "show_results",
@@ -61,8 +59,7 @@ $template->param(
     json_template => 'acqui/tables/members_results.tt',
     selection_type => 'add',
     alphabet        => ( C4::Context->preference('alphabet') || join ' ', 'A' .. 'Z' ),
-    categories      => [ C4::Category->all ],
-    branches        => [ map { { branchcode => $_->{branchcode}, branchname => $_->{branchname} } } values %$branches ],
+    categories      => $patron_categories,
     aaSorting       => 1,
 );
 output_html_with_http_headers( $input, $cookie, $template->output );

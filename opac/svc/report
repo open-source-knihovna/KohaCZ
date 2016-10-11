@@ -27,7 +27,7 @@ use C4::Reports::Guided;
 use JSON;
 use CGI qw ( -utf8 );
 
-use Koha::Cache;
+use Koha::Caches;
 
 my $query       = CGI->new();
 my $report_id   = $query->param('id');
@@ -41,7 +41,7 @@ die "Sorry this report is not public\n" unless $report_rec->{public};
 
 my @sql_params  = $query->param('sql_params');
 
-my $cache = Koha::Cache->get_instance();
+my $cache = Koha::Caches->get_instance();
 my $cache_active = $cache->is_cache_active;
 my ($cache_key, $json_text);
 if ($cache_active) {

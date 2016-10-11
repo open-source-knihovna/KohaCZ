@@ -1,6 +1,7 @@
 [% USE Koha %]
+[% USE Branches %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title>Koha &rsaquo; Catalog &rsaquo; Item details for [% title %] [% FOREACH subtitl IN subtitle %] [% subtitl.subfield %][% END %]</title>
+<title>Koha &rsaquo; Catalog &rsaquo; Item details for [% title | html %] [% FOREACH subtitl IN subtitle %] [% subtitl.subfield | html %][% END %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
 <style type="text/css">h3{padding-top: 1em; border-top: 2px solid #CCCCCC;}#exportLabelexportModal_{border-top: 0px;}</style>
 [% INCLUDE 'browser-strings.inc' %]
@@ -33,14 +34,14 @@
 
     <h2>[% title |html %]</h2>
     [% IF ( subtitle ) %]<h4>[% FOREACH subtitl IN subtitle %] [% subtitl.subfield|html %][% END %]</h4>[% END %]
-    [% IF ( author ) %]<h4>by [% author %]</h4>[% END %]
+    [% IF ( author ) %]<h4>by [% author | html %]</h4>[% END %]
     <ol class="bibliodetails">
         <li><span class="label">Biblionumber:</span> [% biblionumber %]&nbsp;</li>
         [% UNLESS ( item_level_itypes ) %]
         <li><span class="label">Item type:</span> [% itemtypename %]&nbsp;</li>
         [% END %]
         [% IF ( rentalcharge ) %]<li><span class="label">Rental charge:</span>[% rentalcharge %]&nbsp;</li>[% END %]
-        <li><span class="label">ISBN:</span> [% isbn %]&nbsp;</li>
+        <li><span class="label">ISBN:</span> [% isbn | html %]&nbsp;</li>
         <li><span class="label">Publisher:</span>[% place %] [% publishercode |html %] [% publicationyear %]&nbsp;</li>
         [% IF ( volumeddesc ) %]<li><span class="label">Volume:</span> [% volumeddesc %]</li>[% END %]
         <li><span class="label">Physical details:</span> [% pages %] [% illus %] [% size %]&nbsp;</li>
@@ -62,7 +63,7 @@
          [% END %]
          [% END %][% END %]</h4>
             <ol class="bibliodetails">
-            <li><span class="label">Home library:</span> [% ITEM_DAT.homebranchname %]&nbsp;</li>
+            <li><span class="label">Home library:</span> [% Branches.GetName( ITEM_DAT.homebranch ) %]&nbsp;</li>
 	    [% IF ( item_level_itypes ) %]
             <li><span class="label">Item type:</span> [% ITEM_DAT.itype %]&nbsp;</li>
 	    [% END %]
@@ -80,7 +81,7 @@
             )[% END %]</h4>
 
             <ol class="bibliodetails">
-            <li><span class="label">Current location:</span> [% ITEM_DAT.holdingbranchname %]&nbsp;</li>
+            <li><span class="label">Current location:</span> [% Branches.GetName( ITEM_DAT.holdingbranch ) %]&nbsp;</li>
             <li><span class="label">Checkout status:</span>
             [% IF ( ITEM_DAT.issue ) %]Checked out to
                 [% IF ( hidepatronname ) %]

@@ -34,6 +34,7 @@
                                     <label for="comment">Comment:</label>
                                     <textarea id="comment" name="comment" rows="4" cols="40"></textarea>
                                     <input type="hidden" name="bib_list" value="[% bib_list %]" />
+                                    <input type="hidden" name="csrf_token" value="[% csrf_token %]" />
                                 </fieldset>
                                 <fieldset class="action">
                                     <input type="submit" class="btn" value="Send" />

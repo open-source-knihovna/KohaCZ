@@ -78,13 +78,14 @@ my $sql = '
 
         itemnumber,
         barcode,
+        branches2.branchname AS homebranch,
         itemnotes,
         itemnotes_nonpublic,
         itemcallnumber,
         replacementprice,
 
         issues.branchcode,
-        branchname,
+        branches.branchname,
 
         items.itype,
         biblioitems.itemtype,
@@ -97,6 +98,7 @@ my $sql = '
         itemlost,
         damaged,
         location,
+        items.enumchron,
 
         DATEDIFF( issuedate, CURRENT_DATE() ) AS not_issued_today
     FROM issues
@@ -105,6 +107,7 @@ my $sql = '
         LEFT JOIN biblioitems USING ( biblionumber )
         LEFT JOIN borrowers USING ( borrowernumber )
         LEFT JOIN branches ON ( issues.branchcode = branches.branchcode )
+        LEFT JOIN branches branches2 ON ( items.homebranch = branches2.branchcode )
     WHERE borrowernumber
 ';
 
@@ -154,6 +157,7 @@ while ( my $c = $sth->fetchrow_hashref() ) {
         itemtype             => $item_level_itypes ? $c->{itype} : $c->{itemtype},
         itemtype_description => $itemtype->{translated_description},
         location             => $c->{location} ? GetAuthorisedValueByCode( 'LOC', $c->{location} ) : q{},
+        homebranch           => $c->{homebranch},
         itemnotes            => $c->{itemnotes},
         itemnotes_nonpublic  => $c->{itemnotes_nonpublic},
         branchcode           => $c->{branchcode},
@@ -173,6 +177,7 @@ while ( my $c = $sth->fetchrow_hashref() ) {
         date_due_overdue    => $c->{date_due_overdue} ? JSON::true : JSON::false,
         timestamp           => $c->{timestamp},
         onsite_checkout     => $c->{onsite_checkout},
+        enumchron           => $c->{enumchron},
         renewals_count      => $renewals_count,
         renewals_allowed    => $renewals_allowed,
         renewals_remaining  => $renewals_remaining,

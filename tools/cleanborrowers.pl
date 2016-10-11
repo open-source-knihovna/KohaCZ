@@ -31,15 +31,15 @@ This script allows to do 2 things.
 
 =cut
 
-use strict;
+use Modern::Perl;
 
-#use warnings; FIXME - Bug 2505
 use CGI qw ( -utf8 );
 use C4::Auth;
 use C4::Output;
 use C4::Members;        # GetBorrowersWhoHavexxxBorrowed.
 use C4::Circulation;    # AnonymiseIssueHistory.
 use Koha::DateUtils qw( dt_from_string output_pref );
+use Koha::Patron::Categories;
 use Date::Calc qw/Today Add_Delta_YM/;
 use Koha::List::Patron;
 
@@ -64,6 +64,10 @@ my $borrower_dateexpiry =
   $params->{borrower_dateexpiry}
   ? dt_from_string $params->{borrower_dateexpiry}
   : undef;
+my $borrower_lastseen =
+  $params->{borrower_lastseen}
+  ? dt_from_string $params->{borrower_lastseen}
+  : undef;
 my $patron_list_id = $params->{patron_list_id};
 
 my $borrower_categorycode = $params->{'borrower_categorycode'} || q{};
@@ -78,6 +82,10 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
+my $branch = $params->{ branch } || '*';
+$template->param( current_branch => $branch );
+$template->param( OnlyMine => C4::Context->only_my_library );
+
 if ( $step == 2 ) {
 
     my %checkboxes = map { $_ => 1 } split /\0/, $params->{'checkbox'};
@@ -88,8 +96,10 @@ if ( $step == 2 ) {
              _get_selection_params(
                   $not_borrowed_since,
                   $borrower_dateexpiry,
+                  $borrower_lastseen,
                   $borrower_categorycode,
                   $patron_list_id,
+                  $branch
              )
         );
     }
@@ -97,13 +107,17 @@ if ( $step == 2 ) {
 
     my $members_to_anonymize;
     if ( $checkboxes{issue} ) {
-        $members_to_anonymize = GetBorrowersWithIssuesHistoryOlderThan($last_issue_date);
+        if ( $branch eq '*' ) {
+            $members_to_anonymize = GetBorrowersWithIssuesHistoryOlderThan($last_issue_date);
+        } else {
+            $members_to_anonymize = GetBorrowersWithIssuesHistoryOlderThan($last_issue_date, $branch);
+        }
     }
 
     $template->param(
         patrons_to_delete    => $patrons_to_delete,
         patrons_to_anonymize => $members_to_anonymize,
-        patron_list_id          => $patron_list_id,
+        patron_list_id       => $patron_list_id
     );
 }
 
@@ -117,8 +131,12 @@ elsif ( $step == 3 ) {
     if ($do_delete) {
         my $patrons_to_delete = GetBorrowersToExpunge(
                 _get_selection_params(
-                    $not_borrowed_since, $borrower_dateexpiry,
-                    $borrower_categorycode, $patron_list_id
+                    $not_borrowed_since,
+                    $borrower_dateexpiry,
+                    $borrower_lastseen,
+                    $borrower_categorycode,
+                    $patron_list_id,
+                    $branch
                 )
             );
         _skip_borrowers_with_nonzero_balance($patrons_to_delete);
@@ -161,12 +179,15 @@ elsif ( $step == 3 ) {
     $template->param( patron_lists => [ @non_empty_lists ] );
 }
 
+my $patron_categories = Koha::Patron::Categories->search_limited({}, {order_by => ['description']});
+
 $template->param(
     step                   => $step,
     not_borrowed_since   => $not_borrowed_since,
     borrower_dateexpiry    => $borrower_dateexpiry,
+    borrower_lastseen      => $borrower_lastseen,
     last_issue_date        => $last_issue_date,
-    borrower_categorycodes => GetBorrowercategoryList(),
+    borrower_categorycodes => $patron_categories,
     borrower_categorycode  => $borrower_categorycode,
 );
 
@@ -178,12 +199,13 @@ sub _skip_borrowers_with_nonzero_balance {
     my $balance;
     @$borrowers = map {
         (undef, undef, $balance) = GetMemberIssuesAndFines( $_->{borrowernumber} );
-        ($balance != 0) ? (): ($_);
+        (defined $balance && $balance != 0) ? (): ($_);
     } @$borrowers;
 }
 
 sub _get_selection_params {
-    my ($not_borrowed_since, $borrower_dateexpiry, $borrower_categorycode, $patron_list_id) = @_;
+    my ($not_borrowed_since, $borrower_dateexpiry, $borrower_lastseen,
+        $borrower_categorycode, $patron_list_id, $branch) = @_;
 
     my $params = {};
     $params->{not_borrowed_since} = output_pref({
@@ -196,8 +218,17 @@ sub _get_selection_params {
         dateformat => 'iso',
         dateonly   => 1
     }) if $borrower_dateexpiry;
+    $params->{last_seen} = output_pref({
+        dt         => $borrower_lastseen,
+        dateformat => 'iso',
+        dateonly   => 1
+    }) if $borrower_lastseen;
     $params->{category_code} = $borrower_categorycode if $borrower_categorycode;
     $params->{patron_list_id} = $patron_list_id if $patron_list_id;
+
+    if ( defined $branch and $branch ne '*' ) {
+        $params->{ branchcode } = $branch;
+    }
 
     return $params;
 };

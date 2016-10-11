@@ -30,7 +30,6 @@ use C4::Items;
 use C4::Output;
 use C4::Context;
 use C4::Members;
-use C4::Branch; # GetBranches
 use C4::Overdues;
 use C4::Debug;
 use Koha::DateUtils;
@@ -88,8 +87,7 @@ if ( $borr->{'BlockExpiredPatronOpacActions'} ) {
 if ($borr->{reservefee} > 0){
     $template->param( RESERVE_CHARGE => sprintf("%.2f",$borr->{reservefee}));
 }
-# get branches and itemtypes
-my $branches = GetBranches();
+
 my $itemTypes = GetItemTypes();
 
 # There are two ways of calling this script, with a single biblio num
@@ -124,11 +122,7 @@ if (($#biblionumbers < 0) && (! $query->param('place_reserve'))) {
 
 # pass the pickup branch along....
 my $branch = $query->param('branch') || $borr->{'branchcode'} || C4::Context->userenv->{branch} || '' ;
-($branches->{$branch}) or $branch = "";     # Confirm branch is real
 $template->param( branch => $branch );
-
-# make branch selection options...
-my $branchloop = GetBranchesLoop($branch);
 
 # Is the person allowed to choose their branch
 my $OPACChooseBranch = (C4::Context->preference("OPACAllowUserToChooseBranch")) ? 1 : 0;
@@ -359,17 +353,6 @@ unless ( $noreserves ) {
     }
 }
 
-foreach my $res (@reserves) {
-    foreach my $biblionumber (@biblionumbers) {
-        if ( $res->{'biblionumber'} == $biblionumber && $res->{'borrowernumber'} == $borrowernumber) {
-#            $template->param( message => 1 );
-#            $noreserves = 1;
-#            $template->param( already_reserved => 1 );
-            $biblioDataHash{$biblionumber}->{already_reserved} = 1;
-        }
-    }
-}
-
 unless ($noreserves) {
     $template->param( select_item_types => 1 );
 }
@@ -394,7 +377,7 @@ foreach my $biblioNum (@biblionumbers) {
 
     my $record = GetMarcBiblio($biblioNum);
     # Init the bib item with the choices for branch pickup
-    my %biblioLoopIter = ( branchloop => $branchloop );
+    my %biblioLoopIter;
 
     # Get relevant biblio data.
     my $biblioData = $biblioDataHash{$biblioNum};
@@ -437,7 +420,7 @@ foreach my $biblioNum (@biblionumbers) {
 
         $itemLoopIter->{itemnumber} = $itemNum;
         $itemLoopIter->{barcode} = $itemInfo->{barcode};
-        $itemLoopIter->{homeBranchName} = $branches->{$itemInfo->{homebranch}}{branchname};
+        $itemLoopIter->{homeBranchName} = $itemInfo->{homebranch};
         $itemLoopIter->{callNumber} = $itemInfo->{itemcallnumber};
         $itemLoopIter->{enumchron} = $itemInfo->{enumchron};
         $itemLoopIter->{copynumber} = $itemInfo->{copynumber};
@@ -450,8 +433,7 @@ foreach my $biblioNum (@biblionumbers) {
         # If the holdingbranch is different than the homebranch, we show the
         # holdingbranch of the document too.
         if ( $itemInfo->{homebranch} ne $itemInfo->{holdingbranch} ) {
-            $itemLoopIter->{holdingBranchName} =
-              $branches->{ $itemInfo->{holdingbranch} }{branchname};
+            $itemLoopIter->{holdingBranchName} = $itemInfo->{holdingbranch};
         }
 
         # If the item is currently on loan, we display its return date and
@@ -468,9 +450,6 @@ foreach my $biblioNum (@biblionumbers) {
 
         # the item could be reserved for this borrower vi a host record, flag this
         $reservedfor //= '';
-        if ($reservedfor eq $borrowernumber){
-            $itemLoopIter->{already_reserved} = 1;
-        }
 
         if ( defined $reservedate ) {
             $itemLoopIter->{backgroundcolor} = 'reserved';
@@ -509,18 +488,17 @@ foreach my $biblioNum (@biblionumbers) {
           GetTransfers($itemNum);
         if ( $transfertwhen && ($transfertwhen ne '') ) {
             $itemLoopIter->{transfertwhen} = output_pref({ dt => dt_from_string($transfertwhen), dateonly => 1 });
-            $itemLoopIter->{transfertfrom} =
-              $branches->{$transfertfrom}{branchname};
-            $itemLoopIter->{transfertto} = $branches->{$transfertto}{branchname};
+            $itemLoopIter->{transfertfrom} = $transfertfrom;
+            $itemLoopIter->{transfertto} = $transfertto;
             $itemLoopIter->{nocancel} = 1;
         }
 
-	# if the items belongs to a host record, show link to host record
-	if ($itemInfo->{biblionumber} ne $biblioNum){
-		$biblioLoopIter{hostitemsflag} = 1;
-		$itemLoopIter->{hostbiblionumber} = $itemInfo->{biblionumber};
-		$itemLoopIter->{hosttitle} = GetBiblioData($itemInfo->{biblionumber})->{title};
-	}
+        # if the items belongs to a host record, show link to host record
+        if ( $itemInfo->{biblionumber} ne $biblioNum ) {
+            $biblioLoopIter{hostitemsflag}    = 1;
+            $itemLoopIter->{hostbiblionumber} = $itemInfo->{biblionumber};
+            $itemLoopIter->{hosttitle}        = GetBiblioData( $itemInfo->{biblionumber} )->{title};
+        }
 
         # If there is no loan, return and transfer, we show a checkbox.
         $itemLoopIter->{notforloan} = $itemLoopIter->{notforloan} || 0;
@@ -568,6 +546,24 @@ foreach my $biblioNum (@biblionumbers) {
     }
 
     $biblioLoopIter{holdable} &&= CanBookBeReserved($borrowernumber,$biblioNum) eq 'OK';
+
+    # For multiple holds per record, if a patron has previously placed a hold,
+    # the patron can only place more holds of the same type. That is, if the
+    # patron placed a record level hold, all the holds the patron places must
+    # be record level. If the patron placed an item level hold, all holds
+    # the patron places must be item level
+    my $forced_hold_level = Koha::Holds->search(
+        {
+            borrowernumber => $borrowernumber,
+            biblionumber   => $biblioNum,
+            found          => undef,
+        }
+    )->forced_hold_level();
+    if ($forced_hold_level) {
+        $biblioLoopIter{force_hold}   = 1 if $forced_hold_level eq 'item';
+        $biblioLoopIter{itemholdable} = 0 if $forced_hold_level eq 'record';
+    }
+
 
     push @$biblioLoop, \%biblioLoopIter;
 

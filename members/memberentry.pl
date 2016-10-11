@@ -37,11 +37,12 @@ use C4::Members::AttributeTypes;
 use C4::Koha;
 use C4::Log;
 use C4::Letters;
-use C4::Branch; # GetBranches
 use C4::Form::MessagingPreferences;
 use Koha::Patron::Debarments;
 use Koha::Cities;
 use Koha::DateUtils;
+use Koha::Libraries;
+use Koha::Patron::Categories;
 use Koha::Token;
 use Email::Valid;
 use Module::Load;
@@ -153,9 +154,9 @@ $template->param( "checked" => 1 ) if ( defined($nodouble) && $nodouble eq 1 );
 my $categorycode  = $input->param('categorycode') || $borrower_data->{'categorycode'};
 my $category_type = $input->param('category_type') || '';
 unless ($category_type or !($categorycode)){
-    my $borrowercategory = GetBorrowercategory($categorycode);
-    $category_type    = $borrowercategory->{'category_type'};
-    my $category_name = $borrowercategory->{'description'}; 
+    my $borrowercategory = Koha::Patron::Categories->find($categorycode);
+    $category_type    = $borrowercategory->category_type;
+    my $category_name = $borrowercategory->description;
     $template->param("categoryname"=>$category_name);
 }
 $category_type="A" unless $category_type; # FIXME we should display a error message instead of a 500 error !
@@ -303,8 +304,8 @@ if ($op eq 'save' || $op eq 'insert'){
 
     if ( $newdata{dateofbirth} ) {
         my $age = GetAge($newdata{dateofbirth});
-        my $borrowercategory=GetBorrowercategory($newdata{'categorycode'});   
-        my ($low,$high) = ($borrowercategory->{'dateofbirthrequired'}, $borrowercategory->{'upperagelimit'});
+        my $borrowercategory = Koha::Patron::Categories->find($newdata{categorycode});
+        my ($low,$high) = ($borrowercategory->dateofbirthrequired, $borrowercategory->upperagelimit);
         if (($high && ($age > $high)) or ($age < $low)) {
             push @errors, 'ERROR_age_limitations';
             $template->param( age_low => $low);
@@ -370,8 +371,8 @@ if ($op eq 'save' || $op eq 'insert'){
 
 if ( ($op eq 'modify' || $op eq 'insert' || $op eq 'save'|| $op eq 'duplicate') and ($step == 0 or $step == 3 )){
     unless ($newdata{'dateexpiry'}){
-        my $arg2 = $newdata{'dateenrolled'} || output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
-        $newdata{'dateexpiry'} = GetExpiryDate($newdata{'categorycode'},$arg2);
+        my $patron_category = Koha::Patron::Categories->find( $newdata{categorycode} );
+        $newdata{'dateexpiry'} = $patron_category->get_expiry_date( $newdata{dateenrolled} ) if $patron_category;
     }
 }
 
@@ -520,27 +521,30 @@ if(!defined($data{'sex'})){
 my @typeloop;
 my $no_categories = 1;
 my $no_add;
-foreach (qw(C A S P I X)) {
-    my $action="WHERE category_type=?";
-    my ($categories,$labels)=GetborCatFromCatType($_,$action);
-    if(scalar(@$categories) > 0){ $no_categories = 0; }
-	my @categoryloop;
-	foreach my $cat (@$categories){
-		push @categoryloop,{'categorycode' => $cat,
-			  'categoryname' => $labels->{$cat},
-			  'categorycodeselected' => ((defined($borrower_data->{'categorycode'}) && 
-                                                     $cat eq $borrower_data->{'categorycode'}) 
-                                                     || (defined($categorycode) && $cat eq $categorycode)),
-		};
-	}
-	my %typehash;
-	$typehash{'typename'}=$_;
-    my $typedescription = "typename_".$typehash{'typename'};
-	$typehash{'categoryloop'}=\@categoryloop;
-	push @typeloop,{'typename' => $_,
+foreach my $category_type (qw(C A S P I X)) {
+    my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => $category_type }, {order_by => ['categorycode']});
+    $no_categories = 0 if $patron_categories->count > 0;
+
+    my @categoryloop;
+    while ( my $patron_category = $patron_categories->next ) {
+        push @categoryloop,
+          { 'categorycode' => $patron_category->categorycode,
+            'categoryname' => $patron_category->description,
+            'categorycodeselected' =>
+              ( ( defined( $borrower_data->{'categorycode'} ) && $patron_category->categorycode eq $borrower_data->{'categorycode'} ) || ( defined($categorycode) && $patron_category->categorycode eq $categorycode ) ),
+          };
+    }
+    my %typehash;
+    $typehash{'typename'} = $category_type;
+    my $typedescription = "typename_" . $typehash{'typename'};
+    $typehash{'categoryloop'} = \@categoryloop;
+    push @typeloop,
+      { 'typename'       => $category_type,
         $typedescription => 1,
-	  'categoryloop' => \@categoryloop};
+        'categoryloop'   => \@categoryloop
+      };
 }
+
 $template->param('typeloop' => \@typeloop,
         no_categories => $no_categories);
 if($no_categories){ $no_add = 1; }
@@ -590,8 +594,8 @@ foreach (keys(%flags)) {
 }
 
 # get Branch Loop
-# in modify mod: userbranch value for GetBranchesLoop() comes from borrowers table
-# in add    mod: userbranch value come from branches table (ip correspondence)
+# in modify mod: userbranch value comes from borrowers table
+# in add    mod: userbranch value comes from branches table (ip correspondence)
 
 my $userbranch = '';
 if (C4::Context->userenv && C4::Context->userenv->{'branch'}) {
@@ -601,10 +605,9 @@ if (C4::Context->userenv && C4::Context->userenv->{'branch'}) {
 if (defined ($data{'branchcode'}) and ( $op eq 'modify' || $op eq 'duplicate' || ( $op eq 'add' && $category_type eq 'C' ) )) {
     $userbranch = $data{'branchcode'};
 }
+$template->param( userbranch => $userbranch );
 
-my $branchloop = GetBranchesLoop( $userbranch );
-
-if( !$branchloop ){
+if ( Koha::Libraries->search->count < 1 ){
     $no_add = 1;
     $template->param(no_branches => 1);
 }
@@ -632,7 +635,8 @@ if (!defined($data{'dateenrolled'}) or $data{'dateenrolled'} eq ''){
 }
 if ( $op eq 'duplicate' ) {
     $data{'dateenrolled'} = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
-    $data{'dateexpiry'} = GetExpiryDate( $data{'categorycode'}, $data{'dateenrolled'} );
+    my $patron_category = Koha::Patron::Categories->find( $data{categorycode} );
+    $data{dateexpiry} = $patron_category->get_expiry_date( $data{dateenrolled} );
 }
 if (C4::Context->preference('uppercasesurnames')) {
     $data{'surname'} &&= uc( $data{'surname'} );
@@ -676,7 +680,6 @@ $template->param(
   check_member    => $check_member,#to know if the borrower already exist(=>1) or not (=>0) 
   "op$op"   => 1);
 
-$template->param( branchloop => $branchloop ) if ( $branchloop );
 $template->param(
   nodouble  => $nodouble,
   borrowernumber  => $borrowernumber, #register number

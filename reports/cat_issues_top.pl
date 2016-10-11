@@ -23,7 +23,6 @@ use strict;
 use C4::Auth;
 use CGI qw ( -utf8 );
 use C4::Context;
-use C4::Branch; # GetBranches
 use C4::Output;
 use C4::Koha;
 use C4::Circulation;
@@ -36,8 +35,6 @@ use Koha::DateUtils;
 plugin that shows a stats on borrowers
 
 =head1 DESCRIPTION
-
-=over 2
 
 =cut
 
@@ -154,26 +151,15 @@ if ($do_it) {
 
     @shelvinglocloop = sort {$a->{value} cmp $b->{value}} @shelvinglocloop;
 
-    #borcat
-    my ($codes,$labels) = GetborCatFromCatType(undef,undef);
-    my @borcatloop;
-    foreach my $thisborcat (sort {$labels->{$a} cmp $labels->{$b}} keys %$labels) {
-            my %row =(value => $thisborcat,
-                      description => $labels->{$thisborcat},
-                            );
-            push @borcatloop, \%row;
-    }
-    
-    #Day
-    #Month
+    my $patron_categories = Koha::Patron::Categories->search_limited({}, {order_by => ['categorycode']});
+
     $template->param(
                     CGIextChoice => $CGIextChoice,
                     CGIsepChoice => $CGIsepChoice,
-                    branchloop => GetBranchesLoop(C4::Context->userenv->{'branch'}),
                     itemtypeloop =>\@itemtypeloop,
                     ccodeloop =>\@ccodeloop,
                     shelvinglocloop =>\@shelvinglocloop,
-                    borcatloop =>\@borcatloop,
+                    patron_categories => $patron_categories,
                     );
 output_html_with_http_headers $input, $cookie, $template->output;
 }

@@ -33,7 +33,9 @@ use C4::Auth qw(:DEFAULT check_cookie_auth);
 use C4::Context;
 use C4::Debug;
 use C4::Output qw(:html :ajax pagination_bar);
-use C4::Ratings;
+
+use Koha::Ratings;
+
 use JSON;
 
 my $is_ajax = is_ajax();
@@ -70,25 +72,28 @@ my $rating;
 $rating_value //= '';
 
 if ( $rating_value eq '' ) {
-#### delete
-    $rating = DelRating( $biblionumber, $loggedinuser );
+    my $rating = Koha::Ratings->find( { biblionumber => $biblionumber, borrowernumber => $loggedinuser } );
+    $rating->delete if $rating;
 }
 
 elsif ( $rating_value and !$rating_old_value ) {
-#### insert
-    $rating = AddRating( $biblionumber, $loggedinuser, $rating_value );
+    Koha::Rating->new( { biblionumber => $biblionumber, borrowernumber => $loggedinuser, rating_value => $rating_value, })->store;
 }
 
 elsif ( $rating_value ne $rating_old_value ) {
-#### mod
-    $rating = ModRating( $biblionumber, $loggedinuser, $rating_value );
+    my $rating = Koha::Ratings->find( { biblionumber => $biblionumber, borrowernumber => $loggedinuser });
+    $rating->rating_value($rating_value)->store if $rating
 }
 
+my $ratings = Koha::Ratings->search({ biblionumber => $biblionumber });
+my $my_rating = $ratings->search({ borrowernumber => $loggedinuser })->next;
+my $avg = $ratings->get_avg_rating;
+
 my %js_reply = (
-    rating_total   => $rating->{'rating_total'},
-    rating_avg     => $rating->{'rating_avg'},
-    rating_avg_int => $rating->{'rating_avg_int'},
-    rating_value   => $rating->{'rating_value'},
+    rating_total   => $ratings->count,
+    rating_avg     => $avg,
+    rating_avg_int => sprintf("%.0f", $avg),
+    rating_value   => $my_rating ? $my_rating->rating_value : undef,
     auth_status    => $auth_status,
 
 );

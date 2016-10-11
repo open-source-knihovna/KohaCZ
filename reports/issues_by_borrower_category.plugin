@@ -27,7 +27,7 @@ use C4::Output;
 use C4::Koha;
 use C4::Members;
 
-use C4::Branch; # GetBranches
+use Koha::Patron::Categories;
 
 =head1 NAME
 
@@ -64,17 +64,8 @@ the hashes are then translated to hash / arrays to be returned to manager.pl & s
 sub set_parameters {
     my ($template) = @_;
 
-    $template->param( branchloop => GetBranchesLoop() );
-  
-    my ($codes,$labels)=GetborCatFromCatType(undef,undef);
-    my @borcatloop;
-    foreach my $thisborcat (sort keys %$labels) {
-        push @borcatloop, {
-                          value       => $thisborcat,
-                          description => $labels->{$thisborcat},
-                          };
-    }
-    $template->param(loopcategories => \@borcatloop);
+    my $patron_categories = Koha::Patron::Categories->search_limited({}, {order_by => ['categorycode']});
+    $template->param( patron_categories => $patron_categories );
     return $template;
 }
 

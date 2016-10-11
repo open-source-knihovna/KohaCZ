@@ -24,8 +24,7 @@ use strict;
 #use warnings; FIXME - Bug 2505
 
 use C4::Context;
-use C4::Branch; # Can be removed?
-use Koha::Cache;
+use Koha::Caches;
 use Koha::DateUtils qw(dt_from_string);
 use Koha::Libraries;
 use DateTime::Format::MySQL;
@@ -41,7 +40,6 @@ BEGIN {
 		&GetPrinters &GetPrinter
 		&GetItemTypes &getitemtypeinfo
                 &GetItemTypesCategorized &GetItemTypesByCategory
-		&GetSupportName &GetSupportList
 		&getframeworks &getframeworkinfo
         &GetFrameworksLoop
 		&getallthemes
@@ -92,79 +90,6 @@ Koha.pm provides many functions for Koha scripts.
 
 =cut
 
-=head2 GetSupportName
-
-  $itemtypename = &GetSupportName($codestring);
-
-Returns a string with the name of the itemtype.
-
-=cut
-
-sub GetSupportName{
-	my ($codestring)=@_;
-	return if (! $codestring); 
-	my $resultstring;
-	my $advanced_search_types = C4::Context->preference("AdvancedSearchTypes");
-	if (!$advanced_search_types or $advanced_search_types eq 'itemtypes') {  
-		my $query = qq|
-			SELECT description
-			FROM   itemtypes
-			WHERE itemtype=?
-			order by description
-		|;
-		my $sth = C4::Context->dbh->prepare($query);
-		$sth->execute($codestring);
-		($resultstring)=$sth->fetchrow;
-		return $resultstring;
-	} else {
-        my $sth =
-            C4::Context->dbh->prepare(
-                    "SELECT lib FROM authorised_values WHERE category = ? AND authorised_value = ?"
-                    );
-        $sth->execute( $advanced_search_types, $codestring );
-        my $data = $sth->fetchrow_hashref;
-        return $$data{'lib'};
-	}
-
-}
-=head2 GetSupportList
-
-  $itemtypes = &GetSupportList();
-
-Returns an array ref containing informations about Support (since itemtype is rather a circulation code when item-level-itypes is used).
-
-build a HTML select with the following code :
-
-=head3 in PERL SCRIPT
-
-    my $itemtypes = GetSupportList();
-    $template->param(itemtypeloop => $itemtypes);
-
-=head3 in TEMPLATE
-
-    <select name="itemtype" id="itemtype">
-        <option value=""></option>
-        [% FOREACH itemtypeloo IN itemtypeloop %]
-             [% IF ( itemtypeloo.selected ) %]
-                <option value="[% itemtypeloo.itemtype %]" selected="selected">[% itemtypeloo.description %]</option>
-            [% ELSE %]
-                <option value="[% itemtypeloo.itemtype %]">[% itemtypeloo.description %]</option>
-            [% END %]
-       [% END %]
-    </select>
-
-=cut
-
-sub GetSupportList{
-	my $advanced_search_types = C4::Context->preference("AdvancedSearchTypes");
-    if (!$advanced_search_types or $advanced_search_types =~ /itemtypes/) {
-        return GetItemTypes( style => 'array' );
-	} else {
-		my $advsearchtypes = GetAuthorisedValues($advanced_search_types);
-		my @results= map {{itemtype=>$$_{authorised_value},description=>$$_{lib},imageurl=>$$_{imageurl}}} @$advsearchtypes;
-		return \@results;
-	}
-}
 =head2 GetItemTypes
 
   $itemtypes = &GetItemTypes( style => $style );
@@ -1017,7 +942,7 @@ sub GetAuthorisedValues {
       C4::Context->userenv ? C4::Context->userenv->{"branch"} : "";
     my $cache_key =
       "AuthorisedValues-$category-$opac-$branch_limit";
-    my $cache  = Koha::Cache->get_instance();
+    my $cache  = Koha::Caches->get_instance();
     my $result = $cache->get_from_cache($cache_key);
     return $result if $result;
 
@@ -1059,7 +984,7 @@ sub GetAuthorisedValues {
     }
     $sth->finish;
 
-    $cache->set_in_cache( $cache_key, \@results, { deepcopy => 1, expiry => 5 } );
+    $cache->set_in_cache( $cache_key, \@results, { expiry => 5 } );
     return \@results;
 }
 

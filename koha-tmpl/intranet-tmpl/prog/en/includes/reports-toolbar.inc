@@ -19,13 +19,13 @@
                 </div>
             [% END %]
             <div class="btn-group">
-                <a class="btn btn-small" title="Duplicate this saved report" href="/cgi-bin/koha/reports/guided_reports.pl?phase=Create report from SQL&amp;sql=[% sql |uri %]&amp;reportname=[% reportname |uri %]&amp;notes=[% notes |uri %]">
+                <a class="btn btn-small" title="Duplicate this saved report" href="/cgi-bin/koha/reports/guided_reports.pl?phase=Create report from SQL&amp;sql=[% original_sql || sql |uri %]&amp;reportname=[% reportname |uri %]&amp;notes=[% notes |uri %]">
                     <i class="fa fa-copy"></i> Duplicate
                 </a>
             </div>
         [% END %]
 
-        [% IF ( CAN_user_reports_create_reports ) %]
+        [% IF ( CAN_user_reports_delete_reports ) %]
             <div class="btn-group">
                 <a class="delete btn btn-small" href="/cgi-bin/koha/reports/guided_reports.pl?reports=[% id %]&phase=Delete%20Saved">
                     <i class="fa fa-trash"></i> Delete

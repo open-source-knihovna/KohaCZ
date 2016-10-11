@@ -69,7 +69,6 @@ use C4::Auth;
 use C4::Output;
 use C4::Budgets qw/ GetBudget GetBudgetHierarchy CanUserUseBudget GetBudgetPeriods /;
 use C4::Members;
-use C4::Branch;    # GetBranches
 use C4::Items;
 use C4::Biblio;
 use C4::Suggestions;
@@ -112,7 +111,7 @@ unless ( $results and @$results) {
 my $order = $results->[0];
 
 # Check if ACQ framework exists
-my $acq_fw = GetMarcStructure(1, 'ACQ');
+my $acq_fw = GetMarcStructure( 1, 'ACQ', { unsafe => 1 } );
 unless($acq_fw) {
     $template->param('NoACQframework' => 1);
 }
@@ -129,12 +128,6 @@ if ($AcqCreateItem eq 'receiving') {
     my @items;
     foreach (@itemnumbers) {
         my $item = GetItem($_);
-        if($item->{homebranch}) {
-            $item->{homebranchname} = GetBranchName($item->{homebranch});
-        }
-        if($item->{holdingbranch}) {
-            $item->{holdingbranchname} = GetBranchName($item->{holdingbranch});
-        }
         if(my $code = GetAuthValCode("items.notforloan", $fw)) {
             $item->{notforloan} = GetKohaAuthorisedValueLib($code, $item->{notforloan});
         }
