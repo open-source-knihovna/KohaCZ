@@ -103,7 +103,7 @@
         </div>
 
         <div id="sysinfo">
-    [% IF warnPrefBiblioAddsAuthorities || warnPrefEasyAnalyticalRecords || warnPrefAnonymousPatron ||
+    [% IF warnPrefBiblioAddsAuthorities || warnPrefEasyAnalyticalRecords || warnPrefAnonymousPatron || warnPrefAnonymousPatron_PatronDoesNotExist ||
           warnNoActiveCurrency || QueryParserError || warnIsRootUser || xml_config_warnings.size || AutoSelfCheckPatronDoesNotHaveSelfCheckPerm || AutoSelfCheckPatronHasTooManyPerm || warnStatisticsFieldsError %]
         [% IF (warnIsRootUser) %]
             <h2>Warning regarding current user</h2>
@@ -111,7 +111,7 @@
             <p>Please log in instead with a regular staff account. To create a staff account, create a library, a patron category 'Staff' and add a new patron. Then give this patron permissions from 'More' in the toolbar.</p>
         [% END %]
 
-        [% IF warnPrefBiblioAddsAuthorities || warnPrefEasyAnalyticalRecords || warnPrefAnonymousPatron ||
+        [% IF warnPrefBiblioAddsAuthorities || warnPrefEasyAnalyticalRecords || warnPrefAnonymousPatron || warnPrefAnonymousPatron_PatronDoesNotExist ||
               warnNoActiveCurrency || QueryParserError || AutoSelfCheckPatronDoesNotHaveSelfCheckPerm || AutoSelfCheckPatronHasTooManyPerm || warnStatisticsFieldsError%]
             <h2>Warnings regarding the system configuration</h2>
             <table>
@@ -204,8 +204,8 @@
                     <th scope="row"><b>Warning</b></th>
                     <td>The &lt;zebra_bib_index_mode&gt; entry is set to 'grs1'.
                         GRS-1 support is now deprecated and will be removed in future releases.
-                        Please use DOM instead by setting &lt;zebra_bib_index_mode&gt; to
-                        'dom' (full reindex required).
+                        Please use DOM instead. To switch follow this page of wiki:
+                        <a href="https://wiki.koha-community.org/wiki/Switching_to_dom_indexing">Switching to dom indexing</a>
                     </td>
                 </tr>
                 [% ELSIF config_entry.error == 'zebra_bib_index_mode_mismatch_warn' %]
@@ -218,8 +218,8 @@
                     <th scope="row"><b>Warning</b></th>
                     <td>The &lt;zebra_auth_index_mode&gt; entry is set to 'grs1'.
                         GRS-1 support is now deprecated and will be removed in future releases.
-                        Please use DOM instead by setting &lt;zebra_auth_index_mode&gt; to
-                        'dom' (full reindex required).
+                        Please use DOM instead. To switch follow this page of wiki:
+                        <a href="https://wiki.koha-community.org/wiki/Switching_to_dom_indexing">Switching to dom indexing</a>
                     </td>
                 </tr>
                 [% ELSIF config_entry.error == 'zebra_auth_index_mode_mismatch_warn' %]

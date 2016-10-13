@@ -69,6 +69,7 @@ overdue_notices.pl
    -borcat       <categorycode>   category code that must be included
    -borcatout    <categorycode>   category code that must be excluded
    -t                             only include triggered overdues
+   --test                         Run in test mode. No changes will be made on the DB.
    -list-all                      list all overdues
    -date         <yyyy-mm-dd>     emulate overdues run for this date
    -email        <email_type>     type of email that will be used. Can be 'email', 'emailpro' or 'B_email'. Repeatable.
@@ -158,6 +159,13 @@ less frequent run cron script, but requires syncing notice triggers with
 the  cron schedule to ensure proper behavior.
 Add the --triggered option for daily cron, at the risk of no notice 
 being generated if the cron fails to run on time.
+
+=item B<-test>
+
+This option makes the script run in test mode.
+
+In test mode, the script won't make any changes on the DB. This is useful
+for debugging configuration.
 
 =item B<-list-all>
 
@@ -281,6 +289,7 @@ my $man     = 0;
 my $verbose = 0;
 my $nomail  = 0;
 my $MAX     = 90;
+my $test_mode = 0;
 my @branchcodes; # Branch(es) passed as parameter
 my @emails_to_use;    # Emails to use for messaging
 my @emails;           # Emails given in command-line parameters
@@ -307,6 +316,7 @@ GetOptions(
     'itemscontent=s' => \$itemscontent,
     'list-all'       => \$listall,
     't|triggered'    => \$triggered,
+    'test'           => \$test_mode,
     'date=s'         => \$date_input,
     'borcat=s'       => \@myborcat,
     'borcatout=s'    => \@myborcatout,
@@ -315,7 +325,7 @@ GetOptions(
 pod2usage(1) if $help;
 pod2usage( -verbose => 2 ) if $man;
 
-cronlogaction();
+cronlogaction() unless $test_mode;
 
 if ( defined $csvfilename && $csvfilename =~ /^-/ ) {
     warn qq(using "$csvfilename" as filename, that seems odd);
@@ -600,7 +610,7 @@ END_SQL
                             type           => 'OVERDUES',
                             comment => "OVERDUES_PROCESS " .  output_pref( dt_from_string() ),
                         }
-                    );
+                    ) unless $test_mode;
                     $verbose and warn "debarring $borr\n";
                 }
                 my @params = ($borrowernumber);
@@ -757,7 +767,7 @@ END_SQL
                                     from_address           => $admin_email_address,
                                     to_address             => join(',', @emails_to_use),
                                 }
-                            );
+                            ) unless $test_mode;
                             # A print notice should be sent only once per overdue level.
                             # Without this check, a print could be sent twice or more if the library checks sms and email and print and the patron has no email or sms number.
                             $print_sent = 1 if $effective_mtt eq 'print';
@@ -811,7 +821,7 @@ END_SQL
                 attachments            => [$attachment],
                 to_address             => $admin_email_address,
             }
-        );
+        ) unless $test_mode;
     }
 
 }
