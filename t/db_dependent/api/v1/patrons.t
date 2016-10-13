@@ -68,6 +68,16 @@ my $patron = $builder->build({
     }
 });
 
+my $librarian = $builder->build({
+    source => 'Borrower',
+    value => {
+        branchcode   => $branchcode,
+        categorycode => $categorycode,
+        flags        => 16,
+        password     => Koha::AuthUtils::hash_password("test"),
+    }
+});
+
 $t->get_ok('/api/v1/patrons')
   ->status_is(401);
 
@@ -87,6 +97,13 @@ $session2->param('id', $guarantor->{ userid });
 $session2->param('ip', '127.0.0.1');
 $session2->param('lasttime', time());
 $session2->flush;
+
+my $session3 = C4::Auth::get_session('');
+$session3->param('number', $librarian->{ borrowernumber });
+$session3->param('id', $librarian->{ userid });
+$session3->param('ip', '127.0.0.1');
+$session3->param('lasttime', time());
+$session3->flush;
 
 my $tx = $t->ua->build_tx(GET => '/api/v1/patrons');
 $tx->req->cookies({name => 'CGISESSID', value => $session->id});
@@ -349,6 +366,11 @@ $t->request_ok($tx)
 t::lib::Mocks::mock_preference("OpacPasswordChange", 1);
 $tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$borrower->{borrowernumber}.'/password' => json => $password_obj);
 $tx->req->cookies({name => 'CGISESSID', value => $session_nopermission->id});
+$t->request_ok($tx)
+  ->status_is(200);
+
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$borrower->{borrowernumber}.'/password' => json => $password_obj);
+$tx->req->cookies({name => 'CGISESSID', value => $session3->id});
 $t->request_ok($tx)
   ->status_is(200);
 
