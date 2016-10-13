@@ -29,6 +29,7 @@ use Koha::AuthUtils;
 use Koha::Checkouts;
 use Koha::Database;
 use Koha::DateUtils;
+use Koha::Exceptions::Password;
 use Koha::Holds;
 use Koha::Old::Checkouts;
 use Koha::Patron::Categories;
@@ -701,10 +702,14 @@ sub change_password_to {
 
     my $min_length = C4::Context->preference("minPasswordLength");
     if ($min_length > length($cleartext_password)) {
-        return (undef, "Password is too short. Minimum length: $min_length.");
+        Koha::Exceptions::Password::TooShort->throw(
+            "Password is too short. Minimum length: $min_length"
+        );
     }
-    if ($cleartext_password =~ m|^\s+| or $cleartext_password =~ m|\s+$|) {
-        return (undef, "Password cannot contain trailing whitespaces.");
+    elsif ($cleartext_password =~ m|^\s+| or $cleartext_password =~ m|\s+$|) {
+        Koha::Exceptions::Password::TrailingWhitespaces->throw(
+            "Password cannot contain trailing whitespaces."
+        );
     }
     my $hashed_password = Koha::AuthUtils::hash_password($cleartext_password);
     $self->set({ password => $hashed_password })->store;
