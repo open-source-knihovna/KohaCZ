@@ -53,8 +53,6 @@ BEGIN {
 
       GetItemsInCollection
 
-      GetCollections
-
       AddItemToCollection
       RemoveItemFromCollection
       TransferCollection
@@ -159,35 +157,6 @@ sub UpdateCollection {
 
     return 1;
 
-}
-
-=head2 GetCollections
-
- $collections = GetCollections();
- Returns data about all collections
-
- Output:
-  On Success:
-   $results: Reference to an array of associated arrays
-  On Failure:
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub GetCollections {
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth = $dbh->prepare("SELECT * FROM collections");
-    $sth->execute() or return ( 1, $sth->errstr() );
-
-    my @results;
-    while ( my $row = $sth->fetchrow_hashref ) {
-        push( @results, $row );
-    }
-
-    return \@results;
 }
 
 =head2 GetItemsInCollection

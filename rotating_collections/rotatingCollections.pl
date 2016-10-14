@@ -23,7 +23,8 @@ use CGI qw ( -utf8 );
 use C4::Output;
 use C4::Auth;
 use C4::Context;
-use C4::RotatingCollections;
+
+use Koha::RotatingCollections;
 
 my $query = new CGI;
 
@@ -40,7 +41,7 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 
 my $branchcode = $query->cookie('branch');
 
-my $collections = GetCollections();
+my $collections = Koha::RotatingCollections->search;
 
 $template->param(
     collectionsLoop => $collections,
