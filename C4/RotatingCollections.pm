@@ -50,7 +50,6 @@ BEGIN {
     @EXPORT = qw(
       CreateCollection
       UpdateCollection
-      DeleteCollection
 
       GetItemsInCollection
 
@@ -161,39 +160,6 @@ sub UpdateCollection {
 
     return 1;
 
-}
-
-=head2 DeleteCollection
-
- ( $success, $errorcode, $errormessage ) = DeleteCollection( $colId );
- Deletes a collection of the given id
-
- Input:
-   $colId : id of the Archetype to be deleted
-
- Output:
-   $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub DeleteCollection {
-    my ($colId) = @_;
-
-    ## Parameter check
-    if ( !$colId ) {
-        return ( 0, 1, "NO_ID" );
-    }
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth;
-
-    $sth = $dbh->prepare("DELETE FROM collections WHERE colId = ?");
-    $sth->execute($colId) or return ( 0, 4, $sth->errstr() );
-
-    return 1;
 }
 
 =head2 GetCollections

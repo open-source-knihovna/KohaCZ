@@ -23,10 +23,13 @@ use CGI qw ( -utf8 );
 use C4::Output;
 use C4::Auth;
 use C4::Context;
-
 use C4::RotatingCollections;
 
+use Koha::RotatingCollections;
+
 my $query = new CGI;
+my $action = $query->param('action');
+my @messages;
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     {
@@ -38,9 +41,6 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
         debug           => 1,
     }
 );
-
-my $action = $query->param('action');
-$template->param( action => $action );
 
 # Create new Collection
 if ( $action eq 'create' ) {
@@ -62,21 +62,17 @@ if ( $action eq 'create' ) {
         $template->param( createFailure  => 1 );
         $template->param( failureMessage => $errorMessage );
     }
-}
-
-## Delete a club or service
-elsif ( $action eq 'delete' ) {
+} elsif ( $action eq 'delete' ) { # Delete collection
     my $colId = $query->param('colId');
-    my ( $success, $errorCode, $errorMessage ) = DeleteCollection($colId);
+    my $collection = Koha::RotatingCollections->find($colId);
+    my $deleted = eval { $collection->delete; };
 
-    $template->param( previousActionDelete => 1 );
-    if ($success) {
-        $template->param( deleteSuccess => 1 );
+    if ( $@ or not $deleted ) {
+        push @messages, { type => 'error', code => 'error_on_delete' };
+    } else {
+        push @messages, { type => 'message', code => 'success_on_delete' };
     }
-    else {
-        $template->param( deleteFailure  => 1 );
-        $template->param( failureMessage => $errorMessage );
-    }
+    $action = "list";
 }
 
 ## Edit a club or service: grab data, put in form.
@@ -113,5 +109,10 @@ elsif ( $action eq 'update' ) {
         $template->param( failureMessage => $errorMessage );
     }
 }
+
+$template->param(
+    action   => $action,
+    messages => \@messages,
+);
 
 output_html_with_http_headers $query, $cookie, $template->output;
