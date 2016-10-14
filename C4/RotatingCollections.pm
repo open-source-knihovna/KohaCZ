@@ -49,14 +49,7 @@ BEGIN {
     require Exporter;
     @ISA    = qw( Exporter );
     @EXPORT = qw(
-      CreateCollection
-      UpdateCollection
-      DeleteCollection
-
       GetItemsInCollection
-
-      GetCollection
-      GetCollections
 
       AddItemToCollection
       RemoveItemFromCollection
@@ -66,166 +59,6 @@ BEGIN {
 
       GetCollectionItemBranches
     );
-}
-
-=head2  CreateCollection
- ( $success, $errorcode, $errormessage ) = CreateCollection( $title, $description );
- Creates a new collection
-
- Input:
-   $title: short description of the club or service
-   $description: long description of the club or service
-
- Output:
-   $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub CreateCollection {
-    my ( $title, $description ) = @_;
-
-    my $schema = Koha::Database->new()->schema();
-    my $duplicate_titles = $schema->resultset('Collection')->count({ colTitle => $title });
-
-    ## Check for all necessary parameters
-    if ( !$title ) {
-        return ( 0, 1, "NO_TITLE" );
-    } elsif ( $duplicate_titles ) {
-        return ( 0, 2, "DUPLICATE_TITLE" );
-    }
-
-    $description ||= q{};
-
-    my $success = 1;
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth;
-    $sth = $dbh->prepare(
-        "INSERT INTO collections ( colId, colTitle, colDesc )
-                        VALUES ( NULL, ?, ? )"
-    );
-    $sth->execute( $title, $description ) or return ( 0, 3, $sth->errstr() );
-
-    return 1;
-
-}
-
-=head2 UpdateCollection
-
- ( $success, $errorcode, $errormessage ) = UpdateCollection( $colId, $title, $description );
-
-Updates a collection
-
- Input:
-   $colId: id of the collection to be updated
-   $title: short description of the club or service
-   $description: long description of the club or service
-
- Output:
-   $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub UpdateCollection {
-    my ( $colId, $title, $description ) = @_;
-
-    my $schema = Koha::Database->new()->schema();
-    my $duplicate_titles = $schema->resultset('Collection')->count({ colTitle => $title,  -not => { colId => $colId } });
-
-    ## Check for all necessary parameters
-    if ( !$colId ) {
-        return ( 0, 1, "NO_ID" );
-    }
-    if ( !$title ) {
-        return ( 0, 2, "NO_TITLE" );
-    }
-    if ( $duplicate_titles ) {
-        return ( 0, 3, "DUPLICATE_TITLE" );
-    }
-
-    my $dbh = C4::Context->dbh;
-
-    $description ||= q{};
-
-    my $sth;
-    $sth = $dbh->prepare(
-        "UPDATE collections
-                        SET 
-                        colTitle = ?, colDesc = ? 
-                        WHERE colId = ?"
-    );
-    $sth->execute( $title, $description, $colId )
-      or return ( 0, 4, $sth->errstr() );
-
-    return 1;
-
-}
-
-=head2 DeleteCollection
-
- ( $success, $errorcode, $errormessage ) = DeleteCollection( $colId );
- Deletes a collection of the given id
-
- Input:
-   $colId : id of the Archetype to be deleted
-
- Output:
-   $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub DeleteCollection {
-    my ($colId) = @_;
-
-    ## Parameter check
-    if ( !$colId ) {
-        return ( 0, 1, "NO_ID" );
-    }
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth;
-
-    $sth = $dbh->prepare("DELETE FROM collections WHERE colId = ?");
-    $sth->execute($colId) or return ( 0, 4, $sth->errstr() );
-
-    return 1;
-}
-
-=head2 GetCollections
-
- $collections = GetCollections();
- Returns data about all collections
-
- Output:
-  On Success:
-   $results: Reference to an array of associated arrays
-  On Failure:
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub GetCollections {
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth = $dbh->prepare("SELECT * FROM collections");
-    $sth->execute() or return ( 1, $sth->errstr() );
-
-    my @results;
-    while ( my $row = $sth->fetchrow_hashref ) {
-        push( @results, $row );
-    }
-
-    return \@results;
 }
 
 =head2 GetItemsInCollection
@@ -275,37 +108,6 @@ sub GetItemsInCollection {
     }
 
     return \@results;
-}
-
-=head2 GetCollection
-
- ( $colId, $colTitle, $colDesc, $colBranchcode ) = GetCollection( $colId );
-
-Returns information about a collection
-
- Input:
-   $colId: Id of the collection
- Output:
-   $colId, $colTitle, $colDesc, $colBranchcode
-
-=cut
-
-sub GetCollection {
-    my ($colId) = @_;
-
-    my $dbh = C4::Context->dbh;
-
-    my ( $sth, @results );
-    $sth = $dbh->prepare("SELECT * FROM collections WHERE colId = ?");
-    $sth->execute($colId) or return 0;
-
-    my $row = $sth->fetchrow_hashref;
-
-    return (
-        $$row{'colId'},   $$row{'colTitle'},
-        $$row{'colDesc'}, $$row{'colBranchcode'}
-    );
-
 }
 
 =head2 AddItemToCollection

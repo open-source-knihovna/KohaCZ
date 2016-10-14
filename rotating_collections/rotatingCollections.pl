@@ -23,10 +23,11 @@ use CGI qw ( -utf8 );
 use C4::Output;
 use C4::Auth;
 use C4::Context;
-use C4::RotatingCollections;
 use C4::Items;
 use C4::Biblio;
 use C4::Circulation;
+
+use Koha::RotatingCollections;
 
 my $query = new CGI;
 
@@ -72,7 +73,7 @@ if ( $query->param('action') eq 'removeItem' ) {
 
 my $branchcode = $query->cookie('branch');
 
-my $collections = GetCollections();
+my $collections = Koha::RotatingCollections->search;
 
 $template->param(
     collectionsLoop => $collections,

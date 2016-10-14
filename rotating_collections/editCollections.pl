@@ -23,10 +23,13 @@ use CGI qw ( -utf8 );
 use C4::Output;
 use C4::Auth;
 use C4::Context;
-
 use C4::RotatingCollections;
 
+use Koha::RotatingCollections;
+
 my $query = new CGI;
+my $action = $query->param('action');
+my @messages;
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     {
@@ -39,79 +42,76 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
-my $action = $query->param('action');
-$template->param( action => $action );
-
 # Create new Collection
 if ( $action eq 'create' ) {
     my $title       = $query->param('title');
     my $description = $query->param('description');
 
-    my ( $createdSuccessfully, $errorCode, $errorMessage ) =
-      CreateCollection( $title, $description );
-
-    $template->param(
-        previousActionCreate => 1,
-        createdTitle         => $title,
+    my $collection = Koha::RotatingCollection->new(
+        {   colTitle => $title,
+            colDesc  => $description,
+        }
     );
 
-    if ($createdSuccessfully) {
-        $template->param( createSuccess => 1 );
-    }
-    else {
-        $template->param( createFailure  => 1 );
-        $template->param( failureMessage => $errorMessage );
-    }
-}
+    eval { $collection->store; };
 
-## Delete a club or service
-elsif ( $action eq 'delete' ) {
+    if ($@) {
+        push @messages, { type => 'error', code => 'error_on_insert' };
+    } else {
+        push @messages, { type => 'message', code => 'success_on_insert' };
+    }
+
+    $action = "list";
+
+} elsif ( $action eq 'delete' ) { # Delete collection
     my $colId = $query->param('colId');
-    my ( $success, $errorCode, $errorMessage ) = DeleteCollection($colId);
+    my $collection = Koha::RotatingCollections->find($colId);
+    my $deleted = eval { $collection->delete; };
 
-    $template->param( previousActionDelete => 1 );
-    if ($success) {
-        $template->param( deleteSuccess => 1 );
+    if ( $@ or not $deleted ) {
+        push @messages, { type => 'error', code => 'error_on_delete' };
+    } else {
+        push @messages, { type => 'message', code => 'success_on_delete' };
     }
-    else {
-        $template->param( deleteFailure  => 1 );
-        $template->param( failureMessage => $errorMessage );
-    }
-}
 
-## Edit a club or service: grab data, put in form.
-elsif ( $action eq 'edit' ) {
-    my ( $colId, $colTitle, $colDesc, $colBranchcode ) = GetCollection( $query->param('colId') );
+    $action = "list";
+
+} elsif ( $action eq 'edit' ) { # Edit page of collection
+    my $collection = Koha::RotatingCollections->find($query->param('colId'));
 
     $template->param(
         previousActionEdit => 1,
-        editColId          => $colId,
-        editColTitle       => $colTitle,
-        editColDescription => $colDesc,
+        editColId          => $collection->colId,
+        editColTitle       => $collection->colTitle,
+        editColDescription => $collection->colDesc,
     );
-}
 
-# Update a Club or Service
-elsif ( $action eq 'update' ) {
+} elsif ( $action eq 'update' ) { # Update collection
     my $colId       = $query->param('colId');
     my $title       = $query->param('title');
     my $description = $query->param('description');
 
-    my ( $createdSuccessfully, $errorCode, $errorMessage ) =
-      UpdateCollection( $colId, $title, $description );
+    if ($colId) {
+        my $collection = Koha::RotatingCollections->find($colId);
+        $collection->colTitle($title);
+        $collection->colDesc($description);
 
-    $template->param(
-        previousActionUpdate => 1,
-        updatedTitle         => $title,
-    );
+        eval { $collection->store; };
 
-    if ($createdSuccessfully) {
-        $template->param( updateSuccess => 1 );
+        if ($@) {
+            push @messages, { type => 'error', code => 'error_on_update' };
+        } else {
+            push @messages, { type => 'message', code => 'success_on_update' };
+        }
+
+        $action = "list";
     }
-    else {
-        $template->param( updateFailure  => 1 );
-        $template->param( failureMessage => $errorMessage );
-    }
+
 }
+
+$template->param(
+    action   => $action,
+    messages => \@messages,
+);
 
 output_html_with_http_headers $query, $cookie, $template->output;

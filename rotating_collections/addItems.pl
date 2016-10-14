@@ -26,6 +26,8 @@ use C4::Items;
 use C4::Biblio;
 use C4::Circulation;
 
+use Koha::RotatingCollections;
+
 use CGI qw ( -utf8 );
 
 my $query = new CGI;
@@ -100,18 +102,19 @@ if ( $query->param('action') eq 'addItem' ) {
     }
 }
 
-my ( $colId, $colTitle, $colDescription, $colBranchcode ) =
-  GetCollection( $query->param('colId') );
+my $colId = $query->param('colId');
+my $collection = Koha::RotatingCollections->find($colId);
+
 my $collectionItems = GetItemsInCollection($colId);
 if ($collectionItems) {
     $template->param( collectionItemsLoop => $collectionItems );
 }
 
 $template->param(
-    colId          => $colId,
-    colTitle       => $colTitle,
-    colDescription => $colDescription,
-    colBranchcode  => $colBranchcode,
+    colId          => $collection->colId,
+    colTitle       => $collection->colTitle,
+    colDescription => $collection->colDesc,
+    colBranchcode  => $collection->colBranchcode,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

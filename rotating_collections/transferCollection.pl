@@ -23,6 +23,8 @@ use C4::Auth;
 use C4::Context;
 use C4::RotatingCollections;
 
+use Koha::RotatingCollections;
+
 use CGI qw ( -utf8 );
 
 my $query = new CGI;
@@ -60,13 +62,13 @@ if ($toBranch) {
 }
 
 ## Get data about collection
-my ( $colTitle, $colDesc, $colBranchcode );
-( $colId, $colTitle, $colDesc, $colBranchcode ) = GetCollection($colId);
+my $collection = Koha::RotatingCollections->find($colId);
+
 $template->param(
-    colId            => $colId,
-    colTitle         => $colTitle,
-    colDesc          => $colDesc,
-    colBranchcode    => $colBranchcode,
+    colId            => $collection->colId,
+    colTitle         => $collection->colTitle,
+    colDesc          => $collection->colDesc,
+    colBranchcode    => $collection->colBranchcode,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;
