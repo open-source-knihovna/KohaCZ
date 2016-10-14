@@ -53,7 +53,6 @@ BEGIN {
 
       GetItemsInCollection
 
-      GetCollection
       GetCollections
 
       AddItemToCollection
@@ -238,37 +237,6 @@ sub GetItemsInCollection {
     }
 
     return \@results;
-}
-
-=head2 GetCollection
-
- ( $colId, $colTitle, $colDesc, $colBranchcode ) = GetCollection( $colId );
-
-Returns information about a collection
-
- Input:
-   $colId: Id of the collection
- Output:
-   $colId, $colTitle, $colDesc, $colBranchcode
-
-=cut
-
-sub GetCollection {
-    my ($colId) = @_;
-
-    my $dbh = C4::Context->dbh;
-
-    my ( $sth, @results );
-    $sth = $dbh->prepare("SELECT * FROM collections WHERE colId = ?");
-    $sth->execute($colId) or return 0;
-
-    my $row = $sth->fetchrow_hashref;
-
-    return (
-        $$row{'colId'},   $$row{'colTitle'},
-        $$row{'colDesc'}, $$row{'colBranchcode'}
-    );
-
 }
 
 =head2 AddItemToCollection

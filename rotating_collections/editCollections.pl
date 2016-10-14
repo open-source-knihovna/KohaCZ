@@ -77,13 +77,13 @@ if ( $action eq 'create' ) {
 
 ## Edit a club or service: grab data, put in form.
 elsif ( $action eq 'edit' ) {
-    my ( $colId, $colTitle, $colDesc, $colBranchcode ) = GetCollection( $query->param('colId') );
+    my $collection = Koha::RotatingCollections->find($query->param('colId'));
 
     $template->param(
         previousActionEdit => 1,
-        editColId          => $colId,
-        editColTitle       => $colTitle,
-        editColDescription => $colDesc,
+        editColId          => $collection->{colId},
+        editColTitle       => $collection->{colTitle},
+        editColDescription => $collection->{colDesc},
     );
 }
 
