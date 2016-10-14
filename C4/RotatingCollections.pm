@@ -48,7 +48,6 @@ BEGIN {
     require Exporter;
     @ISA    = qw( Exporter );
     @EXPORT = qw(
-      CreateCollection
       UpdateCollection
 
       GetItemsInCollection
@@ -59,51 +58,6 @@ BEGIN {
 
       GetCollectionItemBranches
     );
-}
-
-=head2  CreateCollection
- ( $success, $errorcode, $errormessage ) = CreateCollection( $title, $description );
- Creates a new collection
-
- Input:
-   $title: short description of the club or service
-   $description: long description of the club or service
-
- Output:
-   $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub CreateCollection {
-    my ( $title, $description ) = @_;
-
-    my $schema = Koha::Database->new()->schema();
-    my $duplicate_titles = $schema->resultset('Collection')->count({ colTitle => $title });
-
-    ## Check for all necessary parameters
-    if ( !$title ) {
-        return ( 0, 1, "NO_TITLE" );
-    } elsif ( $duplicate_titles ) {
-        return ( 0, 2, "DUPLICATE_TITLE" );
-    }
-
-    $description ||= q{};
-
-    my $success = 1;
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth;
-    $sth = $dbh->prepare(
-        "INSERT INTO collections ( colId, colTitle, colDesc )
-                        VALUES ( NULL, ?, ? )"
-    );
-    $sth->execute( $title, $description ) or return ( 0, 3, $sth->errstr() );
-
-    return 1;
-
 }
 
 =head2 UpdateCollection

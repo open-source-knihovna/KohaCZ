@@ -47,21 +47,22 @@ if ( $action eq 'create' ) {
     my $title       = $query->param('title');
     my $description = $query->param('description');
 
-    my ( $createdSuccessfully, $errorCode, $errorMessage ) =
-      CreateCollection( $title, $description );
-
-    $template->param(
-        previousActionCreate => 1,
-        createdTitle         => $title,
+    my $collection = Koha::RotatingCollection->new(
+        {   colTitle => $title,
+            colDesc  => $description,
+        }
     );
 
-    if ($createdSuccessfully) {
-        $template->param( createSuccess => 1 );
+    eval { $collection->store; };
+
+    if ($@) {
+        push @messages, { type => 'error', code => 'error_on_insert' };
+    } else {
+        push @messages, { type => 'message', code => 'success_on_insert' };
     }
-    else {
-        $template->param( createFailure  => 1 );
-        $template->param( failureMessage => $errorMessage );
-    }
+
+    $action = "list";
+
 } elsif ( $action eq 'delete' ) { # Delete collection
     my $colId = $query->param('colId');
     my $collection = Koha::RotatingCollections->find($colId);
@@ -72,11 +73,10 @@ if ( $action eq 'create' ) {
     } else {
         push @messages, { type => 'message', code => 'success_on_delete' };
     }
-    $action = "list";
-}
 
-## Edit a club or service: grab data, put in form.
-elsif ( $action eq 'edit' ) {
+    $action = "list";
+
+} elsif ( $action eq 'edit' ) { # Edit page of collection
     my $collection = Koha::RotatingCollections->find($query->param('colId'));
 
     $template->param(
