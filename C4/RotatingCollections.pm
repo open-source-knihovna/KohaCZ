@@ -48,8 +48,6 @@ BEGIN {
     require Exporter;
     @ISA    = qw( Exporter );
     @EXPORT = qw(
-      UpdateCollection
-
       GetItemsInCollection
 
       AddItemToCollection
@@ -58,59 +56,6 @@ BEGIN {
 
       GetCollectionItemBranches
     );
-}
-
-=head2 UpdateCollection
-
- ( $success, $errorcode, $errormessage ) = UpdateCollection( $colId, $title, $description );
-
-Updates a collection
-
- Input:
-   $colId: id of the collection to be updated
-   $title: short description of the club or service
-   $description: long description of the club or service
-
- Output:
-   $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub UpdateCollection {
-    my ( $colId, $title, $description ) = @_;
-
-    my $schema = Koha::Database->new()->schema();
-    my $duplicate_titles = $schema->resultset('Collection')->count({ colTitle => $title,  -not => { colId => $colId } });
-
-    ## Check for all necessary parameters
-    if ( !$colId ) {
-        return ( 0, 1, "NO_ID" );
-    }
-    if ( !$title ) {
-        return ( 0, 2, "NO_TITLE" );
-    }
-    if ( $duplicate_titles ) {
-        return ( 0, 3, "DUPLICATE_TITLE" );
-    }
-
-    my $dbh = C4::Context->dbh;
-
-    $description ||= q{};
-
-    my $sth;
-    $sth = $dbh->prepare(
-        "UPDATE collections
-                        SET 
-                        colTitle = ?, colDesc = ? 
-                        WHERE colId = ?"
-    );
-    $sth->execute( $title, $description, $colId )
-      or return ( 0, 4, $sth->errstr() );
-
-    return 1;
-
 }
 
 =head2 GetItemsInCollection

@@ -81,33 +81,32 @@ if ( $action eq 'create' ) {
 
     $template->param(
         previousActionEdit => 1,
-        editColId          => $collection->{colId},
-        editColTitle       => $collection->{colTitle},
-        editColDescription => $collection->{colDesc},
+        editColId          => $collection->colId,
+        editColTitle       => $collection->colTitle,
+        editColDescription => $collection->colDesc,
     );
-}
 
-# Update a Club or Service
-elsif ( $action eq 'update' ) {
+} elsif ( $action eq 'update' ) { # Update collection
     my $colId       = $query->param('colId');
     my $title       = $query->param('title');
     my $description = $query->param('description');
 
-    my ( $createdSuccessfully, $errorCode, $errorMessage ) =
-      UpdateCollection( $colId, $title, $description );
+    if ($colId) {
+        my $collection = Koha::RotatingCollections->find($colId);
+        $collection->colTitle($title);
+        $collection->colDesc($description);
 
-    $template->param(
-        previousActionUpdate => 1,
-        updatedTitle         => $title,
-    );
+        eval { $collection->store; };
 
-    if ($createdSuccessfully) {
-        $template->param( updateSuccess => 1 );
+        if ($@) {
+            push @messages, { type => 'error', code => 'error_on_update' };
+        } else {
+            push @messages, { type => 'message', code => 'success_on_update' };
+        }
+
+        $action = "list";
     }
-    else {
-        $template->param( updateFailure  => 1 );
-        $template->param( failureMessage => $errorMessage );
-    }
+
 }
 
 $template->param(
