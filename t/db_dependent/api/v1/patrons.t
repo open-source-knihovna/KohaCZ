@@ -186,7 +186,7 @@ $tx = $t->ua->build_tx(POST => "/api/v1/patrons" => json => $newpatron);
 $tx->req->cookies({name => 'CGISESSID', value => $session->id});
 $t->request_ok($tx)
   ->status_is(500)
-  ->json_is('/error' => "Something went wrong, check Koha logs for details");
+  ->json_is('/error' => "Something went wrong, check Koha logs for details.");
 
 delete $newpatron->{ falseproperty };
 $tx = $t->ua->build_tx(POST => "/api/v1/patrons" => json => $newpatron);
@@ -213,7 +213,7 @@ $t->request_ok($tx)
   ->status_is(404)
   ->json_has('/error', 'Fails when trying to PUT nonexistent patron');
 
-$tx = $t->ua->build_tx(PUT => "/api/v1/patrons/" . $newpatron->{ borrowernumber } => json => {categorycode => "nonexistent"});
+$tx = $t->ua->build_tx(PUT => "/api/v1/patrons/" . $newpatron->{ borrowernumber } => json => {branchcode => $branchcode, categorycode => "nonexistent"});
 $tx->req->cookies({name => 'CGISESSID', value => $session->id});
 $t->request_ok($tx)
   ->status_is(404)
@@ -230,7 +230,7 @@ $tx = $t->ua->build_tx(PUT => "/api/v1/patrons/" . $newpatron->{ borrowernumber 
 $tx->req->cookies({name => 'CGISESSID', value => $session->id});
 $t->request_ok($tx)
   ->status_is(500)
-  ->json_is('/error' => "Something went wrong, check Koha logs for details");
+  ->json_is('/error' => "Something went wrong, check Koha logs for details.");
 delete $newpatron->{ falseproperty };
 
 $newpatron->{ cardnumber } = $patron-> { cardnumber };
