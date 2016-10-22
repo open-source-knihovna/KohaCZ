@@ -11466,13 +11466,19 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
         ADD serialseq_z VARCHAR( 100 ) NULL DEFAULT NULL AFTER serialseq_y
    ");
 
-    my $schema        = Koha::Database->new()->schema();
-    my @subscriptions = $schema->resultset('Subscription')->all();
+    my $sth = $dbh->prepare("SELECT * FROM subscription");
+    $sth->execute();
 
-    foreach my $subscription (@subscriptions) {
-        my $number_pattern = $subscription->numberpattern();
+    my $sth2 = $dbh->prepare("SELECT * FROM subscription_numberpatterns WHERE id = ?");
 
-        my $numbering_method = $number_pattern->numberingmethod();
+    my $sth3 = $dbh->prepare("UPDATE serial SET serialseq_x = ?, serialseq_y = ?, serialseq_z = ? WHERE serialid = ?");
+
+    foreach my $subscription ( $sth->fetchrow_hashref() ) {
+        next if !defined($subscription);
+        $sth2->execute( $subscription->{numberpattern} );
+        my $number_pattern = $sth2->fetchrow_hashref();
+
+        my $numbering_method = $number_pattern->{numberingmethod};
         # Get all the data between the enumeration values, we need
         # to split each enumeration string based on these values.
         my @splits = split( /\{[XYZ]\}/, $numbering_method );
@@ -11484,12 +11490,15 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
         }
         my @indexes = sort { $indexes{$a} <=> $indexes{$b} } keys(%indexes);
 
-        my @serials =
-          $schema->resultset('Serial')
-          ->search( { subscriptionid => $subscription->subscriptionid() } );
+        my @serials = @{
+            $dbh->selectall_arrayref(
+                "SELECT * FROM serial WHERE subscriptionid = $subscription->{subscriptionid}",
+                { Slice => {} }
+            )
+        };
 
         foreach my $serial (@serials) {
-            my $serialseq = $serial->serialseq();
+            my $serialseq = $serial->{serialseq};
             my %enumeration_data;
 
             ## We cannot split on multiple values at once,
@@ -11511,12 +11520,11 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
                 $enumeration_data{ $indexes[0] } = $serialseq;
             }
 
-            $serial->update(
-                {
-                    serialseq_x => $enumeration_data{'X'},
-                    serialseq_y => $enumeration_data{'Y'},
-                    serialseq_z => $enumeration_data{'Z'},
-                }
+            $sth3->execute(
+                    $enumeration_data{'X'},
+                    $enumeration_data{'Y'},
+                    $enumeration_data{'Z'},
+                    $serial->{serialid},
             );
         }
     }
@@ -12339,9 +12347,9 @@ if ( $column_has_been_used ) {
 
 $DBversion = "3.23.00.050";
 if ( CheckVersion($DBversion) ) {
-    use YAML::Syck;
     use Koha::SearchMarcMaps;
     use Koha::SearchFields;
+    use Koha::SearchEngine::Elasticsearch;
 
     $dbh->do(q|INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
                     VALUES('SearchEngine','Zebra','Choose Search Engine','','Choice')|);
@@ -12403,21 +12411,8 @@ $dbh->do(q|
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
         |);
 
-my $mappings_yaml = C4::Context->config('intranetdir') . '/admin/searchengine/elasticsearch/mappings.yaml';
-my $indexes = LoadFile( $mappings_yaml );
-
-while ( my ( $index_name, $fields ) = each %$indexes ) {
-        while ( my ( $field_name, $data ) = each %$fields ) {
-            my $field_type = $data->{type};
-            my $field_label = $data->{label};
-            my $mappings = $data->{mappings};
-            my $search_field = Koha::SearchFields->find_or_create({ name => $field_name, label => $field_label, type => $field_type }, { key => 'name' });
-            for my $mapping ( @$mappings ) {
-                my $marc_field = Koha::SearchMarcMaps->find_or_create({ index_name => $index_name, marc_type => $mapping->{marc_type}, marc_field => $mapping->{marc_field} });
-                $search_field->add_to_search_marc_maps($marc_field, { facet => $mapping->{facet}, suggestible => $mapping->{suggestible}, sort => $mapping->{sort} } );
-            }
-        }
-}
+        # Insert default mappings
+        Koha::SearchEngine::Elasticsearch->reset_elasticsearch_mappings;
 
 print "Upgrade to $DBversion done (Bug 12478 - Elasticsearch support for Koha)\n";
     SetVersion($DBversion);
@@ -12655,6 +12650,9 @@ SetVersion($DBversion);
 $DBversion = "3.23.00.063";
 if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
+        UPDATE letter SET branchcode='' WHERE branchcode IS NULL;
+    });
+    $dbh->do(q{
         ALTER TABLE letter MODIFY COLUMN branchcode varchar(10) NOT NULL DEFAULT ''
     });
     $dbh->do(q{
@@ -12875,6 +12873,40 @@ if ( CheckVersion($DBversion) ) {
     });
 
     print "Upgrade to $DBversion done (Bug 14707 - Change UsageStatsCountry from free text to a dropdown list)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.05.04.002";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        update marc_subfield_structure set defaultvalue=REPLACE(defaultvalue, 'YYYY', '<<YYYY>>') where defaultvalue like "%YYYY%" and defaultvalue not like "%<<YYYY>>%";
+    });
+    $dbh->do(q{
+        update marc_subfield_structure set defaultvalue=REPLACE(defaultvalue, 'MM', '<<MM>>') where defaultvalue like "%MM%" and defaultvalue not like "%<<MM>>%";
+    });
+    $dbh->do(q{
+        update marc_subfield_structure set defaultvalue=REPLACE(defaultvalue, 'DD', '<<DD>>') where defaultvalue like "%DD%" and defaultvalue not like "%<<DD>>%";
+    });
+    $dbh->do(q{
+        update marc_subfield_structure set defaultvalue=REPLACE(defaultvalue, 'user', '<<USER>>') where defaultvalue like "%user%" and defaultvalue not like "%<<USER>>%";
+    });
+    print "Upgrade to $DBversion done (Bug 7045 - Default-value substitution inconsistent)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.05.04.003";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE marc_subfield_structure SET authorised_value="WITHDRAWN" WHERE authorised_value="WTHDRAWN";
+    });
+
+    print "Upgrade to $DBversion done (Bug 17357 - WTHDRAWN is still used in installer files)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.05.05.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.05.05)\n";
     SetVersion($DBversion);
 }
 

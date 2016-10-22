@@ -6,6 +6,55 @@ var debug    = "[% debug %]";
 var dformat  = "[% dateformat %]";
 var sentmsg = 0;
 if (debug > 1) {alert("dateformat: " + dformat + "\ndebug is on (level " + debug + ")");}
+var MSG_PLEASE_ENTER_A_VALID_DATE = _("Please enter a valid date (should match %s).");
+
+function is_valid_date(date) {
+    // An empty string is considered as a valid date for convenient reasons.
+    if ( date === '' ) return 1;
+
+    var dateformat = dateformat_str = '[% Koha.Preference('dateformat') %]';
+    if ( dateformat == 'us' ) {
+        if ( date.search(/^\d{2}\/\d{2}\/\d{4}($|\s)/) == -1 ) return 0;
+        dateformat = 'mm/dd/yy';
+    } else if ( dateformat == 'metric' ) {
+        if ( date.search(/^\d{2}\/\d{2}\/\d{4}($|\s)/) == -1 ) return 0;
+        dateformat = 'dd/mm/yy';
+    } else if (dateformat == 'iso' ) {
+        if ( date.search(/^\d{2}-\d{2}-\d{4}($|\s)/) == -1 ) return 0;
+        dateformat = 'yy-mm-dd';
+    } else if ( dateformat == 'dmydot' ) {
+        if ( date.search(/^\d{2}\.\d{2}\.\d{4}($|\s)/) == -1 ) return 0;
+        dateformat = 'dd.mm.yy';
+    }
+    try {
+        $.datepicker.parseDate(dateformat, date);
+    } catch (e) {
+        return 0;
+    };
+    return 1;
+}
+
+function get_dateformat_str(dateformat) {
+    var dateformat_str;
+    if ( dateformat == 'us' ) {
+        dateformat_str = 'mm/dd/yyyy';
+    } else if ( dateformat == 'metric' ) {
+        dateformat_str = 'dd/mm/yyyy';
+    } else if (dateformat == 'iso' ) {
+        dateformat_str = 'yyyy-mm-dd';
+    } else if ( dateformat == 'dmydot' ) {
+        dateformat_str = 'dd.mm.yyyy';
+    }
+    return dateformat_str;
+}
+
+function validate_date (dateText, inst) {
+    if ( !is_valid_date(dateText) ) {
+        var dateformat_str = get_dateformat_str( '[% Koha.Preference('dateformat') %]' );
+        alert(MSG_PLEASE_ENTER_A_VALID_DATE.format(dateformat_str));
+        $('#'+inst.id).val('');
+    }
+}
 
 function Date_from_syspref(dstring) {
         var dateX = dstring.split(/[-/.]/);
@@ -89,7 +138,13 @@ $.datepicker.setDefaults({
         selectOtherMonths: true
     });
 
-    $( ".datepicker" ).datepicker();
+    $( ".datepicker" ).datepicker({
+        onClose: function(dateText, inst) {
+            validate_date(dateText, inst);
+        },
+    }).on("change", function(e, value) {
+        if ( ! is_valid_date( $(this).val() ) ) {$(this).val("");}
+    });
     // http://jqueryui.com/demos/datepicker/#date-range
     var dates = $( ".datepickerfrom, .datepickerto" ).datepicker({
         changeMonth: true,
@@ -102,7 +157,12 @@ $.datepicker.setDefaults({
                     $.datepicker._defaults.dateFormat,
                     selectedDate, instance.settings );
             dates.not( this ).datepicker( "option", option, date );
-        }
+        },
+        onClose: function(dateText, inst) {
+            validate_date(dateText, inst);
+        },
+    }).on("change", function(e, value) {
+        if ( ! is_valid_date( $(this).val() ) ) {$(this).val("");}
     });
 });
 //]]>

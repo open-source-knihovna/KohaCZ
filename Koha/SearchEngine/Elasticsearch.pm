@@ -1,4 +1,4 @@
-package Koha::ElasticSearch;
+package Koha::SearchEngine::Elasticsearch;
 
 # Copyright 2015 Catalyst IT
 #
@@ -22,11 +22,14 @@ use base qw(Class::Accessor);
 use C4::Context;
 
 use Koha::Database;
+use Koha::SearchFields;
+use Koha::SearchMarcMaps;
 
 use Carp;
 use JSON;
 use Modern::Perl;
 use Readonly;
+use YAML::Syck;
 
 use Data::Dumper;    # TODO remove
 
@@ -39,7 +42,7 @@ Readonly our $AUTHORITIES_INDEX => 'authorities';
 
 =head1 NAME
 
-Koha::ElasticSearch - Base module for things using elasticsearch
+Koha::SearchEngine::Elasticsearch - Base module for things using elasticsearch
 
 =head1 ACCESSORS
 
@@ -250,6 +253,24 @@ sub get_elasticsearch_mappings {
     return $mappings;
 }
 
+sub reset_elasticsearch_mappings {
+    my $mappings_yaml = C4::Context->config('intranetdir') . '/admin/searchengine/elasticsearch/mappings.yaml';
+    my $indexes = LoadFile( $mappings_yaml );
+
+    while ( my ( $index_name, $fields ) = each %$indexes ) {
+        while ( my ( $field_name, $data ) = each %$fields ) {
+            my $field_type = $data->{type};
+            my $field_label = $data->{label};
+            my $mappings = $data->{mappings};
+            my $search_field = Koha::SearchFields->find_or_create({ name => $field_name, label => $field_label, type => $field_type }, { key => 'name' });
+            for my $mapping ( @$mappings ) {
+                my $marc_field = Koha::SearchMarcMaps->find_or_create({ index_name => $index_name, marc_type => $mapping->{marc_type}, marc_field => $mapping->{marc_field} });
+                $search_field->add_to_search_marc_maps($marc_field, { facet => $mapping->{facet}, suggestible => $mapping->{suggestible}, sort => $mapping->{sort} } );
+            }
+        }
+    }
+}
+
 # This overrides the accessor provided by Class::Accessor so that if
 # sort_fields isn't set, then it'll generate it.
 sub sort_fields {
@@ -444,6 +465,8 @@ __END__
 =item Chris Cormack C<< <chrisc@catalyst.net.nz> >>
 
 =item Robin Sheat C<< <robin@catalyst.net.nz> >>
+
+=item Jonathan Druart C<< <jonathan.druart@bugs.koha-community.org> >>
 
 =back
 
