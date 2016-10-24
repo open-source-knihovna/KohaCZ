@@ -259,6 +259,16 @@ if ( $data->{dateofbirth} ) {
     $template->param( age => Koha::Patron->new({ dateofbirth => $data->{dateofbirth} })->get_age );
 }
 
+# Check patron's category against age
+my $borrowercategory = Koha::Patron::Categories->find($data->{ 'categorycode' });
+my ($low,$high) = ($borrowercategory->dateofbirthrequired, $borrowercategory->upperagelimit);
+if (($high && ($age > $high)) or ($age < $low)) {
+    $template->param( age_limitations => 1 );
+    $template->param( age_low => $low );
+    $template->param( age_high => $high );
+}
+
+
 ### ###############################################################################
 # BUILD HTML
 # show all reserves of this borrower, and the position of the reservation ....

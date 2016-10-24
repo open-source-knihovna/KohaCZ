@@ -324,6 +324,18 @@ if ($patron) {
         }
     }
 
+    # Calculate and display patron's age
+    my $dateofbirth = $borrower->{ 'dateofbirth' };
+    my $age = GetAge($dateofbirth);
+
+    my $borrowercategory = Koha::Patron::Categories->find($borrower->{ 'categorycode' });
+    my ($low,$high) = ($borrowercategory->dateofbirthrequired, $borrowercategory->upperagelimit);
+    if (($high && ($age > $high)) or ($age < $low)) {
+        $template->param( age_limitations => 1 );
+        $template->param( age_low => $low );
+        $template->param( age_high => $high );
+    }
+
 }
 
 #
