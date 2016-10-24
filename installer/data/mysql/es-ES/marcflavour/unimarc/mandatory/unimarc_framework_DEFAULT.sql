@@ -121,7 +121,7 @@ INSERT INTO `marc_tag_structure` (`tagfield`, `liblibrarian`, `libopac`, `repeat
 		('995', 'Location and Item Information (Koha)', 'Location and Item Information (Koha)', 0, 0, '', '');
 
 INSERT INTO `marc_subfield_structure` (`tagfield`, `tagsubfield`, `liblibrarian`, `libopac`, `repeatable`, `mandatory`, `kohafield`, `tab`, `authorised_value`, `authtypecode`, `value_builder`, `isurl`, `hidden`, `frameworkcode`, `seealso`, `link`, `defaultvalue`) VALUES
-               ('995', '0', 'Withdrawn status', 'Withdrawn status', 0, 0, 'items.withdrawn', 10, 'WTHDRAWN', '', '', 0, 0, '', '', '', NULL),
+               ('995', '0', 'Withdrawn status', 'Withdrawn status', 0, 0, 'items.withdrawn', 10, 'WITHDRAWN', '', '', 0, 0, '', '', '', NULL),
 		('995', '2', 'Lost status', 'Lost status', 0, 0, 'items.itemlost', 10, 'LOST', '', '', 0, 0, '', '', '', NULL),
 		('995', '3', 'Use restrictions', 'Use restrictions', 0, 0, 'items.restricted', 10, 'RESTRICTED', '', '', 0, 0, '', '', '', NULL),
 		('995', '5', 'Date acquired', 'Coded location qualifier', 0, 0, 'items.dateaccessioned', 10, '', '', '', NULL, 0, '', '', '', NULL),
@@ -357,7 +357,7 @@ INSERT INTO `marc_subfield_structure` (`tagfield`, `tagsubfield`, `liblibrarian`
 		('071', 'a', 'Publisher\'s Number (Sound Recordings and Music)', 'Publisher\'s Number (Sound Recordings and Music)', 0, 0, '', 0, '', '', '', 0, -5, '', '', '', NULL),
 		('071', 'b', 'Source', 'Source', 0, 0, '', 0, '', '', '', 0, -5, '', '', '', NULL),
 		('100', 'a', 'General Processing Data', 'General Processing Data', 0, 0, '', 1, '', '', 'unimarc_field_100.pl', 0, 0, '', '', '', NULL),
-		('101', 'a', 'Language of the Text, Soundtrack, etc.', 'Language of the Text, Soundtrack, etc.', 1, 0, '', 1, 'LAN', '', '', 0, 0, '', '', '', NULL),
+		('101', 'a', 'Language of the Text, Soundtrack, etc.', 'Language of the Text, Soundtrack, etc.', 1, 0, '', 1, 'LANG', '', '', 0, 0, '', '', '', NULL),
 		('101', 'b', 'Language of Intermediate Text when Item is Not Translated from Original', 'Language of Intermediate Text when Item is Not Translated from Original', 0, 0, '', 1, '', '', '', 0, -5, '', '', '', NULL),
 		('101', 'c', 'Language of Original Work', 'Language of Original Work', 0, 0, '', 1, '', '', '', 0, -5, '', '', '', NULL),
 		('101', 'd', 'Language of Summary', 'Language of Summary', 0, 0, '', 1, '', '', '', 0, -5, '', '', '', NULL),
@@ -367,7 +367,7 @@ INSERT INTO `marc_subfield_structure` (`tagfield`, `tagsubfield`, `liblibrarian`
 		('101', 'h', 'Language of Libretto, etc.', 'Language of Libretto, etc.', 0, 0, '', 1, '', '', '', 0, -5, '', '', '', NULL),
 		('101', 'i', 'Language of Accompainying MAterial (Other than Summaries, Abstracts or Librettos', 'Language of Accompainying MAterial (Other than Summaries, Abstracts or Librettos', 0, 0, '', 1, '', '', '', 0, -5, '', '', '', NULL),
 		('101', 'j', 'Language of Subtitles', 'Language of Subtitles', 0, 0, '', 1, '', '', '', 0, -5, '', '', '', NULL),
-		('102', 'a', 'Country of Publication', 'Country of Publication', 1, 0, '', 1, 'COU', '', '', 0, 0, '', '', '', NULL),
+		('102', 'a', 'Country of Publication', 'Country of Publication', 1, 0, '', 1, 'COUNTRY', '', '', 0, 0, '', '', '', NULL),
 		('102', 'b', 'Locality of Publication', 'Locality of Publication', 1, 0, '', 1, '', '', '', 0, -5, '', '', '', NULL),
 		('105', 'a', 'Monograph Coded Data', 'Monograph Coded Data', 0, 0, '', 1, '', '', '', 0, 0, '', '', '', NULL),
 		('106', 'a', 'Textual Material Data - Physical Medium Designator', 'Textual Material Data - Physical Medium Designator', 0, 0, '', 1, '', '', '', 0, -5, '', '', '', NULL),

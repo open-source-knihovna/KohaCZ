@@ -209,6 +209,8 @@ elsif ( $step && $step == 3 ) {
             "fwklanguage" => $fwk_language,
             "list"        => $list
         );
+        use Koha::SearchEngine::Elasticsearch;
+        Koha::SearchEngine::Elasticsearch->reset_elasticsearch_mappings;
         $template->param( "$op" => 1 );
     }
     elsif ( $op && $op eq 'selectframeworks' ) {

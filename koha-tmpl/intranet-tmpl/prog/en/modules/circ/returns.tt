@@ -38,11 +38,17 @@ $(document).ready(function () {
             }, columns_settings);
 
     $("#return_date_override").datetimepicker({
-        onClose: function(dateText, inst) { $("#barcode").focus(); },
+        onClose: function(dateText, inst) {
+            if (validate_date(dateText, inst) ) {
+                $("#barcode").focus();
+            }
+        },
         defaultDate: -1,
         hour: 23,
         minute: 59,
         maxDate: 0
+    }).on("change", function(e, value) {
+        if ( ! is_valid_date( $(this).val() ) ) {$(this).val("");}
     });
     $("#return_date_override").on("blur", function() {
             check_valid_return_date();
