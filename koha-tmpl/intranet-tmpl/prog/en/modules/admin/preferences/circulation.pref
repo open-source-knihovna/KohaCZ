@@ -628,6 +628,12 @@ Circulation:
                   no:  "Don't enable"
             - "sending an email to the Koha administrator email address whenever a hold request is placed."
         -
+            - pref: NotifyToReturnItemWhenHoldIsPlaced
+              choices:
+                  yes: Enable
+                  no:  "Don't enable"
+            - "sending an email to the borrowers to return an item whenever a hold request is placed on it."
+        -
             - pref: DisplayMultiPlaceHold
               choices:
                   yes: Enable
