@@ -62,6 +62,8 @@ INSERT INTO `letter` (module, code, name, title, content, message_transport_type
  'Встановлено резервування на наступний примірник: „<<biblio.title>>“ (<<biblio.biblionumber>>) відвідувачем: <<borrowers.firstname>> <<borrowers.surname>> (<<borrowers.cardnumber>>).',
  'email'),
 
+('reserves', 'HOLDPLACED_CONTACT','Hold Placed on Item, Contact Patrons','Item Return Required','Dear <<borrowers.firstname>> <<borrowers.surname>>,\r\n a hold has been placed on the following item: <<biblio.title>> (<<biblio.biblionumber>>) by another patron. Please, return it as soon as possible.\r\n\r\nThank you!','email'),
+
 ('suggestions','ACCEPTED','пропозиція прийнята', 'Пропозицію на придбання прийнято',
  'Дорог(ий/а) <<borrowers.firstname>> <<borrowers.surname>>,\n\n Ви запропонували бібліотеці отримати надходження зі заголовком „<<suggestions.title>>“, автор „<<suggestions.author>>“.\n\n Бібліотека розглянула сьогодні Вашу пропозицію. Примірник буде замовлений як можна швидше. Ви будете повідомлені поштою, коли замовлення завершено, і знову, коли примірник надійде до бібліотеки. \n\n Якщо у Вас є які-небудь питання, будь ласка, напишіть нам за адресою <<branches.branchemail>>.\n\n Спасибі,\n\n<<branches.branchname>>',
  'email'),
