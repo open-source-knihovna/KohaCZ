@@ -283,7 +283,7 @@ INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `
 ('NoticeBcc','','','Email address to bcc outgoing notices sent by email','free'),
 ('NoticeCSS','',NULL,'Notices CSS url.','free'),
 ('NotifyBorrowerDeparture','30',NULL,'Define number of days before expiry where circulation is warned about patron account expiry','Integer'),
-('NotifyToReturnItemFromLibrary','PatronLibrary','PatronLibrary|AnyLibrary','Restricts which libraries to take into consideration when notifying patrons to return items on hold','Choice'),
+('NotifyToReturnItemFromLibrary','ItemHomeLibrary','RequestorLibrary|ItemHomeLibrary|AnyLibrary','Restricts what library to take into consideration when notifying patrons to return items on hold','Choice'),
 ('NotifyToReturnItemWhenHoldIsPlaced','0',NULL,'If ON, notifies the borrowers to return an item whenever a hold is placed on it','YesNo'),
 ('NovelistSelectEnabled','0',NULL,'Enable Novelist Select content.  Requires Novelist Profile and Password','YesNo'),
 ('NovelistSelectPassword','',NULL,'Enable Novelist user Profile','free'),

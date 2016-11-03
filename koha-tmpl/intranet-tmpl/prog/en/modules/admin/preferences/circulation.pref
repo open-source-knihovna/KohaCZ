@@ -613,11 +613,12 @@ Circulation:
               choices:
                   yes: Enable
                   no:  "Don't enable"
-            - sending an email to the patrons to return an item whenever a hold request is placed on it. If enabled, contact patrons from
+            - sending an email to the patrons to return an item whenever a hold request is placed on it. If enabled, contact patrons
             - pref: NotifyToReturnItemFromLibrary
               choices:
-                  PatronLibrary: "patron's home library"
-                  AnyLibrary:    "any library"
+                  RequestorLibrary: "belonging to requestor's home library"
+                  ItemHomeLibrary:  "having the item borrowed from requestor's home library"
+                  AnyLibrary:       "from any library"
             - .
         -
             - pref: DisplayMultiPlaceHold
