@@ -257,9 +257,46 @@ sub AddReserve {
                     borrowernumber         => $borrowernumber,
                     message_transport_type => 'email',
                     from_address           => $admin_email_address,
-                    to_address           => $admin_email_address,
+                    to_address             => $admin_email_address,
                 }
             );
+        }
+    }
+
+    # Send email to borrowers asking to return item whenever a hold is placed on it
+    if (C4::Context->preference("NotifyToReturnItemWhenHoldIsPlaced")) {
+        my @borrowers = GetBorrowersToSatisfyHold($hold);
+        foreach my $borrower (@borrowers) {
+            if ( !$borrower->{email} ) {
+                next;
+            }
+
+            my $library = Koha::Libraries->find($borrower->{branchcode})->unblessed;
+            if ( my $letter =  C4::Letters::GetPreparedLetter (
+                module => 'reserves',
+                letter_code => 'HOLDPLACED_CONTACT',
+                branchcode => $branch,
+                tables => {
+                    'branches'    => $library,
+                    'borrowers'   => $borrower,
+                    'biblio'      => $biblionumber,
+                    'biblioitems' => $biblionumber,
+                    'items'       => $checkitem,
+                },
+            ) ) {
+
+                my $admin_email_address = $library->{'branchemail'} || C4::Context->preference('KohaAdminEmailAddress');
+
+                C4::Letters::EnqueueLetter(
+                    {   letter                 => $letter,
+                        borrowernumber         => $borrower->{borrowernumber},
+                        message_transport_type => 'email',
+                        from_address           => $admin_email_address,
+                        to_address             => $borrower->{email},
+                    }
+            );
+            }
+
         }
     }
 
@@ -2213,6 +2250,69 @@ sub GetHoldRule {
     $sth->execute( $categorycode, $itemtype, $branchcode );
 
     return $sth->fetchrow_hashref();
+}
+
+=head2 GetBorrowersToSatisfyHold
+
+my @borrowers = GetBorrowersToSatisfyHold( $hold );
+
+Returns borrowers who can return item to satisfy a given hold.
+
+=cut
+
+sub GetBorrowersToSatisfyHold {
+    my ( $hold ) = @_;
+
+    my $query = "";
+
+    if ($hold->item()) {
+        $query = q{
+             SELECT borrowers.borrowernumber
+               FROM reserves
+               JOIN items ON reserves.itemnumber = items.itemnumber
+               JOIN issues ON issues.itemnumber = items.itemnumber
+               JOIN borrowers ON issues.borrowernumber = borrowers.borrowernumber
+              WHERE reserves.reserve_id = ?
+        };
+    }
+    elsif ($hold->biblio()) {
+        $query = q{
+             SELECT borrowers.borrowernumber
+               FROM reserves
+               JOIN biblio ON reserves.biblionumber = biblio.biblionumber
+               JOIN items ON items.biblionumber = biblio.biblionumber
+               JOIN issues ON issues.itemnumber = items.itemnumber
+               JOIN borrowers ON issues.borrowernumber = borrowers.borrowernumber
+              WHERE reserves.reserve_id = ?
+        };
+    }
+
+    my $library = C4::Context->preference("NotifyToReturnItemFromLibrary");
+    my $dbh = C4::Context->dbh;
+    my $sth;
+
+    if ($library eq 'RequestorLibrary') {
+        $query .= " AND borrowers.branchcode = ?";
+	$sth = $dbh->prepare( $query );
+	$sth->execute( $hold->id(), $hold->borrower()->branchcode );
+    }
+    elsif ($library eq 'ItemHomeLibrary') {
+        $query .= " AND items.homebranch = ?";
+	$sth = $dbh->prepare( $query );
+	$sth->execute( $hold->id(), $hold->borrower()->branchcode );
+    }
+    else {
+	$sth = $dbh->prepare( $query );
+	$sth->execute( $hold->id() );
+    }
+
+    my @results = ();
+    while ( my $data = $sth->fetchrow_hashref ) {
+        my $borrower = C4::Members::GetMember(borrowernumber => $data->{borrowernumber});
+        push( @results, $borrower );
+    }
+
+    return @results;
 }
 
 =head1 AUTHOR
