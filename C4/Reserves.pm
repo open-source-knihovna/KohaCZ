@@ -2498,17 +2498,17 @@ sub GetBorrowersToSatisfyHold {
 
     if ($library eq 'RequestorLibrary') {
         $query .= " AND borrowers.branchcode = ?";
-	$sth = $dbh->prepare( $query );
-	$sth->execute( $hold->id(), $hold->borrower()->branchcode );
+        $sth = $dbh->prepare( $query );
+        $sth->execute( $hold->id(), $hold->borrower()->branchcode );
     }
     elsif ($library eq 'ItemHomeLibrary') {
         $query .= " AND items.homebranch = ?";
-	$sth = $dbh->prepare( $query );
-	$sth->execute( $hold->id(), $hold->borrower()->branchcode );
+        $sth = $dbh->prepare( $query );
+        $sth->execute( $hold->id(), $hold->borrower()->branchcode );
     }
     else {
-	$sth = $dbh->prepare( $query );
-	$sth->execute( $hold->id() );
+        $sth = $dbh->prepare( $query );
+        $sth->execute( $hold->id() );
     }
 
     my @results = ();
