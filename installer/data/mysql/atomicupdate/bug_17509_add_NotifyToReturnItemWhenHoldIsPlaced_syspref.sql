@@ -1,1 +1,2 @@
-INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('NotifyToReturnItemWhenHoldIsPlaced', '0', 'If ON, notifies the borrowers to return an item whenever a hold is placed on it', NULL, 'YesNo');
+INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('NotifyToReturnItemWhenHoldIsPlaced', '0', 'If ON, notifies the patrons to return an item whenever a hold is placed on it', NULL, 'YesNo');
+INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('NotifyToReturnItemFromLibrary', 'PatronLibrary', 'Restricts which libraries to take into consideration when notifying patrons to return items on hold', 'PatronLibrary|AnyLibrary', 'Choice');
