@@ -24,7 +24,9 @@ use Carp;
 use Koha::Database;
 
 use C4::Context;
+use C4::Circulation qw(GetIssuingRule);
 use Koha::IssuingRules;
+use Koha::Item::Availabilities;
 use Koha::Item::Transfer;
 use Koha::Patrons;
 use Koha::Libraries;
@@ -41,6 +43,24 @@ Koha::Item - Koha Item object class
 
 =cut
 
+=head3 availabilities
+
+my $availabilities = $item->availabilities;
+
+# Available for checkout?
+$availabilities->issue->available
+
+Returns Koha::Item::Availabilities object which holds different types of
+availabilities for this item.
+
+=cut
+
+sub availabilities {
+    my ($self) = @_;
+
+    return Koha::Item::Availabilities->new($self);
+}
+
 =head3 effective_itemtype
 
 Returns the itemtype for the item based on whether item level itemtypes are set or not.
@@ -51,6 +71,18 @@ sub effective_itemtype {
     my ( $self ) = @_;
 
     return $self->_result()->effective_itemtype();
+}
+
+=head3 hold_queue_length
+
+=cut
+
+sub hold_queue_length {
+    my ( $self ) = @_;
+
+    my $reserves = Koha::Holds->search({ itemnumber => $self->itemnumber });
+    return $reserves->count() if $reserves;
+    return 0;
 }
 
 =head3 home_branch
