@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "available": {
+      "type": "boolean",
+      "description": "availability status"
+    },
+    "description": {
+      "type": "array",
+      "items": {
+        "type": ["string", "null"],
+        "description": "more information on availability"
+      }
+    }
+  }
+}

@@ -1,4 +1,10 @@
 {
+  "availability": {
+    "$ref": "definitions/availability.json"
+  },
+  "availabilities": {
+    "$ref": "definitions/availabilities.json"
+  },
   "city": {
     "$ref": "definitions/city.json"
   },

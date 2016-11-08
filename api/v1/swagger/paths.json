@@ -1,4 +1,7 @@
 {
+  "/availability/items": {
+    "$ref": "paths/availability.json#/~1availability~1items"
+  },
   "/cities": {
     "$ref": "paths/cities.json#/~1cities"
   },

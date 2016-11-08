@@ -1,0 +1,65 @@
+{
+  "type": "object",
+  "properties": {
+    "barcode": {
+      "type": ["string", "null"],
+      "description": "item barcode"
+    },
+    "biblioitemnumber": {
+      "type": "string",
+      "description": "internally assigned biblio item identifier"
+    },
+    "biblionumber": {
+      "type": "string",
+      "description": "internally assigned biblio identifier"
+    },
+    "checkout": {
+      "$ref": "availabilitystatus.json"
+    },
+    "enumchron": {
+      "type": ["string", "null"],
+      "description": "serial enumeration/chronology for the item"
+    },
+    "expected_available": {
+      "type": ["string", "null"],
+      "description": "date this item is expected to be available"
+    },
+    "hold": {
+      "$ref": "availabilitystatus.json"
+    },
+    "holdQueueLength": {
+      "type": ["integer", "null"],
+      "description": "number of holdings placed on title/item"
+    },
+    "holdingbranch": {
+      "type": ["string", "null"],
+      "description": "library that is currently in possession item"
+    },
+    "homebranch": {
+      "type": ["string", "null"],
+      "description": "library that owns this item"
+    },
+    "itemcallnumber": {
+      "type": ["string", "null"],
+      "description": "call number for this item"
+    },
+    "itemnotes": {
+      "type": ["string", "null"],
+      "description": "public notes on this item"
+    },
+    "itemnumber": {
+      "type": "string",
+      "description": "internally assigned item identifier"
+    },
+    "local_use": {
+      "$ref": "availabilitystatus.json"
+    },
+    "location": {
+      "type": ["string", "null"],
+      "description": "authorized value for the shelving location for this item"
+    },
+    "onsite_checkout": {
+      "$ref": "availabilitystatus.json"
+    }
+  }
+}

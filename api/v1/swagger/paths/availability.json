@@ -1,0 +1,36 @@
+{
+  "/availability/items": {
+    "get": {
+      "operationId": "itemsAvailability",
+      "tags": ["items", "availability"],
+      "parameters": [{
+          "$ref": "../parameters.json#/itemnumbersQueryParam"
+        }, {
+          "$ref": "../parameters.json#/biblionumbersQueryParam"
+        }
+      ],
+      "consumes": ["application/json"],
+      "produces": ["application/json"],
+      "responses": {
+        "200": {
+          "description": "Availability information on item(s)",
+          "schema": {
+            "$ref": "../definitions.json#/availabilities"
+          }
+        },
+        "400": {
+          "description": "Missing or wrong parameters",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        },
+        "404": {
+          "description": "No item(s) found",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        }
+      }
+    }
+  }
+}
