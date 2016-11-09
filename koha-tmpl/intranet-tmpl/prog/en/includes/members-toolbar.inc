@@ -169,6 +169,8 @@ function searchToHold(){
 
     <a id="addnewmessageLabel" href="#add_message_form" data-toggle="modal" class="btn btn-default btn-sm"><i class="fa fa-comment-o"></i> Add message</a>
 
+    <a id="createfine" href="/cgi-bin/koha/members/maninvoice.pl?borrowernumber=[% borrowernumber %]" class="btn btn-small"><i class="fa fa-usd"></i> Create fine</a>
+
          <div class="btn-group">
         <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">More <span class="caret"></span></button>
             <ul class="dropdown-menu">
