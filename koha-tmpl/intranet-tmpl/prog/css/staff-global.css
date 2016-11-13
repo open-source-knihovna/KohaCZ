@@ -2114,7 +2114,7 @@ ul.ui-tabs-nav li {
     color: #538200;
 }
 
-.statictabs ul {
+.statictabs > ul {
     background: none repeat scroll 0 0 transparent;
     border: 0 none;
     margin: 0;
@@ -2132,17 +2132,17 @@ ul.ui-tabs-nav li {
     text-decoration: none;
 }
 
-.statictabs ul:after {
+.statictabs > ul:after {
     clear: both;
 }
 
-.statictabs ul:before,
-.statictabs ul:after {
+.statictabs > ul:before,
+.statictabs > ul:after {
     content: "";
     display: table;
 }
 
-.statictabs ul li {
+.statictabs > ul li {
     background: none repeat scroll 0 0 #E6F0F2;
     border: 1px solid #B9D8D9;
     border-bottom: 0 none;
@@ -2161,14 +2161,14 @@ ul.ui-tabs-nav li {
 
 }
 
-.statictabs ul li.active {
+.statictabs > ul li.active {
     background-color: #FFFFFF;
     color: #212121;
     font-weight: normal;
     padding-bottom: 1px;
 }
 
-.statictabs ul li a {
+.statictabs > ul li a {
     color: #004D99;
     cursor: pointer;
     float: left;
@@ -2176,14 +2176,14 @@ ul.ui-tabs-nav li {
     text-decoration: none;
 }
 
-.statictabs ul li a:hover {
+.statictabs > ul li a:hover {
     background-color : #EDF4F5;
     border-top-right-radius: 4px;
     border-top-left-radius: 4px;
     color : #538200;
 }
 
-.statictabs ul li.active a {
+.statictabs > ul li.active a {
     color: #000000;
     font-weight: bold;
     cursor: text;

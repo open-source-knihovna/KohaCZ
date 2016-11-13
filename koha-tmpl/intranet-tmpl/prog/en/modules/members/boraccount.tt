@@ -112,17 +112,34 @@ $(document).ready(function() {
       [% IF ( account.amountcredit ) %]<td class="credit" style="text-align: right;">[% ELSE %]<td class="debit" style="text-align: right;">[% END %][% account.amount | $Price %]</td>
       [% IF ( account.amountoutstandingcredit ) %]<td class="credit" style="text-align: right;">[% ELSE %]<td class="debit" style="text-align: right;">[% END %][% account.amountoutstanding | $Price %]</td>
       <td class="actions">
-        [% IF ( account.payment ) %]
-          <a target="_blank" href="printfeercpt.pl?action=print&amp;accountlines_id=[% account.accountlines_id %]&amp;borrowernumber=[% account.borrowernumber %]" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Print</a>
+        <div class="dropdown">
+        <div class="btn-group">
+        [% IF ( account.amountoutstanding > 0 ) %]
+          <a class="btn btn-default btn-xs" href="paycollect.pl?borrowernumber=[% account.borrowernumber %]&pay_individual=1&accounttype=[% account.accounttype %]&amount=[% account.amount %]&amountoutstanding=[% account.amountoutstanding %]&description=[% account.description %]&notify_id=[% account.notify_id %]&notify_level=[% account.notify_level %]&accountlines_id=[% account.accountlines_id %]"><i class="fa fa-dollar"></i> Pay</a>a
+          [% # If there is amount outstanding, we have at least two actions (pay, print, sometimes writeoff), so we need dropdown %]
+          <a class="btn btn-default btn-xs dropdown-toggle" id="subactions[% account.accountlines_id %]" role="button" data-toggle="dropdown" href="#"><i class="caret"></i></a>
+          <ul class="dropdown-menu" role="menu" arialabelledby="subactions[% account.accountlines_id %]">
         [% ELSE %]
-          <a target="_blank" href="printinvoice.pl?action=print&amp;accountlines_id=[% account.accountlines_id %]&amp;borrowernumber=[% account.borrowernumber %]" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Print</a>
-        [% END %]
-        [% IF ( reverse_col) %]
           [% IF ( account.payment ) %]
-            <a href="boraccount.pl?action=reverse&amp;accountlines_id=[% account.accountlines_id %]&amp;borrowernumber=[% account.borrowernumber %]" class="btn btn-default btn-xs"><i class="fa fa-undo"></i> Reverse</a>
+            <a target="_blank" href="printfeercpt.pl?action=print&amp;accountlines_id=[% account.accountlines_id %]&amp;borrowernumber=[% account.borrowernumber %]" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Print</a>
           [% ELSE %]
-            &nbsp;
+            <a target="_blank" href="printinvoice.pl?action=print&amp;accountlines_id=[% account.accountlines_id %]&amp;borrowernumber=[% account.borrowernumber %]" class="btn btn-default btn-xs"><i class="fa fa-print"></i> Print</a>
           [% END %]
+        [% END %]
+        [% # If user can reverse, we need the dropdown %]
+        [% IF ( reverse_col && account.payment ) %]
+          <a class="btn btn-default btn-xs dropdown-toggle" id="subactions[% account.accountlines_id %]" role="button" data-toggle="dropdown" href="#"><i class="caret"></i></a>
+          <ul class="dropdown-menu" role="menu" arialabelledby="subactions[% account.accountlines_id %]">
+        [% END %]
+
+        [% IF ( account.amountoutstanding > 0 ) %]
+            [% IF CAN_user_updatecharges_writeoff %]
+            <li><a href="paycollect.pl?borrowernumber=[% account.borrowernumber %]&writeoff_individual=1&accounttype=[% account.accounttype %]&amount=[% account.amount %]&amountoutstanding=[% account.amountoutstanding %]&description=[% account.description %]&notify_id=[% account.notify_id %]&notify_level=[% account.notify_level %]&accountlines_id=[% account.accountlines_id %]"><i class="fa fa-times"></i> Write off</a></li>
+            [% END %]
+            <li><a target="_blank" href="printinvoice.pl?action=print&amp;accountlines_id=[% account.accountlines_id %]&amp;borrowernumber=[% account.borrowernumber %]"><i class="fa fa-print"></i> Print</a></li>
+        [% END %]
+        [% IF ( reverse_col && account.payment ) %]
+            <li><a href="boraccount.pl?action=reverse&amp;accountlines_id=[% account.accountlines_id %]&amp;borrowernumber=[% account.borrowernumber %]"><i class="fa fa-undo"></i> Reverse</a></li>
         [% END %]
       </td>
     </tr>
