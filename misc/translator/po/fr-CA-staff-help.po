@@ -2794,15 +2794,6 @@ msgid ""
 "the script."
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:196
-#, fuzzy, c-format
-msgid ""
-"As your file is uploaded you will see an image that will confirm that the "
-"system is working."
-msgstr ""
-"Une fois le fichier chargé sur le serveur, un message de confirmation est "
-"affiché."
-
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:29
 #, c-format
 msgid ""
@@ -12598,31 +12589,6 @@ msgstr ""
 "une date de fin de suspension."
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/merge.tt:20
-#, c-format
-msgid ""
-"Note: If you would like you can also use the Lists tool for merging records "
-"together."
-msgstr ""
-
-#: intranet-tmpl/prog/en/modules/help/members/discharge.tt:7
-#: intranet-tmpl/prog/en/modules/help/members/moremember.tt:77
-#, c-format
-msgid ""
-"Note: In France a \"quitus\" (\"discharge\") is needed if you want to "
-"register for an account in a library or a university)."
-msgstr ""
-
-#: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:225
-#, c-format
-msgid "Note: Please note that edit_items permission is still required"
-msgstr ""
-
-#: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:432
-#, c-format
-msgid "Note: Please note that items_batchmod permission is still required"
-msgstr ""
-
-#: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
 #, c-format
 msgid ""
 "Note: If you would like you can also use the Lists tool for merging records "

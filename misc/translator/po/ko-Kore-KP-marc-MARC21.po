@@ -109,7 +109,6 @@ msgstr "#기록"
 #. %5$s:  ELSE 
 #. %6$s:  END 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_linking_section.tt:158
-#, c-format
 #, fuzzy, c-format
 msgid "%sResults %s to %s of %s %sNo results found %s"
 msgstr "결과를 찾을 수 없음"
@@ -1912,7 +1911,7 @@ msgstr "책"
 
 #: intranet-tmpl/prog/en/data/marc21_field_008.xml:3
 #: intranet-tmpl/prog/en/data/marc21_field_006.xml:3
-#, c-format, fuzzy
+#, fuzzy, c-format
 msgid "Books"
 msgstr "책들"
 
@@ -11661,7 +11660,7 @@ msgid "large print"
 msgstr "큰활자인쇄자료"
 
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MADS.xsl:1113
-#, c-format, fuzzy
+#, fuzzy, c-format
 msgid "later"
 msgstr "이후"
 
@@ -12309,7 +12308,7 @@ msgstr "음악 플레이트"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3.xsl:1740
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:1597
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS.xsl:1337
-#, c-format, fuzzy
+#, fuzzy, c-format
 msgid "music publisher"
 msgstr "음악 발행처"
 
@@ -12453,7 +12452,7 @@ msgid "not fiction "
 msgstr "픽션이 아님"
 
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MADS.xsl:1054
-#, c-format, fuzzy
+#, fuzzy, c-format
 msgid "notFound"
 msgstr "미발견"
 
@@ -12569,7 +12568,7 @@ msgstr "o- 정부 기관 형태 미정"
 
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:100
 #: intranet-tmpl/prog/en/modules/cataloguing/value_builder/marc21_leader_authorities.tt:102
-#, c-format, fuzzy
+#, fuzzy, c-format
 msgid "o- Incomplete authority record"
 msgstr "o- 불완전한 전거 레코드"
 
@@ -13736,7 +13735,7 @@ msgstr "주제"
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS32.xsl:2989
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:2441
 #: intranet-tmpl/prog/en/xslt/MARC21slim2MODS3-1.xsl:2499
-#, c-format, fuzzy
+#, fuzzy, c-format
 msgid "summary or subtitle"
 msgstr "요약 또는 부제"
 

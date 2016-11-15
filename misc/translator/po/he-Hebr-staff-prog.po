@@ -37047,7 +37047,7 @@ msgstr "תוכן העניינים של <em>%s</em>"
 msgid "Print list"
 msgstr "תוכן העניינים של <em>%s</em>"
 
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:156
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:164
 #, fuzzy, c-format
 msgid "Print overdues"
 msgstr "תוכן העניינים של <em>%s</em>"

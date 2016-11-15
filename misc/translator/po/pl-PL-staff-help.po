@@ -588,7 +588,7 @@ msgid "'Required match checks' - ??"
 msgstr "'Sprawdzanie wymaganego dopasowania' - ??"
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:27
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "'SRU Search field mapping': Click on Modify to add or update the mapping "
 "from the available fields on the Koha search form to the specific server "
@@ -4216,7 +4216,7 @@ msgstr "Udostępnianie:"
 #: intranet-tmpl/prog/en/modules/help/admin/cities.tt:3
 #, c-format
 msgid "Cities and Towns"
-msgstr "Miejscowości"
+msgstr "Miejscowość"
 
 #: intranet-tmpl/prog/en/modules/help/admin/cities.tt:13
 #, c-format
@@ -6014,7 +6014,7 @@ msgstr ""
 "telefonu dokładnie tak, jak podano w systemie lub wpisać 12 555 12 12"
 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:25
-#, fuzzy, c-format
+#, c-format
 msgid "Example: You may have multiple $a subfields in a field"
 msgstr "Przykład: Możesz mieć wiele podpól $a w polu"
 
@@ -8444,14 +8444,6 @@ msgstr ""
 "potrzebujesz raportu który pokaże wszystkie egzemplarze obecnie wypożyczone "
 "na miejscu."
 
-#: intranet-tmpl/prog/en/modules/help/circ/on-site_checkouts.tt:5
-#, c-format
-msgid ""
-"If you are using the on site checkouts functionality (OnSiteCheckouts) then "
-"you'll have a report to view all items that are currently checked out on "
-"site."
-msgstr ""
-
 #: intranet-tmpl/prog/en/modules/help/tools/overduerules.tt:38
 #, c-format
 msgid ""
@@ -9122,18 +9114,6 @@ msgstr ""
 "zaznaczyć i kliknąć 'Scal wybrane' na górze wyników. Jeśli wybierzesz więcej "
 "lub mniej niż 2 rekordy, zostanie wyświetlony błąd."
 
-#: intranet-tmpl/prog/en/modules/help/cataloguing/merge.tt:7
-#, c-format
-msgid ""
-"If you see duplicates on that search results screen you can check the boxes "
-"next to the duplicates and click the 'Merge selected' button at the top of "
-"the results. If you choose more than or fewer than 2, you will be presented "
-"with an error."
-msgstr ""
-"Duplikaty rekordów wyświetlą się w wynikach wyszukiwania, możesz je "
-"zaznaczyć i kliknąć 'Scal wybrane' na górze wyników. Jeśli wybierzesz więcej "
-"lub mniej niż 2 rekordy, zostanie wyświetlony błąd."
-
 #: intranet-tmpl/prog/en/modules/help/members/files.tt:5
 #: intranet-tmpl/prog/en/modules/help/members/moremember.tt:59
 #, c-format
@@ -9606,24 +9586,6 @@ msgstr ""
 "Jeśli używasz modułu Czasopisma, możesz dołączyć zamówienie rekordu z "
 "poziomu 'Z prenumeraty' "
 
-#: intranet-tmpl/prog/en/modules/help/acqui/newordersubscription.tt:7
-#, c-format
-msgid ""
-"If you're using the Serials module you can link your subscription order "
-"information to acquisitions by choosing to order 'From a subscription'"
-msgstr ""
-"Jeśli używasz modułu Czasopisma, możesz dołączyć zamówienie rekordu z "
-"poziomu 'Z prenumeraty'"
-
-#: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:24
-#, c-format
-msgid ""
-"If you're using the Serials module you can link your subscription order "
-"information to acquisitions by choosing to order 'From a subscription' "
-msgstr ""
-"Jeśli używasz modułu Czasopisma, możesz dołączyć zamówienie rekordu z "
-"poziomu 'Z prenumeraty' "
-
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:32
 #, c-format
 msgid ""
@@ -9905,17 +9867,6 @@ msgstr ""
 "Ważne: Nie usuwaj i nie modyfikuj Szablonu Domyślnego MARC - może to "
 "spowodować problemy z istniejącymi rekordami w bazie - zawsze twórz nowy "
 "szablon oparty na Szablonie Domyślnym lub innym."
-
-#: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:7
-#, fuzzy, c-format
-msgid ""
-"Important: Do not delete or edit the Default Framework since this will cause "
-"problems with your cataloging records - always create a new template based "
-"on the Default Framework, or alter the other Frameworks."
-msgstr ""
-"Nie usuwaj i nie modyfikuj Szablonu Domyślnego MARC - może to spowodować "
-"problemy z istniejącymi rekordami w bazie - zawsze twórz nowy szablon oparty "
-"na Szablonie Domyślnym lub innym."
 
 #: intranet-tmpl/prog/en/modules/help/admin/itemtypes.tt:36
 #, c-format
@@ -10398,14 +10349,13 @@ msgstr ""
 "(unimarc_plugin_210c i unimarc_plugin_225a, które mogą znaleźć zarówno "
 "wydawcę po ISBN, jak i listę kolekcji dla wydawcy)"
 
-#: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:164
-#: intranet-tmpl/prog/en/modules/help/admin/marc_subfields_structure.tt:110
+#: intranet-tmpl/prog/en/modules/help/cataloguing/addbiblio.tt:28
+#: intranet-tmpl/prog/en/modules/help/cataloguing/addbooks.tt:25
 #, c-format
 msgid ""
-"In UNIMARC there are plugins for every 1xx fields that are coded fields. The "
-"plugin is a huge help for cataloger! There are also two plugins "
-"(unimarc_plugin_210c and unimarc_plugin_225a that can \"magically\" find the "
-"editor from an ISBN, and the collection list for the editor)"
+"In addition to the Import link to the right of each title, you can click on "
+"the title you're interested in and a menu will pop up with links to preview "
+"the record and import it"
 msgstr ""
 "Oprócz linku do importu po prawej stronie każdego tytułu, można kliknąć na "
 "tytuł i rozwinie się menu z linkami do podglądu rekordu i jego importu."
@@ -17726,7 +17676,7 @@ msgid ""
 "This can be set by the librarian editing a patron record and adding a "
 "restriction or by the Overdue/Notice Status Triggers"
 msgstr ""
-"Ograniczenie może nadać bibliotekarz w 'Modyfikuj' na koncie użytkownika lub "
+"ograniczenie może nadać bibliotekarz w 'Modyfikuj' na koncie użytkownika lub "
 "zaznaczyć 'Ogranicz' w narzędziu Wyzwalacze powiadomień/statusów przy "
 "określonej kategorii użytkownika"
 
@@ -19358,15 +19308,6 @@ msgstr ""
 "Jeśli chcesz ukryć niektóre kolumny, kliknij 'Pokaż/Ukryj kolumny', zaznacz "
 "miesiące, które chcesz wyświetlać, a które ukryć. Jeśli chcesz dodać więcej "
 "kolumn, kliknij 'Pokaż/Ukryj wszystkie kolumny'."
-
-#: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:190
-#, c-format
-msgid ""
-"To import a framework you first need to create a new framework. Once you "
-"have that framework, click 'Import' to the right of the new framework."
-msgstr ""
-"Jeśli chcesz importować szablon, najpierw utwórz nowy szablon, a następnie "
-"kliknij 'Import' po prawej stronie nowego szablonu."
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:190
 #, c-format

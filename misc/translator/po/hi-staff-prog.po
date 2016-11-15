@@ -37372,7 +37372,7 @@ msgstr "Print page"
 msgid "Print list"
 msgstr "प्रिंट पर्ची"
 
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:156
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:164
 #, fuzzy, c-format
 msgid "Print overdues"
 msgstr "प्रिंटर"

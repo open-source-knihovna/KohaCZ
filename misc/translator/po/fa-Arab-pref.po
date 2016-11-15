@@ -2715,10 +2715,6 @@ msgid "circulation.pref#finesMode# <br><b>Note:</b> Fines can also be charged by
 msgstr ""
 
 # Circulation > Fines Policy
-msgid "circulation.pref#finesMode# <br><b>Note:</b> Fines can also be charged by the CalculateFinesOnReturn system preference."
-msgstr ""
-
-# Circulation > Fines Policy
 msgid "circulation.pref#finesMode# Calculate (but only for mailing to the admin)"
 msgstr "محاسبه کردن (اما فقط برای ایمیل کردن به مدیر)"
 
@@ -6493,10 +6489,6 @@ msgstr "از کار انداختن"
 # Web services > IdRef
 msgid "web_services.pref#IdRef# Enable"
 msgstr "فعال کردن"
-
-# Web services > IdRef
-msgid "web_services.pref#IdRef# Please note that this feature is available only for UNIMARC."
-msgstr ""
 
 # Web services > IdRef
 msgid "web_services.pref#IdRef# Please note that this feature is available only for UNIMARC."

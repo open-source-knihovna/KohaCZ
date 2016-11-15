@@ -38165,7 +38165,7 @@ msgstr "Etikett drucken"
 msgid "Print list"
 msgstr "Liste drucken"
 
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:156
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:164
 #, c-format
 msgid "Print overdues"
 msgstr "Überfälligkeiten drucken"

@@ -38111,7 +38111,7 @@ msgstr "Imprimir etiqueta"
 msgid "Print list"
 msgstr "Imprimir lista"
 
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:156
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:164
 #, c-format
 msgid "Print overdues"
 msgstr "Imprimir atrasos"

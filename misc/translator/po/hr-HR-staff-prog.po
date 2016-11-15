@@ -45,30 +45,6 @@ msgstr ""
 "\", \"borrowernumber\": \"%s\" }%s,%s %s ] } %s %s %s%s%s %s%s%s %s%s%s %s "
 "%s "
 
-#. %1$s:  data.borrowernumber 
-#. %2$s:  UNLESS loop.last 
-#. %3$s:  END 
-#. %4$s:  END 
-#. %5$s:  BLOCK escape_address 
-#. %6$s: ~ SET address = data.streetnumber _ ' ' 
-#. %7$s: ~ IF data.streettype 
-#. %8$s:  address = address _ AuthorisedValues.GetByCode( 'ROADTYPE', data.streettype ) _ ' ' 
-#. %9$s:  END 
-#. %10$s: ~ IF data.address 
-#. %11$s:  address = address _ data.address _ ' ' 
-#. %12$s:  END 
-#. %13$s: ~ IF data.address2 
-#. %14$s:  address = address _ data.address2 _ ' ' 
-#. %15$s:  END 
-#. %16$s: ~ To.json( address ) ~
-#. %17$s:  END 
-#: intranet-tmpl/prog/en/modules/members/tables/members_results.tt:31
-#, fuzzy, c-format
-msgid ""
-"\", \"borrowernumber\": \"%s\" }%s,%s %s ] } %s %s %s%s%s %s%s%s %s%s%s %s "
-"%s "
-msgstr "%s %s by %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s%s"
-
 #. %1$s:  data.borrowernotes.replace('\\\\' , '\\\\') |html |html_line_break |collapse 
 #: intranet-tmpl/prog/en/modules/members/tables/members_results.tt:30
 #, c-format
@@ -221,7 +197,7 @@ msgstr ""
 #. %19$s:  (item.issues || 0) |html 
 #. %20$s:  INCLUDE 'empty_line.inc' 
 #: intranet-tmpl/prog/en/includes/catalogue/itemsearch_item.csv.inc:1
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s %s %s %s \"%s %sby %s%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s"
 "\", \"%s\", \"%s\", \"%s\", \"%s\", \"%s\"%s "

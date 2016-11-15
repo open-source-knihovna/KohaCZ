@@ -37275,7 +37275,7 @@ msgstr "列印標籤"
 msgid "Print list"
 msgstr "列印虛擬書架"
 
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:156
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:164
 #, c-format
 msgid "Print overdues"
 msgstr "列印逾期"

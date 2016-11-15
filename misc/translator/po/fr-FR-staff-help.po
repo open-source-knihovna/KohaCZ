@@ -2799,15 +2799,6 @@ msgstr ""
 "Au moins une substitution doit être définie, autrement il n'y a aucun sens "
 "de lancer le script."
 
-#: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:196
-#, fuzzy, c-format
-msgid ""
-"As your file is uploaded you will see an image that will confirm that the "
-"system is working."
-msgstr ""
-"Une fois le fichier chargé sur le serveur, un message de confirmation est "
-"affiché."
-
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:29
 #, c-format
 msgid ""
@@ -12742,32 +12733,6 @@ msgid ""
 "together."
 msgstr ""
 "Note: Vous pouvez utiliser l'outil \"Listes\" pour fusionner les notices."
-
-#: intranet-tmpl/prog/en/modules/help/members/discharge.tt:7
-#: intranet-tmpl/prog/en/modules/help/members/moremember.tt:77
-#, fuzzy, c-format
-msgid ""
-"Note: In France a \"quitus\" (\"discharge\") is needed if you want to "
-"register for an account in a library or a university)."
-msgstr ""
-"Note&nbsp;: en France un quitus est nécessaire sous vous voulez vous "
-"inscrire dans une bibliothèque ou une université."
-
-#: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:225
-#, fuzzy, c-format
-msgid "Note: Please note that edit_items permission is still required"
-msgstr "Note&nbsp;: Merci que la permission edit_items est toujours exigée"
-
-#: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:432
-#, c-format
-msgid "Note: Please note that items_batchmod permission is still required"
-msgstr ""
-"Note: Veuillez noter que la permission items_batchmod est toujours nécessaire"
-
-#: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
-#, c-format
-msgid "Note: if you list prices and/or invoice prices, include tax."
-msgstr "Note: si vos prix catalogue ou facturés incluent la TVA."
 
 #: intranet-tmpl/prog/en/modules/help/members/discharge.tt:7
 #: intranet-tmpl/prog/en/modules/help/members/moremember.tt:77

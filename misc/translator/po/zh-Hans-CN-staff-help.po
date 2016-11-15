@@ -2455,13 +2455,6 @@ msgid ""
 "the script."
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:196
-#, fuzzy, c-format
-msgid ""
-"As your file is uploaded you will see an image that will confirm that the "
-"system is working."
-msgstr "文件上传后，出现确认消息。"
-
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:29
 #, c-format
 msgid ""
@@ -11314,17 +11307,6 @@ msgid ""
 msgstr ""
 "选好之后按下 '合并' 钮。主要纪录将显示选择的数据以及来自书目数据的馆藏/预约资"
 "料，次要数据被删除。"
-
-#: intranet-tmpl/prog/en/modules/help/authorities/merge.tt:11
-#, c-format
-msgid ""
-"Once you have completed your selections click the 'merge' button. The "
-"primary record will now CONTAIN the data you chose for it as well as all of "
-"the items/holdings from both bib records, and the second record will be "
-"deleted."
-msgstr ""
-"选好之后，按下'合并'钮，主要纪录将显示选择的数据，以及来自书目数据的馆藏/预约"
-"数据，次要数据被删除。"
 
 #: intranet-tmpl/prog/en/modules/help/authorities/merge.tt:11
 #, c-format

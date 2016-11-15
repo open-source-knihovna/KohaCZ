@@ -2562,14 +2562,6 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:29
 #, c-format
 msgid ""
-"As your file is uploaded you will see an image that will confirm that the "
-"system is working."
-msgstr ""
-"Once the file is uploaded you will be presented with a confirmation message."
-
-#: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:29
-#, c-format
-msgid ""
 "At the bottom of the page there is a summary of the patron's current checked "
 "out items along with the due date (and time if the item is an hourly loan), "
 "items checked out today will appear at the top."
@@ -7847,7 +7839,7 @@ msgid ""
 msgstr "Holiday repeated yearly on the same date"
 
 #: intranet-tmpl/prog/en/modules/help/mainpage.tt:5
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "If this is your first time logging into Koha, you should now go to Koha "
 "Administration and set up all system preferences, patron categories, item "
@@ -12310,7 +12302,7 @@ msgstr ""
 "the merge."
 
 #: intranet-tmpl/prog/en/modules/help/mainpage.tt:7
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Once you have set up patron categories, you should create a new user in the "
 "Patrons module with superlibrarian permissions. Once that user is created, "

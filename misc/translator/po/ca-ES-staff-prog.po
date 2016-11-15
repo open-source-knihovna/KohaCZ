@@ -37217,7 +37217,7 @@ msgstr "Imprimeix el llistat"
 msgid "Print list"
 msgstr "Imprimeix el llistat"
 
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:156
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:164
 #, fuzzy, c-format
 msgid "Print overdues"
 msgstr "Imprimeix"

@@ -37105,7 +37105,7 @@ msgstr "Edicións"
 msgid "Print list"
 msgstr "Edicións"
 
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:156
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:164
 #, fuzzy, c-format
 msgid "Print overdues"
 msgstr "Edicións"

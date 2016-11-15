@@ -2716,10 +2716,6 @@ msgid "circulation.pref#finesMode# <br><b>Note:</b> Fines can also be charged by
 msgstr "<br><b>주의:</b> CalculateFinesOnReturn 시스템 기본 설정에 의해 벌금이 부과 될 수 있습니다."
 
 # Circulation > Fines Policy
-msgid "circulation.pref#finesMode# <br><b>Note:</b> Fines can also be charged by the CalculateFinesOnReturn system preference."
-msgstr ""
-
-# Circulation > Fines Policy
 msgid "circulation.pref#finesMode# Calculate (but only for mailing to the admin)"
 msgstr "계산 (관리자에게 메일을 보낼 때만)"
 
