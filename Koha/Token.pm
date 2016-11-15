@@ -1,4 +1,3 @@
-=======
 package Koha::Token;
 
 # Created as wrapper for CSRF tokens, but designed for more general use
@@ -183,4 +182,3 @@ sub _gen_rand {
 =cut
 
 1;
->>>>>>> origin/master
