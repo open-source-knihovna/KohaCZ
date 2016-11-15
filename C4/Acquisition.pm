@@ -1464,6 +1464,10 @@ sub ModReceiveOrder {
         $order->{budget_id} = ( $budget_id || $order->{budget_id} );
         $order->{quantity} = $quantrec;
         $order->{quantityreceived} = $quantrec;
+        $order->{ecost_tax_excluded} //= 0;
+        $order->{tax_rate_on_ordering} //= 0;
+        $order->{unitprice_tax_excluded} //= 0;
+        $order->{tax_rate_on_receiving} //= 0;
         $order->{tax_value_on_ordering} = $order->{quantity} * $order->{ecost_tax_excluded} * $order->{tax_rate_on_ordering};
         $order->{tax_value_on_receiving} = $order->{quantity} * $order->{unitprice_tax_excluded} * $order->{tax_rate_on_receiving};
         $order->{datereceived} = $datereceived;
@@ -1505,7 +1509,7 @@ sub ModReceiveOrder {
         $query .= q| where biblionumber=? and ordernumber=?|;
 
         my $sth = $dbh->prepare( $query );
-        my @params = ( $quantrec, $datereceived, $invoice->{invoiceid}, $budget_id );
+        my @params = ( $quantrec, $datereceived, $invoice->{invoiceid}, ( $budget_id ? $budget_id : $order->{budget_id} ) );
 
         if ( defined $order->{unitprice} ) {
             push @params, $order->{unitprice}, $order->{unitprice_tax_included}, $order->{unitprice_tax_excluded};
