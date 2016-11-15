@@ -35,9 +35,6 @@ use C4::Search;		# enabled_staff_search_views
 use C4::Members qw/GetHideLostItemsPreference/;
 use C4::Reserves qw(GetReservesFromBiblionumber GetReserveCountFromItemnumber);
 
-use C4::NCIP::NcipUtils qw/prinJson/;
-use JSON qw /to_json/;
-
 use Koha::Acquisition::Bookseller;
 use Koha::AuthorisedValues;
 use Koha::DateUtils;
@@ -198,8 +195,6 @@ foreach my $item (@items){
     }
 
     $item->{reservescount} = GetReserveCountFromItemnumber($item->{itemnumber});
-
-#    $item->{json} = to_json($item);
 }
 
 my $mss = Koha::MarcSubfieldStructures->search({ frameworkcode => $fw, kohafield => 'items.itemlost', authorised_value => { not => undef } });

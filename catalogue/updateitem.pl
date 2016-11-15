@@ -28,9 +28,6 @@ use C4::Output;
 use C4::Circulation;
 use C4::Reserves;
 
-use C4::NCIP::NcipUtils;
-use JSON qw/to_json/;
-
 my $cgi= new CGI;
 
 checkauth($cgi, 0, {circulate => 'circulate_remaining_permissions'}, 'intranet');
