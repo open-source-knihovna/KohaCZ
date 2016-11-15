@@ -401,13 +401,6 @@ __PACKAGE__->table("borrowers");
   default_value: 1
   is_nullable: 0
 
-=head2 checkprevissue
-
-  data_type: 'varchar'
-  default_value: 'inherit'
-  is_nullable: 0
-  size: 7
-
 =head2 privacy_guarantor_checkouts
 
   data_type: 'tinyint'
@@ -601,13 +594,6 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "privacy",
   { data_type => "integer", default_value => 1, is_nullable => 0 },
-  "checkprevissue",
-  {
-    data_type => "varchar",
-    default_value => "inherit",
-    is_nullable => 0,
-    size => 7,
-  },
   "privacy_guarantor_checkouts",
   { data_type => "tinyint", default_value => 0, is_nullable => 0 },
   "checkprevcheckout",

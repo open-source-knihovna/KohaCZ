@@ -93,7 +93,6 @@ elsif ( $op eq 'add_validate' ) {
     my $checkPrevCheckout = $input->param('checkprevcheckout');
     my $default_privacy = $input->param('default_privacy');
     my @branches = grep { $_ ne q{} } $input->multi_param('branches');
-    my $checkprevissue = $input->param('checkprevissue');
 
     my $is_a_modif = $input->param("is_a_modif");
 
@@ -123,7 +122,6 @@ elsif ( $op eq 'add_validate' ) {
         $category->BlockExpiredPatronOpacActions($BlockExpiredPatronOpacActions);
         $category->checkprevcheckout($checkPrevCheckout);
         $category->default_privacy($default_privacy);
-        $category->checkprevissue($checkprevissue);
         eval {
             $category->store;
             $category->replace_branch_limitations( \@branches );
@@ -150,7 +148,6 @@ elsif ( $op eq 'add_validate' ) {
             BlockExpiredPatronOpacActions => $BlockExpiredPatronOpacActions,
             checkprevcheckout => $checkPrevCheckout,
             default_privacy => $default_privacy,
-            checkprevissue => $checkprevissue,
         });
         eval {
             $category->store;
