@@ -11790,21 +11790,6 @@ if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
         ALTER IGNORE TABLE deleteditems ADD withdrawn_categorycode VARCHAR(10) AFTER withdrawn_on
     });
-    $dbh->do(q{
-        CREATE TABLE IF NOT EXISTS default_permanent_withdrawal_reason(
-            categorycode VARCHAR(10) DEFAULT NULL,
-            description VARCHAR(250) DEFAULT NULL
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-    });
-    $dbh->do(q{
-        INSERT IGNORE INTO default_permanent_withdrawal_reason
-            (categorycode, description)
-        VALUES
-            ('focus', 'does not match the focus of the library'),
-            ('multi', 'multiplicates document'),
-            ('damaged', 'worn or damaged'),
-            ('lost', 'lost by reader')
-    });
 
     print "Upgrade to $DBversion done (Permanent withdrawal)\n";
     SetVersion($DBversion);
