@@ -59,7 +59,6 @@ BEGIN {
     @ISA = qw(Exporter);
     #Get data
     push @EXPORT, qw(
-        &Search
         &GetMemberDetails
         &GetMember
 
@@ -71,14 +70,11 @@ BEGIN {
         &GetNoticeEmailAddress
 
         &GetAge
-        &GetTitles
 
         &GetHideLostItemsPreference
 
         &GetMemberAccountRecords
         &GetBorNotifyAcctRecord
-
-        GetBorrowerCategorycode
 
         &GetBorrowersToExpunge
         &GetBorrowersWhoHaveNeverBorrowed
@@ -98,16 +94,10 @@ BEGIN {
         &changepassword
     );
 
-    #Delete data
-    push @EXPORT, qw(
-        &DelMember
-    );
-
     #Insert data
     push @EXPORT, qw(
         &AddMember
         &AddMember_Opac
-        &MoveMemberToDeleted
     );
 
     #Check data
@@ -528,7 +518,7 @@ sub ModMember {
         }
     }
 
-    my $old_categorycode = GetBorrowerCategorycode( $data{borrowernumber} );
+    my $old_categorycode = Koha::Patrons->find( $data{borrowernumber} )->categorycode;
 
     # get only the columns of a borrower
     my $schema = Koha::Database->new()->schema;
@@ -541,19 +531,19 @@ sub ModMember {
     $new_borrower->{dateexpiry}      ||= undef if exists $new_borrower->{dateexpiry};
     $new_borrower->{debarred}        ||= undef if exists $new_borrower->{debarred};
     $new_borrower->{sms_provider_id} ||= undef if exists $new_borrower->{sms_provider_id};
+    $new_borrower->{guarantorid}     ||= undef if exists $new_borrower->{guarantorid};
 
-    my $rs = $schema->resultset('Borrower')->search({
-        borrowernumber => $new_borrower->{borrowernumber},
-     });
+    my $patron = Koha::Patrons->find( $new_borrower->{borrowernumber} );
 
     delete $new_borrower->{userid} if exists $new_borrower->{userid} and not $new_borrower->{userid};
 
-    my $execute_success = $rs->update($new_borrower);
-    if ($execute_success ne '0E0') { # only proceed if the update was a success
+    my $execute_success = $patron->store if $patron->set($new_borrower);
+
+    if ($execute_success) { # only proceed if the update was a success
         # If the patron changes to a category with enrollment fee, we add a fee
         if ( $data{categorycode} and $data{categorycode} ne $old_categorycode ) {
             if ( C4::Context->preference('FeeOnChangePatronCategory') ) {
-                AddEnrolmentFeeIfNeeded( $data{categorycode}, $data{borrowernumber} );
+                $patron->add_enrolment_fee_if_needed;
             }
         }
 
@@ -636,13 +626,14 @@ sub AddMember {
     $data{'sms_provider_id'} = undef if ( not $data{'sms_provider_id'} );
 
     # get only the columns of Borrower
+    # FIXME Do we really need this check?
     my @columns = $schema->source('Borrower')->columns;
     my $new_member = { map { join(' ',@columns) =~ /$_/ ? ( $_ => $data{$_} )  : () } keys(%data) } ;
-    $new_member->{checkprevcheckout} ||= 'inherit';
+
     delete $new_member->{borrowernumber};
 
-    my $rs = $schema->resultset('Borrower');
-    $data{borrowernumber} = $rs->create($new_member)->id;
+    my $patron = Koha::Patron->new( $new_member )->store;
+    $data{borrowernumber} = $patron->borrowernumber;
 
     # If NorwegianPatronDBEnable is enabled, we set syncstatus to something that a
     # cronjob will use for syncing with NL
@@ -656,10 +647,9 @@ sub AddMember {
         });
     }
 
-    # mysql_insertid is probably bad.  not necessarily accurate and mysql-specific at best.
     logaction("MEMBERS", "CREATE", $data{'borrowernumber'}, "") if C4::Context->preference("BorrowersLog");
 
-    AddEnrolmentFeeIfNeeded( $data{categorycode}, $data{borrowernumber} );
+    $patron->add_enrolment_fee_if_needed;
 
     return $data{borrowernumber};
 }
@@ -1219,26 +1209,6 @@ sub GetUpcomingMembershipExpires {
     return $results;
 }
 
-=head2 GetBorrowerCategorycode
-
-    $categorycode = &GetBorrowerCategoryCode( $borrowernumber );
-
-Given the borrowernumber, the function returns the corresponding categorycode
-
-=cut
-
-sub GetBorrowerCategorycode {
-    my ( $borrowernumber ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare( qq{
-        SELECT categorycode
-        FROM borrowers
-        WHERE borrowernumber = ?
-    } );
-    $sth->execute( $borrowernumber );
-    return $sth->fetchrow;
-}
-
 =head2 GetAge
 
   $dateofbirth,$date = &GetAge($date);
@@ -1308,92 +1278,6 @@ sub SetAge{
 
     return $borrower;
 }    # sub SetAge
-
-=head2 MoveMemberToDeleted
-
-  $result = &MoveMemberToDeleted($borrowernumber);
-
-Copy the record from borrowers to deletedborrowers table.
-The routine returns 1 for success, undef for failure.
-
-=cut
-
-sub MoveMemberToDeleted {
-    my ($member) = shift or return;
-
-    my $schema       = Koha::Database->new()->schema();
-    my $borrowers_rs = $schema->resultset('Borrower');
-    $borrowers_rs->result_class('DBIx::Class::ResultClass::HashRefInflator');
-    my $borrower = $borrowers_rs->find($member);
-    return unless $borrower;
-
-    my $deleted = $schema->resultset('Deletedborrower')->create($borrower);
-
-    return $deleted ? 1 : undef;
-}
-
-=head2 DelMember
-
-    DelMember($borrowernumber);
-
-This function remove directly a borrower whitout writing it on deleteborrower.
-+ Deletes reserves for the borrower
-
-=cut
-
-sub DelMember {
-    my $dbh            = C4::Context->dbh;
-    my $borrowernumber = shift;
-    #warn "in delmember with $borrowernumber";
-    return unless $borrowernumber;    # borrowernumber is mandatory.
-    # Delete Patron's holds
-    my @holds = Koha::Holds->search({ borrowernumber => $borrowernumber });
-    $_->delete for @holds;
-
-    my $query = "
-       DELETE
-       FROM borrowers
-       WHERE borrowernumber = ?
-   ";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($borrowernumber);
-    logaction("MEMBERS", "DELETE", $borrowernumber, "") if C4::Context->preference("BorrowersLog");
-    return $sth->rows;
-}
-
-=head2 HandleDelBorrower
-
-     HandleDelBorrower($borrower);
-
-When a member is deleted (DelMember in Members.pm), you should call me first.
-This routine deletes/moves lists and entries for the deleted member/borrower.
-Lists owned by the borrower are deleted, but entries from the borrower to
-other lists are kept.
-
-=cut
-
-sub HandleDelBorrower {
-    my ($borrower)= @_;
-    my $query;
-    my $dbh = C4::Context->dbh;
-
-    #Delete all lists and all shares of this borrower
-    #Consistent with the approach Koha uses on deleting individual lists
-    #Note that entries in virtualshelfcontents added by this borrower to
-    #lists of others will be handled by a table constraint: the borrower
-    #is set to NULL in those entries.
-    $query="DELETE FROM virtualshelves WHERE owner=?";
-    $dbh->do($query,undef,($borrower));
-
-    #NOTE:
-    #We could handle the above deletes via a constraint too.
-    #But a new BZ report 11889 has been opened to discuss another approach.
-    #Instead of deleting we could also disown lists (based on a pref).
-    #In that way we could save shared and public lists.
-    #The current table constraints support that idea now.
-    #This pref should then govern the results of other routines/methods such as
-    #Koha::Virtualshelf->new->delete too.
-}
 
 =head2 GetHideLostItemsPreference
 
@@ -1771,35 +1655,6 @@ sub AddMember_Opac {
     return ( $borrowernumber, $borrower{'password'} );
 }
 
-=head2 AddEnrolmentFeeIfNeeded
-
-    AddEnrolmentFeeIfNeeded( $borrower->{categorycode}, $borrower->{borrowernumber} );
-
-Add enrolment fee for a patron if needed.
-
-=cut
-
-sub AddEnrolmentFeeIfNeeded {
-    my ( $categorycode, $borrowernumber ) = @_;
-    # check for enrollment fee & add it if needed
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(q{
-        SELECT enrolmentfee
-        FROM categories
-        WHERE categorycode=?
-    });
-    $sth->execute( $categorycode );
-    if ( $sth->err ) {
-        warn sprintf('Database returned the following error: %s', $sth->errstr);
-        return;
-    }
-    my ($enrolmentfee) = $sth->fetchrow;
-    if ($enrolmentfee && $enrolmentfee > 0) {
-        # insert fee in patron debts
-        C4::Accounts::manualinvoice( $borrowernumber, '', '', 'A', $enrolmentfee );
-    }
-}
-
 =head2 DeleteExpiredOpacRegistrations
 
     Delete accounts that haven't been upgraded from the 'temporary' category
@@ -1824,7 +1679,7 @@ WHERE categorycode = ? AND DATEDIFF( NOW(), dateenrolled ) > ? |;
     $sth->execute( $category_code, $delay );
     my $cnt=0;
     while ( my ($borrowernumber) = $sth->fetchrow_array() ) {
-        DelMember($borrowernumber);
+        Koha::Patrons->find($borrowernumber)->delete;
         $cnt++;
     }
     return $cnt;

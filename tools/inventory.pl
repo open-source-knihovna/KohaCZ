@@ -36,6 +36,8 @@ use C4::Circulation;
 use C4::Reports::Guided;    #_get_column_defs
 use C4::Charset;
 use Koha::DateUtils;
+use Koha::AuthorisedValues;
+use Koha::BiblioFrameworks;
 use List::MoreUtils qw( none );
 
 
@@ -66,12 +68,13 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
 my @authorised_value_list;
 my $authorisedvalue_categories = '';
 
-my $frameworks = getframeworks();
-$frameworks->{''} = {frameworkcode => ''}; # Add the default framework
+my $frameworks = Koha::BiblioFrameworks->search({}, { order_by => ['frameworktext'] })->unblessed;
+unshift @$frameworks, { frameworkcode => '' };
 
-for my $fwk (keys %$frameworks){
-  my $fwkcode = $frameworks->{$fwk}->{'frameworkcode'};
-  my $authcode = GetAuthValCode('items.location', $fwkcode);
+for my $fwk ( @$frameworks ){
+  my $fwkcode = $fwk->{frameworkcode};
+  my $mss = Koha::MarcSubfieldStructures->search({ frameworkcode => $fwkcode, kohafield => 'items.location', authorised_value => { not => undef } });
+  my $authcode = $mss->count ? $mss->next->authorised_value : undef;
     if ($authcode && $authorisedvalue_categories!~/\b$authcode\W/){
       $authorisedvalue_categories.="$authcode ";
       my $data=GetAuthorisedValues($authcode);
@@ -86,7 +89,8 @@ my $statuses = [];
 for my $statfield (qw/items.notforloan items.itemlost items.withdrawn items.damaged/){
     my $hash = {};
     $hash->{fieldname} = $statfield;
-    $hash->{authcode} = GetAuthValCode($statfield);
+    my $mss = Koha::MarcSubfieldStructures->search({ frameworkcode => '', kohafield => $statfield, authorised_value => { not => undef } });
+    $hash->{authcode} = $mss->count ? $mss->next->authorised_value : undef;
     if ($hash->{authcode}){
         my $arr = GetAuthorisedValues($hash->{authcode});
         $hash->{values} = $arr;
@@ -243,7 +247,6 @@ if ( $markseen or $op ) {
       offset       => 0,
       size         => undef,
       statushash   => $staton,
-      interface    => 'staff',
     } );
 
     # For the items that may be marked as "wrong place", we only check the location (callnumbers, location and branch)
@@ -259,7 +262,6 @@ if ( $markseen or $op ) {
       offset       => 0,
       size         => undef,
       statushash   => undef,
-      interface    => 'staff',
     } );
 
 }
@@ -297,7 +299,9 @@ foreach my $item ( @scanned_items ) {
         my ($f, $sf) = GetMarcFromKohaField("items.$field", $fc);
         if ($f and $sf) {
             # We replace the code with it's description
-            my $authvals = C4::Koha::GetKohaAuthorisedValuesFromField($f, $sf, $fc);
+            my $av = Koha::AuthorisedValues->search_by_marc_field({ frameworkcode => $fc, tagfield => $f, tagsubfield => $sf, });
+            $av = $av->count ? $av->unblessed : [];
+            my $authvals = { map { ( $_->{authorised_value} => $_->{lib} ) } @$av };
             if ($authvals and defined $item->{$field} and defined $authvals->{$item->{$field}}) {
               $item->{$field} = $authvals->{$item->{$field}};
             }

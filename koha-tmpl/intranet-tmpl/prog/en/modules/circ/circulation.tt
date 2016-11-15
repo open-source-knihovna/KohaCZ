@@ -850,23 +850,24 @@ No patron matched <span class="ex">[% message | html %]</span>
     <div id="messages" class="circmessage">
         <h4>Messages:</h4>
         <ul>
-            [% FOREACH message IN librarian_messages %]
+            [% FOREACH message IN messages %]
                 <li>
-                    <span class="circ-hlt">
+                    [% IF(message.message_type == "L") %]
+                        <span class="circ-hlt">
+                    [% ELSE %]
+                        <span>
+                    [% END %]>
                         [% message.message_date | $KohaDates %]
                         [% Branches.GetName( message.branchcode ) %]
+                        [% IF message.manager_id %]
+                            ( <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% message.manager_id %]">[% message.get_column('manager_firstname') %] [% message.get_column('manager_surname') %]</a> )
+                        [% END %]
                         <i>"[% message.message %]"</i>
                     </span>
                     [% IF message.branchcode == branch OR Koha.Preference('AllowAllMessageDeletion') %]
                         [<a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% message.message_id %]&amp;borrowernumber=[% message.borrowernumber %]" onclick="return confirm(MSG_CONFIRM_DELETE_MESSAGE);"><i class="fa fa-trash"></i> Delete</a>]
                     [% END %]
                 </li>
-            [% END %]
-            [% FOREACH message IN patron_messages %]
-                <li><span class="">[% message.message_date | $KohaDates %] [% Branches.GetName( message.branchcode )%] <i>"[% message.message %]"</i></span>
-                [% IF message.branchcode == branch OR Koha.Preference('AllowAllMessageDeletion') %]
-                    [<a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% message.message_id %]&amp;borrowernumber=[% message.borrowernumber %]"><i class="fa fa-trash"></i> Delete</a>]
-                [% END %]</li>
             [% END %]
         </ul>
         <a id="addnewmessageLabel" href="#add_message_form" data-toggle="modal"><i class="fa fa-plus"></i> Add a new message</a>
@@ -896,6 +897,13 @@ No patron matched <span class="ex">[% message | html %]</span>
         [% ELSE %]
             <a href="#reserves" id="holds-tab">0 Holds</a>
         [% END %]
+    </li>
+
+    [% IF Koha.Preference('ArticleRequests') %]
+        <li>
+            <a href="#article-requests" id="article-requests-tab"> [% patron.article_requests_current.count %] Article requests</a>
+        </li>
+    [% END %]
 
     <li><a id="debarments-tab-link" href="#reldebarments">[% debarments.size %] Restrictions</a></li>
 </ul>
@@ -983,6 +991,10 @@ No patron matched <span class="ex">[% message | html %]</span>
 	<p>Patron has nothing on hold.</p>
 [% END %]
 </div> <!-- reservesloop -->
+
+[% IF Koha.Preference('ArticleRequests') %]
+    [% INCLUDE 'patron-article-requests.inc' %]
+[% END %]
 
 [% ELSIF borrowernumber %]
     <div class="dialog message">This patron does not exist. <a href="/cgi-bin/koha/members/members-home.pl">Find another patron?</a></div>

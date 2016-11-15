@@ -29,6 +29,7 @@ use C4::Koha;
 use C4::Biblio;
 use C4::Circulation;
 use C4::Reserves;
+use Koha::AuthorisedValues;
 use Koha::XSLT_Handler;
 use Koha::Libraries;
 
@@ -272,8 +273,10 @@ sub buildKohaItemsNamespace {
         @items = grep { !$hi{$_->{itemnumber}} } @items;
     }
 
-    my $shelflocations = GetKohaAuthorisedValues('items.location',GetFrameworkCode($biblionumber), 'opac');
-    my $ccodes         = GetKohaAuthorisedValues('items.ccode',GetFrameworkCode($biblionumber), 'opac');
+    my $shelflocations =
+      { map { $_->authorised_value => $_->opac_description } Koha::AuthorisedValues->search_by_koha_field( { frameworkcode => GetFrameworkCode($biblionumber), kohafield => 'items.location' } ) };
+    my $ccodes =
+      { map { $_->authorised_value => $_->opac_description } Koha::AuthorisedValues->search_by_koha_field( { frameworkcode => GetFrameworkCode($biblionumber), kohafield => 'items.ccode' } ) };
 
     my %branches = map { $_->branchcode => $_->branchname } Koha::Libraries->search({}, { order_by => 'branchname' });
 
@@ -322,6 +325,7 @@ sub buildKohaItemsNamespace {
         $location = $item->{location}? xml_escape($shelflocations->{$item->{location}}||$item->{location}):'';
         $ccode = $item->{ccode}? xml_escape($ccodes->{$item->{ccode}}||$item->{ccode}):'';
         my $itemcallnumber = xml_escape($item->{itemcallnumber});
+        my $stocknumber = $item->{stocknumber}? xml_escape($item->{stocknumber}):'';
         $xml .=
             "<item>"
           . "<homebranch>$homebranch</homebranch>"
@@ -330,6 +334,7 @@ sub buildKohaItemsNamespace {
           . "<ccode>$ccode</ccode>"
           . "<status>$status</status>"
           . "<itemcallnumber>$itemcallnumber</itemcallnumber>"
+          . "<stocknumber>$stocknumber</stocknumber>"
           . "</item>";
     }
     $xml = "<items xmlns=\"http://www.koha-community.org/items\">".$xml."</items>";

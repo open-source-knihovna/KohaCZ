@@ -47,7 +47,7 @@ my $today;
 for my $currency_format ( qw( US FR ) ) {
     t::lib::Mocks::mock_preference( 'CurrencyFormat', $currency_format );
     subtest 'Configuration 1: 0 0' => sub {
-        plan tests => 12;
+        plan tests => 8;
         $bookseller_module->mock(
             'fetch',
             sub {
@@ -67,7 +67,7 @@ for my $currency_format ( qw( US FR ) ) {
             invoiceid        => $invoiceid_0_0,
             rrp              => 82.00,
             ecost            => 73.80,
-            gstrate          => 0.0500,
+            tax_rate         => 0.0500,
             discount         => 10.0000,
             datereceived     => $today
         };
@@ -79,61 +79,44 @@ for my $currency_format ( qw( US FR ) ) {
             }
         );
 
-        # Note that this configuration is correct \o/
         compare(
             {
-                got      => $order_0_0->{rrpgsti},
+                got      => $order_0_0->{rrp_tax_included},
                 expected => 86.10,
                 conf     => '0 0',
-                field    => 'rrpgsti'
+                field    => 'rrp_tax_included'
             }
         );
         compare(
             {
-                got      => $order_0_0->{rrpgste},
+                got      => $order_0_0->{rrp_tax_excluded},
                 expected => 82.00,
                 conf     => '0 0',
-                field    => 'rrpgste'
+                field    => 'rrp_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_0_0->{ecostgsti},
+                got      => $order_0_0->{ecost_tax_included},
                 expected => 77.49,
                 conf     => '0 0',
-                field    => 'ecostgsti'
+                field    => 'ecost_tax_included'
             }
         );
         compare(
             {
-                got      => $order_0_0->{ecostgste},
+                got      => $order_0_0->{ecost_tax_excluded},
                 expected => 73.80,
                 conf     => '0 0',
-                field    => 'ecostgste'
+                field    => 'ecost_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_0_0->{gstvalue},
+                got      => $order_0_0->{tax_value_on_ordering},
                 expected => 7.38,
                 conf     => '0 0',
-                field    => 'gstvalue'
-            }
-        );
-        compare(
-            {
-                got      => $order_0_0->{totalgsti},
-                expected => 154.98,
-                conf     => '0 0',
-                field    => 'totalgsti'
-            }
-        );
-        compare(
-            {
-                got      => $order_0_0->{totalgste},
-                expected => 147.60,
-                conf     => '0 0',
-                field    => 'totalgste'
+                field    => 'tax_value'
             }
         );
 
@@ -145,51 +128,34 @@ for my $currency_format ( qw( US FR ) ) {
             }
         );
 
-        # Note that this configuration is correct \o/
         compare(
             {
-                got      => $order_0_0->{unitpricegsti},
+                got      => $order_0_0->{unitprice_tax_included},
                 expected => 77.49,
                 conf     => '0 0',
-                field    => 'unitpricegsti'
+                field    => 'unitprice_tax_included'
             }
         );
         compare(
             {
-                got      => $order_0_0->{unitpricegste},
+                got      => $order_0_0->{unitprice_tax_excluded},
                 expected => 73.80,
                 conf     => '0 0',
-                field    => 'unitpricegste'
+                field    => 'unitprice_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_0_0->{gstvalue},
+                got      => $order_0_0->{tax_value_on_receiving},
                 expected => 7.38,
                 conf     => '0 0',
-                field    => 'gstvalue'
-            }
-        );
-        compare(
-            {
-                got      => $order_0_0->{totalgsti},
-                expected => 154.98,
-                conf     => '0 0',
-                field    => 'totalgsti'
-            }
-        );
-        compare(
-            {
-                got      => $order_0_0->{totalgste},
-                expected => 147.60,
-                conf     => '0 0',
-                field    => 'totalgste'
+                field    => 'tax_value'
             }
         );
     };
 
     subtest 'Configuration 1: 1 1' => sub {
-        plan tests => 12;
+        plan tests => 8;
         $bookseller_module->mock(
             'fetch',
             sub {
@@ -208,7 +174,7 @@ for my $currency_format ( qw( US FR ) ) {
             invoiceid        => $invoiceid_1_1,
             rrp              => 82.00,
             ecost            => 73.80,
-            gstrate          => 0.0500,
+            tax_rate         => 0.0500,
             discount         => 10.0000,
             datereceived     => $today
         };
@@ -221,62 +187,44 @@ for my $currency_format ( qw( US FR ) ) {
             }
         );
 
-        # Note that this configuration is *not* correct
-        # gstvalue should be 7.03 instead of 7.02
         compare(
             {
-                got      => $order_1_1->{rrpgsti},
+                got      => $order_1_1->{rrp_tax_included},
                 expected => 82.00,
                 conf     => '1 1',
-                field    => 'rrpgsti'
+                field    => 'rrp_tax_included'
             }
         );
         compare(
             {
-                got      => $order_1_1->{rrpgste},
+                got      => $order_1_1->{rrp_tax_excluded},
                 expected => 78.10,
                 conf     => '1 1',
-                field    => 'rrpgste'
+                field    => 'rrp_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_1_1->{ecostgsti},
+                got      => $order_1_1->{ecost_tax_included},
                 expected => 73.80,
                 conf     => '1 1',
-                field    => 'ecostgsti'
+                field    => 'ecost_tax_included'
             }
         );
         compare(
             {
-                got      => $order_1_1->{ecostgste},
+                got      => $order_1_1->{ecost_tax_excluded},
                 expected => 70.29,
                 conf     => '1 1',
-                field    => 'ecostgste'
+                field    => 'ecost_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_1_1->{gstvalue},
-                expected => 7.02,
+                got      => $order_1_1->{tax_value_on_ordering},
+                expected => 7.03,
                 conf     => '1 1',
-                field    => 'gstvalue'
-            }
-        );
-        compare(
-            {
-                got      => $order_1_1->{totalgsti},
-                expected => 147.60,
-                conf     => '1 1',
-                field    => 'totalgsti'
-            }
-        );
-        compare(
-            {
-                got      => $order_1_1->{totalgste},
-                expected => 140.58,
-                conf     => '1 1',
-                field    => 'totalgste'
+                field    => 'tax_value'
             }
         );
 
@@ -287,52 +235,35 @@ for my $currency_format ( qw( US FR ) ) {
                 receiving    => 1,
             }
         );
-        # Note that this configuration is *not* correct!
-        # gstvalue should be 7.03
+
         compare(
             {
-                got      => $order_1_1->{unitpricegsti},
+                got      => $order_1_1->{unitprice_tax_included},
                 expected => 73.80,
                 conf     => '1 1',
-                field    => 'unitpricegsti'
+                field    => 'unitprice_tax_included'
             }
         );
         compare(
             {
-                got      => $order_1_1->{unitpricegste},
+                got      => $order_1_1->{unitprice_tax_excluded},
                 expected => 70.29,
                 conf     => '1 1',
-                field    => 'unitpricegste'
+                field    => 'unitprice_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_1_1->{gstvalue},
-                expected => 7.02,
+                got      => $order_1_1->{tax_value_on_receiving},
+                expected => 7.03,
                 conf     => '1 1',
-                field    => 'gstvalue'
-            }
-        );
-        compare(
-            {
-                got      => $order_1_1->{totalgsti},
-                expected => 147.60,
-                conf     => '1 1',
-                field    => 'totalgsti'
-            }
-        );
-        compare(
-            {
-                got      => $order_1_1->{totalgste},
-                expected => 140.58,
-                conf     => '1 1',
-                field    => 'totalgste'
+                field    => 'tax_value'
             }
         );
     };
 
     subtest 'Configuration 1: 1 0' => sub {
-        plan tests => 12;
+        plan tests => 8;
         $bookseller_module->mock(
             'fetch',
             sub {
@@ -345,13 +276,13 @@ for my $currency_format ( qw( US FR ) ) {
             biblionumber     => $biblionumber_1_0,
             quantity         => 2,
             listprice        => 82.000000,
-            unitprice        => 73.804500,
+            unitprice        => 70.290000,
             quantityreceived => 2,
             basketno         => $basketno_1_1,
             invoiceid        => $invoiceid_1_1,
-            rrp              => 82.01,
+            rrp              => 82.00,
             ecost            => 73.80,
-            gstrate          => 0.0500,
+            tax_rate         => 0.0500,
             discount         => 10.0000,
             datereceived     => $today
         };
@@ -364,65 +295,44 @@ for my $currency_format ( qw( US FR ) ) {
             }
         );
 
-        # Note that this configuration is *not* correct!
-        # rrp gsti should be 82 (what we inserted!)
-        # => Actually we need to fix the inserted value (here we have 82.01 in DB)
-        # gstvalue should be 7.03 instead of 7.02
-
         compare(
             {
-                got      => $order_1_0->{rrpgsti},
-                expected => 82.01,
+                got      => $order_1_0->{rrp_tax_included},
+                expected => 82,
                 conf     => '1 0',
-                field    => 'rrpgsti'
+                field    => 'rrp_tax_included'
             }
         );
         compare(
             {
-                got      => $order_1_0->{rrpgste},
+                got      => $order_1_0->{rrp_tax_excluded},
                 expected => 78.10,
                 conf     => '1 0',
-                field    => 'rrpgste'
+                field    => 'rrp_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_1_0->{ecostgsti},
+                got      => $order_1_0->{ecost_tax_included},
                 expected => 73.80,
                 conf     => '1 0',
-                field    => 'ecostgsti'
+                field    => 'ecost_tax_included'
             }
         );
         compare(
             {
-                got      => $order_1_0->{ecostgste},
+                got      => $order_1_0->{ecost_tax_excluded},
                 expected => 70.29,
                 conf     => '1 0',
-                field    => 'ecostgste'
+                field    => 'ecost_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_1_0->{gstvalue},
-                expected => 7.02,
+                got      => $order_1_0->{tax_value_on_ordering},
+                expected => 7.03,
                 conf     => '1 0',
-                field    => 'gstvalue'
-            }
-        );
-        compare(
-            {
-                got      => $order_1_0->{totalgsti},
-                expected => 147.60,
-                conf     => '1 0',
-                field    => 'totalgsti'
-            }
-        );
-        compare(
-            {
-                got      => $order_1_0->{totalgste},
-                expected => 140.58,
-                conf     => '1 0',
-                field    => 'totalgste'
+                field    => 'tax_value'
             }
         );
 
@@ -433,52 +343,35 @@ for my $currency_format ( qw( US FR ) ) {
                 receiving    => 1,
             }
         );
-        # Note that this configuration is *not* correct!
-        # gstvalue should be 7.03
+
         compare(
             {
-                got      => $order_1_0->{unitpricegsti},
+                got      => $order_1_0->{unitprice_tax_included},
                 expected => 73.80,
                 conf     => '1 0',
-                field    => 'unitpricegsti'
+                field    => 'unitprice_tax_included'
             }
         );
         compare(
             {
-                got      => $order_1_0->{unitpricegste},
+                got      => $order_1_0->{unitprice_tax_excluded},
                 expected => 70.29,
                 conf     => '1 0',
-                field    => 'unitpricegste'
+                field    => 'unitprice_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_1_0->{gstvalue},
-                expected => 7.02,
+                got      => $order_1_0->{tax_value_on_receiving},
+                expected => 7.03,
                 conf     => '1 0',
-                field    => 'gstvalue'
-            }
-        );
-        compare(
-            {
-                got      => $order_1_0->{totalgsti},
-                expected => 147.60,
-                conf     => '1 0',
-                field    => 'totalgsti'
-            }
-        );
-        compare(
-            {
-                got      => $order_1_0->{totalgste},
-                expected => 140.58,
-                conf     => '1 0',
-                field    => 'totalgste'
+                field    => 'tax_value'
             }
         );
     };
 
     subtest 'Configuration 1: 0 1' => sub {
-        plan tests => 12;
+        plan tests => 8;
         $bookseller_module->mock(
             'fetch',
             sub {
@@ -491,13 +384,13 @@ for my $currency_format ( qw( US FR ) ) {
             biblionumber     => $biblionumber_0_1,
             quantity         => 2,
             listprice        => 82.000000,
-            unitprice        => 73.800000,
+            unitprice        => 77.490000,
             quantityreceived => 2,
             basketno         => $basketno_1_1,
             invoiceid        => $invoiceid_1_1,
             rrp              => 82.00,
             ecost            => 73.80,
-            gstrate          => 0.0500,
+            tax_rate         => 0.0500,
             discount         => 10.0000,
             datereceived     => $today
         };
@@ -510,61 +403,44 @@ for my $currency_format ( qw( US FR ) ) {
             }
         );
 
-        # Note that this configuration is correct \o/
         compare(
             {
-                got      => $order_0_1->{rrpgsti},
+                got      => $order_0_1->{rrp_tax_included},
                 expected => 86.10,
-                conf     => '1 0',
-                field    => 'rrpgsti'
+                conf     => '0 1',
+                field    => 'rrp_tax_included'
             }
         );
         compare(
             {
-                got      => $order_0_1->{rrpgste},
+                got      => $order_0_1->{rrp_tax_excluded},
                 expected => 82.00,
-                conf     => '1 0',
-                field    => 'rrpgste'
+                conf     => '0 1',
+                field    => 'rrp_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_0_1->{ecostgsti},
+                got      => $order_0_1->{ecost_tax_included},
                 expected => 77.49,
-                conf     => '1 0',
-                field    => 'ecostgsti'
+                conf     => '0 1',
+                field    => 'ecost_tax_included'
             }
         );
         compare(
             {
-                got      => $order_0_1->{ecostgste},
+                got      => $order_0_1->{ecost_tax_excluded},
                 expected => 73.80,
-                conf     => '1 0',
-                field    => 'ecostgste'
+                conf     => '0 1',
+                field    => 'ecost_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_0_1->{gstvalue},
+                got      => $order_0_1->{tax_value_on_ordering},
                 expected => 7.38,
-                conf     => '1 0',
-                field    => 'gstvalue'
-            }
-        );
-        compare(
-            {
-                got      => $order_0_1->{totalgsti},
-                expected => 154.98,
-                conf     => '1 0',
-                field    => 'totalgsti'
-            }
-        );
-        compare(
-            {
-                got      => $order_0_1->{totalgste},
-                expected => 147.60,
-                conf     => '1 0',
-                field    => 'totalgste'
+                conf     => '0 1',
+                field    => 'tax_value'
             }
         );
 
@@ -575,45 +451,29 @@ for my $currency_format ( qw( US FR ) ) {
                 receiving    => 1,
             }
         );
-        # Note that this configuration is correct
+
         compare(
             {
-                got      => $order_0_1->{unitpricegsti},
+                got      => $order_0_1->{unitprice_tax_included},
                 expected => 77.49,
                 conf     => '0 1',
-                field    => 'unitpricegsti'
+                field    => 'unitprice_tax_included'
             }
         );
         compare(
             {
-                got      => $order_0_1->{unitpricegste},
+                got      => $order_0_1->{unitprice_tax_excluded},
                 expected => 73.80,
                 conf     => '0 1',
-                field    => 'unitpricegste'
+                field    => 'unitprice_tax_excluded'
             }
         );
         compare(
             {
-                got      => $order_0_1->{gstvalue},
+                got      => $order_0_1->{tax_value_on_receiving},
                 expected => 7.38,
                 conf     => '0 1',
-                field    => 'gstvalue'
-            }
-        );
-        compare(
-            {
-                got      => $order_0_1->{totalgsti},
-                expected => 154.98,
-                conf     => '0 1',
-                field    => 'totalgsti'
-            }
-        );
-        compare(
-            {
-                got      => $order_0_1->{totalgste},
-                expected => 147.60,
-                conf     => '0 1',
-                field    => 'totalgste'
+                field    => 'tax_value'
             }
         );
     };

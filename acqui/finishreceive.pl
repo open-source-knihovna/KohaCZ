@@ -47,16 +47,13 @@ my $ordernumber      = $input->param('ordernumber');
 my $origquantityrec  = $input->param('origquantityrec');
 my $quantityrec      = $input->param('quantityrec');
 my $quantity         = $input->param('quantity');
-my $unitprice        = $input->param('cost');
+my $unitprice        = $input->param('unitprice');
 my $datereceived     = $input->param('datereceived'),
 my $invoiceid        = $input->param('invoiceid');
 my $invoice          = GetInvoice($invoiceid);
 my $invoiceno        = $invoice->{invoicenumber};
 my $booksellerid     = $input->param('booksellerid');
 my $cnt              = 0;
-my $ecost            = $input->param('ecost');
-my $rrp              = $input->param('rrp');
-my $order_internalnote = $input->param("order_internalnote");
 my $bookfund         = $input->param("bookfund");
 my $order            = GetOrder($ordernumber);
 my $new_ordernumber  = $ordernumber;
@@ -83,40 +80,33 @@ if ($quantityrec > $origquantityrec ) {
         }
     }
 
-    $order->{rrp} = $rrp;
-    $order->{ecost} = $ecost;
+    $order->{order_internalnote} = $input->param("order_internalnote");
+    $order->{tax_rate_on_receiving} = $input->param("tax_rate");
     $order->{unitprice} = $unitprice;
+
     my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
-    if ( $bookseller->{listincgst} ) {
-        if ( not $bookseller->{invoiceincgst} ) {
-            $order->{rrp} = $order->{rrp} * ( 1 + $order->{gstrate} );
-            $order->{ecost} = $order->{ecost} * ( 1 + $order->{gstrate} );
-            $order->{unitprice} = $order->{unitprice} * ( 1 + $order->{gstrate} );
+
+    $order = C4::Acquisition::populate_order_with_prices(
+        {
+            order => $order,
+            booksellerid => $booksellerid,
+            receiving => 1
         }
-    } else {
-        if ( $bookseller->{invoiceincgst} ) {
-            $order->{rrp} = $order->{rrp} / ( 1 + $order->{gstrate} );
-            $order->{ecost} = $order->{ecost} / ( 1 + $order->{gstrate} );
-            $order->{unitprice} = $order->{unitprice} / ( 1 + $order->{gstrate} );
-        }
-    }
+    );
 
     # save the quantity received.
     if ( $quantityrec > 0 ) {
-        ($datereceived, $new_ordernumber) = ModReceiveOrder({
-              biblionumber     => $biblionumber,
-              ordernumber      => $ordernumber,
-              quantityreceived => $quantityrec,
-              user             => $user,
-              cost             => $order->{unitprice},
-              ecost            => $order->{ecost},
-              invoiceid        => $invoiceid,
-              rrp              => $order->{rrp},
-              budget_id        => $bookfund,
-              datereceived     => $datereceived,
-              received_items   => \@received_items,
-              order_internalnote  => $order_internalnote,
-        } );
+        ( $datereceived, $new_ordernumber ) = ModReceiveOrder(
+            {
+                biblionumber     => $biblionumber,
+                order            => $order,
+                quantityreceived => $quantityrec,
+                user             => $user,
+                invoice          => $invoice,
+                budget_id        => $bookfund,
+                received_items   => \@received_items,
+            }
+        );
     }
 
     # now, add items if applicable
@@ -164,7 +154,7 @@ ModItem(
         booksellerid         => $booksellerid,
         dateaccessioned      => $datereceived,
         price                => $unitprice,
-        replacementprice     => $rrp,
+        replacementprice     => $order->{rrp},
         replacementpricedate => $datereceived,
     },
     $biblionumber,

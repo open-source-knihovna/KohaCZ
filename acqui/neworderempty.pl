@@ -229,11 +229,9 @@ foreach my $r (@{$budgets}) {
         b_sort2_authcat => $r->{'sort2_authcat'},
         b_active => $r->{budget_period_active},
         b_sel => ( $r->{budget_id} == $budget_id ) ? 1 : 0,
+        b_level => $r->{budget_level},
     };
 }
-
-@{$budget_loop} =
-  sort { uc( $a->{b_txt}) cmp uc( $b->{b_txt}) } @{$budget_loop};
 
 if ($close) {
     $budget_id      =  $data->{'budget_id'};
@@ -265,7 +263,7 @@ if ( defined $subscriptionid ) {
         $budget_id              = $lastOrderReceived->{budgetid};
         $data->{listprice}      = $lastOrderReceived->{listprice};
         $data->{uncertainprice} = $lastOrderReceived->{uncertainprice};
-        $data->{gstrate}        = $lastOrderReceived->{gstrate};
+        $data->{tax_rate}       = $lastOrderReceived->{tax_rate_on_ordering};
         $data->{discount}       = $lastOrderReceived->{discount};
         $data->{rrp}            = $lastOrderReceived->{rrp};
         $data->{ecost}          = $lastOrderReceived->{ecost};
@@ -350,7 +348,7 @@ $template->param(
     quantityrec      => $quantity,
     rrp              => $data->{'rrp'},
     gst_values       => \@gst_values,
-    gstrate          => $data->{gstrate} ? $data->{gstrate}+0.0 : $bookseller->{gstrate} ? $bookseller->{gstrate}+0.0 : 0,
+    tax_rate         => $data->{tax_rate_on_ordering} ? $data->{tax_rate_on_ordering}+0.0 : $bookseller->{tax_rate} ? $bookseller->{tax_rate}+0.0 : 0,
     listprice        => sprintf( "%.2f", $data->{listprice} || $data->{price} || $listprice),
     total            => sprintf( "%.2f", ($data->{ecost} || 0) * ($data->{'quantity'} || 0) ),
     ecost            => sprintf( "%.2f", $data->{ecost} || 0),

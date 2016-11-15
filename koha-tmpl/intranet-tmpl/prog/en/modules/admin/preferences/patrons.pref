@@ -109,6 +109,10 @@ Patrons:
            class: integer
          - results per page in the staff client.
      -
+         - pref: DefaultPatronSearchFields
+           class: multi
+         - "Comma separated list defining the default fields to be used during a patron search"
+     -
          - pref: PatronQuickAddFields
            class: multi
          - (separate columns with |)
@@ -133,6 +137,7 @@ Patrons:
            choices:
                now: current date.
                dateexpiry: current membership expiry date.
+               combination: the latter of the current and expiry date.
      -
          - pref: TalkingTechItivaPhoneNotification
            choices:

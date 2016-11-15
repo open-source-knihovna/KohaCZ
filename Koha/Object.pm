@@ -23,6 +23,7 @@ use Modern::Perl;
 use Carp;
 
 use Koha::Database;
+use Koha::Exceptions::Object;
 
 =head1 NAME
 
@@ -57,8 +58,17 @@ sub new {
     my $self = {};
 
     if ($attributes) {
-        $self->{_result} =
-          Koha::Database->new()->schema()->resultset( $class->_type() )
+        my $schema = Koha::Database->new->schema;
+
+        # Remove the arguments which exist, are not defined but NOT NULL to use the default value
+        my $columns_info = $schema->resultset( $class->_type )->result_source->columns_info;
+        for my $column_name ( keys %$attributes ) {
+            my $c_info = $columns_info->{$column_name};
+            next if $c_info->{is_nullable};
+            next if not exists $attributes->{$column_name} or defined $attributes->{$column_name};
+            delete $attributes->{$column_name};
+        }
+        $self->{_result} = $schema->resultset( $class->_type() )
           ->new($attributes);
     }
 
@@ -161,8 +171,7 @@ sub set {
 
     foreach my $p ( keys %$properties ) {
         unless ( grep {/^$p$/} @columns ) {
-            carp("No property $p!");
-            return 0;
+            Koha::Exceptions::Object::PropertyNotFound->throw( "No property $p for " . ref($self) );
         }
     }
 
@@ -239,12 +248,11 @@ sub AUTOLOAD {
 
     my @known_methods = qw( is_changed id in_storage get_column );
 
-    carp "The method $method is not covered by tests or does not exist!" and return unless grep {/^$method$/} @known_methods;
+    Koha::Exceptions::Object::MethodNotCoveredByTests->throw( "The method $method is not covered by tests!" ) unless grep {/^$method$/} @known_methods;
 
     my $r = eval { $self->_result->$method(@_) };
     if ( $@ ) {
-        carp "No method $method found for " . ref($self) . " " . $@;
-        return
+        Koha::Exceptions::Object::MethodNotFound->throw( "No method $method for " . ref($self) );
     }
     return $r;
 }

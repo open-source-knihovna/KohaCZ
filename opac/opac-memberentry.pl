@@ -20,7 +20,6 @@ use Modern::Perl;
 use CGI qw ( -utf8 );
 use Digest::MD5 qw( md5_base64 md5_hex );
 use String::Random qw( random_string );
-use HTML::Entities;
 
 use C4::Auth;
 use C4::Output;
@@ -139,7 +138,10 @@ if ( $action eq 'create' ) {
             );
             $template->param( 'email' => $borrower{'email'} );
 
-            my $verification_token = md5_hex( \%borrower );
+            my $verification_token = md5_hex( time().{}.rand().{}.$$ );
+            while ( Koha::Patron::Modifications->search( { verification_token => $verification_token } )->count() ) {
+                $verification_token = md5_hex( time().{}.rand().{}.$$ );
+            }
 
             $borrower{password}           = random_string("..........");
             $borrower{verification_token} = $verification_token;
@@ -403,7 +405,7 @@ sub ParseCgiForBorrower {
     foreach ( $cgi->param ) {
         if ( $_ =~ '^borrower_' ) {
             my ($key) = substr( $_, 9 );
-            $borrower{$key} = HTML::Entities::encode( $scrubber->scrub( scalar $cgi->param($_) ) );
+            $borrower{$key} = $scrubber->scrub( scalar $cgi->param($_) );
         }
     }
 

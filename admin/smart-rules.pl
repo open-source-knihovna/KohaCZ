@@ -136,6 +136,8 @@ elsif ($op eq 'add') {
     my $norenewalbefore  = $input->param('norenewalbefore');
     $norenewalbefore = undef if $norenewalbefore =~ /^\s*$/;
     my $auto_renew = $input->param('auto_renew') eq 'yes' ? 1 : 0;
+    my $no_auto_renewal_after = $input->param('no_auto_renewal_after');
+    $no_auto_renewal_after = undef if $no_auto_renewal_after =~ /^\s*$/;
     my $reservesallowed  = $input->param('reservesallowed');
     my $holds_per_record  = $input->param('holds_per_record');
     my $onshelfholds     = $input->param('onshelfholds') || 0;
@@ -152,6 +154,7 @@ elsif ($op eq 'add') {
     my $hardduedatecompare = $input->param('hardduedatecompare');
     my $rentaldiscount = $input->param('rentaldiscount');
     my $opacitemholds = $input->param('opacitemholds') || 0;
+    my $article_requests = $input->param('article_requests') || 'no';
     my $overduefinescap = $input->param('overduefinescap') || undef;
     my $cap_fine_to_replacement_price = $input->param('cap_fine_to_replacement_price') eq 'on';
     $debug and warn "Adding $br, $bor, $itemtype, $fine, $maxissueqty, $maxonsiteissueqty, $cap_fine_to_replacement_price";
@@ -172,6 +175,7 @@ elsif ($op eq 'add') {
         renewalperiod                 => $renewalperiod,
         norenewalbefore               => $norenewalbefore,
         auto_renew                    => $auto_renew,
+        no_auto_renewal_after         => $no_auto_renewal_after,
         reservesallowed               => $reservesallowed,
         holds_per_record              => $holds_per_record,
         issuelength                   => $issuelength,
@@ -183,6 +187,7 @@ elsif ($op eq 'add') {
         opacitemholds                 => $opacitemholds,
         overduefinescap               => $overduefinescap,
         cap_fine_to_replacement_price => $cap_fine_to_replacement_price,
+        article_requests              => $article_requests,
     };
 
     my $issuingrule = Koha::IssuingRules->find({categorycode => $bor, itemtype => $itemtype, branchcode => $br});

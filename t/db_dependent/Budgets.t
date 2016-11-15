@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 use Modern::Perl;
-use Test::More tests => 137;
+use Test::More tests => 142;
 
 BEGIN {
     use_ok('C4::Budgets')
@@ -317,6 +317,7 @@ my @order_infos = (
 
 my %budgets;
 my $invoiceid = AddInvoice(invoicenumber => 'invoice_test_clone', booksellerid => $booksellerid, unknown => "unknown");
+my $invoice = GetInvoice( $invoiceid );
 my $item_price = 10;
 my $item_quantity = 2;
 my $number_of_orders_to_move = 0;
@@ -330,14 +331,12 @@ for my $infos (@order_infos) {
                 order_internalnote => "internal note",
                 order_vendornote   => "vendor note",
                 quantity           => 2,
-                cost               => $item_price,
-                rrp                => $item_price,
+                cost_tax_included  => $item_price,
+                rrp_tax_included   => $item_price,
                 listprice          => $item_price,
-                ecost              => $item_price,
-                rrp                => $item_price,
+                ecost_tax_include  => $item_price,
                 discount           => 0,
                 uncertainprice     => 0,
-                gstrate            => 0,
             }
         )->insert;
         my $ordernumber = $order->{ordernumber};
@@ -354,25 +353,20 @@ for my $infos (@order_infos) {
                 order_vendornote   => "vendor note",
                 quantity           => $item_quantity,
                 cost               => $item_price,
-                rrp                => $item_price,
+                rrp_tax_included   => $item_price,
                 listprice          => $item_price,
-                ecost              => $item_price,
-                rrp                => $item_price,
+                ecost_tax_included => $item_price,
                 discount           => 0,
                 uncertainprice     => 0,
-                gstrate            => 0,
             }
         )->insert;
         my $ordernumber = $order->{ordernumber};
         ModReceiveOrder({
               biblionumber     => $biblionumber,
-              ordernumber      => $ordernumber,
+              order            => $order,
               budget_id        => $infos->{budget_id},
               quantityreceived => $item_quantity,
-              cost             => $item_price,
-              ecost            => $item_price,
-              invoiceid        => $invoiceid,
-              rrp              => $item_price,
+              invoice          => $invoice,
               received_items   => [],
         } );
     }
@@ -434,7 +428,11 @@ $budget_period_id_cloned = C4::Budgets::CloneBudgetPeriod(
 $budget_hierarchy        = GetBudgetHierarchy($budget_period_id);
 is( $budget_hierarchy->[0]->{children}->[0]->{budget_name}, 'budget_11', 'GetBudgetHierarchy should return budgets ordered by name, first child is budget_11' );
 is( $budget_hierarchy->[0]->{children}->[1]->{budget_name}, 'budget_12', 'GetBudgetHierarchy should return budgets ordered by name, second child is budget_12' );
-
+is($budget_hierarchy->[0]->{budget_name},'budget_1','GetBudgetHierarchy should return budgets ordered by name, first budget is budget_1');
+is($budget_hierarchy->[0]->{budget_level},'0','budget_level of budget (budget_1)  should be 0');
+is($budget_hierarchy->[0]->{children}->[0]->{budget_level},'1','budget_level of first fund(budget_11)  should be 1');
+is($budget_hierarchy->[0]->{children}->[1]->{budget_level},'1','budget_level of second fund(budget_12)  should be 1');
+is($budget_hierarchy->[0]->{children}->[0]->{children}->[0]->{budget_level},'2','budget_level of  child fund budget_11 should be 2');
 $budget_hierarchy        = GetBudgetHierarchy($budget_period_id);
 $budget_hierarchy_cloned = GetBudgetHierarchy($budget_period_id_cloned);
 

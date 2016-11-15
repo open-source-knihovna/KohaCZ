@@ -130,6 +130,37 @@ sub search {
     }
 }
 
+=head3 search_related
+
+    my @objects = Koha::Objects->search_related( $rel_name, $cond?, \%attrs? );
+    my $objects = Koha::Objects->search_related( $rel_name, $cond?, \%attrs? );
+
+Searches the specified relationship, optionally specifying a condition and attributes for matching records.
+
+=cut
+
+sub search_related {
+    my ( $self, $rel_name, @params ) = @_;
+
+    return if !$rel_name;
+    if (wantarray) {
+        my @dbic_rows = $self->_resultset()->search_related($rel_name, @params);
+        return if !@dbic_rows;
+        my $object_class = _get_objects_class( $dbic_rows[0]->result_class );
+
+        eval "require $object_class";
+        return _wrap( $object_class, @dbic_rows );
+
+    } else {
+        my $rs = $self->_resultset()->search_related($rel_name, @params);
+        return if !$rs;
+        my $object_class = _get_objects_class( $rs->result_class );
+
+        eval "require $object_class";
+        return _new_from_dbic( $object_class, $rs );
+    }
+}
+
 =head3 Koha::Objects->next();
 
 my $object = Koha::Objects->next();
@@ -148,6 +179,23 @@ sub next {
     my $object = $self->object_class()->_new_from_dbic( $result );
 
     return $object;
+}
+
+=head3 Koha::Objects->reset();
+
+Koha::Objects->reset();
+
+resets iteration so the next call to next() will start agein
+with the first object in a set.
+
+=cut
+
+sub reset {
+    my ( $self ) = @_;
+
+    $self->_resultset()->reset();
+
+    return $self;
 }
 
 =head3 Koha::Objects->as_list();
@@ -189,7 +237,7 @@ wraps the DBIC object in a corresponding Koha object
 sub _wrap {
     my ( $self, @dbic_rows ) = @_;
 
-    my @objects = map { $self->object_class()->_new_from_dbic( $_ ) } @dbic_rows;
+    my @objects = map { $self->object_class->_new_from_dbic( $_ ) } @dbic_rows;
 
     return @objects;
 }
@@ -214,6 +262,17 @@ sub _resultset {
     }
 }
 
+sub _get_objects_class {
+    my ( $type ) = @_;
+    return unless $type;
+
+    if( $type->can('koha_objects_class') ) {
+        return $type->koha_objects_class;
+    }
+    $type =~ s|Schema::Result::||;
+    return "${type}s";
+}
+
 =head3 columns
 
 my @columns = Koha::Objects->columns
@@ -233,14 +292,14 @@ The autoload method is used call DBIx::Class method on a resultset.
 
 Important: If you plan to use one of the DBIx::Class methods you must provide
 relevant tests in t/db_dependent/Koha/Objects.t
-Currently count, pager, reset, update and delete are covered.
+Currently count, pager, update and delete are covered.
 
 =cut
 
 sub AUTOLOAD {
     my ( $self, @params ) = @_;
 
-    my @known_methods = qw( count pager reset update delete );
+    my @known_methods = qw( count pager update delete result_class );
     my $method = our $AUTOLOAD;
     $method =~ s/.*:://;
 

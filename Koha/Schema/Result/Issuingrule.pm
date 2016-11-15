@@ -153,6 +153,11 @@ __PACKAGE__->table("issuingrules");
   default_value: 0
   is_nullable: 1
 
+=head2 no_auto_renewal_after
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =head2 reservesallowed
 
   data_type: 'smallint'
@@ -196,6 +201,13 @@ __PACKAGE__->table("issuingrules");
   default_value: 'N'
   is_nullable: 0
   size: 1
+
+=head2 article_requests
+
+  data_type: 'enum'
+  default_value: 'no'
+  extra: {list => ["no","yes","bib_only","item_only"]}
+  is_nullable: 0
 
 =cut
 
@@ -251,6 +263,8 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_nullable => 1 },
   "auto_renew",
   { data_type => "tinyint", default_value => 0, is_nullable => 1 },
+  "no_auto_renewal_after",
+  { data_type => "integer", is_nullable => 1 },
   "reservesallowed",
   { data_type => "smallint", default_value => 0, is_nullable => 0 },
   "holds_per_record",
@@ -265,6 +279,13 @@ __PACKAGE__->add_columns(
   { data_type => "tinyint", default_value => 0, is_nullable => 0 },
   "opacitemholds",
   { data_type => "char", default_value => "N", is_nullable => 0, size => 1 },
+  "article_requests",
+  {
+    data_type => "enum",
+    default_value => "no",
+    extra => { list => ["no", "yes", "bib_only", "item_only"] },
+    is_nullable => 0,
+  },
 );
 
 =head1 PRIMARY KEY
@@ -284,8 +305,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("branchcode", "categorycode", "itemtype");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-09-06 09:35:36
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:HkvNR2YHTkqN2PnQk5XGAA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-11-02 10:33:37
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:t9AhZLbm4SE7mx25LAyhGA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

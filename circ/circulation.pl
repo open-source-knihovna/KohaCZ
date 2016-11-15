@@ -47,6 +47,7 @@ use Koha::Patron;
 use Koha::Patron::Debarments qw(GetDebarments);
 use Koha::DateUtils;
 use Koha::Database;
+use Koha::BiblioFrameworks;
 use Koha::Patron::Messages;
 use Koha::Patron::Images;
 use Koha::SearchEngine;
@@ -261,7 +262,9 @@ if ($findborrower) {
 }
 
 # get the borrower information.....
+my $patron;
 if ($borrowernumber) {
+    $patron = Koha::Patrons->find( $borrowernumber );
     $borrower = GetMemberDetails( $borrowernumber, 0 );
     my ( $od, $issue, $fines ) = GetMemberIssuesAndFines( $borrowernumber );
 
@@ -299,7 +302,6 @@ if ($borrowernumber) {
         finetotal    => $fines
     );
 
-    my $patron = Koha::Patrons->find( $borrowernumber );
     if ( $patron and $patron->is_debarred ) {
         $template->param(
             'userdebarred'    => $borrower->{debarred},
@@ -340,8 +342,9 @@ if (@$barcodes) {
 
     #  Get the item title for more information
     my $getmessageiteminfo = GetBiblioFromItemNumber(undef,$barcode);
-    $template_params->{authvalcode_notforloan} =
-        C4::Koha::GetAuthValCode('items.notforloan', $getmessageiteminfo->{'frameworkcode'});
+
+    my $mss = Koha::MarcSubfieldStructures->search({ frameworkcode => $getmessageiteminfo->{frameworkcode}, kohafield => 'items.notforloan', authorised_value => { not => undef } });
+    $template_params->{authvalcode_notforloan} = $mss->count ? $mss->next->authorised_value : undef;
 
     # Fix for bug 7494: optional checkout-time fallback search for a book
 
@@ -390,11 +393,8 @@ if (@$barcodes) {
         unless($issueconfirmed){
             #  Get the item title for more information
             my $materials = $iteminfo->{'materials'};
-            my $avcode = GetAuthValCode('items.materials');
-            if ($avcode) {
-                my $av = Koha::AuthorisedValues->search({ category => $avcode, authorised_value => $materials });
-                $materials = $av->count ? $av->next->lib : '';
-            }
+            my $av = Koha::AuthorisedValues->search_by_koha_field({ frameworkcode => $getmessageiteminfo->{frameworkcode}, kohafield => 'items.materials', authorised_value => $materials });
+            $materials = $av->count ? $av->next->lib : '';
             $template_params->{additional_materials} = $materials;
             $template_params->{itemhomebranch} = $iteminfo->{'homebranch'};
 
@@ -566,22 +566,19 @@ if ( $borrowernumber && $borrower->{'category_type'} eq 'C') {
     $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
 }
 
-my $librarian_messages = Koha::Patron::Messages->search(
+my $messages = Koha::Patron::Messages->search(
     {
-        borrowernumber => $borrowernumber,
-        message_type => 'L',
-    }
-);
-
-my $patron_messages = Koha::Patron::Messages->search(
+        'me.borrowernumber' => $borrowernumber,
+    },
     {
-        borrowernumber => $borrowernumber,
-        message_type => 'B',
+       join => 'manager',
+       '+select' => ['manager.surname', 'manager.firstname' ],
+       '+as' => ['manager_surname', 'manager_firstname'],
     }
 );
 
 my $fast_cataloging = 0;
-if (defined getframeworkinfo('FA')) {
+if ( Koha::BiblioFrameworks->find('FA') ) {
     $fast_cataloging = 1 
 }
 
@@ -598,7 +595,7 @@ my $view = $batch
 
 my @relatives;
 if ( $borrowernumber ) {
-    if ( my $patron = Koha::Patrons->find( $borrower->{borrowernumber} ) ) {
+    if ( $patron ) {
         if ( my $guarantor = $patron->guarantor ) {
             push @relatives, $guarantor->borrowernumber;
             push @relatives, $_->borrowernumber for $patron->siblings;
@@ -611,7 +608,8 @@ my $relatives_issues_count =
   Koha::Database->new()->schema()->resultset('Issue')
   ->count( { borrowernumber => \@relatives } );
 
-my $roadtype = C4::Koha::GetAuthorisedValueByCode( 'ROADTYPE', $borrower->{streettype} );
+my $av = Koha::AuthorisedValues->search({ category => 'ROADTYPE', authorised_value => $borrower->{streettype} });
+my $roadtype = $av->count ? $av->next->lib : '';
 
 $template->param(%$borrower);
 
@@ -627,8 +625,8 @@ if ($restoreduedatespec || $stickyduedate) {
 }
 
 $template->param(
-    librarian_messages => $librarian_messages,
-    patron_messages   => $patron_messages,
+    patron            => $patron,
+    messages           => $messages,
     borrower          => $borrower,
     borrowernumber    => $borrowernumber,
     categoryname      => $borrower->{'description'},

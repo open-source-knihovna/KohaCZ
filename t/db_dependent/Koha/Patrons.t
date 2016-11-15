@@ -19,10 +19,12 @@
 
 use Modern::Perl;
 
-use Test::More tests => 8;
+use Test::More tests => 11;
 use Test::Warn;
 
-use C4::Circulation;
+use C4::Members;
+
+use Koha::Holds;
 use Koha::Patron;
 use Koha::Patrons;
 use Koha::Database;
@@ -164,10 +166,12 @@ subtest 'update_password' => sub {
 };
 
 subtest 'renew_account' => sub {
-    plan tests => 6;
+    plan tests => 10;
     my $a_month_ago                = dt_from_string->add( months => -1 )->truncate( to => 'day' );
     my $a_year_later               = dt_from_string->add( months => 12 )->truncate( to => 'day' );
     my $a_year_later_minus_a_month = dt_from_string->add( months => 11 )->truncate( to => 'day' );
+    my $a_month_later              = dt_from_string->add( months => 1  )->truncate( to => 'day' );
+    my $a_year_later_plus_a_month  = dt_from_string->add( months => 13 )->truncate( to => 'day' );
     my $patron_category = $builder->build(
         {   source => 'Category',
             value  => {
@@ -184,7 +188,25 @@ subtest 'renew_account' => sub {
             }
         }
     );
+    my $patron_2 = $builder->build(
+        {  source => 'Borrower',
+           value  => {
+               dateexpiry => $a_month_ago,
+               categorycode => $patron_category->{categorycode},
+            }
+        }
+    );
+    my $patron_3 = $builder->build(
+        {  source => 'Borrower',
+           value  => {
+               dateexpiry => $a_month_later,
+               categorycode => $patron_category->{categorycode},
+           }
+        }
+    );
     my $retrieved_patron = Koha::Patrons->find( $patron->{borrowernumber} );
+    my $retrieved_patron_2 = Koha::Patrons->find( $patron_2->{borrowernumber} );
+    my $retrieved_patron_3 = Koha::Patrons->find( $patron_3->{borrowernumber} );
 
     t::lib::Mocks::mock_preference( 'BorrowerRenewalPeriodBase', 'dateexpiry' );
     t::lib::Mocks::mock_preference( 'BorrowersLog',              1 );
@@ -204,7 +226,115 @@ subtest 'renew_account' => sub {
     $number_of_logs = $schema->resultset('ActionLog')->search( { module => 'MEMBERS', action => 'RENEW', object => $retrieved_patron->borrowernumber } )->count;
     is( $number_of_logs, 1, 'Without BorrowerLogs, Koha::Patron->renew_account should not have logged' );
 
+    t::lib::Mocks::mock_preference( 'BorrowerRenewalPeriodBase', 'combination' );
+    $expiry_date = $retrieved_patron_2->renew_account;
+    is( $expiry_date, $a_year_later );
+    $retrieved_expiry_date = Koha::Patrons->find( $patron_2->{borrowernumber} )->dateexpiry;
+    is( dt_from_string($retrieved_expiry_date), $a_year_later );
+
+    $expiry_date = $retrieved_patron_3->renew_account;
+    is( $expiry_date, $a_year_later_plus_a_month );
+    $retrieved_expiry_date = Koha::Patrons->find( $patron_3->{borrowernumber} )->dateexpiry;
+    is( dt_from_string($retrieved_expiry_date), $a_year_later_plus_a_month );
+
     $retrieved_patron->delete;
+    $retrieved_patron_2->delete;
+    $retrieved_patron_3->delete;
+};
+
+subtest "move_to_deleted" => sub {
+    plan tests => 2;
+    my $patron = $builder->build( { source => 'Borrower' } );
+    my $retrieved_patron = Koha::Patrons->find( $patron->{borrowernumber} );
+    is( ref( $retrieved_patron->move_to_deleted ), 'Koha::Schema::Result::Deletedborrower', 'Koha::Patron->move_to_deleted should return the Deleted patron' )
+      ;    # FIXME This should be Koha::Deleted::Patron
+    my $deleted_patron = $schema->resultset('Deletedborrower')
+        ->search( { borrowernumber => $patron->{borrowernumber} }, { result_class => 'DBIx::Class::ResultClass::HashRefInflator' } )
+        ->next;
+    is_deeply( $deleted_patron, $patron, 'Koha::Patron->move_to_deleted should have correctly moved the patron to the deleted table' );
+    $retrieved_patron->delete( $patron->{borrowernumber} );    # Cleanup
+};
+
+subtest "delete" => sub {
+    plan tests => 5;
+    t::lib::Mocks::mock_preference( 'BorrowersLog', 1 );
+    my $patron           = $builder->build( { source => 'Borrower' } );
+    my $retrieved_patron = Koha::Patrons->find( $patron->{borrowernumber} );
+    my $hold             = $builder->build(
+        {   source => 'Reserve',
+            value  => { borrowernumber => $patron->{borrowernumber} }
+        }
+    );
+    my $list = $builder->build(
+        {   source => 'Virtualshelve',
+            value  => { owner => $patron->{borrowernumber} }
+        }
+    );
+
+    my $deleted = $retrieved_patron->delete;
+    is( $deleted, 1, 'Koha::Patron->delete should return 1 if the patron has been correctly deleted' );
+
+    is( Koha::Patrons->find( $patron->{borrowernumber} ), undef, 'Koha::Patron->delete should have deleted the patron' );
+
+    is( Koha::Holds->search( { borrowernumber => $patron->{borrowernumber} } )->count, 0, q|Koha::Patron->delete should have deleted patron's holds| );
+
+    is( Koha::Virtualshelves->search( { owner => $patron->{borrowernumber} } )->count, 0, q|Koha::Patron->delete should have deleted patron's lists| );
+
+    my $number_of_logs = $schema->resultset('ActionLog')->search( { module => 'MEMBERS', action => 'DELETE', object => $retrieved_patron->borrowernumber } )->count;
+    is( $number_of_logs, 1, 'With BorrowerLogs, Koha::Patron->delete should have logged' );
+};
+
+subtest 'add_enrolment_fee_if_needed' => sub {
+    plan tests => 4;
+
+    my $enrolmentfee_K  = 5;
+    my $enrolmentfee_J  = 10;
+    my $enrolmentfee_YA = 20;
+
+    my $dbh = C4::Context->dbh;
+    $dbh->do(q|UPDATE categories set enrolmentfee=? where categorycode=?|, undef, $enrolmentfee_K, 'K');
+    $dbh->do(q|UPDATE categories set enrolmentfee=? where categorycode=?|, undef, $enrolmentfee_J, 'J');
+    $dbh->do(q|UPDATE categories set enrolmentfee=? where categorycode=?|, undef, $enrolmentfee_YA, 'YA');
+
+    my %borrower_data = (
+        firstname    => 'my firstname',
+        surname      => 'my surname',
+        categorycode => 'K',
+        branchcode   => $library->{branchcode},
+    );
+
+    my $borrowernumber = C4::Members::AddMember(%borrower_data);
+    $borrower_data{borrowernumber} = $borrowernumber;
+
+    my ($total) = C4::Members::GetMemberAccountRecords($borrowernumber);
+    is( $total, $enrolmentfee_K, "New kid pay $enrolmentfee_K" );
+
+    t::lib::Mocks::mock_preference( 'FeeOnChangePatronCategory', 0 );
+    $borrower_data{categorycode} = 'J';
+    C4::Members::ModMember(%borrower_data);
+    ($total) = C4::Members::GetMemberAccountRecords($borrowernumber);
+    is( $total, $enrolmentfee_K, "Kid growing and become a juvenile, but shouldn't pay for the upgrade " );
+
+    $borrower_data{categorycode} = 'K';
+    C4::Members::ModMember(%borrower_data);
+    t::lib::Mocks::mock_preference( 'FeeOnChangePatronCategory', 1 );
+
+    $borrower_data{categorycode} = 'J';
+    C4::Members::ModMember(%borrower_data);
+    ($total) = C4::Members::GetMemberAccountRecords($borrowernumber);
+    is( $total, $enrolmentfee_K + $enrolmentfee_J, "Kid growing and become a juvenile, he should pay " . ( $enrolmentfee_K + $enrolmentfee_J ) );
+
+    # Check with calling directly Koha::Patron->get_enrolment_fee_if_needed
+    my $patron = Koha::Patrons->find($borrowernumber);
+    $patron->categorycode('YA')->store;
+    my $fee = $patron->add_enrolment_fee_if_needed;
+    ($total) = C4::Members::GetMemberAccountRecords($borrowernumber);
+    is( $total,
+        $enrolmentfee_K + $enrolmentfee_J + $enrolmentfee_YA,
+        "Juvenile growing and become an young adult, he should pay " . ( $enrolmentfee_K + $enrolmentfee_J + $enrolmentfee_YA )
+    );
+
+    $patron->delete;
 };
 
 $retrieved_patron_1->delete;

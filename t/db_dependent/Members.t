@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 84;
+use Test::More tests => 79;
 use Test::MockModule;
 use Data::Dumper;
 use C4::Context;
@@ -95,20 +95,6 @@ testAgeAccessors(\%data); #Age accessor tests don't touch the db so it is safe t
 my $addmem=AddMember(%data);
 ok($addmem, "AddMember()");
 
-# It's not really a Move, it's a Copy.
-my $result = MoveMemberToDeleted($addmem);
-ok($result,"MoveMemberToDeleted()");
-
-my $sth = $dbh->prepare("SELECT * from borrowers WHERE borrowernumber=?");
-$sth->execute($addmem);
-my $MemberAdded = $sth->fetchrow_hashref;
-
-$sth = $dbh->prepare("SELECT * from deletedborrowers WHERE borrowernumber=?");
-$sth->execute($addmem);
-my $MemberMoved = $sth->fetchrow_hashref;
-
-is_deeply($MemberMoved,$MemberAdded,"Confirm MoveMemberToDeleted.");
-
 my $member=GetMemberDetails("",$CARDNUMBER)
   or BAIL_OUT("Cannot read member with card $CARDNUMBER");
 
@@ -168,21 +154,6 @@ ModMember(borrowernumber => $member->{'borrowernumber'}, dateexpiry => '2001-01-
 $member = GetMemberDetails($member->{'borrowernumber'});
 ok($member->{is_expired}, "GetMemberDetails() indicates that patron is expired");
 
-# Create a reserve for the patron
-$builder->build({
-    source => 'Reserve',
-    value  => {
-        borrowernumber => $member->{ borrowernumber }
-    }
-});
-is( Koha::Holds->search({ borrowernumber => $member->{borrowernumber} })->count,
-    1, 'Hold created correctly' );
-DelMember($member->{borrowernumber});
-my $borrower = GetMember( cardnumber => $CARDNUMBER );
-is( $borrower, undef, 'DelMember should remove the patron' );
-is( Koha::Holds->search({ borrowernumber => $member->{borrowernumber} })->count,
-    0, 'Hold deleted correctly' );
-
 # Check_Userid tests
 %data = (
     cardnumber   => "123456789",
@@ -206,7 +177,7 @@ is( Check_Userid( 'tomasito.none', '' ), 0,
 is( Check_Userid( 'tomasitoxxx', '' ), 1,
     'non-existent userid -> unique (blank borrowernumber)' );
 
-$borrower = GetMember( borrowernumber => $borrowernumber );
+my $borrower = GetMember( borrowernumber => $borrowernumber );
 is( $borrower->{dateofbirth}, undef, 'AddMember should undef dateofbirth if empty string is given');
 is( $borrower->{debarred}, undef, 'AddMember should undef debarred if empty string is given');
 isnt( $borrower->{dateexpiry}, '0000-00-00', 'AddMember should not set dateexpiry to 0000-00-00 if empty string is given');

@@ -38,11 +38,14 @@ use C4::Koha;
 use C4::Log;
 use C4::Letters;
 use C4::Form::MessagingPreferences;
+use Koha::AuthorisedValues;
 use Koha::Patron::Debarments;
 use Koha::Cities;
 use Koha::DateUtils;
 use Koha::Libraries;
 use Koha::Patron::Categories;
+use Koha::Patron::HouseboundRole;
+use Koha::Patron::HouseboundRoles;
 use Koha::Token;
 use Email::Valid;
 use Module::Load;
@@ -302,9 +305,18 @@ if ($op eq 'save' || $op eq 'insert'){
                 : ()
     }
 
-    if ( $newdata{dateofbirth} ) {
-        my $age = GetAge($newdata{dateofbirth});
-        my $borrowercategory = Koha::Patron::Categories->find($newdata{categorycode});
+    my $dateofbirth;
+    if ($op eq 'save' && $step == 3) {
+        my $borrower = C4::Members::GetMember(borrowernumber => $borrowernumber);
+        $dateofbirth = $borrower->{dateofbirth};
+    }
+    else {
+        $dateofbirth = $newdata{dateofbirth};
+    }
+
+    if ( $dateofbirth ) {
+        my $age = GetAge($dateofbirth);
+        my $borrowercategory = Koha::Patron::Categories->find($categorycode);
         my ($low,$high) = ($borrowercategory->dateofbirthrequired, $borrowercategory->upperagelimit);
         if (($high && ($age > $high)) or ($age < $low)) {
             push @errors, 'ERROR_age_limitations';
@@ -435,11 +447,53 @@ if ((!$nok) and $nodouble and ($op eq 'insert' or $op eq 'save')){
         if ( exists $data{'borrowernumber'} && C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preference('NorwegianPatronDBEnable') == 1 ) {
             NLSync({ 'borrowernumber' => $borrowernumber });
         }
-	} elsif ($op eq 'save'){ 
-		if ($NoUpdateLogin) {
-			delete $newdata{'password'};
-			delete $newdata{'userid'};
-		}
+
+        # Create HouseboundRole if necessary.
+        # Borrower did not exist, so HouseboundRole *cannot* yet exist.
+        my ( $hsbnd_chooser, $hsbnd_deliverer ) = ( 0, 0 );
+        $hsbnd_chooser = 1 if $input->param('housebound_chooser');
+        $hsbnd_deliverer = 1 if $input->param('housebound_deliverer');
+        # Only create a HouseboundRole if patron has a role.
+        if ( $hsbnd_chooser || $hsbnd_deliverer ) {
+            Koha::Patron::HouseboundRole->new({
+                borrowernumber_id    => $borrowernumber,
+                housebound_chooser   => $hsbnd_chooser,
+                housebound_deliverer => $hsbnd_deliverer,
+            })->store;
+        }
+
+    } elsif ($op eq 'save') {
+
+        # Update or create our HouseboundRole if necessary.
+        my $housebound_role = Koha::Patron::HouseboundRoles->find($borrowernumber);
+        my ( $hsbnd_chooser, $hsbnd_deliverer ) = ( 0, 0 );
+        $hsbnd_chooser = 1 if $input->param('housebound_chooser');
+        $hsbnd_deliverer = 1 if $input->param('housebound_deliverer');
+        if ( $housebound_role ) {
+            if ( $hsbnd_chooser || $hsbnd_deliverer ) {
+                # Update our HouseboundRole.
+                $housebound_role
+                    ->housebound_chooser($hsbnd_chooser)
+                    ->housebound_deliverer($hsbnd_deliverer)
+                    ->store;
+            } else {
+                $housebound_role->delete; # No longer needed.
+            }
+        } else {
+            # Only create a HouseboundRole if patron has a role.
+            if ( $hsbnd_chooser || $hsbnd_deliverer ) {
+                $housebound_role = Koha::Patron::HouseboundRole->new({
+                    borrowernumber_id    => $borrowernumber,
+                    housebound_chooser   => $hsbnd_chooser,
+                    housebound_deliverer => $hsbnd_deliverer,
+                })->store;
+            }
+        }
+
+        if ($NoUpdateLogin) {
+            delete $newdata{'password'};
+            delete $newdata{'userid'};
+        }
         &ModMember(%newdata) unless scalar(keys %newdata) <= 1; # bug 4508 - avoid crash if we're not
                                                                 # updating any columns in the borrowers table,
                                                                 # which can happen if we're only editing the
@@ -703,6 +757,11 @@ $template->param(
     ),
 );
 
+# HouseboundModule data
+$template->param(
+    housebound_role  => Koha::Patron::HouseboundRoles->find($borrowernumber),
+);
+
 if(defined($data{'flags'})){
   $template->param(flags=>$data{'flags'});
 }
@@ -795,7 +854,8 @@ sub patron_attributes_form {
         }
     }
     while ( my ($class, @items) = each %items_by_class ) {
-        my $lib = GetAuthorisedValueByCode( 'PA_CLASS', $class ) || $class;
+        my $av = Koha::AuthorisedValues->search({ category => 'PA_CLASS', authorised_value => $class });
+        my $lib = $av->count ? $av->next->lib : $class;
         push @attribute_loop, {
             class => $class,
             items => @items,

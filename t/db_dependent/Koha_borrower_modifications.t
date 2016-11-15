@@ -1,10 +1,12 @@
 #!/usr/bin/perl
 
 use Modern::Perl;
-use Test::More tests => 8;
+use Test::More tests => 10;
+use Try::Tiny;
+
+use t::lib::TestBuilder;
 
 use C4::Context;
-use t::lib::TestBuilder;
 use C4::Members;
 
 BEGIN {
@@ -26,6 +28,21 @@ Koha::Patron::Modification->new(
         firstname          => 'Kyle'
     }
 )->store();
+
+## Ensure duplicate verification tokens cannot be added to the database
+try {
+    Koha::Patron::Modification->new(
+        {
+            verification_token => '1234567890',
+            surname            => 'Hall',
+            firstname          => 'Daria'
+        }
+    )->store();
+} catch {
+    ok( $_->isa('Koha::Exceptions::Patron::Modification::DuplicateVerificationToken'),
+        'Attempting to add a duplicate verification token to the database should raise a Koha::Exceptions::Koha::Patron::Modification::DuplicateVerificationToken exception' );
+    is( $_->message, "Duplicate verification token 1234567890", 'Exception carries the right message' );
+};
 
 ## Get the new pending modification
 my $borrower =

@@ -17,8 +17,7 @@ package C4::Letters;
 # You should have received a copy of the GNU General Public License
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-use warnings;
+use Modern::Perl;
 
 use MIME::Lite;
 use Mail::Sendmail;
@@ -28,7 +27,6 @@ use Carp;
 use Template;
 use Module::Load::Conditional qw(can_load);
 
-use C4::Koha qw(GetAuthorisedValueByCode);
 use C4::Members;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
 use C4::Log;
@@ -365,12 +363,24 @@ sub findrelatedto {
 
 =head2 SendAlerts
 
-    parameters :
-    - $type : the type of alert
-    - $externalid : the id of the "object" to query
-    - $letter_code : the letter to send.
+    my $err = &SendAlerts($type, $externalid, $letter_code);
 
-    send an alert to all borrowers having put an alert on a given subject.
+    Parameters:
+      - $type : the type of alert
+      - $externalid : the id of the "object" to query
+      - $letter_code : the notice template to use
+
+    C<&SendAlerts> sends an email notice directly to a patron or a vendor.
+
+    Currently it supports ($type):
+      - claim serial issues (claimissues)
+      - claim acquisition orders (claimacquisition)
+      - send acquisition orders to the vendor (orderacquisition)
+      - notify patrons about newly received serial issues (issue)
+      - notify patrons when their account is created (members)
+
+    Returns undef or { error => 'message } on failure.
+    Returns true on success.
 
 =cut
 
@@ -441,23 +451,42 @@ sub SendAlerts {
                                     : 'text/plain; charset="utf-8"',
                 }
             );
-            sendmail(%mail) or carp $Mail::Sendmail::error;
+            unless( sendmail(%mail) ) {
+                carp $Mail::Sendmail::error;
+                return { error => $Mail::Sendmail::error };
+            }
         }
     }
-    elsif ( $type eq 'claimacquisition' or $type eq 'claimissues' ) {
+    elsif ( $type eq 'claimacquisition' or $type eq 'claimissues' or $type eq 'orderacquisition' ) {
 
         # prepare the letter...
-        # search the biblionumber
-        my $strsth =  $type eq 'claimacquisition'
-            ? qq{
+        my $strsth;
+        my $sthorders;
+        my $dataorders;
+        my $action;
+        if ( $type eq 'claimacquisition') {
+            $strsth = qq{
             SELECT aqorders.*,aqbasket.*,biblio.*,biblioitems.*
             FROM aqorders
             LEFT JOIN aqbasket ON aqbasket.basketno=aqorders.basketno
             LEFT JOIN biblio ON aqorders.biblionumber=biblio.biblionumber
             LEFT JOIN biblioitems ON aqorders.biblionumber=biblioitems.biblionumber
             WHERE aqorders.ordernumber IN (
+            };
+
+            if (!@$externalid){
+                carp "No order selected";
+                return { error => "no_order_selected" };
             }
-            : qq{
+            $strsth .= join( ",", @$externalid ) . ")";
+            $action = "ACQUISITION CLAIM";
+            $sthorders = $dbh->prepare($strsth);
+            $sthorders->execute;
+            $dataorders = $sthorders->fetchall_arrayref( {} );
+        }
+
+        if ($type eq 'claimissues') {
+            $strsth = qq{
             SELECT serial.*,subscription.*, biblio.*, aqbooksellers.*,
             aqbooksellers.id AS booksellerid
             FROM serial
@@ -467,21 +496,46 @@ sub SendAlerts {
             WHERE serial.serialid IN (
             };
 
-        if (!@$externalid){
-            carp "No Order seleted";
-            return { error => "no_order_seleted" };
+            if (!@$externalid){
+                carp "No Order selected";
+                return { error => "no_order_selected" };
+            }
+
+            $strsth .= join( ",", @$externalid ) . ")";
+            $action = "CLAIM ISSUE";
+            $sthorders = $dbh->prepare($strsth);
+            $sthorders->execute;
+            $dataorders = $sthorders->fetchall_arrayref( {} );
         }
 
-        $strsth .= join( ",", @$externalid ) . ")";
-        my $sthorders = $dbh->prepare($strsth);
-        $sthorders->execute;
-        my $dataorders = $sthorders->fetchall_arrayref( {} );
+        if ( $type eq 'orderacquisition') {
+            $strsth = qq{
+            SELECT aqorders.*,aqbasket.*,biblio.*,biblioitems.*
+            FROM aqorders
+            LEFT JOIN aqbasket ON aqbasket.basketno=aqorders.basketno
+            LEFT JOIN biblio ON aqorders.biblionumber=biblio.biblionumber
+            LEFT JOIN biblioitems ON aqorders.biblionumber=biblioitems.biblionumber
+            WHERE aqbasket.basketno = ?
+            AND orderstatus IN ('new','ordered')
+            };
+
+            if (!$externalid){
+                carp "No basketnumber given";
+                return { error => "no_basketno" };
+            }
+            $action = "ACQUISITION ORDER";
+            $sthorders = $dbh->prepare($strsth);
+            $sthorders->execute($externalid);
+            $dataorders = $sthorders->fetchall_arrayref( {} );
+        }
 
         my $sthbookseller =
           $dbh->prepare("select * from aqbooksellers where id=?");
         $sthbookseller->execute( $dataorders->[0]->{booksellerid} );
         my $databookseller = $sthbookseller->fetchrow_hashref;
-        my $addressee =  $type eq 'claimacquisition' ? 'acqprimary' : 'serialsprimary';
+
+        my $addressee =  $type eq 'claimacquisition' || $type eq 'orderacquisition' ? 'acqprimary' : 'serialsprimary';
+
         my $sthcontact =
           $dbh->prepare("SELECT * FROM aqcontacts WHERE booksellerid=? AND $type=1 ORDER BY $addressee DESC");
         $sthcontact->execute( $dataorders->[0]->{booksellerid} );
@@ -512,7 +566,7 @@ sub SendAlerts {
             },
             repeat => $dataorders,
             want_librarian => 1,
-        ) or return;
+        ) or return { error => "no_letter" };
 
         # Remove the order tag
         $letter->{content} =~ s/<order>(.*?)<\/order>/$1/gxms;
@@ -532,12 +586,14 @@ sub SendAlerts {
                                 : 'text/plain; charset="utf-8"',
         );
 
-        $mail{'Reply-to'} = C4::Context->preference('ReplytoDefault')
-          if C4::Context->preference('ReplytoDefault');
-        $mail{'Sender'} = C4::Context->preference('ReturnpathDefault')
-          if C4::Context->preference('ReturnpathDefault');
-        $mail{'Bcc'} = $userenv->{emailaddress}
-          if C4::Context->preference("ClaimsBccCopy");
+        if ($type eq 'claimacquisition' || $type eq 'claimissues' ) {
+            $mail{'Reply-to'} = C4::Context->preference('ReplytoDefault')
+              if C4::Context->preference('ReplytoDefault');
+            $mail{'Sender'} = C4::Context->preference('ReturnpathDefault')
+              if C4::Context->preference('ReturnpathDefault');
+            $mail{'Bcc'} = $userenv->{emailaddress}
+              if C4::Context->preference("ClaimsBccCopy");
+        }
 
         unless ( sendmail(%mail) ) {
             carp $Mail::Sendmail::error;
@@ -546,7 +602,7 @@ sub SendAlerts {
 
         logaction(
             "ACQUISITION",
-            $type eq 'claimissues' ? "CLAIM ISSUE" : "ACQUISITION CLAIM",
+            $action,
             undef,
             "To="
                 . join( ',', @email )
@@ -588,8 +644,14 @@ sub SendAlerts {
                                 : 'text/plain; charset="utf-8"',
             }
         );
-        sendmail(%mail) or carp $Mail::Sendmail::error;
+        unless( sendmail(%mail) ) {
+            carp $Mail::Sendmail::error;
+            return { error => $Mail::Sendmail::error };
+        }
     }
+
+    # If we come here, return an OK status
+    return 1;
 }
 
 =head2 GetPreparedLetter( %params )
@@ -755,18 +817,19 @@ sub _parseletter_sth {
     #       broke things for the rest of us. prepare_cached is a better
     #       way to cache statement handles anyway.
     my $query = 
-    ($table eq 'biblio'       ) ? "SELECT * FROM $table WHERE   biblionumber = ?"                                  :
-    ($table eq 'biblioitems'  ) ? "SELECT * FROM $table WHERE   biblionumber = ?"                                  :
-    ($table eq 'items'        ) ? "SELECT * FROM $table WHERE     itemnumber = ?"                                  :
-    ($table eq 'issues'       ) ? "SELECT * FROM $table WHERE     itemnumber = ?"                                  :
-    ($table eq 'old_issues'   ) ? "SELECT * FROM $table WHERE     itemnumber = ? ORDER BY timestamp DESC LIMIT 1"  :
-    ($table eq 'reserves'     ) ? "SELECT * FROM $table WHERE borrowernumber = ? and biblionumber = ?"             :
-    ($table eq 'borrowers'    ) ? "SELECT * FROM $table WHERE borrowernumber = ?"                                  :
-    ($table eq 'branches'     ) ? "SELECT * FROM $table WHERE     branchcode = ?"                                  :
-    ($table eq 'suggestions'  ) ? "SELECT * FROM $table WHERE   suggestionid = ?"                                  :
-    ($table eq 'aqbooksellers') ? "SELECT * FROM $table WHERE             id = ?"                                  :
-    ($table eq 'aqorders'     ) ? "SELECT * FROM $table WHERE    ordernumber = ?"                                  :
-    ($table eq 'opac_news'    ) ? "SELECT * FROM $table WHERE          idnew = ?"                                  :
+    ($table eq 'biblio'       )    ? "SELECT * FROM $table WHERE   biblionumber = ?"                                  :
+    ($table eq 'biblioitems'  )    ? "SELECT * FROM $table WHERE   biblionumber = ?"                                  :
+    ($table eq 'items'        )    ? "SELECT * FROM $table WHERE     itemnumber = ?"                                  :
+    ($table eq 'issues'       )    ? "SELECT * FROM $table WHERE     itemnumber = ?"                                  :
+    ($table eq 'old_issues'   )    ? "SELECT * FROM $table WHERE     itemnumber = ? ORDER BY timestamp DESC LIMIT 1"  :
+    ($table eq 'reserves'     )    ? "SELECT * FROM $table WHERE borrowernumber = ? and biblionumber = ?"             :
+    ($table eq 'borrowers'    )    ? "SELECT * FROM $table WHERE borrowernumber = ?"                                  :
+    ($table eq 'branches'     )    ? "SELECT * FROM $table WHERE     branchcode = ?"                                  :
+    ($table eq 'suggestions'  )    ? "SELECT * FROM $table WHERE   suggestionid = ?"                                  :
+    ($table eq 'aqbooksellers')    ? "SELECT * FROM $table WHERE             id = ?"                                  :
+    ($table eq 'aqorders'     )    ? "SELECT * FROM $table WHERE    ordernumber = ?"                                  :
+    ($table eq 'opac_news'    )    ? "SELECT * FROM $table WHERE          idnew = ?"                                  :
+    ($table eq 'article_requests') ? "SELECT * FROM $table WHERE             id = ?"                                  :
     ($table eq 'borrower_modifications') ? "SELECT * FROM $table WHERE verification_token = ?" :
     ($table eq 'subscription') ? "SELECT * FROM $table WHERE subscriptionid = ?" :
     ($table eq 'serial') ? "SELECT * FROM $table WHERE serialid = ?" :
@@ -829,7 +892,10 @@ sub _parseletter {
             #Therefore adding the test on biblio. This includes biblioitems,
             #but excludes items. Removed unneeded global and lookahead.
 
-        $val = GetAuthorisedValueByCode ('ROADTYPE', $val, 0) if $table=~/^borrowers$/ && $field=~/^streettype$/;
+        if ( $table=~/^borrowers$/ && $field=~/^streettype$/ ) {
+            my $av = Koha::AuthorisedValues->search({ category => 'ROADTYPE', authorised_value => $val });
+            $val = $av->count ? $av->next->lib : '';
+        }
 
         # Dates replacement
         my $replacedby   = defined ($val) ? $val : '';

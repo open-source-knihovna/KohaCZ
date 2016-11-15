@@ -39,6 +39,7 @@ use C4::NCIP::NcipUtils qw/prinJson/;
 use JSON qw /to_json/;
 
 use Koha::Acquisition::Bookseller;
+use Koha::AuthorisedValues;
 use Koha::DateUtils;
 use Koha::Items;
 
@@ -121,8 +122,10 @@ $data->{'count'}=$totalcount;
 $data->{'showncount'}=$showncount;
 $data->{'hiddencount'}=$hiddencount;  # can be zero
 
-my $ccodes= GetKohaAuthorisedValues('items.ccode',$fw);
-my $copynumbers = GetKohaAuthorisedValues('items.copynumber',$fw);
+my $ccodes =
+  { map { $_->authorised_value => $_->lib } Koha::AuthorisedValues->search_by_koha_field( { frameworkcode => $fw, kohafield => 'items.ccode' } ) };
+my $copynumbers =
+  { map { $_->authorised_value => $_->lib } Koha::AuthorisedValues->search_by_koha_field( { frameworkcode => $fw, kohafield => 'items.copynumber' } ) };
 my $itemtypes = GetItemTypes;
 
 $data->{'itemtypename'} = $itemtypes->{$data->{'itemtype'}}->{'translated_description'};
@@ -199,14 +202,17 @@ foreach my $item (@items){
 #    $item->{json} = to_json($item);
 }
 
-if ( my $lost_av = GetAuthValCode('items.itemlost', $fw) ) {
-    $template->param( itemlostloop => GetAuthorisedValues( $lost_av ) );
+my $mss = Koha::MarcSubfieldStructures->search({ frameworkcode => $fw, kohafield => 'items.itemlost', authorised_value => { not => undef } });
+if ( $mss->count ) {
+    $template->param( itemlostloop => GetAuthorisedValues( $mss->next->authorised_value ) );
 }
-if ( my $damaged_av = GetAuthValCode('items.damaged', $fw) ) {
-    $template->param( itemdamagedloop => GetAuthorisedValues( $damaged_av ) );
+$mss = Koha::MarcSubfieldStructures->search({ frameworkcode => $fw, kohafield => 'items.damaged', authorised_value => { not => undef } });
+if ( $mss->count ) {
+    $template->param( itemdamagedloop => GetAuthorisedValues( $mss->next->authorised_value ) );
 }
-if ( my $withdrawn_av = GetAuthValCode('items.withdrawn', $fw) ) {
-    $template->param( itemwithdrawnloop => GetAuthorisedValues( $withdrawn_av ) );
+$mss = Koha::MarcSubfieldStructures->search({ frameworkcode => $fw, kohafield => 'items.withdrawn', authorised_value => { not => undef } });
+if ( $mss->count ) {
+    $template->param( itemwithdrawnloop => GetAuthorisedValues( $mss->next->authorised_value) );
 }
 
 $template->param(count => $data->{'count'},

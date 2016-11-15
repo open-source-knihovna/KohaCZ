@@ -26,9 +26,12 @@ use strict;
 use C4::Context;
 use Koha::Caches;
 use Koha::DateUtils qw(dt_from_string);
+use Koha::AuthorisedValues;
 use Koha::Libraries;
+use Koha::MarcSubfieldStructures;
 use DateTime::Format::MySQL;
 use Business::ISBN;
+use Business::ISSN;
 use autouse 'Data::cselectall_arrayref' => qw(Dumper);
 use DBI qw(:sql_types);
 use vars qw(@ISA @EXPORT @EXPORT_OK $DEBUG);
@@ -37,26 +40,18 @@ BEGIN {
 	require Exporter;
 	@ISA    = qw(Exporter);
 	@EXPORT = qw(
-		&GetPrinters &GetPrinter
-		&GetItemTypes &getitemtypeinfo
+        &GetPrinters &GetPrinter
+        &GetItemTypes &getitemtypeinfo
                 &GetItemTypesCategorized &GetItemTypesByCategory
-		&getframeworks &getframeworkinfo
-        &GetFrameworksLoop
-		&getallthemes
-		&getFacets
-		&getnbpages
+        &getallthemes
+        &getFacets
+        &getnbpages
 		&get_infos_of
 		&get_notforloan_label_of
 		&getitemtypeimagedir
 		&getitemtypeimagesrc
 		&getitemtypeimagelocation
 		&GetAuthorisedValues
-		&GetAuthorisedValueCategories
-		&GetKohaAuthorisedValues
-		&GetKohaAuthorisedValuesFromField
-    &GetKohaAuthorisedValuesMapping
-    &GetAuthorisedValueByCode
-		&GetAuthValCode
 		&GetNormalizedUPC
 		&GetNormalizedISBN
 		&GetNormalizedEAN
@@ -66,6 +61,9 @@ BEGIN {
         &GetVariationsOfISBN
         &GetVariationsOfISBNs
         &NormalizeISBN
+        &GetVariationsOfISSN
+        &GetVariationsOfISSNs
+        &NormalizeISSN
 
 		$DEBUG
 	);
@@ -225,128 +223,6 @@ sub GetItemTypesByCategory {
     my $query = qq|SELECT itemtype FROM itemtypes WHERE searchcategory=?|;
     my $tmp=$dbh->selectcol_arrayref($query,undef,$category);
     return @$tmp;
-}
-
-=head2 getframework
-
-  $frameworks = &getframework();
-
-Returns information about existing frameworks
-
-build a HTML select with the following code :
-
-=head3 in PERL SCRIPT
-
-  my $frameworks = getframeworks();
-  my @frameworkloop;
-  foreach my $thisframework (keys %$frameworks) {
-    my $selected = 1 if $thisframework eq $frameworkcode;
-    my %row =(
-                value       => $thisframework,
-                selected    => $selected,
-                description => $frameworks->{$thisframework}->{'frameworktext'},
-            );
-    push @frameworksloop, \%row;
-  }
-  $template->param(frameworkloop => \@frameworksloop);
-
-=head3 in TEMPLATE
-
-  <form action="[% script_name %] method=post>
-    <select name="frameworkcode">
-        <option value="">Default</option>
-        [% FOREACH framework IN frameworkloop %]
-        [% IF ( framework.selected ) %]
-        <option value="[% framework.value %]" selected="selected">[% framework.description %]</option>
-        [% ELSE %]
-        <option value="[% framework.value %]">[% framework.description %]</option>
-        [% END %]
-        [% END %]
-    </select>
-    <input type=text name=searchfield value="[% searchfield %]">
-    <input type="submit" value="OK" class="button">
-  </form>
-
-=cut
-
-sub getframeworks {
-
-    # returns a reference to a hash of references to branches...
-    my %itemtypes;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare("select * from biblio_framework");
-    $sth->execute;
-    while ( my $IT = $sth->fetchrow_hashref ) {
-        $itemtypes{ $IT->{'frameworkcode'} } = $IT;
-    }
-    return ( \%itemtypes );
-}
-
-=head2 GetFrameworksLoop
-
-  $frameworks = GetFrameworksLoop( $frameworkcode );
-
-Returns the loop suggested on getframework(), but ordered by framework description.
-
-build a HTML select with the following code :
-
-=head3 in PERL SCRIPT
-
-  $template->param( frameworkloop => GetFrameworksLoop( $frameworkcode ) );
-
-=head3 in TEMPLATE
-
-  Same as getframework()
-
-  <form action="[% script_name %] method=post>
-    <select name="frameworkcode">
-        <option value="">Default</option>
-        [% FOREACH framework IN frameworkloop %]
-        [% IF ( framework.selected ) %]
-        <option value="[% framework.value %]" selected="selected">[% framework.description %]</option>
-        [% ELSE %]
-        <option value="[% framework.value %]">[% framework.description %]</option>
-        [% END %]
-        [% END %]
-    </select>
-    <input type=text name=searchfield value="[% searchfield %]">
-    <input type="submit" value="OK" class="button">
-  </form>
-
-=cut
-
-sub GetFrameworksLoop {
-    my $frameworkcode = shift;
-    my $frameworks = getframeworks();
-    my @frameworkloop;
-    foreach my $thisframework (sort { uc($frameworks->{$a}->{'frameworktext'}) cmp uc($frameworks->{$b}->{'frameworktext'}) } keys %$frameworks) {
-        my $selected = ( $thisframework eq $frameworkcode ) ? 1 : undef;
-        my %row = (
-                value       => $thisframework,
-                selected    => $selected,
-                description => $frameworks->{$thisframework}->{'frameworktext'},
-            );
-        push @frameworkloop, \%row;
-  }
-  return \@frameworkloop;
-}
-
-=head2 getframeworkinfo
-
-  $frameworkinfo = &getframeworkinfo($frameworkcode);
-
-Returns information about an frameworkcode.
-
-=cut
-
-sub getframeworkinfo {
-    my ($frameworkcode) = @_;
-    my $dbh             = C4::Context->dbh;
-    my $sth             =
-      $dbh->prepare("select * from biblio_framework where frameworkcode=?");
-    $sth->execute($frameworkcode);
-    my $res = $sth->fetchrow_hashref;
-    return $res;
 }
 
 =head2 getitemtypeinfo
@@ -880,46 +756,6 @@ SELECT lib,
     return \%notforloan_label_of;
 }
 
-=head2 GetAuthValCode
-
-  $authvalcode = GetAuthValCode($kohafield,$frameworkcode);
-
-=cut
-
-sub GetAuthValCode {
-	my ($kohafield,$fwcode) = @_;
-	my $dbh = C4::Context->dbh;
-	$fwcode='' unless $fwcode;
-	my $sth = $dbh->prepare('select authorised_value from marc_subfield_structure where kohafield=? and frameworkcode=?');
-	$sth->execute($kohafield,$fwcode);
-	my ($authvalcode) = $sth->fetchrow_array;
-	return $authvalcode;
-}
-
-=head2 GetAuthValCodeFromField
-
-  $authvalcode = GetAuthValCodeFromField($field,$subfield,$frameworkcode);
-
-C<$subfield> can be undefined
-
-=cut
-
-sub GetAuthValCodeFromField {
-	my ($field,$subfield,$fwcode) = @_;
-	my $dbh = C4::Context->dbh;
-	$fwcode='' unless $fwcode;
-	my $sth;
-	if (defined $subfield) {
-	    $sth = $dbh->prepare('select authorised_value from marc_subfield_structure where tagfield=? and tagsubfield=? and frameworkcode=?');
-	    $sth->execute($field,$subfield,$fwcode);
-	} else {
-	    $sth = $dbh->prepare('select authorised_value from marc_tag_structure where tagfield=? and frameworkcode=?');
-	    $sth->execute($field,$fwcode);
-	}
-	my ($authvalcode) = $sth->fetchrow_array;
-	return $authvalcode;
-}
-
 =head2 GetAuthorisedValues
 
   $authvalues = GetAuthorisedValues([$category]);
@@ -985,152 +821,6 @@ sub GetAuthorisedValues {
 
     $cache->set_in_cache( $cache_key, \@results, { expiry => 5 } );
     return \@results;
-}
-
-=head2 GetAuthorisedValueCategories
-
-  $auth_categories = GetAuthorisedValueCategories();
-
-Return an arrayref of all of the available authorised
-value categories.
-
-=cut
-
-sub GetAuthorisedValueCategories {
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare("SELECT DISTINCT category FROM authorised_values ORDER BY category");
-    $sth->execute;
-    my @results;
-    while (defined (my $category  = $sth->fetchrow_array) ) {
-        push @results, $category;
-    }
-    return \@results;
-}
-
-=head2 GetAuthorisedValueByCode
-
-$authorised_value = GetAuthorisedValueByCode( $category, $authvalcode, $opac );
-
-Return the lib attribute from authorised_values from the row identified
-by the passed category and code
-
-=cut
-
-sub GetAuthorisedValueByCode {
-    my ( $category, $authvalcode, $opac ) = @_;
-
-    my $field = $opac ? 'lib_opac' : 'lib';
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare("SELECT $field FROM authorised_values WHERE category=? AND authorised_value =?");
-    $sth->execute( $category, $authvalcode );
-    while ( my $data = $sth->fetchrow_hashref ) {
-        return $data->{ $field };
-    }
-}
-
-=head2 GetKohaAuthorisedValues
-
-Takes $kohafield, $fwcode as parameters.
-
-If $opac parameter is set to a true value, displays OPAC descriptions rather than normal ones when they exist.
-
-Returns hashref of Code => description
-
-Returns undef if no authorised value category is defined for the kohafield.
-
-=cut
-
-sub GetKohaAuthorisedValues {
-  my ($kohafield,$fwcode,$opac) = @_;
-  $fwcode='' unless $fwcode;
-  my %values;
-  my $dbh = C4::Context->dbh;
-  my $avcode = GetAuthValCode($kohafield,$fwcode);
-  if ($avcode) {  
-	my $sth = $dbh->prepare("select authorised_value, lib, lib_opac from authorised_values where category=? ");
-   	$sth->execute($avcode);
-	while ( my ($val, $lib, $lib_opac) = $sth->fetchrow_array ) { 
-		$values{$val} = ($opac && $lib_opac) ? $lib_opac : $lib;
-   	}
-   	return \%values;
-  } else {
-	return;
-  }
-}
-
-=head2 GetKohaAuthorisedValuesFromField
-
-Takes $field, $subfield, $fwcode as parameters.
-
-If $opac parameter is set to a true value, displays OPAC descriptions rather than normal ones when they exist.
-$subfield can be undefined
-
-Returns hashref of Code => description
-
-Returns undef if no authorised value category is defined for the given field and subfield 
-
-=cut
-
-sub GetKohaAuthorisedValuesFromField {
-  my ($field, $subfield, $fwcode,$opac) = @_;
-  $fwcode='' unless $fwcode;
-  my %values;
-  my $dbh = C4::Context->dbh;
-  my $avcode = GetAuthValCodeFromField($field, $subfield, $fwcode);
-  if ($avcode) {  
-	my $sth = $dbh->prepare("select authorised_value, lib, lib_opac from authorised_values where category=? ");
-   	$sth->execute($avcode);
-	while ( my ($val, $lib, $lib_opac) = $sth->fetchrow_array ) { 
-		$values{$val} = ($opac && $lib_opac) ? $lib_opac : $lib;
-   	}
-   	return \%values;
-  } else {
-	return;
-  }
-}
-
-=head2 GetKohaAuthorisedValuesMapping
-
-Takes a hash as a parameter. The interface key indicates the
-description to use in the mapping.
-
-Returns hashref of:
- "{kohafield},{frameworkcode},{authorised_value}" => "{description}"
-for all the kohafields, frameworkcodes, and authorised values.
-
-Returns undef if nothing is found.
-
-=cut
-
-sub GetKohaAuthorisedValuesMapping {
-    my ($parameter) = @_;
-    my $interface = $parameter->{'interface'} // '';
-
-    my $query_mapping = q{
-SELECT TA.kohafield,TA.authorised_value AS category,
-       TA.frameworkcode,TB.authorised_value,
-       IF(TB.lib_opac>'',TB.lib_opac,TB.lib) AS OPAC,
-       TB.lib AS Intranet,TB.lib_opac
-FROM marc_subfield_structure AS TA JOIN
-     authorised_values as TB ON
-     TA.authorised_value=TB.category
-WHERE TA.kohafield>'' AND TA.authorised_value>'';
-    };
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare($query_mapping);
-    $sth->execute();
-    my $avmapping;
-    if ($interface eq 'opac') {
-        while (my $row = $sth->fetchrow_hashref) {
-            $avmapping->{$row->{kohafield}.",".$row->{frameworkcode}.",".$row->{authorised_value}} = $row->{OPAC};
-        }
-    }
-    else {
-        while (my $row = $sth->fetchrow_hashref) {
-            $avmapping->{$row->{kohafield}.",".$row->{frameworkcode}.",".$row->{authorised_value}} = $row->{Intranet};
-        }
-    }
-    return $avmapping;
 }
 
 =head2 xml_escape
@@ -1505,6 +1195,95 @@ sub GetVariationsOfISBNs {
 
     return wantarray ? @isbns : join( " | ", @isbns );
 }
+
+=head2 NormalizedISSN
+
+  my $issns = NormalizedISSN({
+          issn => $issn,
+          strip_hyphen => [0,1]
+          });
+
+  Returns an issn validated by Business::ISSN.
+  Optionally strips hyphen.
+
+  If the string cannot be validated as an issn,
+  it returns nothing.
+
+=cut
+
+sub NormalizeISSN {
+    my ($params) = @_;
+
+    my $string        = $params->{issn};
+    my $strip_hyphen  = $params->{strip_hyphen};
+
+    my $issn = Business::ISSN->new($string);
+
+    if ( $issn && $issn->is_valid ){
+
+        if ($strip_hyphen) {
+            $string = $issn->_issn;
+        }
+        else {
+            $string = $issn->as_string;
+        }
+        return $string;
+    }
+
+}
+
+=head2 GetVariationsOfISSN
+
+  my @issns = GetVariationsOfISSN( $issn );
+
+  Returns a list of variations of the given issn in
+  with and without a hyphen.
+
+  In a scalar context, the issns are returned as a
+  string delimited by ' | '.
+
+=cut
+
+sub GetVariationsOfISSN {
+    my ( $issn ) = @_;
+
+    return unless $issn;
+
+    my @issns;
+    my $str = NormalizeISSN({ issn => $issn });
+    if( $str ) {
+        push @issns, $str;
+        push @issns, NormalizeISSN({ issn => $issn, strip_hyphen => 1 });
+    }  else {
+        push @issns, $issn;
+    }
+
+    # Strip out any "empty" strings from the array
+    @issns = grep { defined($_) && $_ =~ /\S/ } @issns;
+
+    return wantarray ? @issns : join( " | ", @issns );
+}
+
+=head2 GetVariationsOfISSNs
+
+  my @issns = GetVariationsOfISSNs( @issns );
+
+  Returns a list of variations of the given issns in
+  with and without a hyphen.
+
+  In a scalar context, the issns are returned as a
+  string delimited by ' | '.
+
+=cut
+
+sub GetVariationsOfISSNs {
+    my (@issns) = @_;
+
+    @issns = map { GetVariationsOfISSN( $_ ) } @issns;
+
+    return wantarray ? @issns : join( " | ", @issns );
+}
+
 
 =head2 IsKohaFieldLinked
 

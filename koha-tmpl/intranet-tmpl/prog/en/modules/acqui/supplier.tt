@@ -30,6 +30,13 @@
                 <input type="checkbox" id="contact_serialsprimary[% contact.id %]" class="contact_serialsprimary"></input>
             [% END %]
             <input type="hidden" class="contact_serialsprimary_hidden" name="contact_serialsprimary" value="[% contact.serialsprimary %]"></input>
+        <li><label for="contact_orderacquisition[% contact.id %]">Contact when ordering?</label>
+            [% IF contact.orderacquisition %]
+                <input type="checkbox" id="contact_orderacquisition[% contact.id %]" class="contact_orderacquisition" checked="checked"></input>
+            [% ELSE %]
+                <input type="checkbox" id="contact_orderacquisition[% contact.id %]" class="contact_orderacquisition"></input>
+            [% END %]
+            <input type="hidden" class="contact_orderacquisition_hidden" name="contact_orderacquisition" value="[% contact.orderacquisition %]"></input>
         <li><label for="contact_claimacquisition[% contact.id %]">Contact about late orders?</label>
             [% IF contact.claimacquisition %]
                 <input type="checkbox" id="contact_claimacquisition[% contact.id %]" class="contact_claimacquisition" checked="checked"></input>
@@ -67,6 +74,9 @@
     [% IF ( contact.serialsprimary ) %]
         <p><span class="label">Primary serials contact</span></p>
     [% END %]
+    [% IF ( contact.orderacquisition ) %]
+        <p><span class="label">Receives orders</span></p>
+    [% END %]
     [% IF ( contact.claimacquisition ) %]
         <p><span class="label">Receives claims for late orders</span></p>
     [% END %]
@@ -101,7 +111,7 @@ function add_contact() {
     });
     $(new_contact).insertBefore(this);
     if ($('.supplier-contact').length === 2) { // First contact
-        $.each(['.contact_acqprimary', '.contact_serialsprimary', '.contact_claimacquisition', '.contact_claimissues'], function (idx, checkbox) {
+        $.each(['.contact_acqprimary', '.contact_serialsprimary', '.contact_orderacquisition', '.contact_claimacquisition', '.contact_claimissues'], function (idx, checkbox) {
             $(checkbox, new_contact).click();
         });
     }
@@ -141,6 +151,9 @@ function delete_contact(ev) {
             });
         }
         $(this).next('.contact_serialsprimary_hidden').val($(this).is(':checked') ? '1' : '0');
+    });
+    $('body').on('click', '.contact_orderacquisition', null, function () {
+        $(this).next('.contact_orderacquisition_hidden').val($(this).is(':checked') ? '1' : '0');
     });
     $('body').on('click', '.contact_claimacquisition', null, function () {
         $(this).next('.contact_claimacquisition_hidden').val($(this).is(':checked') ? '1' : '0');
@@ -274,10 +287,10 @@ function delete_contact(ev) {
             [% IF gst_values %]
                 <ol>
                   <li>
-                    <label for="gstrate">Tax rate: </label>
-                    <select name="gstrate" id="gstrate">
+                    <label for="tax_rate">Tax rate: </label>
+                    <select name="tax_rate" id="tax_rate">
                     [% FOREACH gst IN gst_values %]
-                      [% IF ( gstrate == gst.option ) %]
+                      [% IF ( tax_rate == gst.option ) %]
                         <option value="[% gst.option %]" selected="selected">[% gst.option * 100 | format ("%.1f") %] %</option>
                       [% ELSE %]
                         <option value="[% gst.option %]">[% gst.option * 100 | format ("%.1f") %] %</option>
@@ -287,7 +300,7 @@ function delete_contact(ev) {
                   </li>
                 </ol>
             [% ELSE %]
-                <input type="hidden" name="gstrate" value="0" />
+                <input type="hidden" name="tax_rate" value="0" />
             [% END %]
             <ol>
             <li><label for="discount">Discount: </label>
@@ -331,7 +344,7 @@ function delete_contact(ev) {
                         [% END %]</p>
                 <p><strong>List prices are: </strong>[% listprice %]</p>
                 <p><strong>Invoice prices are: </strong>[% invoiceprice %]</p>
-                [% IF ( gstrate ) %]<p><strong>Tax number registered: </strong>
+                [% IF ( tax_rate ) %]<p><strong>Tax number registered: </strong>
                         [% IF ( gstreg ) %]Yes[% ELSE %]No[% END %]</p>
                 <p><strong>List item price includes tax: </strong>
                         [% IF ( listincgst ) %]Yes[% ELSE %]No[% END %]</p>
@@ -340,7 +353,7 @@ function delete_contact(ev) {
                 <p><strong>Discount: </strong>
                     [% discount | format("%.1f") %] %</p>
                 <p><strong>Tax rate: </strong>
-                    [% 0 + gstrate * 100 | format("%.1f") %] %</p>
+                    [% 0 + tax_rate * 100 | format("%.1f") %] %</p>
                 [% IF deliverytime.defined %]
                     <p><strong>Delivery time: </strong>
                         [% deliverytime %] days</p>

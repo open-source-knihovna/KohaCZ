@@ -28,14 +28,14 @@ use C4::Output;
 use C4::Context;
 
 use Koha::Caches;
+use Koha::AuthorisedValues;
+use Koha::BiblioFrameworks;
 
 # retrieve parameters
 my $input = new CGI;
 my $frameworkcode         = $input->param('frameworkcode')         || ''; # set to select framework
 my $existingframeworkcode = $input->param('existingframeworkcode') || '';
 my $searchfield           = $input->param('searchfield') || 0;
-# set when we have to create a new framework (in frameworkcode) by copying an old one (in existingframeworkcode)
-my $frameworkinfo = getframeworkinfo($frameworkcode);
 $searchfield=~ s/\,//g;
 
 my $offset    = $input->param('offset') || 0;
@@ -58,16 +58,7 @@ my ($template, $loggedinuser, $cookie)
 			     debug => 1,
 			     });
 
-# get framework list
-my $frameworks = getframeworks();
-my @frameworkloop;
-foreach my $thisframeworkcode (keys %$frameworks) {
-	push @frameworkloop, {
-        value => $thisframeworkcode,
-        selected => ($thisframeworkcode eq $frameworkcode) ? 1 : 0,
-        frameworktext => $frameworks->{$thisframeworkcode}->{'frameworktext'},
-    };
-}
+my $frameworks = Koha::BiblioFrameworks->search({}, { order_by => ['frameworktext'] });
 
 # check that framework is defined in marc_tag_structure
 my $sth=$dbh->prepare("select count(*) from marc_tag_structure where frameworkcode=?");
@@ -83,12 +74,13 @@ unless ($frameworkexist) {
 		$op = "framework_create";
 	}
 }
+
+my $framework = $frameworks->search({ frameworkcode => $frameworkcode })->next;
 $template->param(
-    frameworkloop => \@frameworkloop,
-    frameworkcode => $frameworkcode,
-    frameworktext => $frameworkinfo->{frameworktext},
+    frameworks    => $frameworks,
+    framework     => $framework,
     script_name   => $script_name,
-    ($op||'else') => 1,
+    ( $op || 'else' ) => 1,
 );
 
 
@@ -103,13 +95,6 @@ if ($op eq 'add_form') {
 		$data=$sth->fetchrow_hashref;
 	}
 
-    my @authorised_values = @{C4::Koha::GetAuthorisedValueCategories()};    # function returns array ref, dereferencing
-    unshift @authorised_values, "";                                         # put empty value first
-    my $authorised_value = {
-        values  => \@authorised_values,
-        default => $data->{'authorised_value'},
-    };
-
 	if ($searchfield) {
         $template->param(searchfield => $searchfield);
 		$template->param(action => "Modify tag");
@@ -123,7 +108,7 @@ if ($op eq 'add_form') {
 			libopac => $data->{'libopac'},
             repeatable => $data->{'repeatable'},
             mandatory => $data->{'mandatory'},
-			authorised_value => $authorised_value,
+            authorised_value => $data->{authorised_value},
 			frameworkcode => $frameworkcode,
     );  # FIXME: move checkboxes to presentation layer
 													# END $OP eq ADD_FORM
@@ -216,7 +201,6 @@ if ($op eq 'add_form') {
 	}
 	$template->param(existingframeworkloop => \@existingframeworkloop,
 					frameworkcode => $frameworkcode,
-# 					FRtext => $frameworkinfo->{frameworktext},
 					);
 ################## DEFAULT ##################################
 } else { # DEFAULT
@@ -285,6 +269,12 @@ if ($op eq 'add_form') {
 		$template->param(select_display => "True",
 						loop => \@loop_data);
 	} else {
+        # Hidden feature: If search was field$subfield, redirect to the subfield edit form
+        my ( $tagfield, $tagsubfield ) = split /\$/, $searchfield;
+        if ( $tagsubfield ) {
+            print $input->redirect('/cgi-bin/koha/admin/marc_subfields_structure.pl?op=add_form&tagfield='.$tagfield.'&frameworkcode='.$frameworkcode.'#sub'.$tagsubfield.'field');
+            exit;
+        }
 		#here, normal old style : display every tags
 		my ($count,$results)=StringSearch($searchfield,$frameworkcode);
 		$cnt = $count;

@@ -24,6 +24,7 @@ use Carp;
 use Koha::Database;
 
 use Koha::AuthorisedValue;
+use Koha::MarcSubfieldStructures;
 
 use base qw(Koha::Objects);
 
@@ -44,7 +45,7 @@ my @objects = Koha::AuthorisedValues->search($params);
 =cut
 
 sub search {
-    my ( $self, $params ) = @_;
+    my ( $self, $params, $attributes ) = @_;
 
     my $branchcode = $params->{branchcode};
     delete( $params->{branchcode} );
@@ -59,7 +60,47 @@ sub search {
       }
       : {};
     my $join = $branchcode ? { join => 'authorised_values_branches' } : {};
-    return $self->SUPER::search( { %$params, %$or, }, $join );
+    $attributes //= {};
+    $attributes = { %$attributes, %$join };
+    return $self->SUPER::search( { %$params, %$or, }, $attributes );
+}
+
+sub search_by_marc_field {
+    my ( $self, $params ) = @_;
+    my $frameworkcode = $params->{frameworkcode} || '';
+    my $tagfield      = $params->{tagfield};
+    my $tagsubfield   = $params->{tagsubfield};
+
+    return unless $tagfield or $tagsubfield;
+
+    return $self->SUPER::search(
+        {   'marc_subfield_structures.frameworkcode' => $frameworkcode,
+            ( defined $tagfield    ? ( 'marc_subfield_structures.tagfield'    => $tagfield )    : () ),
+            ( defined $tagsubfield ? ( 'marc_subfield_structures.tagsubfield' => $tagsubfield ) : () ),
+        },
+        { join => { category => 'marc_subfield_structures' } }
+    );
+}
+
+sub search_by_koha_field {
+    my ( $self, $params ) = @_;
+    my $frameworkcode    = $params->{frameworkcode} || '';
+    my $kohafield        = $params->{kohafield};
+    my $category         = $params->{category};
+    my $authorised_value = $params->{authorised_value};
+
+    return unless $kohafield;
+
+    return $self->SUPER::search(
+        {   'marc_subfield_structures.frameworkcode' => $frameworkcode,
+            'marc_subfield_structures.kohafield'     => $kohafield,
+            ( defined $category ? ( category_name    => $category )         : () ),
+            ( $authorised_value ? ( authorised_value => $authorised_value ) : () ),
+        },
+        {   join     => { category => 'marc_subfield_structures' },
+            distinct => 1,
+        }
+    );
 }
 
 sub categories {

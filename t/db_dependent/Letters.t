@@ -18,7 +18,7 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Test::More tests => 74;
+use Test::More tests => 80;
 use Test::MockModule;
 use Test::Warn;
 
@@ -61,11 +61,12 @@ $dbh->do(q|DELETE FROM message_transport_types|);
 my $library = $builder->build({
     source => 'Branch',
 });
+my $patron_category = $builder->build({ source => 'Category' });
 my $date = dt_from_string;
 my $borrowernumber = AddMember(
     firstname    => 'Jane',
     surname      => 'Smith',
-    categorycode => 'PT',
+    categorycode => $patron_category,,
     branchcode   => $library->{branchcode},
     dateofbirth  => $date,
 );
@@ -356,6 +357,7 @@ $prepared_letter = GetPreparedLetter((
 is( $prepared_letter->{content}, q|And also this one:| . output_pref({ dt => $yesterday_night }) . q|.|, 'dateonly test 3' );
 
 $dbh->do(q{INSERT INTO letter (module, code, name, title, content) VALUES ('claimacquisition','TESTACQCLAIM','Acquisition Claim','Item Not Received','<<aqbooksellers.name>>|<<aqcontacts.name>>|<order>Ordernumber <<aqorders.ordernumber>> (<<biblio.title>>) (<<aqorders.quantity>> ordered)</order>');});
+$dbh->do(q{INSERT INTO letter (module, code, name, title, content) VALUES ('orderacquisition','TESTACQORDER','Acquisition Order','Order','<<aqbooksellers.name>>|<<aqcontacts.name>>|<order>Ordernumber <<aqorders.ordernumber>> (<<biblio.title>>) (<<aqorders.quantity>> ordered)</order>');});
 
 # Test that _parseletter doesn't modify its parameters bug 15429
 {
@@ -373,7 +375,7 @@ my $booksellerid = C4::Bookseller::AddBookseller(
         deliverytime => 5,
     },
     [
-        { name => 'John Smith',  phone => '0123456x1', claimacquisition => 1 },
+        { name => 'John Smith', acqprimary => 1, phone => '0123456x1', claimacquisition => 1, orderacquisition => 1 },
         { name => 'Leo Tolstoy', phone => '0123456x2', claimissues => 1 },
     ]
 );
@@ -424,6 +426,24 @@ t::lib::Mocks::mock_preference( 'LetterLog', 'on' );
 
 {
 warning_is {
+    $err = SendAlerts( 'orderacquisition', $basketno , 'TESTACQORDER' ) }
+    "Fake sendmail",
+    "SendAlerts is using the mocked sendmail routine (orderacquisition)";
+is($err, 1, "Successfully sent order.");
+is($mail{'To'}, 'testemail@mydomain.com', "mailto correct in sent order");
+is($mail{'Message'}, 'my vendor|John Smith|Ordernumber ' . $ordernumber . ' (Silence in the library) (1 ordered)', 'Order notice text constructed successfully');
+
+$dbh->do(q{DELETE FROM letter WHERE code = 'TESTACQORDER';});
+warning_like {
+    $err = SendAlerts( 'orderacquisition', $basketno , 'TESTACQORDER' ) }
+    qr/No orderacquisition TESTACQORDER letter transported by email/,
+    "GetPreparedLetter warns about missing notice template";
+is($err->{'error'}, 'no_letter', "No TESTACQORDER letter was defined.");
+}
+
+
+{
+warning_is {
     $err = SendAlerts( 'claimacquisition', [ $ordernumber ], 'TESTACQCLAIM' ) }
     "Fake sendmail",
     "SendAlerts is using the mocked sendmail routine";
@@ -454,7 +474,7 @@ my $serial = $serials[0];
 my $borrowernumber = AddMember(
     firstname    => 'John',
     surname      => 'Smith',
-    categorycode => 'PT',
+    categorycode => $patron_category,
     branchcode   => $library->{branchcode},
     dateofbirth  => $date,
     email        => 'john.smith@test.de',
@@ -467,7 +487,7 @@ warning_is {
 $err2 = SendAlerts( 'issue', $serial->{serialid}, 'RLIST' ) }
     "Fake sendmail",
     "SendAlerts is using the mocked sendmail routine";
-is($err2, "", "Successfully sent serial notification");
+is($err2, 1, "Successfully sent serial notification");
 is($mail{'To'}, 'john.smith@test.de', "mailto correct in sent serial notification");
 is($mail{'Message'}, 'Silence in the library,'.$subscriptionid.',No. 0', 'Serial notification text constructed successfully');
 }

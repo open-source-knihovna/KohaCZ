@@ -19,18 +19,23 @@
 
 use Modern::Perl;
 
-use Test::More tests => 7;
+use Test::More tests => 10;
 use Test::Warn;
 
 use Koha::Authority::Types;
 use Koha::Cities;
+use Koha::Patron::Category;
+use Koha::Patron::Categories;
 use Koha::Patrons;
 use Koha::Database;
 
 use t::lib::TestBuilder;
 
+use Try::Tiny;
+
 my $schema = Koha::Database->new->schema;
 $schema->storage->txn_begin;
+my $builder = t::lib::TestBuilder->new;
 
 is( ref(Koha::Authority::Types->find('')), 'Koha::Authority::Type', 'Koha::Objects->find should work if the primary key is an empty string' );
 
@@ -40,7 +45,7 @@ is( $borrowernumber_exists, 1, 'Koha::Objects->columns should return the table c
 
 subtest 'update' => sub {
     plan tests => 2;
-    my $builder = t::lib::TestBuilder->new;
+
     $builder->build( { source => 'City', value => { city_country => 'UK' } } );
     $builder->build( { source => 'City', value => { city_country => 'UK' } } );
     $builder->build( { source => 'City', value => { city_country => 'UK' } } );
@@ -59,17 +64,19 @@ subtest 'pager' => sub {
 };
 
 subtest 'reset' => sub {
-    plan tests => 1;
-    my $builder   = t::lib::TestBuilder->new;
+    plan tests => 3;
+
     my $patrons = Koha::Patrons->search;
     my $first_borrowernumber = $patrons->next->borrowernumber;
     my $second_borrowernumber = $patrons->next->borrowernumber;
+    is( ref( $patrons->reset ), 'Koha::Patrons', 'Koha::Objects->reset should allow chaining' );
+    is( ref( $patrons->reset->next ), 'Koha::Patron', 'Koha::Objects->reset should allow chaining' );
     is( $patrons->reset->next->borrowernumber, $first_borrowernumber, 'Koha::Objects->reset should work as expected');
 };
 
 subtest 'delete' => sub {
     plan tests => 2;
-    my $builder   = t::lib::TestBuilder->new;
+
     my $patron_1 = $builder->build({source => 'Borrower'});
     my $patron_2 = $builder->build({source => 'Borrower'});
     is( Koha::Patrons->search({ -or => { borrowernumber => [ $patron_1->{borrowernumber}, $patron_2->{borrowernumber}]}})->delete, 2, '');
@@ -79,6 +86,55 @@ subtest 'delete' => sub {
 subtest 'not_covered_yet' => sub {
     plan tests => 1;
     warning_is { Koha::Patrons->search->not_covered_yet } { carped => 'The method not_covered_yet is not covered by tests' }, "If a method is not covered by tests, the AUTOLOAD method won't execute the method";
+};
+subtest 'new' => sub {
+    plan tests => 2;
+    my $a_cat_code = 'A_CAT_CODE';
+    my $patron_category = Koha::Patron::Category->new( { categorycode => $a_cat_code } )->store;
+    is( Koha::Patron::Categories->find($a_cat_code)->category_type, 'A', 'Koha::Object->new should set the default value' );
+    Koha::Patron::Categories->find($a_cat_code)->delete;
+    $patron_category = Koha::Patron::Category->new( { categorycode => $a_cat_code, category_type => undef } )->store;
+    is( Koha::Patron::Categories->find($a_cat_code)->category_type, 'A', 'Koha::Object->new should set the default value even if the argument exists but is not defined' );
+    Koha::Patron::Categories->find($a_cat_code)->delete;
+};
+
+subtest 'search_related' => sub {
+    plan tests => 8;
+    my $builder   = t::lib::TestBuilder->new;
+    my $patron_1  = $builder->build( { source => 'Borrower' } );
+    my $patron_2  = $builder->build( { source => 'Borrower' } );
+    my $libraries = Koha::Patrons->search( { -or => { borrowernumber => [ $patron_1->{borrowernumber}, $patron_2->{borrowernumber} ] } } )->search_related('branchcode');
+    is( ref( $libraries ), 'Koha::Libraries', 'Koha::Objects->search_related should return an instanciated Koha::Objects-based object' );
+    is( $libraries->count,            2,                       'Koha::Objects->search_related should work as expected' );
+    is( $libraries->next->branchcode, $patron_1->{branchcode}, 'Koha::Objects->search_related should work as expected' );
+    is( $libraries->next->branchcode, $patron_2->{branchcode}, 'Koha::Objects->search_related should work as expected' );
+
+    my @libraries = Koha::Patrons->search( { -or => { borrowernumber => [ $patron_1->{borrowernumber}, $patron_2->{borrowernumber} ] } } )->search_related('branchcode');
+    is( ref( $libraries[0] ),      'Koha::Library',         'Koha::Objects->search_related should return a list of Koha::Object-based objects' );
+    is( scalar(@libraries),        2,                       'Koha::Objects->search_related should work as expected' );
+    is( $libraries[0]->branchcode, $patron_1->{branchcode}, 'Koha::Objects->search_related should work as expected' );
+    is( $libraries[1]->branchcode, $patron_2->{branchcode}, 'Koha::Objects->search_related should work as expected' );
+};
+
+subtest 'Exceptions' => sub {
+    plan tests => 2;
+
+    my $patron_borrowernumber = $builder->build({ source => 'Borrower' })->{ borrowernumber };
+    my $patron = Koha::Patrons->find( $patron_borrowernumber );
+
+    try {
+        $patron->blah('blah');
+    } catch {
+        ok( $_->isa('Koha::Exceptions::Object::MethodNotCoveredByTests'),
+            'Calling a non-covered method should raise a Koha::Exceptions::Object::MethodNotCoveredByTests exception' );
+    };
+
+    try {
+        $patron->set({ blah => 'blah' });
+    } catch {
+        ok( $_->isa('Koha::Exceptions::Object::PropertyNotFound'),
+            'Setting a non-existent property should raise a Koha::Exceptions::Object::PropertyNotFound exception' );
+    };
 };
 
 $schema->storage->txn_rollback;

@@ -1,6 +1,6 @@
 package Koha::Biblios;
 
-# Copyright ByWater Solutions 2014
+# Copyright ByWater Solutions 2015
 #
 # This file is part of Koha.
 #

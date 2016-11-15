@@ -20,6 +20,8 @@
 use Modern::Perl;
 use Test::More tests => 6;
 
+use Koha::AuthorisedValues;
+
 $| = 1;
 
 BEGIN {
@@ -36,7 +38,7 @@ $dbh->{AutoCommit} = 0;
 $dbh->{RaiseError} = 1;
 
 my ($oldResults, $oldCount) = OldWay($dbh);
-my ($newResults, $newCount) = GetItemsForInventory( { interface => 'staff' } );
+my ($newResults, $newCount) = GetItemsForInventory;
 
 is_deeply($newResults,$oldResults,"Inventory results unchanged.");
 
@@ -56,7 +58,6 @@ sub OldWay {
     my $offset       = '';
     my $size         = '';
     my $statushash   = '';
-    my $interface    = '';
 
     my ( @bind_params, @where_strings );
 
@@ -135,6 +136,7 @@ sub OldWay {
     $sth->execute( @bind_params );
     my ($iTotalRecords) = $sth->fetchrow_array();
 
+    my $marc_field_mapping;
     foreach my $row (@$tmpresults) {
 
         # Auth values
@@ -143,7 +145,14 @@ sub OldWay {
             my ($f, $sf) = C4::Biblio::GetMarcFromKohaField("items.$field", $row->{'frameworkcode'});
             if (defined($f) and defined($sf)) {
                 # We replace the code with it's description
-                my $authvals = C4::Koha::GetKohaAuthorisedValuesFromField($f, $sf, $row->{'frameworkcode'});
+                my $avs;
+                if ( exists $marc_field_mapping->{$row->{frameworkcode}}{$f}{$sf} ) {
+                    $avs = $marc_field_mapping->{$row->{frameworkcode}}{$f}{$sf};
+                } else {
+                    $avs = Koha::AuthorisedValues->search_by_marc_field({ frameworkcode => $row->{frameworkcode}, tagfield => $f, tagsubfield => $sf, });
+                    $marc_field_mapping->{$row->{frameworkcode}}{$f}{$sf} = $avs->unblessed;
+                }
+                my $authvals = { map { $_->{authorised_value} => $_->{lib} } @{ $marc_field_mapping->{$row->{frameworkcode}}{$f}{$sf} } };
                 $row->{$field} = $authvals->{$row->{$field}} if defined $authvals && defined $row->{$field} && defined $authvals->{$row->{$field}};
             }
         }

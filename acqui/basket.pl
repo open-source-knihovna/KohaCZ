@@ -20,8 +20,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-use warnings;
+use Modern::Perl;
 use C4::Auth;
 use C4::Koha;
 use C4::Output;
@@ -36,6 +35,7 @@ use C4::Items;
 use C4::Suggestions;
 use C4::Csv;
 use Koha::Libraries;
+use C4::Letters qw/SendAlerts/;
 use Date::Calc qw/Add_Delta_Days/;
 use Koha::Database;
 use Koha::EDI qw( create_edi_order get_edifact_ean );
@@ -109,13 +109,12 @@ unless (CanUserManageBasket($loggedinuser, $basket, $userflags)) {
 # FIXME : the query->param('booksellerid') below is probably useless. The bookseller is always known from the basket
 # if no booksellerid in parameter, get it from basket
 # warn "=>".$basket->{booksellerid};
-my $op = $query->param('op');
-if (!defined $op) {
-    $op = q{};
-}
+my $op = $query->param('op') // 'list';
 
 my $confirm_pref= C4::Context->preference("BasketConfirmations") || '1';
 $template->param( skip_confirm_reopen => 1) if $confirm_pref eq '2';
+
+my @messages;
 
 if ( $op eq 'delete_confirm' ) {
     my $basketno = $query->param('basketno');
@@ -171,6 +170,19 @@ if ( $op eq 'delete_confirm' ) {
         print  GetBasketAsCSV($query->param('basketno'), $query, $csv_profile_id);
     }
     exit;
+} elsif ($op eq 'email') {
+    my $err = eval {
+        SendAlerts( 'orderacquisition', $query->param('basketno'), 'ACQORDER' );
+    };
+    if ( $@ ) {
+        push @messages, { type => 'error', code => $@ };
+    } elsif ( ref $err and exists $err->{error} ) {
+        push @messages, { type => 'error', code => $err->{error} };
+    } else {
+        push @messages, { type => 'message', code => 'email_sent' };
+    }
+
+    $op = 'list';
 } elsif ($op eq 'close') {
     my $confirm = $query->param('confirm') || $confirm_pref eq '2';
     if ($confirm) {
@@ -227,7 +239,9 @@ elsif ( $op eq 'ediorder' ) {
     });
     print $query->redirect("/cgi-bin/koha/acqui/basket.pl?basketno=$basketno");
     exit;
-} else {
+}
+
+if ( $op eq 'list' ) {
     my @branches_loop;
     # get librarian branch...
     if ( C4::Context->preference("IndependentBranches") ) {
@@ -239,7 +253,7 @@ elsif ( $op eq 'ediorder' ) {
               || ( $basket->{branch}  eq '' );
             unless ($validtest) {
                 print $query->redirect("../mainpage.pl");
-                exit 1;
+                exit 0;
             }
         }
 
@@ -312,27 +326,29 @@ elsif ( $op eq 'ediorder' ) {
     my @book_foot_loop;
     my %foot;
     my $total_quantity = 0;
-    my $total_gste = 0;
-    my $total_gsti = 0;
-    my $total_gstvalue = 0;
+    my $total_tax_excluded = 0;
+    my $total_tax_included = 0;
+    my $total_tax_value = 0;
     for my $order (@orders) {
-        $order = C4::Acquisition::populate_order_with_prices({ order => $order, booksellerid => $booksellerid, ordering => 1 });
         my $line = get_order_infos( $order, $bookseller);
         if ( $line->{uncertainprice} ) {
             $template->param( uncertainprices => 1 );
         }
 
+        $line->{tax_rate} = $line->{tax_rate_on_ordering};
+        $line->{tax_value} = $line->{tax_value_on_ordering};
+
         push @books_loop, $line;
 
-        $foot{$$line{gstrate}}{gstrate} = $$line{gstrate};
-        $foot{$$line{gstrate}}{gstvalue} += $$line{gstvalue};
-        $total_gstvalue += $$line{gstvalue};
-        $foot{$$line{gstrate}}{quantity}  += $$line{quantity};
+        $foot{$$line{tax_rate}}{tax_rate} = $$line{tax_rate};
+        $foot{$$line{tax_rate}}{tax_value} += $$line{tax_value};
+        $total_tax_value += $$line{tax_value};
+        $foot{$$line{tax_rate}}{quantity}  += $$line{quantity};
         $total_quantity += $$line{quantity};
-        $foot{$$line{gstrate}}{totalgste} += $$line{totalgste};
-        $total_gste += $$line{totalgste};
-        $foot{$$line{gstrate}}{totalgsti} += $$line{totalgsti};
-        $total_gsti += $$line{totalgsti};
+        $foot{$$line{tax_rate}}{total_tax_excluded} += $$line{total_tax_excluded};
+        $total_tax_excluded += $$line{total_tax_excluded};
+        $foot{$$line{tax_rate}}{total_tax_included} += $$line{total_tax_included};
+        $total_tax_included += $$line{total_tax_included};
     }
 
     push @book_foot_loop, map {$_} values %foot;
@@ -341,7 +357,6 @@ elsif ( $op eq 'ediorder' ) {
     my @cancelledorders = GetOrders($basketno, { cancelled => 1 });
     my @cancelledorders_loop;
     for my $order (@cancelledorders) {
-        $order = C4::Acquisition::populate_order_with_prices({ order => $order, booksellerid => $booksellerid, ordering => 1 });
         my $line = get_order_infos( $order, $bookseller);
         push @cancelledorders_loop, $line;
     }
@@ -393,9 +408,9 @@ elsif ( $op eq 'ediorder' ) {
         book_foot_loop       => \@book_foot_loop,
         cancelledorders_loop => \@cancelledorders_loop,
         total_quantity       => $total_quantity,
-        total_gste           => sprintf( "%.2f", $total_gste ),
-        total_gsti           => sprintf( "%.2f", $total_gsti ),
-        total_gstvalue       => sprintf( "%.2f", $total_gstvalue ),
+        total_tax_excluded   => $total_tax_excluded,
+        total_tax_included   => $total_tax_included,
+        total_tax_value      => $total_tax_value,
         currency             => $active_currency->currency,
         listincgst           => $bookseller->{listincgst},
         basketgroups         => $basketgroups,
@@ -413,6 +428,9 @@ elsif ( $op eq 'ediorder' ) {
     );
 }
 
+$template->param( messages => \@messages );
+output_html_with_http_headers $query, $cookie, $template->output;
+
 sub get_order_infos {
     my $order = shift;
     my $bookseller = shift;
@@ -429,8 +447,13 @@ sub get_order_infos {
     $line{basketno}       = $basketno;
     $line{budget_name}    = $budget->{budget_name};
 
+    $line{total_tax_included} = $line{ecost_tax_included} * $line{quantity};
+    $line{total_tax_excluded} = $line{ecost_tax_excluded} * $line{quantity};
+    $line{tax_value} = $line{tax_value_on_ordering};
+    $line{tax_rate} = $line{tax_rate_on_ordering};
+
     if ( $line{uncertainprice} ) {
-        $line{rrpgste} .= ' (Uncertain)';
+        $line{rrp_tax_excluded} .= ' (Uncertain)';
     }
     if ( $line{'title'} ) {
         my $volume      = $order->{'volume'};
@@ -487,9 +510,6 @@ sub get_order_infos {
 
     return \%line;
 }
-
-output_html_with_http_headers $query, $cookie, $template->output;
-
 
 sub edi_close_and_order {
     my $confirm = $query->param('confirm') || $confirm_pref eq '2';

@@ -279,11 +279,8 @@ if ($barcode) {
     $returnbranch = $biblio->{$hbr};
 
     my $materials = $biblio->{'materials'};
-    my $avcode = GetAuthValCode('items.materials');
-    if ($avcode) {
-        my $av = Koha::AuthorisedValues->search({ category => $avcode, authorised_value => $materials });
-        $materials = $av->count ? $av->next->lib : '';
-    }
+    my $av = Koha::AuthorisedValues->search_by_koha_field({frameworkcode => '', kohafield =>'items.materials', authorised_value => $materials });
+    $materials = $av->count ? $av->next->lib : '';
 
     $template->param(
         title            => $biblio->{'title'},
@@ -554,7 +551,8 @@ $template->param( errmsgloop => \@errmsgloop );
 my $returned_counter = ( C4::Context->preference('numReturnedItemsToShow') ) ? C4::Context->preference('numReturnedItemsToShow') : 8;
 my $count = 0;
 my @riloop;
-my $shelflocations = GetKohaAuthorisedValues('items.location','');
+my $shelflocations =
+  { map { $_->authorised_value => $_->lib } Koha::AuthorisedValues->search_by_koha_field( { frameworkcode => '', kohafield => 'items.location' } ) };
 foreach ( sort { $a <=> $b } keys %returneditems ) {
     my %ri;
     if ( $count++ < $returned_counter ) {

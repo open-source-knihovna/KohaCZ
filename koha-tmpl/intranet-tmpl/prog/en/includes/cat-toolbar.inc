@@ -158,7 +158,7 @@ CAN_user_serials_create_subscription ) %]
     <button class="btn btn-small dropdown-toggle" data-toggle="dropdown"><i class="fa fa-pencil"></i> Edit <span class="caret"></span></button>
         <ul class="dropdown-menu">
             [% IF CAN_user_editcatalogue_edit_catalogue or ( frameworkcode == 'FA' and CAN_user_editcatalogue_fast_cataloging ) %]
-            <li><a id="editbiblio" href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% biblionumber %]&amp;frameworkcode=[% current_framework %]&amp;op=">Edit record</a></li>
+            <li><a id="editbiblio" href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% biblionumber %]">Edit record</a></li>
             [% END %]
 
             [% IF CAN_user_editcatalogue_edit_items or ( frameworkcode == 'FA' and CAN_user_editcatalogue_fast_cataloging ) %]
@@ -187,7 +187,7 @@ CAN_user_serials_create_subscription ) %]
             [% IF ( LocalCoverImages || OPACLocalCoverImages) %][% IF ( CAN_user_tools_upload_local_cover_images ) %]<li><a href="/cgi-bin/koha/tools/upload-cover-image.pl?biblionumber=[% biblionumber %]&amp;filetype=image">Upload image</a>[% END %][% END %]
 
             [% IF ( CAN_user_editcatalogue_edit_catalogue ) %]
-                <li><a id="duplicatebiblio" href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% biblionumber %]&amp;frameworkcode=[% current_framework %]&amp;op=duplicate">Edit as new (duplicate)</a></li>
+                <li><a id="duplicatebiblio" href="/cgi-bin/koha/cataloguing/addbiblio.pl?biblionumber=[% biblionumber %]&amp;op=duplicate">Edit as new (duplicate)</a></li>
                 <li><a href="#" id="z3950copy">Replace record via Z39.50/SRU</a></li>
             [% END %]
 
@@ -259,6 +259,10 @@ CAN_user_serials_create_subscription ) %]
             <div class="btn-group"><a id="placehold" class="btn btn-small" href="/cgi-bin/koha/reserve/request.pl?biblionumber=[% biblionumber %]"><i class="fa fa-sticky-note-o"></i> Place hold</a></div>
         [% END %]
     [% END %]
+[% END %]
+
+[% IF Koha.Preference('ArticleRequests') %]
+    <div class="btn-group"><a id="placehold" class="btn btn-small" href="/cgi-bin/koha/circ/request-article.pl?biblionumber=[% biblionumber %]"><i class="fa fa-file-text-o"></i> Request article</a></div>
 [% END %]
 
 </div>

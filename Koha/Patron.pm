@@ -26,11 +26,15 @@ use C4::Context;
 use C4::Log;
 use Koha::Database;
 use Koha::DateUtils;
+use Koha::Holds;
 use Koha::Issues;
 use Koha::OldIssues;
 use Koha::Patron::Categories;
+use Koha::Patron::HouseboundProfile;
+use Koha::Patron::HouseboundRole;
 use Koha::Patron::Images;
 use Koha::Patrons;
+use Koha::Virtualshelves;
 
 use base qw(Koha::Object);
 
@@ -43,6 +47,51 @@ Koha::Patron - Koha Patron Object class
 =head2 Class Methods
 
 =cut
+
+=head3 delete
+
+$patron->delete
+
+Delete patron's holds, lists and finally the patron.
+
+Lists owned by the borrower are deleted, but entries from the borrower to
+other lists are kept.
+
+=cut
+
+sub delete {
+    my ($self) = @_;
+
+    my $deleted;
+    $self->_result->result_source->schema->txn_do(
+        sub {
+            # Delete Patron's holds
+            # FIXME Should be $patron->get_holds
+            $_->delete for Koha::Holds->search( { borrowernumber => $self->borrowernumber } );
+
+            # Delete all lists and all shares of this borrower
+            # Consistent with the approach Koha uses on deleting individual lists
+            # Note that entries in virtualshelfcontents added by this borrower to
+            # lists of others will be handled by a table constraint: the borrower
+            # is set to NULL in those entries.
+            # NOTE:
+            # We could handle the above deletes via a constraint too.
+            # But a new BZ report 11889 has been opened to discuss another approach.
+            # Instead of deleting we could also disown lists (based on a pref).
+            # In that way we could save shared and public lists.
+            # The current table constraints support that idea now.
+            # This pref should then govern the results of other routines/methods such as
+            # Koha::Virtualshelf->new->delete too.
+            # FIXME Could be $patron->get_lists
+            $_->delete for Koha::Virtualshelves->search( { owner => $self->borrowernumber } );
+
+            $deleted = $self->SUPER::delete;
+
+            logaction( "MEMBERS", "DELETE", $self->borrowernumber, "" ) if C4::Context->preference("BorrowersLog");
+        }
+    );
+    return $deleted;
+}
 
 =head3 guarantor
 
@@ -74,6 +123,34 @@ sub guarantees {
     my ( $self ) = @_;
 
     return Koha::Patrons->search( { guarantorid => $self->borrowernumber } );
+}
+
+=head3 housebound_profile
+
+Returns the HouseboundProfile associated with this patron.
+
+=cut
+
+sub housebound_profile {
+    my ( $self ) = @_;
+    my $profile = $self->_result->housebound_profile;
+    return Koha::Patron::HouseboundProfile->_new_from_dbic($profile)
+        if ( $profile );
+    return;
+}
+
+=head3 housebound_role
+
+Returns the HouseboundRole associated with this patron.
+
+=cut
+
+sub housebound_role {
+    my ( $self ) = @_;
+
+    my $role = $self->_result->housebound_role;
+    return Koha::Patron::HouseboundRole->_new_from_dbic($role) if ( $role );
+    return;
 }
 
 =head3 siblings
@@ -218,17 +295,21 @@ Extending the subscription to the expiry date.
 
 sub renew_account {
     my ($self) = @_;
-
-    my $date =
-      C4::Context->preference('BorrowerRenewalPeriodBase') eq 'dateexpiry'
-      ? dt_from_string( $self->dateexpiry )
-      : dt_from_string;
+    my $date;
+    if ( C4::Context->preference('BorrowerRenewalPeriodBase') eq 'combination' ) {
+        $date = ( dt_from_string gt dt_from_string( $self->dateexpiry ) ) ? dt_from_string : dt_from_string( $self->dateexpiry );
+    } else {
+        $date =
+            C4::Context->preference('BorrowerRenewalPeriodBase') eq 'dateexpiry'
+            ? dt_from_string( $self->dateexpiry )
+            : dt_from_string;
+    }
     my $patron_category = Koha::Patron::Categories->find( $self->categorycode );    # FIXME Should be $self->category
     my $expiry_date     = $patron_category->get_expiry_date($date);
 
     $self->dateexpiry($expiry_date)->store;
 
-    C4::Members::AddEnrolmentFeeIfNeeded( $self->categorycode, $self->borrowernumber );
+    $self->add_enrolment_fee_if_needed;
 
     logaction( "MEMBERS", "RENEW", $self->borrowernumber, "Membership renewed" ) if C4::Context->preference("BorrowersLog");
     return dt_from_string( $expiry_date )->truncate( to => 'day' );
@@ -265,6 +346,107 @@ sub track_login {
         !$params->{force} &&
         !C4::Context->preference('TrackLastPatronActivity');
     $self->lastseen( dt_from_string() )->store;
+}
+
+=head2 move_to_deleted
+
+my $is_moved = $patron->move_to_deleted;
+
+Move a patron to the deletedborrowers table.
+This can be done before deleting a patron, to make sure the data are not completely deleted.
+
+=cut
+
+sub move_to_deleted {
+    my ($self) = @_;
+    my $patron_infos = $self->unblessed;
+    return Koha::Database->new->schema->resultset('Deletedborrower')->create($patron_infos);
+}
+
+=head3 article_requests
+
+my @requests = $borrower->article_requests();
+my $requests = $borrower->article_requests();
+
+Returns either a list of ArticleRequests objects,
+or an ArtitleRequests object, depending on the
+calling context.
+
+=cut
+
+sub article_requests {
+    my ( $self ) = @_;
+
+    $self->{_article_requests} ||= Koha::ArticleRequests->search({ borrowernumber => $self->borrowernumber() });
+
+    return $self->{_article_requests};
+}
+
+=head3 article_requests_current
+
+my @requests = $patron->article_requests_current
+
+Returns the article requests associated with this patron that are incomplete
+
+=cut
+
+sub article_requests_current {
+    my ( $self ) = @_;
+
+    $self->{_article_requests_current} ||= Koha::ArticleRequests->search(
+        {
+            borrowernumber => $self->id(),
+            -or          => [
+                { status => Koha::ArticleRequest::Status::Pending },
+                { status => Koha::ArticleRequest::Status::Processing }
+            ]
+        }
+    );
+
+    return $self->{_article_requests_current};
+}
+
+=head3 article_requests_finished
+
+my @requests = $biblio->article_requests_finished
+
+Returns the article requests associated with this patron that are completed
+
+=cut
+
+sub article_requests_finished {
+    my ( $self, $borrower ) = @_;
+
+    $self->{_article_requests_finished} ||= Koha::ArticleRequests->search(
+        {
+            borrowernumber => $self->id(),
+            -or          => [
+                { status => Koha::ArticleRequest::Status::Completed },
+                { status => Koha::ArticleRequest::Status::Canceled }
+            ]
+        }
+    );
+
+    return $self->{_article_requests_finished};
+}
+
+=head3 add_enrolment_fee_if_needed
+
+my $enrolment_fee = $patron->add_enrolment_fee_if_needed;
+
+Add enrolment fee for a patron if needed.
+
+=cut
+
+sub add_enrolment_fee_if_needed {
+    my ($self) = @_;
+    my $patron_category = Koha::Patron::Categories->find( $self->categorycode );
+    my $enrolment_fee = $patron_category->enrolmentfee;
+    if ( $enrolment_fee && $enrolment_fee > 0 ) {
+        # insert fee in patron debts
+        C4::Accounts::manualinvoice( $self->borrowernumber, '', '', 'A', $enrolment_fee );
+    }
+    return $enrolment_fee || 0;
 }
 
 =head3 type

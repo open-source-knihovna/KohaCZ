@@ -51,6 +51,7 @@ use C4::Biblio;
 use C4::Form::MessagingPreferences;
 use List::MoreUtils qw/uniq/;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
+use Koha::AuthorisedValues;
 use Koha::Patron::Debarments qw(GetDebarments);
 use Koha::Patron::Images;
 use Module::Load;
@@ -292,7 +293,9 @@ if (C4::Context->preference('ExtendedPatronAttributes')) {
         for my $attr (@$attributes) {
             push @items, $attr if $attr->{class} eq $class
         }
-        my $lib = GetAuthorisedValueByCode( 'PA_CLASS', $class ) || $class;
+        my $av = Koha::AuthorisedValues->search({ category => 'PA_CLASS', authorised_value => $class });
+        my $lib = $av->count ? $av->next->lib : $class;
+
         push @attributes_loop, {
             class => $class,
             items => \@items,
@@ -320,9 +323,10 @@ if (C4::Context->preference('EnhancedMessagingPreferences')) {
 }
 
 # in template <TMPL_IF name="I"> => instutitional (A for Adult, C for children) 
-$template->param( $data->{'categorycode'} => 1 ); 
+$template->param( $data->{'categorycode'} => 1 );
 $template->param(
-    detailview => 1,
+    patron          => $patron,
+    detailview      => 1,
     borrowernumber  => $borrowernumber,
     othernames      => $data->{'othernames'},
     categoryname    => $data->{'description'},
@@ -336,6 +340,7 @@ $template->param(
     is_child        => ($category_type eq 'C'),
     samebranch      => $samebranch,
     quickslip       => $quickslip,
+    housebound_role => $patron->housebound_role,
     privacy_guarantor_checkouts => $data->{'privacy_guarantor_checkouts'},
     activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
     AutoResumeSuspendedHolds => C4::Context->preference('AutoResumeSuspendedHolds'),

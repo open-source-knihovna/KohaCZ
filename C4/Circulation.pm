@@ -34,16 +34,13 @@ use C4::ItemCirculationAlertPreference;
 use C4::Message;
 use C4::Debug;
 use C4::Log; # logaction
-use C4::Koha qw(
-    GetAuthorisedValueByCode
-    GetAuthValCode
-);
 use C4::Overdues qw(CalcFine UpdateFine get_chargeable_units);
 use C4::RotatingCollections qw(GetCollectionItemBranches);
 use Algorithm::CheckDigits;
 
 use Data::Dumper;
 use Koha::Account;
+use Koha::AuthorisedValues;
 use Koha::DateUtils;
 use Koha::Calendar;
 use Koha::Items;
@@ -88,6 +85,7 @@ BEGIN {
 		&AddRenewal
 		&GetRenewCount
         &GetSoonestRenewDate
+        &GetLatestAutoRenewDate
 		&GetItemIssue
 		&GetItemIssues
 		&GetIssuingCharges
@@ -714,7 +712,7 @@ sub CanBookBeIssued {
                      branch => C4::Context->userenv->{'branch'},
                      type => 'localuse',
                      itemnumber => $item->{'itemnumber'},
-                     itemtype => $item->{'itemtype'},
+                     itemtype => $item->{'itype'},
                      borrowernumber => $borrower->{'borrowernumber'},
                      ccode => $item->{'ccode'}}
                     );
@@ -901,7 +899,8 @@ sub CanBookBeIssued {
         $issuingimpossible{RESTRICTED} = 1;
     }
     if ( $item->{'itemlost'} && C4::Context->preference("IssueLostItem") ne 'nothing' ) {
-        my $code = GetAuthorisedValueByCode( 'LOST', $item->{'itemlost'} );
+        my $av = Koha::AuthorisedValues->search({ category => 'LOST', authorised_value => $item->{itemlost} });
+        my $code = $av->count ? $av->next->lib : '';
         $needsconfirmation{ITEM_LOST} = $code if ( C4::Context->preference("IssueLostItem") eq 'confirm' );
         $alerts{ITEM_LOST} = $code if ( C4::Context->preference("IssueLostItem") eq 'alert' );
     }
@@ -1846,16 +1845,22 @@ sub AddReturn {
     $branch = C4::Context->userenv->{'branch'} unless $branch;  # we trust userenv to be a safe fallback/default
     my $messages;
     my $borrower;
-    my $biblio;
     my $doreturn       = 1;
     my $validTransfert = 0;
     my $stat_type = 'return';
 
     # get information on item
-    my $itemnumber = GetItemnumberFromBarcode( $barcode );
-    unless ($itemnumber) {
-        return (0, { BadBarcode => $barcode }); # no barcode means no item or borrower.  bail out.
+    my $item = GetItem( undef, $barcode );
+    unless ($item) {
+        return ( 0, { BadBarcode => $barcode } );    # no barcode means no item or borrower.  bail out.
     }
+
+    my $itemnumber = $item->{ itemnumber };
+
+    my $item_level_itypes = C4::Context->preference("item-level_itypes");
+    my $biblio   = $item_level_itypes ? undef : GetBiblioData( $item->{ biblionumber } ); # don't get bib data unless we need it
+    my $itemtype = $item_level_itypes ? $item->{itype} : $biblio->{itemtype};
+
     my $issue  = GetItemIssue($itemnumber);
     if ($issue and $issue->{borrowernumber}) {
         $borrower = C4::Members::GetMemberDetails($issue->{borrowernumber})
@@ -1872,8 +1877,6 @@ sub AddReturn {
            $stat_type = 'localuse';
         }
     }
-
-    my $item = GetItem($itemnumber) or die "GetItem($itemnumber) failed";
 
     if ( $item->{'location'} eq 'PROC' ) {
         if ( C4::Context->preference("InProcessingToShelvingCart") ) {
@@ -2075,15 +2078,14 @@ sub AddReturn {
     }
 
     # Record the fact that this book was returned.
-    # FIXME itemtype should record item level type, not bibliolevel type
     UpdateStats({
-                branch => $branch,
-                type => $stat_type,
-                itemnumber => $item->{'itemnumber'},
-                itemtype => $biblio->{'itemtype'},
-                borrowernumber => $borrowernumber,
-                ccode => $item->{'ccode'}}
-    );
+        branch         => $branch,
+        type           => $stat_type,
+        itemnumber     => $itemnumber,
+        itemtype       => $itemtype,
+        borrowernumber => $borrowernumber,
+        ccode          => $item->{ ccode }
+    });
 
     # Send a check-in slip. # NOTE: borrower may be undef.  probably shouldn't try to send messages then.
     my $circulation_alert = 'C4::ItemCirculationAlertPreference';
@@ -2852,6 +2854,22 @@ sub CanBookBeRenewed {
         return ( 0, 'overdue');
     }
 
+    if ( $itemissue->{auto_renew}
+        and defined $issuingrule->{no_auto_renewal_after}
+                and $issuingrule->{no_auto_renewal_after} ne "" ) {
+
+        # Get issue_date and add no_auto_renewal_after
+        # If this is greater than today, it's too late for renewal.
+        my $maximum_renewal_date = dt_from_string($itemissue->{issuedate});
+        $maximum_renewal_date->add(
+            $issuingrule->{lengthunit} => $issuingrule->{no_auto_renewal_after}
+        );
+        my $now = dt_from_string;
+        if ( $now >= $maximum_renewal_date ) {
+            return ( 0, "auto_too_late" );
+        }
+    }
+
     if ( defined $issuingrule->{norenewalbefore}
         and $issuingrule->{norenewalbefore} ne "" )
     {
@@ -2881,7 +2899,7 @@ sub CanBookBeRenewed {
 
     # Fallback for automatic renewals:
     # If norenewalbefore is undef, don't renew before due date.
-    elsif ( $itemissue->{auto_renew} ) {
+    if ( $itemissue->{auto_renew} ) {
         my $now = dt_from_string;
         return ( 0, "auto_renew" )
           if $now >= $itemissue->{date_due};
@@ -3123,6 +3141,55 @@ sub GetSoonestRenewDate {
     }
     return $now;
 }
+
+=head2 GetLatestAutoRenewDate
+
+  $NoAutoRenewalAfterThisDate = &GetLatestAutoRenewDate($borrowernumber, $itemnumber);
+
+Find out the latest possible auto renew date of a borrowed item.
+
+C<$borrowernumber> is the borrower number of the patron who currently
+has the item on loan.
+
+C<$itemnumber> is the number of the item to renew.
+
+C<$GetLatestAutoRenewDate> returns the DateTime of the latest possible
+auto renew date, based on the value "No auto renewal after" of the applicable
+issuing rule.
+Returns undef if there is no date specify in the circ rules or if the patron, loan,
+or item cannot be found.
+
+=cut
+
+sub GetLatestAutoRenewDate {
+    my ( $borrowernumber, $itemnumber ) = @_;
+
+    my $dbh = C4::Context->dbh;
+
+    my $item      = GetItem($itemnumber)      or return;
+    my $itemissue = GetItemIssue($itemnumber) or return;
+
+    $borrowernumber ||= $itemissue->{borrowernumber};
+    my $borrower = C4::Members::GetMember( borrowernumber => $borrowernumber )
+      or return;
+
+    my $branchcode = _GetCircControlBranch( $item, $borrower );
+    my $issuingrule =
+      GetIssuingRule( $borrower->{categorycode}, $item->{itype}, $branchcode );
+
+    my $now = dt_from_string;
+
+    return if not $issuingrule->{no_auto_renewal_after}
+               or $issuingrule->{no_auto_renewal_after} eq '';
+
+    my $maximum_renewal_date = dt_from_string($itemissue->{issuedate});
+    $maximum_renewal_date->add(
+        $issuingrule->{lengthunit} => $issuingrule->{no_auto_renewal_after}
+    );
+
+    return $maximum_renewal_date;
+}
+
 
 =head2 GetIssuingCharges
 

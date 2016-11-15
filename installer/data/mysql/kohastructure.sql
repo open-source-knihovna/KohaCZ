@@ -185,7 +185,6 @@ CREATE TABLE `biblioitems` ( -- information related to bibliographic records in 
   `size` varchar(255) default NULL, -- material size (MARC21 300$c)
   `place` varchar(255) default NULL, -- publication place (MARC21 260$a)
   `lccn` varchar(25) default NULL, -- library of congress control number (MARC21 010$a)
-  `marc` longblob, -- full bibliographic MARC record
   `url` text default NULL, -- url (MARC21 856$u)
   `cn_source` varchar(10) default NULL, -- classification source (MARC21 942$2)
   `cn_class` varchar(30) default NULL,
@@ -540,7 +539,6 @@ CREATE TABLE `deletedbiblioitems` ( -- information about bibliographic records t
   `size` varchar(255) default NULL, -- material size (MARC21 300$c)
   `place` varchar(255) default NULL, -- publication place (MARC21 260$a)
   `lccn` varchar(25) default NULL, -- library of congress control number (MARC21 010$a)
-  `marc` longblob, -- full bibliographic MARC record
   `url` text default NULL, -- url (MARC21 856$u)
   `cn_source` varchar(10) default NULL, -- classification source (MARC21 942$2)
   `cn_class` varchar(30) default NULL,
@@ -874,6 +872,7 @@ CREATE TABLE `issuingrules` ( -- circulation and fine rules
   `renewalperiod` int(4) default NULL, -- renewal period in the unit set in issuingrules.lengthunit
   `norenewalbefore` int(4) default NULL, -- no renewal allowed until X days or hours before due date.
   `auto_renew` BOOLEAN default FALSE, -- automatic renewal
+  `no_auto_renewal_after` int(4) default NULL, -- no auto renewal allowed after X days or hours after the issue date
   `reservesallowed` smallint(6) NOT NULL default "0", -- how many holds are allowed
   `holds_per_record` SMALLINT(6) NOT NULL DEFAULT 1, -- How many holds a patron can have on a given bib
   `branchcode` varchar(10) NOT NULL default '', -- the branch this rule is for (branches.branchcode)
@@ -881,6 +880,7 @@ CREATE TABLE `issuingrules` ( -- circulation and fine rules
   cap_fine_to_replacement_price BOOLEAN NOT NULL DEFAULT  '0', -- cap the fine based on item's replacement price
   onshelfholds tinyint(1) NOT NULL default 0, -- allow holds for items that are on shelf
   opacitemholds char(1) NOT NULL default 'N', -- allow opac users to place specific items on hold
+  article_requests enum('no','yes','bib_only','item_only') NOT NULL DEFAULT 'no', -- allow article requests to be placed,
   PRIMARY KEY  (`branchcode`,`categorycode`,`itemtype`),
   KEY `categorycode` (`categorycode`),
   KEY `itemtype` (`itemtype`)
@@ -2685,7 +2685,9 @@ CREATE TABLE `messages` ( -- circulation messages left via the patron's check ou
   `message_type` varchar(1) NOT NULL, -- whether the message is for the librarians (L) or the patron (B)
   `message` text NOT NULL, -- the text of the message
   `message_date` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, -- the date and time the message was written
-  PRIMARY KEY (`message_id`)
+  `manager_id` int(11) default NULL, -- creator of message
+  PRIMARY KEY (`message_id`),
+  CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`manager_id`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -2800,7 +2802,7 @@ CREATE TABLE `aqbooksellers` ( -- information about the vendors listed in acquis
   `gstreg` tinyint(4) default NULL, -- is your library charged tax (1 for yes, 0 for no)
   `listincgst` tinyint(4) default NULL, -- is tax included in list prices (1 for yes, 0 for no)
   `invoiceincgst` tinyint(4) default NULL, -- is tax included in invoice prices (1 for yes, 0 for no)
-  `gstrate` decimal(6,4) default NULL, -- the tax rate the library is charged
+  `tax_rate` decimal(6,4) default NULL, -- the tax rate the library is charged
   `discount` float(6,4) default NULL, -- discount offered on all items ordered from this vendor
   `fax` varchar(50) default NULL, -- vendor fax number
   deliverytime int(11) default NULL, -- vendor delivery time
@@ -2928,6 +2930,7 @@ CREATE TABLE aqcontacts (
   fax varchar(100) default NULL,  -- contact's fax number
   email varchar(100) default NULL, -- contact's email address
   notes mediumtext, -- notes related to the contact
+  orderacquisition BOOLEAN NOT NULL DEFAULT 0, -- should this contact receive acquisition orders
   claimacquisition BOOLEAN NOT NULL DEFAULT 0, -- should this contact receive acquisitions claims
   claimissues BOOLEAN NOT NULL DEFAULT 0, -- should this contact receive serial claims
   acqprimary BOOLEAN NOT NULL DEFAULT 0, -- is this the primary contact for acquisitions messages
@@ -3138,8 +3141,10 @@ CREATE TABLE `aqorders` ( -- information related to the basket line items
   `listprice` decimal(28,6) default NULL, -- the vendor price for this line item
   `datereceived` date default NULL, -- the date this order was received
   invoiceid int(11) default NULL, -- id of invoice
-  `freight` decimal(28,6) default NULL, -- shipping costs (not used)
-  `unitprice` decimal(28,6) default NULL, -- the actual cost entered when receiving this line item
+  `freight` decimal(28,6) DEFAULT NULL, -- shipping costs (not used)
+  `unitprice` decimal(28,6) DEFAULT NULL, -- the actual cost entered when receiving this line item
+  `unitprice_tax_excluded` decimal(28,6) default NULL, -- the unit price excluding tax (on receiving)
+  `unitprice_tax_included` decimal(28,6) default NULL, -- the unit price including tax (on receiving)
   `quantityreceived` smallint(6) NOT NULL default 0, -- the quantity that have been received so far
   `datecancellationprinted` date default NULL, -- the date the line item was deleted
   `cancellationreason` text default NULL, -- reason of cancellation
@@ -3148,10 +3153,19 @@ CREATE TABLE `aqorders` ( -- information related to the basket line items
   `purchaseordernumber` mediumtext, -- not used? always NULL
   `basketno` int(11) default NULL, -- links this order line to a specific basket (aqbasket.basketno)
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- the date and time this order line was last modified
-  `rrp` decimal(13,2) default NULL, -- the replacement cost for this line item
-  `ecost` decimal(13,2) default NULL, -- the estimated cost for this line item
-  `gstrate` decimal(6,4) default NULL, -- the tax rate for this line item
-  `discount` float(6,4) default NULL, -- the discount for this line item
+  `rrp` decimal(13,2) DEFAULT NULL, -- the replacement cost for this line item
+  `rrp_tax_excluded` decimal(28,6) default NULL, -- the replacement cost excluding tax
+  `rrp_tax_included` decimal(28,6) default NULL, -- the replacement cost including tax
+  `ecost` decimal(13,2) DEFAULT NULL, -- the replacement cost for this line item
+  `ecost_tax_excluded` decimal(28,6) default NULL, -- the estimated cost excluding tax
+  `ecost_tax_included` decimal(28,6) default NULL, -- the estimated cost including tax
+  `tax_rate_bak` decimal(6,4) DEFAULT NULL, -- the tax rate for this line item (%)
+  `tax_rate_on_ordering` decimal(6,4) DEFAULT NULL, -- the tax rate on ordering for this line item (%)
+  `tax_rate_on_receiving` decimal(6,4) DEFAULT NULL, -- the tax rate on receiving for this line item (%)
+  `tax_value_bak` decimal(28,6) default NULL, -- the tax value for this line item
+  `tax_value_on_ordering` decimal(28,6) DEFAULT NULL, -- the tax value on ordering for this line item
+  `tax_value_on_receiving` decimal(28,6) DEFAULT NULL, -- the tax value on receiving for this line item
+  `discount` float(6,4) default NULL, -- the discount for this line item (%)
   `budget_id` int(11) NOT NULL, -- the fund this order goes against (aqbudgets.budget_id)
   `budgetdate` date default NULL, -- not used? always NULL
   `sort1` varchar(80) default NULL, -- statistical field
@@ -3823,15 +3837,102 @@ CREATE TABLE `hold_fill_targets` (
     REFERENCES `branches` (`branchcode`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+--
+-- Table structure for table `housebound_profile`
+--
 
-DROP TABLE IF EXISTS borrower_password_recovery;
-CREATE TABLE borrower_password_recovery (
-  borrowernumber int(11) NOT NULL,
-  uuid varchar(128) NOT NULL,
-  valid_until timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  KEY borrowernumber (borrowernumber)
+DROP TABLE IF EXISTS `housebound_profile`;
+CREATE TABLE `housebound_profile` (
+  `borrowernumber` int(11) NOT NULL, -- Number of the borrower associated with this profile.
+  `day` text NOT NULL,  -- The preferred day of the week for delivery.
+  `frequency` text NOT NULL, -- The Authorised_Value definining the pattern for delivery.
+  `fav_itemtypes` text default NULL, -- Free text describing preferred itemtypes.
+  `fav_subjects` text default NULL, -- Free text describing preferred subjects.
+  `fav_authors` text default NULL, -- Free text describing preferred authors.
+  `referral` text default NULL, -- Free text indicating how the borrower was added to the service.
+  `notes` text default NULL, -- Free text for additional notes.
+  PRIMARY KEY  (`borrowernumber`),
+  CONSTRAINT `housebound_profile_bnfk`
+    FOREIGN KEY (`borrowernumber`)
+    REFERENCES `borrowers` (`borrowernumber`)
+    ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+--
+-- Table structure for table `housebound_visit`
+--
+
+DROP TABLE IF EXISTS `housebound_visit`;
+CREATE TABLE `housebound_visit` (
+  `id` int(11) NOT NULL auto_increment, -- ID of the visit.
+  `borrowernumber` int(11) NOT NULL, -- Number of the borrower, & the profile, linked to this visit.
+  `appointment_date` date default NULL, -- Date of visit.
+  `day_segment` varchar(10),  -- Rough time frame: 'morning', 'afternoon' 'evening'
+  `chooser_brwnumber` int(11) default NULL, -- Number of the borrower to choose items  for delivery.
+  `deliverer_brwnumber` int(11) default NULL, -- Number of the borrower to deliver items.
+  PRIMARY KEY  (`id`),
+  CONSTRAINT `houseboundvisit_bnfk`
+    FOREIGN KEY (`borrowernumber`)
+    REFERENCES `housebound_profile` (`borrowernumber`)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `houseboundvisit_bnfk_1`
+    FOREIGN KEY (`chooser_brwnumber`)
+    REFERENCES `borrowers` (`borrowernumber`)
+    ON UPDATE CASCADE ON DELETE CASCADE,
+  CONSTRAINT `houseboundvisit_bnfk_2`
+    FOREIGN KEY (`deliverer_brwnumber`)
+    REFERENCES `borrowers` (`borrowernumber`)
+    ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table `housebound_role`
+--
+
+DROP TABLE IF EXISTS `housebound_role`;
+CREATE TABLE IF NOT EXISTS `housebound_role` (
+  `borrowernumber_id` int(11) NOT NULL, -- borrowernumber link
+  `housebound_chooser` tinyint(1) NOT NULL DEFAULT 0, -- set to 1 to indicate this patron is a housebound chooser volunteer
+  `housebound_deliverer` tinyint(1) NOT NULL DEFAULT 0, -- set to 1 to indicate this patron is a housebound deliverer volunteer
+  PRIMARY KEY (`borrowernumber_id`),
+  CONSTRAINT `houseboundrole_bnfk`
+    FOREIGN KEY (`borrowernumber_id`)
+    REFERENCES `borrowers` (`borrowernumber`)
+    ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table 'article_requests'
+--
+
+CREATE TABLE `article_requests` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `borrowernumber` int(11) NOT NULL,
+  `biblionumber` int(11) NOT NULL,
+  `itemnumber` int(11) DEFAULT NULL,
+  `branchcode` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+  `title` text,
+  `author` text,
+  `volume` text,
+  `issue` text,
+  `date` text,
+  `pages` text,
+  `chapters` text,
+  `patron_notes` text,
+  `status` enum('PENDING','PROCESSING','COMPLETED','CANCELED') NOT NULL DEFAULT 'PENDING',
+  `notes` text,
+  `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `updated_on` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `borrowernumber` (`borrowernumber`),
+  KEY `biblionumber` (`biblionumber`),
+  KEY `itemnumber` (`itemnumber`),
+  KEY `branchcode` (`branchcode`),
+  CONSTRAINT `article_requests_ibfk_1` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `article_requests_ibfk_2` FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `article_requests_ibfk_3` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `article_requests_ibfk_4` FOREIGN KEY (`branchcode`) REFERENCES `branches` (`branchcode`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

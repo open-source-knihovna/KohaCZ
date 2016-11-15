@@ -156,38 +156,25 @@ names to values.  If C<$serial> is true, include serial publication data.
 sub GetItem {
     my ($itemnumber,$barcode, $serial) = @_;
     my $dbh = C4::Context->dbh;
-	my $data;
 
+    my $item;
     if ($itemnumber) {
-        my $sth = $dbh->prepare("
-            SELECT * FROM items 
-            WHERE itemnumber = ?");
-        $sth->execute($itemnumber);
-        $data = $sth->fetchrow_hashref;
+        $item = Koha::Items->find( $itemnumber );
     } else {
-        my $sth = $dbh->prepare("
-            SELECT * FROM items 
-            WHERE barcode = ?"
-            );
-        $sth->execute($barcode);		
-        $data = $sth->fetchrow_hashref;
+        $item = Koha::Items->find( { barcode => $barcode } );
     }
 
-    return unless ( $data );
+    return unless ( $item );
 
-    if ( $serial) {      
-    my $ssth = $dbh->prepare("SELECT serialseq,publisheddate from serialitems left join serial on serialitems.serialid=serial.serialid where serialitems.itemnumber=?");
-        $ssth->execute($data->{'itemnumber'}) ;
-        ($data->{'serialseq'} , $data->{'publisheddate'}) = $ssth->fetchrow_array();
+    my $data = $item->unblessed();
+    $data->{itype} = $item->effective_itemtype(); # set the correct itype
+
+    if ($serial) {
+        my $ssth = $dbh->prepare("SELECT serialseq,publisheddate from serialitems left join serial on serialitems.serialid=serial.serialid where serialitems.itemnumber=?");
+        $ssth->execute( $data->{'itemnumber'} );
+        ( $data->{'serialseq'}, $data->{'publisheddate'} ) = $ssth->fetchrow_array();
     }
-	#if we don't have an items.itype, use biblioitems.itemtype.
-    # FIXME this should respect the itypes systempreference
-    # if (C4::Context->preference('item-level_itypes')) {
-	if( ! $data->{'itype'} ) {
-		my $sth = $dbh->prepare("SELECT itemtype FROM biblioitems  WHERE biblionumber = ?");
-		$sth->execute($data->{'biblionumber'});
-		($data->{'itype'}) = $sth->fetchrow_array;
-	}
+
     return $data;
 }    # sub GetItem
 
@@ -335,8 +322,8 @@ embedded item fields.  This routine is suitable for batch jobs.
 
 This API assumes that the bib record has already been
 saved to the C<biblio> and C<biblioitems> tables.  It does
-not expect that C<biblioitems.marc> and C<biblioitems.marcxml>
-are populated, but it will do so via a call to ModBibiloMarc.
+not expect that C<biblioitems.marcxml> are populated, but it
+will do so via a call to ModBibiloMarc.
 
 The goal of this API is to have a similar effect to using AddBiblio
 and AddItems in succession, but without inefficient repeated
@@ -869,7 +856,6 @@ sub GetItemStatus {
                 $itemstatus{$authorisedvalue} = $lib;
             }
             return \%itemstatus;
-            exit 1;
         }
         else {
 
@@ -955,7 +941,6 @@ sub GetItemLocation {
                 $itemlocation{$authorisedvalue} = $lib;
             }
             return \%itemlocation;
-            exit 1;
         }
         else {
 
@@ -1047,7 +1032,6 @@ sub GetLostItems {
   offset       => $offset,
   size         => $size,
   statushash   => $statushash,
-  interface    => $interface,
 } );
 
 Retrieve a list of title/authors/barcode/callnumber, for biblio inventory.
@@ -1078,7 +1062,6 @@ sub GetItemsForInventory {
     my $offset       = $parameters->{'offset'}       // '';
     my $size         = $parameters->{'size'}         // '';
     my $statushash   = $parameters->{'statushash'}   // '';
-    my $interface    = $parameters->{'interface'}    // '';
 
     my $dbh = C4::Context->dbh;
     my ( @bind_params, @where_strings );
@@ -1158,9 +1141,19 @@ sub GetItemsForInventory {
     $sth->execute( @bind_params );
     my ($iTotalRecords) = $sth->fetchrow_array();
 
-    my $avmapping = C4::Koha::GetKohaAuthorisedValuesMapping( {
-                      interface => $interface
-                    } );
+    my @avs = Koha::AuthorisedValues->search(
+        {   'marc_subfield_structures.kohafield' => { '>' => '' },
+            'me.authorised_value'                => { '>' => '' },
+        },
+        {   join     => { category => 'marc_subfield_structures' },
+            distinct => ['marc_subfield_structures.kohafield, me.category, frameworkcode, me.authorised_value'],
+            '+select' => [ 'marc_subfield_structures.kohafield', 'marc_subfield_structures.frameworkcode', 'me.authorised_value', 'me.lib' ],
+            '+as'     => [ 'kohafield',                          'frameworkcode',                          'authorised_value',    'lib' ],
+        }
+    );
+
+    my $avmapping = { map { $_->get_column('kohafield') . ',' . $_->get_column('frameworkcode') . ',' . $_->get_column('authorised_value') => $_->get_column('lib') } @avs };
+
     foreach my $row (@$tmpresults) {
 
         # Auth values
@@ -1381,27 +1374,22 @@ sub GetItemsInfo {
 
         $serial ||= $data->{'serial'};
 
+        my $av;
         # get notforloan complete status if applicable
-        if ( my $code = C4::Koha::GetAuthValCode( 'items.notforloan', $data->{frameworkcode} ) ) {
-            my $av = Koha::AuthorisedValues->search({ category => $code, authorised_value => $data->{itemnotforloan} });
-            $av = $av->count ? $av->next : undef;
-            $data->{notforloanvalue}     = $av ? $av->lib : '';
-            $data->{notforloanvalueopac} = $av ? $av->opac_description : '';
-        }
+        $av = Koha::AuthorisedValues->search_by_koha_field({frameworkcode => $data->{frameworkcode}, kohafield => 'items.notforloan', authorised_value => $data->{itemnotforloan} });
+        $av = $av->count ? $av->next : undef;
+        $data->{notforloanvalue}     = $av ? $av->lib : '';
+        $data->{notforloanvalueopac} = $av ? $av->opac_description : '';
 
         # get restricted status and description if applicable
-        if ( my $code = C4::Koha::GetAuthValCode( 'items.restricted', $data->{frameworkcode} ) ) {
-            my $av = Koha::AuthorisedValues->search({ category => $code, authorised_value => $data->{restricted} });
-            $av = $av->count ? $av->next : undef;
-            $data->{restricted}     = $av ? $av->lib : '';
-            $data->{restrictedopac} = $av ? $av->opac_description : '';
-        }
+        $av = Koha::AuthorisedValues->search_by_koha_field({frameworkcode => $data->{frameworkcode}, kohafield => 'items.restricted', authorised_value => $data->{restricted} });
+        $av = $av->count ? $av->next : undef;
+        $data->{restricted}     = $av ? $av->lib : '';
+        $data->{restrictedopac} = $av ? $av->opac_description : '';
 
         # my stack procedures
-        if ( my $code = C4::Koha::GetAuthValCode( 'items.stack', $data->{frameworkcode} ) ) {
-            my $av = Koha::AuthorisedValues->search({ category => $code, authorised_value => $data->{stack} });
-            $data->{stack}          = $av->count ? $av->next->lib : '';
-        }
+        $av = Koha::AuthorisedValues->search_by_koha_field({frameworkcode => $data->{frameworkcode}, kohafield => 'items.stack', authorised_value => $data->{stack} });
+        $data->{stack}          = $av->count ? $av->next->lib : '';
 
         # Find the last 3 people who borrowed this item.
         my $sth2 = $dbh->prepare("SELECT * FROM old_issues,borrowers

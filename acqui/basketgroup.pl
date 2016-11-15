@@ -74,10 +74,11 @@ sub BasketTotal {
     my $total = 0;
     my @orders = GetOrders($basketno);
     for my $order (@orders){
-        $total = $total + ( $order->{ecost} * $order->{quantity} );
-        if ($bookseller->{invoiceincgst} && ! $bookseller->{listincgst} && ( $bookseller->{gstrate} // C4::Context->preference("gist") )) {
-            my $gst = $bookseller->{gstrate} // C4::Context->preference("gist");
-            $total = $total * ( $gst / 100 +1);
+        # FIXME The following is wrong
+        if ( $bookseller->{listincgst} ) {
+            $total = $total + ( $order->{ecost_tax_included} * $order->{quantity} );
+        } else {
+            $total = $total + ( $order->{ecost_tax_excluded} * $order->{quantity} );
         }
     }
     $total .= " " . ($bookseller->{invoiceprice} // 0);
@@ -167,13 +168,17 @@ sub printbasketgrouppdf{
                 croak $@;
             }
 
-            $ord = C4::Acquisition::populate_order_with_prices({ order => $ord, booksellerid => $bookseller->{id}, ordering => 1 });
+            $ord->{tax_value} = $ord->{tax_value_on_ordering};
+            $ord->{tax_rate} = $ord->{tax_rate_on_ordering};
+            $ord->{total_tax_included} = $ord->{ecost_tax_included} * $ord->{quantity};
+            $ord->{total_tax_excluded} = $ord->{ecost_tax_excluded} * $ord->{quantity};
+
             my $bib = GetBiblioData($ord->{biblionumber});
             my $itemtypes = GetItemTypes();
 
             #FIXME DELETE ME
             # 0      1        2        3         4            5         6       7      8        9
-            #isbn, itemtype, author, title, publishercode, quantity, listprice ecost discount gstrate
+            #isbn, itemtype, author, title, publishercode, quantity, listprice ecost discount tax_rate
 
             # Editor Number
             my $en;
@@ -201,7 +206,7 @@ sub printbasketgrouppdf{
         -type       => 'application/pdf',
         -attachment => ( $basketgroup->{name} || $basketgroupid ) . '.pdf'
     );
-    my $pdf = printpdf($basketgroup, $bookseller, $baskets, \%orders, $bookseller->{gstrate} // C4::Context->preference("gist")) || die "pdf generation failed";
+    my $pdf = printpdf($basketgroup, $bookseller, $baskets, \%orders, $bookseller->{tax_rate} // C4::Context->preference("gist")) || die "pdf generation failed";
     print $pdf;
 
 }

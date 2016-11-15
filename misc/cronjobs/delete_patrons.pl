@@ -7,6 +7,7 @@ use Getopt::Long;
 
 use C4::Members;
 use Koha::DateUtils;
+use Koha::Patrons;
 use C4::Log;
 
 my ( $help, $verbose, $not_borrowed_since, $expired_before, $last_seen,
@@ -59,11 +60,6 @@ unless ($confirm) {
 
 say scalar(@$members) . " patrons to delete";
 
-my $dbh = C4::Context->dbh;
-$dbh->{RaiseError} = 1;
-$dbh->{PrintError} = 0;
-
-$dbh->{AutoCommit} = 0; # use transactions to avoid partial deletes
 my $deleted = 0;
 for my $member (@$members) {
     print "Trying to delete patron $member->{borrowernumber}... "
@@ -76,31 +72,20 @@ for my $member (@$members) {
         next;
     }
 
-    eval {
-        C4::Members::MoveMemberToDeleted( $borrowernumber )
-          if $confirm;
-    };
-    if ($@) {
-        say "Failed to delete patron $borrowernumber, cannot move it: ($@)";
-        $dbh->rollback;
-        next;
+    if ( $confirm ) {
+        my $patron = Koha::Patrons->find( $borrowernumber );
+        my $deleted = eval { $patron->move_to_deleted; };
+        if ($@ or not $deleted) {
+            say "Failed to delete patron $borrowernumber, cannot move it" . ( $@ ? ": ($@)" : "" );
+            next;
+        }
+
+        eval { $patron->delete };
+        if ($@) {
+            say "Failed to delete patron $borrowernumber: $@)";
+            next;
+        }
     }
-    eval {
-        C4::Members::HandleDelBorrower( $borrowernumber )
-          if $confirm;
-    };
-    if ($@) {
-        say "Failed to delete patron $borrowernumber, error handling its lists: ($@)";
-        $dbh->rollback;
-        next;
-    }
-    eval { C4::Members::DelMember( $borrowernumber ) if $confirm; };
-    if ($@) {
-        say "Failed to delete patron $borrowernumber: $@)";
-        $dbh->rollback;
-        next;
-    }
-    $dbh->commit;
     $deleted++;
     say "OK" if $verbose;
 }

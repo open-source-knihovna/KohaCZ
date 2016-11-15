@@ -747,6 +747,21 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 article_requests
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::ArticleRequest>
+
+=cut
+
+__PACKAGE__->has_many(
+  "article_requests",
+  "Koha::Schema::Result::ArticleRequest",
+  { "foreign.borrowernumber" => "self.borrowernumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 borrower_attributes
 
 Type: has_many
@@ -912,6 +927,66 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 housebound_profile
+
+Type: might_have
+
+Related object: L<Koha::Schema::Result::HouseboundProfile>
+
+=cut
+
+__PACKAGE__->might_have(
+  "housebound_profile",
+  "Koha::Schema::Result::HouseboundProfile",
+  { "foreign.borrowernumber" => "self.borrowernumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 housebound_role
+
+Type: might_have
+
+Related object: L<Koha::Schema::Result::HouseboundRole>
+
+=cut
+
+__PACKAGE__->might_have(
+  "housebound_role",
+  "Koha::Schema::Result::HouseboundRole",
+  { "foreign.borrowernumber_id" => "self.borrowernumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 housebound_visit_chooser_brwnumbers
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::HouseboundVisit>
+
+=cut
+
+__PACKAGE__->has_many(
+  "housebound_visit_chooser_brwnumbers",
+  "Koha::Schema::Result::HouseboundVisit",
+  { "foreign.chooser_brwnumber" => "self.borrowernumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 housebound_visit_deliverer_brwnumbers
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::HouseboundVisit>
+
+=cut
+
+__PACKAGE__->has_many(
+  "housebound_visit_deliverer_brwnumbers",
+  "Koha::Schema::Result::HouseboundVisit",
+  { "foreign.deliverer_brwnumber" => "self.borrowernumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 issues
 
 Type: has_many
@@ -954,6 +1029,21 @@ __PACKAGE__->has_many(
   "message_queues",
   "Koha::Schema::Result::MessageQueue",
   { "foreign.borrowernumber" => "self.borrowernumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 messages
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::Message>
+
+=cut
+
+__PACKAGE__->has_many(
+  "messages",
+  "Koha::Schema::Result::Message",
+  { "foreign.manager_id" => "self.borrowernumber" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
@@ -1258,13 +1348,17 @@ Composing rels: L</aqorder_users> -> ordernumber
 __PACKAGE__->many_to_many("ordernumbers", "aqorder_users", "ordernumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-09-13 17:32:29
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:23Yg0CXG1z8f5Bx92JCVoQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-10-31 10:39:35
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Lc6GQ2E7d+tyzTk3v2sWjQ
 
 __PACKAGE__->belongs_to(
     "guarantor",
     "Koha::Schema::Result::Borrower",
     { borrowernumber => "guarantorid" },
 );
+
+sub koha_objects_class {
+    'Koha::Patrons';
+}
 
 1;

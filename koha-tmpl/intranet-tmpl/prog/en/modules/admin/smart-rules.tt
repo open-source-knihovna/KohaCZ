@@ -186,10 +186,12 @@ $(document).ready(function() {
                 <th>Renewal period</th>
                 <th>No renewal before</th>
                 <th>Automatic renewal</th>
+                <th>No automatic renewal after</th>
                 <th>Holds allowed (count)</th>
                 <th>Holds per record (count)</th>
                 <th>On shelf holds allowed</th>
                 <th>Item level holds</th>
+                <th>Article requests</th>
                 <th>Rental discount (%)</th>
                 <th>Actions</th>
             </tr>
@@ -265,6 +267,7 @@ $(document).ready(function() {
                                 No
                                 [% END %]
                             </td>
+                            <td>[% rule.no_auto_renewal_after %]</td>
 							<td>[% rule.reservesallowed %]</td>
                                                         <td>[% rule.holds_per_record %]</td>
                                                         <td>
@@ -276,6 +279,17 @@ $(document).ready(function() {
                                                                 If any unavailable
                                                             [% END %]</td>
                                                         <td>[% IF rule.opacitemholds == 'F'%]Force[% ELSIF rule.opacitemholds == 'Y'%]Allow[% ELSE %]Don't allow[% END %]</td>
+                                                        <td>
+                                                            [% IF rule.article_requests == 'no' %]
+                                                                No
+                                                            [% ELSIF rule.article_requests == 'yes' %]
+                                                                Yes
+                                                            [% ELSIF rule.article_requests == 'bib_only' %]
+                                                                Record only
+                                                            [% ELSIF rule.article_requests == 'item_only' %]
+                                                                Item only
+                                                            [% END %]
+                                                        </td>
 							<td>[% rule.rentaldiscount %]</td>
                                                         <td class="actions">
                                                           <a href="#" class="editrule btn btn-mini"><i class="fa fa-pencil"></i> Edit</a>
@@ -340,6 +354,7 @@ $(document).ready(function() {
                             <option value="yes">Yes</option>
                         </select>
                     </td>
+                    <td><input type="text" name="no_auto_renewal_after" id="no_auto_renewal_after" size="3" /></td>
                     <td><input type="text" name="reservesallowed" id="reservesallowed" size="2" /></td>
                     <td><input type="text" name="holds_per_record" id="holds_per_record" size="2" /></td>
                     <td>
@@ -354,6 +369,14 @@ $(document).ready(function() {
                             <option value="N">Don't allow</option>
                             <option value="Y">Allow</option>
                             <option value="F">Force</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select id="article_requests" name="article_requests">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                            <option value="bib_only">Record only</option>
+                            <option value="item_only">Item only</option>
                         </select>
                     </td>
                     <td><input type="text" name="rentaldiscount" id="rentaldiscount" size="2" /></td>
@@ -384,10 +407,12 @@ $(document).ready(function() {
                       <th>Renewal period</th>
                       <th>No renewal before</th>
                       <th>Automatic renewal</th>
+                      <th>No automatic renewal after</th>
                       <th>Holds allowed (count)</th>
                       <th>Holds per record (count)</th>
                       <th>On shelf holds allowed</th>
                       <th>Item level holds</th>
+                      <th>Article requests</th>
                       <th>Rental discount (%)</th>
                       <th colspan="2">&nbsp;</th>
                     </tr>

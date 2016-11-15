@@ -13282,6 +13282,443 @@ if ( CheckVersion($DBversion) ) {
       SetVersion($DBversion);
 }
 
+$DBversion = "16.06.00.034";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE biblioitems DROP COLUMN marc;
+    });
+    $dbh->do(q{
+        ALTER TABLE deletedbiblioitems DROP COLUMN marc;
+    });
+
+    print "Upgrade to $DBversion done (Bug 10455 - remove redundant 'biblioitems.marc' field)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.035';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+         SELECT 'AllowItemsOnHoldCheckoutSCO',COALESCE(value,0),'','Do not generate RESERVE_WAITING and RESERVED warning in the SCO module when checking out items reserved to someone else. This allows self checkouts for those items.','YesNo'
+         FROM systempreferences WHERE variable='AllowItemsOnHoldCheckout';
+    });
+
+    print "Upgrade to $DBversion done (Bug 15131: Give SCO separate control for AllowItemsOnHoldCheckout)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.036';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS `housebound_profile` (
+          `borrowernumber` int(11) NOT NULL, -- Number of the borrower associated with this profile.
+          `day` text NOT NULL,  -- The preferred day of the week for delivery.
+          `frequency` text NOT NULL, -- The Authorised_Value definining the pattern for delivery.
+          `fav_itemtypes` text default NULL, -- Free text describing preferred itemtypes.
+          `fav_subjects` text default NULL, -- Free text describing preferred subjects.
+          `fav_authors` text default NULL, -- Free text describing preferred authors.
+          `referral` text default NULL, -- Free text indicating how the borrower was added to the service.
+          `notes` text default NULL, -- Free text for additional notes.
+          PRIMARY KEY  (`borrowernumber`),
+          CONSTRAINT `housebound_profile_bnfk`
+            FOREIGN KEY (`borrowernumber`)
+            REFERENCES `borrowers` (`borrowernumber`)
+            ON UPDATE CASCADE ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS `housebound_visit` (
+          `id` int(11) NOT NULL auto_increment, -- ID of the visit.
+          `borrowernumber` int(11) NOT NULL, -- Number of the borrower, & the profile, linked to this visit.
+          `appointment_date` date default NULL, -- Date of visit.
+          `day_segment` varchar(10),  -- Rough time frame: 'morning', 'afternoon' 'evening'
+          `chooser_brwnumber` int(11) default NULL, -- Number of the borrower to choose items  for delivery.
+          `deliverer_brwnumber` int(11) default NULL, -- Number of the borrower to deliver items.
+          PRIMARY KEY  (`id`),
+          CONSTRAINT `houseboundvisit_bnfk`
+            FOREIGN KEY (`borrowernumber`)
+            REFERENCES `housebound_profile` (`borrowernumber`)
+            ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT `houseboundvisit_bnfk_1`
+            FOREIGN KEY (`chooser_brwnumber`)
+            REFERENCES `borrowers` (`borrowernumber`)
+            ON UPDATE CASCADE ON DELETE CASCADE,
+          CONSTRAINT `houseboundvisit_bnfk_2`
+            FOREIGN KEY (`deliverer_brwnumber`)
+            REFERENCES `borrowers` (`borrowernumber`)
+            ON UPDATE CASCADE ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS `housebound_role` (
+          `borrowernumber_id` int(11) NOT NULL, -- borrowernumber link
+          `housebound_chooser` tinyint(1) NOT NULL DEFAULT 0, -- set to 1 to indicate this patron is a housebound chooser volunteer
+          `housebound_deliverer` tinyint(1) NOT NULL DEFAULT 0, -- set to 1 to indicate this patron is a housebound deliverer volunteer
+          PRIMARY KEY (`borrowernumber_id`),
+          CONSTRAINT `houseboundrole_bnfk`
+            FOREIGN KEY (`borrowernumber_id`)
+            REFERENCES `borrowers` (`borrowernumber`)
+            ON UPDATE CASCADE ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences
+               (variable,value,options,explanation,type) VALUES
+               ('HouseboundModule',0,'',
+               'If ON, enable housebound module functionality.','YesNo');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO authorised_value_categories( category_name ) VALUES
+            ('HSBND_FREQ');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO authorised_values (category, authorised_value, lib) VALUES
+               ('HSBND_FREQ','EW','Every week');
+    });
+
+    print "Upgrade to $DBversion done (Bug 5670 - Housebound Readers Module)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.037";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE `issuingrules` ADD `article_requests` ENUM( 'no', 'yes', 'bib_only', 'item_only' ) NOT NULL DEFAULT 'no' AFTER `opacitemholds`;
+    });
+    $dbh->do(q{
+        INSERT INTO `systempreferences` (`variable`, `value`, `options`, `explanation`, `type`) VALUES
+            ('ArticleRequests', '0', NULL, 'Enables the article request feature', 'YesNo'),
+            ('ArticleRequestsMandatoryFields', '', NULL, 'Comma delimited list of required fields for bibs where article requests rule = ''yes''', 'multiple'),
+            ('ArticleRequestsMandatoryFieldsItemsOnly', '', NULL, 'Comma delimited list of required fields for bibs where article requests rule = ''item_only''', 'multiple'),
+            ('ArticleRequestsMandatoryFieldsRecordOnly', '', NULL, 'Comma delimited list of required fields for bibs where article requests rule = ''bib_only''', 'multiple');
+    });
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS `article_requests` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `borrowernumber` int(11) NOT NULL,
+          `biblionumber` int(11) NOT NULL,
+          `itemnumber` int(11) DEFAULT NULL,
+          `branchcode` varchar(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+          `title` text,
+          `author` text,
+          `volume` text,
+          `issue` text,
+          `date` text,
+          `pages` text,
+          `chapters` text,
+          `patron_notes` text,
+          `status` enum('PENDING','PROCESSING','COMPLETED','CANCELED') NOT NULL DEFAULT 'PENDING',
+          `notes` text,
+          `created_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          `updated_on` timestamp NULL DEFAULT NULL,
+          PRIMARY KEY (`id`),
+          KEY `borrowernumber` (`borrowernumber`),
+          KEY `biblionumber` (`biblionumber`),
+          KEY `itemnumber` (`itemnumber`),
+          KEY `branchcode` (`branchcode`),
+          CONSTRAINT `article_requests_ibfk_1` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT `article_requests_ibfk_2` FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT `article_requests_ibfk_3` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE SET NULL ON UPDATE CASCADE,
+          CONSTRAINT `article_requests_ibfk_4` FOREIGN KEY (`branchcode`) REFERENCES `branches` (`branchcode`) ON DELETE SET NULL ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+    $dbh->do(q{
+        INSERT INTO `letter` (`module`, `code`, `branchcode`, `name`, `is_html`, `title`, `content`, `message_transport_type`) VALUES
+        ('circulation', 'AR_CANCELED', '', 'Article Request - Email - Canceled', 0, 'Article Request Canceled', '<<borrowers.firstname>> <<borrowers.surname>> (<<borrowers.cardnumber>>)\r\n\r\nYour request for an article from <<biblio.title>> (<<items.barcode>>) has been canceled for the following reason:\r\n\r\n<<article_requests.notes>>\r\n\r\nArticle requested:\r\nTitle: <<article_requests.title>>\r\nAuthor: <<article_requests.author>>\r\nVolume: <<article_requests.volume>>\r\nIssue: <<article_requests.issue>>\r\nDate: <<article_requests.date>>\r\nPages: <<article_requests.pages>>\r\nChapters: <<article_requests.chapters>>\r\nNotes: <<article_requests.patron_notes>>\r\n', 'email'),
+        ('circulation', 'AR_COMPLETED', '', 'Article Request - Email - Completed', 0, 'Article Request Completed', '<<borrowers.firstname>> <<borrowers.surname>> (<<borrowers.cardnumber>>)\r\n\r\nWe are have completed your request for an article from <<biblio.title>> (<<items.barcode>>).\r\n\r\nArticle requested:\r\nTitle: <<article_requests.title>>\r\nAuthor: <<article_requests.author>>\r\nVolume: <<article_requests.volume>>\r\nIssue: <<article_requests.issue>>\r\nDate: <<article_requests.date>>\r\nPages: <<article_requests.pages>>\r\nChapters: <<article_requests.chapters>>\r\nNotes: <<article_requests.patron_notes>>\r\n\r\nYou may pick your article up at <<branches.branchname>>.\r\n\r\nThank you!', 'email'),
+        ('circulation', 'AR_PENDING', '', 'Article Request - Email - Open', 0, 'Article Request Received', '<<borrowers.firstname>> <<borrowers.surname>> (<<borrowers.cardnumber>>)\r\n\r\nWe have received your request for an article from <<biblio.title>> (<<items.barcode>>).\r\n\r\nArticle requested:\r\nTitle: <<article_requests.title>>\r\nAuthor: <<article_requests.author>>\r\nVolume: <<article_requests.volume>>\r\nIssue: <<article_requests.issue>>\r\nDate: <<article_requests.date>>\r\nPages: <<article_requests.pages>>\r\nChapters: <<article_requests.chapters>>\r\nNotes: <<article_requests.patron_notes>>\r\n\r\n\r\nThank you!', 'email'),
+        ('circulation', 'AR_SLIP', '', 'Article Request - Print Slip', 0, 'Test', 'Article Request:\r\n\r\n<<borrowers.firstname>> <<borrowers.surname>> (<<borrowers.cardnumber>>)\r\n\r\nTitle: <<biblio.title>>\r\nBarcode: <<items.barcode>>\r\n\r\nArticle requested:\r\nTitle: <<article_requests.title>>\r\nAuthor: <<article_requests.author>>\r\nVolume: <<article_requests.volume>>\r\nIssue: <<article_requests.issue>>\r\nDate: <<article_requests.date>>\r\nPages: <<article_requests.pages>>\r\nChapters: <<article_requests.chapters>>\r\nNotes: <<article_requests.patron_notes>>\r\n', 'print'),
+        ('circulation', 'AR_PROCESSING', '', 'Article Request - Email - Processing', 0, 'Article Request Processing', '<<borrowers.firstname>> <<borrowers.surname>> (<<borrowers.cardnumber>>)\r\n\r\nWe are now processing your request for an article from <<biblio.title>> (<<items.barcode>>).\r\n\r\nArticle requested:\r\nTitle: <<article_requests.title>>\r\nAuthor: <<article_requests.author>>\r\nVolume: <<article_requests.volume>>\r\nIssue: <<article_requests.issue>>\r\nDate: <<article_requests.date>>\r\nPages: <<article_requests.pages>>\r\nChapters: <<article_requests.chapters>>\r\nNotes: <<article_requests.patron_notes>>\r\n\r\nThank you!', 'email');
+    });
+
+    print "Upgrade to $DBversion done (Bug 14610 - Add ability to place article requests in Koha)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.038';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type) VALUES ('DefaultPatronSearchFields','surname,firstname,othernames,cardnumber,userid',NULL,'Comma separated list defining the default fields to be used during a patron search','free');
+    });
+
+    print "Upgrade to $DBversion done (Bug 14874 - Add ability to search for patrons by date of birth from checkout and patron quick searches)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.06.00.039";
+if ( CheckVersion($DBversion) ) {
+
+    my $sth = $dbh->prepare(q{
+        SELECT s.itemnumber, i.itype, b.itemtype
+        FROM
+         ( SELECT DISTINCT itemnumber
+           FROM statistics
+           WHERE ( type = "return" OR type = "localuse" ) AND
+                 itemtype IS NULL
+         ) s
+        LEFT JOIN
+         ( SELECT itemnumber,biblionumber, itype
+             FROM items
+           UNION
+           SELECT itemnumber,biblionumber, itype
+             FROM deleteditems
+         ) i
+        ON (s.itemnumber=i.itemnumber)
+        LEFT JOIN
+         ( SELECT biblionumber, itemtype
+             FROM biblioitems
+           UNION
+           SELECT biblionumber, itemtype
+             FROM deletedbiblioitems
+         ) b
+        ON (i.biblionumber=b.biblionumber);
+    });
+    $sth->execute();
+
+    my $update_sth = $dbh->prepare(q{
+        UPDATE statistics
+        SET itemtype=?
+        WHERE itemnumber=? AND itemtype IS NULL
+    });
+    my $ilevel_itypes = C4::Context->preference('item-level_itypes');
+
+    while ( my ($itemnumber,$item_itype,$biblio_itype) = $sth->fetchrow_array ) {
+
+        my $effective_itemtype = $ilevel_itypes
+                                    ? $item_itype // $biblio_itype
+                                    : $biblio_itype;
+        warn "item-level_itypes set but no itype defined for item ($itemnumber)"
+            if $ilevel_itypes and !defined $item_itype;
+        $update_sth->execute( $effective_itemtype, $itemnumber );
+    }
+
+    print "Upgrade to $DBversion done (Bug 14598: itemtype is not set on statistics by C4::Circulation::AddReturn)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.040';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE `aqcontacts` ADD `orderacquisition` BOOLEAN NOT NULL DEFAULT 0 AFTER `notes`;
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO `letter` (module, code, name, title, content, message_transport_type) VALUES
+        ('orderacquisition','ACQORDER','Acquisition order','Order','<<aqbooksellers.name>>\r\n<<aqbooksellers.address1>>\r\n<<aqbooksellers.address2>>\r\n<<aqbooksellers.address3>>\r\n<<aqbooksellers.address4>>\r\n<<aqbooksellers.phone>>\r\n\r\nPlease order for the library:\r\n\r\n<order>Ordernumber <<aqorders.ordernumber>> (<<biblio.title>>) (quantity: <<aqorders.quantity>>) ($<<aqorders.listprice>> each).</order>\r\n\r\nThank you,\n\n<<branches.branchname>>', 'email');
+    });
+
+    print "Upgrade to $DBversion done (Bug 5260 - Add option to send an order by e-mail to the acquisition module)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.041';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('AggressiveMatchOnISSN','0','If enabled, attempt to match aggressively by trying all variations of the ISSNs in the imported record as a phrase in the ISSN fields of already cataloged records when matching on ISSN with the record import tool','','YesNo')
+    });
+
+    print "Upgrade to $DBversion done (Bug 14629 - Add aggressive ISSN matching feature equivalent to the aggressive ISBN matcher)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.042';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+        ALTER TABLE aqorders
+            ADD COLUMN unitprice_tax_excluded decimal(28,6) default NULL AFTER unitprice,
+            ADD COLUMN unitprice_tax_included decimal(28,6) default NULL AFTER unitprice_tax_excluded,
+            ADD COLUMN rrp_tax_excluded decimal(28,6) default NULL AFTER rrp,
+            ADD COLUMN rrp_tax_included decimal(28,6) default NULL AFTER rrp_tax_excluded,
+            ADD COLUMN ecost_tax_excluded decimal(28,6) default NULL AFTER ecost,
+            ADD COLUMN ecost_tax_included decimal(28,6) default NULL AFTER ecost_tax_excluded,
+            ADD COLUMN tax_value decimal(6,4) default NULL AFTER gstrate
+    |);
+
+    # rename gstrate with tax_rate
+    $dbh->do(q|ALTER TABLE aqorders CHANGE COLUMN gstrate tax_rate decimal(6,4) DEFAULT NULL|);
+    $dbh->do(q|ALTER TABLE aqbooksellers CHANGE COLUMN gstrate tax_rate decimal(6,4) DEFAULT NULL|);
+
+    # Fill the new columns
+    my $orders = $dbh->selectall_arrayref(q|
+        SELECT * FROM aqorders
+    |, { Slice => {} } );
+
+    my $sth_update_order = $dbh->prepare(q|
+        UPDATE aqorders
+        SET unitprice_tax_excluded = ?,
+            unitprice_tax_included = ?,
+            rrp_tax_excluded = ?,
+            rrp_tax_included = ?,
+            ecost_tax_excluded = ?,
+            ecost_tax_included = ?,
+            tax_value = ?
+        WHERE ordernumber = ?
+    |);
+
+    my $sth_get_bookseller = $dbh->prepare(q|
+        SELECT aqbooksellers.*
+        FROM aqbooksellers
+        LEFT JOIN aqbasket ON aqbasket.booksellerid = aqbooksellers.id
+        LEFT JOIN aqorders ON aqorders.basketno = aqbasket.basketno
+        WHERE ordernumber = ?
+    |);
+
+    require Koha::Number::Price;
+    for my $order ( @$orders ) {
+        $sth_get_bookseller->execute( $order->{ordernumber} );
+        my ( $bookseller ) = $sth_get_bookseller->fetchrow_hashref;
+        $order->{rrp}   = Koha::Number::Price->new( $order->{rrp} )->round;
+        $order->{ecost} = Koha::Number::Price->new( $order->{ecost} )->round;
+        $order->{tax_rate} ||= 0 ; # tax_rate can be NULL in DB
+        # Ordering
+        if ( $bookseller->{listincgst} ) {
+            $order->{rrp_tax_included} = $order->{rrp};
+            $order->{rrp_tax_excluded} = Koha::Number::Price->new(
+                $order->{rrp_tax_included} / ( 1 + $order->{tax_rate} ) )->round;
+            $order->{ecost_tax_included} = $order->{ecost};
+            $order->{ecost_tax_excluded} = Koha::Number::Price->new(
+                $order->{ecost} / ( 1 + $order->{tax_rate} ) )->round;
+        }
+        else {
+            $order->{rrp_tax_excluded} = $order->{rrp};
+            $order->{rrp_tax_included} = Koha::Number::Price->new(
+                $order->{rrp} * ( 1 + $order->{tax_rate} ) )->round;
+            $order->{ecost_tax_excluded} = $order->{ecost};
+            $order->{ecost_tax_included} = Koha::Number::Price->new(
+                $order->{ecost} * ( 1 + $order->{tax_rate} ) )->round;
+        }
+
+        #receiving
+        if ( $bookseller->{listincgst} ) {
+            $order->{unitprice_tax_included} = Koha::Number::Price->new( $order->{unitprice} )->round;
+            $order->{unitprice_tax_excluded} = Koha::Number::Price->new(
+              $order->{unitprice_tax_included} / ( 1 + $order->{tax_rate} ) )->round;
+        }
+        else {
+            $order->{unitprice_tax_excluded} = Koha::Number::Price->new( $order->{unitprice} )->round;
+            $order->{unitprice_tax_included} = Koha::Number::Price->new(
+              $order->{unitprice_tax_excluded} * ( 1 + $order->{tax_rate} ) )->round;
+        }
+
+        # If the order is received, the tax is calculated from the unit price
+        if ( $order->{orderstatus} eq 'complete' ) {
+            $order->{tax_value} = Koha::Number::Price->new(
+              ( $order->{unitprice_tax_included} - $order->{unitprice_tax_excluded} )
+              * $order->{quantity} )->round;
+        } else {
+            # otherwise the ecost is used
+            $order->{tax_value} = Koha::Number::Price->new(
+                ( $order->{ecost_tax_included} - $order->{ecost_tax_excluded} ) *
+                  $order->{quantity} )->round;
+        }
+
+        $sth_update_order->execute(
+            $order->{unitprice_tax_excluded},
+            $order->{unitprice_tax_included},
+            $order->{rrp_tax_excluded},
+            $order->{rrp_tax_included},
+            $order->{ecost_tax_excluded},
+            $order->{ecost_tax_included},
+            $order->{tax_value},
+            $order->{ordernumber},
+        );
+    }
+
+    print "Upgrade to $DBversion done (Bug 13321 - Tax and prices calculation need to be fixed)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.043';
+if ( CheckVersion($DBversion) ) {
+    # Add the new columns
+    $dbh->do(q|
+        ALTER TABLE aqorders
+            ADD COLUMN tax_rate_on_ordering   decimal(6,4) default NULL AFTER tax_rate,
+            ADD COLUMN tax_rate_on_receiving  decimal(6,4) default NULL AFTER tax_rate_on_ordering,
+            ADD COLUMN tax_value_on_ordering  decimal(28,6) default NULL AFTER tax_value,
+            ADD COLUMN tax_value_on_receiving decimal(28,6) default NULL AFTER tax_value_on_ordering
+    |);
+
+    my $orders = $dbh->selectall_arrayref(q|
+        SELECT * FROM aqorders
+    |, { Slice => {} } );
+
+    my $sth_update_order = $dbh->prepare(q|
+        UPDATE aqorders
+        SET tax_rate_on_ordering = tax_rate,
+            tax_rate_on_receiving = tax_rate,
+            tax_value_on_ordering = ?,
+            tax_value_on_receiving = ?
+        WHERE ordernumber = ?
+    |);
+
+    require Koha::Number::Price;
+    for my $order (@$orders) {
+        my $tax_value_on_ordering =
+          $order->{quantity} *
+          $order->{ecost_tax_excluded} *
+          $order->{tax_rate};
+
+        my $tax_value_on_receiving =
+          ( defined $order->{unitprice_tax_excluded} )
+          ? $order->{quantity} * $order->{unitprice_tax_excluded} * $order->{tax_rate}
+          : undef;
+
+        $sth_update_order->execute( $tax_value_on_ordering,
+            $tax_value_on_receiving, $order->{ordernumber} );
+    }
+
+    # Remove the old columns
+    $dbh->do(q|
+        ALTER TABLE aqorders
+            CHANGE COLUMN tax_value tax_value_bak  decimal(28,6) default NULL,
+            CHANGE COLUMN tax_rate tax_rate_bak decimal(6,4) default NULL
+    |);
+
+    print "Upgrade to $DBversion done (Bug 13323 - Change the tax rate on receiving)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.044';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE `messages`
+        ADD `manager_id` int(11) NULL,
+        ADD FOREIGN KEY (`manager_id`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL;
+    });
+
+    print "Upgrade to $DBversion done (Bug 17397 - Show name of librarian who created circulation message)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.045';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE systempreferences SET options = "now|dateexpiry|combination", explanation = "Set whether the borrower renewal date should be counted from the dateexpiry, from the current date or by combination: if the dateexpiry is in future use dateexpiry, else use current date " WHERE variable = "BorrowerRenewalPeriodBase";
+    });
+
+    print "Upgrade to $DBversion done (Bug 17443 - Make possible to renew patron by later of expiry and current date)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.046';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE issuingrules ADD COLUMN no_auto_renewal_after INT(4) DEFAULT NULL AFTER auto_renew;
+    });
+
+    print "Upgrade to $DBversion done (Bug 15581 - Add a circ rule to not allow auto-renewals after defined loan period)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.047';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE language_descriptions SET description = 'Čeština' WHERE subtag = 'cs' AND type = 'language' AND lang = 'cs'
+    });
+
+    print "Upgrade to $DBversion done (Bug 17518: Displayed language name for Czech is wrong)\n";
+    SetVersion($DBversion);
+}
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
@@ -13291,6 +13728,7 @@ my $update_dir = C4::Context->config('intranetdir') . '/installer/data/mysql/ato
 opendir( my $dirh, $update_dir );
 foreach my $file ( sort readdir $dirh ) {
     next if $file !~ /\.(sql|perl)$/;  #skip other files
+    next if $file eq 'skeleton.perl'; # skip the skeleton file
     print "DEV atomic update: $file\n";
     if ( $file =~ /\.sql$/ ) {
         my $installer = C4::Installer->new();

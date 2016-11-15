@@ -40,6 +40,7 @@ use C4::Members;        # GetBorrowersWhoHavexxxBorrowed.
 use C4::Circulation;    # AnonymiseIssueHistory.
 use Koha::DateUtils qw( dt_from_string output_pref );
 use Koha::Patron::Categories;
+use Koha::Patrons;
 use Date::Calc qw/Today Add_Delta_YM/;
 use Koha::List::Patron;
 
@@ -146,9 +147,9 @@ elsif ( $step == 3 ) {
         for ( my $i = 0 ; $i < $totalDel ; $i++ ) {
             $radio eq 'testrun' && last;
             my $borrowernumber = $patrons_to_delete->[$i]->{'borrowernumber'};
-            $radio eq 'trash' && MoveMemberToDeleted($borrowernumber);
-            C4::Members::HandleDelBorrower($borrowernumber);
-            DelMember($borrowernumber);
+            my $patron = Koha::Patrons->find($borrowernumber);
+            $radio eq 'trash' && $patron->move_to_deleted;
+            $patron->delete;
         }
         $template->param(
             do_delete => '1',

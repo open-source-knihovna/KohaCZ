@@ -268,6 +268,14 @@ if ( $basket->{is_standing} || $orderinfo->{quantity} ne '0' ) {
 
     $orderinfo->{unitprice} = $orderinfo->{ecost} if not defined $orderinfo->{unitprice} or $orderinfo->{unitprice} eq '';
 
+    $orderinfo = C4::Acquisition::populate_order_with_prices(
+        {
+            order        => $orderinfo,
+            booksellerid => $orderinfo->{booksellerid},
+            ordering     => 1,
+        }
+    );
+
     # if we already have $ordernumber, then it's an ordermodif
     my $order = Koha::Acquisition::Order->new($orderinfo);
     if ( $orderinfo->{ordernumber} ) {
@@ -316,6 +324,7 @@ if ( $basket->{is_standing} || $orderinfo->{quantity} ne '0' ) {
                                     'ITEM');
             my $record=MARC::Record::new_from_xml($xml, 'UTF-8');
             my ($barcodefield,$barcodesubfield) = GetMarcFromKohaField('items.barcode');
+            next unless ( defined $barcodefield && defined $barcodesubfield );
             my $barcode = $record->subfield($barcodefield,$barcodesubfield) || '';
             my $aBpref = C4::Context->preference('autoBarcode');
             if( $barcode eq '' && $aBpref ne 'OFF'){
