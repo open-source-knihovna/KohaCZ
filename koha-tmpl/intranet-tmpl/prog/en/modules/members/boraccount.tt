@@ -1,7 +1,7 @@
 [% USE Koha %]
 [% USE KohaDates %]
-[% USE ColumnsSettings %]
 [% USE Price %]
+[% USE ColumnsSettings %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Patrons &rsaquo; Account for [% INCLUDE 'patron-title.inc' %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
