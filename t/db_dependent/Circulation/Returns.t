@@ -19,9 +19,11 @@ use Modern::Perl;
 
 use Test::More tests => 3;
 use Test::MockModule;
-use t::lib::TestBuilder;
+use Test::Warn;
 
 use t::lib::Mocks;
+use t::lib::TestBuilder;
+
 use C4::Biblio;
 use C4::Circulation;
 use C4::Items;
@@ -70,7 +72,7 @@ subtest "InProcessingToShelvingCart tests" => sub {
     my $itemnumber = $built_item->{ itemnumber };
     my $item;
 
-    C4::Context->set_preference( "InProcessingToShelvingCart", 1 );
+    t::lib::Mocks::mock_preference( "InProcessingToShelvingCart", 1 );
     AddReturn( $barcode, $branch );
     $item = GetItem( $itemnumber );
     is( $item->{location}, 'CART',
@@ -79,7 +81,7 @@ subtest "InProcessingToShelvingCart tests" => sub {
     $item->{location} = $location;
     ModItem( $item, undef, $itemnumber );
 
-    C4::Context->set_preference( "InProcessingToShelvingCart", 0 );
+    t::lib::Mocks::mock_preference( "InProcessingToShelvingCart", 0 );
     AddReturn( $barcode, $branch );
     $item = GetItem( $itemnumber );
     is( $item->{location}, $permanent_location,
@@ -89,14 +91,14 @@ subtest "InProcessingToShelvingCart tests" => sub {
 
 subtest "AddReturn logging on statistics table (item-level_itypes=1)" => sub {
 
-    plan tests => 2;
+    plan tests => 4;
 
     # Set item-level item types
-    C4::Context->set_preference( "item-level_itypes", 1 );
+    t::lib::Mocks::mock_preference( "item-level_itypes", 1 );
 
     # Make sure logging is enabled
-    C4::Context->set_preference( "IssueLog", 1 );
-    C4::Context->set_preference( "ReturnLog", 1 );
+    t::lib::Mocks::mock_preference( "IssueLog", 1 );
+    t::lib::Mocks::mock_preference( "ReturnLog", 1 );
 
     # Create an itemtype for biblio-level item type
     my $blevel_itemtype = $builder->build({ source => 'Itemtype' })->{ itemtype };
@@ -160,9 +162,12 @@ subtest "AddReturn logging on statistics table (item-level_itypes=1)" => sub {
 
     is( $stat->itemtype, $ilevel_itemtype,
         "item-level itype recorded on statistics for return");
-
-    AddIssue( $borrower, $item_without_itemtype->{ barcode } );
-    AddReturn( $item_without_itemtype->{ barcode }, $branch );
+    warning_like { AddIssue( $borrower, $item_without_itemtype->{ barcode } ) }
+                 qr/^item-level_itypes set but no itemtype set for item/,
+                 'Item without itemtype set raises warning on AddIssue';
+    warning_like { AddReturn( $item_without_itemtype->{ barcode }, $branch ) }
+                 qr/^item-level_itypes set but no itemtype set for item/,
+                 'Item without itemtype set raises warning on AddReturn';
     # Test biblio-level itemtype was recorded on the 'statistics' table
     $stat = $schema->resultset('Statistic')->search({
         branch     => $branch,
@@ -180,11 +185,11 @@ subtest "AddReturn logging on statistics table (item-level_itypes=0)" => sub {
     plan tests => 2;
 
     # Make sure logging is enabled
-    C4::Context->set_preference( "IssueLog", 1 );
-    C4::Context->set_preference( "ReturnLog", 1 );
+    t::lib::Mocks::mock_preference( "IssueLog", 1 );
+    t::lib::Mocks::mock_preference( "ReturnLog", 1 );
 
     # Set item-level item types
-    C4::Context->set_preference( "item-level_itypes", 0 );
+    t::lib::Mocks::mock_preference( "item-level_itypes", 0 );
 
     # Create an itemtype for biblio-level item type
     my $blevel_itemtype = $builder->build({ source => 'Itemtype' })->{ itemtype };

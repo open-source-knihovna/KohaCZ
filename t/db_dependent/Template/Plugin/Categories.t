@@ -1,22 +1,60 @@
+#!/usr/bin/perl
+
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
+
 use Modern::Perl;
 
-use Test::More tests => 5;
+use Test::More tests => 4;
+use t::lib::TestBuilder;
 
-use C4::Context;
+use Koha::Patron::Categories;
+use Koha::Issues;
+use Koha::Patrons;
+use Koha::Database;
 use Koha::Template::Plugin::Categories;
 
-my $dbh = C4::Context->dbh;
-$dbh->{AutoCommit} = 0;
-$dbh->{RaiseError} = 1;
+my $schema = Koha::Database->new->schema;
+$schema->storage->txn_begin;
 
+# Delete all categories
+Koha::Issues->search->delete;
+Koha::Patrons->search->delete;
+Koha::Patron::Categories->search->delete;
+
+my $builder = t::lib::TestBuilder->new;
+
+is( Koha::Template::Plugin::Categories->new->all->count,
+    0, '->all returns 0 results if no categories defined' );
+
+# Create sample categories
+my $category_1 = $builder->build( { source => 'Category' } );
 my @categories = Koha::Template::Plugin::Categories->new->all;
-isnt( scalar( @categories ), 0, 'Plugin Categories should return categories' );
-my $selected_categories = [ grep { $_->{selected} } @categories ];
-is( scalar( @$selected_categories ), 0, 'Plugin Categories should not select one if not given' );
+is( scalar(@categories), 1, '->all returns all defined categories' );
 
-my $category = $categories[-1];
-@categories = Koha::Template::Plugin::Categories->new->all({selected => $category->{categorycode}});
-isnt( scalar( @categories ), 0, 'Plugin Categories should return categories if selected needed' );
-$selected_categories = [ grep { $_->{selected} } @categories ];
-is( scalar( @$selected_categories ), 1, 'Plugin Categories should select only 1 category' );
-is( $selected_categories->[0]->{categorycode}, $category->{categorycode}, 'Plugin Categories should select the good one' );
+my $category_2 = $builder->build( { source => 'Category' } );
+@categories = Koha::Template::Plugin::Categories->new->all;
+is( scalar(@categories), 2, '->all returns all defined categories' );
+
+is( Koha::Template::Plugin::Categories->GetName(
+        $category_1->{categorycode}
+    ),
+    $category_1->{description},
+    '->GetName returns the right description'
+);
+
+$schema->storage->txn_rollback;
+
+1;

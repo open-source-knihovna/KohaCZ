@@ -24,12 +24,12 @@ use t::lib::TestBuilder;
 use DateTime;
 
 use C4::Context;
-use C4::Biblio;
-use C4::Items;
 use C4::Reserves;
 
 use Koha::Database;
-use Koha::Patron;
+use Koha::Biblios;
+use Koha::Items;
+use Koha::Patrons;
 
 my $builder = t::lib::TestBuilder->new();
 
@@ -41,8 +41,8 @@ $ENV{REMOTE_ADDR} = '127.0.0.1';
 my $t = Test::Mojo->new('Koha::REST::V1');
 my $tx;
 
-my $categorycode = Koha::Database->new()->schema()->resultset('Category')->first()->categorycode();
-my $branchcode = Koha::Database->new()->schema()->resultset('Branch')->first()->branchcode();
+my $categorycode = $builder->build({ source => 'Category' })->{categorycode};
+my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
 
 # User without any permissions
 my $nopermission = $builder->build({
@@ -110,7 +110,15 @@ $session3->flush;
 my $biblionumber = create_biblio('RESTful Web APIs');
 my $itemnumber = create_item($biblionumber, 'TEST000001');
 
+my $biblionumber2 = create_biblio('RESTful Web APIs');
+my $itemnumber2 = create_item($biblionumber2, 'TEST000002');
+
 $dbh->do('DELETE FROM reserves');
+$dbh->do('DELETE FROM issuingrules');
+    $dbh->do(q{
+        INSERT INTO issuingrules (categorycode, branchcode, itemtype, reservesallowed)
+        VALUES (?, ?, ?, ?)
+    }, {}, '*', '*', '*', 1);
 
 my $reserve_id = C4::Reserves::AddReserve($branchcode, $borrowernumber,
     $biblionumber, undef, 1, undef, undef, undef, '', $itemnumber);
@@ -204,7 +212,7 @@ subtest "Test endpoints without permission, but accessing own object" => sub {
 };
 
 subtest "Test endpoints with permission" => sub {
-    plan tests => 42;
+    plan tests => 45;
 
     $tx = $t->ua->build_tx(GET => '/api/v1/holds');
     $tx->req->cookies({name => 'CGISESSID', value => $session->id});
@@ -260,12 +268,6 @@ subtest "Test endpoints with permission" => sub {
       ->status_is(200)
       ->json_is([]);
 
-    $dbh->do('DELETE FROM issuingrules');
-    $dbh->do(q{
-        INSERT INTO issuingrules (categorycode, branchcode, itemtype, reservesallowed)
-        VALUES (?, ?, ?, ?)
-    }, {}, '*', '*', '*', 1);
-
     $tx = $t->ua->build_tx(DELETE => "/api/v1/holds/$reserve_id2");
     $tx->req->cookies({name => 'CGISESSID', value => $session3->id});
     $t->request_ok($tx)
@@ -290,6 +292,14 @@ subtest "Test endpoints with permission" => sub {
     $tx->req->cookies({name => 'CGISESSID', value => $session3->id});
     $t->request_ok($tx)
       ->status_is(403)
+      ->json_like('/error', qr/itemAlreadyOnHold/);
+
+    $post_data->{biblionumber} = int($biblionumber2);
+    $post_data->{itemnumber} = int($itemnumber2);
+    $tx = $t->ua->build_tx(POST => "/api/v1/holds" => json => $post_data);
+    $tx->req->cookies({name => 'CGISESSID', value => $session3->id});
+    $t->request_ok($tx)
+      ->status_is(403)
       ->json_like('/error', qr/tooManyReserves/);
 };
 
@@ -299,25 +309,25 @@ $dbh->rollback;
 sub create_biblio {
     my ($title) = @_;
 
-    my $record = new MARC::Record;
-    $record->append_fields(
-        new MARC::Field('200', ' ', ' ', a => $title),
-    );
+    my $biblio = Koha::Biblio->new( { title => $title } )->store;
 
-    my ($biblionumber) = C4::Biblio::AddBiblio($record, '');
-
-    return $biblionumber;
+    return $biblio->biblionumber;
 }
 
 sub create_item {
-    my ($biblionumber, $barcode) = @_;
+    my ( $biblionumber, $barcode ) = @_;
 
-    my $item = {
-        barcode => $barcode,
-    };
-    $dbh->do("DELETE FROM items WHERE barcode='$barcode'") if $barcode;
+    Koha::Items->search( { barcode => $barcode } )->delete;
+    my $builder = t::lib::TestBuilder->new;
+    my $item    = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                biblionumber     => $biblionumber,
+                barcode          => $barcode,
+            }
+        }
+    );
 
-    my $itemnumber = C4::Items::AddItem($item, $biblionumber);
-
-    return $itemnumber;
+    return $item->{itemnumber};
 }

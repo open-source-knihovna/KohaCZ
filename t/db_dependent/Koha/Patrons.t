@@ -19,7 +19,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 11;
+use Test::More tests => 13;
 use Test::Warn;
 
 use C4::Members;
@@ -87,6 +87,13 @@ subtest 'guarantees' => sub {
     is( ref(\@guarantees), 'ARRAY', 'Koha::Patron->guarantees should return an array in a list context' );
     is( scalar(@guarantees), 2, 'new_patron_1 should have 2 guarantees' );
     $_->delete for @guarantees;
+};
+
+subtest 'category' => sub {
+    plan tests => 2;
+    my $patron_category = $new_patron_1->category;
+    is( ref( $patron_category), 'Koha::Patron::Category', );
+    is( $patron_category->categorycode, $category->{categorycode}, );
 };
 
 subtest 'siblings' => sub {
@@ -163,6 +170,24 @@ subtest 'update_password' => sub {
     $retrieved_patron_1->update_password( 'yet_another_nonexistent_userid_1', 'another_password' );
     $number_of_logs = $schema->resultset('ActionLog')->search( { module => 'MEMBERS', action => 'CHANGE PASS', object => $new_patron_1->borrowernumber } )->count;
     is( $number_of_logs, 1, 'With BorrowerLogs, Koha::Patron->update_password should not have logged' );
+};
+
+subtest 'is_expired' => sub {
+    plan tests => 5;
+    my $patron = $builder->build({ source => 'Borrower' });
+    $patron = Koha::Patrons->find( $patron->{borrowernumber} );
+    $patron->dateexpiry( undef )->store->discard_changes;
+    is( $patron->is_expired, 0, 'Patron should not be considered expired if dateexpiry is not set');
+    $patron->dateexpiry( '0000-00-00' )->store->discard_changes;
+    is( $patron->is_expired, 0, 'Patron should not be considered expired if dateexpiry is not 0000-00-00');
+    $patron->dateexpiry( dt_from_string )->store->discard_changes;
+    is( $patron->is_expired, 0, 'Patron should not be considered expired if dateexpiry is today');
+    $patron->dateexpiry( dt_from_string->add( days => 1 ) )->store->discard_changes;
+    is( $patron->is_expired, 0, 'Patron should not be considered expired if dateexpiry is tomorrow');
+    $patron->dateexpiry( dt_from_string->add( days => -1 ) )->store->discard_changes;
+    is( $patron->is_expired, 1, 'Patron should be considered expired if dateexpiry is yesterday');
+
+    $patron->delete;
 };
 
 subtest 'renew_account' => sub {

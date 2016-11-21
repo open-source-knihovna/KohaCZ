@@ -93,10 +93,10 @@ subtest 'General Add, Get and Del tests' => sub {
     is( $getitem->{location}, 'CART', "The location should have been set to CART" );
     is( $getitem->{permanent_location}, $location, "The permanent_location should not have been set to CART" );
 
-    C4::Context->set_preference('item-level_itypes', '1');
+    t::lib::Mocks::mock_preference('item-level_itypes', '1');
     $getitem = GetItem($itemnumber);
     is( $getitem->{itype}, $itemtype->{itemtype}, "Itemtype set correctly when using item_level-itypes" );
-    C4::Context->set_preference('item-level_itypes', '0');
+    t::lib::Mocks::mock_preference('item-level_itypes', '0');
     $getitem = GetItem($itemnumber);
     is( $getitem->{itype}, undef, "Itemtype set correctly when not using item_level-itypes" );
 
@@ -418,7 +418,11 @@ subtest 'SearchItems test' => sub {
 
     my $item3_record = new MARC::Record;
     $item3_record->append_fields(
-        new MARC::Field($itemfield, '', '', 'z' => 'foobar')
+        new MARC::Field(
+            $itemfield, '', '',
+            'z' => 'foobar',
+            'y' => $itemtype->{itemtype}
+        )
     );
     my (undef, undef, $item3_itemnumber) = AddItemFromMarc($item3_record,
         $biblionumber);
@@ -652,6 +656,18 @@ subtest 'C4::Items::_build_default_values_for_mod_marc' => sub {
         }
     });
 
+    my $mss_itemtype = $builder->build({
+        source => 'MarcSubfieldStructure',
+        value => {
+            frameworkcode => $framework->{frameworkcode},
+            kohafield => 'items.itype',
+            tagfield => '952',
+            tagsubfield => 'y',
+        }
+    });
+
+    my $itemtype = $builder->build({ source => 'Itemtype' })->{itemtype};
+
     # Create a record with a barcode
     my ($biblionumber) = get_biblio( $framework->{frameworkcode} );
     my $item_record = new MARC::Record;
@@ -659,6 +675,11 @@ subtest 'C4::Items::_build_default_values_for_mod_marc' => sub {
     my $barcode_field = MARC::Field->new(
         '952', ' ', ' ',
         p => $a_barcode,
+        y => $itemtype
+    );
+    my $itemtype_field = MARC::Field->new(
+        '952', ' ', ' ',
+        y => $itemtype
     );
     $item_record->append_fields( $barcode_field );
     my (undef, undef, $item_itemnumber) = AddItemFromMarc($item_record, $biblionumber);
@@ -669,6 +690,7 @@ subtest 'C4::Items::_build_default_values_for_mod_marc' => sub {
 
     # Delete the barcode field and save the record
     $item_record->delete_fields( $barcode_field );
+    $item_record->append_fields( $itemtype_field ); # itemtype is mandatory
     ModItemFromMarc($item_record, $biblionumber, $item_itemnumber);
     $item = GetItem($item_itemnumber);
     is( $item->{barcode}, undef, 'The default value should have been set to the barcode, the field is mapped to a kohafield' );
