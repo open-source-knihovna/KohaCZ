@@ -74,7 +74,7 @@ a.add, a.delete {
       <div class="dialog [% m.type %]">
         [% SWITCH m.code %]
         [% CASE 'error_on_update' %]
-          An error occurred when updateing mappings ([% m.message %]).
+          An error occurred when updating mappings ([% m.message %]).
         [% CASE 'error_on_delete' %]
           An error occurred when deleting the existing mappings. Nothing has been changed!
           (search field [% m.values.field_name %] with mapping [% m.values.marc_field %].)
@@ -219,7 +219,7 @@ a.add, a.delete {
                                   <option value="0" selected="selected">No</option>
                                   <option value="1">Yes</option>
                                 [% END %]
-                              </selected>
+                              </select>
                             </td>
                             <td>
                               <select name="mapping_suggestible">
@@ -230,7 +230,7 @@ a.add, a.delete {
                                   <option value="0" selected="selected">No</option>
                                   <option value="1">Yes</option>
                                 [% END %]
-                              </selected>
+                              </select>
                             </td>
                             <td>
                                 <input name="mapping_marc_field" type="text" value="[% mapping.marc_field %]" />
@@ -247,7 +247,7 @@ a.add, a.delete {
                              [% FOREACH f IN all_search_fields %]
                                <option value="[% f.name %]">[% f.name %]</option>
                              [% END %]
-                            /select>
+                            </select>
                           </td>
                           <td>
                             <select data-id="mapping_sort">
@@ -265,7 +265,7 @@ a.add, a.delete {
                                 <option value="0" selected="selected">No</option>
                                 <option value="1">Yes</option>
                               [% END %]
-                            </selected>
+                            </select>
                           </td>
                           <td>
                             <select data-id="mapping_suggestible">
@@ -276,7 +276,7 @@ a.add, a.delete {
                                 <option value="0" selected="selected">No</option>
                                 <option value="1">Yes</option>
                               [% END %]
-                            </selected>
+                            </select>
                           </td>
                           <td><input data-id="mapping_marc_field" type="text" /></td>
                           <td><a class="btn btn-mini add"><i class="fa fa-plus"></i> Add</a></td>

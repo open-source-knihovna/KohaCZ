@@ -8476,6 +8476,7 @@ $DBversion = "3.15.00.049";
 if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
     $dbh->do("ALTER TABLE biblioitems DROP INDEX isbn");
     $dbh->do("ALTER TABLE biblioitems DROP INDEX issn");
+    $dbh->do("ALTER TABLE biblioitems DROP INDEX issn_idx");
     $dbh->do("ALTER TABLE biblioitems
               CHANGE isbn isbn MEDIUMTEXT NULL DEFAULT NULL,
               CHANGE issn issn MEDIUMTEXT NULL DEFAULT NULL
@@ -13702,6 +13703,79 @@ if ( CheckVersion($DBversion) ) {
     });
 
     print "Upgrade to $DBversion done (Bug 17518: Displayed language name for Czech is wrong)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.06.00.048';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q|
+        INSERT IGNORE INTO permissions (module_bit, code, description) VALUES
+        (13, 'upload_general_files', 'Upload any file'),
+        (13, 'upload_manage', 'Manage uploaded files');
+    |);
+
+    # Update user_permissions for current users (check count in uploaded_files)
+    # Note 9 == edit_catalogue and 13 == tools
+    # We do not insert if someone is superlibrarian, does not have edit_catalogue,
+    # or already has all tools
+    $dbh->do(q|
+        INSERT IGNORE INTO user_permissions (borrowernumber, module_bit, code)
+        SELECT borrowernumber, 13, 'upload_general_files'
+        FROM borrowers bo
+        WHERE flags<>1 AND flags & POW(2,13) = 0 AND
+            ( flags & POW(2,9) > 0 OR (
+                SELECT COUNT(*) FROM user_permissions
+                WHERE borrowernumber=bo.borrowernumber AND module_bit=9 ) > 0 )
+            AND ( SELECT COUNT(*) FROM uploaded_files ) > 0;
+    |);
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17663 - Forgotten userpermissions)\n";
+}
+
+$DBversion = '16.06.00.049';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q|
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type) 
+        VALUES ('ReplytoDefault',  '',  NULL,  'The default email address to be set as replyto.',  'Free');
+    |);
+
+    $dbh->do(q|
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('ReturnpathDefault',  '',  NULL,  'The default email address to be set as return-path',  'Free');
+    |);
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17391 - ReturnpathDefault and ReplyToDefault missing from syspref.sql)\n";
+}
+
+$DBversion = "16.06.00.050";
+if ( CheckVersion($DBversion) ) {
+
+    # If index issn_idx still exists, we assume that dbrev 3.15.00.049 failed,
+    # and we repeat it (partially).
+    # Note: the db rev only pertains to biblioitems and is not needed for
+    # deletedbiblioitems.
+
+    my $temp = $dbh->selectall_arrayref( "SHOW INDEXES FROM biblioitems WHERE key_name = 'issn_idx'" );
+
+    if( @$temp > 0 ) {
+        $dbh->do( "ALTER TABLE biblioitems DROP INDEX isbn" );
+        $dbh->do( "ALTER TABLE biblioitems DROP INDEX issn" );
+        $dbh->do( "ALTER TABLE biblioitems DROP INDEX issn_idx" );
+        $dbh->do( "ALTER TABLE biblioitems CHANGE isbn isbn MEDIUMTEXT NULL DEFAULT NULL, CHANGE issn issn MEDIUMTEXT NULL DEFAULT NULL" );
+        $dbh->do( "ALTER TABLE biblioitems ADD INDEX isbn ( isbn ( 255 ) ), ADD INDEX issn ( issn ( 255 ) )" );
+        print "Upgrade to $DBversion done (Bug 8835). Removed issn_idx.\n";
+    } else {
+        print "Upgrade to $DBversion done (Bug 8835). Everything is fine.\n";
+    }
+
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.11.00.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.11)\n";
     SetVersion($DBversion);
 }
 
