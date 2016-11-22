@@ -5,6 +5,21 @@
   "/acquisitions/vendors/{vendor_id}": {
     "$ref": "paths/acquisitions_vendors.json#/~1acquisitions~1vendors~1{vendor_id}"
   },
+  "/availability/biblio/hold": {
+    "$ref": "paths/availability.json#/~1availability~1biblio~1hold"
+  },
+  "/availability/biblio/search": {
+    "$ref": "paths/availability.json#/~1availability~1biblio~1search"
+  },
+  "/availability/item/checkout": {
+    "$ref": "paths/availability.json#/~1availability~1item~1checkout"
+  },
+  "/availability/item/hold": {
+    "$ref": "paths/availability.json#/~1availability~1item~1hold"
+  },
+  "/availability/item/search": {
+    "$ref": "paths/availability.json#/~1availability~1item~1search"
+  },
   "/cities": {
     "$ref": "paths/cities.json#/~1cities"
   },
