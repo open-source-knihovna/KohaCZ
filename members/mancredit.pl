@@ -36,6 +36,7 @@ use C4::Members::Attributes qw(GetBorrowerAttributes);
 use Koha::Patron::Images;
 
 use Koha::Patron::Categories;
+use Koha::Account::CreditTypes;
 
 my $input=new CGI;
 my $flagsrequired = { borrowers => 1, updatecharges => 1 };
@@ -91,6 +92,10 @@ if ($add){
             extendedattributes => $attributes
         );
     }
+
+    my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually => 1 });
+
+    $template->param( credit_types => \@credit_types );
 
     $template->param(%$data);
 

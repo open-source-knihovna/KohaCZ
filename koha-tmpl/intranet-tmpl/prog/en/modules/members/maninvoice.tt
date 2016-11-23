@@ -46,24 +46,14 @@ $(document).ready(function(){
       <li>
 <script type="text/javascript">
 var type_fees = new Array();
-type_fees['L'] = '';
-type_fees['F'] = '';
-type_fees['A'] = '';
-type_fees['N'] = '';
-type_fees['M'] = '';
-[% FOREACH invoice_types_loo IN invoice_types_loop %]
-type_fees['[% invoice_types_loo.authorised_value %]'] = "[% invoice_types_loo.lib %]";
+[% FOREACH debit_type IN debit_types %]
+type_fees['[% debit_type.type_code %]'] = "[% debit_type.default_amount %]";
 [% END %]
 </script>
         <label for="type">Type: </label>
-        <select name="type" id="type" onchange="this.form.desc.value=this.options[this.selectedIndex].value; this.form.amount.value=type_fees[this.options[this.selectedIndex].value];">
-          <option value="L">Lost item</option>
-          <option value="F">Fine</option>
-          <option value="A">Account management fee</option>
-          <option value="N">New card</option>
-          <option value="M">Sundry</option>
-          [% FOREACH invoice_types_loo IN invoice_types_loop %]
-            <option value="[% invoice_types_loo.authorised_value %]">[% invoice_types_loo.authorised_value %]</option>
+        <select name="type" id="type" onchange="this.form.desc.value=this.options[this.selectedIndex].text; this.form.amount.value=type_fees[this.options[this.selectedIndex].value];">
+          [% FOREACH debit_type IN debit_types %]
+            <option value="[% debit_type.type_code %]">[% debit_type.description %]</option>
           [% END %]
         </select>
       </li>
