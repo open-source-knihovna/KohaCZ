@@ -35,6 +35,7 @@ use C4::Members::Attributes qw(GetBorrowerAttributes);
 use Koha::Patron::Images;
 
 use Koha::Patron::Categories;
+use Koha::Account::DebitTypes;
 
 my $input=new CGI;
 my $flagsrequired = { borrowers => 1 };
@@ -89,16 +90,9 @@ if ($add){
                              updatecharges => 'remaining_permissions' },
         debug           => 1,
     });
-					
-  # get authorised values with type of MANUAL_INV
-  my @invoice_types;
-  my $dbh = C4::Context->dbh;
-  my $sth = $dbh->prepare('SELECT * FROM authorised_values WHERE category = "MANUAL_INV"');
-  $sth->execute();
-  while ( my $row = $sth->fetchrow_hashref() ) {
-    push @invoice_types, $row;
-  }
-  $template->param( invoice_types_loop => \@invoice_types );
+
+    my @debit_types = Koha::Account::DebitTypes->search({ can_be_added_manually => 1 });
+    $template->param( debit_types => \@debit_types );
 
     if ( $data->{'category_type'} eq 'C') {
         my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});

@@ -11,10 +11,18 @@
 $(document).ready(function(){
         $('#maninvoice').preventDoubleFormSubmit();
         $("fieldset.rows input, fieldset.rows select").addClass("noEnterSubmit");
-    $("#invoice_type").on("change",function(){
-        this.form.desc.value = this.options[this.selectedIndex].value;
-        this.form.amount.value = type_fees[this.options[this.selectedIndex].value];
-    });
+        var type_fees = new Array();
+        [% FOREACH debit_type IN debit_types %]
+            type_fees['[% debit_type.type_code %]'] = "[% debit_type.default_amount %]";
+        [% END %]
+
+        $("#maninvoice #desc").val($("#maninvoice #type option:selected").text());
+        $("#maninvoice #amount").val(type_fees[$("#maninvoice #type option:selected").val()]);
+
+        $("#maninvoice #type").change(function(){
+            $("#maninvoice #desc").val($(this).find("option:selected").text());
+            $("#maninvoice #amount").val(type_fees[$(this).val()]);
+        });
 });
 //]]>
 </script>
@@ -53,14 +61,9 @@ $(document).ready(function(){
 	<ol>
       <li>
         <label for="type">Type: </label>
-        <select name="type" id="invoice_type">
-          <option value="L">Lost item</option>
-          <option value="F">Fine</option>
-          <option value="A">Account management fee</option>
-          <option value="N">New card</option>
-          <option value="M">Sundry</option>
-          [% FOREACH invoice_types_loo IN invoice_types_loop %]
-            <option value="[% invoice_types_loo.authorised_value %]">[% invoice_types_loo.authorised_value %]</option>
+        <select name="type" id="type">
+          [% FOREACH debit_type IN debit_types %]
+            <option value="[% debit_type.type_code %]">[% debit_type.description %]</option>
           [% END %]
         </select>
       </li>
