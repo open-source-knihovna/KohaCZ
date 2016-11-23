@@ -37,6 +37,7 @@
     <li><a href="/cgi-bin/koha/admin/transport-cost-matrix.pl">Transport cost matrix</a></li>
     <li><a href="/cgi-bin/koha/admin/item_circulation_alerts.pl">Item circulation alerts</a></li>
     <li><a href="/cgi-bin/koha/admin/cities.pl">Cities and towns</a></li>
+    <li><a href="/cgi-bin/koha/admin/account_types.pl">Account types</a></li>
 </ul>
 
 <h5>Catalog</h5>
