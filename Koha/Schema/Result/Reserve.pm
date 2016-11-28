@@ -311,6 +311,18 @@ __PACKAGE__->belongs_to(
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:v9+wPKUT381CLNlusQ4LMA
 
 __PACKAGE__->belongs_to(
+  "borrower",
+  "Koha::Schema::Result::Borrower",
+  { borrowernumber => "borrowernumber" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "CASCADE",
+    on_update     => "CASCADE",
+  },
+);
+
+__PACKAGE__->belongs_to(
   "item",
   "Koha::Schema::Result::Item",
   { itemnumber => "itemnumber" },
@@ -337,6 +349,16 @@ __PACKAGE__->belongs_to(
 __PACKAGE__->add_columns(
     '+lowestPriority' => { is_boolean => 1 },
     '+suspend' => { is_boolean => 1 }
+);
+
+__PACKAGE__->belongs_to(
+  "biblioitem",
+  "Koha::Schema::Result::Biblioitem",
+  { biblionumber => "biblionumber" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+  },
 );
 
 1;
