@@ -3,6 +3,11 @@
     "get": {
       "operationId": "listAccountlines",
       "tags": ["accountlines"],
+      "parameters": [
+        {
+          "$ref": "../parameters.json#/borrowernumberQueryParam"
+        }
+      ],
       "produces": [
         "application/json"
       ],
