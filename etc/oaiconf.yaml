@@ -19,4 +19,3 @@ format:
     metadataNamespace: http://www.openarchives.org/OAI/2.0/oai_dc/
     schema: http://www.openarchives.org/OAI/2.0/oai_dc.xsd
     xsl_file: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/cs-CZ/xslt/MARC21slim2OAIDC.xsl
-~                                                                                                      
