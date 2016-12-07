@@ -73,7 +73,6 @@ if($total <= 0){
         $totalcredit = 1;
 }
 
-my $reverse_col = 0; # Flag whether we need to show the reverse column
 foreach my $accountline ( @{$accts}) {
     $accountline->{amount} += 0.00;
     if ($accountline->{amount} <= 0 ) {
@@ -88,7 +87,6 @@ foreach my $accountline ( @{$accts}) {
     $accountline->{amountoutstanding} = sprintf '%.2f', $accountline->{amountoutstanding};
     if ($accountline->{accounttype} =~ /^Pay/) {
         $accountline->{payment} = 1;
-        $reverse_col = 1;
     }
 }
 
@@ -113,7 +111,6 @@ $template->param(
     total               => sprintf("%.2f",$total),
     totalcredit         => $totalcredit,
     is_child            => ($data->{'category_type'} eq 'C'),
-    reverse_col         => $reverse_col,
     accounts            => $accts,
     RoutingSerials => C4::Context->preference('RoutingSerials'),
 );

@@ -70,11 +70,7 @@ $(document).ready(function() {
           <th>Note</th>
           <th>Amount</th>
           <th>Outstanding</th>
-          [% IF ( reverse_col ) %]
-              <th>Actions</th>
-          [% ELSE %]
-              <th>&nbsp;</th>
-          [% END %]
+          <th>Actions</th>
         </tr>
     </thead>
 
@@ -127,7 +123,7 @@ $(document).ready(function() {
           [% END %]
         [% END %]
         [% # If user can reverse, we need the dropdown %]
-        [% IF ( reverse_col && account.payment ) %]
+        [% IF ( account.payment ) %]
           <a class="btn btn-default btn-xs dropdown-toggle" id="subactions[% account.accountlines_id %]" role="button" data-toggle="dropdown" href="#"><i class="caret"></i></a>
           <ul class="dropdown-menu" role="menu" arialabelledby="subactions[% account.accountlines_id %]">
         [% END %]
@@ -138,7 +134,7 @@ $(document).ready(function() {
             [% END %]
             <li><a target="_blank" href="printinvoice.pl?action=print&amp;accountlines_id=[% account.accountlines_id %]&amp;borrowernumber=[% account.borrowernumber %]"><i class="fa fa-print"></i> Print</a></li>
         [% END %]
-        [% IF ( reverse_col && account.payment ) %]
+        [% IF ( account.payment ) %]
             <li><a href="boraccount.pl?action=reverse&amp;accountlines_id=[% account.accountlines_id %]&amp;borrowernumber=[% account.borrowernumber %]"><i class="fa fa-undo"></i> Reverse</a></li>
         [% END %]
       </td>
