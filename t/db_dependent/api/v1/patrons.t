@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 77;
+use Test::More tests => 102;
 
 use Test::Mojo;
 use t::lib::TestBuilder;
@@ -41,8 +41,6 @@ $schema->storage->txn_begin;
 
 $ENV{REMOTE_ADDR} = '127.0.0.1';
 my $t = Test::Mojo->new('Koha::REST::V1');
-
-$schema->storage->txn_begin;
 
 my $categorycode = $builder->build({ source => 'Category' })->{ categorycode };
 my $branchcode = $builder->build({ source => 'Branch' })->{ branchcode };
@@ -172,8 +170,8 @@ $session->param('lasttime', time());
 $session->flush;
 
 my $session_nopermission = C4::Auth::get_session('');
-$session_nopermission->param('number', $borrower->{ borrowernumber });
-$session_nopermission->param('id', $borrower->{ userid });
+$session_nopermission->param('number', $patron->{ borrowernumber });
+$session_nopermission->param('id', $patron->{ userid });
 $session_nopermission->param('ip', '127.0.0.1');
 $session_nopermission->param('lasttime', time());
 $session_nopermission->flush;
@@ -357,19 +355,19 @@ $password_obj = {
     new_password        => "new password",
 };
 t::lib::Mocks::mock_preference("OpacPasswordChange", 0);
-$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$borrower->{borrowernumber}.'/password' => json => $password_obj);
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$patron->{borrowernumber}.'/password' => json => $password_obj);
 $tx->req->cookies({name => 'CGISESSID', value => $session_nopermission->id});
 $t->request_ok($tx)
   ->status_is(403)
   ->json_is('/error', "OPAC password change is disabled");
 
 t::lib::Mocks::mock_preference("OpacPasswordChange", 1);
-$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$borrower->{borrowernumber}.'/password' => json => $password_obj);
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$patron->{borrowernumber}.'/password' => json => $password_obj);
 $tx->req->cookies({name => 'CGISESSID', value => $session_nopermission->id});
 $t->request_ok($tx)
   ->status_is(200);
 
-$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$borrower->{borrowernumber}.'/password' => json => $password_obj);
+$tx = $t->ua->build_tx(PATCH => '/api/v1/patrons/'.$patron->{borrowernumber}.'/password' => json => $password_obj);
 $tx->req->cookies({name => 'CGISESSID', value => $session3->id});
 $t->request_ok($tx)
   ->status_is(200);

@@ -24,7 +24,6 @@ use Carp;
 use Koha::Database;
 
 use C4::Context;
-use C4::Circulation qw(GetIssuingRule);
 use Koha::IssuingRules;
 use Koha::Item::Availabilities;
 use Koha::Item::Transfer;
