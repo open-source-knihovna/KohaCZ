@@ -24,6 +24,7 @@ INSERT IGNORE INTO authorised_value_categories( category_name )
 INSERT IGNORE INTO authorised_value_categories( category_name )
     VALUES
     ('WITHDRAWN'),
+    ('WITHDRAWN_REASON'),
     ('RESTRICTED'),
     ('NOT_LOAN'),
     ('CCODE'),
