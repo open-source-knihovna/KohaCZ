@@ -28,6 +28,8 @@ use C4::Context;
 use C4::Serials;
 use Koha::Patron::Images;
 use CGI::Session;
+use Koha::Account::DebitTypes;
+use Koha::Account::CreditTypes;
 
 my $query = new CGI;
 
@@ -40,6 +42,12 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user (
         flagsrequired   => { circulate => 'circulate_remaining_permissions' },
     }
 );
+
+my @debit_types = Koha::Account::DebitTypes->search({ can_be_added_manually => 1 });
+$template->param( debit_types => \@debit_types );
+
+my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually => 1 });
+$template->param( credit_types => \@credit_types );
 
 my $findborrower = $query->param('findborrower');
 $findborrower =~ s|,| |g;

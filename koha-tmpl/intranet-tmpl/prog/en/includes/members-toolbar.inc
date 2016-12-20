@@ -71,6 +71,18 @@ $(document).ready(function(){
     $("#select_patron_messages").on("change",function(){
         $("#borrower_message").val( $(this).val() );
     });
+    $("#add_fine_form").preventDoubleFormSubmit();
+    $("fieldset.rows input, fieldset.rows select").addClass("noEnterSubmit");
+    var type_fees = new Array();
+    [% FOREACH debit_type IN debit_types %]
+        type_fees['[% debit_type.type_code %]'] = "[% debit_type.default_amount %]";
+    [% END %]
+
+    $("#add_fine_form #amount").val(type_fees[$("#add_fine_form #type option:selected").val()]);
+
+    $("#add_fine_form #type").change(function(){
+        $("#add_fine_form #amount").val(type_fees[$(this).val()]);
+    });
 });
 function confirm_local_deletion() {
     var is_confirmed = window.confirm(_("Are you sure you want to delete this patron from the local database? This cannot be undone."));
@@ -168,8 +180,9 @@ function searchToHold(){
     [% END %]
 
     <a id="addnewmessageLabel" href="#add_message_form" data-toggle="modal" class="btn btn-default btn-sm"><i class="fa fa-comment-o"></i> Add message</a>
-
-    <a id="createfine" href="/cgi-bin/koha/members/maninvoice.pl?borrowernumber=[% borrowernumber %]" class="btn btn-small"><i class="fa fa-usd"></i> Create fine</a>
+    [% IF ( CAN_user_borrowers && CAN_user_updatecharges ) %]
+        <a id="createfine" href="#add_fine_form" data-toggle="modal" class="btn btn-default btn-sm"><i class="fa fa-usd"></i> Create fine</a>
+    [% END %]
 
          <div class="btn-group">
         <button class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown">More <span class="caret"></span></button>
@@ -256,4 +269,40 @@ function searchToHold(){
             </form>
         </div>
     </div>
+</div>
+
+<!-- Modal for manual invoice -->
+<div id="add_fine_form" class="modal hide" tabindes="-1" role="dialog" aria-labelledby="createfine" aria-hidden="true">
+    <form method="post" action="/cgi-bin/koha/members/maninvoice.pl">
+    <input type="hidden" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" />
+    <div class="modal-header">
+        <h3>Create manual invoice</h3>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <label for="type">Type: </label>
+            <select name="type" id="type">
+            [% FOREACH debit_type IN debit_types %]
+                <option value="[% debit_type.type_code %]">[% debit_type.description %]</options>
+            [% END %]
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="barcode">Barcode: </label>
+            <input type="text" name="barcode" id="barcode" />
+        </div>
+        <div class="form-group">
+            <label for="desc">Description: </label>
+            <input type="text" name="desc" id="desc" size="50" />
+        </div>
+        <div class="form-group">
+            <label for="amount">Amount: </label>
+            <input type="number" name="amount" id="amount" required="required" value="" step="any" min="0" />Example: 5.00
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn approve" type="submit" name="add" value="Save"><i class="fa fa-check"></i> Save</button>
+        <button class="btn deny" href="#" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times"></i> Cancel</button>
+    </div>
+    </form>
 </div>

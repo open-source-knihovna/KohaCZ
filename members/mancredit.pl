@@ -37,6 +37,7 @@ use Koha::Patron::Images;
 
 use Koha::Patron::Categories;
 use Koha::Account::CreditTypes;
+use Koha::Account::DebitTypes;
 
 my $input=new CGI;
 my $flagsrequired = { borrowers => 1, updatecharges => 1 };
@@ -74,7 +75,13 @@ if ($add){
             debug           => 1,
         }
     );
-					  
+
+    my @debit_types = Koha::Account::DebitTypes->search({ can_be_added_manually => 1 });
+    $template->param( debit_types => \@debit_types );
+
+    my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually => 1 });
+    $template->param( credit_types => \@credit_types );
+
     if ( $data->{'category_type'} eq 'C') {
         my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
         $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
@@ -92,10 +99,6 @@ if ($add){
             extendedattributes => $attributes
         );
     }
-
-    my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually => 1 });
-
-    $template->param( credit_types => \@credit_types );
 
     $template->param(%$data);
 

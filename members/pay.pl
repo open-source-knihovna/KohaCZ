@@ -44,6 +44,8 @@ use Koha::Patron::Images;
 
 use Koha::Patron::Categories;
 use URI::Escape;
+use Koha::Account::DebitTypes;
+use Koha::Account::CreditTypes;
 
 our $input = CGI->new;
 
@@ -57,6 +59,12 @@ our ( $template, $loggedinuser, $cookie ) = get_template_and_user(
         debug           => 1,
     }
 );
+
+my @debit_types = Koha::Account::DebitTypes->search({ can_be_added_manually => 1 });
+$template->param( debit_types => \@debit_types );
+
+my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually => 1 });
+$template->param( credit_types => \@credit_types );
 
 my @names = $input->param;
 

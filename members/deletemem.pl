@@ -33,6 +33,8 @@ use Module::Load;
 use Koha::Patrons;
 use Koha::Patron::Images;
 use Koha::Token;
+use Koha::Account::DebitTypes;
+use Koha::Account::CreditTypes;
 
 if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preference('NorwegianPatronDBEnable') == 1 ) {
     load Koha::NorwegianPatronDB, qw( NLMarkForDeletion NLSync );
@@ -48,6 +50,12 @@ my ($template, $borrowernumber, $cookie)
                                         flagsrequired => {borrowers => 1},
                                         debug => 1,
                                         });
+
+my @debit_types = Koha::Account::DebitTypes->search({ can_be_added_manually => 1 });
+$template->param( debit_types => \@debit_types );
+
+my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually => 1 });
+$template->param( credit_types => \@credit_types );
 
 #print $input->header;
 my $member       = $input->param('member');

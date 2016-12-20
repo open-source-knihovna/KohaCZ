@@ -15,7 +15,7 @@ $(document).ready(function() {
     var columns_settings = [% ColumnsSettings.GetColumns('members', 'fines', 'account-fines', 'json') %];
     var table_account_fines = KohaTable("#table_account_fines", {
         "sPaginationType": "four_button",
-        'aaSorting': [[0, 'desc']],
+        'aaSorting': [[0, 'asc'], [1, 'desc']],
         "sDom": 'C<"top pager"ilpfB><"#filter_c">tr<"bottom pager"ip>',
         "aoColumnDefs": [
             { "sType": "title-string", "aTargets" : [ "title-string" ] },
@@ -57,7 +57,6 @@ $(document).ready(function() {
 <ul>
     <li class="active"><a href="/cgi-bin/koha/members/boraccount.pl?borrowernumber=[% borrowernumber %]">Account</a></li>
 	<li><a href="/cgi-bin/koha/members/pay.pl?borrowernumber=[% borrowernumber %]" >Pay fines</a></li>
-	<li><a href="/cgi-bin/koha/members/maninvoice.pl?borrowernumber=[% borrowernumber %]" >Create manual invoice</a></li>
 	<li><a href="/cgi-bin/koha/members/mancredit.pl?borrowernumber=[% borrowernumber %]" >Create manual credit</a></li>
 </ul>
 <div class="tabs-container">
@@ -65,9 +64,14 @@ $(document).ready(function() {
 <table id="table_account_fines">
     <thead>
       <tr>
+          <th>&nbsp;</th>
           <th class="title-string">Date</th>
+          <th>Account type</th>
           <th>Description of charges</th>
+          <th>Item</th>
           <th>Note</th>
+          <th>Notify id</th>
+          <th>Notify level</th>
           <th>Amount</th>
           <th>Outstanding</th>
           <th>Actions</th>
@@ -78,8 +82,9 @@ $(document).ready(function() {
   [% FOREACH account IN accounts %]
 
    <tr>
-   <td><span title="[% account.date %]">[% account.date |$KohaDates %]</span></td>
-      <td>
+     <td>[% IF ( account.amountoutstanding > 0 ) %]<input type="checkbox" checked="checked">[% ELSE %]&nbsp;[% END %]</td>
+     <td><span title="[% account.date %]">[% account.date |$KohaDates %]</span></td>
+     <td>
         [% SWITCH account.accounttype %]
           [% CASE 'Pay' %]Payment, thanks
           [% CASE 'Pay00' %]Payment, thanks (cash via SIP2)
@@ -102,9 +107,14 @@ $(document).ready(function() {
           [% CASE 'CR' %]Credit
           [% CASE %][% account.accounttype %]
         [%- END -%]
-        [%- IF account.description %], [% account.description %][% END %]
-        &nbsp;[% IF ( account.itemnumber ) %]<a href="/cgi-bin/koha/catalogue/moredetail.pl?biblionumber=[% account.biblionumber %]&amp;itemnumber=[% account.itemnumber %]">[% account.title |html %]</a>[% END %]</td>
+      </td>
+      <td>
+        [%- IF account.description %][% account.description %][% END %]
+      </td>
+      <td>[% IF ( account.itemnumber ) %]<a href="/cgi-bin/koha/catalogue/moredetail.pl?biblionumber=[% account.biblionumber %]&amp;itemnumber=[% account.itemnumber %]">[% account.title |html %]</a>[% END %]</td>
       <td>[% account.note | html_line_break %]</td>
+      <td>[% account.notify_id %]</td>
+      <td>[% account.notify_level %]</td>
       [% IF ( account.amountcredit ) %]<td class="credit" style="text-align: right;">[% ELSE %]<td class="debit" style="text-align: right;">[% END %][% account.amount | $Price %]</td>
       [% IF ( account.amountoutstandingcredit ) %]<td class="credit" style="text-align: right;">[% ELSE %]<td class="debit" style="text-align: right;">[% END %][% account.amountoutstanding | $Price %]</td>
       <td class="actions">
@@ -143,7 +153,7 @@ $(document).ready(function() {
   [% END %]
 <tfoot>
   <tr>
-    <td colspan="4">Total due</td>
+    <td colspan="9">Total due</td>
     [% IF ( totalcredit ) %]
         <td class="credit" style="text-align: right;">[% total | $Price %]</td>
     [% ELSE %]
