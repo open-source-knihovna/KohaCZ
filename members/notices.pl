@@ -28,6 +28,8 @@ use C4::Members;
 use C4::Letters;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
 use Koha::Patron::Images;
+use Koha::Account::DebitTypes;
+use Koha::Account::CreditTypes;
 
 my $input=new CGI;
 
@@ -44,6 +46,12 @@ my ($template, $loggedinuser, $cookie)
 				flagsrequired => {borrowers => 1},
 				debug => 1,
 				});
+
+my @debit_types = Koha::Account::DebitTypes->search({ can_be_added_manually => 1 });
+$template->param( debit_types => \@debit_types );
+
+my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually => 1 });
+$template->param( credit_types => \@credit_types );
 
 $template->param( $borrower );
 my $patron_image = Koha::Patron::Images->find($borrower->{borrowernumber});
