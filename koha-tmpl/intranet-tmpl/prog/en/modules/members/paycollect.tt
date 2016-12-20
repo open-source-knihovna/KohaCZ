@@ -86,9 +86,6 @@ function moneyFormat(textObj) {
     <a href="/cgi-bin/koha/members/pay.pl?borrowernumber=[% borrower.borrowernumber %]" >Pay fines</a>
     </li>
     <li>
-    <a href="/cgi-bin/koha/members/maninvoice.pl?borrowernumber=[% borrower.borrowernumber %]" >Create manual invoice</a>
-    </li>
-    <li>
     <a href="/cgi-bin/koha/members/mancredit.pl?borrowernumber=[% borrower.borrowernumber %]" >Create manual credit</a>
     </li>
 </ul>

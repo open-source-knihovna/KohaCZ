@@ -31,6 +31,8 @@ use C4::Debug;
 use Koha::DateUtils;
 use Koha::Patron::Files;
 use Koha::Patron::Images;
+use Koha::Account::DebitTypes;
+use Koha::Account::CreditTypes;
 
 my $cgi = CGI->new;
 
@@ -45,6 +47,12 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 $template->param( 'borrower_files' => 1 );
+
+my @debit_types = Koha::Account::DebitTypes->search({ can_be_added_manually => 1 });
+$template->param( debit_types => \@debit_types );
+
+my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually => 1 });
+$template->param( credit_types => \@credit_types );
 
 my $borrowernumber = $cgi->param('borrowernumber');
 my $bf = Koha::Patron::Files->new( borrowernumber => $borrowernumber );

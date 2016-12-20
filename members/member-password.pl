@@ -19,6 +19,8 @@ use Koha::Patron::Images;
 use Koha::Token;
 
 use Koha::Patron::Categories;
+use Koha::Account::DebitTypes;
+use Koha::Account::CreditTypes;
 
 use Digest::MD5 qw(md5_base64);
 use Encode qw( encode );
@@ -39,6 +41,12 @@ my ( $template, $loggedinuser, $cookie, $staffflags ) = get_template_and_user(
         debug           => 1,
     }
 );
+
+my @debit_types = Koha::Account::DebitTypes->search({ can_be_added_manually => 1 });
+$template->param( debit_types => \@debit_types );
+
+my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually => 1 });
+$template->param( credit_types => \@credit_types );
 
 my $flagsrequired;
 $flagsrequired->{borrowers} = 1;
