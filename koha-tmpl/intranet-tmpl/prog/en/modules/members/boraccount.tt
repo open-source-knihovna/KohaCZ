@@ -8,21 +8,47 @@
 <link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
 [% INCLUDE 'datatables.inc' %]
 [% INCLUDE 'columns_settings.inc' %]
+<script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.checkboxes.min.js"></script>
 <script type="text/javascript">
+function setCheckboxActions(){
+    // Enable/disable controls if checkboxes are checked
+    var checkedBoxes = $("input.cb:checked");
+    if ($(checkedBoxes).size()) {
+        $("#payselected").prop("disabled",false);
+    } else {
+        $("#payselected").prop("disabled",true);
+    }
+}
+
 $(document).ready(function() {
     var txtActivefilter = _("Filter paid transactions");
     var txtInactivefilter = _("Show all transactions");
+    var txtSelectAll = _("Select all");
+    var txtClearAll = _("Clear all");
+    var txtPayAmount = _("Pay amount");
+    var txtWriteOffAll = _("Write off all");
+    var txtPaySelected = _("Pay selected");
     var columns_settings = [% ColumnsSettings.GetColumns('members', 'fines', 'account-fines', 'json') %];
     var table_account_fines = KohaTable("#table_account_fines", {
         "sPaginationType": "four_button",
         'aaSorting': [[0, 'asc'], [1, 'desc']],
-        "sDom": 'C<"top pager"ilpfB><"#filter_c">tr<"bottom pager"ip>',
+        "sDom": 'C<"#table_toolbar"><"top pager"ilpfB>tr<"bottom pager"ip>',
         "aoColumnDefs": [
             { "sType": "title-string", "aTargets" : [ "title-string" ] },
             { "bSortable": false, "bSearchable": false, "aTargets": [-1] }
         ]
     }, columns_settings);
-    $("#filter_c").html('<p><a href="#" id="filter_transacs"><i class="fa fa-filter"></i> '+txtActivefilter+'</a>');
+
+    var table_toolbar_html = '<p><a href="#" id="filter_transacs"><i class="fa fa-filter"></i> '+txtActivefilter+'</a>'
+        + ' | <a id="CheckAll" href="#"><i class="fa fa-check"></i> ' + txtSelectAll + '</a>'
+        + ' | <a id="CheckNone" href="#"><i class="fa fa-remove"></i> ' + txtClearAll + '</a>'
+        + '<a class="btn" href="/cgi-bin/koha/members/paycollect.pl?borrowernumber=[% borrowernumber %]"><i class="fa fa-money"></i> ' + txtPayAmount + '</a> ';
+    [% IF CAN_user_updatecharges_writeoff %]
+        table_toolbar_html += '<a id="woall" href="#" class="btn"><i class="fa fa-times"></i> ' + txtWriteOffAll + '</a>';
+    [% END %]
+    table_toolbar_html += ' <a class="btn" href="#"><i class="fa fa-money"></i> ' + txtPaySelected + '</a>';
+    $("#table_toolbar").html(table_toolbar_html);
+
     $('#filter_transacs').click(function(e) {
         e.preventDefault();
         if ($(this).hasClass('filtered')) {
@@ -32,9 +58,23 @@ $(document).ready(function() {
             var filteredValue = '^((?!0.00).*)$'; //Filter not matching 0.00 http://stackoverflow.com/a/406408
             $(this).html('<i class="fa fa-filter"></i> '+txtInactivefilter);
         }
-        table_account_fines.fnFilter(filteredValue, 4, true, false);
+        table_account_fines.fnFilter(filteredValue, 9, true, false);
         $(this).toggleClass('filtered');
     });
+    $('#CheckAll').click(function(){
+        $("#table_account_fines").checkCheckboxes();
+        setCheckboxActions();
+        return false;
+    });
+    $('#CheckNone').click(function(){
+        $("#table_account_fines").unCheckCheckboxes();
+        setCheckboxActions();
+        return false
+    });
+    $(".cb").change(function(){
+        setCheckboxActions();
+    });
+    setCheckboxActions();
 });
 </script>
 </head>
@@ -82,7 +122,7 @@ $(document).ready(function() {
   [% FOREACH account IN accounts %]
 
    <tr>
-     <td>[% IF ( account.amountoutstanding > 0 ) %]<input type="checkbox" checked="checked">[% ELSE %]&nbsp;[% END %]</td>
+     <td>[% IF ( account.amountoutstanding > 0 ) %]<input type="checkbox" class="cb" name="incl_par_[% account.accountlines_id %]" checked="checked">[% ELSE %]&nbsp;[% END %]</td>
      <td><span title="[% account.date %]">[% account.date |$KohaDates %]</span></td>
      <td>
         [% SWITCH account.accounttype %]
@@ -121,7 +161,7 @@ $(document).ready(function() {
         <div class="dropdown">
         <div class="btn-group">
         [% IF ( account.amountoutstanding > 0 ) %]
-          <a class="btn btn-default btn-xs" href="paycollect.pl?borrowernumber=[% account.borrowernumber %]&pay_individual=1&accounttype=[% account.accounttype %]&amount=[% account.amount %]&amountoutstanding=[% account.amountoutstanding %]&description=[% account.description %]&notify_id=[% account.notify_id %]&notify_level=[% account.notify_level %]&accountlines_id=[% account.accountlines_id %]"><i class="fa fa-dollar"></i> Pay</a>a
+          <a class="btn btn-default btn-xs" href="paycollect.pl?borrowernumber=[% account.borrowernumber %]&pay_individual=1&accounttype=[% account.accounttype %]&amount=[% account.amount %]&amountoutstanding=[% account.amountoutstanding %]&description=[% account.description %]&notify_id=[% account.notify_id %]&notify_level=[% account.notify_level %]&accountlines_id=[% account.accountlines_id %]"><i class="fa fa-money"></i> Pay</a>
           [% # If there is amount outstanding, we have at least two actions (pay, print, sometimes writeoff), so we need dropdown %]
           <a class="btn btn-default btn-xs dropdown-toggle" id="subactions[% account.accountlines_id %]" role="button" data-toggle="dropdown" href="#"><i class="caret"></i></a>
           <ul class="dropdown-menu" role="menu" arialabelledby="subactions[% account.accountlines_id %]">
