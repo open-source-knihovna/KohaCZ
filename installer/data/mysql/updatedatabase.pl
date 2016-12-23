@@ -47,7 +47,7 @@ use MARC::File::XML ( BinaryEncoding => 'utf8' );
 
 use File::Path qw[remove_tree]; # perl core module
 use File::Spec;
-use Path::Tiny;
+use File::Slurp;
 
 # FIXME - The user might be installing a new database, so can't rely
 # on /etc/koha.conf anyway.
@@ -9736,6 +9736,7 @@ if ( CheckVersion($DBversion) ) {
                     MODIFY COLUMN seealso varchar(1100) COLLATE utf8_unicode_ci DEFAULT NULL,
                     MODIFY COLUMN link varchar(80) COLLATE utf8_unicode_ci DEFAULT NULL
                 |);
+                $dbh->do(qq|ALTER TABLE $name CHARACTER SET utf8 COLLATE utf8_unicode_ci|);
             }
             else {
                 $dbh->do(qq|ALTER TABLE $name CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci|);
@@ -11475,13 +11476,12 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
 
     my $sth2 = $dbh->prepare("SELECT * FROM subscription_numberpatterns WHERE id = ?");
 
-    my $sth3 = $dbh->prepare("UPDATE serials SET serialseq_x = ?, serialseq_y = ?, serialseq_z = ? WHERE serialid = ?");
+    my $sth3 = $dbh->prepare("UPDATE serial SET serialseq_x = ?, serialseq_y = ?, serialseq_z = ? WHERE serialid = ?");
 
     foreach my $subscription ( $sth->fetchrow_hashref() ) {
         next if !defined($subscription);
-        my $number_pattern = $subscription->numberpattern();
         $sth2->execute( $subscription->{numberpattern} );
-        $number_pattern = $sth2->fetchrow_hashref();
+        my $number_pattern = $sth2->fetchrow_hashref();
 
         my $numbering_method = $number_pattern->{numberingmethod};
         # Get all the data between the enumeration values, we need
@@ -13258,6 +13258,13 @@ if ( CheckVersion($DBversion) ) {
             UPDATE marc_subfield_structure SET authorised_value = NULL WHERE authorised_value = ';';
             });
 
+    # If the DB has been created before 3.19.00.006, the default collate for marc_subfield_structure if not set to utf8_unicode_ci and the new FK will not be create (MariaDB or MySQL will raise err 150)
+    my $table_sth = $dbh->prepare(qq|SHOW CREATE TABLE marc_subfield_structure|);
+    $table_sth->execute;
+    my @table = $table_sth->fetchrow_array;
+    if ( $table[1] !~ /COLLATE=utf8_unicode_ci/ and $table[1] !~ /COLLATE=utf8mb4_unicode_ci/ ) { #catches utf8mb4 collated tables
+        $dbh->do(qq|ALTER TABLE marc_subfield_structure CHARACTER SET utf8 COLLATE utf8_unicode_ci|);
+    }
     $dbh->do(q{
             ALTER TABLE marc_subfield_structure
             MODIFY COLUMN authorised_value VARCHAR(32) DEFAULT NULL,
@@ -13779,6 +13786,12 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
+$DBversion = "16.11.01.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.11.01)\n";
+    SetVersion($DBversion);
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.
@@ -13793,7 +13806,7 @@ foreach my $file ( sort readdir $dirh ) {
         my $installer = C4::Installer->new();
         my $rv = $installer->load_sql( $update_dir . $file ) ? 0 : 1;
     } elsif ( $file =~ /\.perl$/ ) {
-        my $code = path( $update_dir . $file )->slurp_utf8;
+        my $code = read_file( $update_dir . $file );
         eval $code;
         say "Atomic update generated errors: $@" if $@;
     }
