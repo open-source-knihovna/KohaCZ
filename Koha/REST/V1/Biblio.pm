@@ -19,8 +19,11 @@ use Modern::Perl;
 
 use Mojo::Base 'Mojolicious::Controller';
 
+use C4::Auth qw( haspermission );
+use C4::Context;
+
 use C4::Biblio qw( GetBiblioData AddBiblio ModBiblio DelBiblio );
-use C4::Items qw ( AddItemBatchFromMarc );
+use C4::Items qw ( AddItemBatchFromMarc GetHiddenItemnumbers );
 use Koha::Biblios;
 use MARC::Record;
 use MARC::Batch;
@@ -46,7 +49,15 @@ sub getitems {
     unless ($biblio) {
         return $c->$cb({error => "Biblio not found"}, 404);
     }
-    return $c->$cb({ biblio => $biblio->unblessed, items => $biblio->items->unblessed }, 200);
+
+    my $items = $biblio->items->unblessed;
+    my $user = $c->stash('koha.user');
+
+    if (_hide_opac_hidden_items($user)) {
+        $items = _filter_hidden_items($items);
+    }
+
+    return $c->$cb({ biblio => $biblio->unblessed, items => $items }, 200);
 }
 
 sub getexpanded {
@@ -56,7 +67,14 @@ sub getexpanded {
     unless ($biblio) {
         return $c->$cb({error => "Biblio not found"}, 404);
     }
+
     my $expanded = $biblio->items->unblessed;
+    my $user = $c->stash('koha.user');
+
+    if (_hide_opac_hidden_items($user)) {
+        $expanded = _filter_hidden_items($expanded);
+    }
+
     for my $item (@{$expanded}) {
 
         # we assume item is available by default
@@ -168,6 +186,34 @@ sub delete {
     } else {
         return $c->$cb({error => "Error code: " . $res, items => @item_errors}, 400);
     }
+}
+
+sub _hide_opac_hidden_items {
+    my ($user) = @_;
+
+    my $isStaff = haspermission($user->userid, {borrowers => 1});
+
+    # Hide the hidden items from all but staff
+    my $hide_items = ! $isStaff && ( C4::Context->preference('OpacHiddenItems') !~ /^\s*$/ );
+
+    return $hide_items;
+}
+
+sub _filter_hidden_items {
+    my ($items) = @_;
+
+    my @hiddenitems = C4::Items::GetHiddenItemnumbers( @{$items} );
+
+    my @filteredItems = ();
+
+    # Convert to a hash for quick searching
+    my %hiddenitems = map { $_ => 1 } @hiddenitems;
+    for my $item (@{$items}) {
+        next if $hiddenitems{$item->{itemnumber}};
+        push @filteredItems, $item;
+    }
+
+    return \@filteredItems;
 }
 
 1;
