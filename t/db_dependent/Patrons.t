@@ -26,24 +26,21 @@ use C4::Context;
 use Koha::Database;
 use Koha::DateUtils;
 
+use t::lib::TestBuilder;
+
 BEGIN {
     use_ok('Koha::Objects');
     use_ok('Koha::Patrons');
 }
 
 # Start transaction
-my $dbh = C4::Context->dbh;
-$dbh->{AutoCommit} = 0;
-$dbh->{RaiseError} = 1;
-$dbh->do("DELETE FROM issues");
-$dbh->do("DELETE FROM borrowers");
+my $database = Koha::Database->new();
+my $schema = $database->schema();
+$schema->storage->txn_begin();
+my $builder = t::lib::TestBuilder->new;
 
-my $builder = t::lib::TestBuilder->new();
-my $categorycode =
-  Koha::Database->new()->schema()->resultset('Category')->first()
-  ->categorycode();
-my $branchcode =
-  Koha::Database->new()->schema()->resultset('Branch')->first()->branchcode();
+my $categorycode = $builder->build({ source => 'Category' })->{categorycode};
+my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
 
 my $b1 = Koha::Patron->new(
     {
@@ -53,6 +50,7 @@ my $b1 = Koha::Patron->new(
     }
 );
 $b1->store();
+my $now = dt_from_string;
 my $b2 = Koha::Patron->new(
     {
         surname      => 'Test 2',
@@ -75,13 +73,13 @@ $b3->store();
 my $b1_new = Koha::Patrons->find( $b1->borrowernumber() );
 is( $b1->surname(), $b1_new->surname(), "Found matching patron" );
 isnt( $b1_new->updated_on, undef, "borrowers.updated_on should be set" );
-is( dt_from_string($b1_new->updated_on), dt_from_string, "borrowers.updated_on should have been set to now on creating" );
+is( dt_from_string($b1_new->updated_on), $now, "borrowers.updated_on should have been set to now on creating" );
 
 my $b3_new = Koha::Patrons->find( $b3->borrowernumber() );
 is( dt_from_string($b3_new->updated_on), $three_days_ago, "borrowers.updated_on should have been kept to what we set on creating" );
-$b3_new->set({ surname => 'another surname for Test 3' });
+$b3_new->set({ firstname => 'Some first name for Test 3' })->store();
 $b3_new = Koha::Patrons->find( $b3->borrowernumber() );
-is( dt_from_string($b1_new->updated_on), dt_from_string, "borrowers.updated_on should have been set to now on updating" );
+is( dt_from_string($b3_new->updated_on), dt_from_string, "borrowers.updated_on should have been set to now on updating" );
 
 my @patrons = Koha::Patrons->search( { branchcode => $branchcode } );
 is( @patrons, 3, "Found 3 patrons with Search" );
@@ -129,5 +127,7 @@ $patrons->reset();
 foreach my $b ( $patrons->as_list() ) {
     is( $b->categorycode(), $categorycode, "Iteration returns a patron object" );
 }
+
+$schema->storage->txn_rollback();
 
 1;

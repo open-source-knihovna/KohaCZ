@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-11-20 20:13-0300\n"
-"PO-Revision-Date: 2016-06-01 18:24+0000\n"
-"Last-Translator: kyr.stefanidis <kyr.stefanidis@gmail.com>\n"
+"POT-Creation-Date: 2017-01-15 21:40-0300\n"
+"PO-Revision-Date: 2017-01-19 08:36+0000\n"
+"Last-Translator: Dimitris <dimantonak@gmail.com>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1464805440.000000\n"
+"X-POOTLE-MTIME: 1484814996.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -57,7 +57,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:31
 #, c-format
 msgid "\"INSTID:12345,BASEBALL:Cubs,\"\"BASEBALL:White Sox\"\"\""
-msgstr ""
+msgstr "\"INSTID:12345,BASEBALL:Cubs,\"\"BASEBALL:White Sox\"\"\""
 
 #: intranet-tmpl/prog/en/modules/help/offline_circ/list.tt:16
 #, c-format
@@ -879,7 +879,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11
@@ -2492,10 +2492,11 @@ msgid ""
 "customized using the Notices &amp; Slips Tool. The system comes with several "
 "predefined templates that will appear when you first visit this tool."
 msgstr ""
-"Όλες οι ειδοποιήσεις και οι αποδείξεις διακίνησης που στέλνονται από το Koha "
-"μπορούν να εξατομικευτούν μέσω του Εργαλείου Ειδοποιήσεων &amp; Σημειωμάτων. "
-"Το σύστημα περιλαμβάνει διάφορα προκαθορισμένα πρότυπα που θα εμφανιστούν "
-"όταν επισκεφτείτε για πρώτη φορά αυτό το εργαλείο."
+"Όλες οι ειδοποιήσεις και οι αποδείξεις δανεισμού (ή σημειωμάτων) που "
+"δημιουργούνται από το Koha μπορούν να παραμετροποιηθούν μέσω του Εργαλείου "
+"Ειδοποιήσεων &amp; Σημειωμάτων. Το σύστημα περιλαμβάνει διάφορα "
+"προκαθορισμένα πρότυπα που θα εμφανιστούν όταν επισκεφτείτε για πρώτη φορά "
+"αυτό το εργαλείο."
 
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:9
 #, c-format
@@ -3100,14 +3101,14 @@ msgid "Batch modify items"
 msgstr "Ομαδική τροποποίηση τεκμηρίων"
 
 #: intranet-tmpl/prog/en/modules/help/tools/batch_delete_records.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Batch record deletion"
-msgstr "Ομαδική διαγραφή τεκμηρίων"
+msgstr "Ομαδική διαγραφή εγγραφών"
 
 #: intranet-tmpl/prog/en/modules/help/tools/batch_record_modification.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Batch record modification"
-msgstr "Ομαδική τροποποίηση τεκμηρίων"
+msgstr "Ομαδική τροποποίηση εγγραφών"
 
 #: intranet-tmpl/prog/en/modules/help/labels/label-edit-batch.tt:3
 #: intranet-tmpl/prog/en/modules/help/labels/label-home.tt:40
@@ -3989,9 +3990,9 @@ msgstr ""
 "κανέναν περιορισμό, απλά πατήστε Επόμενο αντί να κάνετε κάποια επιλογή."
 
 #: intranet-tmpl/prog/en/modules/help/reports/itemslost.tt:10
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"Choose category to 'Order by' (the 'order by' field effects what ordering "
+"Choose category to 'Order by' (the 'order by' field affects what ordering "
 "method is used when displaying the lost items)"
 msgstr ""
 "Επιλέξτε κατηγορία στο 'Ταξινόμηση κατά' (το πεδίο 'ταξινόμηση κατά' επιδρά "
@@ -5336,9 +5337,9 @@ msgid "Delete Quote(s)"
 msgstr "Διαγραφή Αποφθέγματος/ων"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:504
-#, fuzzy, c-format
+#, c-format
 msgid "Delete SQL Reports"
-msgstr "Δημιουργία Αναφοράς SQL"
+msgstr "Διαγραφή της SQL αναφοράς"
 
 #: intranet-tmpl/prog/en/modules/help/admin/oai_sets.tt:20
 #, c-format
@@ -5346,9 +5347,9 @@ msgid "Delete a set"
 msgstr "Διαγραφή ενός συνόλου"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:206
-#, fuzzy, c-format
+#, c-format
 msgid "Delete all items at once"
-msgstr "Διαγραφή λίστας"
+msgstr "Διαγραφή όλων των τεκμηρίων μονομιάς"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:325
 #, c-format
@@ -5557,17 +5558,17 @@ msgstr "Αντιγραφή εγγραφών"
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:28
 #, c-format
 msgid "Duration: 10 days"
-msgstr ""
+msgstr "Διάρκεια: 10 μέρες"
 
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:35
 #, c-format
 msgid "Duration: 7 days"
-msgstr ""
+msgstr "Διάρκεια: 7 μέρες"
 
 #: intranet-tmpl/prog/en/modules/help/acqui/edifactmsgs.tt:3
 #, c-format
 msgid "EDIFACT messages"
-msgstr ""
+msgstr "μηνύματα EDIFACT"
 
 #: intranet-tmpl/prog/en/modules/help/tools/marc_modification_templates.tt:21
 #, c-format
@@ -5757,9 +5758,9 @@ msgid "Edit items"
 msgstr "Επεξεργασία αντιτύπων"
 
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:10
-#, fuzzy, c-format
+#, c-format
 msgid "Editing"
-msgstr "Έκδοση"
+msgstr "Επεξεργασία"
 
 #: intranet-tmpl/prog/en/modules/help/authorities/authorities.tt:21
 #, c-format
@@ -6224,9 +6225,9 @@ msgstr ""
 "ερπυσμός πρέπει να είναι στο .03\" για να κάνει αυτή τη διαφορά."
 
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:25
-#, fuzzy, c-format
+#, c-format
 msgid "Examples"
-msgstr "δείγματα "
+msgstr "Παραδείγματα"
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:161
 #: intranet-tmpl/prog/en/modules/help/admin/marc_subfields_structure.tt:107
@@ -6852,12 +6853,12 @@ msgstr "Μορφή"
 #. %1$s:  interface 
 #. %2$s:  theme 
 #: intranet-tmpl/prog/en/modules/help/labels/spinelabel-home.tt:9
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Format your label printing by editing spinelabel.css found in %s/%s/css/"
 msgstr ""
-"Μορφοποίηση την εκτύπωση των ετικετών σας επεξεργάζοντας το spinelabel.css "
-"στο koha-tmpl/intranet-tmpl/prog/en/css/"
+"Μορφοποίηση της εκτύπωση των ετικετών, κάνοντας επεξεργασία του αρχείου "
+"spinelabel.css το οποίο βρίσκεται στον φάκελο %s/%s/css/"
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:59
 #: intranet-tmpl/prog/en/modules/help/admin/marc_subfields_structure.tt:5
@@ -7663,7 +7664,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:281
 #, c-format
 msgid "HOLD_SLIP "
-msgstr ""
+msgstr "HOLD_SLIP "
 
 #: intranet-tmpl/prog/en/modules/help/mainpage.tt:9
 #, c-format
@@ -8803,9 +8804,9 @@ msgid ""
 "checked out, including those they checked out at an earlier date. Choosing "
 "'Print quick slip' will print only the items that were checked out today."
 msgstr ""
-"Εάν επιλέξετε 'Εκτύπωση απόδειξης' θα εκτυπωθούν όλα τα τεκμήρια που έχει "
+"Εάν επιλέξετε 'Εκτύπωση σημειώματος' θα εκτυπωθούν όλα τα τεκμήρια που έχει "
 "δανειστεί το μέλος, συμπεριλαμβανομένων εκείνων που δανείστηκε σε "
-"προηγούμενη ημερομηνία. Επιλέγοντας 'Εκτύπωση Γρήγορης Απόδειξης' θα "
+"προηγούμενη ημερομηνία. Επιλέγοντας 'Εκτύπωση Γρήγορου Σημειώματος' θα "
 "εκτυπωθούν μόνο τα τεκμήρια που δανείστηκαν σήμερα."
 
 #: intranet-tmpl/prog/en/modules/help/acqui/addorderiso2709.tt:17
@@ -11577,9 +11578,9 @@ msgstr "Το όνομα είναι αυτό που θα εμφανιστεί σ�
 
 #. %1$s:  fields.008.0.substr( 28, 3 ) 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:128
-#, fuzzy, c-format
+#, c-format
 msgid "Language=%s "
-msgstr "Γλώσσες"
+msgstr "Γλώσσα=%s "
 
 #: intranet-tmpl/prog/en/modules/help/labels/label-home.tt:36
 #: intranet-tmpl/prog/en/modules/help/labels/label-manage.tt:5
@@ -14779,7 +14780,7 @@ msgstr ""
 "Βλέπε την πλήρη τεκμηρίωση για τους Κανόνες Διακίνησης Υλικού και Προστίμων "
 "στο "
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #, c-format
 msgid "See the full documentation for Circulation in the "
 msgstr "Βλέπε την πλήρη τεκμηρίωση για την Διακίνηση Υλικού στο "
@@ -15993,9 +15994,9 @@ msgstr "Θέμα"
 #. %4$s:  END 
 #. %5$s:  END 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:123
-#, fuzzy, c-format
+#, c-format
 msgid "Subject=%s%s%s%s%s "
-msgstr "Θέματα:"
+msgstr "Θέμα=%s%s%s%s%s "
 
 #. INPUT type=submit name=submit
 #: intranet-tmpl/prog/en/modules/help/edithelp.tt:36
@@ -19049,7 +19050,7 @@ msgstr ""
 "έκθεση προτού τρέξει επιλέγοντας το 'Απαιτείται' στην προτίμηση συστήματος "
 "FilterBeforeOverdueReport."
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:21
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:22
 #, c-format
 msgid "Tip: Mac users use the OPTION button in place of ALT"
 msgstr ""
@@ -23205,6 +23206,11 @@ msgstr "μεταφερθείτε στο δανεισμό με Alt+R"
 msgid "jump to the checkout with Alt+U "
 msgstr "μεταφερθείτε στις επιστροφές με Alt+U "
 
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:19
+#, fuzzy, c-format
+msgid "jump to the renew tab with Alt+W"
+msgstr "μεταφερθείτε στο δανεισμό με Alt+R"
+
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:8
 #, c-format
 msgid "know easily what are the new items in the catalogue."
@@ -23390,7 +23396,7 @@ msgstr "διαχείριση "
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11

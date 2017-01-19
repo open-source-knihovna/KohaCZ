@@ -478,10 +478,10 @@ sub SendAlerts {
                 carp "No order selected";
                 return { error => "no_order_selected" };
             }
-            $strsth .= join( ",", @$externalid ) . ")";
+            $strsth .= join( ",", ('?') x @$externalid ) . ")";
             $action = "ACQUISITION CLAIM";
             $sthorders = $dbh->prepare($strsth);
-            $sthorders->execute;
+            $sthorders->execute( @$externalid );
             $dataorders = $sthorders->fetchall_arrayref( {} );
         }
 
@@ -501,10 +501,10 @@ sub SendAlerts {
                 return { error => "no_order_selected" };
             }
 
-            $strsth .= join( ",", @$externalid ) . ")";
+            $strsth .= join( ",", ('?') x @$externalid ) . ")";
             $action = "CLAIM ISSUE";
             $sthorders = $dbh->prepare($strsth);
-            $sthorders->execute;
+            $sthorders->execute( @$externalid );
             $dataorders = $sthorders->fetchall_arrayref( {} );
         }
 
@@ -1570,10 +1570,7 @@ sub _get_tt_params {
                     $object = $module->search( { $pk => $tables->{$table} } )->next();
                 }
                 else {                                  # Params are mutliple foreign keys
-                    my @values = @{ $tables->{$table} };
-                    my @keys   = @{ $config->{$table}->{fk} };
-                    my %params = map { $_ => shift(@values) } @keys;
-                    $object = $module->search( \%params )->next();
+                    croak "Multiple foreign keys (table $table) should be passed using an hashref";
                 }
                 $params->{ $config->{$table}->{singular} } = $object;
             }

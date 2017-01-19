@@ -37,6 +37,7 @@ use strict;
 #use warnings; FIXME - Bug 2505
 use CGI qw ( -utf8 );
 use Digest::MD5 qw(md5_base64);
+use Encode qw( encode );
 use C4::Context;
 use C4::Auth;
 use C4::Output;
@@ -274,8 +275,8 @@ $template->param( picture => 1 ) if $patron_image;
 # Generate CSRF token for upload and delete image buttons
 $template->param(
     csrf_token => Koha::Token->new->generate_csrf({
-        id     => C4::Context->userenv->{id},
-        secret => md5_base64( C4::Context->config('pass') ),
+        id     => Encode::encode( 'UTF-8', C4::Context->userenv->{id} ),
+        secret => md5_base64( Encode::encode( 'UTF-8', C4::Context->config('pass') ) ),
     }),
 );
 

@@ -1080,12 +1080,18 @@ sub checkauth {
                         $branchname = $library? $library->branchname: '';
                     }
                     my $branches = { map { $_->branchcode => $_->unblessed } Koha::Libraries->search };
-                    if ( C4::Context->boolean_preference('IndependentBranches') && C4::Context->boolean_preference('Autolocation') ) {
+                    if ( $type ne 'opac' and C4::Context->boolean_preference('AutoLocation') ) {
 
                         # we have to check they are coming from the right ip range
                         my $domain = $branches->{$branchcode}->{'branchip'};
+                        $domain =~ s|\.\*||g;
                         if ( $ip !~ /^$domain/ ) {
                             $loggedin = 0;
+                            $cookie = $query->cookie(
+                                -name     => 'CGISESSID',
+                                -value    => '',
+                                -HttpOnly => 1
+                            );
                             $info{'wrongip'} = 1;
                         }
                     }
@@ -1185,7 +1191,7 @@ sub checkauth {
 
         if ( $userid ) {
             # track_login also depends on pref TrackLastPatronActivity
-            my $patron = Koha::Patrons->search({ userid => $userid })->next;
+            my $patron = Koha::Patrons->find({ userid => $userid });
             $patron->track_login if $patron;
         }
 

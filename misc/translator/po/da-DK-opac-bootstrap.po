@@ -2,8 +2,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Danish Koha Translation\n"
-"POT-Creation-Date: 2016-11-20 20:16-0300\n"
-"PO-Revision-Date: 2016-11-16 15:47+0000\n"
+"POT-Creation-Date: 2017-01-15 21:36-0300\n"
+"PO-Revision-Date: 2017-01-20 12:47+0000\n"
 "Last-Translator: Poul <poul@wachmann.dk>\n"
 "Language-Team: -\n"
 "Language: da\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-POOTLE-MTIME: 1479311271.000000\n"
+"X-POOTLE-MTIME: 1484916455.000000\n"
 
 #. %1$s:  IF debarred_comment.search('OVERDUES_PROCESS') 
 #. %2$s:  debarred_comment.remove('OVERDUES_PROCESS ') | html_line_break 
@@ -24,6 +24,7 @@ msgstr ""
 #, c-format
 msgid "\" %s Restriction added by overdues process %s %s %s %s "
 msgstr ""
+"\" %s Begrænsning tilføjet af processen for forsinket aflevering %s %s %s %s "
 
 #. A
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:301
@@ -163,6 +164,9 @@ msgid ""
 "%s %s %s %s is overdue %sYour copy of %s (barcode %s) is overdue %s %s is "
 "due %sYour copy of %s (barcode %s) is due back at the library today %s "
 msgstr ""
+"%s %s %s %s is for sen aflevering %sDin kopi af %s (stregkode %s) er "
+"overskredet %s %s skal afleveres %sDin kopi af %s (stregkode %s) skal "
+"afleveres påbiblioteket i dag %s "
 
 #. %1$s:  IF ( RESERVE.is_waiting ) 
 #. %2$s:  IF ( RESERVE.is_at_destination ) 
@@ -301,6 +305,11 @@ msgid ""
 "been added. A suggestion with this title already exists. %s Your suggestion "
 "has been submitted. %s %s %s "
 msgstr ""
+"%s %s Forslaget er ikke tilføjet. Du har nået grænsen for forslag, som du "
+"kan afgive på nuværende tidspunkt (%s). Når biblioteket har behandlet disse "
+"forslag, vil du kunne fremsættet nye forslag. %s Forslaget er ikke tilføjet. "
+"A forslag med denne titel eksisterer allerede. %s Dit forslag er modtaget. %"
+"s %s %s "
 
 #. %1$s:  END 
 #. %2$s:  ELSE 
@@ -2146,14 +2155,15 @@ msgstr "%sSamling%sMaterialetype%s"
 #. %23$s:  IF ( serial.status8 ) 
 #. %24$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-full-serial-issues.tt:110
-#, fuzzy, c-format
+#, c-format, c-format
 msgid ""
 "%sExpected%s %sArrived%s %sLate%s %sMissing%s %sMissing (never received)%s "
 "%sMissing (sold out)%s %sMissing (damaged)%s %sMissing (lost)%s %sNot "
 "available%s %sDelete%s %sClaimed%s %sStopped%s "
 msgstr ""
-"%sForventet%s %sAnkommet%s %sForsinket%s %sMangler%s %sIkke tilgængelig%s "
-"%sSlet%s %sBestilt%s %sStoppet%s "
+"%sForventet%s %sAnkommet%s %sForsinket%s %sMangler%s %sMangler (aldrig "
+"modtaget)%s %sMangler (udsolgt)%s %sMangler (beskadiget)%s %sMangler (tabt)%"
+"s %sIkke tilgængelig%s %sSlet%s %sBestilt%s %sStoppet%s "
 
 #. %1$s:  IF (latestserial.status1 ) 
 #. %2$s:  END 
@@ -2180,14 +2190,15 @@ msgstr ""
 #. %23$s:  IF (latestserial.status8 ) 
 #. %24$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:835
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%sExpected%s %sArrived%s %sLate%s %sMissing%s %sMissing (never received)%s "
 "%sMissing (sold out)%s %sMissing (damaged)%s %sMissing (lost)%s %sNot issued"
 "%s %sDelete%s %sClaimed%s %sStopped%s "
 msgstr ""
-"%sForventet%s %sAnkommet%s %sForsinket%s %sMangler%s %sIkke tilgængelig%s "
-"%sSlet%s %sBestilt%s %sStoppet%s "
+"%sForventet%s %sAnkommet%s %sForsinket%s %sMangler%s %sMangler (aldrig "
+"modtaget)%s %sMangler (udsolgt)%s %sMangler (skadet)%s %sMangler (tabt)%s %"
+"sIkke udsendt%s %sSlet%s %sBestilt%s %sStoppet%s "
 
 #. %1$s:  IF ( messaging_preference.Item_Due ) 
 #. %2$s:  ELSIF ( messaging_preference.Advance_Notice ) 
@@ -2277,7 +2288,7 @@ msgstr ""
 #. %1$s:  IF ( ISSUE.charges ) 
 #. %2$s:  ELSE 
 #. %3$s:  END 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:273
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:278
 #, c-format
 msgid "%sYes%sNo%s "
 msgstr "%sJa%sNej%s "
@@ -3156,9 +3167,9 @@ msgstr ". Kontakt biblioteket, for mere information."
 #. %2$s:  END 
 #. %3$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:117
-#, fuzzy, c-format
+#, c-format
 msgid ".%sYou have fines.%s %s "
-msgstr "Du har ubetalte bøder. Beløb: %s. "
+msgstr ".%sDu har bøder.%s %s "
 
 #: opac-tmpl/bootstrap/en/modules/opac-addbybiblionumber.tt:57
 #, c-format
@@ -4179,9 +4190,9 @@ msgstr "Din adgangskode skal mindst bestå af %s tegn."
 #. %1$s:  minlength_cardnumber 
 #. %2$s:  maxlength_cardnumber 
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:147
-#, fuzzy, c-format
+#, c-format
 msgid "Card number must be between %s and %s characters."
-msgstr "Din adgangskode skal mindst bestå af %s tegn."
+msgstr "Din adgangskode skal være mellem %s og %s tegn lang."
 
 #. %1$s:  minlength_cardnumber 
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:143
@@ -4244,7 +4255,7 @@ msgid "Chapters:"
 msgstr ""
 
 #. INPUT type=submit name=confirm
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:255
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:270
 msgid "Check in item"
 msgstr "Aflever udlån"
 
@@ -6655,7 +6666,7 @@ msgstr "Sted"
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:726
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:84
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:86
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:296
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:301
 #, c-format
 msgid "Log in"
 msgstr "Log ind"
@@ -6683,7 +6694,7 @@ msgstr "Login for at se dine markeringer."
 #: opac-tmpl/bootstrap/en/includes/masthead.inc:305
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:40
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:944
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:290
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:295
 #, c-format
 msgid "Log in to your account"
 msgstr "Log ind på din konto"
@@ -6700,9 +6711,9 @@ msgid "Log in with Google"
 msgstr ""
 
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:38
-#, fuzzy, c-format
+#, c-format
 msgid "Log out"
-msgstr "%s Log ud"
+msgstr "Log ud"
 
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:33
 #, c-format
@@ -6728,7 +6739,7 @@ msgstr "katalog"
 #: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:82
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:81
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:73
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:291
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:296
 #, c-format
 msgid "Login:"
 msgstr "Login:"
@@ -7257,7 +7268,7 @@ msgstr "Ingen offentlige lister."
 msgid "No record was removed."
 msgstr "FEJL: Intet hyldenummer modtaget."
 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:259
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:267
 #, c-format
 msgid "No renewals allowed"
 msgstr "Ikke flere forlængelser tilladt"
@@ -7555,14 +7566,8 @@ msgstr "Bestilt ("
 msgid "On-site checkouts"
 msgstr "Samlet udlån:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:259
-#, c-format
-msgid ""
-"Once the library has processed those suggestions you will be able to place "
-"more"
-msgstr ""
-
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:155
+#: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:259
 #, c-format
 msgid ""
 "Once the library has processed those suggestions you will be able to place "
@@ -7717,7 +7722,7 @@ msgstr "Adgangskoden er opdateret"
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:82
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:44
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:79
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:293
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:298
 #, c-format
 msgid "Password:"
 msgstr "Password:"
@@ -7953,16 +7958,16 @@ msgstr "Ret fejlene og send igen. "
 msgid "Please enter numbers only. "
 msgstr "Indtast kun numre. "
 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:300
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:305
 #, c-format
 msgid "Please enter your card number:"
 msgstr "Indtast dit kortnummer:"
 
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:38
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Please fill out this form to make a purchase suggestion. You will receive an "
-"email when the library processes your suggestion"
+"email when the library processes your suggestion."
 msgstr ""
 "Udfyld dette skema for at foreslå et nyt indkøb til biblioteket. Du vil få "
 "en e-mail når biblioteket behandler forslaget"
@@ -8496,8 +8501,8 @@ msgstr "Forlænge alle"
 
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:119
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:127
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:265
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:267
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:257
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:259
 #, c-format
 msgid "Renew item"
 msgstr "Forlæng udlån"
@@ -9557,7 +9562,7 @@ msgstr "Emne: %s "
 #: opac-tmpl/bootstrap/en/modules/opac-authorities-home.tt:80
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:933
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:188
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:302
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:307
 #, c-format
 msgid "Submit"
 msgstr "Send"
@@ -10258,6 +10263,11 @@ msgstr ""
 msgid "This email address already exists in our database."
 msgstr "Dette eksemplar ligger allerede i indkøbskurven"
 
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:265
+#, fuzzy, c-format
+msgid "This is a on-site checkout, it cannot be renewed."
+msgstr "Denne titel kan ikke bestelles."
+
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:795
 #, c-format
 msgid "This is a serial"
@@ -10267,6 +10277,12 @@ msgstr "Dette er et abonnement på periodika"
 #, c-format
 msgid "This item does not exist."
 msgstr "Dette eksemplar eksisterer ikke."
+
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:263
+#, c-format
+msgid ""
+"This item has been scheduled for automatic renewal and cannot be renewed"
+msgstr ""
 
 #. %1$s:  ELSIF ( circ_error_RESTRICTED ) 
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:58
@@ -10380,7 +10396,7 @@ msgid "Thursday"
 msgstr "Torsdag"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:326
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:331
 msgid "Timeout while waiting for print confirmation"
 msgstr ""
 
@@ -10846,7 +10862,7 @@ msgid "Wk"
 msgstr "Uge"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:326
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:331
 msgid "Would you like to print a receipt?"
 msgstr "Ønsker du at udskrive en kvittering?"
 
@@ -10985,18 +11001,16 @@ msgstr "Du kan ikke forlænge dette udlån igen. %s "
 
 #. %1$s:  IF ( renewal_blocked_fines ) > 0  
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:117
-#, fuzzy, c-format
+#, c-format
 msgid "You cannot renew your books online. Reason: %sYour fines exceed "
-msgstr ""
-", du kan ikke forny dine bøger online. Betal venligst dine bøder, hvis du "
-"vil forny dine bøger."
+msgstr "Du kan ikke forny dine bøger online. Årsag: %sDine bøder overstiger "
 
 #: opac-tmpl/bootstrap/en/modules/opac-shareshelf.tt:40
 #, c-format
 msgid "You cannot share a public list."
 msgstr "Du kan ikke dele en offentlig liste."
 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:282
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:287
 #, c-format
 msgid "You currently have nothing checked out."
 msgstr "Du har ikke lånt noget endnu."
@@ -11401,7 +11415,7 @@ msgstr "Dine lister:"
 #. %6$s:  END 
 #. %7$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:75
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Your loan renewal failed because of the following reason(s): %s %s Your "
 "account has expired. Please contact the library for more information. %s You "
@@ -11411,8 +11425,9 @@ msgid ""
 msgstr ""
 "Din fornyelse af udlån fejlede af følgende årsag(er): %s %s Din konto er "
 "udløbet. Kontakt biblioteket for yderligere information. %s Du har fornyet "
-"dette eksemplar det tilladte antal gange. %s Dette eksemplar er reserveret "
-"af en anden låner. %s %s "
+"dette eksemplar det tilladte antal gange. %s Det er for tidligt efter "
+"udlånsdagen til fornyelse. %s Dette eksemplar er reserveret af en anden "
+"låner. %s %s "
 
 #: opac-tmpl/bootstrap/en/modules/opac-messaging.tt:14
 #: opac-tmpl/bootstrap/en/modules/opac-messaging.tt:27
@@ -11611,15 +11626,15 @@ msgstr ""
 "type=seefro.type %%] "
 
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:118
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "[%% UNLESS ( hidden.defined('cardnumber') || ( !borrower && Koha."
 "Preference('autoMemberNum') ) ) && hidden.defined('dateexpiry') && hidden."
 "defined('branchcode') && hidden.defined('categorycode') %%] "
 msgstr ""
-"%s [%% UNLESS hidden.defined('phone') && hidden.defined('phonepro') && "
-"hidden.defined('mobile') && hidden.defined('email') && hidden."
-"defined('emailpro') && hidden.defined('fax') %%] "
+"[%% UNLESS ( hidden.defined('cardnumber') || ( !borrower && "
+"Koha.Preference('autoMemberNum') ) ) && hidden.defined('dateexpiry') && "
+"hidden.defined('branchcode') && hidden.defined('categorycode') %%] "
 
 #: opac-tmpl/bootstrap/en/includes/openlibrary-readapi.inc:1
 #, c-format
@@ -12157,13 +12172,13 @@ msgstr "show_loans"
 #. %11$s:  END 
 #. %12$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:627
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "since %s %s Suspended %s until %s %s %s %s Pending for next available item "
 "of item type '%s' %s Pending %s %s %s "
 msgstr ""
-"siden %s %s Suspenderet %s indtil %s %s %s %s Udestående til næste "
-"tilgængelige "
+"siden %s %s Suspenderet %s indtil %s %s %s %s Venter på næste tilgængelige "
+"materiale af typen '%s' %s Afventer %s %s %s "
 
 #: opac-tmpl/bootstrap/en/modules/maintenance.tt:34
 #, c-format

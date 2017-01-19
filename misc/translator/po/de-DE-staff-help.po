@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German Koha Translation\n"
-"POT-Creation-Date: 2016-11-20 20:26-0300\n"
-"PO-Revision-Date: 2016-11-20 14:15+0000\n"
+"POT-Creation-Date: 2017-01-15 21:39-0300\n"
+"PO-Revision-Date: 2017-01-18 20:15+0000\n"
 "Last-Translator: Katrin <katrin.fischer@bsz-bw.de>\n"
 "Language-Team: \n"
 "Language: de\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-POOTLE-MTIME: 1479651344.000000\n"
+"X-POOTLE-MTIME: 1484770530.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -865,7 +865,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11
@@ -4035,7 +4035,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/reports/itemslost.tt:10
 #, c-format
 msgid ""
-"Choose category to 'Order by' (the 'order by' field effects what ordering "
+"Choose category to 'Order by' (the 'order by' field affects what ordering "
 "method is used when displaying the lost items)"
 msgstr ""
 "Wählen Sie die Kategorie für das 'Sortieren nach' (das 'Sortieren nach'-Feld "
@@ -6558,7 +6558,8 @@ msgid ""
 msgstr ""
 "Wenn Sie für den Medientyp eine Leihgebühr erheben und bestimmten "
 "Benutzertypen einen Rabatt auf die Leihgebühr einräumen möchten, können Sie "
-"den Prozentsatz (ohne das %%-Symbol) bei 'Rabatt auf Leihgebühr' eintragen."
+"den Prozentsatz (ohne das Prozent-Zeichen) bei 'Rabatt auf Leihgebühr' "
+"eintragen."
 
 #: intranet-tmpl/prog/en/modules/help/members/memberentry.tt:72
 #, c-format
@@ -15002,7 +15003,7 @@ msgstr "Die vollständige Hilfe für die Ausleihstatistik finden Sie im "
 msgid "See the full documentation for Circulation and Fine Rules in the "
 msgstr "Die vollständige Hilfe zu den Ausleihkonditionen finden Sie im "
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #, c-format
 msgid "See the full documentation for Circulation in the "
 msgstr "Die vollständige hilfe zur Ausleihe finden Sie im "
@@ -19316,7 +19317,7 @@ msgstr ""
 "Tipp: Große Bibliotheken können den Report vor der Ausführung filtern, indem "
 "der Systemparameter FilterBeforeOverdueReport aktiviert wird."
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:21
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:22
 #, c-format
 msgid "Tip: Mac users use the OPTION button in place of ALT"
 msgstr "Tipp: Mac-Anwender verwenden OPTION an Stelle von ALT"
@@ -23517,6 +23518,11 @@ msgstr "Rückgabe mit Alt+R"
 msgid "jump to the checkout with Alt+U "
 msgstr "zur Ausleihe springen mit Alt+U "
 
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:19
+#, c-format
+msgid "jump to the renew tab with Alt+W"
+msgstr "zur Verlängerung wechseln mit Alt+W"
+
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:8
 #, c-format
 msgid "know easily what are the new items in the catalogue."
@@ -23703,7 +23709,7 @@ msgstr "Verwaltung "
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11

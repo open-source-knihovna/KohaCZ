@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-11-20 20:32-0300\n"
-"PO-Revision-Date: 2016-06-12 09:17+0000\n"
+"POT-Creation-Date: 2017-01-15 22:01-0300\n"
+"PO-Revision-Date: 2017-01-04 07:00+0000\n"
 "Last-Translator: tigran <tigran@flib.sci.am>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
 "Language: hy\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Pootle 2.5.1.1\n"
 "X-Poedit-Bookmarks: 1755,-1,-1,-1,-1,-1,-1,-1,-1,-1\n"
-"X-POOTLE-MTIME: 1465723041.000000\n"
+"X-POOTLE-MTIME: 1483513259.000000\n"
 
 #. %1$s:  IF debarred_comment.search('OVERDUES_PROCESS') 
 #. %2$s:  debarred_comment.remove('OVERDUES_PROCESS ') | html_line_break 
@@ -26,7 +26,7 @@ msgstr ""
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:45
 #, c-format
 msgid "\" %s Restriction added by overdues process %s %s %s %s "
-msgstr ""
+msgstr "\" %s Սահմանափակումը ավելացված է ժամկետանցներից %s %s %s %s "
 
 #. A
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:301
@@ -132,9 +132,9 @@ msgstr ""
 #. %3$s:  IF ( RESERVE.is_in_transit ) 
 #. %4$s:  SET transfer = RESERVE.item.get_transfer 
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:622
-#, fuzzy, c-format
+#, c-format
 msgid "%s %s %s %s Item in transit from "
-msgstr "%s %s %s Նյութը փոխանցման մեջ է այստեղից "
+msgstr "%s %s %s %s Նյութը փոխանցման մեջ է այստեղից "
 
 #. %1$s:  END 
 #. %2$s:  IF ( subscription_LOO.letter ) 
@@ -166,6 +166,9 @@ msgid ""
 "%s %s %s %s is overdue %sYour copy of %s (barcode %s) is overdue %s %s is "
 "due %sYour copy of %s (barcode %s) is due back at the library today %s "
 msgstr ""
+"%s %s %s %s ժամկետանց է %sՔո այս պատճենը %s (barcode %s) ժամկետանց է %s %s "
+"ենթակա է վերադարձի %sՔո այս պատճենը %s (barcode %s) ենթակա է վերադարձի այսօր "
+"%s "
 
 #. %1$s:  IF ( RESERVE.is_waiting ) 
 #. %2$s:  IF ( RESERVE.is_at_destination ) 
@@ -304,6 +307,10 @@ msgid ""
 "been added. A suggestion with this title already exists. %s Your suggestion "
 "has been submitted. %s %s %s "
 msgstr ""
+"%s %s Առաջարկը չի ավելացվել։ Դու հասնում ես այս պահին քեզ հատկացված "
+"առաջարկների տեղադրման սահմանին (%s)։ Հենց գրադարանը մշակի այդ առաջարկները, "
+"դու կկարողանաս տեղադրել նորերը։ %s Առաջարկը չի ավելացվել։ Այս վերնագրով "
+"առաջարկ արդեն առկա է։ %s Քո առաջարկը ընդունվել է։ %s %s %s "
 
 #. %1$s:  END 
 #. %2$s:  ELSE 
@@ -489,7 +496,7 @@ msgstr ""
 #. %28$s:  ACCOUNT_LINE.title 
 #. %29$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-account.tt:105
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s %sPayment, thanks %sPayment, thanks (cash via SIP2) %sPayment, thanks "
 "(VISA via SIP2) %sPayment, thanks (credit card via SIP2) %sNew card %sFine "
@@ -497,12 +504,12 @@ msgid ""
 "%sHold waiting too long %sRental fee %sForgiven %sLost item fee refund "
 "%sPayment %sWriteoff %sCredit %sCredit %s%s %s %s, %s%s %s(%s)%s "
 msgstr ""
-"%s %sՎճարման շնորհակալություն %sՎճարման շնորհակալություն (կանխիկ SIP2 "
-"միջոցով) %sՎճարման շնորհակալություն (ՎԻԶԱ SIP2 միջոցով) %sՎճարման "
-"շնորհակալություն (կրեդիտ քարտ SIP2միջթցթվ) %sՆոր քարտ %sՏուգանք %sՀաշվի "
+"%s %sՎճարում, շնորհակալություն %sՎճարում, շնորհակալություն (կանխիկ SIP2 "
+"միջոցով) %sՎճարում, շնորհակալություն (ՎԻԶԱ SIP2 միջոցով) %sՎճարում, "
+"շնորհակալություն (կրեդիտ քարտ SIP2 միջոցով) %sՆոր քարտ %sՏուգանք %sՀաշվի "
 "կառավարման վարձավճար %sԱյլ %sԿորած նյութ %sԴուրս գրված %sՏուգանքի հավելում "
-"%sՎարձավճար %sՆերված %sԿորած նյութի վերադարձի վճար %sՎճարում %sԴուրս գրում "
-"%sԿրեդիտ %sԿրեդիտ %s%s %s %s, %s%s %s(%s)%s "
+"%sՊահումը շատ երկար է սպասում %sՎարձավճար %sՆերված %sԿորած նյութի վերադարձի "
+"վճար %sՎճարում %sԴուրս գրում %sԿրեդիտ %sԿրեդիտ %s%s %s %s, %s%s %s(%s)%s "
 
 #. %1$s:  IF s.category == PRIVATE 
 #. %2$s:  IF s.is_shared 
@@ -758,14 +765,14 @@ msgstr "%sԴուրս գալ"
 #: opac-tmpl/bootstrap/en/modules/opac-request-article.tt:178
 #, c-format
 msgid "%s No article requests can be made for this record. %s "
-msgstr ""
+msgstr "%s Այս գրառման համար հոդվածի պատվերներ հնարավոր չէ իրականացնել։ %s "
 
 #. %1$s:  ELSIF ( ISSUE.auto_too_late ) 
 #. %2$s:  ELSIF ( ISSUE.auto_renew || ISSUE.auto_too_soon ) 
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:261
-#, fuzzy, c-format
+#, c-format
 msgid "%s No longer renewable %s Automatic renewal "
-msgstr "%s Չթարմացվող %s Չի թույլատրված "
+msgstr "%s Այլևս չթարմացվող %s Ավտոմատ թարմացում "
 
 #. %1$s:  ELSIF ( ISSUE.too_soon ) 
 #. %2$s:  ISSUE.soonestrenewdate 
@@ -2296,7 +2303,7 @@ msgstr "%sԹարմացրու քո կապի տվյալները%sԳնա քո կա�
 #. %1$s:  IF ( ISSUE.charges ) 
 #. %2$s:  ELSE 
 #. %3$s:  END 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:273
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:278
 #, c-format
 msgid "%sYes%sNo%s "
 msgstr "%sԱյո%sՈչ%s "
@@ -4264,7 +4271,7 @@ msgid "Chapters:"
 msgstr ""
 
 #. INPUT type=submit name=confirm
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:255
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:270
 msgid "Check in item"
 msgstr "Հետ ընդունիր նյութը"
 
@@ -6667,7 +6674,7 @@ msgstr "Տեղակայություններ"
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:726
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:84
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:86
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:296
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:301
 #, c-format
 msgid "Log in"
 msgstr "Մուտք"
@@ -6695,7 +6702,7 @@ msgstr "Մուտք գործիր տեսնելու քո սեփական պահվա�
 #: opac-tmpl/bootstrap/en/includes/masthead.inc:305
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:40
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:944
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:290
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:295
 #, c-format
 msgid "Log in to your account"
 msgstr "Մուտք գործիր քո հաշիվ"
@@ -6740,7 +6747,7 @@ msgstr "Մուտքի էջ"
 #: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:82
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:81
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:73
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:291
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:296
 #, c-format
 msgid "Login:"
 msgstr "Գրանցում"
@@ -7269,7 +7276,7 @@ msgstr "Չկան հանրային Ցուցակներ"
 msgid "No record was removed."
 msgstr "Գրառում չի հեռացված։"
 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:259
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:267
 #, c-format
 msgid "No renewals allowed"
 msgstr "Թարմացումներ թույլատրված չեն"
@@ -7565,14 +7572,8 @@ msgstr "Պատվիրված"
 msgid "On-site checkouts"
 msgstr "Տեղային դուրս տրումներ"
 
-#: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:259
-#, c-format
-msgid ""
-"Once the library has processed those suggestions you will be able to place "
-"more"
-msgstr ""
-
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:155
+#: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:259
 #, c-format
 msgid ""
 "Once the library has processed those suggestions you will be able to place "
@@ -7727,7 +7728,7 @@ msgstr "Գաղտնաբառը թարմացվել է"
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:82
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:44
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:79
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:293
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:298
 #, c-format
 msgid "Password:"
 msgstr "Գաղտնաբառ։"
@@ -7967,16 +7968,16 @@ msgstr "Շտկեք սխալները և կրկին ուղարկեք։ "
 msgid "Please enter numbers only. "
 msgstr "Մուտք արա միայն համարները "
 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:300
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:305
 #, c-format
 msgid "Please enter your card number:"
 msgstr "Մուտք արա քարտի համարը"
 
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:38
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Please fill out this form to make a purchase suggestion. You will receive an "
-"email when the library processes your suggestion"
+"email when the library processes your suggestion."
 msgstr ""
 "Լրացրու ձևաթուղթը գնման առաջարկի համար։ Երբ գրադարանը կկատարի քո պատվերը, "
 "դու կստանաս հաղորդագրություն։"
@@ -8516,8 +8517,8 @@ msgstr "Թարմացրու բոլորը"
 
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:119
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:127
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:265
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:267
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:257
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:259
 #, c-format
 msgid "Renew item"
 msgstr "Թարմացրու նյութը"
@@ -9583,7 +9584,7 @@ msgstr "Խորագիր։ %s "
 #: opac-tmpl/bootstrap/en/modules/opac-authorities-home.tt:80
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:933
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:188
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:302
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:307
 #, c-format
 msgid "Submit"
 msgstr "Հաստատել"
@@ -10278,6 +10279,11 @@ msgstr ""
 msgid "This email address already exists in our database."
 msgstr "Նյութը արդեն քո սայլակում է"
 
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:265
+#, fuzzy, c-format
+msgid "This is a on-site checkout, it cannot be renewed."
+msgstr "Այս վերնագիրը հնարավոր չէ պահանջել։"
+
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:795
 #, c-format
 msgid "This is a serial"
@@ -10287,6 +10293,12 @@ msgstr "Սա պարբերական է"
 #, c-format
 msgid "This item does not exist."
 msgstr "Այս նյութը գոյություն չունի։"
+
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:263
+#, c-format
+msgid ""
+"This item has been scheduled for automatic renewal and cannot be renewed"
+msgstr ""
 
 #. %1$s:  ELSIF ( circ_error_RESTRICTED ) 
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:58
@@ -10400,7 +10412,7 @@ msgid "Thursday"
 msgstr "Հինգշաբթի"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:326
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:331
 msgid "Timeout while waiting for print confirmation"
 msgstr "Մինչ սպասում ես տպելու հաստատմանը ժամանակը սպառվեց"
 
@@ -10866,7 +10878,7 @@ msgid "Wk"
 msgstr "Wk"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:326
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:331
 msgid "Would you like to print a receipt?"
 msgstr "Կցանկանա՞ս տպել ստացականը։"
 
@@ -11017,7 +11029,7 @@ msgstr ""
 msgid "You cannot share a public list."
 msgstr "Դու չես կարող համատեղել հանրային ցուցակը։"
 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:282
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:287
 #, c-format
 msgid "You currently have nothing checked out."
 msgstr "Այս պահին դու ոչինչ չունես դուրս տրված։"

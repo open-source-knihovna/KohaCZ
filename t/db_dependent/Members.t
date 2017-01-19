@@ -39,6 +39,9 @@ my $builder = t::lib::TestBuilder->new;
 my $dbh = C4::Context->dbh;
 $dbh->{RaiseError} = 1;
 
+# Remove invalid guarantorid's as long as we have no FK
+$dbh->do("UPDATE borrowers b1 LEFT JOIN borrowers b2 ON b2.borrowernumber=b1.guarantorid SET b1.guarantorid=NULL where b1.guarantorid IS NOT NULL AND b2.borrowernumber IS NULL");
+
 my $library1 = $builder->build({
     source => 'Branch',
 });
@@ -263,6 +266,7 @@ my $borrower1 = $builder->build({
             categorycode=>'STAFFER',
             branchcode => $library3->{branchcode},
             dateexpiry => '2015-01-01',
+            guarantorid=> undef,
         },
 });
 my $bor1inlist = $borrower1->{borrowernumber};
@@ -272,6 +276,7 @@ my $borrower2 = $builder->build({
             categorycode=>'STAFFER',
             branchcode => $library3->{branchcode},
             dateexpiry => '2015-01-01',
+            guarantorid=> undef,
         },
 });
 
@@ -281,6 +286,7 @@ my $guarantee = $builder->build({
             categorycode=>'KIDclamp',
             branchcode => $library3->{branchcode},
             dateexpiry => '2015-01-01',
+            guarantorid=> undef, # will be filled later
         },
 });
 
@@ -349,9 +355,9 @@ is( scalar(@$patstodel),2,'Borrowers without issues deleted by last issue date')
 
 # Test GetBorrowersToExpunge and TrackLastPatronActivity
 $dbh->do(q|UPDATE borrowers SET lastseen=NULL|);
-$builder->build({ source => 'Borrower', value => { lastseen => '2016-01-01 01:01:01', guarantorid => undef } } );
-$builder->build({ source => 'Borrower', value => { lastseen => '2016-02-02 02:02:02', guarantorid => undef } } );
-$builder->build({ source => 'Borrower', value => { lastseen => '2016-03-03 03:03:03', guarantorid => undef } } );
+$builder->build({ source => 'Borrower', value => { lastseen => '2016-01-01 01:01:01', categorycode => 'CIVILIAN', guarantorid => undef } } );
+$builder->build({ source => 'Borrower', value => { lastseen => '2016-02-02 02:02:02', categorycode => 'CIVILIAN', guarantorid => undef } } );
+$builder->build({ source => 'Borrower', value => { lastseen => '2016-03-03 03:03:03', categorycode => 'CIVILIAN', guarantorid => undef } } );
 $patstodel = GetBorrowersToExpunge( { last_seen => '1999-12-12' });
 is( scalar @$patstodel, 0, 'TrackLastPatronActivity - 0 patrons must be deleted' );
 $patstodel = GetBorrowersToExpunge( { last_seen => '2016-02-15' });

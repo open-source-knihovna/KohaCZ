@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-11-20 20:17-0300\n"
-"PO-Revision-Date: 2016-10-15 18:38+0000\n"
-"Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
+"POT-Creation-Date: 2017-01-15 21:34-0300\n"
+"PO-Revision-Date: 2016-11-26 21:30+0000\n"
+"Last-Translator: m23 <black23@gmail.com>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
 ">\n"
 "Language: cs\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1476556709.000000\n"
+"X-POOTLE-MTIME: 1480195807.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -841,7 +841,7 @@ msgstr "(! znamená 'neviditelný' nebo v případě zhrouceno 'nezhrouceno')"
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11
@@ -3907,9 +3907,9 @@ msgstr ""
 "klikněte na Další namísto předchozí volby."
 
 #: intranet-tmpl/prog/en/modules/help/reports/itemslost.tt:10
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"Choose category to 'Order by' (the 'order by' field effects what ordering "
+"Choose category to 'Order by' (the 'order by' field affects what ordering "
 "method is used when displaying the lost items)"
 msgstr ""
 "Vyberte kategorii pro 'Seřadit podle' (pole 'Seřadit podle' určuje, jaký "
@@ -10743,9 +10743,9 @@ msgid ""
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/tools/inventory.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Inventory"
-msgstr "inventář "
+msgstr "Revize"
 
 #: intranet-tmpl/prog/en/modules/help/acqui/invoice.tt:3
 #: intranet-tmpl/prog/en/modules/help/acqui/invoices.tt:3
@@ -14476,7 +14476,7 @@ msgstr "Viz úplnou dokumentaci pro pro statistiky výpůjček v "
 msgid "See the full documentation for Circulation and Fine Rules in the "
 msgstr "Viz úplnou dokumentaci pro Výpůjční a penalizační pravidla v "
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #, c-format
 msgid "See the full documentation for Circulation in the "
 msgstr "Viz úplnou dokumentaci pro Výpůjčky v "
@@ -18577,7 +18577,7 @@ msgstr ""
 "pomocí nastavení sytémové preference FilterBeforeOverdueReport na \"Vyžadovat"
 "\"."
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:21
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:22
 #, c-format
 msgid "Tip: Mac users use the OPTION button in place of ALT"
 msgstr "Tip: Na počítačích Mac použijte klávesu OPTION místo ALT"
@@ -22601,7 +22601,7 @@ msgstr "včetně nastavení potřebných ke službám jako je OAI-PMH"
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:411
 #, c-format
 msgid "inventory "
-msgstr "inventář "
+msgstr "Revize "
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:139
 #, c-format
@@ -22637,6 +22637,11 @@ msgstr "vracení: Alt+R"
 #, c-format
 msgid "jump to the checkout with Alt+U "
 msgstr "půjčování: Alt+U "
+
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:19
+#, fuzzy, c-format
+msgid "jump to the renew tab with Alt+W"
+msgstr "vracení: Alt+R"
 
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:8
 #, c-format
@@ -22823,7 +22828,7 @@ msgstr "management (správa) "
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11
