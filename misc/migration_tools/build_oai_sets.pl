@@ -70,8 +70,10 @@ my $mappings = GetOAISetsMappings;
 # Get all biblionumbers and marcxml
 print "Retrieving biblios... " if $verbose;
 my $query = qq{
-    SELECT biblionumber, marcxml
-    FROM biblioitems
+    SELECT biblionumber, metadata
+    FROM biblio_metadata
+    WHERE format='marcxml'
+    AND marcflavour = ?
 };
 if($length) {
     $query .= "LIMIT $length";
@@ -80,7 +82,7 @@ if($length) {
     }
 }
 my $sth = $dbh->prepare($query);
-$sth->execute;
+$sth->execute( C4::Context->preference('marcflavour') );
 my $results = $sth->fetchall_arrayref({});
 print "done.\n" if $verbose;
 
@@ -106,7 +108,7 @@ my $i = 1;
 my $sets_biblios = {};
 foreach my $res (@$results) {
     my $biblionumber = $res->{'biblionumber'};
-    my $marcxml = $res->{'marcxml'};
+    my $marcxml = $res->{'metadata'};
     if($verbose and $i % 1000 == 0) {
         my $percent = ($i * 100) / $num_biblios;
         $percent = sprintf("%.2f", $percent);

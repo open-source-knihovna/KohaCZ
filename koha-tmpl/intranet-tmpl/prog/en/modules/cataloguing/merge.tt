@@ -9,7 +9,7 @@
 div.record ul, div.record li { float:none; display:block; }
 div#result { margin-top: 1em; }
 /* We use this style "against" the li ui-tabs-nav style automatically applied */
-#dataPreview { width : 80%; margin-left : -40%; } @media (max-width: 767px) { #dataPreview { margin: 0; width : auto; } }
+#dataPreview { width : 80%; } @media (max-width: 767px) { #dataPreview { margin: 0; width : auto; } }
 </style>
 <script type="text/javascript">
 //<![CDATA[
@@ -29,7 +29,7 @@ div#result { margin-top: 1em; }
         });
         $("#dataPreview").on("hidden", function(){
             $("#dataPreviewLabel").html("");
-            $("#dataPreview .modal-body").html("<div id=\"loading\"><img src=\"[% interface %]/[% theme %]/img/loading-small.gif\" alt=\"\" /> "+_("Loading")+"</div>");
+            $("#dataPreview .modal-body").html("<div id=\"loading\"><img src=\"[% interface %]/[% theme %]/img/spinner-small.gif\" alt=\"\" /> "+_("Loading")+"</div>");
         });
     });
   [% ELSE %]
@@ -239,16 +239,20 @@ $(document).ready(function(){
     </fieldset>
 </form>
 
-<div id="dataPreview" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="dataPreviewLabel" aria-hidden="true">
+<div id="dataPreview" class="modal" tabindex="-1" role="dialog" aria-labelledby="dataPreviewLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
     <div class="modal-header">
         <button type="button" class="closebtn" data-dismiss="modal" aria-hidden="true">×</button>
         <h3 id="dataPreviewLabel">Preview</h3>
     </div>
     <div class="modal-body">
-        <div id="loading"> <img src="[% interface %]/[% theme %]/img/loading-small.gif" alt="" /> Loading </div>
+        <div id="loading"> <img src="[% interface %]/[% theme %]/img/spinner-small.gif" alt="" /> Loading </div>
     </div>
     <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+        <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+    </div>
     </div>
 </div>
 

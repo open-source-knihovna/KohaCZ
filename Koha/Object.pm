@@ -134,7 +134,7 @@ Returns:
 sub delete {
     my ($self) = @_;
 
-    # Deleting something not in storage thows an exception
+    # Deleting something not in storage throws an exception
     return -1 unless $self->_result()->in_storage();
 
     # Return a boolean for succcess
@@ -220,7 +220,6 @@ sub _columns {
 
     return $self->{_columns};
 }
-
 
 =head3 AUTOLOAD
 

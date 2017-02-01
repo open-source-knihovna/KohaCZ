@@ -43,6 +43,7 @@ use Koha::Account;
 use Koha::AuthorisedValues;
 use Koha::DateUtils;
 use Koha::Calendar;
+use Koha::Checkouts;
 use Koha::IssuingRules;
 use Koha::Items;
 use Koha::Patrons;
@@ -88,7 +89,6 @@ BEGIN {
         &GetSoonestRenewDate
         &GetLatestAutoRenewDate
 		&GetItemIssue
-		&GetItemIssues
 		&GetIssuingCharges
         &GetBranchBorrowerCircRule
         &GetBranchItemRule
@@ -555,6 +555,10 @@ sub TooMany {
         }
     }
 
+    if ( not defined( $issuing_rule ) and not defined($branch_borrower_circ_rule->{maxissueqty}) ) {
+        return { reason => 'NO_RULE_DEFINED', max_allowed => 0 };
+    }
+
     # OK, the patron can issue !!!
     return;
 }
@@ -570,7 +574,7 @@ C<$issuingimpossible> and C<$needsconfirmation> are some hashref.
 
 =over 4
 
-=item C<$borrower> hash with borrower informations (from GetMember or GetMemberDetails)
+=item C<$borrower> hash with borrower informations (from GetMember)
 
 =item C<$barcode> is the bar code of the book being issued.
 
@@ -725,14 +729,16 @@ sub CanBookBeIssued {
         ModDateLastSeen( $item->{'itemnumber'} );
         return( { STATS => 1 }, {});
     }
-    if ( ref $borrower->{flags} ) {
-        if ( $borrower->{flags}->{GNA} ) {
+
+    my $flags = C4::Members::patronflags( $borrower );
+    if ( ref $flags ) {
+        if ( $flags->{GNA} ) {
             $issuingimpossible{GNA} = 1;
         }
-        if ( $borrower->{flags}->{'LOST'} ) {
+        if ( $flags->{'LOST'} ) {
             $issuingimpossible{CARD_LOST} = 1;
         }
-        if ( $borrower->{flags}->{'DBARRED'} ) {
+        if ( $flags->{'DBARRED'} ) {
             $issuingimpossible{DEBARRED} = 1;
         }
     }
@@ -1064,14 +1070,18 @@ sub CanBookBeIssued {
         require C4::Serials;
         my $is_a_subscription = C4::Serials::CountSubscriptionFromBiblionumber($biblionumber);
         unless ($is_a_subscription) {
-            my $issues = GetIssues( {
-                borrowernumber => $borrower->{borrowernumber},
-                biblionumber   => $biblionumber,
-            } );
-            my @issues = $issues ? @$issues : ();
+            my $checkouts = Koha::Checkouts->search(
+                {
+                    borrowernumber => $borrower->{borrowernumber},
+                    biblionumber   => $biblionumber,
+                },
+                {
+                    join => 'item',
+                }
+            );
             # if we get here, we don't already have a loan on this item,
             # so if there are any loans on this bib, ask for confirmation
-            if (scalar @issues > 0) {
+            if ( $checkouts->count ) {
                 $needsconfirmation{BIBLIO_ALREADY_ISSUED} = 1;
             }
         }
@@ -1228,7 +1238,7 @@ Issue a book. Does no check, they are done in CanBookBeIssued. If we reach this 
 
 =over 4
 
-=item C<$borrower> is a hash with borrower informations (from GetMember or GetMemberDetails).
+=item C<$borrower> is a hash with borrower informations (from GetMember).
 
 =item C<$barcode> is the barcode of the item being issued.
 
@@ -1826,7 +1836,7 @@ sub AddReturn {
 
     my $issue  = GetItemIssue($itemnumber);
     if ($issue and $issue->{borrowernumber}) {
-        $borrower = C4::Members::GetMemberDetails($issue->{borrowernumber})
+        $borrower = C4::Members::GetMember( borrowernumber => $issue->{borrowernumber} )
             or die "Data inconsistency: barcode $barcode (itemnumber:$itemnumber) claims to be issued to non-existent borrowernumber '$issue->{borrowernumber}'\n"
                 . Dumper($issue) . "\n";
     } else {
@@ -2506,120 +2516,6 @@ sub GetOpenIssue {
 
 }
 
-=head2 GetIssues
-
-    $issues = GetIssues({});    # return all issues!
-    $issues = GetIssues({ borrowernumber => $borrowernumber, biblionumber => $biblionumber });
-
-Returns all pending issues that match given criteria.
-Returns a arrayref or undef if an error occurs.
-
-Allowed criteria are:
-
-=over 2
-
-=item * borrowernumber
-
-=item * biblionumber
-
-=item * itemnumber
-
-=back
-
-=cut
-
-sub GetIssues {
-    my ($criteria) = @_;
-
-    # Build filters
-    my @filters;
-    my @allowed = qw(borrowernumber biblionumber itemnumber);
-    foreach (@allowed) {
-        if (defined $criteria->{$_}) {
-            push @filters, {
-                field => $_,
-                value => $criteria->{$_},
-            };
-        }
-    }
-
-    # Do we need to join other tables ?
-    my %join;
-    if (defined $criteria->{biblionumber}) {
-        $join{items} = 1;
-    }
-
-    # Build SQL query
-    my $where = '';
-    if (@filters) {
-        $where = "WHERE " . join(' AND ', map { "$_->{field} = ?" } @filters);
-    }
-    my $query = q{
-        SELECT issues.*
-        FROM issues
-    };
-    if (defined $join{items}) {
-        $query .= q{
-            LEFT JOIN items ON (issues.itemnumber = items.itemnumber)
-        };
-    }
-    $query .= $where;
-
-    # Execute SQL query
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare($query);
-    my $rv = $sth->execute(map { $_->{value} } @filters);
-
-    return $rv ? $sth->fetchall_arrayref({}) : undef;
-}
-
-=head2 GetItemIssues
-
-  $issues = &GetItemIssues($itemnumber, $history);
-
-Returns patrons that have issued a book
-
-C<$itemnumber> is the itemnumber
-C<$history> is false if you just want the current "issuer" (if any)
-and true if you want issues history from old_issues also.
-
-Returns reference to an array of hashes
-
-=cut
-
-sub GetItemIssues {
-    my ( $itemnumber, $history ) = @_;
-    
-    my $today = DateTime->now( time_zome => C4::Context->tz);  # get today date
-    $today->truncate( to => 'minute' );
-    my $sql = "SELECT * FROM issues
-              JOIN borrowers USING (borrowernumber)
-              JOIN items     USING (itemnumber)
-              WHERE issues.itemnumber = ? ";
-    if ($history) {
-        $sql .= "UNION ALL
-                 SELECT * FROM old_issues
-                 LEFT JOIN borrowers USING (borrowernumber)
-                 JOIN items USING (itemnumber)
-                 WHERE old_issues.itemnumber = ? ";
-    }
-    $sql .= "ORDER BY date_due DESC";
-    my $sth = C4::Context->dbh->prepare($sql);
-    if ($history) {
-        $sth->execute($itemnumber, $itemnumber);
-    } else {
-        $sth->execute($itemnumber);
-    }
-    my $results = $sth->fetchall_arrayref({});
-    foreach (@$results) {
-        my $date_due = dt_from_string($_->{date_due},'sql');
-        $date_due->truncate( to => 'minute' );
-
-        $_->{overdue} = (DateTime->compare($date_due, $today) == -1) ? 1 : 0;
-    }
-    return $results;
-}
-
 =head2 GetBiblioIssues
 
   $issues = GetBiblioIssues($biblionumber);
@@ -2982,7 +2878,7 @@ sub AddRenewal {
 
     # Send a renewal slip according to checkout alert preferencei
     if ( C4::Context->preference('RenewalSendNotice') eq '1' ) {
-        $borrower = C4::Members::GetMemberDetails( $borrowernumber, 0 );
+        $borrower = C4::Members::GetMember( borrowernumber => $borrowernumber );
         my $circulation_alert = 'C4::ItemCirculationAlertPreference';
         my %conditions        = (
             branchcode   => $branch,
@@ -3013,15 +2909,19 @@ sub AddRenewal {
     }
 
     # Log the renewal
-    UpdateStats({branch => $branch,
-                type => 'renew',
-                amount => $charge,
-                itemnumber => $itemnumber,
-                itemtype => $item->{itype},
-                borrowernumber => $borrowernumber,
-                ccode => $item->{'ccode'}}
-                );
-	return $datedue;
+    UpdateStats(
+        {
+            branch => C4::Context->userenv ? C4::Context->userenv->{branch} : $branch,
+            type           => 'renew',
+            amount         => $charge,
+            itemnumber     => $itemnumber,
+            itemtype       => $item->{itype},
+            borrowernumber => $borrowernumber,
+            ccode          => $item->{'ccode'}
+        }
+    );
+
+    return $datedue;
 }
 
 sub GetRenewCount {
@@ -3091,7 +2991,7 @@ sub GetSoonestRenewDate {
     my $itemissue = GetItemIssue($itemnumber) or return;
 
     $borrowernumber ||= $itemissue->{borrowernumber};
-    my $borrower = C4::Members::GetMemberDetails($borrowernumber)
+    my $borrower = C4::Members::GetMember( borrowernumber => $borrowernumber )
       or return;
 
     my $branchcode = _GetCircControlBranch( $item, $borrower );
@@ -3309,7 +3209,8 @@ sub GetTransfers {
     my $query = '
         SELECT datesent,
                frombranch,
-               tobranch
+               tobranch,
+               branchtransfer_id
         FROM branchtransfers
         WHERE itemnumber = ?
           AND datearrived IS NULL
@@ -3333,7 +3234,7 @@ sub GetTransfersFromTo {
     return unless ( $frombranch && $tobranch );
     my $dbh   = C4::Context->dbh;
     my $query = "
-        SELECT itemnumber,datesent,frombranch
+        SELECT branchtransfer_id,itemnumber,datesent,frombranch
         FROM   branchtransfers
         WHERE  frombranch=?
           AND  tobranch=?
@@ -3755,7 +3656,7 @@ sub LostItem{
 
     # If a borrower lost the item, add a replacement cost to the their record
     if ( my $borrowernumber = $issues->{borrowernumber} ){
-        my $borrower = C4::Members::GetMemberDetails( $borrowernumber );
+        my $borrower = C4::Members::GetMember( borrowernumber => $borrowernumber );
 
         if (C4::Context->preference('WhenLostForgiveFine')){
             my $fix = _FixOverduesOnReturn($borrowernumber, $itemnumber, 1, 0); # 1, 0 = exemptfine, no-dropbox
@@ -3851,7 +3752,7 @@ sub ProcessOfflineReturn {
 sub ProcessOfflineIssue {
     my $operation = shift;
 
-    my $borrower = C4::Members::GetMemberDetails( undef, $operation->{cardnumber} ); # Get borrower from operation cardnumber
+    my $borrower = C4::Members::GetMember( cardnumber => $operation->{cardnumber} );
 
     if ( $borrower->{borrowernumber} ) {
         my $itemnumber = C4::Items::GetItemnumberFromBarcode( $operation->{barcode} );

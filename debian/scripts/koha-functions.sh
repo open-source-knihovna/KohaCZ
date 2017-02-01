@@ -216,6 +216,25 @@ is_plack_running()
     fi
 }
 
+adjust_paths_dev_install()
+{
+# Adjust KOHA_HOME, PERL5LIB for dev installs, as indicated by
+# corresponding tag in koha-conf.xml
+
+    local instancename=$1
+    local dev_install
+
+    if [ -e /etc/koha/sites/$instancename/koha-conf.xml ]; then
+        dev_install=$(xmlstarlet sel -t -v 'yazgfs/config/dev_install' /etc/koha/sites/$instancename/koha-conf.xml)
+    fi
+
+    if [ "$dev_install" != "" ]; then
+        DEV_INSTALL=1
+        KOHA_HOME=$dev_install
+        PERL5LIB=$dev_install
+    fi
+}
+
 get_instances()
 {
     find /etc/koha/sites -mindepth 1 -maxdepth 1\
@@ -232,4 +251,24 @@ get_loglevels()
         echo "none,fatal,warn"
     fi
 
+}
+
+get_tmpdir()
+{
+    if [ "$TMPDIR" != "" ]; then
+        if [ -d "$TMPDIR" ]; then
+            echo $TMPDIR
+            return 0
+        fi
+        # We will not unset TMPDIR but just default to /tmp here
+        # Note that mktemp (used later) would look at TMPDIR
+        echo "/tmp"
+        return 0
+    fi
+    local retval=$(mktemp -u)
+    if [ "$retval" = "" ]; then
+        echo "/tmp"
+        return 0
+    fi
+    echo $(dirname $retval)
 }

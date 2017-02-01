@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 79;
+use Test::More tests => 64;
 use Test::MockModule;
 use Data::Dumper;
 use C4::Context;
@@ -38,6 +38,9 @@ $schema->storage->txn_begin;
 my $builder = t::lib::TestBuilder->new;
 my $dbh = C4::Context->dbh;
 $dbh->{RaiseError} = 1;
+
+# Remove invalid guarantorid's as long as we have no FK
+$dbh->do("UPDATE borrowers b1 LEFT JOIN borrowers b2 ON b2.borrowernumber=b1.guarantorid SET b1.guarantorid=NULL where b1.guarantorid IS NOT NULL AND b2.borrowernumber IS NULL");
 
 my $library1 = $builder->build({
     source => 'Branch',
@@ -90,12 +93,10 @@ my %data = (
     userid => 'tomasito'
 );
 
-testAgeAccessors(\%data); #Age accessor tests don't touch the db so it is safe to run them with just the object.
-
 my $addmem=AddMember(%data);
 ok($addmem, "AddMember()");
 
-my $member=GetMemberDetails("",$CARDNUMBER)
+my $member = GetMember( cardnumber => $CARDNUMBER )
   or BAIL_OUT("Cannot read member with card $CARDNUMBER");
 
 ok ( $member->{firstname}    eq $FIRSTNAME    &&
@@ -112,7 +113,7 @@ $member->{email}     = $EMAIL;
 $member->{phone}     = $PHONE;
 $member->{emailpro}  = $EMAILPRO;
 ModMember(%$member);
-my $changedmember=GetMemberDetails("",$CARDNUMBER);
+my $changedmember = GetMember( cardnumber => $CARDNUMBER );
 ok ( $changedmember->{firstname} eq $CHANGED_FIRSTNAME &&
      $changedmember->{email}     eq $EMAIL             &&
      $changedmember->{phone}     eq $PHONE             &&
@@ -148,11 +149,6 @@ C4::Context->clear_syspref_cache();
 
 $notice_email = GetNoticeEmailAddress($member->{'borrowernumber'});
 is ($notice_email, $EMAILPRO, "GetNoticeEmailAddress returns correct value when AutoEmailPrimaryAddress is emailpro");
-
-ok(!$member->{is_expired}, "GetMemberDetails() indicates that patron is not expired");
-ModMember(borrowernumber => $member->{'borrowernumber'}, dateexpiry => '2001-01-1');
-$member = GetMemberDetails($member->{'borrowernumber'});
-ok($member->{is_expired}, "GetMemberDetails() indicates that patron is expired");
 
 # Check_Userid tests
 %data = (
@@ -263,6 +259,7 @@ my $borrower1 = $builder->build({
             categorycode=>'STAFFER',
             branchcode => $library3->{branchcode},
             dateexpiry => '2015-01-01',
+            guarantorid=> undef,
         },
 });
 my $bor1inlist = $borrower1->{borrowernumber};
@@ -272,6 +269,7 @@ my $borrower2 = $builder->build({
             categorycode=>'STAFFER',
             branchcode => $library3->{branchcode},
             dateexpiry => '2015-01-01',
+            guarantorid=> undef,
         },
 });
 
@@ -281,6 +279,7 @@ my $guarantee = $builder->build({
             categorycode=>'KIDclamp',
             branchcode => $library3->{branchcode},
             dateexpiry => '2015-01-01',
+            guarantorid=> undef, # will be filled later
         },
 });
 
@@ -349,9 +348,9 @@ is( scalar(@$patstodel),2,'Borrowers without issues deleted by last issue date')
 
 # Test GetBorrowersToExpunge and TrackLastPatronActivity
 $dbh->do(q|UPDATE borrowers SET lastseen=NULL|);
-$builder->build({ source => 'Borrower', value => { lastseen => '2016-01-01 01:01:01', guarantorid => undef } } );
-$builder->build({ source => 'Borrower', value => { lastseen => '2016-02-02 02:02:02', guarantorid => undef } } );
-$builder->build({ source => 'Borrower', value => { lastseen => '2016-03-03 03:03:03', guarantorid => undef } } );
+$builder->build({ source => 'Borrower', value => { lastseen => '2016-01-01 01:01:01', categorycode => 'CIVILIAN', guarantorid => undef } } );
+$builder->build({ source => 'Borrower', value => { lastseen => '2016-02-02 02:02:02', categorycode => 'CIVILIAN', guarantorid => undef } } );
+$builder->build({ source => 'Borrower', value => { lastseen => '2016-03-03 03:03:03', categorycode => 'CIVILIAN', guarantorid => undef } } );
 $patstodel = GetBorrowersToExpunge( { last_seen => '1999-12-12' });
 is( scalar @$patstodel, 0, 'TrackLastPatronActivity - 0 patrons must be deleted' );
 $patstodel = GetBorrowersToExpunge( { last_seen => '2016-02-15' });
@@ -412,7 +411,7 @@ subtest 'GetMemberAccountRecords' => sub {
 
 subtest 'GetMemberAccountBalance' => sub {
 
-    plan tests => 10;
+    plan tests => 6;
 
     my $members_mock = new Test::MockModule('C4::Members');
     $members_mock->mock( 'GetMemberAccountRecords', sub {
@@ -429,19 +428,6 @@ subtest 'GetMemberAccountBalance' => sub {
             return ( 0, \@accountlines );
         }
     });
-
-    my $person = GetMemberDetails(undef,undef);
-    ok( !$person , 'Expected no member details from undef,undef' );
-    $person = GetMemberDetails(undef,'987654321');
-    is( $person->{amountoutstanding}, 15,
-        'Expected 15 outstanding for cardnumber.');
-    $borrowernumber = $person->{borrowernumber};
-    $person = GetMemberDetails($borrowernumber,undef);
-    is( $person->{amountoutstanding}, 15,
-        'Expected 15 outstanding for borrowernumber.');
-    $person = GetMemberDetails($borrowernumber,'987654321');
-    is( $person->{amountoutstanding}, 15,
-        'Expected 15 outstanding for both borrowernumber and cardnumber.');
 
     # do not count holds charges
     t::lib::Mocks::mock_preference( 'HoldsInNoissuesCharge', '1' );
@@ -496,84 +482,6 @@ is( $password eq "Nexus-6", 1, 'Test password used if submitted');
 $borrower = GetMember(borrowernumber => $borrowernumber);
 my $hashed_up =  Koha::AuthUtils::hash_password("Nexus-6", $borrower->{password});
 is( $borrower->{password} eq $hashed_up, 1, 'Check password hash equals hash of submitted password' );
-
-
-
-### ------------------------------------- ###
-### Testing GetAge() / SetAge() functions ###
-### ------------------------------------- ###
-#USES the package $member-variable to mock a koha.borrowers-object
-sub testAgeAccessors {
-    my ($member) = @_;
-    my $original_dateofbirth = $member->{dateofbirth};
-
-    ##Testing GetAge()
-    my $age=GetAge("1992-08-14", "2011-01-19");
-    is ($age, "18", "Age correct");
-
-    $age=GetAge("2011-01-19", "1992-01-19");
-    is ($age, "-19", "Birthday In the Future");
-
-    ##Testing SetAge() for now()
-    my $dt_now = DateTime->now();
-    $age = DateTime::Duration->new(years => 12, months => 6, days => 1);
-    C4::Members::SetAge( $member, $age );
-    $age = C4::Members::GetAge( $member->{dateofbirth} );
-    is ($age, '12', "SetAge 12 years");
-
-    $age = DateTime::Duration->new(years => 18, months => 12, days => 31);
-    C4::Members::SetAge( $member, $age );
-    $age = C4::Members::GetAge( $member->{dateofbirth} );
-    is ($age, '19', "SetAge 18+1 years"); #This is a special case, where months=>12 and days=>31 constitute one full year, hence we get age 19 instead of 18.
-
-    $age = DateTime::Duration->new(years => 18, months => 12, days => 30);
-    C4::Members::SetAge( $member, $age );
-    $age = C4::Members::GetAge( $member->{dateofbirth} );
-    is ($age, '19', "SetAge 18 years");
-
-    $age = DateTime::Duration->new(years => 0, months => 1, days => 1);
-    C4::Members::SetAge( $member, $age );
-    $age = C4::Members::GetAge( $member->{dateofbirth} );
-    is ($age, '0', "SetAge 0 years");
-
-    $age = '0018-12-31';
-    C4::Members::SetAge( $member, $age );
-    $age = C4::Members::GetAge( $member->{dateofbirth} );
-    is ($age, '19', "SetAge ISO_Date 18+1 years"); #This is a special case, where months=>12 and days=>31 constitute one full year, hence we get age 19 instead of 18.
-
-    $age = '0018-12-30';
-    C4::Members::SetAge( $member, $age );
-    $age = C4::Members::GetAge( $member->{dateofbirth} );
-    is ($age, '19', "SetAge ISO_Date 18 years");
-
-    $age = '18-1-1';
-    eval { C4::Members::SetAge( $member, $age ); };
-    is ((length $@ > 1), '1', "SetAge ISO_Date $age years FAILS");
-
-    $age = '0018-01-01';
-    eval { C4::Members::SetAge( $member, $age ); };
-    is ((length $@ == 0), '1', "SetAge ISO_Date $age years succeeds");
-
-    ##Testing SetAge() for relative_date
-    my $relative_date = DateTime->new(year => 3010, month => 3, day => 15);
-
-    $age = DateTime::Duration->new(years => 10, months => 3);
-    C4::Members::SetAge( $member, $age, $relative_date );
-    $age = C4::Members::GetAge( $member->{dateofbirth}, $relative_date->ymd() );
-    is ($age, '10', "SetAge, 10 years and 3 months old person was born on ".$member->{dateofbirth}." if todays is ".$relative_date->ymd());
-
-    $age = DateTime::Duration->new(years => 112, months => 1, days => 1);
-    C4::Members::SetAge( $member, $age, $relative_date );
-    $age = C4::Members::GetAge( $member->{dateofbirth}, $relative_date->ymd() );
-    is ($age, '112', "SetAge, 112 years, 1 months and 1 days old person was born on ".$member->{dateofbirth}." if today is ".$relative_date->ymd());
-
-    $age = '0112-01-01';
-    C4::Members::SetAge( $member, $age, $relative_date );
-    $age = C4::Members::GetAge( $member->{dateofbirth}, $relative_date->ymd() );
-    is ($age, '112', "SetAge ISO_Date, 112 years, 1 months and 1 days old person was born on ".$member->{dateofbirth}." if today is ".$relative_date->ymd());
-
-    $member->{dateofbirth} = $original_dateofbirth; #It is polite to revert made changes in the unit tests.
-} #sub testAgeAccessors
 
 # regression test for bug 16009
 my $patron;

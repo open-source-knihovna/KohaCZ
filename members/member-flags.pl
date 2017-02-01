@@ -8,6 +8,8 @@ use strict;
 use warnings;
 
 use CGI qw ( -utf8 );
+use Digest::MD5 qw(md5_base64);
+use Encode qw( encode );
 use C4::Output;
 use C4::Auth qw(:DEFAULT :EditPermissions);
 use C4::Context;
@@ -19,12 +21,13 @@ use Koha::Patron::Categories;
 
 use C4::Output;
 use Koha::Patron::Images;
+use Koha::Token;
 
 my $input = new CGI;
 
 my $flagsrequired = { permissions => 1 };
 my $member=$input->param('member');
-my $bor = GetMemberDetails( $member,'');
+my $bor = GetMember( borrowernumber => $member );
 if( $bor->{'category_type'} eq 'S' )  {
 	$flagsrequired->{'staffaccess'} = 1;
 }
@@ -42,6 +45,15 @@ my %member2;
 $member2{'borrowernumber'}=$member;
 
 if ($input->param('newflags')) {
+
+    die "Wrong CSRF token"
+        unless Koha::Token->new->check_csrf({
+            id     => Encode::encode( 'UTF-8', C4::Context->userenv->{id} ),
+            secret => md5_base64( Encode::encode( 'UTF-8', C4::Context->config('pass') ) ),
+            token  => scalar $input->param('csrf_token'),
+        });
+
+
     my $dbh=C4::Context->dbh();
 
     my @perms = $input->multi_param('flag');
@@ -85,15 +97,25 @@ if ($input->param('newflags')) {
     
     print $input->redirect("/cgi-bin/koha/members/moremember.pl?borrowernumber=$member");
 } else {
-#     my ($bor,$flags,$accessflags)=GetMemberDetails($member,'');
-    my $flags = $bor->{'flags'};
-    my $accessflags = $bor->{'authflags'};
-    my $dbh=C4::Context->dbh();
+
+    my $flags = C4::Members::patronflags( $bor );
+    my $accessflags;
+    my $dbh = C4::Context->dbh();
+    # FIXME This needs to be improved to avoid doing the same query
+    my $sth = $dbh->prepare("select bit,flag from userflags");
+    $sth->execute;
+    while ( my ( $bit, $flag ) = $sth->fetchrow ) {
+        if ( $bor->{flags} && $bor->{flags} & 2**$bit ) {
+            $accessflags->{$flag} = 1;
+        }
+    }
+
     my $all_perms  = get_all_subpermissions();
     my $user_perms = get_user_subpermissions($bor->{'userid'});
-    my $sth=$dbh->prepare("SELECT bit, flag FROM userflags ORDER BY bit");
+    $sth = $dbh->prepare("SELECT bit, flag FROM userflags ORDER BY bit");
     $sth->execute;
     my @loop;
+
     while (my ($bit, $flag) = $sth->fetchrow) {
 	    my $checked='';
 	    if ($accessflags->{$flag}) {
@@ -195,6 +217,11 @@ $template->param(
 		is_child        => ($bor->{'category_type'} eq 'C'),
 		activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
         RoutingSerials => C4::Context->preference('RoutingSerials'),
+        csrf_token => Koha::Token->new->generate_csrf(
+            {   id     => Encode::encode( 'UTF-8', C4::Context->userenv->{id} ),
+                secret => md5_base64( Encode::encode( 'UTF-8', C4::Context->config('pass') ) ),
+            }
+        ),
 		);
 
     output_html_with_http_headers $input, $cookie, $template->output;

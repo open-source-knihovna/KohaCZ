@@ -25,9 +25,10 @@ Koha::BiblioUtils::Iterator - iterates over biblios provided by a DBIx::Class::R
 
 =head1 DESCRIPTION
 
-This provides an iterator that gives the MARC::Record of each biblio that's
-returned by a L<DBIx::Class::ResultSet> that provides a C<biblionumber>, and
-C<marcxml> column from the biblioitems table.
+This provides an iterator over a L<DBIx::Class::ResultSet> that contains a
+biblionumber column.
+Returns a MARC::Record in scalar context.
+Returns biblionumber and marc in list context.
 
 =head1 SYNOPSIS
 
@@ -92,8 +93,9 @@ sub next {
     my $marc;
     my $row = $self->{rs}->next();
     return if !$row;
-    if ( $row->marcxml ) {
-        $marc = MARC::Record->new_from_xml( $row->marcxml );
+    my $marcxml = C4::Biblio::GetXmlBiblio( $row->get_column('biblionumber') );
+    if ( $marcxml ) {
+        $marc = MARC::Record->new_from_xml( $marcxml );
     }
     else {
         confess "No marcxml column returned in the request.";

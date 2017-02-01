@@ -106,14 +106,14 @@ my ($op, $patronid, $patronlogin, $patronpw, $barcode, $confirmed) = (
 
 my $issuenoconfirm = 1; #don't need to confirm on issue.
 #warn "issuerid: " . $issuerid;
-my $issuer   = GetMemberDetails($issuerid);
+my $issuer   = GetMember( borrowernumber => $issuerid );
 my $item     = GetItem(undef,$barcode);
 if (C4::Context->preference('SelfCheckoutByLogin') && !$patronid) {
     my $dbh = C4::Context->dbh;
     my $resval;
     ($resval, $patronid) = checkpw($dbh, $patronlogin, $patronpw);
 }
-my $borrower = GetMemberDetails(undef,$patronid);
+my $borrower = GetMember( cardnumber => $patronid );
 
 my $currencySymbol = "";
 if ( my $active_currency = Koha::Acquisition::Currencies->get_active ) {
@@ -131,7 +131,7 @@ if ($op eq "logout") {
 elsif ( $op eq "returnbook" && $allowselfcheckreturns ) {
     my ($doreturn) = AddReturn( $barcode, $branch );
     #warn "returnbook: " . $doreturn;
-    $borrower = GetMemberDetails(undef,$patronid);
+    $borrower = GetMember( cardnumber => $patronid );
 }
 elsif ( $op eq "checkout" ) {
     my $impossible  = {};
@@ -226,14 +226,12 @@ if ($borrower->{cardnumber}) {
     my @issues;
     my ($issueslist) = GetPendingIssues( $borrower->{'borrowernumber'} );
     foreach my $it (@$issueslist) {
-        my ($renewokay, $renewerror) = CanBookBeIssued(
-            $borrower,
-            $it->{'barcode'},
-            undef,
-            0,
-            C4::Context->preference("AllowItemsOnHoldCheckoutSCO")
+        my ($can_be_renewed, $renew_error) = CanBookBeRenewed(
+            $borrower->{borrowernumber},
+            $it->{itemnumber},
         );
-        $it->{'norenew'} = 1 if $renewokay->{'NO_MORE_RENEWALS'};
+        $it->{can_be_renewed} = $can_be_renewed;
+        $it->{renew_error} = $renew_error;
         $it->{date_due}  = $it->{date_due_sql};
         push @issues, $it;
     }

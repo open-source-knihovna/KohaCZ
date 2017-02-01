@@ -209,36 +209,38 @@
             [% UNLESS ( closedate ) %]
                 <div id="toolbar" class="btn-toolbar">
                     [% IF active %]
-                        <div class="btn-group"><a href="#addtoBasket" role="button" class="btn btn-small" data-toggle="modal"><i class="fa fa-plus"></i> Add to basket</a></div>
+                        <div class="btn-group"><a href="#addtoBasket" role="button" class="btn btn-default btn-sm" data-toggle="modal"><i class="fa fa-plus"></i> Add to basket</a></div>
                     [% END %]
-                    <div class="btn-group"><a href="basketheader.pl?booksellerid=[% booksellerid %]&amp;basketno=[% basketno %]&amp;op=add_form" class="btn btn-small" id="basketheadbutton"><i class="fa fa-pencil"></i> Edit basket</a></div>
+                    <div class="btn-group"><a href="basketheader.pl?booksellerid=[% booksellerid %]&amp;basketno=[% basketno %]&amp;op=add_form" class="btn btn-default btn-sm" id="basketheadbutton"><i class="fa fa-pencil"></i> Edit basket</a></div>
                     [%# FIXME This action should not be available for everyone %]
-                    <div class="btn-group"><a href="#deleteBasketModal" role="button" class="btn btn-small" data-toggle="modal" id="delbasketbutton"><i class="fa fa-trash"></i> Delete this basket</a></div>
+                    <div class="btn-group"><a href="#deleteBasketModal" role="button" class="btn btn-default btn-sm" data-toggle="modal" id="delbasketbutton"><i class="fa fa-trash"></i> Delete this basket</a></div>
                    [% IF ( unclosable ) %]
                     [% ELSIF ( uncertainprices ) %]
-                        <div class="btn-group"><a href="/cgi-bin/koha/acqui/uncertainprice.pl?booksellerid=[% booksellerid %]&amp;owner=1" class="btn btn-small" id="uncertpricesbutton">Uncertain prices</a></div>
+                        <div class="btn-group"><a href="/cgi-bin/koha/acqui/uncertainprice.pl?booksellerid=[% booksellerid %]&amp;owner=1" class="btn btn-default btn-sm" id="uncertpricesbutton">Uncertain prices</a></div>
                     [% ELSE %]
                         <div class="btn-group">
-                            <a href="/cgi-bin/koha/acqui/basket.pl?op=close&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="closebutton"><i class="fa fa-times-circle"></i> Close this basket</a>
+                            <a href="/cgi-bin/koha/acqui/basket.pl?op=close&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-default btn-sm" id="closebutton"><i class="fa fa-times-circle"></i> Close this basket</a>
                         </div>
                     [% END %]
                         [% PROCESS btn_group %]
-                        <div class="btn-group"><a href="/cgi-bin/koha/acqui/basket.pl?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="exportbutton"><i class="fa fa-download"></i> Export this basket as CSV</a></div>
+                        <div class="btn-group"><a href="/cgi-bin/koha/acqui/basket.pl?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-default btn-sm" id="exportbutton"><i class="fa fa-download"></i> Export this basket as CSV</a></div>
                         [% IF ediaccount %]
-                        <div class="btn-group"><a href="/cgi-bin/koha/acqui/edi_ean.pl?op=ediorder&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="ediorderbutton"><i class="fa fa-download"></i> Create EDIFACT order</a></div>
+                        <div class="btn-group"><a href="/cgi-bin/koha/acqui/edi_ean.pl?op=ediorder&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-default btn-sm" id="ediorderbutton"><i class="fa fa-download"></i> Create EDIFACT order</a></div>
                         [% END %]
                         [% IF ( active && books_loop ) %]
                             <div class="btn-group">
                                 <form action="/cgi-bin/koha/acqui/basket.pl" method="post">
                                     <input type="hidden" name="op" value="email" />
                                     <input type="hidden" name="basketno" value="[% basketno %]" />
-                                    <button type="submit" class="btn btn-small" id="emailvendorbutton"><i class="fa fa-envelope"></i> E-mail order</button>
+                                    <button type="submit" class="btn btn-default btn-sm" id="emailvendorbutton"><i class="fa fa-envelope"></i> E-mail order</button>
                                 </form>
                             </div>
                         [% END %]
                 </div>
 <!-- Modal for confirm deletion box-->
-                <div class="modal hide" id="deleteBasketModal" tabindex="-1" role="dialog" aria-labelledby="delbasketModalLabel" aria-hidden="true">
+                <div class="modal" id="deleteBasketModal" tabindex="-1" role="dialog" aria-labelledby="delbasketModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                    <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="closebtn" data-dismiss="modal" aria-hidden="true">×</button>
                         <h3>Confirm deletion</h3>
@@ -254,7 +256,7 @@
                                 <input type="hidden" name="basketno" value="[% basketno %]" />
                                 <input type="hidden" name="booksellerid" value="[% booksellerid %]" />
                                 <input type="hidden" name="delbiblio" value="0" />
-                                <button type="submit" class="btn btn-default">Delete basket</button>
+                                <button type="submit" class="btn btn-default btn-default">Delete basket</button>
                             </form>
                         </div>
                     [% ELSE %]
@@ -272,7 +274,7 @@
                                 <input type="hidden" name="basketno" value="[% basketno %]" />
                                 <input type="hidden" name="booksellerid" value="[% booksellerid %]" />
                                 <input type="hidden" name="delbiblio" value="0" />
-                                <button type="submit" class="btn btn-default">Delete basket and orders</button>
+                                <button type="submit" class="btn btn-default btn-default">Delete basket and orders</button>
                             </form>
 
                             <form action="/cgi-bin/koha/acqui/basket.pl" method="get">
@@ -280,19 +282,21 @@
                                 <input type="hidden" name="basketno" value="[% basketno %]" />
                                 <input type="hidden" name="booksellerid" value="[% booksellerid %]" />
                                 <input type="hidden" name="delbiblio" value="1" />
-                                <button type="submit" class="btn btn-default">Delete basket, orders, and records</button>
+                                <button type="submit" class="btn btn-default btn-default">Delete basket, orders, and records</button>
                             </form>
 
                         </div>
                     [% END %]
+                    </div>
+                    </div>
                 </div>
 <!-- End of Modal-->
             [% ELSE %]
                 [% UNLESS ( grouped ) %]
                 <div id="toolbar" class="btn-toolbar">
-                    <div class="btn-group"><a href="#" class="btn btn-small" id="reopenbutton"><i class="fa fa-refresh"></i> Reopen this basket</a></div>
+                    <div class="btn-group"><a href="#" class="btn btn-default btn-sm" id="reopenbutton"><i class="fa fa-refresh"></i> Reopen this basket</a></div>
                     [% PROCESS btn_group %]
-                    <div class="btn-group"><a href="/cgi-bin/koha/acqui/basket.pl?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-small" id="exportbutton"><i class="fa fa-download"></i> Export this basket as CSV</a></div>
+                    <div class="btn-group"><a href="/cgi-bin/koha/acqui/basket.pl?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-default btn-sm" id="exportbutton"><i class="fa fa-download"></i> Export this basket as CSV</a></div>
                 </div>
                 [% END %]
             [% END %]
@@ -508,7 +512,7 @@
                 [% FOREACH foot_loo IN book_foot_loop %]
                     <tr>
                         <th></th>
-                        <th>Total (GST [% foot_loo.tax_rate * 100 | $Price %])</th>
+                        <th>Total (GST [% foot_loo.tax_rate * 100 %])</th>
                         <th class="tax_excluded">&nbsp;</th>
                         <th class="tax_excluded">&nbsp;</th>
                         <th class="tax_included">&nbsp;</th>
@@ -612,7 +616,7 @@
                         <td class="number [% IF books_loo.quantity.search(zero_regex) %]error[% END %]">[% books_loo.quantity %]</td>
                         <td class="number tax_excluded [% IF books_loo.total_tax_excluded.search(zero_regex) %]error[% END %]">[% books_loo.total_tax_excluded | $Price %]</td>
                         <td class="number tax_included [% IF books_loo.total_tax_included.search(zero_regex) %]error[% END %]">[% books_loo.total_tax_included | $Price %]</td>
-                        <td class="number">[% books_loo.tax_rate * 100 | $Price %]</td>
+                        <td class="number">[% books_loo.tax_rate * 100 %]</td>
                         <td class="number [% IF books_loo.tax_value.search(zero_regex) %]error[% END %]">[% books_loo.tax_value | $Price %]</td>
                         <td>[% books_loo.budget_name %]</td>
                         <td>[% books_loo.suppliers_report %]</td>
@@ -725,7 +729,7 @@
                     <td class="number">[% order.quantity %]</td>
                     <td class="number tax_excluded">[% order.total_tax_excluded | $Price %]</td>
                     <td class="number tax_included">[% order.total_tax_included | $Price %]</td>
-                    <td class="number">[% order.tax_rate * 100 | $Price %]</td>
+                    <td class="number">[% order.tax_rate * 100 %]</td>
                     <td class="number">[% order.tax_value | $Price %]</td>
                     <td>[% order.budget_name %]
                   </tr>
@@ -738,7 +742,9 @@
         [% UNLESS ( closedate ) %]
 
     <!-- Modal -->
-    <div id="addtoBasket" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="addtoBasketLabel" aria-hidden="true">
+    <div id="addtoBasket" class="modal" tabindex="-1" role="dialog" aria-labelledby="addtoBasketLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
         <div class="modal-body">
         [% IF active %]
             [% INCLUDE 'acquisitions-add-to-basket.inc' %]
@@ -746,6 +752,8 @@
         </div>
         <div class="modal-footer">
             <a href="#" class="cancel" data-dismiss="modal" aria-hidden="true">Cancel</a>
+        </div>
+        </div>
         </div>
     </div>
 

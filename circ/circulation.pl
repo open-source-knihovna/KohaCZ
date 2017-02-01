@@ -148,11 +148,6 @@ $findborrower =~ s|,| |g;
 
 my $branch = C4::Context->userenv->{'branch'};
 
-# If AutoLocation is not activated, we show the Circulation Parameters to chage settings of librarian
-if (C4::Context->preference("AutoLocation") != 1) {
-    $template->param(ManualLocation => 1);
-}
-
 if (C4::Context->preference("DisplayClearScreenButton")) {
     $template->param(DisplayClearScreenButton => 1);
 }
@@ -265,18 +260,14 @@ if ($findborrower) {
 my $patron;
 if ($borrowernumber) {
     $patron = Koha::Patrons->find( $borrowernumber );
-    $borrower = GetMemberDetails( $borrowernumber, 0 );
-    my ( $od, $issue, $fines ) = GetMemberIssuesAndFines( $borrowernumber );
+    $borrower = GetMember( borrowernumber => $borrowernumber );
+    my $overdues = $patron->get_overdues;
+    my $issues = $patron->checkouts;
+    my $balance = $patron->account->balance;
 
-    # Warningdate is the date that the warning starts appearing
-    my (  $today_year,   $today_month,   $today_day) = Today();
-    my ($warning_year, $warning_month, $warning_day) = split /-/, $borrower->{'dateexpiry'};
-    my (  $enrol_year,   $enrol_month,   $enrol_day) = split /-/, $borrower->{'dateenrolled'};
+
     # if the expiry date is before today ie they have expired
-    if ( !$borrower->{'dateexpiry'} || $warning_year*$warning_month*$warning_day==0
-        || Date_to_Days($today_year,     $today_month, $today_day  ) 
-         > Date_to_Days($warning_year, $warning_month, $warning_day) )
-    {
+    if ( $patron->is_expired ) {
         #borrowercard expired, no issues
         $template->param(
             noissues => ($force_allow_issue) ? 0 : "1",
@@ -285,10 +276,7 @@ if ($borrowernumber) {
         );
     }
     # check for NotifyBorrowerDeparture
-    elsif ( C4::Context->preference('NotifyBorrowerDeparture') &&
-            Date_to_Days(Add_Delta_Days($warning_year,$warning_month,$warning_day,- C4::Context->preference('NotifyBorrowerDeparture'))) <
-            Date_to_Days( $today_year, $today_month, $today_day ) ) 
-    {
+    elsif ( $patron->is_going_to_expire ) {
         # borrower card soon to expire warn librarian
         $template->param( "warndeparture" => $borrower->{dateexpiry} ,
                         );
@@ -297,9 +285,9 @@ if ($borrowernumber) {
         }
     }
     $template->param(
-        overduecount => $od,
-        issuecount   => $issue,
-        finetotal    => $fines
+        overduecount => $overdues->count,
+        issuecount   => $issues->count,
+        finetotal    => $balance,
     );
 
     if ( $patron and $patron->is_debarred ) {
@@ -417,9 +405,6 @@ if (@$barcodes) {
         }
     }
 
-    # FIXME If the issue is confirmed, we launch another time GetMemberIssuesAndFines, now display the issue count after issue
-    my ( $od, $issue, $fines ) = GetMemberIssuesAndFines($borrowernumber);
-
     if ($question->{RESERVE_WAITING} or $question->{RESERVED}){
         $template->param(
             reserveborrowernumber => $question->{'resborrowernumber'}
@@ -431,8 +416,9 @@ if (@$barcodes) {
     );
 
 
-
-    $template_params->{issuecount} = $issue;
+    # FIXME If the issue is confirmed, we launch another time checkouts->count, now display the issue count after issue
+    $patron = Koha::Patrons->find( $borrowernumber );
+    $template_params->{issuecount} = $patron->checkouts->count;
 
     if ( $iteminfo ) {
         $iteminfo->{subtitle} = GetRecordValue('subtitle', GetMarcBiblio($iteminfo->{biblionumber}), GetFrameworkCode($iteminfo->{biblionumber}));
@@ -454,7 +440,7 @@ if (@$barcodes) {
 
 # reload the borrower info for the sake of reseting the flags.....
 if ($borrowernumber) {
-    $borrower = GetMemberDetails( $borrowernumber, 0 );
+    $borrower = GetMember( borrowernumber => $borrowernumber );
 }
 
 ##################################################################################
@@ -472,7 +458,7 @@ if ($borrowernumber) {
 }
 
 #title
-my $flags = $borrower->{'flags'};
+my $flags = $borrower ? C4::Members::patronflags( $borrower ) : {};
 foreach my $flag ( sort keys %$flags ) {
     $flags->{$flag}->{'message'} =~ s#\n#<br />#g;
     if ( $flags->{$flag}->{'noissues'} ) {
@@ -555,7 +541,7 @@ foreach my $flag ( sort keys %$flags ) {
     }
 }
 
-my $amountold = $borrower->{flags} ? $borrower->{flags}->{'CHARGES'}->{'message'} || 0 : 0;
+my $amountold = $flags ? $flags->{'CHARGES'}->{'message'} || 0 : 0;
 $amountold =~ s/^.*\$//;    # remove upto the $, if any
 
 my ( $total, $accts, $numaccts) = GetMemberAccountRecords( $borrowernumber );

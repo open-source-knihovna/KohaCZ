@@ -18,12 +18,13 @@
 
 use Modern::Perl;
 
-use Test::More tests => 19;
+use Test::More tests => 22;
 use Test::MockModule;
 use Test::Warn;
 
 use t::lib::TestBuilder;
 
+use Koha::Account;
 use Koha::Account::Lines;
 use Koha::Account::Line;
 
@@ -36,7 +37,6 @@ BEGIN {
 
 can_ok( 'C4::Accounts',
     qw(
-        makepayment
         getnextacctno
         chargelostitem
         manualinvoice
@@ -45,9 +45,6 @@ can_ok( 'C4::Accounts',
         getcredits
         getrefunds
         ReversePayment
-        recordpayment_selectaccts
-        makepartialpayment
-        WriteOffFee
         purge_zero_balance_fees )
 );
 
@@ -56,7 +53,7 @@ $schema->storage->txn_begin;
 my $dbh = C4::Context->dbh;
 
 my $builder = t::lib::TestBuilder->new;
-my $library = $builder->build({ source => 'Branch' });
+my $library = $builder->build( { source => 'Branch' } );
 
 $dbh->do(q|DELETE FROM accountlines|);
 $dbh->do(q|DELETE FROM issues|);
@@ -138,7 +135,7 @@ $dbh->do(q|DELETE FROM accountlines|);
 
 subtest "Koha::Account::pay tests" => sub {
 
-    plan tests => 10;
+    plan tests => 12;
 
     # Create a borrower
     my $categorycode = $builder->build({ source => 'Category' })->{ categorycode };
@@ -225,6 +222,7 @@ subtest "Koha::Account::pay tests" => sub {
         $amountleft += $line;
     }
     is($amountleft, 160, 'The account has $160 as expected' );
+
     # Is the payment note well registered
     $sth = $dbh->prepare("SELECT note FROM accountlines WHERE borrowernumber=? ORDER BY accountlines_id DESC LIMIT 1");
     $sth->execute($borrower->borrowernumber);
@@ -244,14 +242,109 @@ subtest "Koha::Account::pay tests" => sub {
         $amountleft += $line;
     }
     is($amountleft, -40, 'The account has -$40 as expected, (credit situation)' );
+
     # Is the payment note well registered
     $sth = $dbh->prepare("SELECT note FROM accountlines WHERE borrowernumber=? ORDER BY accountlines_id DESC LIMIT 1");
     $sth->execute($borrower->borrowernumber);
     $note = $sth->fetchrow_array;
     is($note,'$200.00 payment note', '$200.00 payment note is registered');
+
+    my $line3 = Koha::Account::Line->new({ borrowernumber => $borrower->borrowernumber, amountoutstanding => 42, accounttype => 'TEST' })->store();
+    my $payment_id = $account->pay( { lines => [$line3], amount => 42 } );
+    my $payment = Koha::Account::Lines->find( $payment_id );
+    is( $payment->amount(), '-42.000000', "Payment paid the specified fine" );
+    $line3 = Koha::Account::Lines->find( $line3->id );
+    is( $line3->amountoutstanding, '0.000000', "Specified fine is paid" );
 };
 
-subtest "makepayment() tests" => sub {
+subtest "Koha::Account::pay particular line tests" => sub {
+
+    plan tests => 5;
+
+    # Create a borrower
+    my $categorycode = $builder->build({ source => 'Category' })->{ categorycode };
+    my $branchcode   = $builder->build({ source => 'Branch' })->{ branchcode };
+
+    my $borrower = Koha::Patron->new( {
+        cardnumber => 'kylemhall',
+        surname => 'Hall',
+        firstname => 'Kyle',
+    } );
+    $borrower->categorycode( $categorycode );
+    $borrower->branchcode( $branchcode );
+    $borrower->store;
+
+    my $account = Koha::Account->new({ patron_id => $borrower->id });
+
+    my $line1 = Koha::Account::Line->new({ borrowernumber => $borrower->borrowernumber, amountoutstanding => 1 })->store();
+    my $line2 = Koha::Account::Line->new({ borrowernumber => $borrower->borrowernumber, amountoutstanding => 2 })->store();
+    my $line3 = Koha::Account::Line->new({ borrowernumber => $borrower->borrowernumber, amountoutstanding => 3 })->store();
+    my $line4 = Koha::Account::Line->new({ borrowernumber => $borrower->borrowernumber, amountoutstanding => 4 })->store();
+
+    is( $account->balance(), "10.000000", "Account balance is 10" );
+
+    $account->pay(
+        {
+            lines => [$line2, $line3, $line4],
+            amount => 4,
+        }
+    );
+
+    $_->_result->discard_changes foreach ( $line1, $line2, $line3, $line4 );
+
+    # Line1 is not paid at all, as it was not passed in the lines param
+    is( $line1->amountoutstanding, "1.000000", "Line 1 was not paid" );
+    # Line2 was paid in full, as it was the first in the lines list
+    is( $line2->amountoutstanding, "0.000000", "Line 2 was paid in full" );
+    # Line3 was paid partially, as the remaining balance did not cover it entirely
+    is( $line3->amountoutstanding, "1.000000", "Line 3 was paid to 1.00" );
+    # Line4 was not paid at all, as the payment was all used up by that point
+    is( $line4->amountoutstanding, "4.000000", "Line 4 was not paid" );
+};
+
+subtest "Koha::Account::pay writeoff tests" => sub {
+
+    plan tests => 5;
+
+    # Create a borrower
+    my $categorycode = $builder->build({ source => 'Category' })->{ categorycode };
+    my $branchcode   = $builder->build({ source => 'Branch' })->{ branchcode };
+
+    my $borrower = Koha::Patron->new( {
+        cardnumber => 'chelseahall',
+        surname => 'Hall',
+        firstname => 'Chelsea',
+    } );
+    $borrower->categorycode( $categorycode );
+    $borrower->branchcode( $branchcode );
+    $borrower->store;
+
+    my $account = Koha::Account->new({ patron_id => $borrower->id });
+
+    my $line = Koha::Account::Line->new({ borrowernumber => $borrower->borrowernumber, amountoutstanding => 42 })->store();
+
+    is( $account->balance(), "42.000000", "Account balance is 42" );
+
+    my $id = $account->pay(
+        {
+            lines  => [$line],
+            amount => 42,
+            type   => 'writeoff',
+        }
+    );
+
+    $line->_result->discard_changes();
+
+    is( $line->amountoutstanding, "0.000000", "Line was written off" );
+
+    my $writeoff = Koha::Account::Lines->find( $id );
+
+    is( $writeoff->accounttype, 'W', 'Type is correct' );
+    is( $writeoff->description, 'Writeoff', 'Description is correct' );
+    is( $writeoff->amount, '-42.000000', 'Amount is correct' );
+};
+
+subtest "More Koha::Account::pay tests" => sub {
 
     plan tests => 6;
 
@@ -278,13 +371,10 @@ subtest "makepayment() tests" => sub {
 
     is( $rs->count(), 1, 'Accountline created' );
 
+    my $account = Koha::Account->new( { patron_id => $borrowernumber } );
+    my $line = Koha::Account::Lines->find( $accountline->{ accountlines_id } );
     # make the full payment
-    makepayment(
-        $accountline->{ accountlines_id }, $borrowernumber,
-        $accountline->{ accountno },       $amount,
-        $borrowernumber, $branch, 'A payment note' );
-
-    # TODO: someone should write actual tests for makepayment()
+    $account->pay({ lines => [$line], amount => $amount, library_id => $branch, note => 'A payment note' });
 
     my $stat = $schema->resultset('Statistic')->search({
         branch  => $branch,
@@ -303,7 +393,7 @@ subtest "makepayment() tests" => sub {
     }
 };
 
-subtest "makepartialpayment() tests" => sub {
+subtest "Even more Koha::Account::pay tests" => sub {
 
     plan tests => 6;
 
@@ -331,13 +421,10 @@ subtest "makepartialpayment() tests" => sub {
 
     is( $rs->count(), 1, 'Accountline created' );
 
+    my $account = Koha::Account->new( { patron_id => $borrowernumber } );
+    my $line = Koha::Account::Lines->find( $accountline->{ accountlines_id } );
     # make the full payment
-    makepartialpayment(
-        $accountline->{ accountlines_id }, $borrowernumber,
-        $accountline->{ accountno },       $partialamount,
-        $borrowernumber, $branch, 'A payment note' );
-
-    # TODO: someone should write actual tests for makepartialpayment()
+    $account->pay({ lines => [$line], amount => $partialamount, library_id => $branch, note => 'A payment note' });
 
     my $stat = $schema->resultset('Statistic')->search({
         branch  => $branch,
@@ -354,6 +441,41 @@ subtest "makepartialpayment() tests" => sub {
         is( $stat->borrowernumber, $borrowernumber, "Correct borrowernumber logged to statistics" );
         is( $stat->value, "$partialamount" . "\.0000", "Correct amount logged to statistics" );
     }
+};
+
+subtest 'balance' => sub {
+    plan tests => 2;
+
+    my $patron = $builder->build({source => 'Borrower'});
+    $patron = Koha::Patrons->find( $patron->{borrowernumber} );
+    my $account = $patron->account;
+    is( $account->balance, 0, 'balance should return 0 if the patron does not have fines' );
+
+    my $accountline_1 = $builder->build(
+        {
+            source => 'Accountline',
+            value  => {
+                borrowernumber    => $patron->borrowernumber,
+                amount            => 42,
+                amountoutstanding => 42
+            }
+        }
+    );
+    my $accountline_2 = $builder->build(
+        {
+            source => 'Accountline',
+            value  => {
+                borrowernumber    => $patron->borrowernumber,
+                amount            => -13,
+                amountoutstanding => -13
+            }
+        }
+    );
+
+    my $balance = $patron->account->balance;
+    is( int($balance), 29, 'balance should return the correct value');
+
+    $patron->delete;
 };
 
 1;

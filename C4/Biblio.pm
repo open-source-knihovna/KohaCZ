@@ -41,6 +41,8 @@ use C4::Debug;
 use Koha::Caches;
 use Koha::Authority::Types;
 use Koha::Acquisition::Currencies;
+use Koha::Biblio::Metadata;
+use Koha::Biblio::Metadatas;
 use Koha::SearchEngine;
 use Koha::Libraries;
 
@@ -104,13 +106,11 @@ BEGIN {
       &CountItemsIssued
       &CountBiblioInOrders
       &GetSubscriptionsId
-      &GetHolds
     );
 
     # To modify something
     push @EXPORT, qw(
       &ModBiblio
-      &ModBiblioframework
       &ModZebra
       &UpdateTotalIssues
       &RemoveAllNsb
@@ -159,11 +159,11 @@ Biblio.pm contains functions for managing storage and editing of bibliographic d
 
 =item 2. as raw MARC in the Zebra index and storage engine
 
-=item 3. as MARC XML in biblioitems.marcxml
+=item 3. as MARC XML in biblio_metadata.metadata
 
 =back
 
-In the 3.0 version of Koha, the authoritative record-level information is in biblioitems.marcxml
+In the 3.0 version of Koha, the authoritative record-level information is in biblio_metadata.metadata
 
 Because the data isn't completely normalized there's a chance for information to get out of sync. The design choice to go with a un-normalized schema was driven by performance and stability concerns. However, if this occur, it can be considered as a bug : The API is (or should be) complete & the only entry point for all biblio/items managements.
 
@@ -183,7 +183,7 @@ Because of this design choice, the process of managing storage and editing is a 
 
 =item 2. _koha_* - low-level internal functions for managing the koha tables
 
-=item 3. Marc management function : as the MARC record is stored in biblioitems.marcxml, some subs dedicated to it's management are in this package. They should be used only internally by Biblio.pm, the only official entry points being AddBiblio, AddItem, ModBiblio, ModItem.
+=item 3. Marc management function : as the MARC record is stored in biblio_metadata.metadata, some subs dedicated to it's management are in this package. They should be used only internally by Biblio.pm, the only official entry points being AddBiblio, AddItem, ModBiblio, ModItem.
 
 =item 4. Zebra functions used to update the Zebra index
 
@@ -191,7 +191,7 @@ Because of this design choice, the process of managing storage and editing is a 
 
 =back
 
-The MARC record (in biblioitems.marcxml) contains the complete marc record, including items. It also contains the biblionumber. That is the reason why it is not stored directly by AddBiblio, with all other fields . To save a biblio, we need to :
+The MARC record (in biblio_metadata.metadata) contains the complete marc record, including items. It also contains the biblionumber. That is the reason why it is not stored directly by AddBiblio, with all other fields . To save a biblio, we need to :
 
 =over 4
 
@@ -200,20 +200,6 @@ The MARC record (in biblioitems.marcxml) contains the complete marc record, incl
 =item 2. add the biblionumber and biblioitemnumber into the MARC records
 
 =item 3. save the marc record
-
-=back
-
-When dealing with items, we must :
-
-=over 4
-
-=item 1. save the item in items table, that gives us an itemnumber
-
-=item 2. add the itemnumber to the item MARC field
-
-=item 3. overwrite the MARC record (with the added item) into biblioitems.marcxml
-
-When modifying a biblio or an item, the behaviour is quite similar.
 
 =back
 
@@ -232,7 +218,7 @@ framework code.
 This function also accepts a third, optional argument: a hashref
 to additional options.  The only defined option is C<defer_marc_save>,
 which if present and mapped to a true value, causes C<AddBiblio>
-to omit the call to save the MARC in C<bibilioitems.marcxml>
+to omit the call to save the MARC in C<biblio_metadata.metadata>
 This option is provided B<only>
 for the use of scripts such as C<bulkmarcimport.pl> that may need
 to do some manipulation of the MARC record for item parsing before
@@ -384,22 +370,6 @@ sub _strip_item_fields {
     foreach my $field ( $record->field($itemtag) ) {
         $record->delete_field($field);
     }
-}
-
-=head2 ModBiblioframework
-
-   ModBiblioframework($biblionumber,$frameworkcode);
-
-Exported function to modify a biblio framework
-
-=cut
-
-sub ModBiblioframework {
-    my ( $biblionumber, $frameworkcode ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare( "UPDATE biblio SET frameworkcode=? WHERE biblionumber=?" );
-    $sth->execute( $frameworkcode, $biblionumber );
-    return 1;
 }
 
 =head2 DelBiblio
@@ -1336,11 +1306,12 @@ sub GetMarcBiblio {
     }
 
     my $dbh          = C4::Context->dbh;
-    my $sth          = $dbh->prepare("SELECT biblioitemnumber, marcxml FROM biblioitems WHERE biblionumber=? ");
+    my $sth          = $dbh->prepare("SELECT biblioitemnumber FROM biblioitems WHERE biblionumber=? ");
     $sth->execute($biblionumber);
     my $row     = $sth->fetchrow_hashref;
     my $biblioitemnumber = $row->{'biblioitemnumber'};
-    my $marcxml = StripNonXmlChars( $row->{'marcxml'} );
+    my $marcxml = GetXmlBiblio( $biblionumber );
+    $marcxml = StripNonXmlChars( $marcxml );
     my $frameworkcode = GetFrameworkCode($biblionumber);
     MARC::File::XML->default_record_format( C4::Context->preference('marcflavour') );
     my $record = MARC::Record->new();
@@ -1369,17 +1340,24 @@ sub GetMarcBiblio {
 
   my $marcxml = GetXmlBiblio($biblionumber);
 
-Returns biblioitems.marcxml of the biblionumber passed in parameter.
+Returns biblio_metadata.metadata/marcxml of the biblionumber passed in parameter.
 The XML should only contain biblio information (item information is no longer stored in marcxml field)
 
 =cut
 
 sub GetXmlBiblio {
     my ($biblionumber) = @_;
-    my $dbh            = C4::Context->dbh;
-    my $sth            = $dbh->prepare("SELECT marcxml FROM biblioitems WHERE biblionumber=? ");
-    $sth->execute($biblionumber);
-    my ($marcxml) = $sth->fetchrow;
+    my $dbh = C4::Context->dbh;
+    return unless $biblionumber;
+    my ($marcxml) = $dbh->selectrow_array(
+        q|
+        SELECT metadata
+        FROM biblio_metadata
+        WHERE biblionumber=?
+            AND format='marcxml'
+            AND marcflavour=?
+    |, undef, $biblionumber, C4::Context->preference('marcflavour')
+    );
     return $marcxml;
 }
 
@@ -3234,9 +3212,6 @@ sub _koha_modify_biblio {
 
   my ($biblioitemnumber,$error) = _koha_modify_biblioitem_nonmarc( $dbh, $biblioitem );
 
-Updates biblioitems row except for marc and marcxml, which should be changed
-via ModBiblioMarc
-
 =cut
 
 sub _koha_modify_biblioitem_nonmarc {
@@ -3523,9 +3498,20 @@ sub ModBiblioMarc {
       $f005->update(sprintf("%4d%02d%02d%02d%02d%04.1f",@a)) if $f005;
     }
 
-    $sth = $dbh->prepare("UPDATE biblioitems SET marcxml=? WHERE biblionumber=?");
-    $sth->execute( $record->as_xml_record($encoding), $biblionumber );
-    $sth->finish;
+    my $metadata = {
+        biblionumber => $biblionumber,
+        format       => 'marcxml',
+        marcflavour  => C4::Context->preference('marcflavour'),
+    };
+    # FIXME To replace with ->find_or_create?
+    if ( my $m_rs = Koha::Biblio::Metadatas->find($metadata) ) {
+        $m_rs->metadata( $record->as_xml_record($encoding) );
+        $m_rs->store;
+    } else {
+        my $m_rs = Koha::Biblio::Metadata->new($metadata);
+        $m_rs->metadata( $record->as_xml_record($encoding) );
+        $m_rs->store;
+    }
     ModZebra( $biblionumber, "specialUpdate", "biblioserver", $record );
     return $biblionumber;
 }
@@ -3568,26 +3554,6 @@ sub GetSubscriptionsId {
     $sth->execute($biblionumber);
     my @subscriptions = $sth->fetchrow_array;
     return (@subscriptions);
-}
-
-=head2 GetHolds
-
-    $holds = &GetHolds($biblionumber);
-
-This function return the count of holds with $biblionumber
-
-=cut
-
-sub GetHolds {
- my ($biblionumber) = @_;
-    my $dbh            = C4::Context->dbh;
-    my $query          = "SELECT count(*)
-          FROM  reserves
-          WHERE biblionumber=?";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($biblionumber);
-    my $holds = $sth->fetchrow;
-    return ($holds);
 }
 
 =head2 prepare_host_field

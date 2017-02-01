@@ -134,21 +134,31 @@ sub GetAvailability {
         } else {
             my $status;
             my $msg;
-            my $biblioitem = ( GetBiblioItemByBiblioNumber( $id, undef ) )[0];
-            if ($biblioitem) {
-
+            my $items = GetItemnumbersForBiblio($id);
+            if ($items) {
+                # Open XML
+                $out .= "  <dlf:record>\n";
+                $out .= "    <dlf:bibliographic id=\"" .$id. "\" />\n";
+                $out .= "    <dlf:items>\n";
+                # We loop over the items to clean them
+                foreach my $itemnumber (@$items) {
+                    my ( $biblionumber, $status, $msg, $location ) = _availability($itemnumber);
+                    $out .= "      <dlf:item id=\"" . $itemnumber . "\">\n";
+                    $out .= "        <dlf:simpleavailability>\n";
+                    $out .= "          <dlf:identifier>" . $itemnumber . "</dlf:identifier>\n";
+                    $out .= "          <dlf:availabilitystatus>" . $status . "</dlf:availabilitystatus>\n";
+                    if ($msg)      { $out .= "          <dlf:availabilitymsg>" . $msg . "</dlf:availabilitymsg>\n"; }
+                    if ($location) { $out .= "          <dlf:location>" . $location . "</dlf:location>\n"; }
+                    $out .= "        </dlf:simpleavailability>\n";
+                    $out .= "      </dlf:item>\n";
+                }
+                # Close XML
+                $out .= "    </dlf:items>\n";
+                $out .= "  </dlf:record>\n";
             } else {
                 $status = "unknown";
                 $msg    = "Error: could not retrieve availability for this ID";
             }
-            $out .= "  <dlf:record>\n";
-            $out .= "    <dlf:bibliographic id=\"" . $id . "\" />\n";
-            $out .= "    <dlf:simpleavailability>\n";
-            $out .= "      <dlf:identifier>" . $id . "</dlf:identifier>\n";
-            $out .= "      <dlf:availabilitystatus>" . $status . "</dlf:availabilitystatus>\n";
-            $out .= "      <dlf:availabilitymsg>" . $msg . "</dlf:availabilitymsg>\n";
-            $out .= "    </dlf:simpleavailability>\n";
-            $out .= "  </dlf:record>\n";
         }
     }
     $out .= "</dlf:collection>\n";
@@ -361,14 +371,14 @@ sub GetPatronInfo {
 
     # Get Member details
     my $borrowernumber = $cgi->param('patron_id');
-    my $borrower = GetMemberDetails( $borrowernumber );
+    my $borrower = GetMember( borrowernumber => $borrowernumber );
     return { code => 'PatronNotFound' } unless $$borrower{borrowernumber};
 
     # Cleaning the borrower hashref
-    $borrower->{'charges'}    = $borrower->{'flags'}->{'CHARGES'}->{'amount'};
+    my $flags = C4::Members::patronflags( $borrower );
+    $borrower->{'charges'} = $flags->{'CHARGES'}->{'amount'};
     my $library = Koha::Libraries->find( $borrower->{branchcode} );
     $borrower->{'branchname'} = $library ? $library->branchname : '';
-    delete $borrower->{'flags'};
     delete $borrower->{'userid'};
     delete $borrower->{'password'};
 
@@ -411,7 +421,6 @@ sub GetPatronInfo {
             my $branchname = $library ? $library->branchname : '';
 
             # Remove unwanted fields
-            delete $item->{'marcxml'};
             delete $item->{'more_subfields_xml'};
 
             # Add additional fields
@@ -456,7 +465,7 @@ sub GetPatronStatus {
 
     # Get Member details
     my $borrowernumber = $cgi->param('patron_id');
-    my $borrower = GetMemberDetails( $borrowernumber );
+    my $borrower = GetMember( borrowernumber => $borrowernumber );
     return { code => 'PatronNotFound' } unless $$borrower{borrowernumber};
 
     # Return the results
@@ -478,6 +487,7 @@ Parameters:
 	a borrowernumber
   - item_id (Required)
 	an itemnumber
+
 =cut
 
 sub GetServices {
@@ -485,7 +495,7 @@ sub GetServices {
 
     # Get the member, or return an error code if not found
     my $borrowernumber = $cgi->param('patron_id');
-    my $borrower = GetMemberDetails( $borrowernumber );
+    my $borrower = GetMember( borrowernumber => $borrowernumber );
     return { code => 'PatronNotFound' } unless $$borrower{borrowernumber};
 
     # Get the item, or return an error code if not found
@@ -557,7 +567,7 @@ sub RenewLoan {
 
     # Get borrower infos or return an error code
     my $borrowernumber = $cgi->param('patron_id');
-    my $borrower = GetMemberDetails( $borrowernumber );
+    my $borrower = GetMember( borrowernumber => $borrowernumber );
     return { code => 'PatronNotFound' } unless $$borrower{borrowernumber};
 
     # Get the item, or return an error code
@@ -607,7 +617,7 @@ sub HoldTitle {
 
     # Get the borrower or return an error code
     my $borrowernumber = $cgi->param('patron_id');
-    my $borrower = GetMemberDetails( $borrowernumber );
+    my $borrower = GetMember( borrowernumber => $borrowernumber );
     return { code => 'PatronNotFound' } unless $$borrower{borrowernumber};
 
     # Get the biblio record, or return an error code
@@ -675,7 +685,7 @@ sub HoldItem {
 
     # Get the borrower or return an error code
     my $borrowernumber = $cgi->param('patron_id');
-    my $borrower = GetMemberDetails( $borrowernumber );
+    my $borrower = GetMember( borrowernumber => $borrowernumber );
     return { code => 'PatronNotFound' } unless $$borrower{borrowernumber};
 
     # Get the biblio or return an error code
@@ -742,7 +752,7 @@ sub CancelHold {
 
     # Get the borrower or return an error code
     my $borrowernumber = $cgi->param('patron_id');
-    my $borrower = GetMemberDetails( $borrowernumber );
+    my $borrower = GetMember( borrowernumber => $borrowernumber );
     return { code => 'PatronNotFound' } unless $$borrower{borrowernumber};
 
     # Get the reserve or return an error code

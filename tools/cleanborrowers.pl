@@ -36,7 +36,7 @@ use Modern::Perl;
 use CGI qw ( -utf8 );
 use C4::Auth;
 use C4::Output;
-use C4::Members;        # GetBorrowersWhoHavexxxBorrowed.
+use C4::Members;
 use C4::Circulation;    # AnonymiseIssueHistory.
 use Koha::DateUtils qw( dt_from_string output_pref );
 use Koha::Patron::Categories;
@@ -199,7 +199,8 @@ sub _skip_borrowers_with_nonzero_balance {
     my $borrowers = shift;
     my $balance;
     @$borrowers = map {
-        (undef, undef, $balance) = GetMemberIssuesAndFines( $_->{borrowernumber} );
+        my $patron = Koha::Patrons->find( $_->{borrowernumber} );
+        my $balance = $patron->account->balance;
         (defined $balance && $balance != 0) ? (): ($_);
     } @$borrowers;
 }

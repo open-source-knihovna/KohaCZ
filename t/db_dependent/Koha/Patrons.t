@@ -19,9 +19,12 @@
 
 use Modern::Perl;
 
-use Test::More tests => 13;
+use Test::More tests => 20;
 use Test::Warn;
+use DateTime;
 
+use C4::Biblio;
+use C4::Circulation;
 use C4::Members;
 
 use Koha::Holds;
@@ -67,6 +70,12 @@ is( Koha::Patrons->search->count, $nb_of_patrons + 2, 'The 2 patrons should have
 
 my $retrieved_patron_1 = Koha::Patrons->find( $new_patron_1->borrowernumber );
 is( $retrieved_patron_1->cardnumber, $new_patron_1->cardnumber, 'Find a patron by borrowernumber should return the correct patron' );
+
+subtest 'library' => sub {
+    plan tests => 2;
+    is( $retrieved_patron_1->library->branchcode, $library->{branchcode}, 'Koha::Patron->library should return the correct library' );
+    is( ref($retrieved_patron_1->library), 'Koha::Library', 'Koha::Patron->library should return a Koha::Library object' );
+};
 
 subtest 'guarantees' => sub {
     plan tests => 8;
@@ -137,11 +146,11 @@ subtest 'has_overdues' => sub {
     is( $retrieved_patron->has_overdues, 0, );
 
     my $tomorrow = DateTime->today( time_zone => C4::Context->tz() )->add( days => 1 );
-    my $issue = Koha::Issue->new({ borrowernumber => $new_patron_1->id, itemnumber => $item_1->{itemnumber}, date_due => $tomorrow, branchcode => $library->{branchcode} })->store();
+    my $issue = Koha::Checkout->new({ borrowernumber => $new_patron_1->id, itemnumber => $item_1->{itemnumber}, date_due => $tomorrow, branchcode => $library->{branchcode} })->store();
     is( $retrieved_patron->has_overdues, 0, );
     $issue->delete();
     my $yesterday = DateTime->today(time_zone => C4::Context->tz())->add( days => -1 );
-    $issue = Koha::Issue->new({ borrowernumber => $new_patron_1->id, itemnumber => $item_1->{itemnumber}, date_due => $yesterday, branchcode => $library->{branchcode} })->store();
+    $issue = Koha::Checkout->new({ borrowernumber => $new_patron_1->id, itemnumber => $item_1->{itemnumber}, date_due => $yesterday, branchcode => $library->{branchcode} })->store();
     $retrieved_patron = Koha::Patrons->find( $new_patron_1->borrowernumber );
     is( $retrieved_patron->has_overdues, 1, );
     $issue->delete();
@@ -189,6 +198,47 @@ subtest 'is_expired' => sub {
 
     $patron->delete;
 };
+
+subtest 'is_going_to_expire' => sub {
+    plan tests => 9;
+    my $patron = $builder->build({ source => 'Borrower' });
+    $patron = Koha::Patrons->find( $patron->{borrowernumber} );
+    $patron->dateexpiry( undef )->store->discard_changes;
+    is( $patron->is_going_to_expire, 0, 'Patron should not be considered going to expire if dateexpiry is not set');
+    $patron->dateexpiry( '0000-00-00' )->store->discard_changes;
+    is( $patron->is_going_to_expire, 0, 'Patron should not be considered going to expire if dateexpiry is not 0000-00-00');
+
+    t::lib::Mocks::mock_preference('NotifyBorrowerDeparture', 0);
+    $patron->dateexpiry( dt_from_string )->store->discard_changes;
+    is( $patron->is_going_to_expire, 0, 'Patron should not be considered going to expire if dateexpiry is today');
+
+    $patron->dateexpiry( dt_from_string )->store->discard_changes;
+    is( $patron->is_going_to_expire, 0, 'Patron should not be considered going to expire if dateexpiry is today and pref is 0');
+
+    t::lib::Mocks::mock_preference('NotifyBorrowerDeparture', 10);
+    $patron->dateexpiry( dt_from_string->add( days => 11 ) )->store->discard_changes;
+    is( $patron->is_going_to_expire, 0, 'Patron should not be considered going to expire if dateexpiry is 11 days ahead and pref is 10');
+
+    t::lib::Mocks::mock_preference('NotifyBorrowerDeparture', 0);
+    $patron->dateexpiry( dt_from_string->add( days => 10 ) )->store->discard_changes;
+    is( $patron->is_going_to_expire, 0, 'Patron should not be considered going to expire if dateexpiry is 10 days ahead and pref is 0');
+
+    t::lib::Mocks::mock_preference('NotifyBorrowerDeparture', 10);
+    $patron->dateexpiry( dt_from_string->add( days => 10 ) )->store->discard_changes;
+    is( $patron->is_going_to_expire, 0, 'Patron should not be considered going to expire if dateexpiry is 10 days ahead and pref is 10');
+    $patron->delete;
+
+    t::lib::Mocks::mock_preference('NotifyBorrowerDeparture', 10);
+    $patron->dateexpiry( dt_from_string->add( days => 20 ) )->store->discard_changes;
+    is( $patron->is_going_to_expire, 0, 'Patron should not be considered going to expire if dateexpiry is 20 days ahead and pref is 10');
+
+    t::lib::Mocks::mock_preference('NotifyBorrowerDeparture', 20);
+    $patron->dateexpiry( dt_from_string->add( days => 10 ) )->store->discard_changes;
+    is( $patron->is_going_to_expire, 1, 'Patron should be considered going to expire if dateexpiry is 10 days ahead and pref is 20');
+
+    $patron->delete;
+};
+
 
 subtest 'renew_account' => sub {
     plan tests => 10;
@@ -359,6 +409,250 @@ subtest 'add_enrolment_fee_if_needed' => sub {
         "Juvenile growing and become an young adult, he should pay " . ( $enrolmentfee_K + $enrolmentfee_J + $enrolmentfee_YA )
     );
 
+    $patron->delete;
+};
+
+subtest 'checkouts + get_overdues' => sub {
+    plan tests => 8;
+
+    my $library = $builder->build( { source => 'Branch' } );
+    my ($biblionumber_1) = AddBiblio( MARC::Record->new, '' );
+    my $item_1 = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                homebranch    => $library->{branchcode},
+                holdingbranch => $library->{branchcode},
+                biblionumber  => $biblionumber_1
+            }
+        }
+    );
+    my $item_2 = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                homebranch    => $library->{branchcode},
+                holdingbranch => $library->{branchcode},
+                biblionumber  => $biblionumber_1
+            }
+        }
+    );
+    my ($biblionumber_2) = AddBiblio( MARC::Record->new, '' );
+    my $item_3 = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                homebranch    => $library->{branchcode},
+                holdingbranch => $library->{branchcode},
+                biblionumber  => $biblionumber_2
+            }
+        }
+    );
+    my $patron = $builder->build(
+        {
+            source => 'Borrower',
+            value  => { branchcode => $library->{branchcode} }
+        }
+    );
+
+    $patron = Koha::Patrons->find( $patron->{borrowernumber} );
+    my $checkouts = $patron->checkouts;
+    is( $checkouts->count, 0, 'checkouts should not return any issues for that patron' );
+    is( ref($checkouts), 'Koha::Checkouts', 'checkouts should return a Koha::Checkouts object' );
+
+    # Not sure how this is useful, but AddIssue pass this variable to different other subroutines
+    $patron = GetMember( borrowernumber => $patron->borrowernumber );
+
+    my $module = new Test::MockModule('C4::Context');
+    $module->mock( 'userenv', sub { { branch => $library->{branchcode} } } );
+
+    AddIssue( $patron, $item_1->{barcode}, DateTime->now->subtract( days => 1 ) );
+    AddIssue( $patron, $item_2->{barcode}, DateTime->now->subtract( days => 5 ) );
+    AddIssue( $patron, $item_3->{barcode} );
+
+    $patron = Koha::Patrons->find( $patron->{borrowernumber} );
+    $checkouts = $patron->checkouts;
+    is( $checkouts->count, 3, 'checkouts should return 3 issues for that patron' );
+    is( ref($checkouts), 'Koha::Checkouts', 'checkouts should return a Koha::Checkouts object' );
+
+    my $overdues = $patron->get_overdues;
+    is( $overdues->count, 2, 'Patron should have 2 overdues');
+    is( ref($overdues), 'Koha::Checkouts', 'Koha::Patron->get_overdues should return Koha::Checkouts' );
+    is( $overdues->next->itemnumber, $item_1->{itemnumber}, 'The issue should be returned in the same order as they have been done, first is correct' );
+    is( $overdues->next->itemnumber, $item_2->{itemnumber}, 'The issue should be returned in the same order as they have been done, second is correct' );
+
+    # Clean stuffs
+    Koha::Checkouts->search( { borrowernumber => $patron->borrowernumber } )->delete;
+    $patron->delete;
+};
+
+subtest 'get_age' => sub {
+    plan tests => 6;
+
+    my $patron = $builder->build( { source => 'Borrower' } );
+    $patron = Koha::Patrons->find( $patron->{borrowernumber} );
+
+    my $today = dt_from_string;
+
+    $patron->dateofbirth( $today->clone->add( years => -12, months => -6, days => -1 ) );
+    is( $patron->get_age, 12, 'Patron should be 12' );
+    $patron->dateofbirth( $today->clone->add( years => -18, months => 0, days => 1 ) );
+    is( $patron->get_age, 17, 'Patron should be 17, happy birthday tomorrow!' );
+    $patron->dateofbirth( $today->clone->add( years => -18, months => 0, days => 0 ) );
+    is( $patron->get_age, 18, 'Patron should be 18' );
+    $patron->dateofbirth( $today->clone->add( years => -18, months => -12, days => -31 ) );
+    is( $patron->get_age, 19, 'Patron should be 19' );
+    $patron->dateofbirth( $today->clone->add( years => -18, months => -12, days => -30 ) );
+    is( $patron->get_age, 19, 'Patron should be 19 again' );
+    $patron->dateofbirth( $today->clone->add( years => 0,   months => -1, days => -1 ) );
+    is( $patron->get_age, 0, 'Patron is a newborn child' );
+
+    $patron->delete;
+};
+
+subtest 'account' => sub {
+    plan tests => 1;
+
+    my $patron = $builder->build({source => 'Borrower'});
+
+    $patron = Koha::Patrons->find( $patron->{borrowernumber} );
+    my $account = $patron->account;
+    is( ref($account),   'Koha::Account', 'account should return a Koha::Account object' );
+
+    $patron->delete;
+};
+
+subtest 'search_upcoming_membership_expires' => sub {
+    plan tests => 9;
+
+    my $expiry_days = 15;
+    t::lib::Mocks::mock_preference( 'MembershipExpiryDaysNotice', $expiry_days );
+    my $nb_of_days_before = 1;
+    my $nb_of_days_after = 2;
+
+    my $builder = t::lib::TestBuilder->new();
+
+    my $library = $builder->build({ source => 'Branch' });
+
+    # before we add borrowers to this branch, add the expires we have now
+    # note that this pertains to the current mocked setting of the pref
+    # for this reason we add the new branchcode to most of the tests
+    my $nb_of_expires = Koha::Patrons->search_upcoming_membership_expires->count;
+
+    my $patron_1 = $builder->build({
+        source => 'Borrower',
+        value  => {
+            branchcode              => $library->{branchcode},
+            dateexpiry              => dt_from_string->add( days => $expiry_days )
+        },
+    });
+
+    my $patron_2 = $builder->build({
+        source => 'Borrower',
+        value  => {
+            branchcode              => $library->{branchcode},
+            dateexpiry              => dt_from_string->add( days => $expiry_days - $nb_of_days_before )
+        },
+    });
+
+    my $patron_3 = $builder->build({
+        source => 'Borrower',
+        value  => {
+            branchcode              => $library->{branchcode},
+            dateexpiry              => dt_from_string->add( days => $expiry_days + $nb_of_days_after )
+        },
+    });
+
+    # Test without extra parameters
+    my $upcoming_mem_expires = Koha::Patrons->search_upcoming_membership_expires();
+    is( $upcoming_mem_expires->count, $nb_of_expires + 1, 'Get upcoming membership expires should return one new borrower.' );
+
+    # Test with branch
+    $upcoming_mem_expires = Koha::Patrons->search_upcoming_membership_expires({ 'me.branchcode' => $library->{branchcode} });
+    is( $upcoming_mem_expires->count, 1, 'Test with branch parameter' );
+    my $expired = $upcoming_mem_expires->next;
+    is( $expired->surname, $patron_1->{surname}, 'Get upcoming membership expires should return the correct patron.' );
+    is( $expired->library->branchemail, $library->{branchemail}, 'Get upcoming membership expires should return the correct patron.' );
+    is( $expired->branchcode, $patron_1->{branchcode}, 'Get upcoming membership expires should return the correct patron.' );
+
+    t::lib::Mocks::mock_preference( 'MembershipExpiryDaysNotice', 0 );
+    $upcoming_mem_expires = Koha::Patrons->search_upcoming_membership_expires({ 'me.branchcode' => $library->{branchcode} });
+    is( $upcoming_mem_expires->count, 0, 'Get upcoming membership expires with MembershipExpiryDaysNotice==0 should not return new records.' );
+
+    # Test MembershipExpiryDaysNotice == undef
+    t::lib::Mocks::mock_preference( 'MembershipExpiryDaysNotice', undef );
+    $upcoming_mem_expires = Koha::Patrons->search_upcoming_membership_expires({ 'me.branchcode' => $library->{branchcode} });
+    is( $upcoming_mem_expires->count, 0, 'Get upcoming membership expires without MembershipExpiryDaysNotice should not return new records.' );
+
+    # Test the before parameter
+    t::lib::Mocks::mock_preference( 'MembershipExpiryDaysNotice', 15 );
+    $upcoming_mem_expires = Koha::Patrons->search_upcoming_membership_expires({ 'me.branchcode' => $library->{branchcode}, before => $nb_of_days_before });
+    is( $upcoming_mem_expires->count, 2, 'Expect two results for before');
+    # Test after parameter also
+    $upcoming_mem_expires = Koha::Patrons->search_upcoming_membership_expires({ 'me.branchcode' => $library->{branchcode}, before => $nb_of_days_before, after => $nb_of_days_after });
+    is( $upcoming_mem_expires->count, 3, 'Expect three results when adding after' );
+    Koha::Patrons->search({ borrowernumber => { in => [ $patron_1->{borrowernumber}, $patron_2->{borrowernumber}, $patron_3->{borrowernumber} ] } })->delete;
+};
+
+subtest 'holds' => sub {
+    plan tests => 3;
+
+    my $library = $builder->build( { source => 'Branch' } );
+    my ($biblionumber_1) = AddBiblio( MARC::Record->new, '' );
+    my $item_1 = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                homebranch    => $library->{branchcode},
+                holdingbranch => $library->{branchcode},
+                biblionumber  => $biblionumber_1
+            }
+        }
+    );
+    my $item_2 = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                homebranch    => $library->{branchcode},
+                holdingbranch => $library->{branchcode},
+                biblionumber  => $biblionumber_1
+            }
+        }
+    );
+    my ($biblionumber_2) = AddBiblio( MARC::Record->new, '' );
+    my $item_3 = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                homebranch    => $library->{branchcode},
+                holdingbranch => $library->{branchcode},
+                biblionumber  => $biblionumber_2
+            }
+        }
+    );
+    my $patron = $builder->build(
+        {
+            source => 'Borrower',
+            value  => { branchcode => $library->{branchcode} }
+        }
+    );
+
+    $patron = Koha::Patrons->find( $patron->{borrowernumber} );
+    my $holds = $patron->holds;
+    is( ref($holds), 'Koha::Holds',
+        'Koha::Patron->holds should return a Koha::Holds objects' );
+    is( $holds->count, 0, 'There should not be holds placed by this patron yet' );
+
+    C4::Reserves::AddReserve( $library->{branchcode},
+        $patron->borrowernumber, $biblionumber_1 );
+    # In the future
+    C4::Reserves::AddReserve( $library->{branchcode},
+        $patron->borrowernumber, $biblionumber_2, undef, undef, dt_from_string->add( days => 2 ) );
+
+    $holds = $patron->holds;
+    is( $holds->count, 2, 'There should be 2 holds placed by this patron' );
+
+    $holds->delete;
     $patron->delete;
 };
 

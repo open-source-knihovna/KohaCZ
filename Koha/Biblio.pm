@@ -246,12 +246,27 @@ Returns the itemtype for this record.
 sub itemtype {
     my ( $self ) = @_;
 
-    return $self->_biblioitem()->itemtype();
+    return $self->biblioitem()->itemtype();
 }
 
-=head3 _biblioitem
+=head3 holds
 
-my $field = $self->_biblioitem()->itemtype
+my $holds = $biblio->holds();
+
+return the current holds placed on this record
+
+=cut
+
+sub holds {
+    my ( $self ) = @_;
+
+    my $holds_rs = $self->_result->reserves;
+    return Koha::Holds->_new_from_dbic( $holds_rs );
+}
+
+=head3 biblioitem
+
+my $field = $self->biblioitem()->itemtype
 
 Returns the related Koha::Biblioitem object for this Biblio object
 

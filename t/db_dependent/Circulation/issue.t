@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 32;
+use Test::More tests => 33;
 use DateTime::Duration;
 
 use t::lib::Mocks;
@@ -46,7 +46,6 @@ can_ok(
       GetBiblioIssues
       GetIssuingCharges
       GetItemIssue
-      GetItemIssues
       GetOpenIssue
       GetRenewCount
       GetUpcomingDueIssues
@@ -67,6 +66,9 @@ $dbh->do(q|DELETE FROM branches|);
 $dbh->do(q|DELETE FROM categories|);
 $dbh->do(q|DELETE FROM accountlines|);
 $dbh->do(q|DELETE FROM issuingrules|);
+$dbh->do(q|DELETE FROM reserves|);
+$dbh->do(q|DELETE FROM old_reserves|);
+$dbh->do(q|DELETE FROM statistics|);
 
 # Generate sample datas
 my $itemtype = $builder->build(
@@ -76,6 +78,7 @@ my $itemtype = $builder->build(
 )->{itemtype};
 my $branchcode_1 = $builder->build({ source => 'Branch' })->{branchcode};
 my $branchcode_2 = $builder->build({ source => 'Branch' })->{branchcode};
+my $branchcode_3 = $builder->build({ source => 'Branch' })->{branchcode};
 my $categorycode = $builder->build({
         source => 'Category',
         value => { enrolmentfee => undef }
@@ -159,6 +162,11 @@ my @USERENV = (
     $branchcode_1, 'email@example.org'
 );
 
+my @USERENV_DIFFERENT_LIBRARY = (
+    $borrower_id1, 'test', 'MASTERTEST', 'firstname', $branchcode_3,
+    $branchcode_3, 'email@example.org'
+);
+
 
 C4::Context->_new_userenv('DUMMY_SESSION_ID');
 C4::Context->set_userenv(@USERENV);
@@ -206,15 +214,22 @@ $sth->execute;
 $countaccount = $sth -> fetchrow_array;
 is ($countaccount,1,"1 accountline has been added");
 
-#Test AddRenewal
-my $datedue3 =
-  AddRenewal( $borrower_id1, $item_id1, $branchcode_1,
-    $datedue1, $daysago10 );
+# Test AddRenewal
+
+# Let's renew this one at a different library for statistical purposes to test Bug 17781
+C4::Context->set_userenv(@USERENV_DIFFERENT_LIBRARY);
+my $datedue3 = AddRenewal( $borrower_id1, $item_id1, $branchcode_1, $datedue1, $daysago10 );
+C4::Context->set_userenv(@USERENV);
+
 like(
     $datedue3,
     qr/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
     "AddRenewal returns a date"
 );
+
+my $stat = $dbh->selectrow_hashref("SELECT * FROM statistics WHERE type = 'renew' AND borrowernumber = ? AND itemnumber = ? AND branch = ?", undef, $borrower_id1, $item_id1, $branchcode_3 );
+ok( $stat, "Bug 17781 - 'Improper branchcode set during renewal' still fixed" );
+
 
 #Test GetBiblioIssues
 is( GetBiblioIssues(), undef, "GetBiblio Issues without parameters" );
@@ -223,10 +238,6 @@ is( GetBiblioIssues(), undef, "GetBiblio Issues without parameters" );
 #FIXME : As the issues are not correctly added in the database, these tests don't work correctly
 is(GetItemIssue,undef,"Without parameter GetItemIssue returns undef");
 #is(GetItemIssue($item_id1),{},"Item1's issues");
-
-#Test GetItemIssues
-#FIXME: this routine currently doesn't work be
-#is_deeply (GetItemIssues,{},"Without parameter, GetItemIssue returns all the issues");
 
 #Test GetOpenIssue
 is( GetOpenIssue(), undef, "Without parameter GetOpenIssue returns undef" );

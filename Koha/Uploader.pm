@@ -1,4 +1,4 @@
-package Koha::Upload;
+package Koha::Uploader;
 
 # Copyright 2007 LibLime, Galen Charlton
 # Copyright 2011-2012 BibLibre
@@ -21,33 +21,30 @@ package Koha::Upload;
 
 =head1 NAME
 
-Koha::Upload - Facilitate file uploads (temporary and permanent)
+Koha::Uploader - Facilitate file uploads (temporary and permanent)
 
 =head1 SYNOPSIS
 
-    use Koha::Upload;
+    use Koha::Uploader;
+    use Koha::UploadedFile;
+    use Koha::UploadedFiles;
 
     # add an upload (see tools/upload-file.pl)
     # the public flag allows retrieval via OPAC
-    my $upload = Koha::Upload->new( public => 1, category => 'A' );
+    my $upload = Koha::Uploader->new( public => 1, category => 'A' );
     my $cgi = $upload->cgi;
     # Do something with $upload->count, $upload->result or $upload->err
 
-    # get some upload records (in staff)
-    # Note: use the public flag for OPAC
-    my @uploads = Koha::Upload->new->get( term => $term );
-    $template->param( uploads => \@uploads );
+    # get some upload records (in staff) via Koha::UploadedFiles
+    my @uploads1 = Koha::UploadedFiles->search({ filename => $name });
+    my @uploads2 = Koha::UploadedFiles->search_term({ term => $term });
 
-    # staff download
-    my $rec = Koha::Upload->new->get({ id => $id, filehandle => 1 });
-    my $fh = $rec->{fh};
-    my @hdr = Koha::Upload->httpheaders( $rec->{name} );
-    print Encode::encode_utf8( $input->header( @hdr ) );
+    # staff download (via Koha::UploadedFile[s])
+    my $rec = Koha::UploadedFiles->find( $id );
+    my $fh = $rec->file_handle;
+    print Encode::encode_utf8( $input->header( $rec->httpheaders ) );
     while( <$fh> ) { print $_; }
     $fh->close;
-
-    # delete an upload
-    my ( $fn ) = Koha::Upload->new->delete({ id => $id });
 
 =head1 DESCRIPTION
 
@@ -56,7 +53,8 @@ Koha::Upload - Facilitate file uploads (temporary and permanent)
     That report added module UploadedFiles.pm. This module contains the
     functionality of both.
 
-=head1 METHODS
+    The module has been revised to use Koha::Object[s]; the delete method
+    has been moved to Koha::UploadedFile[s], as well as the get method.
 
 =cut
 
@@ -75,8 +73,12 @@ use base qw(Class::Accessor);
 
 use C4::Context;
 use C4::Koha;
+use Koha::UploadedFile;
+use Koha::UploadedFiles;
 
 __PACKAGE__->mk_ro_accessors( qw|| );
+
+=head1 INSTANCE METHODS
 
 =head2 new
 
@@ -156,89 +158,7 @@ sub err {
     return $err;
 }
 
-=head2 get
-
-    Returns arrayref of uploaded records (hash) or one uploaded record.
-    You can pass id => $id or hashvalue => $hash or term => $term.
-    Optional parameter filehandle => 1 returns you a filehandle too.
-
-=cut
-
-sub get {
-    my ( $self, $params ) = @_;
-    my $temp= $self->_lookup( $params );
-    my ( @rv, $res);
-    foreach my $r ( @$temp ) {
-        undef $res;
-        foreach( qw[id hashvalue filesize uploadcategorycode public permanent owner] ) {
-            $res->{$_} = $r->{$_};
-        }
-        $res->{name} = $r->{filename};
-        $res->{path} = $self->_full_fname($r);
-        if( $res->{path} && -r $res->{path} ) {
-            if( $params->{filehandle} ) {
-                my $fh = IO::File->new( $res->{path}, "r" );
-                $fh->binmode if $fh;
-                $res->{fh} = $fh;
-            }
-            push @rv, $res;
-        } else {
-            $self->{files}->{ $r->{filename} }->{errcode}=5; #not readable
-        }
-        last if !wantarray;
-    }
-    return wantarray? @rv: $res;
-}
-
-=head2 delete
-
-    Returns array of deleted filenames or undef.
-    Since it now only accepts id as parameter, you should not expect more
-    than one filename.
-
-=cut
-
-sub delete {
-    my ( $self, $params ) = @_;
-    return if !$params->{id};
-    my @res;
-    my $temp = $self->_lookup({ id => $params->{id} });
-    foreach( @$temp ) {
-        my $d = $self->_delete( $_ );
-        push @res, $d if $d;
-    }
-    return if !@res;
-    return @res;
-}
-
 =head1 CLASS METHODS
-
-=head2 getCategories
-
-    getCategories returns a list of upload category codes and names
-
-=cut
-
-sub getCategories {
-    my ( $class ) = @_;
-    my $cats = C4::Koha::GetAuthorisedValues('UPLOAD');
-    [ map {{ code => $_->{authorised_value}, name => $_->{lib} }} @$cats ];
-}
-
-=head2 httpheaders
-
-    httpheaders returns http headers for a retrievable upload
-    Will be extended by report 14282
-
-=cut
-
-sub httpheaders {
-    my ( $class, $name ) = @_;
-    return (
-        '-type'       => 'application/octet-stream',
-        '-attachment' => $name,
-    );
-}
 
 =head2 allows_add_by
 
@@ -268,8 +188,8 @@ sub allows_add_by {
 sub _init {
     my ( $self, $params ) = @_;
 
-    $self->{rootdir} = C4::Context->config('upload_path');
-    $self->{tmpdir} = File::Spec->tmpdir;
+    $self->{rootdir} = Koha::UploadedFile->permanent_directory;
+    $self->{tmpdir} = Koha::UploadedFile->temporary_directory;
 
     $params->{tmp} = $params->{temp} if !exists $params->{tmp};
     $self->{temporary} = $params->{tmp}? 1: 0; #default false
@@ -305,13 +225,20 @@ sub _create_file {
         $self->{files}->{$filename}->{errcode} = 4; #no tempdir
     } else {
         my $dir = $self->_dir;
-        my $fn = $self->{files}->{$filename}->{hash}. '_'. $filename;
-        if( -e "$dir/$fn" && @{ $self->_lookup({
-          hashvalue => $self->{files}->{$filename}->{hash} }) } ) {
+        my $hashval = $self->{files}->{$filename}->{hash};
+        my $fn = $hashval. '_'. $filename;
+
         # if the file exists and it is registered, then set error
+        # if it exists, but is not in the database, we will overwrite
+        if( -e "$dir/$fn" &&
+        Koha::UploadedFiles->search({
+            hashvalue          => $hashval,
+            uploadcategorycode => $self->{category},
+        })->count ) {
             $self->{files}->{$filename}->{errcode} = 1; #already exists
             return;
         }
+
         $fh = IO::File->new( "$dir/$fn", "w");
         if( $fh ) {
             $fh->binmode;
@@ -329,19 +256,6 @@ sub _dir {
     $dir.= '/'. $self->{category};
     mkdir $dir if !-d $dir;
     return $dir;
-}
-
-sub _full_fname {
-    my ( $self, $rec ) = @_;
-    my $p;
-    if( ref $rec ) {
-        $p = File::Spec->catfile(
-            $rec->{permanent}? $self->{rootdir}: $self->{tmpdir},
-            $rec->{dir},
-            $rec->{hashvalue}. '_'. $rec->{filename}
-        );
-    }
-    return $p;
 }
 
 sub _hook {
@@ -365,67 +279,17 @@ sub _done {
 
 sub _register {
     my ( $self, $filename, $size ) = @_;
-    my $dbh= C4::Context->dbh;
-    my $sql= 'INSERT INTO uploaded_files (hashvalue, filename, dir, filesize,
-        owner, uploadcategorycode, public, permanent) VALUES (?,?,?,?,?,?,?,?)';
-    my @pars= (
-        $self->{files}->{$filename}->{hash},
-        $filename,
-        $self->{category},
-        $size,
-        $self->{uid},
-        $self->{category},
-        $self->{public},
-        $self->{temporary}? 0: 1,
-    );
-    $dbh->do( $sql, undef, @pars );
-    my $i = $dbh->last_insert_id(undef, undef, 'uploaded_files', undef);
-    $self->{files}->{$filename}->{id} = $i if $i;
-}
-
-sub _lookup {
-    my ( $self, $params ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sql = q|
-SELECT id,hashvalue,filename,dir,filesize,uploadcategorycode,public,permanent,owner
-FROM uploaded_files
-    |;
-    my @pars;
-    if( $params->{id} ) {
-        return [] if $params->{id} !~ /^\d+(,\d+)*$/;
-        $sql.= 'WHERE id IN ('.$params->{id}.')';
-        @pars = ();
-    } elsif( $params->{hashvalue} ) {
-        $sql.= 'WHERE hashvalue=?';
-        @pars = ( $params->{hashvalue} );
-    } elsif( $params->{term} ) {
-        $sql.= 'WHERE (filename LIKE ? OR hashvalue LIKE ?)';
-        @pars = ( '%'.$params->{term}.'%', '%'.$params->{term}.'%' );
-    } else {
-        return [];
-    }
-    $sql.= $self->{public}? ' AND public=1': '';
-    $sql.= ' ORDER BY id';
-    my $temp= $dbh->selectall_arrayref( $sql, { Slice => {} }, @pars );
-    return $temp;
-}
-
-sub _delete {
-    my ( $self, $rec ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sql = 'DELETE FROM uploaded_files WHERE id=?';
-    my $file = $self->_full_fname($rec);
-    if( !-e $file ) { # we will just delete the record
-        # TODO Should we add a trace here for the missing file?
-        $dbh->do( $sql, undef, ( $rec->{id} ) );
-        return $rec->{filename};
-    } elsif( unlink($file) ) {
-        $dbh->do( $sql, undef, ( $rec->{id} ) );
-        return $rec->{filename};
-    }
-    $self->{files}->{ $rec->{filename} }->{errcode} = 7;
-    #NOTE: errcode=6 is used to report successful delete (see template)
-    return;
+    my $rec = Koha::UploadedFile->new({
+        hashvalue => $self->{files}->{$filename}->{hash},
+        filename  => $filename,
+        dir       => $self->{category},
+        filesize  => $size,
+        owner     => $self->{uid},
+        uploadcategorycode => $self->{category},
+        public    => $self->{public},
+        permanent => $self->{temporary}? 0: 1,
+    })->store;
+    $self->{files}->{$filename}->{id} = $rec->id if $rec;
 }
 
 sub _compute {

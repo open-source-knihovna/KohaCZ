@@ -1,4 +1,4 @@
-package Koha::Issues;
+package Koha::Biblio::Metadata;
 
 # This file is part of Koha.
 #
@@ -17,17 +17,28 @@ package Koha::Issues;
 
 use Modern::Perl;
 
-use Koha::Database;
-use Koha::Issue;
+use Carp;
 
-use base qw(Koha::Objects);
+use Koha::Database;
+
+use base qw(Koha::Object);
+
+=head1 NAME
+
+Koha::Metadata - Koha Metadata Object class
+
+=head1 API
+
+=head2 Class Methods
+
+=cut
+
+=head3 type
+
+=cut
 
 sub _type {
-    return 'Issue';
-}
-
-sub object_class {
-    return 'Koha::Issue';
+    return 'BiblioMetadata';
 }
 
 1;

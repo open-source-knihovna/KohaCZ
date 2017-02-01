@@ -68,6 +68,7 @@ use C4::Suggestions;
 use C4::Reserves qw/GetReservesFromBiblionumber/;
 
 use Koha::Acquisition::Bookseller;
+use Koha::Biblios;
 use Koha::DateUtils;
 
 use JSON;
@@ -110,7 +111,7 @@ unless( $invoiceid and $invoice->{invoiceid} ) {
 }
 
 my $booksellerid = $invoice->{booksellerid};
-my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
+my $bookseller = Koha::Acquisition::Booksellers->find( $booksellerid );
 
 my @orders        = @{ $invoice->{orders} };
 my $countlines    = scalar @orders;
@@ -124,17 +125,15 @@ my $subtotal_for_funds;
 for my $order ( @orders ) {
     $order->{'unitprice'} += 0;
 
-    if ( $bookseller->{listincgst} and not $bookseller->{invoiceincgst} ) {
+    if ( $bookseller->invoiceincgst ) {
+        $order->{ecost}     = $order->{ecost_tax_included};
+        $order->{unitprice} = $order->{unitprice_tax_included};
+    }
+    else {
         $order->{ecost}     = $order->{ecost_tax_excluded};
         $order->{unitprice} = $order->{unitprice_tax_excluded};
     }
-    elsif ( not $bookseller->{listinct} and $bookseller->{invoiceincgst} ) {
-        $order->{ecost}     = $order->{ecost_tax_included};
-        $order->{unitprice} = $order->{unitprice_tax_included};
-    } else {
-        $order->{ecost} = $order->{ecost_tax_excluded};
-        $order->{unitprice} = $order->{unitprice_tax_excluded};
-    }
+
     $order->{total} = $order->{unitprice} * $order->{quantity};
 
     my %line = %{ $order };
@@ -224,9 +223,7 @@ unless( defined $invoice->{closedate} ) {
     for (my $i = 0 ; $i < $countpendings ; $i++) {
         my $order = $pendingorders->[$i];
 
-        if ( $bookseller->{listincgst} and not $bookseller->{invoiceincgst} ) {
-            $order->{ecost} = $order->{ecost_tax_excluded};
-        } elsif ( not $bookseller->{listinct} and $bookseller->{invoiceincgst} ) {
+        if ( $bookseller->invoiceincgst ) {
             $order->{ecost} = $order->{ecost_tax_included};
         } else {
             $order->{ecost} = $order->{ecost_tax_excluded};
@@ -239,11 +236,12 @@ unless( defined $invoice->{closedate} ) {
         $line{booksellerid} = $booksellerid;
 
         my $biblionumber = $line{'biblionumber'};
+        my $biblio = Koha::Biblios->find( $biblionumber );
         my $countbiblio = CountBiblioInOrders($biblionumber);
         my $ordernumber = $line{'ordernumber'};
         my @subscriptions = GetSubscriptionsId ($biblionumber);
         my $itemcount = GetItemsCount($biblionumber);
-        my $holds  = GetHolds ($biblionumber);
+        my $holds_count = $biblio->holds->count;
         my @items = GetItemnumbersFromOrder( $ordernumber );
         my $itemholds;
         foreach my $item (@items){
@@ -259,17 +257,17 @@ unless( defined $invoice->{closedate} ) {
         $line{firstnamesuggestedby} = $suggestion->{firstnamesuggestedby};
 
         # if the biblio is not in other orders and if there is no items elsewhere and no subscriptions and no holds we can then show the link "Delete order and Biblio" see bug 5680
-        $line{can_del_bib}          = 1 if $countbiblio <= 1 && $itemcount == scalar @items && !(@subscriptions) && !($holds);
+        $line{can_del_bib}          = 1 if $countbiblio <= 1 && $itemcount == scalar @items && !(@subscriptions) && !($holds_count);
         $line{items}                = ($itemcount) - (scalar @items);
         $line{left_item}            = 1 if $line{items} >= 1;
         $line{left_biblio}          = 1 if $countbiblio > 1;
         $line{biblios}              = $countbiblio - 1;
         $line{left_subscription}    = 1 if scalar @subscriptions >= 1;
         $line{subscriptions}        = scalar @subscriptions;
-        $line{left_holds}           = ($holds >= 1) ? 1 : 0;
+        $line{left_holds}           = ($holds_count >= 1) ? 1 : 0;
         $line{left_holds_on_order}  = 1 if $line{left_holds}==1 && ($line{items} == 0 || $itemholds );
-        $line{holds}                = $holds;
-        $line{holds_on_order}       = $itemholds?$itemholds:$holds if $line{left_holds_on_order};
+        $line{holds}                = $holds_count;
+        $line{holds_on_order}       = $itemholds?$itemholds:$holds_count if $line{left_holds_on_order};
 
         my $budget_name = GetBudgetName( $line{budget_id} );
         $line{budget_name} = $budget_name;
@@ -287,8 +285,8 @@ $template->param(
     invoice               => $invoice->{invoicenumber},
     invoiceclosedate      => $invoice->{closedate},
     datereceived          => dt_from_string,
-    name                  => $bookseller->{'name'},
-    booksellerid          => $bookseller->{id},
+    name                  => $bookseller->name,
+    booksellerid          => $bookseller->id,
     loop_received         => \@loop_received,
     loop_orders           => \@loop_orders,
     book_foot_loop        => \@book_foot_loop,

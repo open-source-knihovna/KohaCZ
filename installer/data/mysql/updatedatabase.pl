@@ -47,7 +47,7 @@ use MARC::File::XML ( BinaryEncoding => 'utf8' );
 
 use File::Path qw[remove_tree]; # perl core module
 use File::Spec;
-use Path::Tiny;
+use File::Slurp;
 
 # FIXME - The user might be installing a new database, so can't rely
 # on /etc/koha.conf anyway.
@@ -9736,6 +9736,7 @@ if ( CheckVersion($DBversion) ) {
                     MODIFY COLUMN seealso varchar(1100) COLLATE utf8_unicode_ci DEFAULT NULL,
                     MODIFY COLUMN link varchar(80) COLLATE utf8_unicode_ci DEFAULT NULL
                 |);
+                $dbh->do(qq|ALTER TABLE $name CHARACTER SET utf8 COLLATE utf8_unicode_ci|);
             }
             else {
                 $dbh->do(qq|ALTER TABLE $name CONVERT TO CHARACTER SET utf8 COLLATE utf8_unicode_ci|);
@@ -10421,15 +10422,21 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "3.19.00.041";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q|
-        ALTER IGNORE TABLE suggestions ADD KEY status (STATUS)
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE suggestions ADD KEY biblionumber (biblionumber)
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE suggestions ADD KEY branchcode (branchcode)
-    |);
+    unless ( index_exists( 'suggestions', 'status' ) ) {
+        $dbh->do(q|
+            ALTER TABLE suggestions ADD KEY status (STATUS)
+        |);
+    }
+    unless ( index_exists( 'suggestions', 'biblionumber' ) ) {
+        $dbh->do(q|
+            ALTER TABLE suggestions ADD KEY biblionumber (biblionumber)
+        |);
+    }
+    unless ( index_exists( 'suggestions', 'branchcode' ) ) {
+        $dbh->do(q|
+            ALTER TABLE suggestions ADD KEY branchcode (branchcode)
+        |);
+    }
     print "Upgrade to $DBversion done (Bug 14132: suggestions table is missing indexes)\n";
     SetVersion ($DBversion);
 }
@@ -10443,12 +10450,14 @@ if ( CheckVersion($DBversion) ) {
         WHERE auth_types.authtypecode IS NULL
     });
 
-    $dbh->do(q{
-        ALTER IGNORE TABLE auth_subfield_structure
-        ADD CONSTRAINT auth_subfield_structure_ibfk_1
-        FOREIGN KEY (authtypecode) REFERENCES auth_types(authtypecode)
-        ON DELETE CASCADE ON UPDATE CASCADE
-    });
+    unless ( foreign_key_exists( 'auth_subfield_structure', 'auth_subfield_structure_ibfk_1' ) ) {
+        $dbh->do(q{
+            ALTER TABLE auth_subfield_structure
+            ADD CONSTRAINT auth_subfield_structure_ibfk_1
+            FOREIGN KEY (authtypecode) REFERENCES auth_types(authtypecode)
+            ON DELETE CASCADE ON UPDATE CASCADE
+        });
+    }
 
     print "Upgrade to $DBversion done (Bug 8480: Add foreign key on auth_subfield_structure.authtypecode)\n";
     SetVersion($DBversion);
@@ -10564,31 +10573,58 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "3.21.00.007";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q|
-        ALTER IGNORE TABLE aqbasket
-            ADD KEY authorisedby (authorisedby)
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE aqbooksellers
-            ADD KEY name (name(255))
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE aqbudgets
-            ADD KEY budget_parent_id (budget_parent_id),
-            ADD KEY budget_code (budget_code),
-            ADD KEY budget_branchcode (budget_branchcode),
-            ADD KEY budget_period_id (budget_period_id),
-            ADD KEY budget_owner_id (budget_owner_id)
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE aqbudgets_planning
-            ADD KEY budget_period_id (budget_period_id)
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE aqorders
-            ADD KEY parent_ordernumber (parent_ordernumber),
-            ADD KEY orderstatus (orderstatus)
-    |);
+    unless ( index_exists( 'aqbasket', 'authorisedby' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbasket
+                ADD KEY authorisedby (authorisedby)
+        |);
+    }
+    unless ( index_exists( 'aqbooksellers', 'name' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbooksellers
+                ADD KEY name (name(255))
+        |);
+    }
+    unless ( index_exists( 'aqbudgets', 'budget_parent_id' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets
+                ADD KEY budget_parent_id (budget_parent_id)|);
+        }
+    unless ( index_exists( 'aqbudgets', 'budget_code' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets
+                ADD KEY budget_code (budget_code)|);
+    }
+    unless ( index_exists( 'aqbudgets', 'budget_branchcode' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets
+                ADD KEY budget_branchcode (budget_branchcode)|);
+    }
+    unless ( index_exists( 'aqbudgets', 'budget_period_id' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets
+                ADD KEY budget_period_id (budget_period_id)|);
+    }
+    unless ( index_exists( 'aqbudgets', 'budget_owner_id' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets
+                ADD KEY budget_owner_id (budget_owner_id)|);
+    }
+    unless ( index_exists( 'aqbudgets_planning', 'budget_period_id' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets_planning
+                ADD KEY budget_period_id (budget_period_id)|);
+    }
+    unless ( index_exists( 'aqorders', 'parent_ordernumber' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqorders
+                ADD KEY parent_ordernumber (parent_ordernumber)|);
+    }
+    unless ( index_exists( 'aqorders', 'orderstatus' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqorders
+                ADD KEY orderstatus (orderstatus)|);
+    }
     print "Upgrade to $DBversion done (Bug 14053: Acquisition db tables are missing indexes)\n";
     SetVersion ($DBversion);
 }
@@ -10689,9 +10725,12 @@ if ( CheckVersion($DBversion) ) {
         INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
         VALUES ('OAI-PMH:DeletedRecord','persistent','Koha\'s deletedbiblio table will never be deleted (persistent) or might be deleted (transient)','transient|persistent','Choice')
     });
-    $dbh->do(q|
-        ALTER TABLE oai_sets_biblios DROP FOREIGN KEY oai_sets_biblios_ibfk_1
-    |);
+
+    if ( foreign_key_exists( 'oai_sets_biblios', 'oai_sets_biblios_ibfk_1' ) ) {
+        $dbh->do(q|
+            ALTER TABLE oai_sets_biblios DROP FOREIGN KEY oai_sets_biblios_ibfk_1
+        |);
+    }
     print "Upgrade to $DBversion done (Bug 3206: OAI repository deleted record support)\n";
     SetVersion ($DBversion);
 }
@@ -10772,12 +10811,14 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "3.21.00.019";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q{
-        ALTER TABLE reserves DROP constrainttype
-    });
-    $dbh->do(q{
-        ALTER TABLE old_reserves DROP constrainttype
-    });
+    if ( column_exists( 'reserves', 'constrainttype' ) ) {
+        $dbh->do(q{
+            ALTER TABLE reserves DROP constrainttype
+        });
+        $dbh->do(q{
+            ALTER TABLE old_reserves DROP constrainttype
+        });
+    }
     $dbh->do(q{
         DROP TABLE IF EXISTS reserveconstraints
     });
@@ -10817,12 +10858,14 @@ if ( CheckVersion($DBversion) ) {
     my ($print_error) = $dbh->{PrintError};
     $dbh->{RaiseError} = 0;
     $dbh->{PrintError} = 0;
-    $dbh->do(q{ALTER TABLE course_reserves DROP FOREIGN KEY course_reserves_ibfk_2});
-    $dbh->do(q{ALTER TABLE course_reserves DROP INDEX course_reserves_ibfk_2});
+    if ( foreign_key_exists('course_reserves', 'course_reserves_ibfk_2') ) {
+        $dbh->do(q{ALTER TABLE course_reserves DROP FOREIGN KEY course_reserves_ibfk_2});
+        $dbh->do(q{ALTER TABLE course_reserves DROP INDEX course_reserves_ibfk_2});
+    }
     $dbh->{PrintError} = $print_error;
 
     $dbh->do(q{
-        ALTER IGNORE TABLE course_reserves
+        ALTER TABLE course_reserves
             ADD CONSTRAINT course_reserves_ibfk_2
                 FOREIGN KEY (ci_id) REFERENCES course_items (ci_id)
                 ON DELETE CASCADE ON UPDATE CASCADE
@@ -10916,28 +10959,32 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "3.21.00.028";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q{
-        ALTER TABLE uploaded_files
-            ADD COLUMN public tinyint,
-            ADD COLUMN permanent tinyint
-    });
-    $dbh->do(q{
-        UPDATE uploaded_files SET public=1, permanent=1
-    });
-    $dbh->do(q{
-        ALTER TABLE uploaded_files
-            CHANGE COLUMN categorycode uploadcategorycode tinytext
-    });
+    unless ( column_exists('uploaded_files', 'public') ) {
+        $dbh->do(q{
+            ALTER TABLE uploaded_files
+                ADD COLUMN public tinyint,
+                ADD COLUMN permanent tinyint
+        });
+        $dbh->do(q{
+            UPDATE uploaded_files SET public=1, permanent=1
+        });
+        $dbh->do(q{
+            ALTER TABLE uploaded_files
+                CHANGE COLUMN categorycode uploadcategorycode tinytext
+        });
+    }
     print "Upgrade to $DBversion done (Bug 14321: Merge UploadedFile and UploadedFiles into Koha::Upload)\n";
     SetVersion($DBversion);
 }
 
 $DBversion = "3.21.00.029";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q{
-        ALTER IGNORE TABLE discharges
-            ADD COLUMN discharge_id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST
-    });
+    unless ( column_exists('discharges', 'discharge_id') ) {
+        $dbh->do(q{
+            ALTER TABLE discharges
+                ADD COLUMN discharge_id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST
+        });
+    }
     print "Upgrade to $DBversion done (Bug 14368: Add discharges history)\n";
     SetVersion($DBversion);
 }
@@ -11475,13 +11522,12 @@ if ( C4::Context->preference("Version") < TransformToNum($DBversion) ) {
 
     my $sth2 = $dbh->prepare("SELECT * FROM subscription_numberpatterns WHERE id = ?");
 
-    my $sth3 = $dbh->prepare("UPDATE serials SET serialseq_x = ?, serialseq_y = ?, serialseq_z = ? WHERE serialid = ?");
+    my $sth3 = $dbh->prepare("UPDATE serial SET serialseq_x = ?, serialseq_y = ?, serialseq_z = ? WHERE serialid = ?");
 
     foreach my $subscription ( $sth->fetchrow_hashref() ) {
         next if !defined($subscription);
-        my $number_pattern = $subscription->numberpattern();
         $sth2->execute( $subscription->{numberpattern} );
-        $number_pattern = $sth2->fetchrow_hashref();
+        my $number_pattern = $sth2->fetchrow_hashref();
 
         my $numbering_method = $number_pattern->{numberingmethod};
         # Get all the data between the enumeration values, we need
@@ -12685,18 +12731,20 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "16.06.00.002";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q{
-        ALTER TABLE borrowers
-            ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
-            ON UPDATE CURRENT_TIMESTAMP
-            AFTER privacy_guarantor_checkouts;
-    });
-    $dbh->do(q{
-        ALTER TABLE deletedborrowers
-            ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
-            ON UPDATE CURRENT_TIMESTAMP
-            AFTER privacy_guarantor_checkouts;
-    });
+    unless ( column_exists('borrowers', 'updated_on') ) {
+        $dbh->do(q{
+            ALTER TABLE borrowers
+                ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
+                ON UPDATE CURRENT_TIMESTAMP
+                AFTER privacy_guarantor_checkouts;
+        });
+        $dbh->do(q{
+            ALTER TABLE deletedborrowers
+                ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
+                ON UPDATE CURRENT_TIMESTAMP
+                AFTER privacy_guarantor_checkouts;
+        });
+    }
 
     print "Upgrade to $DBversion done (Bug 10459 - borrowers should have a timestamp)\n";
     SetVersion($DBversion);
@@ -13069,12 +13117,14 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "16.06.00.027";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q{
-        ALTER IGNORE TABLE borrowers ADD COLUMN lastseen datetime default NULL AFTER updated_on;
-    });
-    $dbh->do(q{
-        ALTER IGNORE TABLE deletedborrowers ADD COLUMN lastseen datetime default NULL AFTER updated_on;
-    });
+    unless ( column_exists('borrowers', 'lastseen') ) {
+        $dbh->do(q{
+            ALTER TABLE borrowers ADD COLUMN lastseen datetime default NULL AFTER updated_on;
+        });
+        $dbh->do(q{
+            ALTER TABLE deletedborrowers ADD COLUMN lastseen datetime default NULL AFTER updated_on;
+        });
+    }
     $dbh->do(q{
         INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('TrackLastPatronActivity', '0', 'If set, the field borrowers.lastseen will be updated everytime a patron is seen', NULL, 'YesNo');
     });
@@ -13258,6 +13308,13 @@ if ( CheckVersion($DBversion) ) {
             UPDATE marc_subfield_structure SET authorised_value = NULL WHERE authorised_value = ';';
             });
 
+    # If the DB has been created before 3.19.00.006, the default collate for marc_subfield_structure if not set to utf8_unicode_ci and the new FK will not be create (MariaDB or MySQL will raise err 150)
+    my $table_sth = $dbh->prepare(qq|SHOW CREATE TABLE marc_subfield_structure|);
+    $table_sth->execute;
+    my @table = $table_sth->fetchrow_array;
+    if ( $table[1] !~ /COLLATE=utf8_unicode_ci/ and $table[1] !~ /COLLATE=utf8mb4_unicode_ci/ ) { #catches utf8mb4 collated tables
+        $dbh->do(qq|ALTER TABLE marc_subfield_structure CHARACTER SET utf8 COLLATE utf8_unicode_ci|);
+    }
     $dbh->do(q{
             ALTER TABLE marc_subfield_structure
             MODIFY COLUMN authorised_value VARCHAR(32) DEFAULT NULL,
@@ -13779,6 +13836,117 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
+$DBversion = "16.12.00.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.12 - Our battered suitcases were piled on the sidewalk again; we had longer ways to go. But no matter, the road is life.)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.12.00.001";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        ALTER TABLE borrower_modifications
+        ADD COLUMN extended_attributes text DEFAULT NULL
+        AFTER privacy
+    });
+
+    print "Upgrade to $DBversion done (Bug 17767 - Let Koha::Patron::Modification handle extended attributes)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.12.00.002';
+if ( CheckVersion($DBversion) ) {
+    unless (column_exists( 'branchtransfers', 'branchtransfer_id' )
+        and index_exists( 'branchtransfers', 'PRIMARY' ) )
+    {
+        $dbh->do(
+            "ALTER TABLE branchtransfers
+                 ADD COLUMN branchtransfer_id int(12) NOT NULL auto_increment FIRST, ADD CONSTRAINT PRIMARY KEY (branchtransfer_id);"
+        );
+    }
+
+    SetVersion($DBversion);
+    print "Upgrade to $DBversion done (Bug 14187 - branchtransfer needs a primary key (id) for DBIx and common sense.)\n";
+}
+
+$DBversion = '16.12.00.003';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{DELETE FROM systempreferences WHERE variable="Persona"});
+    SetVersion($DBversion);
+    print "Upgrade to $DBversion done (Bug 17486 - Remove 'Mozilla Persona' as an authentication method)\n";
+}
+
+$DBversion = '16.12.00.004';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        CREATE TABLE biblio_metadata (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `biblionumber` INT(11) NOT NULL,
+            `format` VARCHAR(16) NOT NULL,
+            `marcflavour` VARCHAR(16) NOT NULL,
+            `metadata` LONGTEXT NOT NULL,
+            PRIMARY KEY(id),
+            UNIQUE KEY `biblio_metadata_uniq_key` (`biblionumber`,`format`,`marcflavour`),
+            CONSTRAINT `biblio_metadata_fk_1` FOREIGN KEY (biblionumber) REFERENCES biblio (biblionumber) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+    $dbh->do(q{
+        CREATE TABLE deletedbiblio_metadata (
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `biblionumber` INT(11) NOT NULL,
+            `format` VARCHAR(16) NOT NULL,
+            `marcflavour` VARCHAR(16) NOT NULL,
+            `metadata` LONGTEXT NOT NULL,
+            PRIMARY KEY(id),
+            UNIQUE KEY `deletedbiblio_metadata_uniq_key` (`biblionumber`,`format`,`marcflavour`),
+            CONSTRAINT `deletedbiblio_metadata_fk_1` FOREIGN KEY (biblionumber) REFERENCES deletedbiblio (biblionumber) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+    $dbh->do(q{
+        INSERT INTO biblio_metadata ( biblionumber, format, marcflavour, metadata ) SELECT biblionumber, 'marcxml', 'CHANGEME', marcxml FROM biblioitems;
+    });
+    $dbh->do(q{
+        INSERT INTO deletedbiblio_metadata ( biblionumber, format, marcflavour, metadata ) SELECT biblionumber, 'marcxml', 'CHANGEME', marcxml FROM deletedbiblioitems;
+    });
+    $dbh->do(q{
+        UPDATE biblio_metadata SET marcflavour = (SELECT value FROM systempreferences WHERE variable="marcflavour");
+    });
+    $dbh->do(q{
+        UPDATE deletedbiblio_metadata SET marcflavour = (SELECT value FROM systempreferences WHERE variable="marcflavour");
+    });
+    $dbh->do(q{
+        ALTER TABLE biblioitems DROP COLUMN marcxml;
+    });
+    $dbh->do(q{
+        ALTER TABLE deletedbiblioitems DROP COLUMN marcxml;
+    });
+    SetVersion($DBversion);
+    print "Upgrade to $DBversion done (Bug 17196 - Move marcxml out of the biblioitems table)\n";
+}
+
+$DBversion = '16.12.00.005';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do( "INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type) VALUES('AuthorityMergeMode','loose','loose|strict','Authority merge mode','Choice')");
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17913 - AuthorityMergeMode)\n";
+}
+
+$DBversion = "16.12.00.006";
+if ( CheckVersion($DBversion) ) {
+    unless (     column_exists( 'borrower_attributes', 'id' )
+             and index_exists( 'borrower_attributes', 'PRIMARY' ) )
+    {
+        $dbh->do(q{
+            ALTER TABLE `borrower_attributes`
+                ADD `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST
+        });
+    }
+
+    print "Upgrade to $DBversion done (Bug 17813: Table borrower_attributes needs a primary key\n";
+    SetVersion($DBversion);
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.
@@ -13793,7 +13961,7 @@ foreach my $file ( sort readdir $dirh ) {
         my $installer = C4::Installer->new();
         my $rv = $installer->load_sql( $update_dir . $file ) ? 0 : 1;
     } elsif ( $file =~ /\.perl$/ ) {
-        my $code = path( $update_dir . $file )->slurp_utf8;
+        my $code = read_file( $update_dir . $file );
         eval $code;
         say "Atomic update generated errors: $@" if $@;
     }

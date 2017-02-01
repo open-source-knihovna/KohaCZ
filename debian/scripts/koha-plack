@@ -74,7 +74,18 @@ start_plack()
 
     _check_and_fix_perms $instancename
 
-    STARMANOPTS="-M FindBin --max-requests 50 --workers 2 \
+    PLACK_MAX_REQUESTS="50"
+    PLACK_WORKERS="2"
+
+    if [[ $(get_plack_max_requests $instancename) ]]; then
+        PLACK_MAX_REQUESTS="$(get_plack_max_requests $instancename)"
+    fi
+
+    if [[ $(get_plack_workers $instancename) ]]; then
+        PLACK_WORKERS="$(get_plack_workers $instancename)"
+    fi
+
+    STARMANOPTS="-M FindBin --max-requests ${PLACK_MAX_REQUESTS} --workers ${PLACK_WORKERS} \
                  --user=${instancename}-koha --group ${instancename}-koha \
                  --pid ${PIDFILE} \
                  --daemonize \
@@ -231,6 +242,30 @@ set_action()
     fi
 }
 
+adjust_paths()
+{
+    # Optionally use alternative paths for a dev install
+    adjust_paths_dev_install $1
+
+    # PERL5LIB has been read from etc/default, add lib/installer
+    # export some vars (for plack.psgi)
+    export KOHA_HOME
+    if [ "$DEV_INSTALL" = "" ]; then
+        export PERL5LIB=$PERL5LIB:$KOHA_HOME/lib/installer
+    else
+        export DEV_INSTALL
+        export PERL5LIB=$PERL5LIB:$KOHA_HOME/installer
+    fi
+}
+
+get_plack_max_requests() {
+    xmlstarlet sel -t -v 'yazgfs/config/plack_max_requests' "/etc/koha/sites/$1/koha-conf.xml"
+}
+
+get_plack_workers() {
+    xmlstarlet sel -t -v 'yazgfs/config/plack_workers' "/etc/koha/sites/$1/koha-conf.xml"
+}
+
 STARMAN=$(which starman)
 op=""
 quiet="no"
@@ -268,12 +303,6 @@ while [ $# -gt 0 ]; do
 
 done
 
-if [ -z $PERL5LIB ]; then
-    PERL5LIB="/usr/share/koha/lib"
-fi
-
-export PERL5LIB
-
 [ "${quiet}" != "yes" ] && check_env_and_warn
 
 if [ $# -gt 0 ]; then
@@ -282,6 +311,7 @@ if [ $# -gt 0 ]; then
 
         if is_instance $name; then
 
+            adjust_paths $name
             case $op in
                 "start")
                     start_plack $name

@@ -70,12 +70,13 @@ sub get_out {
 }
 
 # get borrower information ....
-my ( $borr ) = GetMemberDetails( $borrowernumber );
+my ( $borr ) = GetMember( borrowernumber => $borrowernumber );
+my $patron = Koha::Patrons->find( $borrowernumber );
 
 # check if this user can place a reserve, -1 means use sys pref, 0 means dont block, 1 means block
-if ( $borr->{'BlockExpiredPatronOpacActions'} ) {
+if ( $patron->category->effective_BlockExpiredPatronOpacActions ) {
 
-    if ( $borr->{'is_expired'} ) {
+    if ( $patron->is_expired ) {
 
         # cannot reserve, their card has expired and the rules set mean this is not allowed
         $template->param( message => 1, expired_patron => 1 );
@@ -84,8 +85,9 @@ if ( $borr->{'BlockExpiredPatronOpacActions'} ) {
 }
 
 # Pass through any reserve charge
-if ($borr->{reservefee} > 0){
-    $template->param( RESERVE_CHARGE => sprintf("%.2f",$borr->{reservefee}));
+my $reservefee = $patron->category->reservefee;
+if ( $reservefee > 0){
+    $template->param( RESERVE_CHARGE => sprintf("%.2f",$reservefee));
 }
 
 my $itemTypes = GetItemTypes();
@@ -304,8 +306,9 @@ if ( $query->param('place_reserve') ) {
 my $noreserves     = 0;
 my $maxoutstanding = C4::Context->preference("maxoutstanding");
 $template->param( noreserve => 1 ) unless $maxoutstanding;
-if ( $borr->{'amountoutstanding'} && ($borr->{'amountoutstanding'} > $maxoutstanding) ) {
-    my $amount = sprintf "%.02f", $borr->{'amountoutstanding'};
+my ( $amountoutstanding ) = GetMemberAccountRecords($borrowernumber);
+if ( $amountoutstanding && ($amountoutstanding > $maxoutstanding) ) {
+    my $amount = sprintf "%.02f", $amountoutstanding;
     $template->param( message => 1 );
     $noreserves = 1;
     $template->param( too_much_oweing => $amount );
@@ -446,7 +449,7 @@ foreach my $biblioNum (@biblionumbers) {
 
         # checking reserve
         my ($reservedate,$reservedfor,$expectedAt,undef,$wait) = GetReservesFromItemnumber($itemNum);
-        my $ItemBorrowerReserveInfo = GetMemberDetails( $reservedfor, 0);
+        my $ItemBorrowerReserveInfo = GetMember( borrowernumber => $reservedfor );
 
         # the item could be reserved for this borrower vi a host record, flag this
         $reservedfor //= '';

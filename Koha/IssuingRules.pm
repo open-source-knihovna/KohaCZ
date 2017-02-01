@@ -44,73 +44,31 @@ sub get_effective_issuing_rule {
     my $itemtype     = $params->{itemtype};
     my $branchcode   = $params->{branchcode};
 
-    my $rule = $self->find($params);
-    return $rule if $rule;
+    my $search_categorycode = $default;
+    my $search_itemtype     = $default;
+    my $search_branchcode   = $default;
 
-    $rule = $self->find(
-        {
-            categorycode => $categorycode,
-            itemtype     => $default,
-            branchcode   => $branchcode
-        }
-    );
-    return $rule if $rule;
+    if ($categorycode) {
+        $search_categorycode = { 'in' => [ $categorycode, $default ] };
+    }
+    if ($itemtype) {
+        $search_itemtype = { 'in' => [ $itemtype, $default ] };
+    }
+    if ($branchcode) {
+        $search_branchcode = { 'in' => [ $branchcode, $default ] };
+    }
 
-    $rule = $self->find(
-        {
-            categorycode => $default,
-            itemtype     => $itemtype,
-            branchcode   => $branchcode
-        }
-    );
-    return $rule if $rule;
-
-    $rule = $self->find(
-        {
-            categorycode => $default,
-            itemtype     => $default,
-            branchcode   => $branchcode
-        }
-    );
-    return $rule if $rule;
-
-    $rule = $self->find(
-        {
-            categorycode => $categorycode,
-            itemtype     => $itemtype,
-            branchcode   => $default
-        }
-    );
-    return $rule if $rule;
-
-    $rule = $self->find(
-        {
-            categorycode => $categorycode,
-            itemtype     => $default,
-            branchcode   => $default
-        }
-    );
-    return $rule if $rule;
-
-    $rule = $self->find(
-        {
-            categorycode => $default,
-            itemtype     => $itemtype,
-            branchcode   => $default
-        }
-    );
-    return $rule if $rule;
-
-    $rule = $self->find(
-        {
-            categorycode => $default,
-            itemtype     => $default,
-            branchcode   => $default
-        }
-    );
-    return $rule if $rule;
-
-    return;
+    my $rule = $self->search({
+        categorycode => $search_categorycode,
+        itemtype     => $search_itemtype,
+        branchcode   => $search_branchcode,
+    }, {
+        order_by => {
+            -desc => ['branchcode', 'categorycode', 'itemtype']
+        },
+        rows => 1,
+    })->single;
+    return $rule;
 }
 
 =head3 type

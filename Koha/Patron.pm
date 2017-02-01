@@ -24,11 +24,11 @@ use Carp;
 
 use C4::Context;
 use C4::Log;
+use Koha::Checkouts;
 use Koha::Database;
 use Koha::DateUtils;
 use Koha::Holds;
-use Koha::Issues;
-use Koha::OldIssues;
+use Koha::Old::Checkouts;
 use Koha::Patron::Categories;
 use Koha::Patron::HouseboundProfile;
 use Koha::Patron::HouseboundRole;
@@ -66,8 +66,7 @@ sub delete {
     $self->_result->result_source->schema->txn_do(
         sub {
             # Delete Patron's holds
-            # FIXME Should be $patron->get_holds
-            $_->delete for Koha::Holds->search( { borrowernumber => $self->borrowernumber } );
+            $self->holds->delete;
 
             # Delete all lists and all shares of this borrower
             # Consistent with the approach Koha uses on deleting individual lists
@@ -124,7 +123,12 @@ sub guarantor {
 sub image {
     my ( $self ) = @_;
 
-    return Koha::Patron::Images->find( $self->borrowernumber )
+    return Koha::Patron::Images->find( $self->borrowernumber );
+}
+
+sub library {
+    my ( $self ) = @_;
+    return Koha::Library->_new_from_dbic($self->_result->branchcode);
 }
 
 =head3 guarantees
@@ -252,11 +256,11 @@ sub do_check_for_previous_checkout {
     };
 
     # Check current issues table
-    my $issues = Koha::Issues->search($criteria);
+    my $issues = Koha::Checkouts->search($criteria);
     return 1 if $issues->count; # 0 || N
 
     # Check old issues table
-    my $old_issues = Koha::OldIssues->search($criteria);
+    my $old_issues = Koha::Old::Checkouts->search($criteria);
     return $old_issues->count;  # 0 || N
 }
 
@@ -292,6 +296,26 @@ sub is_expired {
     return 0 unless $self->dateexpiry;
     return 0 if $self->dateexpiry eq '0000-00-00';
     return 1 if dt_from_string( $self->dateexpiry ) < dt_from_string->truncate( to => 'day' );
+    return 0;
+}
+
+=head2 is_going_to_expire
+
+my $is_going_to_expire = $patron->is_going_to_expire;
+
+Returns 1 if the patron is going to expired, depending on the NotifyBorrowerDeparture pref or 0
+
+=cut
+
+sub is_going_to_expire {
+    my ($self) = @_;
+
+    my $delay = C4::Context->preference('NotifyBorrowerDeparture') || 0;
+
+    return 0 unless $delay;
+    return 0 unless $self->dateexpiry;
+    return 0 if $self->dateexpiry eq '0000-00-00';
+    return 1 if dt_from_string( $self->dateexpiry )->subtract( days => $delay ) < dt_from_string->truncate( to => 'day' );
     return 0;
 }
 
@@ -474,6 +498,88 @@ sub add_enrolment_fee_if_needed {
         C4::Accounts::manualinvoice( $self->borrowernumber, '', '', 'A', $enrolment_fee );
     }
     return $enrolment_fee || 0;
+}
+
+=head3 checkouts
+
+my $issues = $patron->checkouts
+
+=cut
+
+sub checkouts {
+    my ($self) = @_;
+    my $issues = $self->_result->issues;
+    return Koha::Checkouts->_new_from_dbic( $issues );
+}
+
+=head3 get_overdues
+
+my $overdue_items = $patron->get_overdues
+
+Return the overdued items
+
+=cut
+
+sub get_overdues {
+    my ($self) = @_;
+    my $dtf = Koha::Database->new->schema->storage->datetime_parser;
+    return $self->checkouts->search(
+        {
+            'me.date_due' => { '<' => $dtf->format_datetime(dt_from_string) },
+        },
+        {
+            prefetch => { item => { biblio => 'biblioitems' } },
+        }
+    );
+}
+
+=head3 get_age
+
+my $age = $patron->get_age
+
+Return the age of the patron
+
+=cut
+
+sub get_age {
+    my ($self)    = @_;
+    my $today_str = dt_from_string->strftime("%Y-%m-%d");
+    my $dob_str   = dt_from_string( $self->dateofbirth )->strftime("%Y-%m-%d");
+
+    my ( $dob_y,   $dob_m,   $dob_d )   = split /-/, $dob_str;
+    my ( $today_y, $today_m, $today_d ) = split /-/, $today_str;
+
+    my $age = $today_y - $dob_y;
+    if ( $dob_m . $dob_d > $today_m . $today_d ) {
+        $age--;
+    }
+
+    return $age;
+}
+
+=head3 account
+
+my $account = $patron->account
+
+=cut
+
+sub account {
+    my ($self) = @_;
+    return Koha::Account->new( { patron_id => $self->borrowernumber } );
+}
+
+=head3 holds
+
+my $holds = $patron->holds
+
+Return all the holds placed by this patron
+
+=cut
+
+sub holds {
+    my ($self) = @_;
+    my $holds_rs = $self->_result->reserves->search( {}, { order_by => 'reservedate' } );
+    return Koha::Holds->_new_from_dbic($holds_rs);
 }
 
 =head3 type

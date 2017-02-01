@@ -1461,51 +1461,68 @@ sub merge {
         $z++;
     }
     $oResult->destroy();
-    #warn scalar(@reccache)." biblios to update";
     # Get All candidate Tags for the change 
     # (This will reduce the search scope in marc records).
-    my $sth = $dbh->prepare("select distinct tagfield from marc_subfield_structure where authtypecode=?");
-    $sth->execute($authtypefrom->authtypecode);
-    my @tags_using_authtype;
-    while (my ($tagfield) = $sth->fetchrow) {
-        push @tags_using_authtype,$tagfield ;
-    }
-    my $tag_to=0;  
+    my $sql = "SELECT DISTINCT tagfield FROM marc_subfield_structure WHERE authtypecode=?";
+    my $tags_using_authtype = $dbh->selectcol_arrayref( $sql, undef, ( $authtypefrom->authtypecode ));
+    my $tags_new;
     if ($authtypeto->authtypecode ne $authtypefrom->authtypecode){
-        # If many tags, take the first
-        $sth->execute($authtypeto->authtypecode);
-        $tag_to=$sth->fetchrow;
-        #warn $tag_to;    
+        $tags_new = $dbh->selectcol_arrayref( $sql, undef, ( $authtypeto->authtypecode ));
     }  
-    # BulkEdit marc records
-    # May be used as a template for a bulkedit field  
+
+    my $overwrite = C4::Context->preference( 'AuthorityMergeMode' ) eq 'strict';
+    my $skip_subfields = $overwrite
+        # This hash contains all subfields from the authority report fields
+        # Including $MARCfrom as well as $MARCto
+        # We only need it in loose merge mode; replaces the former $exclude
+        ? {}
+        : { map { ( $_->[0], 1 ); } ( @record_from, @record_to ) };
+    # And we need to add $9 in order not to duplicate
+    $skip_subfields->{9} = 1 if !$overwrite;
+
     foreach my $marcrecord(@reccache){
         my $update = 0;
-        foreach my $tagfield (@tags_using_authtype){
-#             warn "tagfield : $tagfield ";
-            foreach my $field ($marcrecord->field($tagfield)){
-                # biblio is linked to authority with $9 subfield containing authid
-                my $auth_number=$field->subfield("9");
-                my $tag=$field->tag();          
-                if ($auth_number==$mergefrom) {
-                my $field_to=MARC::Field->new(($tag_to?$tag_to:$tag),$field->indicator(1),$field->indicator(2),"9"=>$mergeto);
-		my $exclude='9';
-                foreach my $subfield (grep {$_->[0] ne '9'} @record_to) {
-                    $field_to->add_subfields($subfield->[0] =>$subfield->[1]);
-		    $exclude.= $subfield->[0];
+        foreach my $tagfield (@$tags_using_authtype) {
+            my $countfrom = 0;    # used in strict mode to remove duplicates
+            foreach my $field ( $marcrecord->field($tagfield) ) {
+                my $auth_number = $field->subfield("9");    # link to authority
+                my $tag         = $field->tag();
+                next if !defined($auth_number) || $auth_number ne $mergefrom;
+                $countfrom++;
+                if ( $overwrite && $countfrom > 1 ) {
+                    # remove this duplicate in strict mode
+                    $marcrecord->delete_field($field);
+                    $update = 1;
+                    next;
                 }
-		$exclude='['.$exclude.']';
-#		add subfields in $field not included in @record_to
-		my @restore= grep {$_->[0]!~/$exclude/} $field->subfields();
-                foreach my $subfield (@restore) {
-                   $field_to->add_subfields($subfield->[0] =>$subfield->[1]);
-		}
-                $marcrecord->delete_field($field);
-                $marcrecord->insert_grouped_field($field_to);            
-                $update=1;
+                my $newtag = $tags_new
+                  ? _merge_newtag( $tag, $tags_new )
+                  : $tag;
+                my $field_to = MARC::Field->new(
+                    $newtag,
+                    $field->indicator(1),
+                    $field->indicator(2),
+                    "9" => $mergeto,
+                );
+                foreach my $subfield ( grep { $_->[0] ne '9' } @record_to ) {
+                    $field_to->add_subfields( $subfield->[0] => $subfield->[1] );
                 }
-            }#for each tag
-        }#foreach tagfield
+                if ( !$overwrite ) {
+                    # add subfields back in loose mode, check skip_subfields
+                    foreach my $subfield ( $field->subfields ) {
+                        next if $skip_subfields->{ $subfield->[0] };
+                        $field_to->add_subfields( $subfield->[0], $subfield->[1] );
+                    }
+                }
+                if ($tags_new) {
+                    $marcrecord->delete_field($field);
+                    append_fields_ordered( $marcrecord, $field_to );
+                } else {
+                    $field->replace_with($field_to);
+                }
+                $update = 1;
+            }
+        }
         my ($bibliotag,$bibliosubf) = GetMarcFromKohaField("biblio.biblionumber","") ;
         my $biblionumber;
         if ($bibliotag<10){
@@ -1523,57 +1540,37 @@ sub merge {
             $counteditedbiblio++;
             warn $counteditedbiblio if (($counteditedbiblio % 10) and $ENV{DEBUG});
         }    
-    }#foreach $marc
+    }
     return $counteditedbiblio;  
-  # now, find every other authority linked with this authority
-  # now, find every other authority linked with this authority
-#   my $oConnection=C4::Context->Zconn("authorityserver");
-#   my $query;
-# # att 9210               Auth-Internal-authtype
-# # att 9220               Auth-Internal-LN
-# # ccl.properties to add for authorities
-#   $query= "= ".$mergefrom;
-#   my $oResult = $oConnection->search(new ZOOM::Query::CCL2RPN( $query, $oConnection ));
-#   my $count=$oResult->size() if  ($oResult);
-#   my @reccache;
-#   my $z=0;
-#   while ( $z<$count ) {
-#   my $rec;
-#           $rec=$oResult->record($z);
-#       my $marcdata = $rec->raw();
-#   push @reccache, $marcdata;
-#   $z++;
-#   }
-#   $oResult->destroy();
-#   foreach my $marc(@reccache){
-#     my $update;
-#     my $marcrecord;
-#     $marcrecord = MARC::File::USMARC::decode($marc);
-#     foreach my $tagfield (@tags_using_authtype){
-#       $tagfield=substr($tagfield,0,3);
-#       my @tags = $marcrecord->field($tagfield);
-#       foreach my $tag (@tags){
-#         my $tagsubs=$tag->subfield("9");
-#     #warn "$tagfield:$tagsubs:$mergefrom";
-#         if ($tagsubs== $mergefrom) {
-#           $tag->update("9" =>$mergeto);
-#           foreach my $subfield (@record_to) {
-#     #        warn "$subfield,$subfield->[0],$subfield->[1]";
-#             $tag->update($subfield->[0] =>$subfield->[1]);
-#           }#for $subfield
-#         }
-#         $marcrecord->delete_field($tag);
-#         $marcrecord->add_fields($tag);
-#         $update=1;
-#       }#for each tag
-#     }#foreach tagfield
-#     my $authoritynumber = TransformMarcToKoha($marcrecord,"") ;
-#     if ($update==1){
-#       &ModAuthority($marcrecord,$authoritynumber,GetAuthTypeCode($authoritynumber)) ;
-#     }
-# 
-#   }#foreach $marc
-}#sub
+}
+
+sub _merge_newtag {
+# Routine is only called for an (exceptional) authtypecode change
+# Fixes old behavior of returning the first tag found
+    my ( $oldtag, $new_tags ) = @_;
+
+    # If we e.g. have 650 and 151,651,751 try 651 and check presence
+    my $prefix = substr( $oldtag, 0, 1 );
+    my $guess = $prefix . substr( $new_tags->[0], -2 );
+    if( grep { $_ eq $guess } @$new_tags ) {
+        return $guess;
+    }
+    # Otherwise return one from the same block e.g. 6XX for 650
+    # If not there too, fall back to first new tag (old behavior!)
+    my @same_block = grep { /^$prefix/ } @$new_tags;
+    return @same_block ? $same_block[0] : $new_tags->[0];
+}
+
+sub append_fields_ordered {
+# while we lack this function in MARC::Record
+# we do not want insert_fields_ordered since it inserts before
+    my ( $record, $field ) = @_;
+    if( my @flds = $record->field( $field->tag ) ) {
+        $record->insert_fields_after( pop @flds, $field );
+    } else { # now fallback to insert_fields_ordered
+        $record->insert_fields_ordered( $field );
+    }
+}
 
 =head2 get_auth_type_location
 

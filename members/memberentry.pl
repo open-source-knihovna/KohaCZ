@@ -26,6 +26,7 @@ use warnings;
 use CGI qw ( -utf8 );
 use List::MoreUtils qw/uniq/;
 use Digest::MD5 qw(md5_base64);
+use Encode qw( encode );
 
 # internal modules
 use C4::Auth;
@@ -289,8 +290,8 @@ if ($op eq 'save' || $op eq 'insert'){
 
     die "Wrong CSRF token"
         unless Koha::Token->new->check_csrf({
-            id     => C4::Context->userenv->{id},
-            secret => md5_base64( C4::Context->config('pass') ),
+            id     => Encode::encode( 'UTF-8', C4::Context->userenv->{id} ),
+            secret => md5_base64( Encode::encode( 'UTF-8', C4::Context->config('pass') ) ),
             token  => scalar $input->param('csrf_token'),
         });
 
@@ -315,7 +316,8 @@ if ($op eq 'save' || $op eq 'insert'){
     }
 
     if ( $dateofbirth ) {
-        my $age = GetAge($dateofbirth);
+        my $patron = Koha::Patron->new({ dateofbirth => $dateofbirth });
+        my $age = $patron->get_age;
         my $borrowercategory = Koha::Patron::Categories->find($categorycode);
         my ($low,$high) = ($borrowercategory->dateofbirthrequired, $borrowercategory->upperagelimit);
         if (($high && ($age > $high)) or ($age < $low)) {
@@ -559,7 +561,6 @@ if ( $op eq "duplicate" ) {
     $data{'cardnumber'} = "";
 }
 
-$data{'cardnumber'}=fixup_cardnumber($data{'cardnumber'}) if ( ( $op eq 'add' ) or ( $op eq 'duplicate' ) );
 if(!defined($data{'sex'})){
     $template->param( none => 1);
 } elsif($data{'sex'} eq 'F'){
@@ -751,8 +752,8 @@ $template->param(
 # Generate CSRF token
 $template->param(
     csrf_token => Koha::Token->new->generate_csrf(
-        {   id     => C4::Context->userenv->{id},
-            secret => md5_base64( C4::Context->config('pass') ),
+        {   id     => Encode::encode( 'UTF-8', C4::Context->userenv->{id} ),
+            secret => md5_base64( Encode::encode( 'UTF-8', C4::Context->config('pass') ) ),
         }
     ),
 );

@@ -55,7 +55,7 @@ use C4::Acquisition qw/CloseBasketgroup ReOpenBasketgroup GetOrders GetBasketsBy
 use C4::Members qw/GetMember/;
 use Koha::EDI qw/create_edi_order get_edifact_ean/;
 
-use Koha::Acquisition::Bookseller;
+use Koha::Acquisition::Booksellers;
 
 our $input=new CGI;
 
@@ -75,13 +75,13 @@ sub BasketTotal {
     my @orders = GetOrders($basketno);
     for my $order (@orders){
         # FIXME The following is wrong
-        if ( $bookseller->{listincgst} ) {
+        if ( $bookseller->listincgst ) {
             $total = $total + ( $order->{ecost_tax_included} * $order->{quantity} );
         } else {
             $total = $total + ( $order->{ecost_tax_excluded} * $order->{quantity} );
         }
     }
-    $total .= " " . ($bookseller->{invoiceprice} // 0);
+    $total .= " " . ($bookseller->invoiceprice // 0);
     return $total;
 }
 
@@ -118,7 +118,7 @@ sub displaybasketgroups {
         }
     }
     $template->param(baskets => $baskets);
-    $template->param( booksellername => $bookseller ->{'name'});
+    $template->param( booksellername => $bookseller->name);
 }
 
 sub printbasketgrouppdf{
@@ -143,7 +143,7 @@ sub printbasketgrouppdf{
     }
     
     my $basketgroup = GetBasketgroup($basketgroupid);
-    my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $basketgroup->{booksellerid} });
+    my $bookseller = Koha::Acquisition::Booksellers->find( $basketgroup->{booksellerid} );
     my $baskets = GetBasketsByBasketgroup($basketgroupid);
     
     my %orders;
@@ -183,6 +183,7 @@ sub printbasketgrouppdf{
             # Editor Number
             my $en;
             my $edition;
+            my $ord->{marcxml} = C4::Biblio::GetXmlBiblio( $ord->{biblionumber} );
             my $marcrecord=eval{MARC::Record::new_from_xml( $ord->{marcxml},'UTF-8' )};
             if ($marcrecord){
                 if ( C4::Context->preference("marcflavour") eq 'UNIMARC' ) {
@@ -206,7 +207,7 @@ sub printbasketgrouppdf{
         -type       => 'application/pdf',
         -attachment => ( $basketgroup->{name} || $basketgroupid ) . '.pdf'
     );
-    my $pdf = printpdf($basketgroup, $bookseller, $baskets, \%orders, $bookseller->{tax_rate} // C4::Context->preference("gist")) || die "pdf generation failed";
+    my $pdf = printpdf($basketgroup, $bookseller, $baskets, \%orders, $bookseller->tax_rate // C4::Context->preference("gist")) || die "pdf generation failed";
     print $pdf;
 
 }
@@ -243,7 +244,7 @@ if ( $op eq "add" ) {
 # else, edit (if it is open) or display (if it is close) the basketgroup basketgroupid
 # the template will know if basketgroup must be displayed or edited, depending on the value of closed key
 #
-    my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
+    my $bookseller = Koha::Acquisition::Booksellers->find( $booksellerid );
     my $basketgroupid = $input->param('basketgroupid');
     my $billingplace;
     my $deliveryplace;
@@ -392,7 +393,7 @@ if ( $op eq "add" ) {
 }else{
 # no param : display the list of all basketgroups for a given vendor
     my $basketgroups = &GetBasketgroups($booksellerid);
-    my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
+    my $bookseller = Koha::Acquisition::Booksellers->find( $booksellerid );
     my $baskets = &GetBasketsByBookseller($booksellerid);
 
     displaybasketgroups($basketgroups, $bookseller, $baskets);

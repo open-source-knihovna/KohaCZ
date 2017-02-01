@@ -103,17 +103,13 @@
                                     [% END %]
                                 [% END %]
                                 [% IF EnableOpacSearchHistory %]
-                                    <li><p class="navbar-text"><a href="/cgi-bin/koha/opac-search-history.pl" title="View your search history">Search history</a> [<a class="logout" href="/cgi-bin/koha/opac-search-history.pl?action=delete" title="Delete your search history" onclick="return confirm(MSG_DELETE_SEARCH_HISTORY);">x</a>]</p></li>
+                                    <li><p class="navbar-text"><a href="/cgi-bin/koha/opac-search-history.pl" title="View your search history">Search history</a> [<a class="logout clearsh" href="/cgi-bin/koha/opac-search-history.pl?action=delete" title="Delete your search history">x</a>]</p></li>
                                     <li class="divider-vertical"></li>
                                 [% END %]
                                 [% IF Koha.Preference( 'opacuserlogin' ) == 1 %]
                                     [% IF ( loggedinusername ) %]
                                         <li><p class="navbar-text">
-                                            [% IF persona %]
-                                                <a class="logout" id="logout" href="/cgi-bin/koha/opac-main.pl?logout.x=1" onclick='navigator.id.logout();'>
-                                            [% ELSE %]
-                                                <a class="logout" id="logout" href="/cgi-bin/koha/opac-main.pl?logout.x=1">
-                                            [% END %]
+                                            <a class="logout" id="logout" href="/cgi-bin/koha/opac-main.pl?logout.x=1">
                                             Log out</a></p></li>
                                     [% END %]
                                 [% END %]

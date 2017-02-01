@@ -1,19 +1,9 @@
 [% USE Koha %]
+[% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha staff client</title>
 <link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/mainpage.css" />
 [% INCLUDE 'doc-head-close.inc' %]
-<style type="text/css"> </style>
-<script type="text/javascript">
-//<![CDATA[
-var MSG_CONFIRM_DELETE = _("Are you sure you want to delete this news item? This cannot be undone.");
-    $(document).ready(function(){
-        $(".news_delete").on("click", function(){
-            return confirmDelete(MSG_CONFIRM_DELETE);
-        });
-    });
-//]]>
-</script>
 </head>
 <body id="main_intranet-main" class="main">
 [% INCLUDE 'header.inc' %]
@@ -30,7 +20,7 @@ var MSG_CONFIRM_DELETE = _("Are you sure you want to delete this news item? This
         <div id="adminwarning" class="dialog alert">
             <p><strong>Warning:</strong> You are logged in as the database administrative user. This is not recommended because some parts of Koha will not function as expected when using this account.</p>
             <p>Please log in instead with a regular staff account. To create a staff account, create a library, a patron category 'Staff' and add a new patron. Then give this patron permissions from 'More' in the toolbar.</p>
-<p><a class="btn btn-small" href="/cgi-bin/koha/members/members-home.pl"><i class="fa fa-plus"> </i> Create patron</a></p>
+<p><a class="btn btn-default btn-sm" href="/cgi-bin/koha/members/members-home.pl"><i class="fa fa-plus"> </i> Create patron</a></p>
         </div>
     [% END %]
     <div class="yui-u first">
@@ -208,5 +198,17 @@ var MSG_CONFIRM_DELETE = _("Are you sure you want to delete this news item? This
     </div>
 </div>
 
+[% MACRO jsinclude BLOCK %]
+    <script type="text/javascript">
+    //<![CDATA[
+    var MSG_CONFIRM_DELETE = _("Are you sure you want to delete this news item? This cannot be undone.");
+        $(document).ready(function(){
+            $(".news_delete").on("click", function(){
+                return confirmDelete(MSG_CONFIRM_DELETE);
+            });
+        });
+    //]]>
+    </script>
+[% END %]
 <!-- the main div is closed in intranet-bottom.inc -->
 [% INCLUDE 'intranet-bottom.inc' %]

@@ -3,7 +3,7 @@
 
 [%- BLOCK action_menu %]
     <div class="dropdown">
-        <a class="btn btn-mini dropdown-toggle" id="budgetmenu_[% block_budget_id %]" role="button" data-toggle="dropdown" href="#">
+        <a class="btn btn-default btn-xs dropdown-toggle" id="budgetmenu_[% block_budget_id %]" role="button" data-toggle="dropdown" href="#">
            Actions <b class="caret"></b>
         </a>
         <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="budgetmenu_[% block_budget_id %]">
@@ -243,7 +243,7 @@
         <span>Budget <a href="/cgi-bin/koha/admin/aqbudgets.pl?budget_period_id=[% budget_period_id %]">[% budget_period_description %]</a> closed</span>
     [% END %]
     [% IF ( else ) %]
-        <span>Budgets administration</span>
+        <span><a href="/cgi-bin/koha/acqui/acqui-home.pl">Budgets administration</a></span>
     [% END %]
 </div>
 

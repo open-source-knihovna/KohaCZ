@@ -193,7 +193,6 @@ CREATE TABLE `biblioitems` ( -- information related to bibliographic records in 
   `cn_sort` varchar(255) default NULL, -- normalized version of the call number used for sorting
   `agerestriction` varchar(255) default NULL, -- target audience/age restriction from the bib record (MARC21 521$a)
   `totalissues` int(10),
-  `marcxml` longtext, -- full bibliographic MARC record in MARCXML
   PRIMARY KEY  (`biblioitemnumber`),
   KEY `bibinoidx` (`biblioitemnumber`),
   KEY `bibnoidx` (`biblionumber`),
@@ -547,7 +546,6 @@ CREATE TABLE `deletedbiblioitems` ( -- information about bibliographic records t
   `cn_sort` varchar(255) default NULL, -- normalized version of the call number used for sorting
   `agerestriction` varchar(255) default NULL, -- target audience/age restriction from the bib record (MARC21 521$a)
   `totalissues` int(10),
-  `marcxml` longtext, -- full bibliographic MARC record in MARCXML
   PRIMARY KEY  (`biblioitemnumber`),
   KEY `bibinoidx` (`biblioitemnumber`),
   KEY `bibnoidx` (`biblionumber`),
@@ -1009,12 +1007,14 @@ CREATE TABLE `default_branch_item_rules` (
 
 DROP TABLE IF EXISTS `branchtransfers`;
 CREATE TABLE `branchtransfers` ( -- information for items that are in transit between branches
+  `branchtransfer_id` int(12) NOT NULL auto_increment, -- primary key
   `itemnumber` int(11) NOT NULL default 0, -- the itemnumber that it is in transit (items.itemnumber)
   `datesent` datetime default NULL, -- the date the transfer was initialized
   `frombranch` varchar(10) NOT NULL default '', -- the branch the transfer is coming from
   `datearrived` datetime default NULL, -- the date the transfer arrived at its destination
   `tobranch` varchar(10) NOT NULL default '', -- the branch the transfer was going to
   `comments` mediumtext, -- any comments related to the transfer
+  PRIMARY KEY (`branchtransfer_id`),
   KEY `frombranch` (`frombranch`),
   KEY `tobranch` (`tobranch`),
   KEY `itemnumber` (`itemnumber`),
@@ -1682,6 +1682,7 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
 
 DROP TABLE IF EXISTS `borrower_attributes`;
 CREATE TABLE `borrower_attributes` ( -- values of custom patron fields known as extended patron attributes linked to patrons/borrowers
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, -- Row id field
   `borrowernumber` int(11) NOT NULL, -- foreign key from the borrowers table, defines which patron/borrower has this attribute
   `code` varchar(10) NOT NULL, -- foreign key from the borrower_attribute_types table, defines which custom field this value was entered for
   `attribute` varchar(255) default NULL, -- custom patron field value
@@ -3435,6 +3436,7 @@ CREATE TABLE IF NOT EXISTS `borrower_modifications` (
   `altcontactphone` varchar(50) DEFAULT NULL,
   `smsalertnumber` varchar(50) DEFAULT NULL,
   `privacy` int(11) DEFAULT NULL,
+  `extended_attributes` text DEFAULT NULL,
   PRIMARY KEY (`verification_token`,`borrowernumber`),
   KEY `verification_token` (`verification_token`),
   KEY `borrowernumber` (`borrowernumber`)
@@ -3930,6 +3932,36 @@ CREATE TABLE `article_requests` (
   CONSTRAINT `article_requests_ibfk_2` FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `article_requests_ibfk_3` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `article_requests_ibfk_4` FOREIGN KEY (`branchcode`) REFERENCES `branches` (`branchcode`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table `biblio_metadata`
+--
+
+CREATE TABLE biblio_metadata (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `biblionumber` INT(11) NOT NULL,
+    `format` VARCHAR(16) NOT NULL,
+    `marcflavour` VARCHAR(16) NOT NULL,
+    `metadata` LONGTEXT NOT NULL,
+    PRIMARY KEY(id),
+    UNIQUE KEY `biblio_metadata_uniq_key` (`biblionumber`,`format`,`marcflavour`),
+    CONSTRAINT `record_metadata_fk_1` FOREIGN KEY (biblionumber) REFERENCES biblio (biblionumber) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table `deletedbiblio_metadata`
+--
+
+CREATE TABLE deletedbiblio_metadata (
+    `id` INT(11) NOT NULL AUTO_INCREMENT,
+    `biblionumber` INT(11) NOT NULL,
+    `format` VARCHAR(16) NOT NULL,
+    `marcflavour` VARCHAR(16) NOT NULL,
+    `metadata` LONGTEXT NOT NULL,
+    PRIMARY KEY(id),
+    UNIQUE KEY `deletedbiblio_metadata_uniq_key` (`biblionumber`,`format`,`marcflavour`),
+    CONSTRAINT `deletedrecord_metadata_fk_1` FOREIGN KEY (biblionumber) REFERENCES deletedbiblio (biblionumber) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

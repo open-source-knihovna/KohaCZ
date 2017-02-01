@@ -52,7 +52,7 @@
             [% END %]
             <input type="hidden" class="contact_claimissues_hidden" name="contact_claimissues" value="[% contact.claimissues %]"></input>
         </li>
-        [% IF contact.id %]<li><button class="btn delete-contact"><i class="fa fa-trash"></i> Delete contact</li>[% END %]
+        [% IF contact.id %]<li><button class="btn btn-default delete-contact"><i class="fa fa-trash"></i> Delete contact</li>[% END %]
     </ol>
 [% END %]
 
@@ -217,7 +217,7 @@ function delete_contact(ev) {
                     [% INCLUDE edit_contact %]
                 </fieldset>
             [% END %]
-            <button id="add-contact" class="btn"><i class="fa fa-plus"></i> Add another contact</button>
+            <button id="add-contact" class="btn btn-default"><i class="fa fa-plus"></i> Add another contact</button>
         </fieldset>
     </div>
         <div class="yui-g">
@@ -291,9 +291,9 @@ function delete_contact(ev) {
                     <select name="tax_rate" id="tax_rate">
                     [% FOREACH gst IN gst_values %]
                       [% IF ( tax_rate == gst.option ) %]
-                        <option value="[% gst.option %]" selected="selected">[% gst.option * 100 | format ("%.1f") %] %</option>
+                        <option value="[% gst.option %]" selected="selected">[% gst.option * 100 %] %</option>
                       [% ELSE %]
-                        <option value="[% gst.option %]">[% gst.option * 100 | format ("%.1f") %] %</option>
+                        <option value="[% gst.option %]">[% gst.option * 100 %] %</option>
                       [% END %]
                     [% END %]
                     </select>
@@ -353,7 +353,7 @@ function delete_contact(ev) {
                 <p><strong>Discount: </strong>
                     [% discount | format("%.1f") %] %</p>
                 <p><strong>Tax rate: </strong>
-                    [% 0 + tax_rate * 100 | format("%.1f") %] %</p>
+                    [% 0 + tax_rate * 100 %] %</p>
                 [% IF deliverytime.defined %]
                     <p><strong>Delivery time: </strong>
                         [% deliverytime %] days</p>
@@ -368,6 +368,15 @@ function delete_contact(ev) {
                 [% FOREACH contact IN contacts %]
                     [% INCLUDE show_contact %]
                 [% END %]
+            </div>
+
+            <div>
+
+                <div class="subscription-details">
+                    <h2>Subscription details</h2>
+                    <p><strong>Number of subscriptions: </strong>[% subscriptioncount %]</p>
+                </div>
+
             </div>
 
         </div>
@@ -395,8 +404,8 @@ function delete_contact(ev) {
                         <td><span title="[% contract.contractstartdate %]">[% contract.contractstartdate | $KohaDates %]</span></td>
                         <td><span title="[% contract.contractenddate %]">[% contract.contractenddate | $KohaDates %]</span></td>
                         <td class="actions">
-                            <a class="btn btn-mini" href="/cgi-bin/koha/admin/aqcontract.pl?op=add_form&amp;contractnumber=[% contract.contractnumber %]&amp;booksellerid=[% contract.booksellerid %]"><i class="fa fa-pencil"></i> Edit</a>
-                            <a class="btn btn-mini" href="/cgi-bin/koha/admin/aqcontract.pl?op=delete_confirm&amp;contractnumber=[% contract.contractnumber %]&amp;booksellerid=[% contract.booksellerid %]"><i class="fa fa-trash"></i> Delete</a>
+                            <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/aqcontract.pl?op=add_form&amp;contractnumber=[% contract.contractnumber %]&amp;booksellerid=[% contract.booksellerid %]"><i class="fa fa-pencil"></i> Edit</a>
+                            <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/aqcontract.pl?op=delete_confirm&amp;contractnumber=[% contract.contractnumber %]&amp;booksellerid=[% contract.booksellerid %]"><i class="fa fa-trash"></i> Delete</a>
                         </td>
                         </tr>
                     [% END %]

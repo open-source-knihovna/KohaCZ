@@ -118,6 +118,10 @@ __PAZPAR2_TOGGLE_XML_POST__
  <log4perl_conf>__KOHA_CONF_DIR__/log4perl.conf</log4perl_conf>
  <memcached_servers>__MEMCACHED_SERVERS__</memcached_servers>
  <memcached_namespace>__MEMCACHED_NAMESPACE__</memcached_namespace>
+ <!-- Uncomment the following line if you want to use template caching
+      That will bring a performance boost
+      <template_cache_dir>/tmp</template_cache_dir>
+ -->
 
  <!-- Secret passphrase used by Mojolicious for signed cookies -->
  <api_secret_passphrase>CHANGEME</api_secret_passphrase>
@@ -137,6 +141,13 @@ __PAZPAR2_TOGGLE_XML_POST__
     <font type="HB" >__FONT_DIR__/DejaVuSans-Bold.ttf</font>
     <font type="HBO">__FONT_DIR__/DejaVuSans-BoldOblique.ttf</font>
  </ttf>
+
+ <!-- Path to the config file for SMS::Send -->
+ <sms_send_config>__KOHA_CONF_DIR__/sms_send/</sms_send_config>
+
+ <!-- Configuration for Plack -->
+ <plack_max_requests>50</plack_max_requests>
+ <plack_workers>2</plack_workers>
 
 </config>
 </yazgfs>

@@ -241,7 +241,11 @@ $(document).ready(function() {
 [% END %]
 
 [% IF ( PATRON_CANT ) %]
-    <li>This patron can't check out this item per library circulation policy</li>
+    <li>This patron can't check out this item per library circulation policy.</li>
+[% END %]
+
+[% IF ( TOO_MANY and TOO_MANY == 'NO_RULE_DEFINED' ) %]
+    <li>No circulation rule is defined for this patron and itemtype combination.</li>
 [% END %]
 
 [% IF ( NOT_FOR_LOAN_FORCING ) %]
@@ -279,7 +283,7 @@ $(document).ready(function() {
 [% END %]
 
 [% IF PREVISSUE %]
-    <li>This item has previously been checked out to this patron.  Check out anyway?</li>
+    <li>Patron has previously checked out this title: <b>[% item.title %] [% IF item.author %] by [% item.author %][% END %]</b>. Check out anyway?</li>
 [% END %]
 
 [% IF BIBLIO_ALREADY_ISSUED %]
@@ -602,7 +606,7 @@ No patron matched <span class="ex">[% message | html %]</span>
     [% ELSE %]
         <input type="text" name="barcode" id="barcode" class="barcode focus" size="14" />
     [% END %]
-    <button type="submit" class="btn">Check out</button>
+    <button type="submit" class="btn btn-default">Check out</button>
 
     <div id="show-checkout-settings">
         <a href="#"><i class="fa fa-caret-right checkout-settings-icon"></i> Checkout settings</a>
@@ -625,7 +629,7 @@ No patron matched <span class="ex">[% message | html %]</span>
                     [% ELSE %]
                         <input type="checkbox" id="stickyduedate" onclick="this.form.barcode.focus();" name="stickyduedate" />
                     [% END %]
-                    <button class="btn btn-small action" id="cleardate" name="cleardate" onclick="this.checked = false; this.form.duedatespec.value = ''; this.form.stickyduedate.checked = false; this.form.barcode.focus(); return false;" >Clear</button>
+                    <button class="btn btn-default btn-sm action" id="cleardate" name="cleardate" onclick="this.checked = false; this.form.duedatespec.value = ''; this.form.stickyduedate.checked = false; this.form.barcode.focus(); return false;" >Clear</button>
                 </div>
             [% END %]
         [% END %]
@@ -778,10 +782,10 @@ No patron matched <span class="ex">[% message | html %]</span>
                     </i>
                    [% END %]
                    <br/>
-                   <a class="btn btn-small" href="#reldebarments" onclick="$('#debarments-tab-link').click()"><i class="fa fa-ban"></i> View restrictions</a>
+                   <a class="btn btn-default btn-sm" href="#reldebarments" onclick="$('#debarments-tab-link').click()"><i class="fa fa-ban"></i> View restrictions</a>
                     [% IF (noissues && borrowernumber && CAN_user_circulate_force_checkout) %]
                         <span class="override_debarment">
-                            <a href="/cgi-bin/koha/circ/circulation.pl?forceallow=1&amp;borrowernumber=[% borrowernumber %]" class="btn btn-small">Override restriction temporarily</a>
+                            <a href="/cgi-bin/koha/circ/circulation.pl?forceallow=1&amp;borrowernumber=[% borrowernumber %]" class="btn btn-default btn-sm">Override restriction temporarily</a>
                         </span>
                     [% END %]
                </li>
@@ -856,7 +860,7 @@ No patron matched <span class="ex">[% message | html %]</span>
                         <span class="circ-hlt">
                     [% ELSE %]
                         <span>
-                    [% END %]>
+                    [% END %]
                         [% message.message_date | $KohaDates %]
                         [% Branches.GetName( message.branchcode ) %]
                         [% IF message.manager_id %]
@@ -865,12 +869,12 @@ No patron matched <span class="ex">[% message | html %]</span>
                         <i>"[% message.message %]"</i>
                     </span>
                     [% IF message.branchcode == branch OR Koha.Preference('AllowAllMessageDeletion') %]
-                        [<a href="/cgi-bin/koha/circ/del_message.pl?message_id=[% message.message_id %]&amp;borrowernumber=[% message.borrowernumber %]" onclick="return confirm(MSG_CONFIRM_DELETE_MESSAGE);"><i class="fa fa-trash"></i> Delete</a>]
+                        <a class="btn btn-link btn-sm" href="/cgi-bin/koha/circ/del_message.pl?message_id=[% message.message_id %]&amp;borrowernumber=[% message.borrowernumber %]" onclick="return confirm(MSG_CONFIRM_DELETE_MESSAGE);"><i class="fa fa-trash"></i> Delete</a>
                     [% END %]
                 </li>
             [% END %]
         </ul>
-        <a id="addnewmessageLabel" href="#add_message_form" data-toggle="modal"><i class="fa fa-plus"></i> Add a new message</a>
+        <a id="addnewmessageLabel" href="#add_message_form" class="btn btn-link btn-sm" data-toggle="modal"><i class="fa fa-plus"></i> Add a new message</a>
     </div>
 
 </div>
@@ -1009,13 +1013,17 @@ No patron matched <span class="ex">[% message | html %]</span>
 </div>[% END %][% END %]
 </div>
 <!-- Modal -->
-<div id="barcodeSubmittedModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="barcodeSubmittedModalLabel" aria-hidden="true">
+<div id="barcodeSubmittedModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="barcodeSubmittedModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
     <div class="modal-header">
         <h3 id="barcodeSubmittedModalLabel">Barcode submitted</h3>
     </div>
 
     <div class="modal-body">
         <p>You have already submitted a barcode, please wait for the checkout to process...</p>
+    </div>
+    </div>
     </div>
 </div>
 [% INCLUDE 'intranet-bottom.inc' %]

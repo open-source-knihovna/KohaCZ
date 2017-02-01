@@ -115,16 +115,32 @@ if ( $total_paid and $total_paid ne '0.00' ) {
     } else {
         if ($individual) {
             if ( $total_paid == $total_due ) {
-                makepayment( $accountlines_id, $borrowernumber, $accountno, $total_paid, $user,
-                    $branch, $payment_note );
-            } else {
-                makepartialpayment( $accountlines_id, $borrowernumber, $accountno, $total_paid,
-                    $user, $branch, $payment_note );
-                if ( $writeoffoutstanding ) {
+                my $line = Koha::Account::Lines->find($accountlines_id);
+                Koha::Account->new( { patron_id => $borrowernumber } )->pay(
+                    {
+                        lines      => [$line],
+                        amount     => $total_paid,
+                        library_id => $branch,
+                        note       => $payment_note
+                    }
+                );
+            }
+            else {
+                my $line = Koha::Account::Lines->find($accountlines_id);
+                Koha::Account->new( { patron_id => $borrowernumber, } )->pay(
+                    {
+                        amount     => $total_paid,
+                        lines      => [$line],
+                        note       => $payment_note,
+                        library_id => $branch,
+                    }
+                );
+
+                if ($writeoffoutstanding ) {
                     my $writeoffamount = $total_due - $total_paid;
-		    WriteOffFee( $borrowernumber, $accountlines_id, $itemnumber, $accounttype,
-		        $writeoffamount, $branch, $payment_note );
+                    # todo: write off outstanding amount
                 }
+
             }
             print $input->redirect(
                 "/cgi-bin/koha/members/pay.pl?borrowernumber=$borrowernumber");
@@ -135,8 +151,29 @@ if ( $total_paid and $total_paid ne '0.00' ) {
                 }
                 my @acc = split /,/, $select;
                 my $note = $input->param('selected_accts_notes');
-                recordpayment_selectaccts( $borrowernumber, $total_paid, \@acc, $note );
-            } else {
+
+                my @lines = Koha::Account::Lines->search(
+                    {
+                        borrowernumber    => $borrowernumber,
+                        amountoutstanding => { '<>' => 0 },
+                        accountno         => { 'IN' => \@acc },
+                    },
+                    { order_by => 'date' }
+                );
+
+                return Koha::Account->new(
+                    {
+                        patron_id => $borrowernumber,
+                    }
+                  )->pay(
+                    {
+                        amount => $total_paid,
+                        lines  => \@lines,
+                        note   => $note,
+                    }
+                  );
+            }
+            else {
                 my $note = $input->param('selected_accts_notes');
                 Koha::Account->new( { patron_id => $borrowernumber } )
                   ->pay( { amount => $total_paid, note => $note } );

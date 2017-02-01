@@ -121,7 +121,7 @@
 
 [% BLOCK closer %]
     [% IF plugin %]
-        <div id="closewindow"><a class="btn btn-default close" href="#">Close</a></div>
+        <div id="closewindow"><a class="btn btn-default btn-default close" href="#">Close</a></div>
     [% END %]
 [% END %]
 
@@ -142,7 +142,7 @@
         </fieldset>
     </form>
     [% IF plugin %]
-        <div id="closewindow"><a class="btn btn-default close" href="#">Close</a></div>
+        <div id="closewindow"><a class="btn btn-default btn-default close" href="#">Close</a></div>
     [% END %]
 [% END %]
 
@@ -162,7 +162,7 @@
     <tbody>
     [% FOREACH record IN uploads %]
     <tr>
-        <td>[% record.name %]</td>
+        <td>[% record.filename %]</td>
         <td>[% record.filesize %]</td>
         <td>[% record.hashvalue %]</td>
         <td>[% record.uploadcategorycode %]</td>
@@ -172,11 +172,11 @@
         [% END %]
         <td class="actions">
             [% IF plugin %]
-                <button class="btn btn-mini choose_entry" data-record-hashvalue="[% record.hashvalue %]"><i class="fa fa-plus"></i> Choose</button>
+                <button class="btn btn-default btn-xs choose_entry" data-record-hashvalue="[% record.hashvalue %]"><i class="fa fa-plus"></i> Choose</button>
             [% END %]
-            <button class="btn btn-mini download_entry" data-record-id="[% record.id %]"><i class="fa fa-download"></i> Download</button>
+            <button class="btn btn-default btn-xs download_entry" data-record-id="[% record.id %]"><i class="fa fa-download"></i> Download</button>
             [% IF record.owner == owner || CAN_user_tools_upload_manage %]
-                <button class="btn btn-mini delete_entry" data-record-id="[% record.id %]"><i class="fa fa-trash"></i> Delete</button>
+                <button class="btn btn-default btn-xs delete_entry" data-record-id="[% record.id %]"><i class="fa fa-trash"></i> Delete</button>
             [% END %]
         </td>
    </tr>
@@ -201,7 +201,7 @@
         _("No temporary directory found."),
         _("File could not be read."),
         _("File has been deleted."),
-        _("File could not be deleted."),
+        _("File or upload record could not be deleted."),
     ];
 //]]>
 </script>

@@ -45,16 +45,29 @@ sub new {
 
 =head2 pay
 
-This method allows payments to be made against feees
+This method allows payments to be made against fees/fines
+
+Koha::Account->new( { patron_id => $borrowernumber } )->pay(
+    {
+        amount     => $amount,
+        sip        => $sipmode,
+        note       => $note,
+        library_id => $branchcode,
+        lines      => $lines, # Arrayref of Koha::Account::Line objects to pay
+    }
+);
 
 =cut
 
 sub pay {
     my ( $self, $params ) = @_;
 
-    my $amount = $params->{amount};
-    my $sip    = $params->{sip};
-    my $note   = $params->{note} || q{};
+    my $amount          = $params->{amount};
+    my $sip             = $params->{sip};
+    my $note            = $params->{note} || q{};
+    my $library_id      = $params->{library_id};
+    my $lines           = $params->{lines};
+    my $type            = $params->{type} || 'payment';
 
     my $userenv = C4::Context->userenv;
 
@@ -71,15 +84,61 @@ sub pay {
 
     my $manager_id = $userenv ? $userenv->{number} : 0;
 
-    my @outstanding_fines = Koha::Account::Lines->search(
+    my @fines_paid; # List of account lines paid on with this payment
+
+    my $balance_remaining = $amount; # Set it now so we can adjust the amount if necessary
+    $balance_remaining ||= 0;
+
+    # We were passed a specific line to pay
+    foreach my $fine ( @$lines ) {
+        my $amount_to_pay =
+            $fine->amountoutstanding > $balance_remaining
+          ? $balance_remaining
+          : $fine->amountoutstanding;
+
+        my $old_amountoutstanding = $fine->amountoutstanding;
+        my $new_amountoutstanding = $old_amountoutstanding - $amount_to_pay;
+        $fine->amountoutstanding($new_amountoutstanding)->store();
+        $balance_remaining = $balance_remaining - $amount_to_pay;
+
+        if ( $fine->accounttype && ( $fine->accounttype eq 'Rep' || $fine->accounttype eq 'L' ) )
+        {
+            C4::Circulation::ReturnLostItem( $self->{patron_id}, $fine->itemnumber );
+        }
+
+        if ( C4::Context->preference("FinesLog") ) {
+            logaction(
+                "FINES", 'MODIFY',
+                $self->{patron_id},
+                Dumper(
+                    {
+                        action                => 'fee_payment',
+                        borrowernumber        => $fine->borrowernumber,
+                        old_amountoutstanding => $old_amountoutstanding,
+                        new_amountoutstanding => 0,
+                        amount_paid           => $old_amountoutstanding,
+                        accountlines_id       => $fine->id,
+                        accountno             => $fine->accountno,
+                        manager_id            => $manager_id,
+                        note                  => $note,
+                    }
+                )
+            );
+            push( @fines_paid, $fine->id );
+        }
+    }
+
+    # Were not passed a specific line to pay, or the payment was for more
+    # than the what was owed on the given line. In that case pay down other
+    # lines with remaining balance.
+    my @outstanding_fines;
+    @outstanding_fines = Koha::Account::Lines->search(
         {
             borrowernumber    => $self->{patron_id},
             amountoutstanding => { '>' => 0 },
         }
-    );
+    ) if $balance_remaining > 0;
 
-    my $balance_remaining = $amount;
-    my @fines_paid;
     foreach my $fine (@outstanding_fines) {
         my $amount_to_pay =
             $fine->amountoutstanding > $balance_remaining
@@ -96,7 +155,7 @@ sub pay {
                 $self->{patron_id},
                 Dumper(
                     {
-                        action                => 'fee_payment',
+                        action                => "fee_$type",
                         borrowernumber        => $fine->borrowernumber,
                         old_amountoutstanding => $old_amountoutstanding,
                         new_amountoutstanding => $fine->amountoutstanding,
@@ -115,7 +174,12 @@ sub pay {
         last unless $balance_remaining > 0;
     }
 
-    my $account_type = defined($sip) ? "Pay$sip" : 'Pay';
+    my $account_type =
+        $type eq 'writeoff' ? 'W'
+      : defined($sip)       ? "Pay$sip"
+      :                       'Pay';
+
+    my $description = $type eq 'writeoff' ? 'Writeoff' : q{};
 
     my $payment = Koha::Account::Line->new(
         {
@@ -123,7 +187,7 @@ sub pay {
             accountno         => $accountno,
             date              => dt_from_string(),
             amount            => 0 - $amount,
-            description       => q{},
+            description       => $description,
             accounttype       => $account_type,
             amountoutstanding => 0 - $balance_remaining,
             manager_id        => $manager_id,
@@ -131,11 +195,12 @@ sub pay {
         }
     )->store();
 
-    my $branch = $userenv ? $userenv->{'branch'} : undef;
+    $library_id ||= $userenv ? $userenv->{'branch'} : undef;
+
     UpdateStats(
         {
-            branch         => $branch,
-            type           => 'payment',
+            branch         => $library_id,
+            type           => $type,
             amount         => $amount,
             borrowernumber => $self->{patron_id},
             accountno      => $accountno,
@@ -148,18 +213,44 @@ sub pay {
             $self->{patron_id},
             Dumper(
                 {
-                    action            => 'create_payment',
+                    action            => "create_$type",
                     borrowernumber    => $self->{patron_id},
                     accountno         => $accountno,
                     amount            => 0 - $amount,
                     amountoutstanding => 0 - $balance_remaining,
-                    accounttype       => 'Pay',
+                    accounttype       => $account_type,
                     accountlines_paid => \@fines_paid,
                     manager_id        => $manager_id,
                 }
             )
         );
     }
+
+    return $payment->id;
+}
+
+=head3 balance
+
+my $balance = $self->balance
+
+Return the balance (sum of amountoutstanding columns)
+
+=cut
+
+sub balance {
+    my ($self) = @_;
+    my $fines = Koha::Account::Lines->search(
+        {
+            borrowernumber => $self->{patron_id},
+        },
+        {
+            select => [ { sum => 'amountoutstanding' } ],
+            as => ['total_amountoutstanding'],
+        }
+    );
+    return $fines->count
+      ? $fines->next->get_column('total_amountoutstanding')
+      : 0;
 }
 
 1;

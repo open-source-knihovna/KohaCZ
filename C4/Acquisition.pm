@@ -29,7 +29,7 @@ use C4::Debug;
 use C4::Templates qw(gettemplate);
 use Koha::DateUtils qw( dt_from_string output_pref );
 use Koha::Acquisition::Order;
-use Koha::Acquisition::Bookseller;
+use Koha::Acquisition::Booksellers;
 use Koha::Number::Price;
 use Koha::Libraries;
 
@@ -396,13 +396,13 @@ sub GetBasketGroupAsCSV {
         my $contract   = GetContract({
             contractnumber => $basket->{contractnumber}
         });
-        my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $basket->{booksellerid} });
+        my $bookseller = Koha::Acquisition::Booksellers->find( $basket->{booksellerid} );
         my $basketgroup = GetBasketgroup( $$basket{basketgroupid} );
 
         foreach my $order (@orders) {
             my $bd = GetBiblioData( $order->{'biblionumber'} );
             my $row = {
-                clientnumber => $bookseller->{accountnumber},
+                clientnumber => $bookseller->accountnumber,
                 basketname => $basket->{basketname},
                 ordernumber => $order->{ordernumber},
                 author => $bd->{author},
@@ -414,14 +414,14 @@ sub GetBasketGroupAsCSV {
                 quantity => $order->{quantity},
                 rrp_tax_included => $order->{rrp_tax_included},
                 rrp_tax_excluded => $order->{rrp_tax_excluded},
-                discount => $bookseller->{discount},
+                discount => $bookseller->discount,
                 ecost_tax_included => $order->{ecost_tax_included},
                 ecost_tax_excluded => $order->{ecost_tax_excluded},
                 notes => $order->{order_vendornote},
                 entrydate => $order->{entrydate},
-                booksellername => $bookseller->{name},
-                bookselleraddress => $bookseller->{address1},
-                booksellerpostal => $bookseller->{postal},
+                booksellername => $bookseller->name,
+                bookselleraddress => $bookseller->address1,
+                booksellerpostal => $bookseller->postal,
                 contractnumber => $contract->{contractnumber},
                 contractname => $contract->{contractname},
             };
@@ -2913,7 +2913,7 @@ sub populate_order_with_prices {
     my $booksellerid = $params->{booksellerid};
     return unless $booksellerid;
 
-    my $bookseller = Koha::Acquisition::Bookseller->fetch({ id => $booksellerid });
+    my $bookseller = Koha::Acquisition::Booksellers->find( $booksellerid );
 
     my $receiving = $params->{receiving};
     my $ordering  = $params->{ordering};
@@ -2922,7 +2922,7 @@ sub populate_order_with_prices {
 
     if ($ordering) {
         $order->{tax_rate_on_ordering} //= $order->{tax_rate};
-        if ( $bookseller->{listincgst} ) {
+        if ( $bookseller->listincgst ) {
             # The user entered the rrp tax included
             $order->{rrp_tax_included} = $order->{rrp};
 
@@ -2959,7 +2959,7 @@ sub populate_order_with_prices {
 
     if ($receiving) {
         $order->{tax_rate_on_receiving} //= $order->{tax_rate};
-        if ( $bookseller->{invoiceincgst} ) {
+        if ( $bookseller->invoiceincgst ) {
             # Trick for unitprice. If the unit price rounded value is the same as the ecost rounded value
             # we need to keep the exact ecost value
             if ( Koha::Number::Price->new( $order->{unitprice} )->round == Koha::Number::Price->new( $order->{ecost_tax_included} )->round ) {
