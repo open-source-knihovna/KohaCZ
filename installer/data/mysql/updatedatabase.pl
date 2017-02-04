@@ -10417,15 +10417,21 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "3.19.00.041";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q|
-        ALTER IGNORE TABLE suggestions ADD KEY status (STATUS)
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE suggestions ADD KEY biblionumber (biblionumber)
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE suggestions ADD KEY branchcode (branchcode)
-    |);
+    unless ( index_exists( 'suggestions', 'status' ) ) {
+        $dbh->do(q|
+            ALTER TABLE suggestions ADD KEY status (STATUS)
+        |);
+    }
+    unless ( index_exists( 'suggestions', 'biblionumber' ) ) {
+        $dbh->do(q|
+            ALTER TABLE suggestions ADD KEY biblionumber (biblionumber)
+        |);
+    }
+    unless ( index_exists( 'suggestions', 'branchcode' ) ) {
+        $dbh->do(q|
+            ALTER TABLE suggestions ADD KEY branchcode (branchcode)
+        |);
+    }
     print "Upgrade to $DBversion done (Bug 14132: suggestions table is missing indexes)\n";
     SetVersion ($DBversion);
 }
@@ -10439,12 +10445,14 @@ if ( CheckVersion($DBversion) ) {
         WHERE auth_types.authtypecode IS NULL
     });
 
-    $dbh->do(q{
-        ALTER IGNORE TABLE auth_subfield_structure
-        ADD CONSTRAINT auth_subfield_structure_ibfk_1
-        FOREIGN KEY (authtypecode) REFERENCES auth_types(authtypecode)
-        ON DELETE CASCADE ON UPDATE CASCADE
-    });
+    unless ( foreign_key_exists( 'auth_subfield_structure', 'auth_subfield_structure_ibfk_1' ) ) {
+        $dbh->do(q{
+            ALTER TABLE auth_subfield_structure
+            ADD CONSTRAINT auth_subfield_structure_ibfk_1
+            FOREIGN KEY (authtypecode) REFERENCES auth_types(authtypecode)
+            ON DELETE CASCADE ON UPDATE CASCADE
+        });
+    }
 
     print "Upgrade to $DBversion done (Bug 8480: Add foreign key on auth_subfield_structure.authtypecode)\n";
     SetVersion($DBversion);
@@ -10560,31 +10568,58 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "3.21.00.007";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q|
-        ALTER IGNORE TABLE aqbasket
-            ADD KEY authorisedby (authorisedby)
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE aqbooksellers
-            ADD KEY name (name(255))
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE aqbudgets
-            ADD KEY budget_parent_id (budget_parent_id),
-            ADD KEY budget_code (budget_code),
-            ADD KEY budget_branchcode (budget_branchcode),
-            ADD KEY budget_period_id (budget_period_id),
-            ADD KEY budget_owner_id (budget_owner_id)
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE aqbudgets_planning
-            ADD KEY budget_period_id (budget_period_id)
-    |);
-    $dbh->do(q|
-        ALTER IGNORE TABLE aqorders
-            ADD KEY parent_ordernumber (parent_ordernumber),
-            ADD KEY orderstatus (orderstatus)
-    |);
+    unless ( index_exists( 'aqbasket', 'authorisedby' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbasket
+                ADD KEY authorisedby (authorisedby)
+        |);
+    }
+    unless ( index_exists( 'aqbooksellers', 'name' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbooksellers
+                ADD KEY name (name(255))
+        |);
+    }
+    unless ( index_exists( 'aqbudgets', 'budget_parent_id' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets
+                ADD KEY budget_parent_id (budget_parent_id)|);
+        }
+    unless ( index_exists( 'aqbudgets', 'budget_code' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets
+                ADD KEY budget_code (budget_code)|);
+    }
+    unless ( index_exists( 'aqbudgets', 'budget_branchcode' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets
+                ADD KEY budget_branchcode (budget_branchcode)|);
+    }
+    unless ( index_exists( 'aqbudgets', 'budget_period_id' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets
+                ADD KEY budget_period_id (budget_period_id)|);
+    }
+    unless ( index_exists( 'aqbudgets', 'budget_owner_id' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets
+                ADD KEY budget_owner_id (budget_owner_id)|);
+    }
+    unless ( index_exists( 'aqbudgets_planning', 'budget_period_id' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqbudgets_planning
+                ADD KEY budget_period_id (budget_period_id)|);
+    }
+    unless ( index_exists( 'aqorders', 'parent_ordernumber' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqorders
+                ADD KEY parent_ordernumber (parent_ordernumber)|);
+    }
+    unless ( index_exists( 'aqorders', 'orderstatus' ) ) {
+        $dbh->do(q|
+            ALTER TABLE aqorders
+                ADD KEY orderstatus (orderstatus)|);
+    }
     print "Upgrade to $DBversion done (Bug 14053: Acquisition db tables are missing indexes)\n";
     SetVersion ($DBversion);
 }
@@ -10685,9 +10720,12 @@ if ( CheckVersion($DBversion) ) {
         INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
         VALUES ('OAI-PMH:DeletedRecord','persistent','Koha\'s deletedbiblio table will never be deleted (persistent) or might be deleted (transient)','transient|persistent','Choice')
     });
-    $dbh->do(q|
-        ALTER TABLE oai_sets_biblios DROP FOREIGN KEY oai_sets_biblios_ibfk_1
-    |);
+
+    if ( foreign_key_exists( 'oai_sets_biblios', 'oai_sets_biblios_ibfk_1' ) ) {
+        $dbh->do(q|
+            ALTER TABLE oai_sets_biblios DROP FOREIGN KEY oai_sets_biblios_ibfk_1
+        |);
+    }
     print "Upgrade to $DBversion done (Bug 3206: OAI repository deleted record support)\n";
     SetVersion ($DBversion);
 }
@@ -10768,12 +10806,14 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "3.21.00.019";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q{
-        ALTER TABLE reserves DROP constrainttype
-    });
-    $dbh->do(q{
-        ALTER TABLE old_reserves DROP constrainttype
-    });
+    if ( column_exists( 'reserves', 'constrainttype' ) ) {
+        $dbh->do(q{
+            ALTER TABLE reserves DROP constrainttype
+        });
+        $dbh->do(q{
+            ALTER TABLE old_reserves DROP constrainttype
+        });
+    }
     $dbh->do(q{
         DROP TABLE IF EXISTS reserveconstraints
     });
@@ -10813,12 +10853,14 @@ if ( CheckVersion($DBversion) ) {
     my ($print_error) = $dbh->{PrintError};
     $dbh->{RaiseError} = 0;
     $dbh->{PrintError} = 0;
-    $dbh->do(q{ALTER TABLE course_reserves DROP FOREIGN KEY course_reserves_ibfk_2});
-    $dbh->do(q{ALTER TABLE course_reserves DROP INDEX course_reserves_ibfk_2});
+    if ( foreign_key_exists('course_reserves', 'course_reserves_ibfk_2') ) {
+        $dbh->do(q{ALTER TABLE course_reserves DROP FOREIGN KEY course_reserves_ibfk_2});
+        $dbh->do(q{ALTER TABLE course_reserves DROP INDEX course_reserves_ibfk_2});
+    }
     $dbh->{PrintError} = $print_error;
 
     $dbh->do(q{
-        ALTER IGNORE TABLE course_reserves
+        ALTER TABLE course_reserves
             ADD CONSTRAINT course_reserves_ibfk_2
                 FOREIGN KEY (ci_id) REFERENCES course_items (ci_id)
                 ON DELETE CASCADE ON UPDATE CASCADE
@@ -10912,28 +10954,32 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "3.21.00.028";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q{
-        ALTER TABLE uploaded_files
-            ADD COLUMN public tinyint,
-            ADD COLUMN permanent tinyint
-    });
-    $dbh->do(q{
-        UPDATE uploaded_files SET public=1, permanent=1
-    });
-    $dbh->do(q{
-        ALTER TABLE uploaded_files
-            CHANGE COLUMN categorycode uploadcategorycode tinytext
-    });
+    unless ( column_exists('uploaded_files', 'public') ) {
+        $dbh->do(q{
+            ALTER TABLE uploaded_files
+                ADD COLUMN public tinyint,
+                ADD COLUMN permanent tinyint
+        });
+        $dbh->do(q{
+            UPDATE uploaded_files SET public=1, permanent=1
+        });
+        $dbh->do(q{
+            ALTER TABLE uploaded_files
+                CHANGE COLUMN categorycode uploadcategorycode tinytext
+        });
+    }
     print "Upgrade to $DBversion done (Bug 14321: Merge UploadedFile and UploadedFiles into Koha::Upload)\n";
     SetVersion($DBversion);
 }
 
 $DBversion = "3.21.00.029";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q{
-        ALTER IGNORE TABLE discharges
-            ADD COLUMN discharge_id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST
-    });
+    unless ( column_exists('discharges', 'discharge_id') ) {
+        $dbh->do(q{
+            ALTER TABLE discharges
+                ADD COLUMN discharge_id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST
+        });
+    }
     print "Upgrade to $DBversion done (Bug 14368: Add discharges history)\n";
     SetVersion($DBversion);
 }
@@ -12689,18 +12735,20 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "16.05.00.002";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do(q{
-        ALTER TABLE borrowers
-            ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
-            ON UPDATE CURRENT_TIMESTAMP
-            AFTER privacy_guarantor_checkouts;
-    });
-    $dbh->do(q{
-        ALTER TABLE deletedborrowers
-            ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
-            ON UPDATE CURRENT_TIMESTAMP
-            AFTER privacy_guarantor_checkouts;
-    });
+    unless ( column_exists('borrowers', 'updated_on') ) {
+        $dbh->do(q{
+            ALTER TABLE borrowers
+                ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
+                ON UPDATE CURRENT_TIMESTAMP
+                AFTER privacy_guarantor_checkouts;
+        });
+        $dbh->do(q{
+            ALTER TABLE deletedborrowers
+                ADD COLUMN updated_on timestamp NULL DEFAULT CURRENT_TIMESTAMP
+                ON UPDATE CURRENT_TIMESTAMP
+                AFTER privacy_guarantor_checkouts;
+        });
+    }
 
     print "Upgrade to $DBversion done (Bug 10459 - borrowers should have a timestamp)\n";
     SetVersion($DBversion);
@@ -12907,6 +12955,74 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "16.05.05.000";
 if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Koha 16.05.05)\n";
+    SetVersion($DBversion);
+}
+
+
+$DBversion = '16.05.05.001';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        UPDATE language_descriptions SET description = 'Čeština' WHERE subtag = 'cs' AND type = 'language' AND lang = 'cs'
+    });
+
+    print "Upgrade to $DBversion done (Bug 17518: Displayed language name for Czech is wrong)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.05.05.002';
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (NO-OP, revert of BZ-14598)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.05.06.000';
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.05.06)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.05.06.001';
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q|
+INSERT IGNORE INTO permissions (module_bit, code, description) VALUES
+    (13, 'upload_general_files', 'Upload any file'),
+    (13, 'upload_manage', 'Manage uploaded files');
+    |);
+
+# Update user_permissions for current users (check count in uploaded_files)
+# Note 9 == edit_catalogue and 13 == tools
+# We do not insert if someone is superlibrarian, does not have edit_catalogue,
+# or already has all tools
+    $dbh->do(q|
+INSERT IGNORE INTO user_permissions (borrowernumber, module_bit, code)
+    SELECT borrowernumber, 13, 'upload_general_files'
+    FROM borrowers bo
+    WHERE flags<>1 AND flags & POW(2,13) = 0 AND
+        ( flags & POW(2,9) > 0 OR (
+            SELECT COUNT(*) FROM user_permissions
+            WHERE borrowernumber=bo.borrowernumber AND module_bit=9 ) > 0 )
+        AND ( SELECT COUNT(*) FROM uploaded_files ) > 0;
+    |);
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17663 - Forgotten userpermissions)\n";
+}
+
+$DBversion = '16.05.07.000';
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.05.07)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.05.08.000';
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.05.08)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.05.09.000';
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.05.09)\n";
     SetVersion($DBversion);
 }
 

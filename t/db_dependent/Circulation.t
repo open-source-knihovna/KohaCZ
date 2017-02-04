@@ -53,6 +53,11 @@ my $library = $builder->build({
 my $library2 = $builder->build({
     source => 'Branch',
 });
+my $itemtype = $builder->build(
+    {   source => 'Itemtype',
+        value  => { notforloan => undef, rentalcharge => 0 }
+    }
+)->{itemtype};
 
 my $CircControl = C4::Context->preference('CircControl');
 my $HomeOrHoldingBranch = C4::Context->preference('HomeOrHoldingBranch');
@@ -218,7 +223,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch       => $branch,
             holdingbranch    => $branch,
             barcode          => $barcode,
-            replacementprice => 12.00
+            replacementprice => 12.00,
+            itype            => $itemtype
         },
         $biblionumber
     );
@@ -229,7 +235,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch       => $branch,
             holdingbranch    => $branch,
             barcode          => $barcode2,
-            replacementprice => 23.00
+            replacementprice => 23.00,
+            itype            => $itemtype
         },
         $biblionumber
     );
@@ -240,7 +247,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch       => $branch,
             holdingbranch    => $branch,
             barcode          => $barcode3,
-            replacementprice => 23.00
+            replacementprice => 23.00,
+            itype            => $itemtype
         },
         $biblionumber
     );
@@ -393,7 +401,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     ModItem({ notforloan => 1 }, $biblionumber, $itemnumber);
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber, 1);
     is( $renewokay, 1, 'Can renew, item is marked not for loan, hold does not block');
-    ModItem({ notforloan => 0, itype => '' }, $biblionumber, $itemnumber,1);
+    ModItem({ notforloan => 0, itype => $itemtype }, $biblionumber, $itemnumber,1);
 
     # FIXME: Add more for itemtype not for loan etc.
 
@@ -404,7 +412,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch       => $branch,
             holdingbranch    => $branch,
             barcode          => $barcode5,
-            replacementprice => 23.00
+            replacementprice => 23.00,
+            itype            => $itemtype
         },
         $biblionumber
     );
@@ -424,7 +433,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch       => $branch,
             holdingbranch    => $branch,
             barcode          => $barcode6,
-            replacementprice => 23.00
+            replacementprice => 23.00,
+            itype            => $itemtype
         },
         $biblionumber
     );
@@ -435,7 +445,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch       => $branch,
             holdingbranch    => $branch,
             barcode          => $barcode7,
-            replacementprice => 23.00
+            replacementprice => 23.00,
+            itype            => $itemtype
         },
         $biblionumber
     );
@@ -484,7 +495,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch       => $branch,
             holdingbranch    => $branch,
             barcode          => $barcode4,
-            replacementprice => 16.00
+            replacementprice => 16.00,
+            itype            => $itemtype
         },
         $biblionumber
     );
@@ -650,7 +662,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         {
             homebranch       => $branch,
             holdingbranch    => $branch,
-            barcode          => $barcode3
+            barcode          => $barcode3,
+            itype            => $itemtype
         },
         $biblionumber2
     );
@@ -729,7 +742,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         {
             homebranch       => $branch,
             holdingbranch    => $branch,
-            barcode          => $barcode
+            barcode          => $barcode,
+            itype            => $itemtype
         },
         $biblionumber
     );
@@ -750,7 +764,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             issue_id       => $issue->id(),
             itemnumber     => $itemnumber,
             borrowernumber => $borrowernumber,
-            amount         => 0
+            amount         => 0,
+            type           => q{}
         }
     );
 
@@ -785,6 +800,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch    => $library2->{branchcode},
             holdingbranch => $library2->{branchcode},
             barcode       => $barcode1,
+            itype         => $itemtype
         },
         $biblionumber
     );
@@ -794,6 +810,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch    => $library2->{branchcode},
             holdingbranch => $library2->{branchcode},
             barcode       => $barcode2,
+            itype         => $itemtype
         },
         $biblionumber
     );
@@ -870,6 +887,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch       => $branch,
             holdingbranch    => $branch,
             barcode          => $barcode,
+            itype            => $itemtype
         },
         $biblionumber
     );
@@ -900,6 +918,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             homebranch       => $library->{branchcode},
             holdingbranch    => $library->{branchcode},
             barcode          => $barcode,
+            itype            => $itemtype
         },
         $biblionumber,
     );
@@ -913,6 +932,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             itemnumber     => $itemnumber,
             borrowernumber => $patron->{borrowernumber},
             amount         => 1,
+            type           => q{}
         }
     );
     UpdateFine(
@@ -921,6 +941,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             itemnumber     => $itemnumber,
             borrowernumber => $patron->{borrowernumber},
             amount         => 2,
+            type           => q{}
         }
     );
     is( Koha::Account::Lines->search({ issue_id => $issue->id })->count, 1, 'UpdateFine should not create a new accountline when updating an existing fine');

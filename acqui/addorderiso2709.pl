@@ -141,6 +141,7 @@ if ($op eq ""){
     my @discount = $input->multi_param('discount');
     my @sort1 = $input->multi_param('sort1');
     my @sort2 = $input->multi_param('sort2');
+    my $matcher_id = $input->param('matcher_id');
     my $active_currency = Koha::Acquisition::Currencies->get_active;
     for my $biblio (@$biblios){
         # Check if this import_record_id was selected
@@ -158,7 +159,19 @@ if ($op eq ""){
 
         # 1st insert the biblio, or find it through matcher
         unless ( $biblionumber ) {
-            $duplinbatch=$import_batch_id and next if FindDuplicate($marcrecord);
+            if ($matcher_id) {
+                if ( $matcher_id eq '_TITLE_AUTHOR_' ) {
+                    $duplinbatch = $import_batch_id if FindDuplicate($marcrecord);
+                }
+                else {
+                    my $matcher = C4::Matcher->fetch($matcher_id);
+                    my @matches = $matcher->get_matches( $marcrecord, my $max_matches = 1 );
+                    $duplinbatch = $import_batch_id if @matches;
+                }
+
+                next if $duplinbatch;
+            }
+
             # add the biblio
             my $bibitemnum;
 

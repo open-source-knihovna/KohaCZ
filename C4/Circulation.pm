@@ -2776,12 +2776,12 @@ sub CanBookBeRenewed {
             # by pushing all the elements onto an array and removing the duplicates.
             my @reservable;
             foreach my $b (@borrowernumbers) {
-                my ($borr) = C4::Members::GetMemberDetails($b);
+                my ($borr) = C4::Members::GetMember( borrowernumber => $b);
                 foreach my $i (@itemnumbers) {
                     my $item = GetItem($i);
-                    if (   IsAvailableForItemLevelRequest( $item, $borr )
-                        && CanItemBeReserved( $b, $i )
-                        && !IsItemOnHoldAndFound($i) )
+                    if (  !IsItemOnHoldAndFound($i)
+                        && IsAvailableForItemLevelRequest( $item, $borr )
+                        && CanItemBeReserved( $b, $i ) )
                     {
                         push( @reservable, $i );
                     }
@@ -2989,15 +2989,19 @@ sub AddRenewal {
     }
 
     # Log the renewal
-    UpdateStats({branch => $branch,
-                type => 'renew',
-                amount => $charge,
-                itemnumber => $itemnumber,
-                itemtype => $item->{itype},
-                borrowernumber => $borrowernumber,
-                ccode => $item->{'ccode'}}
-                );
-	return $datedue;
+    UpdateStats(
+        {
+            branch => C4::Context->userenv ? C4::Context->userenv->{branch} : $branch,
+            type           => 'renew',
+            amount         => $charge,
+            itemnumber     => $itemnumber,
+            itemtype       => $item->{itype},
+            borrowernumber => $borrowernumber,
+            ccode          => $item->{'ccode'}
+        }
+    );
+
+    return $datedue;
 }
 
 sub GetRenewCount {

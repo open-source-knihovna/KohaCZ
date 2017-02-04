@@ -20,16 +20,20 @@ use Modern::Perl;
 use Test::More tests => 4;
 use Test::MockModule;
 use Test::MockObject;
+use t::lib::Mocks;
 use t::lib::TestBuilder;
 use Test::Warn;
 
 use C4::Context;
 
-my $dbh = C4::Context->dbh;
+use Koha::Patrons;
+
+my $dbh = '';
 
 # Start transaction
-$dbh->{AutoCommit} = 0;
-$dbh->{RaiseError} = 1;
+my $database = Koha::Database->new();
+my $schema = $database->schema();
+$schema->storage->txn_begin();
 
 my $builder = t::lib::TestBuilder->new();
 
@@ -81,6 +85,14 @@ my $attr_type    = $builder->build(
         }
     }
 );
+my $attr_type2    = $builder->build(
+    {
+        source => 'BorrowerAttributeType',
+        value  => {
+            category_code => $categorycode
+        }
+    }
+);
 
 my $borrower = $builder->build(
     {
@@ -116,6 +128,7 @@ subtest 'checkpw_ldap tests' => sub {
 
     plan tests => 4;
 
+    my $dbh = C4::Context->dbh;
     ## Connection fail tests
     $desired_connection_result = 'error';
     warning_is {
@@ -131,7 +144,7 @@ subtest 'checkpw_ldap tests' => sub {
 
     subtest 'auth_by_bind = 1 tests' => sub {
 
-        plan tests => 8;
+        plan tests => 9;
 
         $auth_by_bind = 1;
 
@@ -158,11 +171,20 @@ subtest 'checkpw_ldap tests' => sub {
         $update                        = 1;
         reload_ldap_module();
 
+        t::lib::Mocks::mock_preference( 'ExtendedPatronAttributes', 1 );
         my $auth = Test::MockModule->new('C4::Auth_with_ldap');
         $auth->mock(
             'update_local',
             sub {
                 return $borrower->{cardnumber};
+            }
+        );
+        $auth->mock(
+            'ldap_entry_2_hash',
+            sub {
+                return (
+                    $attr_type2->{code}, 'BAR'
+                );
             }
         );
 
@@ -175,7 +197,10 @@ subtest 'checkpw_ldap tests' => sub {
             },
             'Extended attributes are not deleted'
         );
+
+        is( C4::Members::Attributes::GetBorrowerAttributeValue($borrower->{borrowernumber}, $attr_type2->{code}), 'BAR', 'Mapped attribute is BAR' );
         $auth->unmock('update_local');
+        $auth->unmock('ldap_entry_2_hash');
 
         $update               = 0;
         $desired_count_result = 0;    # user auth problem
@@ -506,6 +531,6 @@ sub reload_ldap_module {
     return;
 }
 
-$dbh->rollback;
+$schema->storage->txn_rollback();
 
 1;
