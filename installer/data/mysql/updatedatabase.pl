@@ -12401,7 +12401,7 @@ if ( CheckVersion($DBversion) ) {
              `id` int(11) NOT NULL AUTO_INCREMENT, 
              `name` varchar(255) NOT NULL COMMENT 'the name of the field as it will be stored in the search engine',
              `label` varchar(255) NOT NULL COMMENT 'the human readable name of the field, for display', 
-             `type` ENUM('string', 'date', 'number', 'boolean', 'sum') NOT NULL COMMENT 'what type of data this holds, relevant when storing it in the search engine',
+             `type` ENUM('', 'string', 'date', 'number', 'boolean', 'sum') NOT NULL COMMENT 'what type of data this holds, relevant when storing it in the search engine',
              PRIMARY KEY (`id`),
              UNIQUE KEY (`name`)
              ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
@@ -13305,7 +13305,7 @@ if ( CheckVersion($DBversion) ) {
             });
 
     $dbh->do(q{
-            UPDATE marc_subfield_structure SET authorised_value = NULL WHERE authorised_value = ';';
+            UPDATE marc_subfield_structure SET authorised_value = NULL WHERE authorised_value = '';
             });
 
     # If the DB has been created before 3.19.00.006, the default collate for marc_subfield_structure if not set to utf8_unicode_ci and the new FK will not be create (MariaDB or MySQL will raise err 150)
@@ -13851,6 +13851,36 @@ if ( CheckVersion($DBversion) ) {
 $DBversion = "16.11.03.000";
 if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Koha 16.11.03 - security release)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = '16.11.03.001';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do( "INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type) VALUES('AuthorityMergeMode','loose','loose|strict','Authority merge mode','Choice')");
+    print "Upgrade to $DBversion done (Bug 17913 - Add system preference AuthorityMergeMode)\n";
+    SetVersion( $DBversion );
+}
+
+$DBversion = "16.11.04.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.11.04)\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.11.04.001";
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        ALTER TABLE search_field CHANGE COLUMN type type ENUM('', 'string', 'date', 'number', 'boolean', 'sum') NOT NULL
+        COMMENT 'what type of data this holds, relevant when storing it in the search engine';
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17260 - updatedatabase.pl fails on invalid entries in ENUM and BOOLEAN columns)\n";
+}
+
+$DBversion = "16.11.05.000";
+if ( CheckVersion($DBversion) ) {
+    print "Upgrade to $DBversion done (Koha 16.11.05 - security release)\n";
     SetVersion($DBversion);
 }
 

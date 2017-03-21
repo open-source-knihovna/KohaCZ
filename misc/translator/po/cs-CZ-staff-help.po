@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2017-01-15 21:34-0300\n"
-"PO-Revision-Date: 2016-11-26 21:30+0000\n"
+"POT-Creation-Date: 2017-03-14 14:11-0300\n"
+"PO-Revision-Date: 2017-02-09 14:41+0000\n"
 "Last-Translator: m23 <black23@gmail.com>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
 ">\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1480195807.000000\n"
+"X-POOTLE-MTIME: 1486651268.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -1012,16 +1012,16 @@ msgstr "-8 =&gt; Flag"
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Budoucí použití"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
-#, fuzzy, c-format
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
 "sound will be triggered when a checkout for a patron is not possible (such "
 "as the barcode not being found). "
 msgstr ""
 ". Na příklad, pokud vyberete selektor \"#circ_impossible\" vámi vybraný zvuk "
-"bude spuštěn pokud výpůjčka pro čtenáře není možná (stejně jako když čárový "
-"kód jednotky nebyl nalezen).  "
+"bude přehrán pokud výpůjčku pro čtenáře nelze provést (stejně to zafunguje v "
+"případě, pokud čárový kód jednotky nebyl nalezen).  "
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:35
 #, c-format
@@ -1445,13 +1445,13 @@ msgstr ""
 "pomocí záložky 'Kolovací seznamy' v záznamu čtenáře."
 
 #: intranet-tmpl/prog/en/modules/help/acqui/edifactmsgs.tt:5
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "A log of all messages sent and received via EDIFACT can be found under "
 "EDIFACT Messages."
 msgstr ""
-"Log všech zpráv poslaných a příjmutých pomocí EDIFACT můžete nalezt pod "
-"EDIFACT Zprávy."
+"Záznamy všech zpráv poslaných a příjmutých pomocí EDIFACT můžete nalezt pod "
+"volbou EDIFACT Zprávy."
 
 #: intranet-tmpl/prog/en/modules/help/tools/import_borrowers.tt:52
 #, c-format
@@ -2007,7 +2007,7 @@ msgstr "Přidání rozpočtu"
 msgid "Adding a group"
 msgstr "Přidávání skupiny"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, c-format
 msgid "Adding a new alert"
 msgstr "Přidání nového upozornění"
@@ -2184,12 +2184,12 @@ msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:26
 #: intranet-tmpl/prog/en/modules/help/acqui/newordersubscription.tt:10
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "After clicking the order link you will be brought to a search page that will "
 "help you find your subscription"
 msgstr ""
-"Po kliknutí na odkaz objednávky přejdete na vyhledávací stránku  která vám "
+"Po kliknutí na odkaz objednávky přejdete na stránku vyhledávání, která vám "
 "pomůže s najít vaše předplatné"
 
 #: intranet-tmpl/prog/en/modules/help/tools/quotes.tt:32
@@ -2635,7 +2635,7 @@ msgstr "Příklad použití těchto štítků v šabloně oznámení:"
 #: intranet-tmpl/prog/en/modules/help/cataloguing/linkitem.tt:3
 #, c-format
 msgid "Analytics"
-msgstr "Analytika"
+msgstr "Analytický popis"
 
 #: intranet-tmpl/prog/en/modules/help/admin/oai_set_mappings.tt:19
 #, c-format
@@ -2841,7 +2841,7 @@ msgstr ""
 "Pokud plánujete vydání jednotky do oběhu, měli byste vyplnit alespoň "
 "následující pole pro nové jednotky:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -4306,7 +4306,7 @@ msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr ""
 "Klikněte na \"Zaplatit\" vedle pokuty, kterou chcete zaplatit v plné výši"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr "Klikněte na \"Uložit upozornění\" a máte hotovo!"
@@ -5257,7 +5257,7 @@ msgstr "Odstraňovat veřejné seznamy"
 msgid "Deleting Item Types"
 msgstr "Odstraňování typů jednotek"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, c-format
 msgid "Deleting alerts"
 msgstr "Odstranění upozornění"
@@ -5755,14 +5755,14 @@ msgstr "Zadejte název seznamu a seznam uložte."
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "Zadejte textovou verzi kategorie do políčka \"Popis\"."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
 "jQuery selectors "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -8443,8 +8443,8 @@ msgid ""
 msgstr ""
 "Pokud chcete provádět vracení jednotek, které byly vloženy do biblioboxu, "
 "zatímco knihovna byla uzavřena, můžete zaškrtnout políčko \"Vracení knih z "
-"biblioboxu\". Tím se zapíše datum vrácení zpět na poslední den, kdy knihovna "
-"byla otevřena."
+"biblioboxu\". Systém pak nastaví jako datum vrácení předchozí otevírací den "
+"knihovny."
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:5
 #, c-format
@@ -11427,11 +11427,11 @@ msgid ""
 "not physically separated from the host item. Learn more about Analytics in "
 "Chapter 13 of AACR2."
 msgstr ""
-"Knihovny někdy zpřístupňují novinové články a články v rámci monografií a "
-"časopisů svým čtenářům prostřednictvím analytické katalogizace. Analytická "
-"katalogizace vytváří samostatné bibliografické záznamy o těchto článcích, "
-"kapitolách a sekcích, nacházejících se uvnitř většího zdroje, jako jsou "
-"knihy, články v časopisech, novinách nebo periodikách. V analytické "
+"Některé knihovny zpřístupňují také novinové články a články v rámci "
+"monografií a časopisů svým čtenářům prostřednictvím analytického popisu. "
+"Analytická katalogizace vytváří samostatné bibliografické záznamy o těchto "
+"článcích, kapitolách a sekcích, nacházejících se uvnitř většího zdroje, jako "
+"jsou knihy, články v časopisech, novinách nebo periodikách. V analytické "
 "katalogizaci, ačkoli samostatný bibliografický záznam je vytvořen pro název, "
 "není fyzicky oddělen od hostitelského výtisku. Další informace Analytice viz "
 "v kapitole 13 AACR2."
@@ -11556,7 +11556,7 @@ msgstr "Místní nastavení systému"
 msgid "Local Use:"
 msgstr "Místní užití:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "Locate the \"Add new alert\" form."
 msgstr "Najděte formulář \"Přidat nové upozornění\"."
@@ -12347,6 +12347,11 @@ msgstr "Poznámka: nezapomeňte prosím, že stále vyžadováno právo edit_ite
 #, c-format
 msgid "Note: Please note that items_batchmod permission is still required"
 msgstr "Poznámka: Nezapomeňte, že právo items_batchmod je dále vyžadováno"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
 #, c-format
@@ -15436,12 +15441,12 @@ msgstr ""
 msgid "Sort field 2 "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr "Priority zvukových upozornění"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, fuzzy, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -18564,8 +18569,8 @@ msgid ""
 "Tip: It is also possible to create analytic records from this screen by "
 "clicking on \"Create Analytics\""
 msgstr ""
-"Tip: Je možno také vytvářet analytické záznamy z této obrazovky kliknutím na "
-"\"Vytvořit Analytiku\""
+"Tip: Je možno také vytvářet analytický popis záznamů kliknutím na \"Přidat "
+"analytický popis\""
 
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:11
 #, c-format
@@ -18741,7 +18746,7 @@ msgstr ""
 "Chcete-li přidat nový typ atributu čtenáře, klikněte na \"Nový typ atributu "
 "čtenáře\" v horní části stránky"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, c-format
 msgid "To add a new alert:"
 msgstr "Pokud chcete přidat nové upozornění:"
@@ -18962,7 +18967,7 @@ msgstr ""
 msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr "Aby bylo možné objednat od dodavatele, musíte být tento \"Aktivní\"."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
@@ -19082,7 +19087,7 @@ msgstr ""
 "na shrnutí autoritního záznamu."
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -19774,8 +19779,8 @@ msgid ""
 msgstr ""
 "Chcete-li zobrazit všechny položky vázané na záznam hostitelského "
 "(zdrojového) dokumentu, proveďte vyhledání záznamu, klepněte na kartu "
-"Analytika na levé straně a analytika navázaná na každý čárový kód se zobrazí "
-"ve sloupci pod \"Používáno v\"."
+"Analytický popis na levé straně a popis navázaný na každý čárový kód se "
+"zobrazí ve sloupci pod \"Používáno v\"."
 
 #: intranet-tmpl/prog/en/modules/help/tools/tools-home.tt:3
 #, c-format
@@ -21160,13 +21165,14 @@ msgstr ""
 "kliknutím na odkaz \"Naplánovat\""
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/linkitem.tt:28
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "You can also see the analytics attached to this record by clicking the 'Show "
 "Analytic' link towards the top of the record in the normal view."
 msgstr ""
-"Můžete se také podívat na analytiku napojenou na tento záznamu kliknutím na "
-"odkaz \"Ukázat analytiku\" na horní části záznamu v normálním zobrazení."
+"Můžete se také podívat na analytický popis spojený s tímto záznamem "
+"kliknutím na odkaz \"Zobrazit analytický popis\" na horní části záznamu v "
+"normálním zobrazení."
 
 #: intranet-tmpl/prog/en/modules/help/offline_circ/process_koc.tt:17
 #, c-format
@@ -22461,7 +22467,7 @@ msgstr ""
 msgid "group_manage "
 msgstr "group_manage "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr "zde"

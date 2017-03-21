@@ -555,6 +555,10 @@ sub TooMany {
         }
     }
 
+    if ( not defined( $issuing_rule ) and not defined($branch_borrower_circ_rule->{maxissueqty}) ) {
+        return { reason => 'NO_RULE_DEFINED', max_allowed => 0 };
+    }
+
     # OK, the patron can issue !!!
     return;
 }
@@ -929,7 +933,6 @@ sub CanBookBeIssued {
     if ( $rentalConfirmation ){
         my ($rentalCharge) = GetIssuingCharges( $item->{'itemnumber'}, $borrower->{'borrowernumber'} );
         if ( $rentalCharge > 0 ){
-            $rentalCharge = sprintf("%.02f", $rentalCharge);
             $needsconfirmation{RENTALCHARGE} = $rentalCharge;
         }
     }
@@ -1209,6 +1212,9 @@ sub checkHighHolds {
         my $decreaseLoanHighHoldsDuration = C4::Context->preference('decreaseLoanHighHoldsDuration');
 
         my $reduced_datedue = $calendar->addDate( $issuedate, $decreaseLoanHighHoldsDuration );
+        $reduced_datedue->set_hour($orig_due->hour);
+        $reduced_datedue->set_minute($orig_due->minute);
+        $reduced_datedue->truncate( to => 'minute' );
 
         if ( DateTime->compare( $reduced_datedue, $orig_due ) == -1 ) {
             $return_data->{exceeded} = 1;
@@ -3233,6 +3239,9 @@ sub GetIssuingCharges {
             # We may have multiple rules so get the most specific
             my $discount = _get_discount_from_rule($discount_rules, $branch, $item_type);
             $charge = ( $charge * ( 100 - $discount ) ) / 100;
+        }
+        if ($charge) {
+            $charge = sprintf '%.2f', $charge; # ensure no fractions of a penny returned
         }
     }
 

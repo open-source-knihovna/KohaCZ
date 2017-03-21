@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: pt-PT-i-staff-t-prog-v-3000000\n"
-"POT-Creation-Date: 2017-01-15 22:40-0300\n"
-"PO-Revision-Date: 2017-01-17 11:22+0000\n"
+"POT-Creation-Date: 2017-03-14 17:13-0300\n"
+"PO-Revision-Date: 2017-02-15 12:50+0000\n"
 "Last-Translator: vfernandes <vfernandes@keep.pt>\n"
 "Language-Team: <>\n"
 "Language: pt\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1484652176.000000\n"
+"X-POOTLE-MTIME: 1487163059.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -1031,7 +1031,7 @@ msgstr "-8 =&gt; Sinal"
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Para uso futuro"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
@@ -1699,8 +1699,8 @@ msgid ""
 "Accept the deletion and the records will be removed from the reservoir and "
 "the status will be changed to 'cleaned'"
 msgstr ""
-"Aceitar a exclusão, os registos serão retirados do reservatório e do estado "
-"será alterado para 'limpo'"
+"Aceitar a exclusão, os registos serão retirados do depósito e o estado será "
+"alterado para 'limpo'"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:23
 #, c-format
@@ -2056,7 +2056,7 @@ msgstr "Adicionar um orçamento"
 msgid "Adding a group"
 msgstr "Adicionar um grupo"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, c-format
 msgid "Adding a new alert"
 msgstr "Adicionar um novo alerta"
@@ -2913,7 +2913,7 @@ msgstr ""
 "Por último, se planeio emprestar o exemplar, os seguintes campos devem ser "
 "preenchido para os novos exemplares:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -3564,7 +3564,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/reports/catalogue_stats.tt:3
 #, c-format
 msgid "Catalog statistics"
-msgstr "Estatísticas do Catálogo"
+msgstr "Estatísticas do catálogo"
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbiblio.tt:3
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbooks.tt:3
@@ -4402,7 +4402,7 @@ msgstr "Clicar em \"Pagar\" junto à multa que se deseja pagar parcialmente"
 msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr "Clicar em \"Pagar\" junto à multa que se deseja pagar totalmente"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr "Clique em \"Guardar alerta\" e o processo está terminado!"
@@ -5364,7 +5364,7 @@ msgstr "Eliminar listas públicas"
 msgid "Deleting Item Types"
 msgstr "Eliminar tipos de documento"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, c-format
 msgid "Deleting alerts"
 msgstr "Eliminar alertas"
@@ -5869,7 +5869,7 @@ msgstr "Inserir um nome para a lista e guarde."
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "Insira um descrição em texto livre da categoria no campo 'Descrição'."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
@@ -5878,7 +5878,7 @@ msgstr ""
 "Insira um seletor na caixa \"seletor\", pode ver mais documentação sobre "
 "seletores JQuery "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -6137,7 +6137,7 @@ msgid ""
 "reports already stored in Koha, click 'Use Saved.'"
 msgstr ""
 "Cada relatório pode ser editado a partir da lista de relatórios. Para ver a "
-"lista de relatórios já guardados, clique em 'Usar guardados'."
+"lista de relatórios já guardados, clique em 'Relatórios guardados'."
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-numberpatterns.tt:5
 #, c-format
@@ -11771,7 +11771,7 @@ msgstr "Preferências do sistema"
 msgid "Local Use:"
 msgstr "Uso local:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "Locate the \"Add new alert\" form."
 msgstr "Localize o formulário \"Adicionar novo alerta\"."
@@ -12585,6 +12585,11 @@ msgstr "Nota: Por favor, note que a permissão edit_items é na mesma necessári
 msgid "Note: Please note that items_batchmod permission is still required"
 msgstr ""
 "Nota: Por favor, note que a permissão items_batchmod é na mesma necessária"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
 #, c-format
@@ -13479,8 +13484,8 @@ msgid ""
 "Once your report is saved it will appear on the 'Use Saved' page with all "
 "other saved reports."
 msgstr ""
-"Assim que o relatório estiver guardado é aparecer na página 'Usar guardados' "
-"com todos os relatórios guardados."
+"Assim que o relatório estiver guardado é aparecer na página 'Relatórios "
+"guardados' com todos os relatórios guardados."
 
 #: intranet-tmpl/prog/en/modules/help/tools/marc_modification_templates.tt:59
 #, c-format
@@ -14293,8 +14298,8 @@ msgid ""
 "cleaned. These items will appear when searching the catalog from the "
 "Cataloging tool:"
 msgstr ""
-"Os registos importados usando esta ferramenta ficam no 'reservatório' até "
-"serem limpos. Os exemplares apenas aparecerão nas pesquisas no catálogo da "
+"Os registos importados usando esta ferramenta ficam no 'depósito' até serem "
+"limpos. Os exemplares apenas aparecerão nas pesquisas no catálogo da "
 "ferramenta de catalogação:"
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:136
@@ -14538,7 +14543,7 @@ msgstr "Guardar frases"
 #, c-format
 msgid "Scan or type the barcode on the item you would like to transfer"
 msgstr ""
-"Digitalizar ou inserir o código de barras do exemplar que deseja transferir"
+"Digitar ou inserir o código de barras do exemplar que deseja transferir"
 
 #: intranet-tmpl/prog/en/modules/help/circ/offline.tt:25
 #, c-format
@@ -15756,12 +15761,12 @@ msgstr "Campo de ordenação 1 "
 msgid "Sort field 2 "
 msgstr "Campo de ordenação 2 "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr "Precedência de som"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -15821,7 +15826,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:479
 #, c-format
 msgid "Stage MARC records into the reservoir"
-msgstr "Transferência para área temporária de registos MARC"
+msgstr "Transferência de registos MARC para o depósito"
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:72
 #, c-format
@@ -19140,7 +19145,7 @@ msgstr ""
 "Para adicionar um atributo de leitor, clique em 'Novo tipo de atributo de "
 "leitor' no topo da página"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, c-format
 msgid "To add a new alert:"
 msgstr "Para adicionar um novo alerta:"
@@ -19366,7 +19371,7 @@ msgstr ""
 msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr "Para encomendar de um fornecedor, precisa de activar-los."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
@@ -19416,7 +19421,7 @@ msgstr "Para limpar um lote, clique no botão 'Limpar' à direita"
 #: intranet-tmpl/prog/en/modules/help/tools/manage-marc-import.tt:32
 #, c-format
 msgid "To clean items out of the 'reservoir':"
-msgstr "Para limpar os itens do 'reservatório':"
+msgstr "Para limpar os itens do 'depósito':"
 
 #: intranet-tmpl/prog/en/modules/help/tools/stage-marc-import.tt:33
 #, c-format
@@ -19496,7 +19501,7 @@ msgstr ""
 "autoridade."
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -21350,8 +21355,8 @@ msgid ""
 "the box provided."
 msgstr ""
 "Com esta ferramenta pode efectuar alterações em lote a registos de leitores. "
-"Basta carregar um ficheiro com números de cartão (um por linha) ou "
-"digitalizar esses números na caixa de texto."
+"Basta carregar um ficheiro com números de cartão (um por linha) ou digitar "
+"esses números na caixa de texto."
 
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:43
 #, c-format
@@ -22940,7 +22945,7 @@ msgstr "obter um feed RSS/Atom sobre os novos exemplares."
 msgid "group_manage "
 msgstr "group_manage "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr "aqui"

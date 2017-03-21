@@ -2071,6 +2071,7 @@ sub _koha_new_item {
     my $dbh=C4::Context->dbh;  
     my $error;
     $item->{permanent_location} //= $item->{location};
+    _mod_item_dates( $item );
     my $query =
            "INSERT INTO items SET
             biblionumber        = ?,
@@ -2334,6 +2335,7 @@ sub _koha_modify_item {
 
     my $query = "UPDATE items SET ";
     my @bind;
+    _mod_item_dates( $item );
     for my $key ( keys %$item ) {
         next if ( $key eq 'itemnumber' );
         $query.="$key=?,";
@@ -2349,6 +2351,34 @@ sub _koha_modify_item {
         warn $error;
     }
     return ($item->{'itemnumber'},$error);
+}
+
+sub _mod_item_dates { # date formatting for date fields in item hash
+    my ( $item ) = @_;
+    return if !$item || ref($item) ne 'HASH';
+
+    my @keys = grep
+        { $_ =~ /^onloan$|^date|date$|datetime$/ }
+        keys %$item;
+    # Incl. dateaccessioned,replacementpricedate,datelastborrowed,datelastseen
+    # NOTE: We do not (yet) have items fields ending with datetime
+    # Fields with _on$ have been handled already
+
+    foreach my $key ( @keys ) {
+        next if !defined $item->{$key}; # skip undefs
+        my $dt = eval { dt_from_string( $item->{$key} ) };
+            # eval: dt_from_string will die on us if we pass illegal dates
+
+        my $newstr;
+        if( defined $dt  && ref($dt) eq 'DateTime' ) {
+            if( $key =~ /datetime/ ) {
+                $newstr = DateTime::Format::MySQL->format_datetime($dt);
+            } else {
+                $newstr = DateTime::Format::MySQL->format_date($dt);
+            }
+        }
+        $item->{$key} = $newstr; # might be undef to clear garbage
+    }
 }
 
 =head2 _koha_delete_item
@@ -2931,7 +2961,7 @@ sub PrepareItemrecordDisplay {
                 if (   $tagslib->{$tag}->{$subfield}->{kohafield} eq 'items.itemcallnumber'
                     && $defaultvalues
                     && $defaultvalues->{'callnumber'} ) {
-                    if( $itemrecord and $defaultvalues and not $itemrecord->field($subfield) ){
+                    if( $itemrecord and $defaultvalues and not $itemrecord->subfield($tag,$subfield) ){
                         # if the item record exists, only use default value if the item has no callnumber
                         $defaultvalue = $defaultvalues->{callnumber};
                     } elsif ( !$itemrecord and $defaultvalues ) {
@@ -2942,7 +2972,7 @@ sub PrepareItemrecordDisplay {
                 if (   ( $tagslib->{$tag}->{$subfield}->{kohafield} eq 'items.holdingbranch' || $tagslib->{$tag}->{$subfield}->{kohafield} eq 'items.homebranch' )
                     && $defaultvalues
                     && $defaultvalues->{'branchcode'} ) {
-                    if ( $itemrecord and $defaultvalues and not $itemrecord->field($subfield) ) {
+                    if ( $itemrecord and $defaultvalues and not $itemrecord->subfield($tag,$subfield) ) {
                         $defaultvalue = $defaultvalues->{branchcode};
                     }
                 }
@@ -2950,7 +2980,7 @@ sub PrepareItemrecordDisplay {
                     && $defaultvalues
                     && $defaultvalues->{'location'} ) {
 
-                    if ( $itemrecord and $defaultvalues and not $itemrecord->field($subfield) ) {
+                    if ( $itemrecord and $defaultvalues and not $itemrecord->subfield($tag,$subfield) ) {
                         # if the item record exists, only use default value if the item has no locationr
                         $defaultvalue = $defaultvalues->{location};
                     } elsif ( !$itemrecord and $defaultvalues ) {
@@ -3048,15 +3078,18 @@ sub PrepareItemrecordDisplay {
                     });
                     my $pars = { dbh => $dbh, record => undef, tagslib =>$tagslib, id => $subfield_data{id}, tabloop => undef };
                     $plugin->build( $pars );
+                    if ( $itemrecord and my $field = $itemrecord->field($tag) ) {
+                        $defaultvalue = $field->subfield($subfield);
+                    }
                     if( !$plugin->errstr ) {
                         #TODO Move html to template; see report 12176/13397
                         my $tab= $plugin->noclick? '-1': '';
                         my $class= $plugin->noclick? ' disabled': '';
                         my $title= $plugin->noclick? 'No popup': 'Tag editor';
-                        $subfield_data{marc_value} = qq[<input type="text" id="$subfield_data{id}" name="field_value" class="input_marceditor" size="50" maxlength="255" /><a href="#" id="buttonDot_$subfield_data{id}" tabindex="$tab" class="buttonDot $class" title="$title">...</a>\n].$plugin->javascript;
+                        $subfield_data{marc_value} = qq[<input type="text" id="$subfield_data{id}" name="field_value" class="input_marceditor" size="50" maxlength="255" value="$defaultvalue" /><a href="#" id="buttonDot_$subfield_data{id}" tabindex="$tab" class="buttonDot $class" title="$title">...</a>\n].$plugin->javascript;
                     } else {
                         warn $plugin->errstr;
-                        $subfield_data{marc_value} = qq(<input type="text" id="$subfield_data{id}" name="field_value" class="input_marceditor" size="50" maxlength="255" />); # supply default input form
+                        $subfield_data{marc_value} = qq(<input type="text" id="$subfield_data{id}" name="field_value" class="input_marceditor" size="50" maxlength="255" value="$defaultvalue" />); # supply default input form
                     }
                 }
                 elsif ( $tag eq '' ) {       # it's an hidden field
