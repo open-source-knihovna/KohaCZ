@@ -17,7 +17,8 @@
 
 use Modern::Perl;
 
-use Test::More tests => 10;
+use Test::More tests => 12;
+use t::lib::Mocks;
 
 use Koha::SearchEngine::Elasticsearch::QueryBuilder;
 
@@ -56,5 +57,50 @@ SKIP: {
     is ( $count = $searcher->count_auth_use($searcher,1), 0, 'Testing count_auth_use');
 
 }
+
+subtest 'json2marc' => sub {
+    plan tests => 4;
+    my $leader = '00626nam a2200193   4500';
+    my $_001 = 42;
+    my $_010a = '123456789';
+    my $_010d = 145;
+    my $_200a = 'a title';
+    my $json = [ # It's not a JSON, see the POD of json2marc
+        [ 'LDR', undef, undef, '_', $leader ],
+        [ '001', undef, undef, '_', $_001 ],
+        [ '010', ' ', ' ', 'a', $_010a, 'd', $_010d ],
+        [ '200', '1', ' ', 'a', $_200a, ], # Yes UNIMARC but we don't mind here
+    ];
+
+    my $marc = $searcher->json2marc( $json );
+    is( $marc->leader, $leader, );
+    is( $marc->field('001')->data, $_001, );
+    is( $marc->subfield('010', 'a'), $_010a, );
+    is( $marc->subfield('200', 'a'), $_200a, );
+
+};
+
+subtest 'build_query tests' => sub {
+    plan tests => 6;
+
+    t::lib::Mocks::mock_preference('DisplayLibraryFacets','both');
+    my $query = $builder->build_query();
+    ok( defined $query->{aggregations}{homebranch},
+        'homebranch added to facets if DisplayLibraryFacets=both' );
+    ok( defined $query->{aggregations}{holdingbranch},
+        'holdingbranch added to facets if DisplayLibraryFacets=both' );
+    t::lib::Mocks::mock_preference('DisplayLibraryFacets','holding');
+    $query = $builder->build_query();
+    ok( !defined $query->{aggregations}{homebranch},
+        'homebranch not added to facets if DisplayLibraryFacets=holding' );
+    ok( defined $query->{aggregations}{holdingbranch},
+        'holdingbranch added to facets if DisplayLibraryFacets=holding' );
+    t::lib::Mocks::mock_preference('DisplayLibraryFacets','home');
+    $query = $builder->build_query();
+    ok( defined $query->{aggregations}{homebranch},
+        'homebranch added to facets if DisplayLibraryFacets=home' );
+    ok( !defined $query->{aggregations}{holdingbranch},
+        'holdingbranch not added to facets if DisplayLibraryFacets=home' );
+};
 
 1;

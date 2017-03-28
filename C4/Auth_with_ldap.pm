@@ -209,7 +209,7 @@ sub checkpw_ldap {
 		return(1, $cardnumber, $local_userid);
         }
     } elsif ($config{replicate}) { # A2, C2
-        $borrowernumber = AddMember(%borrower) or die "AddMember failed";
+        $borrowernumber = C4::Members::AddMember(%borrower) or die "AddMember failed";
         C4::Members::Messaging::SetMessagingPreferencesFromDefaults( { borrowernumber => $borrowernumber, categorycode => $borrower{'categorycode'} } );
    } else {
         return 0;   # B2, D2
@@ -221,7 +221,7 @@ sub checkpw_ldap {
                 next;
             }
             if (C4::Members::Attributes::CheckUniqueness($code, $borrower{$code}, $borrowernumber)) {
-                C4::Members::Attributes::UpdateBorrowerAttribute($borrowernumber, {code => $code, value => $borrower{$code}});
+                C4::Members::Attributes::UpdateBorrowerAttribute($borrowernumber, {code => $code, attribute => $borrower{$code}});
             } else {
                 warn "ERROR_extended_unique_id_failed $code $borrower{$code}";
             }

@@ -144,7 +144,7 @@ if ( $record_type eq 'bibs' ) {
                 ?
                   C4::Context->preference('item-level_itypes')
                     ? ( 'items.itype' => $itemtype )
-                    : ( 'biblioitems.itemtype' => $itemtype )
+                    : ( 'me.itemtype' => $itemtype )
                 : ()
             ),
 
@@ -184,14 +184,12 @@ if ( @record_ids and $id_list_file ) {
 
 if ($deleted_barcodes) {
     for my $record_id ( @record_ids ) {
-        my $q = q|
-        |;
-        my $barcode = $dbh->selectall_arrayref(q| (
+        my $barcode = $dbh->selectall_arrayref(q|
             SELECT DISTINCT barcode
             FROM deleteditems
             WHERE deleteditems.biblionumber = ?
         |, { Slice => {} }, $record_id );
-        say $_->{barcode} for @$barcode
+        say $_->{barcode} for @$barcode;
     }
 }
 else {

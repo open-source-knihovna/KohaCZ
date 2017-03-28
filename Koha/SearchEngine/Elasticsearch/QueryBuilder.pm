@@ -115,10 +115,20 @@ sub build_query {
         author   => { terms => { field => "author__facet" } },
         subject  => { terms => { field => "subject__facet" } },
         itype    => { terms => { field => "itype__facet" } },
-        location => { terms => { field => "homebranch__facet" } },
+        location => { terms => { field => "location__facet" } },
         'su-geo' => { terms => { field => "su-geo__facet" } },
         se       => { terms => { field => "se__facet" } },
     };
+
+    my $display_library_facets = C4::Context->preference('DisplayLibraryFacets');
+    if (   $display_library_facets eq 'both'
+        or $display_library_facets eq 'home' ) {
+        $res->{aggregations}{homebranch} = { terms => { field => "homebranch__facet" } };
+    }
+    if (   $display_library_facets eq 'both'
+        or $display_library_facets eq 'holding' ) {
+        $res->{aggregations}{holdingbranch} = { terms => { field => "holdingbranch__facet" } };
+    }
     if ( my $ef = $options{expanded_facet} ) {
         $res->{facets}{$ef}{terms}{size} = C4::Context->preference('FacetMaxCount');
     };
@@ -741,7 +751,7 @@ sub _fix_limit_special_cases {
             push @new_lim, "copydate:$date";
         }
         elsif ( $l =~ /^available$/ ) {
-            push @new_lim, 'onloan:false';
+            push @new_lim, 'onloan:0';
         }
         else {
             push @new_lim, $l;

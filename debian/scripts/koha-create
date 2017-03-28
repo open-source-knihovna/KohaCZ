@@ -52,7 +52,7 @@ Options:
   --marcflavor flavor       Set the MARC flavor. Valid values are marc21 (default),
                             normarc and unimarc.
   --zebralang lang          Choose the primary language for Zebra indexing. Valid
-                            values are en (default), es, fr, gr, nb, ru and uk.
+                            values are cs, en (default), es, fr, gr, nb, ru and uk.
   --auth-idx idx_mode       Set the indexing mode for authority records. Valid
                             values are dom (default) and grs1.
   --biblio-idx idx_mode     Set the indexing mode for bibliographic records.
@@ -659,6 +659,7 @@ CREATE DATABASE \`$mysqldb\`;
 CREATE USER \`$mysqluser\`@'$mysql_hostname' IDENTIFIED BY '$mysqlpwd';
 CREATE USER \`$mysqluser\`@'%' IDENTIFIED BY '$mysqlpwd';
 GRANT ALL PRIVILEGES ON \`$mysqldb\`.* TO \`$mysqluser\`;
+GRANT ALL PRIVILEGES ON \`$mysqldb\`.* TO \`$mysqluser\`@'$mysql_hostname';
 FLUSH PRIVILEGES;
 eof
     fi #`
@@ -669,6 +670,7 @@ eof
 CREATE USER \`$mysqluser\`@'$mysql_hostname' IDENTIFIED BY '$mysqlpwd';
 CREATE USER \`$mysqluser\`@'%' IDENTIFIED BY '$mysqlpwd';
 GRANT ALL PRIVILEGES ON \`$mysqldb\`.* TO \`$mysqluser\`;
+GRANT ALL PRIVILEGES ON \`$mysqldb\`.* TO \`$mysqluser\`@'$mysql_hostname';
 FLUSH PRIVILEGES;
 eof
     fi #`
@@ -741,7 +743,7 @@ then
     then
         # Populate the database with default content.
         zcat "$DEFAULTSQL" |
-        sed "s/__KOHASITE__/$name/g" |
+        sed "s/__KOHASITE__/koha_$name/g" |
         mysql --host="$mysqlhost" --user="$mysqluser" --password="$mysqlpwd" "$mysqldb"
 
 

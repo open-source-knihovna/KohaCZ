@@ -180,7 +180,7 @@ sub get_xslt_sysprefs {
 
     # singleBranchMode was a system preference, but no longer is
     # we can retain it here for compatibility
-    my $singleBranchMode = Koha::Libraries->search->count == 1;
+    my $singleBranchMode = Koha::Libraries->search->count == 1 ? 1 : 0;
     $sysxml .= "<syspref name=\"singleBranchMode\">$singleBranchMode</syspref>\n";
 
     $sysxml .= "</sysprefs>\n";
@@ -311,6 +311,7 @@ sub buildKohaItemsNamespace {
         $location = $item->{location}? xml_escape($shelflocations->{$item->{location}}||$item->{location}):'';
         $ccode = $item->{ccode}? xml_escape($ccodes->{$item->{ccode}}||$item->{ccode}):'';
         my $itemcallnumber = xml_escape($item->{itemcallnumber});
+        my $stocknumber = $item->{stocknumber}? xml_escape($item->{stocknumber}):'';
         $xml .=
             "<item>"
           . "<homebranch>$homebranch</homebranch>"
@@ -319,6 +320,7 @@ sub buildKohaItemsNamespace {
           . "<ccode>$ccode</ccode>"
           . "<status>$status</status>"
           . "<itemcallnumber>$itemcallnumber</itemcallnumber>"
+          . "<stocknumber>$stocknumber</stocknumber>"
           . "</item>";
     }
     $xml = "<items xmlns=\"http://www.koha-community.org/items\">".$xml."</items>";

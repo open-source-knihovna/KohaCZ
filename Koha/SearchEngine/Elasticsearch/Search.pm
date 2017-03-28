@@ -358,14 +358,22 @@ sub json2marc {
 
     # fields are like:
     # [ '245', '1', '2', 'a' => 'Title', 'b' => 'Subtitle' ]
+    # or
+    # [ '001', undef, undef, '_', 'a value' ]
     # conveniently, this is the form that MARC::Field->new() likes
     foreach my $field (@$marcjson) {
-        next if @$field < 5;    # Shouldn't be possible, but...
+        next if @$field < 5;
         if ( $field->[0] eq 'LDR' ) {
             $marc->leader( $field->[4] );
         }
         else {
-            my $marc_field = MARC::Field->new(@$field);
+            my $tag = $field->[0];
+            my $marc_field;
+            if ( MARC::Field->is_controlfield_tag( $field->[0] ) ) {
+                $marc_field = MARC::Field->new($field->[0], $field->[4]);
+            } else {
+                $marc_field = MARC::Field->new(@$field);
+            }
             $marc->append_fields($marc_field);
         }
     }
@@ -400,16 +408,22 @@ sub _convert_facets {
         'su-geo' => { order => 4, label => 'Places', },
         se       => { order => 5, label => 'Series', },
         subject  => { order => 6, label => 'Topics', },
+        holdingbranch => { order => 8, label => 'HoldingLibrary' },
+        homebranch => { order => 9, label => 'HomeLibrary' }
     );
 
     # We also have some special cases, e.g. itypes that need to show the
     # value rather than the code.
     my @itypes = Koha::ItemTypes->search;
+    my @libraries = Koha::Libraries->search;
+    my $library_names = { map { $_->branchcode => $_->branchname } @libraries };
     my @locations = Koha::AuthorisedValues->search( { category => 'LOC' } );
     my $opac = C4::Context->interface eq 'opac' ;
     my %special = (
         itype    => { map { $_->itemtype         => $_->description } @itypes },
         location => { map { $_->authorised_value => ( $opac ? ( $_->lib_opac || $_->lib ) : $_->lib ) } @locations },
+        holdingbranch => $library_names,
+        homebranch => $library_names
     );
     my @facets;
     $exp_facet //= '';
