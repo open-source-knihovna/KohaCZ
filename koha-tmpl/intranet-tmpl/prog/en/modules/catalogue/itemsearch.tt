@@ -291,9 +291,17 @@
           { 'type': 'text' },
           { 'type': 'select', 'values': [% branches.json %] },
           { 'type': 'select', 'values': [% branches.json %] },
-          { 'type': 'select', 'values': [% locations.json %] },
+          [% IF locations.size %]
+              { 'type': 'select', 'values': [% locations.json %] },
+          [% ELSE %]
+              null,
+          [% END %]
           { 'type': 'text' },
-          { 'type': 'select', 'values': [% notforloans.json %] },
+          [% IF notforloans.size %]
+              { 'type': 'select', 'values': [% notforloans.json %] },
+          [% ELSE %]
+              null,
+          [% END %]
           { 'type': 'text' },
           null
         ]
@@ -381,11 +389,13 @@
               options = branches
               empty_option = "All libraries"
             %]
-            [% INCLUDE form_field_select
-              name="location"
-              options = locations
-              empty_option = "All locations"
-            %]
+            [% IF locations.size %]
+                [% INCLUDE form_field_select
+                  name="location"
+                  options = locations
+                  empty_option = "All locations"
+                %]
+            [% END %]
           </fieldset>
           <fieldset>
             [% INCLUDE form_field_select
@@ -398,11 +408,13 @@
               options = ccodes
               empty_option = "All collection codes"
             %]
-            [% INCLUDE form_field_select
-              name="notforloan"
-              options = notforloans
-              empty_option = "All statuses"
-            %]
+            [% IF notforloans.size %]
+                [% INCLUDE form_field_select
+                  name="notforloan"
+                  options = notforloans
+                  empty_option = "All statuses"
+                %]
+            [% END %]
           </fieldset>
           <fieldset>
             [% INCLUDE form_field_select_text_block %]
