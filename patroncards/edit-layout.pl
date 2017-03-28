@@ -140,12 +140,14 @@ if ($op eq 'edit') {
 #   Handle barcodes...
     my @barcode = ();
     foreach my $barcode_param (keys %{$layout_xml->{'barcode'}->[0]}) {
-        push @barcode, (($barcode_param eq 'type' ? ("barcode_" . $barcode_param => _set_selected($layout_xml->{'barcode'}->[0]->{'barcode_type'}, $barcode_types)) : ("barcode_" . $barcode_param => $layout_xml->{'barcode'}->[0]->{$barcode_param})));
+        push @barcode, (($barcode_param eq 'type' ? ("barcode_" . $barcode_param => _set_selected($layout_xml->{'barcode'}->[0]->{'type'}, $barcode_types)) : ("barcode_" . $barcode_param => $layout_xml->{'barcode'}->[0]->{$barcode_param})));
     }
 
     foreach my $unit (@$units){
         if ($unit->{'type'} eq $layout->get_attr('units')) {
             $unit->{'selected'} = 1;
+        } else {
+            $unit->{'selected'} = 0;
         }
     }
 
@@ -156,7 +158,7 @@ if ($op eq 'edit') {
             guide_box       => $layout_xml->{'guide_box'},
             units           => $units,
             @barcode,
-            barcode_type    => get_barcode_types(),
+            barcode_type    => _set_selected($layout_xml->{'barcode'}->[0]->{'type'}, $barcode_types),
             @text_fields,
             @images,
             guidebox        => 0,
