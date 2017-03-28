@@ -8,7 +8,7 @@ use C4::Koha;
 use C4::Output;
 use C4::Context;
 use Koha::Patron::Password::Recovery
-  qw(SendPasswordRecoveryEmail ValidateBorrowernumber GetValidLinkInfo CompletePasswordRecovery);
+  qw(SendPasswordRecoveryEmail ValidateBorrowernumber GetValidLinkInfo CompletePasswordRecovery DeleteExpiredPasswordRecovery);
 use Koha::Patrons;
 use Koha::AuthUtils qw(hash_password);
 use Koha::Patrons;
@@ -90,11 +90,14 @@ if ( $query->param('sendEmail') || $query->param('resendEmail') ) {
         }
 
 # Check if a password reset already issued for this borrower AND we are not asking for a new email
-        elsif ( ValidateBorrowernumber( $borrower->borrowernumber )
-            && !$query->param('resendEmail') )
-        {
-            $hasError                = 1;
-            $errAlreadyStartRecovery = 1;
+        elsif ( not $query->param('resendEmail') ) {
+            if ( ValidateBorrowernumber( $borrower->borrowernumber ) ) {
+                $hasError                = 1;
+                $errAlreadyStartRecovery = 1;
+            }
+            else {
+                DeleteExpiredPasswordRecovery( $borrower->borrowernumber );
+            }
         }
     }
     else {    # 0 matching borrower

@@ -921,14 +921,13 @@ sub checkauth {
             -value    => $session->id,
             -HttpOnly => 1
         );
-        $userid = $q_userid;
         my $pki_field = C4::Context->preference('AllowPKIAuth');
         if ( !defined($pki_field) ) {
             print STDERR "ERROR: Missing system preference AllowPKIAuth.\n";
             $pki_field = 'None';
         }
         if ( ( $cas && $query->param('ticket') )
-            || $userid
+            || $q_userid
             || ( $shib && $shib_login )
             || $pki_field ne 'None'
             || $persona )
@@ -943,7 +942,7 @@ sub checkauth {
                 my $retuserid;
 
                 # Do not pass password here, else shib will not be checked in checkpw.
-                ( $return, $cardnumber, $retuserid ) = checkpw( $dbh, $userid, undef, $query );
+                ( $return, $cardnumber, $retuserid ) = checkpw( $dbh, $q_userid, undef, $query );
                 $userid      = $retuserid;
                 $shibSuccess = $return;
                 $info{'invalidShibLogin'} = 1 unless ($return);
@@ -1015,7 +1014,7 @@ sub checkauth {
                 else {
                     my $retuserid;
                     ( $return, $cardnumber, $retuserid ) =
-                      checkpw( $dbh, $userid, $password, $query, $type );
+                      checkpw( $dbh, $q_userid, $password, $query, $type );
                     $userid = $retuserid if ($retuserid);
                     $info{'invalid_username_or_password'} = 1 unless ($return);
                 }
@@ -1080,12 +1079,18 @@ sub checkauth {
                         $branchname = $library? $library->branchname: '';
                     }
                     my $branches = { map { $_->branchcode => $_->unblessed } Koha::Libraries->search };
-                    if ( C4::Context->boolean_preference('IndependentBranches') && C4::Context->boolean_preference('Autolocation') ) {
+                    if ( $type ne 'opac' and C4::Context->boolean_preference('AutoLocation') ) {
 
                         # we have to check they are coming from the right ip range
                         my $domain = $branches->{$branchcode}->{'branchip'};
+                        $domain =~ s|\.\*||g;
                         if ( $ip !~ /^$domain/ ) {
                             $loggedin = 0;
+                            $cookie = $query->cookie(
+                                -name     => 'CGISESSID',
+                                -value    => '',
+                                -HttpOnly => 1
+                            );
                             $info{'wrongip'} = 1;
                         }
                     }
@@ -1157,7 +1162,7 @@ sub checkauth {
                 $session->param( 'ip',       $session->remote_addr() );
                 $session->param( 'sessiontype', 'anon' );
             }
-        }    # END if ( $userid    = $query->param('userid') )
+        }    # END if ( $q_userid
         elsif ( $type eq "opac" ) {
 
             # if we are here this is an anonymous session; add public lists to it and a few other items...
@@ -1185,7 +1190,7 @@ sub checkauth {
 
         if ( $userid ) {
             # track_login also depends on pref TrackLastPatronActivity
-            my $patron = Koha::Patrons->search({ userid => $userid })->next;
+            my $patron = Koha::Patrons->find({ userid => $userid });
             $patron->track_login if $patron;
         }
 

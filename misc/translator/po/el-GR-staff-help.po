@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-12-15 09:35-0300\n"
-"PO-Revision-Date: 2016-12-02 07:55+0000\n"
+"POT-Creation-Date: 2017-03-17 08:15-0300\n"
+"PO-Revision-Date: 2017-03-03 08:43+0000\n"
 "Last-Translator: Dimitris <dimantonak@gmail.com>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
 "Language: el\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1480665310.000000\n"
+"X-POOTLE-MTIME: 1488530621.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -879,7 +879,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11
@@ -1047,7 +1047,7 @@ msgstr "-8 =&gt; Σημαία"
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Μελλοντική χρήση"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
@@ -1329,7 +1329,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:116
 #, c-format
 msgid "A = Account management fee"
-msgstr "Α = Χρέωση διαχείρισης λογαριασμού"
+msgstr "Α = Κόστος διαχείρισης λογαριασμού"
 
 #: intranet-tmpl/prog/en/modules/help/acqui/basketgroup.tt:5
 #, c-format
@@ -2048,7 +2048,7 @@ msgstr "Προσθήκη κονδυλίου"
 msgid "Adding a group"
 msgstr "Προσθήκη ομάδας"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, fuzzy, c-format
 msgid "Adding a new alert"
 msgstr "Προσθήκη κονδυλίου"
@@ -2492,10 +2492,11 @@ msgid ""
 "customized using the Notices &amp; Slips Tool. The system comes with several "
 "predefined templates that will appear when you first visit this tool."
 msgstr ""
-"Όλες οι ειδοποιήσεις και οι αποδείξεις διακίνησης που στέλνονται από το Koha "
-"μπορούν να εξατομικευτούν μέσω του Εργαλείου Ειδοποιήσεων &amp; Σημειωμάτων. "
-"Το σύστημα περιλαμβάνει διάφορα προκαθορισμένα πρότυπα που θα εμφανιστούν "
-"όταν επισκεφτείτε για πρώτη φορά αυτό το εργαλείο."
+"Όλες οι ειδοποιήσεις και οι αποδείξεις δανεισμού (ή σημειωμάτων) που "
+"δημιουργούνται από το Koha μπορούν να παραμετροποιηθούν μέσω του Εργαλείου "
+"Ειδοποιήσεων &amp; Σημειωμάτων. Το σύστημα περιλαμβάνει διάφορα "
+"προκαθορισμένα πρότυπα που θα εμφανιστούν όταν επισκεφτείτε για πρώτη φορά "
+"αυτό το εργαλείο."
 
 #: intranet-tmpl/prog/en/modules/help/acqui/neworderbiblio.tt:9
 #, c-format
@@ -2908,7 +2909,7 @@ msgstr ""
 "Τουλάχιστον, αν σκοπεύεται να κυκλοφορήσετε το τεκμήριο, τα ακόλουθα πεδία "
 "πρέπει να εισαχθούν για νέα αντίτυπα:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -4402,7 +4403,7 @@ msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr ""
 "Κάντε κλικ στο \"Πληρωμή\" δίπλα στο πρόστιμο που θέλετε να πληρώσετε πλήρως"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, fuzzy, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr "Κάντε κλικ στο Αποθήκευση για να αποθηκεύσετε τη νέα σας απόδοση"
@@ -5374,7 +5375,7 @@ msgstr "Διαγραφή λίστας"
 msgid "Deleting Item Types"
 msgstr "Διαγραφή Τύπων Τεκμηρίου"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, fuzzy, c-format
 msgid "Deleting alerts"
 msgstr "Διαγραφή Αντιτύπων"
@@ -5885,14 +5886,14 @@ msgstr "Εισάγετε ένα όνομα λίστα και αποθηκεύσ�
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "Εισάγετε σε απλό κείμενο την κατηγορία στο πεδίο 'Περιγραφή'."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
 "jQuery selectors "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -7663,7 +7664,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:281
 #, c-format
 msgid "HOLD_SLIP "
-msgstr ""
+msgstr "HOLD_SLIP "
 
 #: intranet-tmpl/prog/en/modules/help/mainpage.tt:9
 #, c-format
@@ -8803,9 +8804,9 @@ msgid ""
 "checked out, including those they checked out at an earlier date. Choosing "
 "'Print quick slip' will print only the items that were checked out today."
 msgstr ""
-"Εάν επιλέξετε 'Εκτύπωση απόδειξης' θα εκτυπωθούν όλα τα τεκμήρια που έχει "
+"Εάν επιλέξετε 'Εκτύπωση σημειώματος' θα εκτυπωθούν όλα τα τεκμήρια που έχει "
 "δανειστεί το μέλος, συμπεριλαμβανομένων εκείνων που δανείστηκε σε "
-"προηγούμενη ημερομηνία. Επιλέγοντας 'Εκτύπωση Γρήγορης Απόδειξης' θα "
+"προηγούμενη ημερομηνία. Επιλέγοντας 'Εκτύπωση Γρήγορου Σημειώματος' θα "
 "εκτυπωθούν μόνο τα τεκμήρια που δανείστηκαν σήμερα."
 
 #: intranet-tmpl/prog/en/modules/help/acqui/addorderiso2709.tt:17
@@ -11765,7 +11766,7 @@ msgstr "Περιορισμός σε μία συγκεκριμένη βιβλιο
 #: intranet-tmpl/prog/en/modules/help/tools/export.tt:20
 #, c-format
 msgid "Limit to an acquisition date range"
-msgstr "Περιορισμός σε μία σειρά ημερομηνιών πρόσκτησης"
+msgstr "Περιορισμός σε ένα εύρος ημερομηνιών πρόσκτησης"
 
 #: intranet-tmpl/prog/en/modules/help/admin/authorised_values.tt:52
 #, c-format
@@ -11797,7 +11798,7 @@ msgstr "Τοπική Χρήση Προτιμήσεων Συστήματος"
 msgid "Local Use:"
 msgstr "Τοπική Χρήση:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "Locate the \"Add new alert\" form."
 msgstr ""
@@ -12609,6 +12610,11 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:432
 #, c-format
 msgid "Note: Please note that items_batchmod permission is still required"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
@@ -14779,7 +14785,7 @@ msgstr ""
 "Βλέπε την πλήρη τεκμηρίωση για τους Κανόνες Διακίνησης Υλικού και Προστίμων "
 "στο "
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #, c-format
 msgid "See the full documentation for Circulation in the "
 msgstr "Βλέπε την πλήρη τεκμηρίωση για την Διακίνηση Υλικού στο "
@@ -15779,12 +15785,12 @@ msgstr ""
 msgid "Sort field 2 "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -19049,7 +19055,7 @@ msgstr ""
 "έκθεση προτού τρέξει επιλέγοντας το 'Απαιτείται' στην προτίμηση συστήματος "
 "FilterBeforeOverdueReport."
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:21
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:22
 #, c-format
 msgid "Tip: Mac users use the OPTION button in place of ALT"
 msgstr ""
@@ -19219,7 +19225,7 @@ msgstr ""
 "Για να προσθέσετε έναν νέο Τύπο Χαρακτηριστικού Μέλους, πατήστε το κουμπί "
 "'Νέος Τύπος Χαρακτηριστικού Μέλους' στην κορυφή της σελίδας"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, fuzzy, c-format
 msgid "To add a new alert:"
 msgstr "Για να προσθέσετε μία νέα βιβλιοθήκη:"
@@ -19444,7 +19450,7 @@ msgstr ""
 "Για να έχετε τη δυνατότητα να παραγγείλετε από έναν προμηθευτή, πρέπει να "
 "τους θέσετε 'Ενεργούς'."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
@@ -19568,7 +19574,7 @@ msgstr ""
 "όρου."
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -23001,7 +23007,7 @@ msgid "fast_cataloging "
 msgstr "fast_cataloging "
 
 #: intranet-tmpl/prog/en/modules/help/catalogue/search.tt:35
-#, fuzzy, c-format
+#, c-format
 msgid "fic:0 Non-fiction"
 msgstr "fic:0 Μη λογοτεχνικό"
 
@@ -23020,7 +23026,7 @@ msgstr ""
 msgid "group_manage "
 msgstr "group_manage "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr ""
@@ -23204,6 +23210,11 @@ msgstr "μεταφερθείτε στο δανεισμό με Alt+R"
 #, c-format
 msgid "jump to the checkout with Alt+U "
 msgstr "μεταφερθείτε στις επιστροφές με Alt+U "
+
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:19
+#, fuzzy, c-format
+msgid "jump to the renew tab with Alt+W"
+msgstr "μεταφερθείτε στο δανεισμό με Alt+R"
 
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:8
 #, c-format
@@ -23390,7 +23401,7 @@ msgstr "διαχείριση "
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11

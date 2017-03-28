@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2016-12-15 09:17-0300\n"
-"PO-Revision-Date: 2016-12-17 09:53+0000\n"
+"POT-Creation-Date: 2017-03-17 08:11-0300\n"
+"PO-Revision-Date: 2017-03-20 08:00+0000\n"
 "Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/>"
 "\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1481968381.000000\n"
+"X-POOTLE-MTIME: 1489996820.000000\n"
 
 #. %1$s:  IF debarred_comment.search('OVERDUES_PROCESS') 
 #. %2$s:  debarred_comment.remove('OVERDUES_PROCESS ') | html_line_break 
@@ -847,7 +847,7 @@ msgid ""
 "%s Passwords do not match. Please re-type your new password. %s %s Your new "
 "password must be at least %s characters long. %s %s Your current password "
 "was entered incorrectly. If this problem persists, please ask a librarian to "
-"re-set your password for you. %s %s Your password contains leading and/or "
+"reset your password for you. %s %s Your password contains leading and/or "
 "trailing spaces. %s "
 msgstr ""
 "%s Hesla se neshodují. Prosím, napište znovu Vaše nové heslo. %s %s Vaše "
@@ -8867,7 +8867,7 @@ msgstr "Search "
 
 #. %1$s:  UNLESS ( Koha.Preference( 'OpacAddMastheadLibraryPulldown' ) == 1 ) 
 #. %2$s:  IF ( mylibraryfirst ) 
-#. %3$s:  mylibraryfirst 
+#. %3$s:  Branches.GetName( mylibraryfirst ) 
 #. %4$s:  END 
 #. %5$s:  END 
 #: opac-tmpl/bootstrap/en/includes/masthead.inc:159
@@ -10583,7 +10583,7 @@ msgid "URL(s)"
 msgstr "Odkaz(y)"
 
 #. For the first occurrence,
-#. %1$s:  BIBLIO_RESULT.url |url 
+#. %1$s:  BIBLIO_RESULT.url 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:135
 #: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:128
 #, c-format

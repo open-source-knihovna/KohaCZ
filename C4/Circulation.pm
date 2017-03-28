@@ -555,6 +555,10 @@ sub TooMany {
         }
     }
 
+    if ( not defined( $issuing_rule ) and not defined($branch_borrower_circ_rule->{maxissueqty}) ) {
+        return { reason => 'NO_RULE_DEFINED', max_allowed => 0 };
+    }
+
     # OK, the patron can issue !!!
     return;
 }
@@ -929,7 +933,6 @@ sub CanBookBeIssued {
     if ( $rentalConfirmation ){
         my ($rentalCharge) = GetIssuingCharges( $item->{'itemnumber'}, $borrower->{'borrowernumber'} );
         if ( $rentalCharge > 0 ){
-            $rentalCharge = sprintf("%.02f", $rentalCharge);
             $needsconfirmation{RENTALCHARGE} = $rentalCharge;
         }
     }
@@ -1209,6 +1212,9 @@ sub checkHighHolds {
         my $decreaseLoanHighHoldsDuration = C4::Context->preference('decreaseLoanHighHoldsDuration');
 
         my $reduced_datedue = $calendar->addDate( $issuedate, $decreaseLoanHighHoldsDuration );
+        $reduced_datedue->set_hour($orig_due->hour);
+        $reduced_datedue->set_minute($orig_due->minute);
+        $reduced_datedue->truncate( to => 'minute' );
 
         if ( DateTime->compare( $reduced_datedue, $orig_due ) == -1 ) {
             $return_data->{exceeded} = 1;
@@ -3013,15 +3019,19 @@ sub AddRenewal {
     }
 
     # Log the renewal
-    UpdateStats({branch => $branch,
-                type => 'renew',
-                amount => $charge,
-                itemnumber => $itemnumber,
-                itemtype => $item->{itype},
-                borrowernumber => $borrowernumber,
-                ccode => $item->{'ccode'}}
-                );
-	return $datedue;
+    UpdateStats(
+        {
+            branch => C4::Context->userenv ? C4::Context->userenv->{branch} : $branch,
+            type           => 'renew',
+            amount         => $charge,
+            itemnumber     => $itemnumber,
+            itemtype       => $item->{itype},
+            borrowernumber => $borrowernumber,
+            ccode          => $item->{'ccode'}
+        }
+    );
+
+    return $datedue;
 }
 
 sub GetRenewCount {
@@ -3229,6 +3239,9 @@ sub GetIssuingCharges {
             # We may have multiple rules so get the most specific
             my $discount = _get_discount_from_rule($discount_rules, $branch, $item_type);
             $charge = ( $charge * ( 100 - $discount ) ) / 100;
+        }
+        if ($charge) {
+            $charge = sprintf '%.2f', $charge; # ensure no fractions of a penny returned
         }
     }
 
@@ -3454,7 +3467,7 @@ sub SendCirculationAlert {
     my %message_name = (
         CHECKIN  => 'Item_Check_in',
         CHECKOUT => 'Item_Checkout',
-	RENEWAL  => 'Item_Checkout',
+        RENEWAL  => 'Item_Checkout',
     );
     my $borrower_preferences = C4::Members::Messaging::GetMessagingPreferences({
         borrowernumber => $borrower->{borrowernumber},
@@ -3462,47 +3475,37 @@ sub SendCirculationAlert {
     });
     my $issues_table = ( $type eq 'CHECKOUT' || $type eq 'RENEWAL' ) ? 'issues' : 'old_issues';
 
+    my $schema = Koha::Database->new->schema;
     my @transports = keys %{ $borrower_preferences->{transports} };
-    # warn "no transports" unless @transports;
-    for (@transports) {
-        # warn "transport: $_";
-        my $message = C4::Message->find_last_message($borrower, $type, $_);
-        if (!$message) {
-            #warn "create new message";
-            my $letter =  C4::Letters::GetPreparedLetter (
-                module => 'circulation',
-                letter_code => $type,
-                branchcode => $branch,
-                message_transport_type => $_,
-                tables => {
-                    $issues_table => $item->{itemnumber},
-                    'items'       => $item->{itemnumber},
-                    'biblio'      => $item->{biblionumber},
-                    'biblioitems' => $item->{biblionumber},
-                    'borrowers'   => $borrower,
-                    'branches'    => $branch,
-                }
-            ) or next;
-            C4::Message->enqueue($letter, $borrower, $_);
+    for my $mtt (@transports) {
+        my $letter =  C4::Letters::GetPreparedLetter (
+            module => 'circulation',
+            letter_code => $type,
+            branchcode => $branch,
+            message_transport_type => $mtt,
+            tables => {
+                $issues_table => $item->{itemnumber},
+                'items'       => $item->{itemnumber},
+                'biblio'      => $item->{biblionumber},
+                'biblioitems' => $item->{biblionumber},
+                'borrowers'   => $borrower,
+                'branches'    => $branch,
+            }
+        ) or next;
+
+        $schema->storage->txn_begin;
+        C4::Context->dbh->do(q|LOCK TABLE message_queue READ|);
+        C4::Context->dbh->do(q|LOCK TABLE message_queue WRITE|);
+        my $message = C4::Message->find_last_message($borrower, $type, $mtt);
+        unless ( $message ) {
+            C4::Context->dbh->do(q|UNLOCK TABLES|);
+            C4::Message->enqueue($letter, $borrower, $mtt);
         } else {
-            #warn "append to old message";
-            my $letter =  C4::Letters::GetPreparedLetter (
-                module => 'circulation',
-                letter_code => $type,
-                branchcode => $branch,
-                message_transport_type => $_,
-                tables => {
-                    $issues_table => $item->{itemnumber},
-                    'items'       => $item->{itemnumber},
-                    'biblio'      => $item->{biblionumber},
-                    'biblioitems' => $item->{biblionumber},
-                    'borrowers'   => $borrower,
-                    'branches'    => $branch,
-                }
-            ) or next;
             $message->append($letter);
             $message->update;
         }
+        C4::Context->dbh->do(q|UNLOCK TABLES|);
+        $schema->storage->txn_commit;
     }
 
     return;

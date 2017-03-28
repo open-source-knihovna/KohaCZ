@@ -2,17 +2,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-12-20 13:03+0000\n"
+"PO-Revision-Date: 2017-02-22 21:00+0000\n"
 "Last-Translator: Ilona <szczudlo@biblos.pk.edu.pl>\n"
 "Language-Team: American English <kde-i18n-doc@kde.org>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1482239007.000000\n"
+"X-POOTLE-MTIME: 1487797225.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -171,8 +170,8 @@ msgid "acquisitions.pref#UniqueItemFields# (separated by a space)"
 msgstr "(oddzielone spacją)"
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#UniqueItemFields# The following <a href='http://schema.koha-community.org/tables/items.html' target='blank'>database columns</a> should be unique in an item:"
-msgstr "Pola unikalne w rekordzie egzemplarza, zgodne ze <a href='http://schema.koha-community.org/tables/items.html' target='blank'>strukturą bazy danych</a> Koha:"
+msgid "acquisitions.pref#UniqueItemFields# The following <a href='http://schema.koha-community.org/16_11/tables/items.html' target='blank'>database columns</a> should be unique in an item:"
+msgstr "Następujące <a href='http://schema.koha-community.org/16_05/tables/items.html' target='blank'>kolumny bazy danych</a>powinny być unikalne w rekordzie egzemplarza:"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#gist# . Enter in numeric form, 0.12 for 12%. The first item in the list will be selected by default. For more than one value, separate with | (pipe)."
@@ -180,9 +179,7 @@ msgstr "Wprowadź wartości w formie numerycznej, np. 0.12 dla 12%. Pierwsza poz
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#gist# Please note: The database will only accept values up to 4 decimals precision, further values will be rounded."
-msgstr ""
-"Uwaga: Baza danych akceptuje jedynie wartości do 4 miejsc po przecinku, "
-"dalsze wartości będą zaokrąglane."
+msgstr "Uwaga: Baza danych akceptuje jedynie wartości do 4 miejsc po przecinku, dalsze wartości będą zaokrąglane."
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#gist# Tax rates are"
@@ -1437,6 +1434,22 @@ msgid "authorities.pref#AuthDisplayHierarchy# broader term/narrower term hierarc
 msgstr "hierarchicznie podczas przeglądania haseł wzorcowych."
 
 # Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# When updating biblio records from an attached authority record (\"merging\"), handle subfields of relevant biblio record fields in"
+msgstr "Podczas uaktualniania rekordu bibliograficznego z dołączonymi hasłami wzorcowymi (\"scalanie\") obsługuj podpola odpowiednich pól rekordu bibliograficznego w trybie"
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# loose"
+msgstr "luźnym"
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# mode. In strict mode subfields that are not found in the authority record, are deleted. Loose mode will keep them. Loose mode is the historical behavior and still the default."
+msgstr "W trybie ścisłym podpola nie odnalezione w hasłach wzorcowych zostaną usunięte. W trybie luźnym zostaną zachowane. Tryb luźny to ustawienie pierwotne i domyślne."
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# strict"
+msgstr "ścisłym"
+
+# Authorities > General
 msgid "authorities.pref#AutoCreateAuthorities# When editing records,"
 msgstr "Gdy modyfikujesz rekordy,"
 
@@ -2314,9 +2327,7 @@ msgstr "Nie zezwalaj"
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#AllowMultipleIssuesOnABiblio# patrons to check out multiple items from the same record.  (NOTE: This will only affect records without a subscription attached.)"
-msgstr ""
-"użytkownikowi wypożyczać wiele egzemplarzy tego samego tytułu.  (UWAGA: "
-"Opcja dotyczy rekordów bez podłączonej prenumeraty)."
+msgstr "użytkownikowi wypożyczać wiele egzemplarzy tego samego tytułu.  (UWAGA: Opcja dotyczy rekordów bez podłączonej prenumeraty)."
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#AllowNotForLoanOverride# Allow"
@@ -5820,8 +5831,8 @@ msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# (separate columns 
 msgstr "(oddziel kolumny separatorem |)"
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-modification screen:"
-msgstr "Następujące <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>kolumny bazy danych</a> nie wyświetlą się na ekranie samodzielnej rejestracji:"
+msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_11/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-modification screen:"
+msgstr "Następujące <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>kolumny bazy danych</a> nie wyświetlą się w oknie samodzielnej rejestracji:"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistration# Allow"
@@ -5844,16 +5855,16 @@ msgid "opac.pref#PatronSelfRegistrationBorrowerMandatoryField# (separate columns
 msgstr "(oddziel kolumny separatorem |)"
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfRegistrationBorrowerMandatoryField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> must be filled in on the patron entry screen:"
-msgstr "Następujące <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>pola</a> muszą zostać wypełnione przez użytkownika przy rejestracji:"
+msgid "opac.pref#PatronSelfRegistrationBorrowerMandatoryField# The following <a href='http://schema.koha-community.org/16_11/tables/borrowers.html' target='blank'>database columns</a> must be filled in on the patron entry screen:"
+msgstr "Następujące <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>kolumny bazy danych</a>muszą zostać wypełnione w oknie wprowadzania danych użytkownika:"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# (separate columns with |)"
 msgstr "(oddziel kolumny separatorem |)"
 
 # OPAC > Self Registration
-msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-registration screen:"
-msgstr "Następujące <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>kolumny bazy danych</a> nie wyświetlą się na ekranie samodzielnej rejestracji:"
+msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_11/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-registration screen:"
+msgstr "Następujące <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>kolumny bazy danych</a> nie wyświetlą się w oknie samodzielnej rejestracji:"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationDefaultCategory# Use the patron category code"
@@ -6284,8 +6295,8 @@ msgid "patrons.pref#BorrowerMandatoryField# (separate columns with |)"
 msgstr "(oddziel kolumny znakiem \"|\")"
 
 # Patrons > General
-msgid "patrons.pref#BorrowerMandatoryField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> must be filled in on the patron entry screen:"
-msgstr "Następujące <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>kolumny bazy danych</a> na ekranie wprowadzania nowego użytkownika muszą być wypełnione:"
+msgid "patrons.pref#BorrowerMandatoryField# The following <a href='http://schema.koha-community.org/16_11/tables/borrowers.html' target='blank'>database columns</a> must be filled in on the patron entry screen:"
+msgstr "Następujące <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>kolumny bazy danych</a> muszą zostać wypełnione w oknie wprowadzania danych użytkownika:"
 
 # Patrons > General
 msgid "patrons.pref#BorrowerRenewalPeriodBase# When renewing borrowers, base the new expiry date on"
@@ -6308,8 +6319,8 @@ msgid "patrons.pref#BorrowerUnwantedField# (separate columns with |)"
 msgstr "(oddziel kolumny znakiem \"|\")"
 
 # Patrons > General
-msgid "patrons.pref#BorrowerUnwantedField# The following <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron entry screen:"
-msgstr "Następujące <a href='http://schema.koha-community.org/tables/borrowers.html' target='blank'>kolumny bazy danych</a> nie pojawią się na ekranie wprowadzania nowego użytkownika:"
+msgid "patrons.pref#BorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_11/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron entry screen:"
+msgstr "Następujące <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>kolumny bazy danych</a> nie wyświetlą się w oknie wprowadzania danych użytkownika:"
 
 # Patrons > General
 msgid "patrons.pref#BorrowersTitles# (separate multiple choices with |)"
@@ -7662,3 +7673,4 @@ msgstr "Liczba wyświetlanych wersów wymaganego raportu poprzez usługę siecio
 # Web services > Reporting
 msgid "web_services.pref#SvcMaxReportRows# rows of a report requested via the reports web service."
 msgstr "."
+

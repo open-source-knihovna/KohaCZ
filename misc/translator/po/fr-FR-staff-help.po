@@ -17,8 +17,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Koha\n"
-"POT-Creation-Date: 2016-12-15 10:10-0300\n"
-"PO-Revision-Date: 2016-12-16 14:27+0000\n"
+"POT-Creation-Date: 2017-03-17 08:22-0300\n"
+"PO-Revision-Date: 2017-03-23 16:57+0000\n"
 "Last-Translator: axelle <axelle.clarisse@univ-amu.fr>\n"
 "Language-Team: French (France) "
 "(http://www.transifex.com/projects/p/koha/language/fr_FR/)\n"
@@ -28,7 +28,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1481898446.000000\n"
+"X-POOTLE-MTIME: 1490288229.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -884,7 +884,7 @@ msgstr "(! signifie 'non visible' ou 'non replié')"
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11
@@ -1055,7 +1055,7 @@ msgstr "-8 =&gt; Flag"
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Usage prochain"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
@@ -2074,7 +2074,7 @@ msgstr "Ajouter un budget"
 msgid "Adding a group"
 msgstr "Ajout d'un groupe"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, c-format
 msgid "Adding a new alert"
 msgstr "Ajouter une nouvelle alerte"
@@ -2955,7 +2955,7 @@ msgstr ""
 "Au strict minimum, si vous prévoyez de faire des prêts, les champs suivants "
 "devraient être entrés pour les exemplaires&nbsp;:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -4054,13 +4054,13 @@ msgstr ""
 "appliquer de limite, cliquer simplement sur 'Suivant' sans saisir une option."
 
 #: intranet-tmpl/prog/en/modules/help/reports/itemslost.tt:10
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Choose category to 'Order by' (the 'order by' field affects what ordering "
 "method is used when displaying the lost items)"
 msgstr ""
-"Sélectionnez une catégorie de tri pour classer les exemplaires perdus à "
-"l'affichage"
+"Sélectionnez une catégorie pour \"Trier par\" (Le champ \"Trier par\" change "
+"la méthode utilisée pour classer les exemplaires perdus à l'affichage)"
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:23
 #, c-format
@@ -4467,7 +4467,7 @@ msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr ""
 "Cliquez sur 'Payer' à côté de l'amende que vous voulez payer entièrement."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr "Cliquez sur \"Sauvegarder l'alerte\" pour finir."
@@ -5454,7 +5454,7 @@ msgstr "Supprimer les listes publiques"
 msgid "Deleting Item Types"
 msgstr "Supprimer les types de document"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, c-format
 msgid "Deleting alerts"
 msgstr "Supprimer des alertes"
@@ -5963,7 +5963,7 @@ msgstr "Saisissez un nom pour la liste et enregistrez la."
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "Entrez une explication plus complète dans le champ 'Description'."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
@@ -5972,7 +5972,7 @@ msgstr ""
 "Entrez un sélecteur dans l'alimentation du \"sélecteur\", vous pouvez voir "
 "la documentation sur des sélecteurs jQuery "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -8735,9 +8735,9 @@ msgstr ""
 "validation)."
 
 #: intranet-tmpl/prog/en/modules/help/acqui/basket.tt:84
-#, fuzzy, c-format
+#, c-format
 msgid "If you are charged sales tax, choose that from the tax_rate field"
-msgstr "Si vous payez la TVA, indiquez le dans le champ approprié"
+msgstr "Si vous payez la TVA, indiquez le dans le champ taux de TVA"
 
 #: intranet-tmpl/prog/en/modules/help/circ/returns.tt:33
 #, c-format
@@ -11994,10 +11994,10 @@ msgstr "Préférences Usage local"
 msgid "Local Use:"
 msgstr "Usage local&nbsp;:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
-#, fuzzy, c-format
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#, c-format
 msgid "Locate the \"Add new alert\" form."
-msgstr "Mettre en place le formulaire \"Ajouter une nouvelle alerte\"."
+msgstr "Trouvez le formulaire \"Ajouter une nouvelle alerte\"."
 
 #: intranet-tmpl/prog/en/modules/help/admin/aqbudgetperiods.tt:26
 #, c-format
@@ -12831,6 +12831,13 @@ msgstr ""
 msgid "Note: Please note that items_batchmod permission is still required"
 msgstr ""
 "Note: Veuillez noter que la permission items_batchmod est toujours nécessaire"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
+msgstr ""
+"Note : Utiliser la préférence système \"AudioAlerts\" pour activer/"
+"désactiver les sons."
 
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
 #, c-format
@@ -14252,9 +14259,9 @@ msgid "Perform batch modification of items"
 msgstr "Lancer la modification par lot des exemplaires"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:413
-#, fuzzy, c-format
+#, c-format
 msgid "Perform inventory of your catalog"
-msgstr "Réalisation de l'inventaire (récolement) de votre catalogue"
+msgstr "Réaliser l'inventaire (récolement) de votre catalogue"
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:21
 #, c-format
@@ -14878,7 +14885,7 @@ msgstr "Recherche index&nbsp;:Control-number"
 
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbiblio.tt:25
 #: intranet-tmpl/prog/en/modules/help/cataloguing/addbooks.tt:22
-#, fuzzy, c-format
+#, c-format
 msgid "Search targets can be altered by using the Z39.50/SRU Admin area."
 msgstr ""
 "Les cibles de recherche peuvent être modifiées dans la rubrique Z39.50 du "
@@ -15055,7 +15062,7 @@ msgstr "Voir la documentation complète des statistiques de circulation le "
 msgid "See the full documentation for Circulation and Fine Rules in the "
 msgstr "Voir la documentation complète sur les règles de Circulation dans le "
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #, c-format
 msgid "See the full documentation for Circulation in the "
 msgstr "Voir la documentation complète sur la Circulation dans le "
@@ -15118,14 +15125,14 @@ msgid "See the full documentation for Custom Reports in the "
 msgstr "Pour plus d'information, voir le "
 
 #: intranet-tmpl/prog/en/modules/help/admin/edi_accounts.tt:15
-#, fuzzy, c-format
+#, c-format
 msgid "See the full documentation for EDI accounts in the "
-msgstr "Voir la documentation complète sur les Postes budgétaires dans le "
+msgstr "Voir la documentation complète sur les comptes EDI dans le "
 
 #: intranet-tmpl/prog/en/modules/help/acqui/edifactmsgs.tt:7
-#, fuzzy, c-format
+#, c-format
 msgid "See the full documentation for EDIFACT messages in the "
-msgstr "Voir la documentation complète sur les Commentaires dans le "
+msgstr "Voir la documentation complète sur les messages EDIFACT dans le&nbsp;"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-password.tt:14
 #, c-format
@@ -15260,7 +15267,7 @@ msgid "See the full documentation for Libraries &amp; Groups in the "
 msgstr "Voir la documentation complète sur les Sites &amp; Groupes dans le "
 
 #: intranet-tmpl/prog/en/modules/help/admin/edi_ean_accounts.tt:11
-#, fuzzy, c-format
+#, c-format
 msgid "See the full documentation for Library EANs in the "
 msgstr "Voir la documentation complète sur les EAN des sites dans le"
 
@@ -16082,12 +16089,12 @@ msgstr "Champ de tri 1"
 msgid "Sort field 2 "
 msgstr "Champ de tri 2"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr "Ordre des sons"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -17183,10 +17190,9 @@ msgstr ""
 "La possibilité de créer et modifier mais pas de lancer des rapports SQL"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:505
-#, fuzzy, c-format
+#, c-format
 msgid "The ability to delete but not run SQL reports"
-msgstr ""
-"La possibilité de créer et modifier mais pas de lancer des rapports SQL"
+msgstr "La possibilité de supprimer mais pas de lancer des rapports SQL"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:517
 #, c-format
@@ -17857,7 +17863,7 @@ msgstr ""
 "les données exemplaires. "
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:48
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "The other option, only for overdue notices, is to use the &lt;item&gt;&lt;/"
 "item&gt; tags to span the line so that it will print out multiple lines. One "
@@ -17872,11 +17878,11 @@ msgstr ""
 "d'utiliser les balises &lt;item&gt;&lt;/item&gt;  pour surligner la ligne "
 "afin de pouvoir imprimer plusieurs lignes. Voici un exemple pour la balise "
 "&lt;item&gt;&lt;/item&gt; :&lt;item&gt;\"&lt;&lt;biblio.title&gt;&gt;\" by "
-"&lt;&lt;biblio.author&gt;&gt;, &lt;&lt;items.itemcallnumber&gt;&gt;, "
-"Barcode: &lt;&lt;items.barcode&gt;&gt; , Checkout date: &lt;&lt;issues."
-"issuedate&gt;&gt;, Due date: &lt;&lt;issues.date_due&gt;&gt; Fine: &lt;"
-"fine&gt;USD&lt;/fine&gt; Due date: &lt;&lt;issues.date_due&gt;&gt; &lt;/"
-"item&gt;"
+"&lt;&lt;biblio.author&gt;&gt;, &lt;&lt;items.itemcallnumber&gt;&gt;, Code à "
+"barres: &lt;&lt;items.barcode&gt;&gt; , Date de prêt: "
+"&lt;&lt;issues.issuedate&gt;&gt;, Date de retour: "
+"&lt;&lt;issues.date_due&gt;&gt; Amende: &lt;fine&gt;USD&lt;/fine&gt; Date de "
+"retour: &lt;&lt;issues.date_due&gt;&gt; &lt;/item&gt;"
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:137
 #, c-format
@@ -19383,7 +19389,7 @@ msgstr ""
 "rapport avant de le lancer en activant la préférence système "
 "FilterBeforeOverdueReport."
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:21
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:22
 #, c-format
 msgid "Tip: Mac users use the OPTION button in place of ALT"
 msgstr ""
@@ -19506,7 +19512,7 @@ msgid "Title=%s%s%s "
 msgstr "Titre=%s%s%s "
 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:58
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "To access to the field list of the current record, you have to use the "
 "'fields' variables (which is a hashref)."
@@ -19558,7 +19564,7 @@ msgstr ""
 "Pour ajouter un nouvel attribut d'adhérent, cliquez sur 'Ajouter un attribut "
 "adhérent' en haut de la page"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, c-format
 msgid "To add a new alert:"
 msgstr "Pour ajouter une nouvelle alerte sonore :"
@@ -19683,11 +19689,9 @@ msgstr ""
 "\" de la page d'accueil des Acquisitions"
 
 #: intranet-tmpl/prog/en/modules/help/admin/edi_accounts.tt:9
-#, fuzzy, c-format
+#, c-format
 msgid "To add account information, click the 'New account' button."
-msgstr ""
-"Pour créer une nouvelle liste, cliquez sur le bouton 'Nouvelle liste "
-"d'adhérents'"
+msgstr "Pour ajouter un compte, cliquez sur le bouton \"Nouveau compte\"."
 
 #: intranet-tmpl/prog/en/modules/help/members/maninvoice.tt:9
 #, c-format
@@ -19699,11 +19703,9 @@ msgstr ""
 "les à la liste de valeurs autorisées MANUAL_INV."
 
 #: intranet-tmpl/prog/en/modules/help/admin/edi_ean_accounts.tt:7
-#, fuzzy, c-format
+#, c-format
 msgid "To add an EAN, click the 'New EAN' button."
-msgstr ""
-"Pour ajouter un fournisseur, cliquez sur le bouton \"Ajouter un fournisseur"
-"\" de la page d'accueil des Acquisitions"
+msgstr "Pour ajouter un EAN, cliquez sur le bouton \"Nouvel EAN\"."
 
 #: intranet-tmpl/prog/en/modules/help/tools/marc_modification_templates.tt:57
 #, c-format
@@ -19791,8 +19793,8 @@ msgstr ""
 "Pour pouvoir commander auprès d'un fournisseur, vous devez lui donner le "
 "statut \"Actif\"."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
-#, fuzzy, c-format
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
 "up, down, or to the top or bottom of the list."
@@ -19922,7 +19924,7 @@ msgstr ""
 "de l'autorité."
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -20711,7 +20713,7 @@ msgid "Troubleshooting"
 msgstr "Problème"
 
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:42
-#, fuzzy, c-format
+#, c-format
 msgid "Try the -h parameter in order to see the help."
 msgstr "Essayez le paramètre -h pour voir l'aide."
 
@@ -21108,14 +21110,14 @@ msgid "Vendor Contracts"
 msgstr "Contrats"
 
 #: intranet-tmpl/prog/en/modules/help/admin/edi_accounts.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "Vendor EDI accounts"
-msgstr "Contrats"
+msgstr "Comptes EDI du fournisseur"
 
 #: intranet-tmpl/prog/en/modules/help/admin/edi_accounts.tt:7
-#, fuzzy, c-format
+#, c-format
 msgid "Vendor in Acquisitions"
-msgstr "4 = Acquisitions"
+msgstr "Fournisseur dans Acquisitions"
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:13
 #, c-format
@@ -22338,11 +22340,11 @@ msgstr ""
 "radio 'ou créer'. "
 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:57
-#, fuzzy, c-format
+#, c-format
 msgid "You can use Template Toolkit tags in order to build complex CSV files."
 msgstr ""
-"Vous pouvez utiliser des tags du Template Toolkit pour construire CSV des "
-"fichiers complexes."
+"Vous pouvez utiliser des tags du Template Toolkit pour construire des "
+"fichiers CSV complexes."
 
 #: intranet-tmpl/prog/en/modules/help/reports/guided_reports.tt:42
 #, c-format
@@ -22424,7 +22426,7 @@ msgstr ""
 "sauvegarde, simplement en pressant la touche 'Échap'."
 
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:33
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "You want to change the items.ccode=1 to items.ccode=2 for items created 7 "
 "days ago. "
@@ -23319,9 +23321,9 @@ msgid "delete_public_lists "
 msgstr "delete_public_lists "
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:502
-#, fuzzy, c-format
+#, c-format
 msgid "delete_reports "
-msgstr "execute_reports "
+msgstr "delete_reports "
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:323
 #, c-format
@@ -23434,7 +23436,7 @@ msgstr "générer un fil RSS/Atom pour ces nouveaux documents."
 msgid "group_manage "
 msgstr "group_manage "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr "ici"
@@ -23611,6 +23613,12 @@ msgstr "activer l'onglet de prêt avec Alt+R"
 #, c-format
 msgid "jump to the checkout with Alt+U "
 msgstr "activer l'onglet de retour avec Alt+U "
+
+# Traduire le raccourci clavier ?
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:19
+#, c-format
+msgid "jump to the renew tab with Alt+W"
+msgstr "Passer à l'onglet \"Renouveler\" avec Alt+W"
 
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:8
 #, c-format
@@ -23800,7 +23808,7 @@ msgstr "management "
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11

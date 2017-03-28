@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Danish Koha Translation\n"
-"POT-Creation-Date: 2016-12-15 09:24-0300\n"
+"POT-Creation-Date: 2017-03-17 08:12-0300\n"
 "PO-Revision-Date: 2016-04-04 20:21+0000\n"
 "Last-Translator: Poul <poul@wachmann.dk>\n"
 "Language-Team: -\n"
@@ -812,7 +812,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11
@@ -980,7 +980,7 @@ msgstr "-8 =&gt; flag"
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; til fremtidig anvendelse"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
@@ -1955,7 +1955,7 @@ msgstr "Tilføj et budget"
 msgid "Adding a group"
 msgstr "Tilføjer en gruppe"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, fuzzy, c-format
 msgid "Adding a new alert"
 msgstr "Tilføj et budget"
@@ -2766,7 +2766,7 @@ msgstr ""
 "Hvis Du vil cirkelure eksemplaret, skal du mindst udfylde følgende felter "
 "for nye eksemplarer:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -4177,7 +4177,7 @@ msgstr "Klik på 'Betal' ved siden af den bøde, der skal betales delvist"
 msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr "Klik på 'Betal' ved siden af den bøde, der skal betales helt"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, fuzzy, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr "Klik Gem og gem den nye egenskab"
@@ -5108,7 +5108,7 @@ msgstr "Slette et sæt"
 msgid "Deleting Item Types"
 msgstr "Sletter medietyper"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, fuzzy, c-format
 msgid "Deleting alerts"
 msgstr "Sletter eksemplarer"
@@ -5598,14 +5598,14 @@ msgstr "Indtast en titel og beskrivelse for helligdagen."
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "Indtast en længere forklaring under 'Beskrivelse'"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
 "jQuery selectors "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -11174,7 +11174,7 @@ msgstr "Lokalt brug systemindstillinger"
 msgid "Local Use:"
 msgstr "Lokalt brug:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "Locate the \"Add new alert\" form."
 msgstr ""
@@ -11935,6 +11935,11 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:432
 #, c-format
 msgid "Note: Please note that items_batchmod permission is still required"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
@@ -14019,7 +14024,7 @@ msgstr "Se den samlede dokumentation for udlånsstatistik i "
 msgid "See the full documentation for Circulation and Fine Rules in the "
 msgstr "Se den samlede dokumentation for udlåns- og bøderegler i "
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #, c-format
 msgid "See the full documentation for Circulation in the "
 msgstr "Se den samlede dokumentation for udlån i "
@@ -14979,12 +14984,12 @@ msgstr ""
 msgid "Sort field 2 "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -18015,7 +18020,7 @@ msgstr ""
 "Tip: Store biblioteker kan vælge at filtrere rapporten før den kører ved at "
 "sætte indstillingen FilterBeforeOverdueReport til 'Krævet'."
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:21
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:22
 #, c-format
 msgid "Tip: Mac users use the OPTION button in place of ALT"
 msgstr "Tip: Mac brugere, anvender OPTION-tasten istedet for ALT"
@@ -18174,7 +18179,7 @@ msgstr ""
 "For at tilføje en ny lånerattributtype, Klik på 'Ny lånerattributtype' "
 "øverst på siden"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, fuzzy, c-format
 msgid "To add a new alert:"
 msgstr "For at tilføje et nyt bibliotek"
@@ -18386,7 +18391,7 @@ msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr ""
 "For at kunne bestille fra en leverandør skal denne først gøres 'aktiv'."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
@@ -18505,7 +18510,7 @@ msgstr ""
 "knap, der vises, når der er klikket på oversigten over normposten."
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -21791,7 +21796,7 @@ msgstr ""
 msgid "group_manage "
 msgstr "group_manage "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr ""
@@ -21966,6 +21971,11 @@ msgstr "spring til aflevering med Alt+R"
 #, c-format
 msgid "jump to the checkout with Alt+U "
 msgstr "spring til udlån med Alt+U "
+
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:19
+#, fuzzy, c-format
+msgid "jump to the renew tab with Alt+W"
+msgstr "spring til aflevering med Alt+R"
 
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:8
 #, c-format
@@ -22152,7 +22162,7 @@ msgstr "forvaltning "
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11

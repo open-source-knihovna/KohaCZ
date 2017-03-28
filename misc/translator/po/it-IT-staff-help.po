@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Koha Staff\n"
-"POT-Creation-Date: 2016-12-15 10:46-0300\n"
-"PO-Revision-Date: 2016-12-16 15:34+0000\n"
+"POT-Creation-Date: 2017-03-17 08:31-0300\n"
+"PO-Revision-Date: 2017-03-21 14:35+0000\n"
 "Last-Translator: bargioni <bargioni@pusc.it>\n"
 "Language-Team: CILEA <z.tajoli@cineca.it>\n"
 "Language: it\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-POOTLE-MTIME: 1481902458.000000\n"
+"X-POOTLE-MTIME: 1490106916.000000\n"
 "X-Poedit-Basepath: ../../../versioni/master/koha-tmpl\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -847,7 +847,7 @@ msgstr "(! significa 'non visibile' o nel caso di compresso 'non compresso')"
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11
@@ -1020,7 +1020,7 @@ msgstr "-8 =&gt; Spunta"
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Utilizzo futuro"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
@@ -2028,7 +2028,7 @@ msgstr "Aggiungi un budget"
 msgid "Adding a group"
 msgstr "Aggiungi un gruppo"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, c-format
 msgid "Adding a new alert"
 msgstr "Aggiungi un nuovo avviso"
@@ -2516,8 +2516,8 @@ msgid ""
 "'Professional' and their Guarantors additional information will appear on "
 "their record."
 msgstr ""
-"Tutte le informazioni dell'utente apparirano in Dettagli. Questo include "
-"tutti i dati di indirizzo, le note, le prefernze, etc. In caso di utenti di "
+"Tutte le informazioni dell'utente appariranno in Dettagli. Questo include "
+"tutti i dati di indirizzo, le note, le preferenze, etc. In caso di utenti di "
 "tipo 'Bambino' o 'Professionista' verrano mostrate anche le informazioni dei "
 "loro garanti."
 
@@ -2891,7 +2891,7 @@ msgstr ""
 "Infine se pensi di far circolare le copie, i seguenti campi devono essere "
 "specificati per le nuove copie:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -4371,7 +4371,7 @@ msgstr "Premi \"Paga\" accanto alla multa che vuoi pagare parzialmente"
 msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr "Premi \"Paga\" accanto alla multa che vuoi conciliare"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr "Premi 'Salva avviso' ed è fatta!"
@@ -5337,7 +5337,7 @@ msgstr "Cancellare liste pubbliche"
 msgid "Deleting Item Types"
 msgstr "Cancellare tipi di copie"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, c-format
 msgid "Deleting alerts"
 msgstr "Cancella avvisi"
@@ -5837,7 +5837,7 @@ msgstr "Inserisci un nome per la lista e salvala."
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "Inserisci una spiegazione più lunga in 'Descrizione'"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
@@ -5846,7 +5846,7 @@ msgstr ""
 "Inserisci un selettore nell'input \"selettore\", nel caso vai a vedere la "
 "documentazione sui selettori jQuery"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -7936,7 +7936,7 @@ msgid ""
 "preference values"
 msgstr ""
 "Se non sono stati inseriti valori in questi campi, allora saranno usate le "
-"prefernze di sistema OPACSerialIssueDisplayCount e "
+"preferenze di sistema OPACSerialIssueDisplayCount e "
 "StaffSerialIssueDisplayCount"
 
 #: intranet-tmpl/prog/en/modules/help/members/discharge.tt:15
@@ -11738,7 +11738,7 @@ msgstr "Preferenze di sistema locali"
 msgid "Local Use:"
 msgstr "Uso locale:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "Locate the \"Add new alert\" form."
 msgstr "Trova il form \"Aggiungi un nuovo avviso\""
@@ -12561,6 +12561,12 @@ msgstr ""
 msgid "Note: Please note that items_batchmod permission is still required"
 msgstr ""
 "Nota: Considera che il permesso items_batchmod continua ad essere richiesto"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
+msgstr ""
+"Nota: usa la preferenza di sistema 'AudioAlerts' per dis/attivare i suoni."
 
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
 #, c-format
@@ -14747,7 +14753,7 @@ msgid "See the full documentation for Circulation and Fine Rules in the "
 msgstr ""
 "Vedi la documentazione completa per le regole per i prestiti e le multe nel "
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #, c-format
 msgid "See the full documentation for Circulation in the "
 msgstr "Vedi la documentazione completa per la Circolazione nel "
@@ -15754,12 +15760,12 @@ msgstr "Ordina per il campo 1 "
 msgid "Sort field 2 "
 msgstr "Ordina per il campo 2 "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr "Precedenza tra i suoni"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -18992,7 +18998,7 @@ msgstr ""
 "prima dell'esecuzione mettendo il valore della preferenza di sistema "
 "FilterBeforeOverdueReport a 'Richiesto'"
 
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:21
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:22
 #, c-format
 msgid "Tip: Mac users use the OPTION button in place of ALT"
 msgstr ""
@@ -19163,7 +19169,7 @@ msgstr ""
 "Per aggiungere un nuovo Attributo Utente, clicca 'Nuovo tipo attributo "
 "utente'"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, c-format
 msgid "To add a new alert:"
 msgstr "Per aggiungere un nuovo avviso"
@@ -19390,7 +19396,7 @@ msgstr ""
 msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr "Per ordinare da un fornitore, devi prima renderlo attivo."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
@@ -19522,7 +19528,7 @@ msgstr ""
 "all'interno della pagina del record intero."
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -22972,7 +22978,7 @@ msgstr "ottenere un feed RSS / Atom su questi nuove copie."
 msgid "group_manage "
 msgstr "Gestisci ordini e raccoglitori raggruppati "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr "qui"
@@ -23156,6 +23162,12 @@ msgstr "vai alla restituzione prestiti con alt+R"
 #, c-format
 msgid "jump to the checkout with Alt+U "
 msgstr "vai ai prestiti con alt+U "
+
+# Windows only?
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:19
+#, c-format
+msgid "jump to the renew tab with Alt+W"
+msgstr "vai al tab rinnovo con Alt+W"
 
 #: intranet-tmpl/prog/en/modules/help/tools/automatic_item_modification_by_age.tt:8
 #, c-format
@@ -23345,7 +23357,7 @@ msgstr "management "
 #: intranet-tmpl/prog/en/modules/help/circ/pendingreserves.tt:9
 #: intranet-tmpl/prog/en/modules/help/circ/transferstoreceive.tt:11
 #: intranet-tmpl/prog/en/modules/help/circ/branchoverdues.tt:11
-#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:23
+#: intranet-tmpl/prog/en/modules/help/circ/circulation-home.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/overdue.tt:14
 #: intranet-tmpl/prog/en/modules/help/circ/branchtransfers.tt:24
 #: intranet-tmpl/prog/en/modules/help/circ/renew.tt:11

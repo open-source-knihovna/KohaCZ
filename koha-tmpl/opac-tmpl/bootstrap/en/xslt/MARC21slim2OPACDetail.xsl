@@ -136,11 +136,11 @@
                             <xsl:choose>
                                 <xsl:when test="@code='h'">
                                     <!--  13381 Span class around subfield h so it can be suppressed via css -->
-                                    <span class="title_medium"><xsl:apply-templates/> </span>
+                                    <span class="title_medium"><xsl:apply-templates/> <xsl:text> </xsl:text> </span>
                                 </xsl:when>
                                 <xsl:when test="@code='c'">
                                     <!--  13381 Span class around subfield c so it can be suppressed via css -->
-                                    <span class="title_resp_stmt"><xsl:apply-templates/> </span>
+                                    <span class="title_resp_stmt"><xsl:apply-templates/> <xsl:text> </xsl:text> </span>
                                 </xsl:when>
                                 <xsl:otherwise>
                                     <xsl:apply-templates/>
@@ -927,6 +927,7 @@
         <xsl:for-each select="marc:datafield[@tag=583]">
             <xsl:if test="@ind1=1 or @ind1=' '">
             <span class="results_summary actionnote">
+                <span class="label">Action note: </span>
                 <xsl:choose>
                 <xsl:when test="marc:subfield[@code='z']">
                     <xsl:value-of select="marc:subfield[@code='z']"/>

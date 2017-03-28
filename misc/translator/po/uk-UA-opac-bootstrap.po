@@ -9,19 +9,19 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: uk-UA-i-staff-t-prog-v-3002000\n"
-"POT-Creation-Date: 2016-12-15 13:19-0300\n"
-"PO-Revision-Date: 2016-12-21 11:00+0000\n"
+"POT-Creation-Date: 2017-03-17 09:03-0300\n"
+"PO-Revision-Date: 2017-02-17 14:23+0000\n"
 "Last-Translator: Serhij <dubyk@ukr.net>\n"
 "Language-Team: Ukrainian Linux Team <translation@linux.org.ua>\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Pootle 2.5.1.1\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-POOTLE-MTIME: 1482318036.000000\n"
+"X-POOTLE-MTIME: 1487341430.000000\n"
 
 #. %1$s:  IF debarred_comment.search('OVERDUES_PROCESS') 
 #. %2$s:  debarred_comment.remove('OVERDUES_PROCESS ') | html_line_break 
@@ -140,9 +140,9 @@ msgstr ""
 #. %3$s:  IF ( RESERVE.is_in_transit ) 
 #. %4$s:  SET transfer = RESERVE.item.get_transfer 
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:622
-#, fuzzy, c-format
+#, c-format
 msgid "%s %s %s %s Item in transit from "
-msgstr "%s %s %s Примірник в дорозі від: "
+msgstr "%s %s %s %s Примірник на переміщенні від: "
 
 #. %1$s:  END 
 #. %2$s:  IF ( subscription_LOO.letter ) 
@@ -355,9 +355,9 @@ msgstr "%s %s / "
 #. %3$s:  i.author | html 
 #. %4$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-shelves-rss.tt:12
-#, fuzzy, c-format
+#, c-format
 msgid "%s %s by %s %s "
-msgstr "%s %s / %s %s "
+msgstr "%s %s за %s %s "
 
 #. %1$s:  ELSE 
 #. %2$s:  IF ( review.borrowernumber && ShowReviewer != "none" ) 
@@ -844,12 +844,12 @@ msgstr "%s Інший телефон:"
 #. %8$s:  IF PasswordContainsTrailingSpaces 
 #. %9$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-passwd.tt:31
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "%s Passwords do not match. Please re-type your new password. %s %s Your new "
 "password must be at least %s characters long. %s %s Your current password "
 "was entered incorrectly. If this problem persists, please ask a librarian to "
-"re-set your password for you. %s %s Your password contains leading and/or "
+"reset your password for you. %s %s Your password contains leading and/or "
 "trailing spaces. %s "
 msgstr ""
 "%s Паролі не збігаються. Будь ласка, ще раз введіть новий пароль. %s %s Ваш "
@@ -978,7 +978,7 @@ msgstr "%s Система самообслуговування"
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:796
 #, c-format
 msgid "%s State:"
-msgstr "%s Область/штат/провінція: "
+msgstr "%s Область, район: "
 
 #. %1$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:381
@@ -1007,7 +1007,7 @@ msgstr "%s Показувати міток від інших користува�
 #: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:60
 #, c-format
 msgid "%s The passwords do not match. %s Your chosen password is too short. "
-msgstr ""
+msgstr "%s Паролі не збігаються. %s Ваш пароль занадто короткий. "
 
 #. %1$s:  IF error 
 #. %2$s:  ELSE 
@@ -1270,9 +1270,9 @@ msgstr "%s / "
 #. %3$s:  END 
 #. %4$s:  END # /IF MY_TAG.XSLTBloc 
 #: opac-tmpl/bootstrap/en/modules/opac-tags.tt:144
-#, fuzzy, c-format
+#, c-format
 msgid "%s by %s %s %s "
-msgstr "%s %s %s %s (%s)"
+msgstr "%s за %s %s %s "
 
 #. %1$s:  IF ( XISBN.author ) 
 #. %2$s:  XISBN.author |html 
@@ -1470,7 +1470,7 @@ msgstr "%s%s%sКоха %s &rsaquo; Довідка з самообслугову�
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:3
 #, c-format
 msgid "%s%s%sKoha online%s catalog"
-msgstr "%s%s%sКоха Електронний%s каталог"
+msgstr "%s%s%s Коха %s &rsaquo; Електронний каталог"
 
 #. %1$s:  IF ( LibraryNameTitle ) 
 #. %2$s:  LibraryNameTitle 
@@ -1521,13 +1521,13 @@ msgstr ""
 #. %6$s:  ELSE 
 #. %7$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s%s%sKoha online%s catalog &rsaquo; %s Log in to your account %s Catalog "
 "login disabled %s"
 msgstr ""
-"%s %s %s%s%sКоха %s &rsaquo; Електронний каталог &rsaquo; %s Вхід у Ваш "
-"обліковий запис %s Вхід у каталог вимкнуто %s %s %s%s "
+"%s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; %s Вхід у Ваш обліковий "
+"запис %s Вхід у каталог вимкнуто %s "
 
 #. For the first occurrence,
 #. %1$s:  IF ( LibraryNameTitle ) 
@@ -1580,11 +1580,11 @@ msgstr ""
 #. %7$s:  ELSE 
 #. %8$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:8
-#, fuzzy, c-format
+#, c-format
 msgid "%s%s%sKoha online%s catalog &rsaquo; %sContents of %s%sYour lists%s"
 msgstr ""
-"%s %s %s %s%s%s%sКоха %s &rsaquo; Електронний каталог &rsaquo; %s Вміст "
-"списку „%s“%s Мої списки %s%s %s%s "
+"%s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; %s Вміст списку „%s“%s "
+"Мої списки %s"
 
 #. %1$s:  IF ( LibraryNameTitle ) 
 #. %2$s:  LibraryNameTitle 
@@ -1627,36 +1627,34 @@ msgstr ""
 #. %6$s:  ELSE 
 #. %7$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:8
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s%s%sKoha online%s catalog &rsaquo; %sUpdate your personal details"
 "%sRegister a new account%s"
 msgstr ""
-"%s %s %s %s %s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; %s "
-"Оновлення Ваших персональних даних %s Реєстрація нового облікового запису %s "
-"%s %s %s "
+"%s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; %s Оновлення Ваших "
+"персональних даних %s Реєстрація нового облікового запису %s"
 
 #. %1$s:  IF ( LibraryNameTitle ) 
 #. %2$s:  LibraryNameTitle 
 #. %3$s:  ELSE 
 #. %4$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-addbybiblionumber.tt:2
-#, fuzzy, c-format
+#, c-format
 msgid "%s%s%sKoha online%s catalog &rsaquo; Add to your list"
 msgstr ""
-"%s %s%s%s Коха &rsaquo; %s Електронний каталог &rsaquo; Додавання до Вашого "
-"списку  %s %s%s "
+"%s%s%s Коха &rsaquo; %s Електронний каталог &rsaquo; Додавання до Вашого "
+"списку "
 
 #. %1$s:  IF ( LibraryNameTitle ) 
 #. %2$s:  LibraryNameTitle 
 #. %3$s:  ELSE 
 #. %4$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:4
-#, fuzzy, c-format
+#, c-format
 msgid "%s%s%sKoha online%s catalog &rsaquo; Advanced search"
 msgstr ""
-"%s %s %s%s%sКоха %s &rsaquo; Електронний каталог &rsaquo; Детальніший пошук "
-"%s  %s%s "
+"%s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; Детальніший пошук "
 
 #. %1$s:  IF ( LibraryNameTitle ) 
 #. %2$s:  LibraryNameTitle 
@@ -1687,34 +1685,32 @@ msgstr ""
 #. %7$s:  authtypetext 
 #. %8$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-auth-detail.tt:4
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "%s%s%sKoha online%s catalog &rsaquo; Authority search &rsaquo; %s%s (%s)%s"
 msgstr ""
-"%s %s %s%s%s%sКоха %s &rsaquo; Електронний каталог &rsaquo; Пошук серед "
-"авторитетних джерел &rsaquo; %s%s (%s)%s %s %s%s "
+"%s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; Пошук серед "
+"авторитетних джерел &rsaquo; %s%s (%s)%s"
 
 #. %1$s:  IF ( LibraryNameTitle ) 
 #. %2$s:  LibraryNameTitle 
 #. %3$s:  ELSE 
 #. %4$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-browser.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "%s%s%sKoha online%s catalog &rsaquo; Browse our catalog"
 msgstr ""
-"%s %s %s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; Огляд нашого "
-"каталогу %s  %s%s "
+"%s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; Огляд нашого каталогу"
 
 #. %1$s:  IF ( LibraryNameTitle ) 
 #. %2$s:  LibraryNameTitle 
 #. %3$s:  ELSE 
 #. %4$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-passwd.tt:3
-#, fuzzy, c-format
+#, c-format
 msgid "%s%s%sKoha online%s catalog &rsaquo; Change your password"
 msgstr ""
-"%s %s%s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; Зміна Вашого "
-"паролю %s %s%s "
+"%s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; Зміна Вашого паролю"
 
 #. %1$s:  IF ( LibraryNameTitle ) 
 #. %2$s:  LibraryNameTitle 
@@ -1722,10 +1718,10 @@ msgstr ""
 #. %4$s:  END 
 #. %5$s:  title |html 
 #: opac-tmpl/bootstrap/en/modules/opac-review.tt:2
-#, fuzzy, c-format
+#, c-format
 msgid "%s%s%sKoha online%s catalog &rsaquo; Comments on %s"
 msgstr ""
-"%s %s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; Коментарі щодо „%s“ "
+"%s%s%s Коха %s &rsaquo; Електронний каталог &rsaquo; Коментарі щодо „%s“ "
 
 #. %1$s:  IF ( LibraryNameTitle ) 
 #. %2$s:  LibraryNameTitle 
@@ -4394,9 +4390,10 @@ msgstr "Ваш пароль повинен складатися з не менш
 #. %1$s:  minlength_cardnumber 
 #. %2$s:  maxlength_cardnumber 
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:147
-#, fuzzy, c-format
+#, c-format
 msgid "Card number must be between %s and %s characters."
-msgstr "Ваш пароль повинен складатися з не менше аніж %s символів."
+msgstr ""
+"Номер читацького квитка повинен перебувати в діапазоні від %s до %s символів."
 
 #. %1$s:  minlength_cardnumber 
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:143
@@ -4586,7 +4583,7 @@ msgstr "Очистити дату для призупинення на неви�
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:48
 #, c-format
 msgid "Click here if you're not %s %s"
-msgstr "Клацніть тут якщо Ви не %s %s"
+msgstr "Клацніть тут, якщо Ви не %s %s."
 
 #: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:119
 #, fuzzy, c-format
@@ -5421,9 +5418,8 @@ msgstr "Помилка № %s"
 
 #. SCRIPT
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:595
-#, fuzzy
 msgid "Error searching OpenLibrary collection"
-msgstr "Помилка при пошуку у зібранні на OverDrive "
+msgstr "Помилка при пошуку у зібраннях OpenLibrary"
 
 #. SCRIPT
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:595
@@ -7821,17 +7817,17 @@ msgid "Online resources:"
 msgstr "Ресурси он-лайн: "
 
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:39
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Only certain fields (marked in red) are required, but the more information "
 "you enter the easier it will be for the librarians to find the title you're "
 "requesting. The \"Notes\" field can be used to provide any additional "
 "information."
 msgstr ""
-"Лише заголовок є обов’язковим, однак чим більш докладну інформацію Ви "
-"надасте, тим легше буде бібліотекарям відшукати заголовок, про який Ви "
-"запитуєте. Поле „Нотатки“ може бути використане для надання будь-якої "
-"додаткової інформації."
+"Тільки деякі поля (відмічені червоним кольором) є обов’язковими, однак чим "
+"більш докладну інформацію Ви надасте, тим легше буде бібліотекарям відшукати "
+"заголовок, про який Ви запитуєте. Поле „Нотатки“ може бути використане для "
+"надання будь-якої додаткової інформації."
 
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:237
 #, c-format
@@ -8204,14 +8200,14 @@ msgid "Please enter your card number:"
 msgstr "Будь ласка, введіть номер Вашого квитка:"
 
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:38
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Please fill out this form to make a purchase suggestion. You will receive an "
 "email when the library processes your suggestion."
 msgstr ""
 "Будь ласка, заповніть цю форму, щоб запропонувати для бібліотеки нове "
-"надбання. Ви будете проінформовані поштою, коли бібліотека розгляне Вашу "
-"пропозицію."
+"надбання. Ви будете проінформовані електронною поштою, коли бібліотека "
+"розгляне Вашу пропозицію."
 
 #: opac-tmpl/bootstrap/en/modules/errors/errorpage.tt:61
 #, c-format
@@ -9109,7 +9105,7 @@ msgstr "Search "
 
 #. %1$s:  UNLESS ( Koha.Preference( 'OpacAddMastheadLibraryPulldown' ) == 1 ) 
 #. %2$s:  IF ( mylibraryfirst ) 
-#. %3$s:  mylibraryfirst 
+#. %3$s:  Branches.GetName( mylibraryfirst ) 
 #. %4$s:  END 
 #. %5$s:  END 
 #: opac-tmpl/bootstrap/en/includes/masthead.inc:159
@@ -9173,9 +9169,8 @@ msgstr "SearchCourseReserves "
 
 #. SCRIPT
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:595
-#, fuzzy
 msgid "Searching Open Library..."
-msgstr "Шукаємо на OverDrive…"
+msgstr "Шукаємо на Open Library…"
 
 #. For the first occurrence,
 #. SCRIPT
@@ -10834,7 +10829,7 @@ msgid "URL(s)"
 msgstr "URL-посилання"
 
 #. For the first occurrence,
-#. %1$s:  BIBLIO_RESULT.url |url 
+#. %1$s:  BIBLIO_RESULT.url 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:135
 #: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:128
 #, c-format
@@ -11916,6 +11911,9 @@ msgid ""
 "OpenLibrarySearch && ( bib.normalized_isbn || bib.lccn || bib."
 "normalized_oclc ) %%] "
 msgstr ""
+"[%%# Input params: bib - search result biblio record %%] [%% IF "
+"OpenLibrarySearch && ( bib.normalized_isbn || bib.lccn || bib."
+"normalized_oclc ) %%] "
 
 #. SCRIPT
 #: opac-tmpl/bootstrap/en/includes/datatables.inc:2
@@ -12192,9 +12190,8 @@ msgstr "ilsdi.pl?service=RenewLoan&amp;patron_id=1&amp;item_id=1 "
 
 #. SCRIPT
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:595
-#, fuzzy
 msgid "in OpenLibrary collection"
-msgstr " у зібранні на OverDrive "
+msgstr " у зібраннях OpenLibrary"
 
 #. SCRIPT
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:595
@@ -12381,7 +12378,7 @@ msgstr ""
 #. SCRIPT
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:595
 msgid "results"
-msgstr " результатів"
+msgstr " результат(и/ів)"
 
 #. SCRIPT
 #: opac-tmpl/bootstrap/en/modules/opac-overdrive-search.tt:62
