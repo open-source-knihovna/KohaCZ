@@ -669,46 +669,28 @@ sub AddAuthority {
     $record->add_fields($auth_type_tag,'','', $auth_type_subfield=>$authtypecode); 
   }
 
-  my $auth_exists=0;
-  my $oldRecord;
-  if (!$authid) {
-    my $sth=$dbh->prepare("select max(authid) from auth_header");
-    $sth->execute;
-    ($authid)=$sth->fetchrow;
-    $authid=$authid+1;
-  ##Insert the recordID in MARC record 
-    unless ($record->field('001') && $record->field('001')->data() eq $authid){
-        $record->delete_field($record->field('001'));
-        $record->insert_fields_ordered(MARC::Field->new('001',$authid));
+    # Save record into auth_header, update 001
+    if (!$authid ) {
+        # Save a blank record, get authid
+        $dbh->do( "INSERT INTO auth_header (datecreated,marcxml) values (NOW(),?)", undef, '' );
+        $authid = $dbh->last_insert_id( undef, undef, 'auth_header', 'authid' );
+        logaction( "AUTHORITIES", "ADD", $authid, "authority" ) if C4::Context->preference("AuthoritiesLog");
     }
-  } else {
-    $auth_exists=$dbh->do(qq(select authid from auth_header where authid=?),undef,$authid);
-#     warn "auth_exists = $auth_exists";
-  }
-  if ($auth_exists>0){
-      $oldRecord=GetAuthority($authid);
-      $record->add_fields('001',$authid) unless ($record->field('001'));
-#       warn "\n\n\n enregistrement".$record->as_formatted;
-      my $sth=$dbh->prepare("update auth_header set authtypecode=?,marc=?,marcxml=? where authid=?");
-      $sth->execute($authtypecode,$record->as_usmarc,$record->as_xml_record($format),$authid) or die $sth->errstr;
-      $sth->finish;
-  }
-  else {
-    my $sth=$dbh->prepare("insert into auth_header (authid,datecreated,authtypecode,marc,marcxml) values (?,now(),?,?,?)");
-    $sth->execute($authid,$authtypecode,$record->as_usmarc,$record->as_xml_record($format));
-    $sth->finish;
-    logaction( "AUTHORITIES", "ADD", $authid, "authority" ) if C4::Context->preference("AuthoritiesLog");
-  }
-  ModZebra($authid,'specialUpdate',"authorityserver",$oldRecord,$record);
-  return ($authid);
-}
+    # Insert/update the recordID in MARC record
+    $record->delete_field( $record->field('001') );
+    $record->insert_fields_ordered( MARC::Field->new( '001', $authid ) );
+    # Update
+    $dbh->do( "UPDATE auth_header SET authtypecode=?, marc=?, marcxml=? WHERE authid=?", undef, $authtypecode, $record->as_usmarc, $record->as_xml_record($format), $authid ) or die $DBI::errstr;
+    ModZebra( $authid, 'specialUpdate', 'authorityserver', $record );
 
+    return ( $authid );
+}
 
 =head2 DelAuthority
 
-  $authid= &DelAuthority($authid)
+    DelAuthority( $authid )
 
-Deletes $authid
+Deletes $authid and calls merge to cleanup in linked biblio records
 
 =cut
 
@@ -716,10 +698,16 @@ sub DelAuthority {
     my ($authid) = @_;
     my $dbh=C4::Context->dbh;
 
+    unless( C4::Context->preference('dontmerge') eq '1' ) {
+        &merge( $authid, GetAuthority($authid) );
+    } else {
+        # save a record in need_merge_authorities table
+        my $sqlinsert="INSERT INTO need_merge_authorities (authid, done) VALUES (?,?)";
+        $dbh->do( $sqlinsert, undef, $authid, 0 );
+    }
+    $dbh->do( "DELETE FROM auth_header WHERE authid=?", undef, $authid );
     logaction( "AUTHORITIES", "DELETE", $authid, "authority" ) if C4::Context->preference("AuthoritiesLog");
-    ModZebra($authid,"recordDelete","authorityserver",GetAuthority($authid),undef);
-    my $sth = $dbh->prepare("DELETE FROM auth_header WHERE authid=?");
-    $sth->execute($authid);
+    ModZebra( $authid, "recordDelete", "authorityserver", undef);
 }
 
 =head2 ModAuthority
@@ -1368,6 +1356,7 @@ sub _get_authid_subfield{
     my ($field)=@_;
     return $field->subfield('9')||$field->subfield('3');
 }
+
 =head2 GetHeaderAuthority
 
   $ref= &GetHeaderAuthority( $authid)
@@ -1405,32 +1394,36 @@ sub AddAuthorityTrees{
 
 =head2 merge
 
-  $ref= &merge(mergefrom,$MARCfrom,$mergeto,$MARCto)
+  $count = merge ( mergefrom, $MARCfrom, [$mergeto, $MARCto] )
 
-Could add some feature : Migrating from a typecode to an other for instance.
-Then we should add some new parameter : bibliotargettag, authtargettag
+Merge biblios linked to authority $mergefrom.
+If $mergeto equals mergefrom, the linked biblio field is updated.
+If $mergeto is different, the biblio field will be linked to $mergeto.
+If $mergeto is missing, the biblio field is deleted.
+
+Note: Although $mergefrom and $mergeto will normally be of the same
+authority type, merge also supports moving to another authority type.
 
 =cut
 
 sub merge {
     my ($mergefrom,$MARCfrom,$mergeto,$MARCto) = @_;
+    return 0 unless $mergefrom > 0; # prevent abuse
     my ($counteditedbiblio,$countunmodifiedbiblio,$counterrors)=(0,0,0);        
     my $dbh=C4::Context->dbh;
     my $authfrom = Koha::Authorities->find($mergefrom);
     my $authto = Koha::Authorities->find($mergeto);
-    my $authtypefrom = Koha::Authority::Types->find($authfrom->authtypecode);
-    my $authtypeto   = Koha::Authority::Types->find($authto->authtypecode);
+    my $authtypefrom = $authfrom ? Koha::Authority::Types->find($authfrom->authtypecode) : undef;
+    my $authtypeto   = $authto ? Koha::Authority::Types->find($authto->authtypecode) : undef;
 
-    return "error MARCFROM not a marcrecord ".Data::Dumper::Dumper($MARCfrom) if scalar($MARCfrom->fields()) == 0;
-    return "error MARCTO not a marcrecord".Data::Dumper::Dumper($MARCto) if scalar($MARCto->fields()) == 0;
     # search the tag to report
-    my $auth_tag_to_report_from = $authtypefrom->auth_tag_to_report;
-    my $auth_tag_to_report_to   = $authtypeto->auth_tag_to_report;
+    my $auth_tag_to_report_from = $authtypefrom ? $authtypefrom->auth_tag_to_report : '';
+    my $auth_tag_to_report_to   = $authtypeto ? $authtypeto->auth_tag_to_report : '';
 
     my @record_to;
-    @record_to = $MARCto->field($auth_tag_to_report_to)->subfields() if $MARCto->field($auth_tag_to_report_to);
+    @record_to = $MARCto->field($auth_tag_to_report_to)->subfields() if $auth_tag_to_report_to && $MARCto && $MARCto->field($auth_tag_to_report_to);
     my @record_from;
-    @record_from = $MARCfrom->field($auth_tag_to_report_from)->subfields() if $MARCfrom->field($auth_tag_to_report_from);
+    @record_from = $MARCfrom->field($auth_tag_to_report_from)->subfields() if $auth_tag_to_report_from && $MARCfrom && $MARCfrom->field($auth_tag_to_report_from);
     
     my @reccache;
     # search all biblio tags using this authority.
@@ -1463,10 +1456,11 @@ sub merge {
     $oResult->destroy();
     # Get All candidate Tags for the change 
     # (This will reduce the search scope in marc records).
+    # For a deleted authority record, we scan all auth controlled fields
     my $sql = "SELECT DISTINCT tagfield FROM marc_subfield_structure WHERE authtypecode=?";
-    my $tags_using_authtype = $dbh->selectcol_arrayref( $sql, undef, ( $authtypefrom->authtypecode ));
+    my $tags_using_authtype = $authtypefrom ? $dbh->selectcol_arrayref( $sql, undef, ( $authtypefrom->authtypecode )) : $dbh->selectcol_arrayref( "SELECT DISTINCT tagfield FROM marc_subfield_structure WHERE authtypecode IS NOT NULL AND authtypecode<>''" );
     my $tags_new;
-    if ($authtypeto->authtypecode ne $authtypefrom->authtypecode){
+    if( $authtypefrom && $authtypeto && $authtypeto->authtypecode ne $authtypefrom->authtypecode ) {
         $tags_new = $dbh->selectcol_arrayref( $sql, undef, ( $authtypeto->authtypecode ));
     }  
 
@@ -1489,8 +1483,9 @@ sub merge {
                 my $tag         = $field->tag();
                 next if !defined($auth_number) || $auth_number ne $mergefrom;
                 $countfrom++;
-                if ( $overwrite && $countfrom > 1 ) {
-                    # remove this duplicate in strict mode
+                if ( !$mergeto || ( $overwrite && $countfrom > 1 ) ) {
+                    # if mergeto is missing, this indicates a delete
+                    # Or: remove this duplicate in strict mode
                     $marcrecord->delete_field($field);
                     $update = 1;
                     next;

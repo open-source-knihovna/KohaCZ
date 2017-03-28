@@ -54,7 +54,7 @@ sub new {
 This will return a list of all available plugins, optionally limited by
 method or metadata value.
 
-    my @plugins = C4::Plugins::GetPlugins({
+    my @plugins = Koha::Plugins::GetPlugins({
         method => 'some_method',
         metadata => { some_key => 'some_value' },
     });
@@ -86,6 +86,8 @@ sub GetPlugins {
                 and %$req_metadata
                 and any { !$plugin_metadata->{$_} || $plugin_metadata->{$_} ne $req_metadata->{$_} } keys %$req_metadata;
             push @plugins, $plugin;
+        } else {
+            warn $Module::Load::Conditional::ERROR;
         }
     }
     return @plugins;

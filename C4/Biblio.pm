@@ -431,6 +431,7 @@ sub DelBiblio {
         return $error if $error;
     }
 
+
     # delete biblio from Koha tables and save in deletedbiblio
     # must do this *after* _koha_delete_biblioitems, otherwise
     # delete cascade will prevent deletedbiblioitems rows
@@ -1052,6 +1053,7 @@ sub GetBiblioItemInfosOf {
 
     my $biblioitemnumber_values = @biblioitemnumbers ? join( ',', @biblioitemnumbers ) : "''";
 
+    my $dbh = C4::Context->dbh;
     my $query = "
         SELECT biblioitemnumber,
             publicationyear,
@@ -1059,7 +1061,7 @@ sub GetBiblioItemInfosOf {
         FROM biblioitems
         WHERE biblioitemnumber IN ($biblioitemnumber_values)
     ";
-    return get_infos_of( $query, 'biblioitemnumber' );
+    return $dbh->selectall_hashref($query, 'biblioitemnumber');
 }
 
 =head1 FUNCTIONS FOR HANDLING MARC MANAGEMENT
@@ -3359,6 +3361,8 @@ sub _koha_delete_biblio {
     my $sth = $dbh->prepare("SELECT * FROM biblio WHERE biblionumber=?");
     $sth->execute($biblionumber);
 
+    # FIXME There is a transaction in _koha_delete_biblio_metadata
+    # But actually all the following should be done inside a single transaction
     if ( my $data = $sth->fetchrow_hashref ) {
 
         # save the record in deletedbiblio
@@ -3375,6 +3379,8 @@ sub _koha_delete_biblio {
         my $bkup_sth = $dbh->prepare($query);
         $bkup_sth->execute(@bind);
         $bkup_sth->finish;
+
+        _koha_delete_biblio_metadata( $biblionumber );
 
         # delete the biblio
         my $sth2 = $dbh->prepare("DELETE FROM biblio WHERE biblionumber=?");
@@ -3435,6 +3441,31 @@ sub _koha_delete_biblioitems {
     }
     $sth->finish;
     return;
+}
+
+=head2 _koha_delete_biblio_metadata
+
+  $error = _koha_delete_biblio_metadata($biblionumber);
+
+C<$biblionumber> - the biblionumber of the biblio metadata to be deleted
+
+=cut
+
+sub _koha_delete_biblio_metadata {
+    my ($biblionumber) = @_;
+
+    my $dbh    = C4::Context->dbh;
+    my $schema = Koha::Database->new->schema;
+    $schema->txn_do(
+        sub {
+            $dbh->do( q|
+                INSERT INTO deletedbiblio_metadata (biblionumber, format, marcflavour, metadata)
+                SELECT biblionumber, format, marcflavour, metadata FROM biblio_metadata WHERE biblionumber=?
+            |,  undef, $biblionumber );
+            $dbh->do( q|DELETE FROM biblio_metadata WHERE biblionumber=?|,
+                undef, $biblionumber );
+        }
+    );
 }
 
 =head1 UNEXPORTED FUNCTIONS

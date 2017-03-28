@@ -130,10 +130,11 @@ if ( $op eq 'delete_confirm' ) {
         my @cannotdelbiblios ;
         foreach my $myorder (@orders){
             my $biblionumber = $myorder->{'biblionumber'};
+            my $biblio = Koha::Biblios->find( $biblionumber );
             my $countbiblio = CountBiblioInOrders($biblionumber);
             my $ordernumber = $myorder->{'ordernumber'};
             my $subscriptions = scalar GetSubscriptionsId ($biblionumber);
-            my $itemcount = GetItemsCount($biblionumber);
+            my $itemcount = $biblio->items->count;
             my $error;
             if ($countbiblio == 0 && $itemcount == 0 && $subscriptions == 0) {
                 $error = DelBiblio($myorder->{biblionumber}) }
@@ -156,7 +157,11 @@ if ( $op eq 'delete_confirm' ) {
     }
  # delete the basket
     DelBasket($basketno,);
-    $template->param( delete_confirmed => 1 );
+    $template->param(
+        delete_confirmed => 1,
+        name => $bookseller->name,
+        booksellerid => $booksellerid,
+    );
 } elsif ( !$bookseller ) {
     $template->param( NO_BOOKSELLER => 1 );
 } elsif ($op eq 'export') {
@@ -468,7 +473,7 @@ sub get_order_infos {
     my $countbiblio = CountBiblioInOrders($biblionumber);
     my $ordernumber = $order->{'ordernumber'};
     my @subscriptions = GetSubscriptionsId ($biblionumber);
-    my $itemcount = GetItemsCount($biblionumber);
+    my $itemcount   = $biblio->items->count;
     my $holds_count = $biblio->holds->count;
     my @items = GetItemnumbersFromOrder( $ordernumber );
     my $itemholds;

@@ -17,12 +17,14 @@
 
 use Modern::Perl;
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 use Test::Warn;
 
 use C4::Context;
 use Koha::Database;
 use Koha::DateUtils qw( dt_from_string );
+
+use Scalar::Util qw( isvstring );
 
 use t::lib::TestBuilder;
 
@@ -31,14 +33,17 @@ BEGIN {
     use_ok('Koha::Patron');
 }
 
-my $schema = Koha::Database->new->schema;
-$schema->storage->txn_begin;
-
-my $categorycode = $schema->resultset('Category')->first()->categorycode();
-my $branchcode = $schema->resultset('Branch')->first()->branchcode();
+my $schema  = Koha::Database->new->schema;
+my $builder = t::lib::TestBuilder->new();
 
 subtest 'is_changed' => sub {
     plan tests => 6;
+
+    $schema->storage->txn_begin;
+
+    my $categorycode = $builder->build({ source => 'Category' })->{categorycode};
+    my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
+
     my $object = Koha::Patron->new();
     $object->categorycode( $categorycode );
     $object->branchcode( $branchcode );
@@ -57,10 +62,18 @@ subtest 'is_changed' => sub {
     is( $object->is_changed(), 1, "Object is changed after Set" );
     $object->store();
     is( $object->is_changed(), 0, "Object no longer marked as changed after being stored" );
+
+    $schema->storage->txn_rollback;
 };
 
 subtest 'in_storage' => sub {
     plan tests => 6;
+
+    $schema->storage->txn_begin;
+
+    my $categorycode = $builder->build({ source => 'Category' })->{categorycode};
+    my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
+
     my $object = Koha::Patron->new();
     is( $object->in_storage, 0, "Object is not in storage" );
     $object->categorycode( $categorycode );
@@ -79,23 +92,43 @@ subtest 'in_storage' => sub {
     $patron = $schema->resultset('Borrower')->find( $borrowernumber );
     ok( ! $patron, "Object no longer found in database" );
     is( $object->in_storage, 0, "Object is not in storage" );
+
+    $schema->storage->txn_rollback;
 };
 
 subtest 'id' => sub {
     plan tests => 1;
+
+    $schema->storage->txn_begin;
+
+    my $categorycode = $builder->build({ source => 'Category' })->{categorycode};
+    my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
+
     my $patron = Koha::Patron->new({categorycode => $categorycode, branchcode => $branchcode })->store;
     is( $patron->id, $patron->borrowernumber );
+
+    $schema->storage->txn_rollback;
 };
 
 subtest 'get_column' => sub {
     plan tests => 1;
+
+    $schema->storage->txn_begin;
+
+    my $categorycode = $builder->build({ source => 'Category' })->{categorycode};
+    my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
+
     my $patron = Koha::Patron->new({categorycode => $categorycode, branchcode => $branchcode })->store;
     is( $patron->get_column('borrowernumber'), $patron->borrowernumber, 'get_column should retrieve the correct value' );
+
+    $schema->storage->txn_rollback;
 };
 
 subtest 'discard_changes' => sub {
     plan tests => 1;
-    my $builder = t::lib::TestBuilder->new;
+
+    $schema->storage->txn_begin;
+
     my $patron = $builder->build( { source => 'Borrower' } );
     $patron = Koha::Patrons->find( $patron->{borrowernumber} );
     $patron->dateexpiry(dt_from_string);
@@ -105,6 +138,36 @@ subtest 'discard_changes' => sub {
         dt_from_string->truncate( to => 'day' ),
         'discard_changes should refresh the object'
     );
+
+    $schema->storage->txn_rollback;
 };
+
+subtest 'TO_JSON tests' => sub {
+
+    plan tests => 5;
+
+    $schema->storage->txn_begin;
+
+    my $borrowernumber = $builder->build(
+        { source => 'Borrower',
+          value => { lost => 1,
+                     gonenoaddress => 0 } })->{borrowernumber};
+
+    my $patron = Koha::Patrons->find($borrowernumber);
+    my $lost = $patron->TO_JSON()->{lost};
+    my $gonenoaddress = $patron->TO_JSON->{gonenoaddress};
+
+    ok( $lost->isa('Mojo::JSON::_Bool'), 'Boolean attribute type is correct' );
+    is( $lost, 1, 'Boolean attribute value is correct (true)' );
+
+    ok( $gonenoaddress->isa('Mojo::JSON::_Bool'), 'Boolean attribute type is correct' );
+    is( $gonenoaddress, 0, 'Boolean attribute value is correct (false)' );
+
+    ok( !isvstring($patron->borrowernumber), 'Integer values are not coded as strings' );
+
+    $schema->storage->txn_rollback;
+};
+
+
 
 1;

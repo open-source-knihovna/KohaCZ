@@ -115,6 +115,8 @@ sub get_elasticsearch_params {
       if ( !$es->{index_name} );
     # Append the name of this particular index to our namespace
     $es->{index_name} .= '_' . $self->index;
+
+    $es->{key_prefix} = 'es_';
     return $es;
 }
 
@@ -145,7 +147,7 @@ sub get_elasticsearch_settings {
                     analyser_standard => {
                         tokenizer => 'standard',
                         filter    => ['lowercase'],
-                    }
+                    },
                 },
             }
         }
@@ -170,14 +172,9 @@ sub get_elasticsearch_mappings {
         data => {
             properties => {
                 record => {
-                    store          => "yes",
+                    store          => "true",
                     include_in_all => JSON::false,
-                    type           => "string",
-                },
-                '_all.phrase' => {
-                    search_analyzer => "analyser_phrase",
-                    index_analyzer  => "analyser_phrase",
-                    type            => "string",
+                    type           => "text",
                 },
             }
         }
@@ -196,36 +193,24 @@ sub get_elasticsearch_mappings {
             my $es_type =
               $type eq 'boolean'
               ? 'boolean'
-              : 'string';
-            $mappings->{data}{properties}{$name} = {
-                search_analyzer => "analyser_standard",
-                index_analyzer  => "analyser_standard",
-                type            => $es_type,
-                fields          => {
-                    phrase => {
-                        search_analyzer => "analyser_phrase",
-                        index_analyzer  => "analyser_phrase",
-                        type            => "string",
-                        copy_to         => "_all.phrase",
-                    },
-                    raw => {
-                        "type" => "string",
-                        "index" => "not_analyzed",
-                    }
-                },
-            };
-            $mappings->{data}{properties}{$name}{null_value} = 0
-              if $type eq 'boolean';
+              : 'text';
+
+            if ($es_type eq 'boolean') {
+                $mappings->{data}{properties}{$name} = _elasticsearch_mapping_for_boolean( $name, $es_type, $facet, $suggestible, $sort, $marc_type );
+                return; #Boolean cannot have facets nor sorting nor suggestions
+            } else {
+                $mappings->{data}{properties}{$name} = _elasticsearch_mapping_for_default( $name, $es_type, $facet, $suggestible, $sort, $marc_type );
+            }
+
             if ($facet) {
                 $mappings->{data}{properties}{ $name . '__facet' } = {
-                    type  => "string",
-                    index => "not_analyzed",
+                    type  => "keyword",
                 };
             }
             if ($suggestible) {
                 $mappings->{data}{properties}{ $name . '__suggestion' } = {
                     type => 'completion',
-                    index_analyzer => 'simple',
+                    analyzer => 'simple',
                     search_analyzer => 'simple',
                 };
             }
@@ -234,14 +219,14 @@ sub get_elasticsearch_mappings {
             if (defined $sort) {
                 $mappings->{data}{properties}{ $name . '__sort' } = {
                     search_analyzer => "analyser_phrase",
-                    index_analyzer  => "analyser_phrase",
-                    type            => "string",
+                    analyzer  => "analyser_phrase",
+                    type            => "text",
                     include_in_all  => JSON::false,
                     fields          => {
                         phrase => {
                             search_analyzer => "analyser_phrase",
-                            index_analyzer  => "analyser_phrase",
-                            type            => "string",
+                            analyzer  => "analyser_phrase",
+                            type            => "text",
                         },
                     },
                 };
@@ -251,6 +236,43 @@ sub get_elasticsearch_mappings {
     );
     $self->sort_fields(\%sort_fields);
     return $mappings;
+}
+
+=head2 _elasticsearch_mapping_for_*
+
+Get the ES mappings for the given data type or a special mapping case
+
+Receives the same parameters from the $self->_foreach_mapping() dispatcher
+
+=cut
+
+sub _elasticsearch_mapping_for_boolean {
+    my ( $name, $type, $facet, $suggestible, $sort, $marc_type ) = @_;
+
+    return {
+        type            => $type,
+        null_value      => 0,
+    };
+}
+
+sub _elasticsearch_mapping_for_default {
+    my ( $name, $type, $facet, $suggestible, $sort, $marc_type ) = @_;
+
+    return {
+        search_analyzer => "analyser_standard",
+        analyzer        => "analyser_standard",
+        type            => $type,
+        fields          => {
+            phrase => {
+                search_analyzer => "analyser_phrase",
+                analyzer        => "analyser_phrase",
+                type            => "text",
+            },
+            raw => {
+                type    => "keyword",
+            }
+        },
+    };
 }
 
 sub reset_elasticsearch_mappings {
@@ -265,7 +287,7 @@ sub reset_elasticsearch_mappings {
             my $search_field = Koha::SearchFields->find_or_create({ name => $field_name, label => $field_label, type => $field_type }, { key => 'name' });
             for my $mapping ( @$mappings ) {
                 my $marc_field = Koha::SearchMarcMaps->find_or_create({ index_name => $index_name, marc_type => $mapping->{marc_type}, marc_field => $mapping->{marc_field} });
-                $search_field->add_to_search_marc_maps($marc_field, { facet => $mapping->{facet}, suggestible => $mapping->{suggestible}, sort => $mapping->{sort} } );
+                $search_field->add_to_search_marc_maps($marc_field, { facet => $mapping->{facet} || 0, suggestible => $mapping->{suggestible} || 0, sort => $mapping->{sort} } );
             }
         }
     }
@@ -294,6 +316,7 @@ sub get_fixer_rules {
 
     my $marcflavour = lc C4::Context->preference('marcflavour');
     my @rules;
+
     $self->_foreach_mapping(
         sub {
             my ( $name, $type, $facet, $suggestible, $sort, $marc_type, $marc_field ) = @_;
@@ -311,7 +334,8 @@ sub get_fixer_rules {
             }
             if ($suggestible) {
                 push @rules,
-"marc_map('$marc_field','${name}__suggestion.input.\$append', $options)";
+                    #"marc_map('$marc_field','${name}__suggestion.input.\$append', $options)"; #must not have nested data structures in .input
+                    "marc_map('$marc_field','${name}__suggestion.input.\$append')";
             }
             if ( $type eq 'boolean' ) {
 
@@ -334,6 +358,8 @@ sub get_fixer_rules {
             }
         }
     );
+
+    push @rules, "move_field(_id,es_id)"; #Also you must set the Catmandu::Store::ElasticSearch->new(key_prefix: 'es_');
     return \@rules;
 }
 

@@ -146,7 +146,7 @@ foreach (qw(dateenrolled dateexpiry dateofbirth)) {
         $data->{$_} = '';
         next;
     }
-    $template->param( $_ => dt_from_string( $userdate ) );
+    $data->{$_} = dt_from_string( $userdate );
 }
 $data->{'IS_ADULT'} = ( $data->{'categorycode'} ne 'I' );
 
@@ -242,7 +242,9 @@ my $overdues_exist = 0;
 my $totalprice = 0;
 
 # Calculate and display patron's age
-$template->param( age => Koha::Patron->new({ dateofbirth => $data->{dateofbirth} })->get_age );
+if ( $data->{dateofbirth} ) {
+    $template->param( age => Koha::Patron->new({ dateofbirth => $data->{dateofbirth} })->get_age );
+}
 
 ### ###############################################################################
 # BUILD HTML

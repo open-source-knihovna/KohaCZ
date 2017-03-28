@@ -19,7 +19,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 use Koha::NewsItem;
 use Koha::News;
@@ -36,10 +36,12 @@ my $nb_of_news = Koha::News->search->count;
 my $new_news_item_1 = Koha::NewsItem->new({
     branchcode => $library->{branchcode},
     title => 'a news',
+    content => 'content for news 1',
 })->store;
 my $new_news_item_2 = Koha::NewsItem->new({
     branchcode => $library->{branchcode},
     title => 'another news',
+    content => 'content for news 2',
 })->store;
 
 like( $new_news_item_1->idnew, qr|^\d+$|, 'Adding a new news_item should have set the idnew');
@@ -47,6 +49,7 @@ is( Koha::News->search->count, $nb_of_news + 2, 'The 2 news should have been add
 
 my $retrieved_news_item_1 = Koha::News->find( $new_news_item_1->idnew );
 is( $retrieved_news_item_1->title, $new_news_item_1->title, 'Find a news_item by id should return the correct news_item' );
+is( $retrieved_news_item_1->content, $new_news_item_1->content, 'The content method return the content of the news');
 
 $retrieved_news_item_1->delete;
 is( Koha::News->search->count, $nb_of_news + 1, 'Delete should have deleted the news_item' );

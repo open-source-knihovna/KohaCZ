@@ -4,8 +4,9 @@
 
 use Modern::Perl;
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
+use Getopt::Long;
 use MARC::Record;
 use Test::MockModule;
 use Test::MockObject;
@@ -20,22 +21,18 @@ BEGIN {
         use_ok('C4::AuthoritiesMarc');
 }
 
+# Optionally change marc flavour
+my $marcflavour;
+GetOptions( 'flavour:s' => \$marcflavour );
+t::lib::Mocks::mock_preference( 'marcflavour', $marcflavour ) if $marcflavour;
+
 my $schema  = Koha::Database->new->schema;
 $schema->storage->txn_begin;
-my $dbh = C4::Context->dbh;
 
-# Some advanced mocking :)
-my ( @zebrarecords, $index );
-my $context_mod = Test::MockModule->new( 'C4::Context' );
-my $search_mod = Test::MockModule->new( 'C4::Search' );
-my $zoom_mod = Test::MockModule->new( 'ZOOM::Query::CCL2RPN', no_auto => 1 );
-my $conn_obj = Test::MockObject->new;
-my $zoom_obj = Test::MockObject->new;
-my $zoom_record_obj = Test::MockObject->new;
-set_mocks();
-
-# Framework operations
-my ( $authtype1, $authtype2 ) = modify_framework();
+# Global variables, mocking and framework modifications
+our ( @zebrarecords, $index );
+my $mocks = set_mocks();
+our ( $authtype1, $authtype2 ) = modify_framework();
 
 subtest 'Test merge A1 to A2 (within same authtype)' => sub {
 # Tests originate from bug 11700
@@ -68,16 +65,14 @@ subtest 'Test merge A1 to A2 (within same authtype)' => sub {
 
     # Check the results
     my $newbiblio1 = GetMarcBiblio($biblionumber1);
-    $newbiblio1->delete_fields( $newbiblio1->field('100') ); # fix for UNIMARC
-    compare_field_count( $biblio1, $newbiblio1 );
-    compare_field_order( $biblio1, $newbiblio1 );
+    compare_fields( $biblio1, $newbiblio1, {}, 'count' );
+    compare_fields( $biblio1, $newbiblio1, {}, 'order' );
     is( $newbiblio1->subfield('609', '9'), $authid1, 'Check biblio1 609$9' );
     is( $newbiblio1->subfield('609', 'a'), 'George Orwell',
         'Check biblio1 609$a' );
     my $newbiblio2 = GetMarcBiblio($biblionumber2);
-    $newbiblio2->delete_fields( $newbiblio2->field('100') ); # fix for UNIMARC
-    compare_field_count( $biblio2, $newbiblio2 );
-    compare_field_order( $biblio2, $newbiblio2 );
+    compare_fields( $biblio2, $newbiblio2, {}, 'count' );
+    compare_fields( $biblio2, $newbiblio2, {}, 'order' );
     is( $newbiblio2->subfield('609', '9'), $authid1, 'Check biblio2 609$9' );
     is( $newbiblio2->subfield('609', 'a'), 'George Orwell',
         'Check biblio2 609$a' );
@@ -85,7 +80,7 @@ subtest 'Test merge A1 to A2 (within same authtype)' => sub {
 
 subtest 'Test merge A1 to modified A1, test strict mode' => sub {
 # Tests originate from bug 11700
-    plan tests => 11;
+    plan tests => 12;
 
     # Simulate modifying an authority from auth1old to auth1new
     my $auth1old = MARC::Record->new;
@@ -115,14 +110,12 @@ subtest 'Test merge A1 to modified A1, test strict mode' => sub {
 
     #Check the results
     my $biblio1 = GetMarcBiblio($biblionumber1);
-    $biblio1->delete_fields( $biblio1->field('100') ); # quick fix for UNIMARC
-    compare_field_count( $MARC1, $biblio1 );
-    compare_field_order( $MARC1, $biblio1 );
+    compare_fields( $MARC1, $biblio1, {}, 'count' );
+    compare_fields( $MARC1, $biblio1, {}, 'order' );
     is( $auth1new->field(109)->subfield('a'), $biblio1->field(109)->subfield('a'), 'Record1 values updated correctly' );
     my $biblio2 = GetMarcBiblio( $biblionumber2 );
-    $biblio2->delete_fields( $biblio2->field('100') ); # quick fix for UNIMARC
-    compare_field_count( $MARC2, $biblio2 );
-    compare_field_order( $MARC2, $biblio2 );
+    compare_fields( $MARC2, $biblio2, {}, 'count' );
+    compare_fields( $MARC2, $biblio2, {}, 'order' );
     is( $auth1new->field(109)->subfield('a'), $biblio2->field(109)->subfield('a'), 'Record2 values updated correctly' );
     # This is only true in loose mode:
     is( $biblio1->field(109)->subfield('b'), $MARC1->field(109)->subfield('b'), 'Subfield not overwritten in loose mode');
@@ -134,9 +127,11 @@ subtest 'Test merge A1 to modified A1, test strict mode' => sub {
     $index = 0;
     $rv = C4::AuthoritiesMarc::merge( $authid1, $auth1old, $authid1, $auth1new );
     $biblio1 = GetMarcBiblio($biblionumber1);
-    $biblio1->delete_fields( $biblio1->field('100') ); # quick fix for UNIMARC
     is( $biblio1->field(109)->subfield('b'), undef, 'Subfield overwritten in strict mode' );
-    is( $biblio1->fields, scalar( $MARC1->fields ) - 1, 'strict mode should remove a duplicate 609' );
+    compare_fields( $MARC1, $biblio1, { 609 => 1 }, 'count' );
+    my @old609 = $MARC1->field('609');
+    my @new609 = $biblio1->field('609');
+    is( scalar @new609, @old609 - 1, 'strict mode should remove a duplicate 609' );
     is( $biblio1->field(609)->subfields,
         scalar($auth1new->field('109')->subfields) + 1,
         'Check number of subfields in strict mode for the remaining 609' );
@@ -173,7 +168,6 @@ subtest 'Test merge A1 to B1 (changing authtype)' => sub {
     );
     my ( $biblionumber ) = C4::Biblio::AddBiblio( $marc, '' );
     my $oldbiblio = C4::Biblio::GetMarcBiblio( $biblionumber );
-    $oldbiblio->delete_fields( $oldbiblio->field('100') ); # fix for UNIMARC
 
     # Time to merge
     @zebrarecords = ( $marc );
@@ -183,12 +177,10 @@ subtest 'Test merge A1 to B1 (changing authtype)' => sub {
 
     # Get new marc record for compares
     my $newbiblio = C4::Biblio::GetMarcBiblio( $biblionumber );
-    $newbiblio->delete_fields( $newbiblio->field('100') ); # fix for UNIMARC
-    compare_field_count( $oldbiblio, $newbiblio );
+    compare_fields( $oldbiblio, $newbiblio, {}, 'count' );
     # Exclude 109/609 and 112/612 in comparing order
-    compare_field_order( $oldbiblio, $newbiblio,
-        { '109' => 1, '112' => 1, '609' => 1, '612' => 1 },
-    );
+    my $excl = { '109' => 1, '112' => 1, '609' => 1, '612' => 1 };
+    compare_fields( $oldbiblio, $newbiblio, $excl, 'order' );
     # Check position of 612s in the new record
     my $full_order = join q/,/, map { $_->tag } $newbiblio->fields;
     is( $full_order =~ /611(,612){3}/, 1, 'Check position of all 612s' );
@@ -224,23 +216,79 @@ subtest 'Test merge A1 to B1 (changing authtype)' => sub {
         'Check 612x' );
 };
 
+subtest 'Merging authorities should handle deletes (BZ 18070)' => sub {
+    plan tests => 2;
+
+    # For this test we need dontmerge OFF
+    t::lib::Mocks::mock_preference('dontmerge', '0');
+
+    # Add authority and linked biblio, delete authority
+    my $auth1 = MARC::Record->new;
+    $auth1->append_fields( MARC::Field->new( '109', '', '', 'a' => 'DEL'));
+    my $authid1 = AddAuthority( $auth1, undef, $authtype1 );
+    my $bib1 = MARC::Record->new;
+    $bib1->append_fields(
+        MARC::Field->new( '245', '', '', a => 'test DEL' ),
+        MARC::Field->new( '609', '', '', a => 'DEL', 9 => "$authid1" ),
+    );
+    my ( $biblionumber ) = C4::Biblio::AddBiblio( $bib1, '' );
+    @zebrarecords = ( $bib1 );
+    $index = 0;
+    DelAuthority( $authid1 ); # this triggers a merge call
+
+    # See what happened in the biblio record
+    my $marc1 = C4::Biblio::GetMarcBiblio( $biblionumber );
+    is( $marc1->field('609'), undef, 'Field 609 should be gone too' );
+
+    # Now we simulate the delete as done from the cron job (with dontmerge)
+    # First, restore auth1 and add 609 back in bib1
+    $auth1 = MARC::Record->new;
+    $auth1->append_fields( MARC::Field->new( '109', '', '', 'a' => 'DEL'));
+    $authid1 = AddAuthority( $auth1, undef, $authtype1 );
+    $marc1->append_fields(
+        MARC::Field->new( '609', '', '', a => 'DEL', 9 => "$authid1" ),
+    );
+    ModBiblio( $marc1, $biblionumber, '' );
+    # Instead of going through DelAuthority, we manually delete the auth
+    # record and call merge afterwards.
+    # This mimics deleting an authority and calling merge later in the
+    # merge_authority.pl cron job (when dontmerge is enabled).
+    C4::Context->dbh->do( "DELETE FROM auth_header WHERE authid=?", undef, $authid1 );
+    @zebrarecords = ( $marc1 );
+    $index = 0;
+    merge( $authid1, undef );
+    # Final check
+    $marc1 = C4::Biblio::GetMarcBiblio( $biblionumber );
+    is( $marc1->field('609'), undef, 'Merge removed the 609 again even after deleting the authority record' );
+};
+
 sub set_mocks {
     # Mock ZOOM objects: They do nothing actually
     # Get new_record_from_zebra to return the records
 
-    $context_mod->mock( 'Zconn', sub { $conn_obj; } );
-    $search_mod->mock( 'new_record_from_zebra', sub {
+    my $mocks;
+    $mocks->{context_mod} = Test::MockModule->new( 'C4::Context' );
+    $mocks->{search_mod} = Test::MockModule->new( 'C4::Search' );
+    $mocks->{zoom_mod} = Test::MockModule->new( 'ZOOM::Query::CCL2RPN', no_auto => 1 );
+    $mocks->{conn_obj} = Test::MockObject->new;
+    $mocks->{zoom_obj} = Test::MockObject->new;
+    $mocks->{zoom_record_obj} = Test::MockObject->new;
+
+    $mocks->{context_mod}->mock( 'Zconn', sub { $mocks->{conn_obj}; } );
+    $mocks->{search_mod}->mock( 'new_record_from_zebra', sub {
          return if $index >= @zebrarecords;
          return $zebrarecords[ $index++ ];
     });
-    $zoom_mod->mock( 'new', sub {} );
+    $mocks->{zoom_mod}->mock( 'new', sub {} );
 
-    $conn_obj->mock( 'search', sub { $zoom_obj; } );
-    $zoom_obj->mock( 'destroy', sub {} );
-    $zoom_obj->mock( 'record', sub { $zoom_record_obj; } );
-    $zoom_obj->mock( 'search', sub {} );
-    $zoom_obj->mock( 'size', sub { @zebrarecords } );
-    $zoom_record_obj->mock( 'raw', sub {} );
+    $mocks->{conn_obj}->mock( 'search', sub { $mocks->{zoom_obj}; } );
+    $mocks->{zoom_obj}->mock( 'destroy', sub {} );
+    $mocks->{zoom_obj}->mock( 'record', sub { $mocks->{zoom_record_obj}; } );
+    $mocks->{zoom_obj}->mock( 'search', sub {} );
+    $mocks->{zoom_obj}->mock( 'size', sub { @zebrarecords } );
+    $mocks->{zoom_record_obj}->mock( 'raw', sub {} );
+
+    return $mocks;
 }
 
 sub modify_framework {
@@ -303,19 +351,23 @@ sub modify_framework {
     return ( $authtype1->{authtypecode}, $authtype2->{authtypecode} );
 }
 
-sub compare_field_count {
-    my ( $oldmarc, $newmarc ) = @_;
-    my $t;
-    is( scalar $newmarc->fields, $t = $oldmarc->fields, "Number of fields still equal to $t" );
-}
-
-sub compare_field_order {
-    my ( $oldmarc, $newmarc, $exclude ) = @_;
+sub compare_fields { # mode parameter: order or count
+    my ( $oldmarc, $newmarc, $exclude, $mode ) = @_;
     $exclude //= {};
+    if( C4::Context->preference('marcflavour') eq 'UNIMARC' ) {
+        # By default exclude field 100 from comparison in UNIMARC.
+        # Will have been added by ModBiblio in merge.
+        $exclude->{100} = 1;
+    }
     my @oldfields = map { $exclude->{$_->tag} ? () : $_->tag } $oldmarc->fields;
     my @newfields = map { $exclude->{$_->tag} ? () : $_->tag } $newmarc->fields;
-    is( ( join q/,/, @newfields ), ( join q/,/, @oldfields ),
-        'Order of fields unchanged' );
+
+    if( $mode eq 'count' ) {
+        my $t;
+        is( scalar @newfields, $t = @oldfields, "Number of fields still equal to $t" );
+    } elsif( $mode eq 'order' ) {
+        is( ( join q/,/, @newfields ), ( join q/,/, @oldfields ), 'Order of fields unchanged' );
+    }
 }
 
 $schema->storage->txn_rollback;

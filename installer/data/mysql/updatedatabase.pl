@@ -12401,7 +12401,7 @@ if ( CheckVersion($DBversion) ) {
              `id` int(11) NOT NULL AUTO_INCREMENT, 
              `name` varchar(255) NOT NULL COMMENT 'the name of the field as it will be stored in the search engine',
              `label` varchar(255) NOT NULL COMMENT 'the human readable name of the field, for display', 
-             `type` ENUM('string', 'date', 'number', 'boolean', 'sum') NOT NULL COMMENT 'what type of data this holds, relevant when storing it in the search engine',
+             `type` ENUM('', 'string', 'date', 'number', 'boolean', 'sum') NOT NULL COMMENT 'what type of data this holds, relevant when storing it in the search engine',
              PRIMARY KEY (`id`),
              UNIQUE KEY (`name`)
              ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
@@ -13305,7 +13305,7 @@ if ( CheckVersion($DBversion) ) {
             });
 
     $dbh->do(q{
-            UPDATE marc_subfield_structure SET authorised_value = NULL WHERE authorised_value = ';';
+            UPDATE marc_subfield_structure SET authorised_value = NULL WHERE authorised_value = '';
             });
 
     # If the DB has been created before 3.19.00.006, the default collate for marc_subfield_structure if not set to utf8_unicode_ci and the new FK will not be create (MariaDB or MySQL will raise err 150)
@@ -13944,6 +13944,150 @@ if ( CheckVersion($DBversion) ) {
     }
 
     print "Upgrade to $DBversion done (Bug 17813: Table borrower_attributes needs a primary key\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.12.00.007";
+if( CheckVersion( $DBversion ) ) {
+
+    if ( column_exists('opac_news', 'new' ) ) {
+        $dbh->do(q|ALTER TABLE opac_news CHANGE COLUMN new content text NOT NULL|);
+    }
+
+    my ( $used_in_templates ) = $dbh->selectrow_array(q|
+        SELECT COUNT(*) FROM letter WHERE content LIKE "%<<opac_news.new>>%";
+    |);
+    if ( $used_in_templates ) {
+        print "WARNING - It seems that you are using the opac_news.new column in your notice templates\n";
+        print "Since it has now been renamed with opac_news.content, you should update them.\n";
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17960 - Rename opac_news with opac_news.content)\n";
+}
+
+$DBversion = "16.12.00.008";
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES
+        ('MarcItemFieldsToOrder','','Set the mapping values for new item records created from a MARC record in a staged file. In a YAML format.', NULL, 'textarea');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 15503 - Grab Item Information from Order Files)\n";
+}
+
+$DBversion = "16.12.00.009";
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES
+        ('OPACHoldsIfAvailableAtPickup','1','','Allow to pickup up holds at libraries where the item is available','YesNo');
+    });
+
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES
+        ('OPACHoldsIfAvailableAtPickupExceptions','','','List the patron categories not affected by OPACHoldsIfAvailableAtPickup if off','Free');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17453 - Inter-site holds improvement)\n";
+}
+
+$DBversion = "16.12.00.010";
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        ALTER TABLE borrowers ADD overdrive_auth_token text default NULL AFTER lastseen;
+    });
+
+    $dbh->do(q{
+        ALTER TABLE deletedborrowers ADD overdrive_auth_token text default NULL AFTER lastseen;
+    });
+
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('OverDriveCirculation','0','Enable client to see their OverDrive account','','YesNo');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 16034 - Integration with OverDrive Patron API)\n";
+}
+
+$DBversion = "16.12.00.011";
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        ALTER TABLE search_field CHANGE COLUMN type type ENUM('', 'string', 'date', 'number', 'boolean', 'sum') NOT NULL
+        COMMENT 'what type of data this holds, relevant when storing it in the search engine';
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17260 - updatedatabase.pl fails on invalid entries in ENUM and BOOLEAN columns)\n";
+}
+
+$DBversion = "16.12.00.012";
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO `systempreferences` (`variable`, `value`, `options`, `explanation`, `type`)
+        VALUES ('OpacNewsLibrarySelect', '0', '', 'Show selector for branches on OPAC news page', 'YesNo');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 14764 - Add OPAC News branch selector)\n";
+}
+
+$DBversion = "16.12.00.013";
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (`variable`, `value`, `options`, `explanation`, `type`)
+        VALUES ('CircSidebar','0','','Activate or deactivate the navigation sidebar on all Circulation pages','YesNo');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 16530 - Add a circ sidebar navigation menu)\n";
+}
+
+$DBversion = "16.12.00.014";
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+            INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+            ('LoadSearchHistoryToTheFirstLoggedUser', '1', NULL, 'If ON, the next user will automatically get the last searches in his history', 'YesNo');
+            });
+            SetVersion( $DBversion );
+            print "Upgrade to $DBversion done (Bug 8010 - Search history can be added to the wrong patron)\n";
+            }
+
+$DBversion = "16.12.00.015";
+if( CheckVersion( $DBversion ) ) {
+    unless( column_exists( 'branches', 'geolocation' ) ) {
+        $dbh->do(q|
+                ALTER TABLE branches ADD COLUMN geolocation VARCHAR(255) DEFAULT NULL after opac_info
+                |);
+    }
+
+    $dbh->do(q|
+            INSERT IGNORE INTO systempreferences (variable, value, options, explanation, type ) VALUES ('UsageStatsGeolocation', '', NULL, 'Geolocation of the main library', 'Free');
+            |);
+    $dbh->do(q|
+            INSERT IGNORE INTO systempreferences (variable, value, options, explanation, type ) VALUES ('UsageStatsLibrariesInfo', '', NULL, 'Share libraries information', 'YesNo');
+            |);
+    $dbh->do(q|
+            INSERT IGNORE INTO systempreferences (variable, value, options, explanation, type ) VALUES ('UsageStatsPublicID', '', NULL, 'Public ID for Hea website', 'Free');
+            |);
+        
+        SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18066 - Hea version 2)\n";
+}
+
+$DBversion = "16.12.00.016";
+if ( CheckVersion($DBversion) ) {
+    unless ( column_exists( 'borrower_attribute_types', 'opac_editable' ) )
+    {
+        $dbh->do(q{
+            ALTER TABLE borrower_attribute_types
+                ADD COLUMN `opac_editable` tinyint(1) NOT NULL default 0 AFTER `opac_display`
+        });
+    }
+
+    print "Upgrade to $DBversion done (Bug 13757: Make patron attributes editable in the opac if set to 'editable in OPAC'\n";
     SetVersion($DBversion);
 }
 

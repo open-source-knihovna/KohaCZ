@@ -330,31 +330,33 @@ sub get_template_and_user {
                 # We show the link in opac
                 $template->param( EnableOpacSearchHistory => 1 );
             }
+            if (C4::Context->preference('LoadSearchHistoryToTheFirstLoggedUser'))
+            {
+                # And if there are searches performed when the user was not logged in,
+                # we add them to the logged-in search history
+                my @recentSearches = C4::Search::History::get_from_session( { cgi => $in->{'query'} } );
+                if (@recentSearches) {
+                    my $dbh   = C4::Context->dbh;
+                    my $query = q{
+                        INSERT INTO search_history(userid, sessionid, query_desc, query_cgi, type,  total, time )
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    };
+                    my $sth = $dbh->prepare($query);
+                    $sth->execute( $borrowernumber,
+                        $in->{query}->cookie("CGISESSID"),
+                        $_->{query_desc},
+                        $_->{query_cgi},
+                        $_->{type} || 'biblio',
+                        $_->{total},
+                        $_->{time},
+                    ) foreach @recentSearches;
 
-            # And if there are searches performed when the user was not logged in,
-            # we add them to the logged-in search history
-            my @recentSearches = C4::Search::History::get_from_session( { cgi => $in->{'query'} } );
-            if (@recentSearches) {
-                my $dbh   = C4::Context->dbh;
-                my $query = q{
-                    INSERT INTO search_history(userid, sessionid, query_desc, query_cgi, type,  total, time )
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                };
+                    # clear out the search history from the session now that
+                    # we've saved it to the database
+                 }
+              }
+              C4::Search::History::set_to_session( { cgi => $in->{'query'}, search_history => [] } );
 
-                my $sth = $dbh->prepare($query);
-                $sth->execute( $borrowernumber,
-                    $in->{query}->cookie("CGISESSID"),
-                    $_->{query_desc},
-                    $_->{query_cgi},
-                    $_->{type} || 'biblio',
-                    $_->{total},
-                    $_->{time},
-                ) foreach @recentSearches;
-
-                # clear out the search history from the session now that
-                # we've saved it to the database
-                C4::Search::History::set_to_session( { cgi => $in->{'query'}, search_history => [] } );
-            }
         } elsif ( $in->{type} eq 'intranet' and C4::Context->preference('EnableSearchHistory') ) {
             $template->param( EnableSearchHistory => 1 );
         }
@@ -914,14 +916,13 @@ sub checkauth {
             -value    => $session->id,
             -HttpOnly => 1
         );
-        $userid = $q_userid;
         my $pki_field = C4::Context->preference('AllowPKIAuth');
         if ( !defined($pki_field) ) {
             print STDERR "ERROR: Missing system preference AllowPKIAuth.\n";
             $pki_field = 'None';
         }
         if ( ( $cas && $query->param('ticket') )
-            || $userid
+            || $q_userid
             || ( $shib && $shib_login )
             || $pki_field ne 'None' )
         {
@@ -935,7 +936,7 @@ sub checkauth {
                 my $retuserid;
 
                 # Do not pass password here, else shib will not be checked in checkpw.
-                ( $return, $cardnumber, $retuserid ) = checkpw( $dbh, $userid, undef, $query );
+                ( $return, $cardnumber, $retuserid ) = checkpw( $dbh, $q_userid, undef, $query );
                 $userid      = $retuserid;
                 $shibSuccess = $return;
                 $info{'invalidShibLogin'} = 1 unless ($return);
@@ -986,7 +987,7 @@ sub checkauth {
                 else {
                     my $retuserid;
                     ( $return, $cardnumber, $retuserid ) =
-                      checkpw( $dbh, $userid, $password, $query, $type );
+                      checkpw( $dbh, $q_userid, $password, $query, $type );
                     $userid = $retuserid if ($retuserid);
                     $info{'invalid_username_or_password'} = 1 unless ($return);
                 }
@@ -1131,7 +1132,7 @@ sub checkauth {
                 $session->param( 'ip',       $session->remote_addr() );
                 $session->param( 'sessiontype', 'anon' );
             }
-        }    # END if ( $userid    = $query->param('userid') )
+        }    # END if ( $q_userid
         elsif ( $type eq "opac" ) {
 
             # if we are here this is an anonymous session; add public lists to it and a few other items...

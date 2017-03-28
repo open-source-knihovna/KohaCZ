@@ -77,6 +77,8 @@ sub update_index {
             )
         );
     }
+
+    #print Data::Dumper::Dumper( $from->to_array );
     $self->store->bag->add_many($from);
     $self->store->bag->commit;
     return 1;

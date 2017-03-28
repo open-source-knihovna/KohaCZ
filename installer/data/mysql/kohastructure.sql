@@ -214,6 +214,7 @@ CREATE TABLE `borrower_attribute_types` ( -- definitions for custom patron field
   `repeatable` tinyint(1) NOT NULL default 0, -- defines whether one patron/borrower can have multiple values for this custom field  (1 for yes, 0 for no)
   `unique_id` tinyint(1) NOT NULL default 0, -- defines if this value needs to be unique (1 for yes, 0 for no)
   `opac_display` tinyint(1) NOT NULL default 0, -- defines if this field is visible to patrons on their account in the OPAC (1 for yes, 0 for no)
+  `opac_editable` tinyint(1) NOT NULL default 0, -- defines if this field is editable by patrons on their account in the OPAC (1 for yes, 0 for no)
   `staff_searchable` tinyint(1) NOT NULL default 0, -- defines if this field is searchable via the patron search in the staff client (1 for yes, 0 for no)
   `authorised_value_category` varchar(32) default NULL, -- foreign key from authorised_values that links this custom field to an authorized value category
   `display_checkout` tinyint(1) NOT NULL default 0,-- defines if this field displays in checkout screens
@@ -277,6 +278,7 @@ CREATE TABLE `branches` ( -- information about your libraries or branches are st
   `branchprinter` varchar(100) default NULL, -- unused in Koha
   `branchnotes` mediumtext, -- notes related to your library or branch
   opac_info text, -- HTML that displays in OPAC
+  `geolocation` VARCHAR(255) default NULL, -- geolocation of your library
   PRIMARY KEY (`branchcode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -630,6 +632,7 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron if this item has previously been checked out to this patron if 'yes', not if 'no', defer to category setting if 'inherit'.
   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
   `lastseen` datetime default NULL, -- last time a patron has been seed (connected at the OPAC or staff interface)
+  `overdrive_auth_token` text default NULL, -- persist OverDrive auth token
   KEY borrowernumber (borrowernumber),
   KEY `cardnumber` (`cardnumber`),
   KEY `sms_provider_id` (`sms_provider_id`)
@@ -1482,7 +1485,7 @@ CREATE TABLE `search_field` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'the name of the field as it will be stored in the search engine',
   `label` varchar(255) NOT NULL COMMENT 'the human readable name of the field, for display',
-  `type` ENUM('string', 'date', 'number', 'boolean', 'sum') NOT NULL COMMENT 'what type of data this holds, relevant when storing it in the search engine',
+  `type` ENUM('', 'string', 'date', 'number', 'boolean', 'sum') NOT NULL COMMENT 'what type of data this holds, relevant when storing it in the search engine',
   PRIMARY KEY (`id`),
   UNIQUE KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1661,6 +1664,7 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron if this item has previously been checked out to this patron if 'yes', not if 'no', defer to category setting if 'inherit'.
   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
   `lastseen` datetime default NULL, -- last time a patron has been seed (connected at the OPAC or staff interface)
+  `overdrive_auth_token` text default NULL, -- persist OverDrive auth token
   UNIQUE KEY `cardnumber` (`cardnumber`),
   PRIMARY KEY `borrowernumber` (`borrowernumber`),
   KEY `categorycode` (`categorycode`),
@@ -1840,7 +1844,7 @@ CREATE TABLE `opac_news` ( -- data from the news tool
   `idnew` int(10) unsigned NOT NULL auto_increment, -- unique identifier for the news article
   `branchcode` varchar(10) default NULL, -- branch code users to create branch specific news, NULL is every branch.
   `title` varchar(250) NOT NULL default '', -- title of the news article
-  `new` text NOT NULL, -- the body of your news article
+  `content` text NOT NULL, -- the body of your news article
   `lang` varchar(25) NOT NULL default '', -- location for the article (koha is the staff client, slip is the circulation receipt and language codes are for the opac)
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP, -- pulibcation date and time
   `expirationdate` date default NULL, -- date the article is set to expire or no longer be visible

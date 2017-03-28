@@ -1,6 +1,7 @@
 package Koha::Patrons;
 
-# Copyright ByWater Solutions 2014
+# Copyright 2014 ByWater Solutions
+# Copyright 2016 Koha Development Team
 #
 # This file is part of Koha.
 #
@@ -70,7 +71,7 @@ sub search_housebound_deliverers {
     return Koha::Patrons->_new_from_dbic($del);
 }
 
-=head3
+=head3 search_upcoming_membership_expires
 
 my $patrons = Koha::Patrons->search_upcoming_membership_expires();
 
@@ -179,6 +180,74 @@ sub article_requests_finished {
     );
 
     return $self->{_article_requests_finished};
+}
+
+=head3 search_patrons_to_anonymise
+
+    my $patrons = Koha::Patrons->search_patrons_to_anonymise( { before => $older_than_date, [ library => $library ] } );
+
+This method returns all patrons who has an issue history older than a given date.
+
+=cut
+
+sub search_patrons_to_anonymise {
+    my ( $class, $params ) = @_;
+    my $older_than_date = $params->{before};
+    my $library         = $params->{library};
+    $older_than_date = $older_than_date ? dt_from_string($older_than_date) : dt_from_string;
+    $library ||=
+      ( C4::Context->preference('IndependentBranches') && C4::Context->userenv && !C4::Context->IsSuperLibrarian() && C4::Context->userenv->{branch} )
+      ? C4::Context->userenv->{branch}
+      : undef;
+
+    my $dtf = Koha::Database->new->schema->storage->datetime_parser;
+    my $rs = $class->_resultset->search(
+        {   returndate                  => { '<'   =>  $dtf->format_datetime($older_than_date), },
+            'old_issues.borrowernumber' => { 'not' => undef },
+            privacy                     => { '<>'  => 0 },                  # Keep forever
+            ( $library ? ( 'old_issues.branchcode' => $library ) : () ),
+        },
+        {   join     => ["old_issues"],
+            group_by => 'borrowernumber'
+        }
+    );
+    return Koha::Patrons->_new_from_dbic($rs);
+}
+
+=head3 anonymise_issue_history
+
+    Koha::Patrons->search->anonymise_issue_history( { [ before => $older_than_date ] } );
+
+Anonymise issue history (old_issues) for all patrons older than the given date (optional).
+To make sure all the conditions are met, the caller has the responsability to
+call search_patrons_to_anonymise to filter the Koha::Patrons set
+
+=cut
+
+sub anonymise_issue_history {
+    my ( $self, $params ) = @_;
+
+    my $older_than_date = $params->{before};
+
+    $older_than_date = dt_from_string $older_than_date if $older_than_date;
+
+    # The default of 0 does not work due to foreign key constraints
+    # The anonymisation should not fail quietly if AnonymousPatron is not a valid entry
+    # Set it to undef (NULL)
+    my $dtf = Koha::Database->new->schema->storage->datetime_parser;
+    my $old_issues_to_anonymise = $self->search_related(
+        'old_issues',
+        {
+            (
+                $older_than_date
+                ? ( returndate =>
+                      { '<' => $dtf->format_datetime($older_than_date) } )
+                : ()
+            )
+        }
+    );
+    my $anonymous_patron = C4::Context->preference('AnonymousPatron') || undef;
+    $old_issues_to_anonymise->update( { 'old_issues.borrowernumber' => $anonymous_patron } );
 }
 
 =head3 type

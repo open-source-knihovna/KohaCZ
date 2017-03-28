@@ -3,14 +3,15 @@
 # This Koha test module is a stub!  
 # Add more tests here!!!
 
-use strict;
-use warnings;
+use Modern::Perl;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 use Test::MockModule;
 use Test::Warn;
 use MARC::Record;
+
 use t::lib::Mocks;
+use Koha::Database;
 
 BEGIN {
         use_ok('C4::AuthoritiesMarc');
@@ -57,9 +58,9 @@ $module->mock('GetAuthority', sub {
     return $record;
 });
 
+my $schema  = Koha::Database->new->schema;
+$schema->storage->txn_begin;
 my $dbh = C4::Context->dbh;
-$dbh->{AutoCommit} = 0;
-$dbh->{RaiseError} = 1;
 
 t::lib::Mocks::mock_preference('marcflavour', 'MARC21');
 
@@ -190,4 +191,19 @@ is_deeply(
     'test BuildSummary for UNIMARC'
 );
 
-$dbh->rollback;
+subtest 'AddAuthority should respect AUTO_INCREMENT (BZ 18104)' => sub {
+    plan tests => 3;
+
+    t::lib::Mocks::mock_preference( 'marcflavour', 'MARC21' );
+    my $record = C4::AuthoritiesMarc::GetAuthority(1);
+    my $id1 = AddAuthority( $record, undef, 'GEOGR_NAME' );
+    DelAuthority( $id1 );
+    my $id2 = AddAuthority( $record, undef, 'GEOGR_NAME' );
+    isnt( $id1, $id2, 'Do not return the same id again' );
+    t::lib::Mocks::mock_preference( 'marcflavour', 'UNIMARC' );
+    my $id3 = AddAuthority( $record, undef, 'GEOGR_NAME' );
+    ok( $id3 > 0, 'Tested AddAuthority with UNIMARC' );
+    is( $record->field('001')->data, $id3, 'Check updated 001' );
+};
+
+$schema->storage->txn_rollback;

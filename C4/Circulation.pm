@@ -94,7 +94,6 @@ BEGIN {
         &GetBranchItemRule
 		&GetBiblioIssues
 		&GetOpenIssue
-		&AnonymiseIssueHistory
         &CheckIfIssuedToPatron
         &IsItemIssued
         GetTopIssues
@@ -935,7 +934,6 @@ sub CanBookBeIssued {
     if ( $rentalConfirmation ){
         my ($rentalCharge) = GetIssuingCharges( $item->{'itemnumber'}, $borrower->{'borrowernumber'} );
         if ( $rentalCharge > 0 ){
-            $rentalCharge = sprintf("%.02f", $rentalCharge);
             $needsconfirmation{RENTALCHARGE} = $rentalCharge;
         }
     }
@@ -1219,6 +1217,9 @@ sub checkHighHolds {
         my $decreaseLoanHighHoldsDuration = C4::Context->preference('decreaseLoanHighHoldsDuration');
 
         my $reduced_datedue = $calendar->addDate( $issuedate, $decreaseLoanHighHoldsDuration );
+        $reduced_datedue->set_hour($orig_due->hour);
+        $reduced_datedue->set_minute($orig_due->minute);
+        $reduced_datedue->truncate( to => 'minute' );
 
         if ( DateTime->compare( $reduced_datedue, $orig_due ) == -1 ) {
             $return_data->{exceeded} = 1;
@@ -2144,7 +2145,15 @@ sub MarkIssueReturned {
         die "Fatal error: the patron ($borrowernumber) has requested their circulation history be anonymized on check-in, but the AnonymousPatron system preference is empty or not set correctly."
             unless C4::Members::GetMember( borrowernumber => $anonymouspatron );
     }
+    my $database = Koha::Database->new();
+    my $schema   = $database->schema;
     my $dbh   = C4::Context->dbh;
+
+    my $issue_id = $dbh->selectrow_array(
+        q|SELECT issue_id FROM issues WHERE itemnumber = ?|,
+        undef, $itemnumber
+    );
+
     my $query = 'UPDATE issues SET returndate=';
     my @bind;
     if ($dropbox_branch) {
@@ -2158,34 +2167,44 @@ sub MarkIssueReturned {
     } else {
         $query .= ' now() ';
     }
-    $query .= ' WHERE  borrowernumber = ?  AND itemnumber = ?';
-    push @bind, $borrowernumber, $itemnumber;
-    # FIXME transaction
-    my $sth_upd  = $dbh->prepare($query);
-    $sth_upd->execute(@bind);
-    my $sth_copy = $dbh->prepare('INSERT INTO old_issues SELECT * FROM issues
-                                  WHERE borrowernumber = ?
-                                  AND itemnumber = ?');
-    $sth_copy->execute($borrowernumber, $itemnumber);
-    # anonymise patron checkout immediately if $privacy set to 2 and AnonymousPatron is set to a valid borrowernumber
-    if ( $privacy == 2) {
-        my $sth_ano = $dbh->prepare("UPDATE old_issues SET borrowernumber=?
-                                  WHERE borrowernumber = ?
-                                  AND itemnumber = ?");
-       $sth_ano->execute($anonymouspatron, $borrowernumber, $itemnumber);
-    }
-    my $sth_del  = $dbh->prepare("DELETE FROM issues
-                                  WHERE borrowernumber = ?
-                                  AND itemnumber = ?");
-    $sth_del->execute($borrowernumber, $itemnumber);
+    $query .= ' WHERE issue_id = ?';
+    push @bind, $issue_id;
 
-    ModItem( { 'onloan' => undef }, undef, $itemnumber );
+    # FIXME Improve the return value and handle it from callers
+    $schema->txn_do(sub {
+        $dbh->do( $query, undef, @bind );
 
-    if ( C4::Context->preference('StoreLastBorrower') ) {
-        my $item = Koha::Items->find( $itemnumber );
-        my $patron = Koha::Patrons->find( $borrowernumber );
-        $item->last_returned_by( $patron );
-    }
+        my $id_already_exists = $dbh->selectrow_array(
+            q|SELECT COUNT(*) FROM old_issues WHERE issue_id = ?|,
+            undef, $issue_id
+        );
+
+        if ( $id_already_exists ) {
+            my $new_issue_id = $dbh->selectrow_array(q|SELECT MAX(issue_id)+1 FROM old_issues|);
+            $dbh->do(
+                q|UPDATE issues SET issue_id = ? WHERE issue_id = ?|,
+                undef, $new_issue_id, $issue_id
+            );
+            $issue_id = $new_issue_id;
+        }
+
+        $dbh->do(q|INSERT INTO old_issues SELECT * FROM issues WHERE issue_id = ?|, undef, $issue_id);
+
+        # anonymise patron checkout immediately if $privacy set to 2 and AnonymousPatron is set to a valid borrowernumber
+        if ( $privacy == 2) {
+            $dbh->do(q|UPDATE old_issues SET borrowernumber=? WHERE issue_id = ?|, undef, $anonymouspatron, $issue_id);
+        }
+
+        $dbh->do(q|DELETE FROM issues WHERE issue_id = ?|, undef, $issue_id);
+
+        ModItem( { 'onloan' => undef }, undef, $itemnumber );
+
+        if ( C4::Context->preference('StoreLastBorrower') ) {
+            my $item = Koha::Items->find( $itemnumber );
+            my $patron = Koha::Patrons->find( $borrowernumber );
+            $item->last_returned_by( $patron );
+        }
+    });
 }
 
 =head2 _debar_user_on_return
@@ -2674,23 +2693,22 @@ sub CanBookBeRenewed {
             # can be filled with available items. We can get the union of the sets simply
             # by pushing all the elements onto an array and removing the duplicates.
             my @reservable;
-            foreach my $b (@borrowernumbers) {
-                my ($borr) = C4::Members::GetMember( borrowernumber => $b);
-                foreach my $i (@itemnumbers) {
-                    my $item = GetItem($i);
-                    if (  !IsItemOnHoldAndFound($i)
-                        && IsAvailableForItemLevelRequest( $item, $borr )
-                        && CanItemBeReserved( $b, $i ) )
-                    {
-                        push( @reservable, $i );
+            my %borrowers;
+            ITEM: foreach my $i (@itemnumbers) {
+                my $item = GetItem($i);
+                next if IsItemOnHoldAndFound($i);
+                for my $b (@borrowernumbers) {
+                    my $borr = $borrowers{$b}//= C4::Members::GetMember(borrowernumber => $b);
+                    next unless IsAvailableForItemLevelRequest($item, $borr);
+                    next unless CanItemBeReserved($b,$i);
+
+                    push @reservable, $i;
+                    if (@reservable >= @borrowernumbers) {
+                        $resfound = 0;
+                        last ITEM;
                     }
+                    last;
                 }
-            }
-
-            @reservable = uniq(@reservable);
-
-            if ( @reservable >= @borrowernumbers ) {
-                $resfound = 0;
             }
         }
     }
@@ -3130,6 +3148,9 @@ sub GetIssuingCharges {
             my $discount = _get_discount_from_rule($discount_rules, $branch, $item_type);
             $charge = ( $charge * ( 100 - $discount ) ) / 100;
         }
+        if ($charge) {
+            $charge = sprintf '%.2f', $charge; # ensure no fractions of a penny returned
+        }
     }
 
     return ( $charge, $item_type );
@@ -3268,49 +3289,6 @@ sub DeleteTransfer {
     return $sth->execute($itemnumber);
 }
 
-=head2 AnonymiseIssueHistory
-
-  ($rows,$err_history_not_deleted) = AnonymiseIssueHistory($date,$borrowernumber)
-
-This function write NULL instead of C<$borrowernumber> given on input arg into the table issues.
-if C<$borrowernumber> is not set, it will delete the issue history for all borrower older than C<$date>.
-
-If c<$borrowernumber> is set, it will delete issue history for only that borrower, regardless of their opac privacy
-setting (force delete).
-
-return the number of affected rows and a value that evaluates to true if an error occurred deleting the history.
-
-=cut
-
-sub AnonymiseIssueHistory {
-    my $date           = shift;
-    my $borrowernumber = shift;
-    my $dbh            = C4::Context->dbh;
-    my $query          = "
-        UPDATE old_issues
-        SET    borrowernumber = ?
-        WHERE  returndate < ?
-          AND borrowernumber IS NOT NULL
-    ";
-
-    # The default of 0 does not work due to foreign key constraints
-    # The anonymisation should not fail quietly if AnonymousPatron is not a valid entry
-    # Set it to undef (NULL)
-    my $anonymouspatron = C4::Context->preference('AnonymousPatron') || undef;
-    my @bind_params = ($anonymouspatron, $date);
-    if (defined $borrowernumber) {
-       $query .= " AND borrowernumber = ?";
-       push @bind_params, $borrowernumber;
-    } else {
-       $query .= " AND (SELECT privacy FROM borrowers WHERE borrowers.borrowernumber=old_issues.borrowernumber) <> 0";
-    }
-    my $sth = $dbh->prepare($query);
-    $sth->execute(@bind_params);
-    my $anonymisation_err = $dbh->err;
-    my $rows_affected = $sth->rows;  ### doublecheck row count return function
-    return ($rows_affected, $anonymisation_err);
-}
-
 =head2 SendCirculationAlert
 
 Send out a C<check-in> or C<checkout> alert using the messaging system.
@@ -3355,7 +3333,7 @@ sub SendCirculationAlert {
     my %message_name = (
         CHECKIN  => 'Item_Check_in',
         CHECKOUT => 'Item_Checkout',
-	RENEWAL  => 'Item_Checkout',
+        RENEWAL  => 'Item_Checkout',
     );
     my $borrower_preferences = C4::Members::Messaging::GetMessagingPreferences({
         borrowernumber => $borrower->{borrowernumber},
@@ -3363,47 +3341,37 @@ sub SendCirculationAlert {
     });
     my $issues_table = ( $type eq 'CHECKOUT' || $type eq 'RENEWAL' ) ? 'issues' : 'old_issues';
 
+    my $schema = Koha::Database->new->schema;
     my @transports = keys %{ $borrower_preferences->{transports} };
-    # warn "no transports" unless @transports;
-    for (@transports) {
-        # warn "transport: $_";
-        my $message = C4::Message->find_last_message($borrower, $type, $_);
-        if (!$message) {
-            #warn "create new message";
-            my $letter =  C4::Letters::GetPreparedLetter (
-                module => 'circulation',
-                letter_code => $type,
-                branchcode => $branch,
-                message_transport_type => $_,
-                tables => {
-                    $issues_table => $item->{itemnumber},
-                    'items'       => $item->{itemnumber},
-                    'biblio'      => $item->{biblionumber},
-                    'biblioitems' => $item->{biblionumber},
-                    'borrowers'   => $borrower,
-                    'branches'    => $branch,
-                }
-            ) or next;
-            C4::Message->enqueue($letter, $borrower, $_);
+    for my $mtt (@transports) {
+        my $letter =  C4::Letters::GetPreparedLetter (
+            module => 'circulation',
+            letter_code => $type,
+            branchcode => $branch,
+            message_transport_type => $mtt,
+            tables => {
+                $issues_table => $item->{itemnumber},
+                'items'       => $item->{itemnumber},
+                'biblio'      => $item->{biblionumber},
+                'biblioitems' => $item->{biblionumber},
+                'borrowers'   => $borrower,
+                'branches'    => $branch,
+            }
+        ) or next;
+
+        $schema->storage->txn_begin;
+        C4::Context->dbh->do(q|LOCK TABLE message_queue READ|);
+        C4::Context->dbh->do(q|LOCK TABLE message_queue WRITE|);
+        my $message = C4::Message->find_last_message($borrower, $type, $mtt);
+        unless ( $message ) {
+            C4::Context->dbh->do(q|UNLOCK TABLES|);
+            C4::Message->enqueue($letter, $borrower, $mtt);
         } else {
-            #warn "append to old message";
-            my $letter =  C4::Letters::GetPreparedLetter (
-                module => 'circulation',
-                letter_code => $type,
-                branchcode => $branch,
-                message_transport_type => $_,
-                tables => {
-                    $issues_table => $item->{itemnumber},
-                    'items'       => $item->{itemnumber},
-                    'biblio'      => $item->{biblionumber},
-                    'biblioitems' => $item->{biblionumber},
-                    'borrowers'   => $borrower,
-                    'branches'    => $branch,
-                }
-            ) or next;
             $message->append($letter);
             $message->update;
         }
+        C4::Context->dbh->do(q|UNLOCK TABLES|);
+        $schema->storage->txn_commit;
     }
 
     return;

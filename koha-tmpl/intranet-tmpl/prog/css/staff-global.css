@@ -152,6 +152,10 @@ label input[type="radio"],
     font-weight : bold;
 }
 
+.members-update-table {
+    padding-top: 10px;
+}
+
 #navmenulist li {
 	padding : .2em 0;
     list-style-image : url("../img/arrow-bullet.gif");
@@ -774,6 +778,10 @@ fieldset.action, div.action {
 
 .btn-toolbar fieldset.action {
     margin-top: 0;
+}
+
+fieldset.rows li[aria-disabled="true"] {
+    color: #999;
 }
 
 div.rows+div.rows {
@@ -2635,6 +2643,10 @@ code {
     font-size: inherit;
     color: inherit;
     padding: 0;
+}
+
+.pagination > li > a, .pagination > li > span {
+    font-weight: bold;
 }
 
 /* End Bootstrap overrides */

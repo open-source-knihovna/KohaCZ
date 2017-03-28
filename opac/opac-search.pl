@@ -479,7 +479,8 @@ my %is_nolimit = map { $_ => 1 } @nolimits;
 if (@searchCategories > 0) {
     my @tabcat;
     foreach my $typecategory (@searchCategories) {
-        push (@tabcat, GetItemTypesByCategory($typecategory));
+        my @itemtypes = Koha::ItemTypes->search({ searchcategory => $typecategory });
+        push @tabcat, $_->itemtype for @itemtypes;
     }
 
     foreach my $itemtypeInCategory (@tabcat) {
@@ -610,7 +611,7 @@ if ($tag) {
     $pasarParams .= '&amp;simple_query=' . uri_escape_utf8($simple_query);
     $pasarParams .= '&amp;query_type=' . uri_escape_utf8($query_type) if ($query_type);
     eval {
-        ($error, $results_hashref, $facets) = $searcher->search_compat($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,undef,$itemtypes,$query_type,$scan,1);
+        ($error, $results_hashref, $facets) = $searcher->search_compat($query,$simple_query,\@sort_by,\@servers,$results_per_page,$offset,$expanded_facet,undef,$itemtypes_nocategory,$query_type,$scan,1);
 };
 }
 

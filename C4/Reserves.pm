@@ -168,6 +168,7 @@ The following tables are available witin the HOLDPLACED message:
     biblio
     biblioitems
     items
+    reserves
 
 =cut
 
@@ -241,6 +242,7 @@ sub AddReserve {
                 'biblio'      => $biblionumber,
                 'biblioitems' => $biblionumber,
                 'items'       => $checkitem,
+                'reserves'    => $hold->unblessed,
             },
         ) ) {
 
@@ -584,7 +586,7 @@ sub CanItemBeReserved {
     if ( C4::Context->preference('IndependentBranches')
         and !C4::Context->preference('canreservefromotherbranches') )
     {
-        my $itembranch = $item->{homebranch};
+        my $itembranch = $item->homebranch;
         if ( $itembranch ne $borrower->{branchcode} ) {
             return 'cannotReserveFromOtherBranches';
         }
@@ -1564,7 +1566,7 @@ sub IsAvailableForItemLevelRequest {
         foreach my $i (@items) {
             $any_available = 1
               unless $i->itemlost
-              || $i->{notforloan} > 0
+              || $i->notforloan > 0
               || $i->withdrawn
               || $i->onloan
               || IsItemOnHoldAndFound( $i->id )

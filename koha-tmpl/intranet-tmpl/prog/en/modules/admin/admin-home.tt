@@ -5,7 +5,7 @@
 </head>
 <body id="admin_admin-home" class="admin">
 [% INCLUDE 'header.inc' %]
-[% INCLUDE 'cat-search.inc' %]
+[% INCLUDE 'prefs-admin-search.inc' %]
 
 <div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; Administration</div>
 
@@ -124,6 +124,8 @@
                         <dt><a href="/cgi-bin/koha/admin/sms_providers.pl">SMS cellular providers</a></dt>
                         <dd>Define a list of cellular providers for sending SMS messages via email.</dd>
                     [% END %]
+                    <dt><a href="/cgi-bin/koha/admin/usage_statistics.pl">Share your usage statistics</a></dt>
+                    <dd>Share with the Koha community the usage statistics of your Koha installation.</dd>
                 </dl>
             </div>
         </div>

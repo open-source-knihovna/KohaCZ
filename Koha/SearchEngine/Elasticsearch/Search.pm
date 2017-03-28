@@ -146,7 +146,6 @@ sub search_compat {
         $servers,  $results_per_page, $offset,       $expanded_facet,
         $branches, $query_type,       $scan
     ) = @_;
-
     my %options;
     $options{offset} = $offset;
     $options{expanded_facet} = $expanded_facet;
@@ -167,7 +166,7 @@ sub search_compat {
     my %result;
     $result{biblioserver}{hits} = $results->total;
     $result{biblioserver}{RECORDS} = \@records;
-    return (undef, \%result, $self->_convert_facets($results->{facets}, $expanded_facet));
+    return (undef, \%result, $self->_convert_facets($results->{aggregations}, $expanded_facet));
 }
 
 =head2 search_auth_compat
@@ -257,8 +256,8 @@ sub count_auth_use {
 
     my $query = {
         query => {
-            filtered => {
-                query  => { match_all => {} },
+            bool => {
+#                query  => { match_all => {} },
                 filter => { term      => { an => $authid } }
             }
         }
@@ -408,16 +407,23 @@ sub _convert_facets {
         'su-geo' => { order => 4, label => 'Places', },
         se       => { order => 5, label => 'Series', },
         subject  => { order => 6, label => 'Topics', },
+        ccode    => { order => 7, label => 'CollectionCodes',},
+        holdingbranch => { order => 8, label => 'HoldingLibrary' },
+        homebranch => { order => 9, label => 'HomeLibrary' }
     );
 
     # We also have some special cases, e.g. itypes that need to show the
     # value rather than the code.
     my @itypes = Koha::ItemTypes->search;
+    my @libraries = Koha::Libraries->search;
+    my $library_names = { map { $_->branchcode => $_->branchname } @libraries };
     my @locations = Koha::AuthorisedValues->search( { category => 'LOC' } );
     my $opac = C4::Context->interface eq 'opac' ;
     my %special = (
         itype    => { map { $_->itemtype         => $_->description } @itypes },
         location => { map { $_->authorised_value => ( $opac ? ( $_->lib_opac || $_->lib ) : $_->lib ) } @locations },
+        holdingbranch => $library_names,
+        homebranch => $library_names
     );
     my @facets;
     $exp_facet //= '';
@@ -430,15 +436,15 @@ sub _convert_facets {
             type_id    => $type . '_id',
             expand     => $type,
             expandable => ( $type ne $exp_facet )
-              && ( @{ $data->{terms} } > $limit ),
+              && ( @{ $data->{buckets} } > $limit ),
             "type_label_$type_to_label{$type}{label}" => 1,
             type_link_value                    => $type,
             order      => $type_to_label{$type}{order},
         };
-        $limit = @{ $data->{terms} } if ( $limit > @{ $data->{terms} } );
-        foreach my $term ( @{ $data->{terms} }[ 0 .. $limit - 1 ] ) {
-            my $t = $term->{term};
-            my $c = $term->{count};
+        $limit = @{ $data->{buckets} } if ( $limit > @{ $data->{buckets} } );
+        foreach my $term ( @{ $data->{buckets} }[ 0 .. $limit - 1 ] ) {
+            my $t = $term->{key};
+            my $c = $term->{doc_count};
             my $label;
             if ( exists( $special{$type} ) ) {
                 $label = $special{$type}->{$t} // $t;

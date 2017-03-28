@@ -135,8 +135,13 @@ Using this account is not recommended because some parts of Koha will not functi
                             [% END %]
                             [% IF ( RESERVES.count ) %]<li><a href="#opac-user-holds">Holds ([% RESERVES.count %])</a></li>[% END %]
                             [% IF Koha.Preference('ArticleRequests') && borrower.article_requests_current %]<li><a href="#opac-user-article-requests">Article requests ([% borrower.article_requests_current.count %])</a></li>[% END %]
+                            [% IF ( OverDriveCirculation ) %]
+                            <li><a href="#opac-user-overdrive">OverDrive Account</a></li>
+                            [% END %]
                         </ul>
 
+                        <div id="opac-user-overdrive">
+                        </div>
                         <div id="opac-user-checkouts">
                             [% IF ( issues_count ) %]
                                 <form id="renewselected" action="/cgi-bin/koha/opac-renew.pl" method="post">
@@ -148,6 +153,7 @@ Using this account is not recommended because some parts of Koha will not functi
                                             <tr>
                                                 [% IF ( JacketImages ) %]<th class="nosort">&nbsp;</th>[% END %]
                                                 <th class="anti-the">Title</th>
+                                                <th>Author</th>
                                                 <th class="title-string psort">Due</th>
                                                 [% UNLESS ( item_level_itypes ) %]
                                                     <th>Item type</th>
@@ -210,7 +216,8 @@ Using this account is not recommended because some parts of Koha will not functi
                                                 <td class="title">
                                                     <a class="title" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ISSUE.biblionumber %]">[% ISSUE.title |html %] [% FOREACH subtitl IN ISSUE.subtitle %] [% subtitl.subfield %][% END %]</a>
                                                     [% IF ( ISSUE.enumchron ) %] [% ISSUE.enumchron %][% END %]
-                                                    <span class="item-details">[% ISSUE.author %]</span>
+                                                </td>
+                                                <td class="author">[% ISSUE.author %]</td>
                                                 </td>
                                                 [% IF ( ISSUE.overdue ) %]
                                                     <td class="date_due overdue">
@@ -824,6 +831,10 @@ Using this account is not recommended because some parts of Koha will not functi
     </div> <!-- /.container-fluid -->
 </div> <!-- /#main -->
 
+[% IF ( OverDriveCirculation ) %]
+[% INCLUDE 'overdrive-checkout.inc' %]
+[% END %]
+
 [% INCLUDE 'opac-bottom.inc' %]
 
 
@@ -887,4 +898,22 @@ Using this account is not recommended because some parts of Koha will not functi
         });
         //]]>
     </script>
+    [% IF Koha.Preference('OverDriveCirculation') %]
+    <script type="text/javascript" src="[% interface %]//[% theme %]/js/overdrive.js"></script>
+    <script type="text/JavaScript">
+    $(document).ready(function() {
+        [% IF ( overdrive_error ) %]
+            KOHA.OverDriveCirculation.display_error("#opac-user-overdrive", "[% overdrive_error.dquote %]");
+        [% END %]
+
+        [% IF ( overdrive_tab ) %]
+            $("#opac-user-views").tabs("select", "#opac-user-overdrive");
+        [% END %]
+
+        $("#opac-user-overdrive").each( function() {
+            KOHA.OverDriveCirculation.display_account_details(this);
+        } );
+    });
+    </script>
+    [% END %]
 [% END %]
