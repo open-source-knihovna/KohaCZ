@@ -11,6 +11,9 @@
   "hold": {
     "$ref": "definitions/hold.json"
   },
+  "messaging_preferences": {
+    "$ref": "definitions/messaging_preferences.json"
+  },
   "error": {
     "$ref": "definitions/error.json"
   }

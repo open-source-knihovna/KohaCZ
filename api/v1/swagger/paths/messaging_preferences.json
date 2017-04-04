@@ -1,0 +1,83 @@
+{
+  "/messaging_preferences/{borrowernumber}": {
+    "get": {
+      "operationId": "getMessagingPreferences",
+      "tags": ["messaging_preferences"],
+      "parameters": [{
+          "$ref": "../parameters.json#/borrowernumberPathParam"
+        }
+      ],
+      "produces": [
+          "application/json"
+      ],
+      "responses": {
+        "200": {
+          "description": "A messaging preferences of a patron",
+          "schema": {
+            "$ref": "../definitions.json#/messaging_preferences"
+          }
+        },
+        "403": {
+          "description": "Access forbidden",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        },
+        "404": {
+          "description": "Patron not found",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        }
+      },
+      "x-koha-authorization": {
+        "allow-owner": true,
+        "allow-guarantor": true,
+        "permissions": {
+          "borrowers": "1"
+        }
+      }
+    },
+    "post": {
+      "operationId": "setMessagingPreferences",
+      "tags": ["messaging_preferences"],
+      "parameters": [{
+        "name": "body",
+        "in": "body",
+        "description": "A JSON object containing informations about the patron messaging preferences",
+        "required": true,
+        "schema": {
+          "$ref": "../definitions.json#/messaging_preferences"
+        }
+      }],
+      "produces": [
+        "application/json"
+      ],
+      "responses": {
+        "200": {
+          "description": "City added",
+          "schema": {
+            "$ref": "../definitions.json#/messaging_preferences"
+          }
+        },
+        "403": {
+          "description": "Access forbidden",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        },
+        "500": {
+          "description": "Internal error",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        }
+      },
+      "x-koha-authorization": {
+        "permissions": {
+          "parameters": "parameters_remaining_permissions"
+        }
+      }
+    }
+  }
+}

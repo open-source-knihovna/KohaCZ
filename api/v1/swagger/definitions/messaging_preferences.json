@@ -1,0 +1,94 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "message_name": {
+          "description": "Name qualifier of the message",
+          "type": "string"
+      },
+      "transport_email": {
+          "description": "Email to use for transport",
+          "type": "string"
+      },
+      "transport_sms": {
+          "description": "Sms to use for transport",
+          "type": "string"
+      },
+      "message_attribute_id": {
+          "description": "Id of the message attribute",
+          "type": "integer"
+      },
+      "takes_days": {
+          "description": "Number of days it takes",
+          "type": "string"
+      },
+      "days_in_advance": {
+          "description": "Number of days in advance to notify",
+          "type": ["integer", "string", "null"]
+      },
+      "select_days": {
+          "description": "Number of days it takes",
+          "type": ["array", "null"],
+          "items": {
+            "type": "object",
+            "properties": {
+                "selected": {
+                    "description": "Is this number selected",
+                    "type": ["integer", "string"]
+                },
+                "day": {
+                    "description": "Day number",
+                    "type": "integer"
+                }
+            }
+          }
+      },
+      "has_digest": {
+          "description": "Can be digest turned on",
+          "type": ["integer", "null"]
+      },
+      "digest": {
+          "description": "Is digest turned on",
+          "type": ["integer", "null"]
+      },
+      "transports_email": {
+          "description": "Is email transport turned on",
+          "type": ["integer", "null"]
+      },
+      "transports_sms": {
+          "description": "Is sms transport turned on",
+          "type": ["integer", "null"]
+      },
+      "transports_phone": {
+          "description": "Is phone transport turned on",
+          "type": ["integer", "null"]
+      },
+      "Hold_Filled": {
+          "description": "Notification qualifier for hold filled",
+          "type": ["integer", "null"]
+      },
+      "Item_Check_in": {
+          "description": "Notification qualifier for item check in",
+          "type": ["integer", "null"]
+      },
+      "Item_Checkout": {
+          "description": "Notification qualifier for item checkout",
+          "type": ["integer", "null"]
+      },
+      "Hold_Filled": {
+          "description": "Notification qualifier for hold filled",
+          "type": ["integer", "null"]
+      },
+      "Advance_Notice": {
+          "description": "Notification qualifier for advance notice",
+          "type": ["integer", "null"]
+      },
+      "Hold_Filled": {
+          "description": "Notification qualifier for hold filled",
+          "type": ["integer", "null"]
+      }
+    }
+  },
+  "additionalProperties": false
+}

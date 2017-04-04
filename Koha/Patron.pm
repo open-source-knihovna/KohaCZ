@@ -584,6 +584,35 @@ sub holds {
     return Koha::Holds->_new_from_dbic($holds_rs);
 }
 
+=head3 messaging_preferences
+
+my $messaging = $category->messaging_preferences();
+
+=cut
+
+sub messaging_preferences {
+    my ( $self ) = @_;
+    my $messaging_options = C4::Members::Messaging::GetMessagingOptions();
+    PREF: foreach my $option ( @$messaging_options ) {
+        my $pref = C4::Members::Messaging::GetMessagingPreferences( { borrowernumber => $self->borrowernumber, message_name => $option->{'message_name'} } );
+        $option->{ $option->{'message_name'} } = 1;
+        # make a hashref of the days, selecting one.
+        if ( $option->{'takes_days'} ) {
+            my $days_in_advance = $pref->{'days_in_advance'} ? $pref->{'days_in_advance'} : 0;
+            $option->{days_in_advance} = $days_in_advance;
+            @{$option->{'select_days'}} = map { {
+                day        => $_,
+                selected   => $_ == $days_in_advance  }
+            } ( 0..30 );
+        }
+        foreach my $transport ( keys %{$pref->{'transports'}} ) {
+            $option->{'transports_'.$transport} = 1;
+        }
+        $option->{'digest'} = 1 if $pref->{'wants_digest'};
+    }
+    return $messaging_options;
+}
+
 =head3 type
 
 =cut
