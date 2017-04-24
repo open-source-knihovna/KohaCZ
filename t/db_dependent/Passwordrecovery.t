@@ -21,6 +21,7 @@ use C4::Context;
 use C4::Letters;
 use Koha::Database;
 use Koha::Patrons;
+use t::lib::TestBuilder;
 
 use Test::More tests => 18;
 
@@ -35,7 +36,7 @@ $dbh->{RaiseError} = 1;
 #
 # Start with fresh data
 #
-
+my $builder = t::lib::TestBuilder->new;
 my $borrowernumber1 = '2000000000';
 my $borrowernumber2 = '2000000001';
 my $borrowernumber3 = '2000000002';
@@ -49,8 +50,8 @@ my $uuid1   = "ABCD1234";
 my $uuid2   = "WXYZ0987";
 my $uuid3   = "LMNO4561";
 
-my $categorycode = 'S'; #  staff
-my $branch       = $schema->resultset('Branch')->first(); #  legit branch from your db
+my $patron_category = $builder->build({ source => 'Category' });
+my $branch = $builder->build({ source => 'Branch' });
 
 $schema->resultset('BorrowerPasswordRecovery')->delete_all();
 
@@ -62,8 +63,8 @@ $schema->resultset('Borrower')->create(
         city            => '',
         userid          => $userid1,
         email           => $email1,
-        categorycode    => $categorycode,
-        branchcode      => $branch,
+        categorycode    => $patron_category->{categorycode},
+        branchcode      => $branch->{branchcode},
     }
 );
 $schema->resultset('Borrower')->create(
@@ -74,8 +75,8 @@ $schema->resultset('Borrower')->create(
         city            => '',
         userid          => $userid2,
         email           => $email2,
-        categorycode    => $categorycode,
-        branchcode      => $branch,
+        categorycode    => $patron_category->{categorycode},
+        branchcode      => $branch->{branchcode},
     }
 );
 $schema->resultset('Borrower')->create(
@@ -86,8 +87,8 @@ $schema->resultset('Borrower')->create(
         city           => '',
         userid         => $userid3,
         email          => $email3,
-        categorycode   => $categorycode,
-        branchcode     => $branch,
+        categorycode   => $patron_category->{categorycode},
+        branchcode     => $branch->{branchcode},
     }
 );
 

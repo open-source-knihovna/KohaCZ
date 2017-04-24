@@ -41,12 +41,11 @@ BEGIN {
 	@ISA    = qw(Exporter);
 	@EXPORT = qw(
         &GetPrinters &GetPrinter
-        &GetItemTypes &getitemtypeinfo
+        &getitemtypeinfo
         &GetItemTypesCategorized
         &getallthemes
         &getFacets
         &getnbpages
-		&get_notforloan_label_of
 		&getitemtypeimagedir
 		&getitemtypeimagesrc
 		&getitemtypeimagelocation
@@ -85,90 +84,6 @@ Koha.pm provides many functions for Koha scripts.
 =head1 FUNCTIONS
 
 =cut
-
-=head2 GetItemTypes
-
-  $itemtypes = &GetItemTypes( style => $style );
-
-Returns information about existing itemtypes.
-
-Params:
-    style: either 'array' or 'hash', defaults to 'hash'.
-           'array' returns an arrayref,
-           'hash' return a hashref with the itemtype value as the key
-
-build a HTML select with the following code :
-
-=head3 in PERL SCRIPT
-
-    my $itemtypes = GetItemTypes;
-    my @itemtypesloop;
-    foreach my $thisitemtype (sort keys %$itemtypes) {
-        my $selected = 1 if $thisitemtype eq $itemtype;
-        my %row =(value => $thisitemtype,
-                    selected => $selected,
-                    description => $itemtypes->{$thisitemtype}->{'description'},
-                );
-        push @itemtypesloop, \%row;
-    }
-    $template->param(itemtypeloop => \@itemtypesloop);
-
-=head3 in TEMPLATE
-
-    <form action='<!-- TMPL_VAR name="script_name" -->' method=post>
-        <select name="itemtype">
-            <option value="">Default</option>
-        <!-- TMPL_LOOP name="itemtypeloop" -->
-            <option value="<!-- TMPL_VAR name="value" -->" <!-- TMPL_IF name="selected" -->selected<!-- /TMPL_IF -->><!-- TMPL_VAR name="description" --></option>
-        <!-- /TMPL_LOOP -->
-        </select>
-        <input type=text name=searchfield value="<!-- TMPL_VAR name="searchfield" -->">
-        <input type="submit" value="OK" class="button">
-    </form>
-
-=cut
-
-sub GetItemTypes {
-    my ( %params ) = @_;
-    my $style = defined( $params{'style'} ) ? $params{'style'} : 'hash';
-
-    require C4::Languages;
-    my $language = C4::Languages::getlanguage();
-    # returns a reference to a hash of references to itemtypes...
-    my $dbh   = C4::Context->dbh;
-    my $query = q|
-        SELECT
-               itemtypes.itemtype,
-               itemtypes.description,
-               itemtypes.rentalcharge,
-               itemtypes.notforloan,
-               itemtypes.imageurl,
-               itemtypes.summary,
-               itemtypes.checkinmsg,
-               itemtypes.checkinmsgtype,
-               itemtypes.sip_media_type,
-               itemtypes.hideinopac,
-               itemtypes.searchcategory,
-               COALESCE( localization.translation, itemtypes.description ) AS translated_description
-        FROM   itemtypes
-        LEFT JOIN localization ON itemtypes.itemtype = localization.code
-            AND localization.entity = 'itemtypes'
-            AND localization.lang = ?
-        ORDER BY itemtype
-    |;
-    my $sth = $dbh->prepare($query);
-    $sth->execute( $language );
-
-    if ( $style eq 'hash' ) {
-        my %itemtypes;
-        while ( my $IT = $sth->fetchrow_hashref ) {
-            $itemtypes{ $IT->{'itemtype'} } = $IT;
-        }
-        return ( \%itemtypes );
-    } else {
-        return [ sort { lc $a->{translated_description} cmp lc $b->{translated_description} } @{ $sth->fetchall_arrayref( {} ) } ];
-    }
-}
 
 =head2 GetItemTypesCategorized
 
@@ -637,58 +552,6 @@ sub getFacets {
     return $facets;
 }
 
-=head2 get_notforloan_label_of
-
-  my $notforloan_label_of = get_notforloan_label_of();
-
-Each authorised value of notforloan (information available in items and
-itemtypes) is link to a single label.
-
-Returns a href where keys are authorised values and values are corresponding
-labels.
-
-  foreach my $authorised_value (keys %{$notforloan_label_of}) {
-    printf(
-        "authorised_value: %s => %s\n",
-        $authorised_value,
-        $notforloan_label_of->{$authorised_value}
-    );
-  }
-
-=cut
-
-# FIXME - why not use GetAuthorisedValues ??
-#
-sub get_notforloan_label_of {
-    my $dbh = C4::Context->dbh;
-
-    my $query = '
-SELECT authorised_value
-  FROM marc_subfield_structure
-  WHERE kohafield = \'items.notforloan\'
-  LIMIT 0, 1
-';
-    my $sth = $dbh->prepare($query);
-    $sth->execute();
-    my ($statuscode) = $sth->fetchrow_array();
-
-    $query = '
-SELECT lib,
-       authorised_value
-  FROM authorised_values
-  WHERE category = ?
-';
-    $sth = $dbh->prepare($query);
-    $sth->execute($statuscode);
-    my %notforloan_label_of;
-    while ( my $row = $sth->fetchrow_hashref ) {
-        $notforloan_label_of{ $row->{authorised_value} } = $row->{lib};
-    }
-    $sth->finish;
-
-    return \%notforloan_label_of;
-}
-
 =head2 GetAuthorisedValues
 
   $authvalues = GetAuthorisedValues([$category]);
@@ -899,44 +762,6 @@ sub GetNormalizedOCLCNumber {
     }
     return
 }
-
-sub GetAuthvalueDropbox {
-    my ( $authcat, $default ) = @_;
-    my $branch_limit = C4::Context->userenv ? C4::Context->userenv->{"branch"} : "";
-    my $dbh = C4::Context->dbh;
-
-    my $query = qq{
-        SELECT *
-        FROM authorised_values
-    };
-    $query .= qq{
-          LEFT JOIN authorised_values_branches ON ( id = av_id )
-    } if $branch_limit;
-    $query .= qq{
-        WHERE category = ?
-    };
-    $query .= " AND ( branchcode = ? OR branchcode IS NULL )" if $branch_limit;
-    $query .= " GROUP BY lib ORDER BY category, lib, lib_opac";
-    my $sth = $dbh->prepare($query);
-    $sth->execute( $authcat, $branch_limit ? $branch_limit : () );
-
-
-    my $option_list = [];
-    my @authorised_values = ( q{} );
-    while (my $av = $sth->fetchrow_hashref) {
-        push @{$option_list}, {
-            value => $av->{authorised_value},
-            label => $av->{lib},
-            default => ($default eq $av->{authorised_value}),
-        };
-    }
-
-    if ( @{$option_list} ) {
-        return $option_list;
-    }
-    return;
-}
-
 
 =head2 GetDailyQuote($opts)
 

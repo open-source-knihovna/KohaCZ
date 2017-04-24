@@ -13954,16 +13954,12 @@ if( CheckVersion( $DBversion ) ) {
         $dbh->do(q|ALTER TABLE opac_news CHANGE COLUMN new content text NOT NULL|);
     }
 
-    my ( $used_in_templates ) = $dbh->selectrow_array(q|
-        SELECT COUNT(*) FROM letter WHERE content LIKE "%<<opac_news.new>>%";
+    $dbh->do(q|
+        UPDATE letter SET content = REPLACE(content, "<<opac_news.new>>", "<<opac_news.content>>") WHERE content LIKE "%<<opac_news.new>>%"
     |);
-    if ( $used_in_templates ) {
-        print "WARNING - It seems that you are using the opac_news.new column in your notice templates\n";
-        print "Since it has now been renamed with opac_news.content, you should update them.\n";
-    }
 
     SetVersion( $DBversion );
-    print "Upgrade to $DBversion done (Bug 17960 - Rename opac_news with opac_news.content)\n";
+    print "Upgrade to $DBversion done (Bug 17960 - Rename opac_news with opac_news.content (template notices have been updated!))\n";
 }
 
 $DBversion = "16.12.00.008";
@@ -14087,8 +14083,159 @@ if ( CheckVersion($DBversion) ) {
         });
     }
 
-    print "Upgrade to $DBversion done (Bug 13757: Make patron attributes editable in the opac if set to 'editable in OPAC'\n";
+    print "Upgrade to $DBversion done (Bug 13757: Make patron attributes editable in the opac if set to 'editable in OPAC)'\n";
     SetVersion($DBversion);
+}
+
+$DBversion = "16.12.00.017";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('CumulativeRestrictionPeriods',  0,  NULL,  'Cumulate the restriction periods instead of keeping the highest',  'YesNo')
+    });
+
+    print "Upgrade to $DBversion done (Bug 14146 - Additional days are not added to restriction period when checking-in several overdues for same patron)'\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.12.00.018";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type )
+            SELECT 'ExportCircHistory', COUNT(*), NULL, "Display the export circulation options",  'YesNo'
+            FROM systempreferences
+            WHERE ( variable = 'ExportRemoveFields' AND value != "" AND value IS NOT NULL )
+                OR ( variable = 'ExportWithCsvProfile' AND value != "" AND value IS NOT NULL );
+    });
+
+    $dbh->do(q{
+        DELETE FROM systempreferences WHERE variable="ExportWithCsvProfile";
+    });
+
+    print "Upgrade to $DBversion done (Bug 15498 - Replace ExportWithCsvProfile with ExportCircHistory)'\n";
+    SetVersion($DBversion);
+}
+
+$DBversion = "16.12.00.019";
+if( CheckVersion( $DBversion ) ) {
+    if ( column_exists( 'issues', 'return' ) ) {
+        $dbh->do(q|ALTER TABLE issues DROP column `return`|);
+    }
+
+    if ( column_exists( 'old_issues', 'return' ) ) {
+        $dbh->do(q|ALTER TABLE old_issues DROP column `return`|);
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18173 - Remove issues.return DB field)\n";
+}
+
+$DBversion = "16.12.00.020";
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        UPDATE systempreferences SET options="any_time_is_placed|not_always|any_time_is_collected" WHERE variable="HoldFeeMode";
+    });
+
+    $dbh->do(q{
+        UPDATE systempreferences SET value="any_time_is_placed" WHERE variable="HoldFeeMode" AND value="always";
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17560 - Hold fee placement at point of checkout)\n";
+}
+
+$DBversion = "16.12.00.021";
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('RenewalLog','0','','If ON, log information about renewals','YesNo');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17708 - Renewal log seems empty)\n";
+}
+
+$DBversion = "16.12.00.022";
+if( CheckVersion( $DBversion ) ) {
+    print "NOTE: The sender for claim notifications has been corrected. The email address of the staff member is no longer used. We will use the branch email address or KohaAdminEmailAddress, as is done for other notices.\n";
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17866 - Change sender for serial claim notifications)\n";
+}
+
+$DBversion = '16.12.00.023';
+if( CheckVersion( $DBversion ) ) {
+    my $oldval = C4::Context->preference('dontmerge');
+    my $newval = $oldval ? 0 : 50;
+
+    # Remove dontmerge, add AuthorityMergeLimit
+    $dbh->do(q{
+        DELETE FROM systempreferences WHERE variable = 'dontmerge';
+    });
+    $dbh->do(qq{
+        INSERT IGNORE INTO systempreferences ( variable, value, options, explanation, type ) VALUES ('AuthorityMergeLimit','$newval',NULL,'Maximum number of biblio records updated immediately when an authority record has been modified.','integer');
+    });
+
+    $dbh->do(q{
+        ALTER TABLE need_merge_authorities
+            ADD COLUMN authid_new BIGINT AFTER authid,
+            ADD COLUMN reportxml text AFTER authid_new,
+            ADD COLUMN timestamp timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+    });
+
+    $dbh->do(q{
+        UPDATE need_merge_authorities SET authid_new=authid WHERE done <> 1
+    });
+
+    SetVersion( $DBversion );
+    if( $newval == 0 ) {
+        print "NOTE: Since dontmerge was enabled, we have initialized AuthorityMergeLimit to 0 records. Please consider raising this value. This will allow for performing smaller merges directly and only postponing larger merges.\n";
+    }
+    print "IMPORTANT NOTE: If you are not using a Debian package install, please verify that you no longer use misc/migration_tools/merge_authority.pl in your cron files AND add misc/cronjobs/merge_authorities.pl to cron now. This job is no longer optional! You need it to perform larger authority merges.\n";
+    print "Upgrade to $DBversion done (Bug 9988 - Add AuthorityMergeLimit)\n";
+}
+
+$DBversion = '16.12.00.024';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        UPDATE systempreferences SET variable="NoticeBcc" WHERE variable="OverdueNoticeBcc";
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 14537 - The system preference 'OverdueNoticeBcc' is mis-named.)\n";
+}
+
+$DBversion = '16.12.00.025';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q|
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` )
+        VALUES ('UploadPurgeTemporaryFilesDays','',NULL,'If not empty, number of days used when automatically deleting temporary uploads','integer');
+    |);
+
+    my ( $cnt ) = $dbh->selectrow_array( "SELECT COUNT(*) FROM uploaded_files WHERE permanent IS NULL or permanent=0" );
+    if( $cnt ) {
+        print "NOTE: You have $cnt temporary uploads. You could benefit from setting pref UploadPurgeTemporaryFilesDays now to automatically delete them.\n";
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17669 - Introduce preference for deleting temporary uploads)\n";
+}
+
+$DBversion = '16.12.00.026';
+if( CheckVersion( $DBversion ) ) {
+
+    # In order to be overcomplete, we check if the situation is what we expect
+    if( !index_exists( 'serialitems', 'PRIMARY' ) ) {
+        if( index_exists( 'serialitems', 'serialitemsidx' ) ) {
+            $dbh->do(q|
+                ALTER TABLE serialitems ADD PRIMARY KEY (itemnumber), DROP INDEX serialitemsidx;
+            |);
+        } else {
+            $dbh->do(q|ALTER TABLE serialitems ADD PRIMARY KEY (itemnumber)|);
+        }
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18427 - Add a primary key to serialitems)\n";
 }
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory

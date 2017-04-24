@@ -830,11 +830,11 @@ sub CanBookBeIssued {
 
     # JB34 CHECKS IF BORROWERS DON'T HAVE ISSUE TOO MANY BOOKS
     #
-    my $switch_onsite_checkout =
+    my $switch_onsite_checkout = (
           C4::Context->preference('SwitchOnSiteCheckouts')
       and $issue->{onsite_checkout}
       and $issue
-      and $issue->{borrowernumber} == $borrower->{'borrowernumber'} ? 1 : 0;
+      and $issue->{borrowernumber} == $borrower->{'borrowernumber'} ? 1 : 0 );
     my $toomany = TooMany( $borrower, $item->{biblionumber}, $item, { onsite_checkout => $onsite_checkout, switch_onsite_checkout => $switch_onsite_checkout, } );
     # if TooMany max_allowed returns 0 the user doesn't have permission to check out this book
     if ( $toomany ) {
@@ -2217,17 +2217,17 @@ C<$item> item hashref
 
 C<$datedue> date due DateTime object
 
-C<$today> DateTime object representing the return time
+C<$return_date> DateTime object representing the return time
 
 Internal function, called only by AddReturn that calculates and updates
- the user fine days, and debars him if necessary.
+ the user fine days, and debars them if necessary.
 
 Should only be called for overdue returns
 
 =cut
 
 sub _debar_user_on_return {
-    my ( $borrower, $item, $dt_due, $dt_today ) = @_;
+    my ( $borrower, $item, $dt_due, $return_date ) = @_;
 
     my $branchcode = _GetCircControlBranch( $item, $borrower );
 
@@ -2240,7 +2240,7 @@ sub _debar_user_on_return {
     );
     my $finedays = $issuing_rule ? $issuing_rule->finedays : undef;
     my $unit     = $issuing_rule ? $issuing_rule->lengthunit : undef;
-    my $chargeable_units = C4::Overdues::get_chargeable_units($unit, $dt_due, $dt_today, $branchcode);
+    my $chargeable_units = C4::Overdues::get_chargeable_units($unit, $dt_due, $return_date, $branchcode);
 
     if ($finedays) {
 
@@ -2267,8 +2267,17 @@ sub _debar_user_on_return {
                   if DateTime::Duration->compare( $max_sd, $suspension_days ) < 0;
             }
 
+            my ( $has_been_extended, $is_a_reminder );
+            if ( C4::Context->preference('CumulativeRestrictionPeriods') and $borrower->{debarred} ) {
+                my $debarment = @{ GetDebarments( { borrowernumber => $borrower->{borrowernumber}, type => 'SUSPENSION' } ) }[0];
+                if ( $debarment ) {
+                    $return_date = dt_from_string( $debarment->{expiration}, 'sql' );
+                    $has_been_extended = 1;
+                }
+            }
+
             my $new_debar_dt =
-              $dt_today->clone()->add_duration( $suspension_days );
+              $return_date->clone()->add_duration( $suspension_days );
 
             Koha::Patron::Debarments::AddUniqueDebarment({
                 borrowernumber => $borrower->{borrowernumber},
@@ -2277,10 +2286,15 @@ sub _debar_user_on_return {
             });
             # if borrower was already debarred but does not get an extra debarment
             my $patron = Koha::Patrons->find( $borrower->{borrowernumber} );
+            my $new_debarment_str;
             if ( $borrower->{debarred} eq $patron->is_debarred ) {
-                return ($borrower->{debarred},1);
+                $is_a_reminder = 1;
+                $new_debarment_str = $borrower->{debarred};
+            } else {
+                $new_debarment_str = $new_debar_dt->ymd();
             }
-            return $new_debar_dt->ymd();
+            # FIXME Should return a DateTime object
+            return $new_debarment_str, $is_a_reminder;
         }
     }
     return;
@@ -2859,7 +2873,7 @@ sub AddRenewal {
         $datedue = (C4::Context->preference('RenewalPeriodBase') eq 'date_due') ?
                                         dt_from_string( $issuedata->{date_due} ) :
                                         DateTime->now( time_zone => C4::Context->tz());
-        $datedue =  CalcDateDue($datedue, $itemtype, $issuedata->{'branchcode'}, $borrower, 'is a renewal');
+        $datedue =  CalcDateDue($datedue, $itemtype, _GetCircControlBranch($item, $borrower), $borrower, 'is a renewal');
     }
 
     # Update the issues record to have the new due date, and a new count
@@ -2926,7 +2940,7 @@ sub AddRenewal {
         DelUniqueDebarment({ borrowernumber => $borrowernumber, type => 'OVERDUES' });
     }
 
-    # Log the renewal
+    # Add the renewal to stats
     UpdateStats(
         {
             branch => C4::Context->userenv ? C4::Context->userenv->{branch} : $branch,
@@ -2939,6 +2953,8 @@ sub AddRenewal {
         }
     );
 
+    #Log the renewal
+    logaction("CIRCULATION", "RENEWAL", $borrowernumber, $itemnumber) if C4::Context->preference("RenewalLog");
     return $datedue;
 }
 
@@ -3343,6 +3359,13 @@ sub SendCirculationAlert {
 
     my $schema = Koha::Database->new->schema;
     my @transports = keys %{ $borrower_preferences->{transports} };
+
+    # From the MySQL doc:
+    # LOCK TABLES is not transaction-safe and implicitly commits any active transaction before attempting to lock the tables.
+    # If the LOCK/UNLOCK statements are executed from tests, the current transaction will be committed.
+    # To avoid that we need to guess if this code is execute from tests or not (yes it is a bit hacky)
+    my $do_not_lock = ( exists $ENV{_} && $ENV{_} =~ m|prove| ) || $ENV{KOHA_NO_TABLE_LOCKS};
+
     for my $mtt (@transports) {
         my $letter =  C4::Letters::GetPreparedLetter (
             module => 'circulation',
@@ -3360,17 +3383,17 @@ sub SendCirculationAlert {
         ) or next;
 
         $schema->storage->txn_begin;
-        C4::Context->dbh->do(q|LOCK TABLE message_queue READ|);
-        C4::Context->dbh->do(q|LOCK TABLE message_queue WRITE|);
+        C4::Context->dbh->do(q|LOCK TABLE message_queue READ|) unless $do_not_lock;
+        C4::Context->dbh->do(q|LOCK TABLE message_queue WRITE|) unless $do_not_lock;
         my $message = C4::Message->find_last_message($borrower, $type, $mtt);
         unless ( $message ) {
-            C4::Context->dbh->do(q|UNLOCK TABLES|);
+            C4::Context->dbh->do(q|UNLOCK TABLES|) unless $do_not_lock;
             C4::Message->enqueue($letter, $borrower, $mtt);
         } else {
             $message->append($letter);
             $message->update;
         }
-        C4::Context->dbh->do(q|UNLOCK TABLES|);
+        C4::Context->dbh->do(q|UNLOCK TABLES|) unless $do_not_lock;
         $schema->storage->txn_commit;
     }
 
@@ -3837,7 +3860,7 @@ sub IsItemIssued {
   my ($ageRestriction, $daysToAgeRestriction) = GetAgeRestriction($record_restrictions, $borrower);
   my ($ageRestriction, $daysToAgeRestriction) = GetAgeRestriction($record_restrictions);
 
-  if($daysToAgeRestriction <= 0) { #Borrower is allowed to access this material, as he is older or as old as the agerestriction }
+  if($daysToAgeRestriction <= 0) { #Borrower is allowed to access this material, as they are older or as old as the agerestriction }
   if($daysToAgeRestriction > 0) { #Borrower is this many days from meeting the agerestriction }
 
 @PARAM1 the koha.biblioitems.agerestriction value, like K18, PEGI 13, ...

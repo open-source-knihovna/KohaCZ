@@ -44,6 +44,8 @@ use C4::Members;
 use C4::Search;		# enabled_staff_search_views
 use Koha::DateUtils;
 use Koha::Holds;
+use Koha::Items;
+use Koha::ItemTypes;
 use Koha::Libraries;
 use Koha::Patrons;
 
@@ -63,7 +65,7 @@ my $multihold = $input->param('multi_hold');
 $template->param(multi_hold => $multihold);
 my $showallitems = $input->param('showallitems');
 
-my $itemtypes = GetItemTypes();
+my $itemtypes = { map { $_->{itemtype} => $_ } @{ Koha::ItemTypes->search_with_localization->unblessed } };
 
 # Select borrowers infos
 my $findborrower = $input->param('findborrower');
@@ -134,7 +136,7 @@ if ($borrowernumber_hold && !$action) {
     my $borrowerinfo = GetMember( borrowernumber => $borrowernumber_hold );
     my $diffbranch;
 
-    # we check the reserves of the borrower, and if he can reserv a document
+    # we check the reserves of the user, and if they can reserve a document
     # FIXME At this time we have a simple count of reservs, but, later, we could improve the infos "title" ...
 
     my $reserves_count =
@@ -321,10 +323,12 @@ foreach my $biblionumber (@biblionumbers) {
     ## Should be same as biblionumber
     my @biblioitemnumbers = keys %itemnumbers_of_biblioitem;
 
-    my $notforloan_label_of = get_notforloan_label_of();
-
     ## Hash of biblioitemnumber to 'biblioitem' table records
     my $biblioiteminfos_of  = GetBiblioItemInfosOf(@biblioitemnumbers);
+
+    my $frameworkcode = GetFrameworkCode( $biblionumber );
+    my @notforloan_avs = Koha::AuthorisedValues->search_by_koha_field({ kohafield => 'items.notforloan', frameworkcode => $frameworkcode });
+    my $notforloan_label_of = { map { $_->authorised_value => $_->lib } @notforloan_avs };
 
     my @bibitemloop;
 
@@ -386,17 +390,17 @@ foreach my $biblionumber (@biblionumbers) {
             }
 
             # checking reserve
-            my ($reservedate,$reservedfor,$expectedAt,$reserve_id,$wait) = GetReservesFromItemnumber($itemnumber);
-            if ( defined $reservedate ) {
-                my $ItemBorrowerReserveInfo = GetMember( borrowernumber => $reservedfor );
+            my $holds = Koha::Items->find( $itemnumber )->current_holds;
+            if ( my $first_hold = $holds->next ) {
+                my $ItemBorrowerReserveInfo = GetMember( borrowernumber => $first_hold->borrowernumber );
 
                 $item->{backgroundcolor} = 'reserved';
-                $item->{reservedate}     = output_pref({ dt => dt_from_string( $reservedate ), dateonly => 1 });
-                $item->{ReservedForBorrowernumber}     = $reservedfor;
+                $item->{reservedate}     = output_pref({ dt => dt_from_string( $first_hold->reservedate ), dateonly => 1 }); # FIXME Should be formatted in the template
+                $item->{ReservedForBorrowernumber}     = $first_hold->borrowernumber;
                 $item->{ReservedForSurname}     = $ItemBorrowerReserveInfo->{'surname'};
                 $item->{ReservedForFirstname}     = $ItemBorrowerReserveInfo->{'firstname'};
-                $item->{ExpectedAtLibrary}     = $expectedAt;
-                $item->{waitingdate} = $wait;
+                $item->{ExpectedAtLibrary}     = $first_hold->branchcode;
+                $item->{waitingdate} = $first_hold->waitingdate;
             }
 
             # Management of the notforloan document

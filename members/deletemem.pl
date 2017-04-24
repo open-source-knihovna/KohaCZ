@@ -25,8 +25,6 @@ use strict;
 #use warnings; FIXME - Bug 2505
 
 use CGI qw ( -utf8 );
-use Digest::MD5 qw(md5_base64);
-use Encode qw( encode );
 use C4::Context;
 use C4::Output;
 use C4::Auth;
@@ -112,6 +110,8 @@ if ( $op eq 'delete_confirm' or $countissues > 0 or $flags->{'CHARGES'}  or $is_
     my $patron_image = Koha::Patron::Images->find($bor->{borrowernumber});
     $template->param( picture => 1 ) if $patron_image;
 
+    $template->param( adultborrower => 1 ) if ( $bor->{category_type} eq 'A' || $bor->{category_type} eq 'I' );
+
     $template->param(borrowernumber => $member,
         surname => $bor->{'surname'},
         title => $bor->{'title'},
@@ -128,7 +128,6 @@ if ( $op eq 'delete_confirm' or $countissues > 0 or $flags->{'CHARGES'}  or $is_
         phone => $bor->{'phone'},
         email => $bor->{'email'},
         branchcode => $bor->{'branchcode'},
-		activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
         RoutingSerials => C4::Context->preference('RoutingSerials'),
     );
     if ($countissues >0) {
@@ -147,19 +146,14 @@ if ( $op eq 'delete_confirm' or $countissues > 0 or $flags->{'CHARGES'}  or $is_
     if ( not $countissues > 0 and not $flags->{CHARGES} ne '' and not $is_guarantor and not $deletelocal == 0 ) {
         $template->param(
             op         => 'delete_confirm',
-            csrf_token => Koha::Token->new->generate_csrf(
-                {   id     => Encode::encode( 'UTF-8', C4::Context->userenv->{id} ),
-                    secret => md5_base64( Encode::encode( 'UTF-8', C4::Context->config('pass') ) ),
-                }
-            ),
+            csrf_token => Koha::Token->new->generate_csrf({ session_id => scalar $input->cookie('CGISESSID') }),
         );
     }
 } elsif ( $op eq 'delete_confirmed' ) {
 
     die "Wrong CSRF token"
-        unless Koha::Token->new->check_csrf({
-            id     => Encode::encode( 'UTF-8', C4::Context->userenv->{id} ),
-            secret => md5_base64( Encode::encode( 'UTF-8', C4::Context->config('pass') ) ),
+        unless Koha::Token->new->check_csrf( {
+            session_id => $input->cookie('CGISESSID'),
             token  => scalar $input->param('csrf_token'),
         });
     my $patron = Koha::Patrons->find( $member );

@@ -62,12 +62,12 @@ if ($merge) {
     ModAuthority( $recordid1, $record, $typecode );
 
     # Now merge for biblios attached to $recordid2
-    # We ignore dontmerge now, since recordid2 is deleted
     my $MARCfrom = GetAuthority( $recordid2 );
-    merge( $recordid2, $MARCfrom, $recordid1, $record );
+    merge({ mergefrom => $recordid2, MARCfrom => $MARCfrom, mergeto => $recordid1, MARCto => $record });
 
-    # Deleting the other record
-    DelAuthority( $recordid2 );
+    # Delete the other record. Do not merge. It is unneeded and could under
+    # special circumstances have unwanted side-effects.
+    DelAuthority({ authid => $recordid2, skip_merge => 1 });
 
     # Parameters
     $template->param(

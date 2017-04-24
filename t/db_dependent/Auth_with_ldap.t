@@ -31,8 +31,7 @@ use Koha::Patrons;
 my $dbh = '';
 
 # Start transaction
-my $database = Koha::Database->new();
-my $schema = $database->schema();
+my $schema = Koha::Database->new->schema;
 $schema->storage->txn_begin();
 
 my $builder = t::lib::TestBuilder->new();
@@ -46,11 +45,11 @@ my $anonymous_bind = 1;
 # Variables controlling LDAP behaviour
 my $desired_authentication_result = 'success';
 my $desired_connection_result     = 'error';
-my $desired_bind_result           = 'error';
-my $desired_compare_result        = 'error';
+my $desired_admin_bind_result     = 'error';
 my $desired_search_result         = 'error';
 my $desired_count_result          = 1;
-my $non_anonymous_bind_result     = 'error';
+my $desired_bind_result           = 'error';
+my $remaining_entry = 1;
 my $ret;
 
 # Mock the context module
@@ -150,7 +149,7 @@ subtest 'checkpw_ldap tests' => sub {
 
         $desired_authentication_result = 'success';
         $anonymous_bind                = 1;
-        $desired_bind_result           = 'error';
+        $desired_admin_bind_result   = 'error';
         $desired_search_result         = 'error';
         reload_ldap_module();
 
@@ -164,10 +163,10 @@ subtest 'checkpw_ldap tests' => sub {
 
         $desired_authentication_result = 'success';
         $anonymous_bind                = 1;
-        $desired_bind_result           = 'success';
+        $desired_admin_bind_result   = 'success';
         $desired_search_result         = 'success';
         $desired_count_result          = 1;
-        $non_anonymous_bind_result     = 'success';
+        $desired_bind_result = 'success';
         $update                        = 1;
         reload_ldap_module();
 
@@ -212,7 +211,7 @@ subtest 'checkpw_ldap tests' => sub {
             'checkpw_ldap returns 0 if user lookup returns 0'
         );
 
-        $non_anonymous_bind_result = 'error';
+        $desired_bind_result = 'error';
         reload_ldap_module();
 
         warning_like {
@@ -227,10 +226,10 @@ subtest 'checkpw_ldap tests' => sub {
         # regression tests for bug 12831
         $desired_authentication_result = 'error';
         $anonymous_bind                = 0;
-        $desired_bind_result           = 'error';
+        $desired_admin_bind_result   = 'error';
         $desired_search_result         = 'success';
         $desired_count_result          = 0;           # user auth problem
-        $non_anonymous_bind_result     = 'error';
+        $desired_bind_result = 'error';
         reload_ldap_module();
 
         warning_like {
@@ -252,8 +251,8 @@ subtest 'checkpw_ldap tests' => sub {
 
         # Anonymous bind
         $anonymous_bind            = 1;
-        $desired_bind_result       = 'error';
-        $non_anonymous_bind_result = 'error';
+        $desired_admin_bind_result = 'error';
+        $desired_bind_result = 'error';
         reload_ldap_module();
 
         warning_like {
@@ -265,24 +264,24 @@ qr/LDAP bind failed as ldapuser cn=Manager,dc=metavore,dc=com: LDAP error #1: er
         is( $ret, 0, 'checkpw_ldap returns 0 if bind fails' );
 
         $anonymous_bind            = 1;
-        $desired_bind_result       = 'success';
-        $non_anonymous_bind_result = 'success';
-        $desired_compare_result    = 'error';
+        $desired_admin_bind_result = 'success';
+        $desired_bind_result = 'error';
+        $desired_search_result = 'success';
+        $desired_count_result = 1;
         reload_ldap_module();
 
         warning_like {
             $ret = C4::Auth_with_ldap::checkpw_ldap( $dbh, 'hola',
                 password => 'hey' );
         }
-qr/LDAP Auth rejected : invalid password for user 'hola'. LDAP error #1: error_name/,
+qr/LDAP Auth rejected : invalid password for user 'hola'./,
           'checkpw_ldap prints correct warning if LDAP bind fails';
         is( $ret, -1, 'checkpw_ldap returns -1 if bind fails (Bug 8148)' );
 
         # Non-anonymous bind
         $anonymous_bind            = 0;
-        $desired_bind_result       = 'success';
-        $non_anonymous_bind_result = 'error';
-        $desired_compare_result    = 'dont care';
+        $desired_admin_bind_result = 'error';
+        $desired_bind_result = 'error';
         reload_ldap_module();
 
         warning_like {
@@ -294,16 +293,15 @@ qr/LDAP bind failed as ldapuser cn=Manager,dc=metavore,dc=com: LDAP error #1: er
         is( $ret, 0, 'checkpw_ldap returns 0 if bind fails' );
 
         $anonymous_bind            = 0;
-        $desired_bind_result       = 'success';
-        $non_anonymous_bind_result = 'success';
-        $desired_compare_result    = 'error';
+        $desired_admin_bind_result = 'success';
+        $desired_bind_result = 'error';
         reload_ldap_module();
 
         warning_like {
             $ret = C4::Auth_with_ldap::checkpw_ldap( $dbh, 'hola',
                 password => 'hey' );
         }
-qr/LDAP Auth rejected : invalid password for user 'hola'. LDAP error #1: error_name/,
+qr/LDAP Auth rejected : invalid password for user 'hola'./,
           'checkpw_ldap prints correct warning if LDAP bind fails';
         is( $ret, -1, 'checkpw_ldap returns -1 if bind fails (Bug 8148)' );
 
@@ -312,7 +310,7 @@ qr/LDAP Auth rejected : invalid password for user 'hola'. LDAP error #1: error_n
 
 subtest 'search_method tests' => sub {
 
-    plan tests => 5;
+    plan tests => 3;
 
     my $ldap = mock_net_ldap();
 
@@ -332,15 +330,6 @@ subtest 'search_method tests' => sub {
         qr/LDAP search failed to return object : 1/,
 'search_method prints correct warning when db->search returns error code'
     );
-
-    $desired_search_result = 'success';
-    $desired_count_result  = 2;
-    reload_ldap_module();
-    warning_like { $ret = C4::Auth_with_ldap::search_method( $ldap, '123' ) }
-    qr/^LDAP Auth rejected \: \(uid\=123\) gets 2 hits/,
-      'search_method prints correct warning when hits count is not 1';
-    is( $ret, 0, 'search_method returns 0 when hits count is not 1' );
-
 };
 
 # Function that mocks the call to C4::Context->config(param)
@@ -394,63 +383,28 @@ sub mock_net_ldap {
 
     my $mocked_ldap = Test::MockObject->new();
 
-    $mocked_ldap->mock(
-        'bind',
-        sub {
-
-            my @args = @_;
-            my $mocked_message;
-
-            if ( $#args > 1 ) {
-
-                # Args passed => non-anonymous bind
-                if ( $non_anonymous_bind_result eq 'error' ) {
-                    return mock_net_ldap_message( 1, 1, 'error_name',
-                        'error_text' );
-                }
-                else {
-                    return mock_net_ldap_message( 0, 0, q{}, q{} );
-                }
-            }
-            else {
-                $mocked_message = mock_net_ldap_message(
-                    ( $desired_bind_result eq 'error' ) ? 1 : 0,    # code
-                    ( $desired_bind_result eq 'error' ) ? 1 : 0,    # error
-                    ( $desired_bind_result eq 'error' )
-                    ? 'error_name'
-                    : 0,                                            # error_name
-                    ( $desired_bind_result eq 'error' )
-                    ? 'error_text'
-                    : 0                                             # error_text
-                );
-            }
-
-            return $mocked_message;
+    $mocked_ldap->mock( 'bind', sub {
+        if (is_admin_bind(@_)) {
+            return mock_net_ldap_message(
+                ($desired_admin_bind_result eq 'error' ) ? 1 : 0, # code
+                ($desired_admin_bind_result eq 'error' ) ? 1 : 0, # error
+                ($desired_admin_bind_result eq 'error' ) ? 'error_name' : 0, # error_name
+                ($desired_admin_bind_result eq 'error' ) ? 'error_text' : 0  # error_text
+            );
         }
-    );
-
-    $mocked_ldap->mock(
-        'compare',
-        sub {
-
-            my $mocked_message;
-
-            if ( $desired_compare_result eq 'error' ) {
-                $mocked_message =
-                  mock_net_ldap_message( 1, 1, 'error_name', 'error_text' );
+        else {
+            if ( $desired_bind_result eq 'error' ) {
+                return mock_net_ldap_message(1,1,'error_name','error_text');
             }
-            else {
-                # we expect return code 6 for success
-                $mocked_message = mock_net_ldap_message( 6, 0, q{}, q{} );
-            }
-
-            return $mocked_message;
+            return mock_net_ldap_message(0,0,'','');
         }
-    );
+    });
 
     $mocked_ldap->mock(
         'search',
         sub {
+
+            $remaining_entry = 1;
 
             return mock_net_ldap_search(
                 {
@@ -494,7 +448,13 @@ sub mock_net_ldap_search {
     $mocked_search->mock( 'error',       sub { return $error; } );
     $mocked_search->mock( 'error_name',  sub { return $error_name; } );
     $mocked_search->mock( 'error_text',  sub { return $error_text; } );
-    $mocked_search->mock( 'shift_entry', sub { return $shift_entry; } );
+    $mocked_search->mock( 'shift_entry', sub {
+        if ($remaining_entry) {
+            $remaining_entry--;
+            return $shift_entry;
+        }
+        return '';
+    });
 
     return $mocked_search;
 }
@@ -529,6 +489,16 @@ sub reload_ldap_module {
     require C4::Auth_with_ldap;
     C4::Auth_with_ldap->import;
     return;
+}
+
+sub is_admin_bind {
+    my @args = @_;
+
+    if ($#args <= 1 || $args[1] eq 'cn=Manager,dc=metavore,dc=com') {
+        return 1;
+    }
+
+    return 0;
 }
 
 $schema->storage->txn_rollback();

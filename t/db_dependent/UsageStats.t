@@ -17,8 +17,10 @@
 use Modern::Perl;
 use Test::More tests => 57;
 use t::lib::Mocks qw(mock_preference);
+use t::lib::TestBuilder;
 use POSIX qw(strftime);
 use Data::Dumper;
+use Koha::Biblios;
 
 use Koha::Libraries;
 
@@ -40,9 +42,10 @@ can_ok(
       _count )
 );
 
+my $schema  = Koha::Database->new->schema;
+$schema->storage->txn_begin;
+my $builder = t::lib::TestBuilder->new;
 my $dbh = C4::Context->dbh;
-$dbh->{AutoCommit} = 0;
-$dbh->{RaiseError} = 1;
 
 $dbh->do('DELETE FROM issues');
 $dbh->do('DELETE FROM biblio');
@@ -212,8 +215,8 @@ sub construct_objects_needed {
     my $cardnumber1  = 'test_card1';
     my $cardnumber2  = 'test_card2';
     my $cardnumber3  = 'test_card3';
-    my $categorycode = Koha::Database->new()->schema()->resultset('Category')->first()->categorycode();
-    my $branchcode   = Koha::Database->new()->schema()->resultset('Branch')->first()->branchcode();
+    my $categorycode = $builder->build({ source => 'Category' })->{categorycode};
+    my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
 
     my $query = '
     INSERT INTO borrowers
@@ -299,9 +302,9 @@ sub construct_objects_needed {
 
     # ---------- Add 1 old_reserves
     AddReserve( $branchcode, $borrowernumber1, $biblionumber1, '', 1, undef, undef, '', 'Title', undef, undef );
-    my $reserves1   = GetReservesFromBiblionumber( { biblionumber => $biblionumber1 } );
-    my $reserve_id1 = $reserves1->[0]->{reserve_id};
-    my $reserve1    = CancelReserve( { reserve_id => $reserve_id1 } );
+    my $biblio = Koha::Biblios->find( $biblionumber1 );
+    my $holds = $biblio->holds;
+    CancelReserve( { reserve_id => $holds->next->reserve_id } );
 
     # ---------- Add 1 aqbudgets
     $query = '
@@ -357,7 +360,8 @@ sub mocking_systempreferences_to_a_set_value {
         AuthDisplayHierarchy
         AutoCreateAuthorities
         BiblioAddsAuthorities
-        dontmerge
+        AuthorityMergeLimit
+        AuthorityMergeMode
         UseAuthoritiesForTracings
         CatalogModuleRelink
         hide_marc
@@ -611,4 +615,4 @@ sub verif_systempreferences_values {
     }
 }
 
-$dbh->rollback;
+$schema->storage->txn_rollback;

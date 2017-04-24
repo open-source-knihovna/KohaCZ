@@ -36,6 +36,7 @@ use C4::Search::History;
 use Koha::Authority::Types;
 use Koha::SearchEngine::Search;
 use Koha::SearchEngine::QueryBuilder;
+use Koha::Token;
 
 my $query = new CGI;
 my $dbh   = C4::Context->dbh;
@@ -58,7 +59,13 @@ if ( $op eq "delete" ) {
             debug           => 1,
         }
     );
-    &DelAuthority( $authid, 1 );
+
+    die "Wrong CSRF token" unless Koha::Token->new->check_csrf({
+        session_id => scalar $query->cookie('CGISESSID'),
+        token  => scalar $query->param('csrf_token'),
+    });
+
+    DelAuthority({ authid => $authid });
 
     if ( $query->param('operator') ) {
         # query contains search params so perform search
@@ -109,6 +116,12 @@ if ( $op eq "do_search" ) {
             flagsrequired   => { catalogue => 1 },
             debug           => 1,
         }
+    );
+
+    $template->param(
+        csrf_token => Koha::Token->new->generate_csrf({
+            session_id => scalar $query->cookie('CGISESSID'),
+        }),
     );
 
     # search history

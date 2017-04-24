@@ -104,8 +104,6 @@ BEGIN {
         &AddReserve
 
         &GetReserve
-        &GetReservesFromItemnumber
-        &GetReservesFromBiblionumber
         &GetReservesFromBorrowernumber
 	    &GetReserveFromBorrowernumberAndItemnumber
         &GetReservesForBranch
@@ -223,8 +221,10 @@ sub AddReserve {
     my $reserve_id = $hold->id();
 
     # add a reserve fee if needed
-    my $fee = GetReserveFee( $borrowernumber, $biblionumber );
-    ChargeReserveFee( $borrowernumber, $fee, $title );
+    if ( C4::Context->preference('HoldFeeMode') ne 'any_time_is_collected' ) {
+        my $reserve_fee = GetReserveFee( $borrowernumber, $biblionumber );
+        ChargeReserveFee( $borrowernumber, $reserve_fee, $title );
+    }
 
     _FixPriority({ biblionumber => $biblionumber});
 
@@ -279,112 +279,6 @@ sub GetReserve {
     my $sth = $dbh->prepare( $query );
     $sth->execute( $reserve_id );
     return $sth->fetchrow_hashref();
-}
-
-=head2 GetReservesFromBiblionumber
-
-  my $reserves = GetReservesFromBiblionumber({
-    biblionumber => $biblionumber,
-    [ itemnumber => $itemnumber, ]
-    [ all_dates => 1|0 ]
-  });
-
-This function gets the list of reservations for one C<$biblionumber>,
-returning an arrayref pointing to the reserves for C<$biblionumber>.
-
-By default, only reserves whose start date falls before the current
-time are returned.  To return all reserves, including future ones,
-the C<all_dates> parameter can be included and set to a true value.
-
-If the C<itemnumber> parameter is supplied, reserves must be targeted
-to that item or not targeted to any item at all; otherwise, they
-are excluded from the list.
-
-=cut
-
-sub GetReservesFromBiblionumber {
-    my ( $params ) = @_;
-    my $biblionumber = $params->{biblionumber} or return [];
-    my $itemnumber = $params->{itemnumber};
-    my $all_dates = $params->{all_dates} // 0;
-    my $dbh   = C4::Context->dbh;
-
-    # Find the desired items in the reserves
-    my @params;
-    my $query = "
-        SELECT  reserve_id,
-                branchcode,
-                timestamp AS rtimestamp,
-                priority,
-                biblionumber,
-                borrowernumber,
-                reservedate,
-                found,
-                itemnumber,
-                reservenotes,
-                expirationdate,
-                lowestPriority,
-                suspend,
-                suspend_until,
-                itemtype
-        FROM     reserves
-        WHERE biblionumber = ? ";
-    push( @params, $biblionumber );
-    unless ( $all_dates ) {
-        $query .= " AND reservedate <= CAST(NOW() AS DATE) ";
-    }
-    if ( $itemnumber ) {
-        $query .= " AND ( itemnumber IS NULL OR itemnumber = ? )";
-        push( @params, $itemnumber );
-    }
-    $query .= "ORDER BY priority";
-    my $sth = $dbh->prepare($query);
-    $sth->execute( @params );
-    my @results;
-    while ( my $data = $sth->fetchrow_hashref ) {
-        push @results, $data;
-    }
-    return \@results;
-}
-
-=head2 GetReservesFromItemnumber
-
- ( $reservedate, $borrowernumber, $branchcode, $reserve_id, $waitingdate ) = GetReservesFromItemnumber($itemnumber);
-
-Get the first reserve for a specific item number (based on priority). Returns the abovementioned values for that reserve.
-
-The routine does not look at future reserves (read: item level holds), but DOES include future waits (a confirmed future hold).
-
-=cut
-
-sub GetReservesFromItemnumber {
-    my ($itemnumber) = @_;
-
-    my $schema = Koha::Database->new()->schema();
-
-    my $r = $schema->resultset('Reserve')->search(
-        {
-            itemnumber => $itemnumber,
-            suspend    => 0,
-            -or        => [
-                reservedate => \'<= CAST( NOW() AS DATE )',
-                waitingdate => { '!=', undef }
-            ]
-        },
-        {
-            order_by => 'priority',
-        }
-    )->first();
-
-    return unless $r;
-
-    return (
-        $r->reservedate(),
-        $r->get_column('borrowernumber'),
-        $r->get_column('branchcode'),
-        $r->reserve_id(),
-        $r->waitingdate(),
-    );
 }
 
 =head2 GetReservesFromBorrowernumber
@@ -758,7 +652,7 @@ SELECT COUNT(*) FROM reserves WHERE biblionumber=? AND borrowernumber<>?
     my $dbh = C4::Context->dbh;
     my ( $fee ) = $dbh->selectrow_array( $borquery, undef, ($borrowernumber) );
     my $hold_fee_mode = C4::Context->preference('HoldFeeMode') || 'not_always';
-    if( $fee and $fee > 0 and $hold_fee_mode ne 'always' ) {
+    if( $fee and $fee > 0 and $hold_fee_mode eq 'not_always' ) {
         # This is a reconstruction of the old code:
         # Compare number of items with items issued, and optionally check holds
         # If not all items are issued and there are no holds: charge no fee
@@ -1297,6 +1191,11 @@ sub ModReserveFill {
     Koha::Old::Hold->new( $hold->unblessed() )->store();
 
     $hold->delete();
+
+    if ( C4::Context->preference('HoldFeeMode') eq 'any_time_is_collected' ) {
+        my $reserve_fee = GetReserveFee( $hold->borrowernumber, $hold->biblionumber );
+        ChargeReserveFee( $hold->borrowernumber, $reserve_fee, $hold->biblio->title );
+    }
 
     # now fix the priority on the others (if the priority wasn't
     # already sorted!)....

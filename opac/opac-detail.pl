@@ -40,6 +40,7 @@ use C4::XSLT;
 use C4::ShelfBrowser;
 use C4::Reserves;
 use C4::Charset;
+use C4::Letters;
 use MARC::Record;
 use MARC::Field;
 use List::MoreUtils qw/any none/;
@@ -49,6 +50,8 @@ use C4::HTML5Media;
 use C4::CourseReserves qw(GetItemCourseReservesInfo);
 use Koha::RecordProcessor;
 use Koha::AuthorisedValues;
+use Koha::Biblios;
+use Koha::ItemTypes;
 use Koha::Virtualshelves;
 use Koha::Ratings;
 use Koha::Reviews;
@@ -205,7 +208,7 @@ if ($session->param('busc')) {
         my ($arrParamsBusc, $offset, $results_per_page) = @_;
 
         my $expanded_facet = $arrParamsBusc->{'expand'};
-        my $itemtypes = GetItemTypes;
+        my $itemtypes = { map { $_->{itemtype} => $_ } @{ Koha::ItemTypes->search_with_localization->unblessed } };
         my @servers;
         @servers = @{$arrParamsBusc->{'server'}} if $arrParamsBusc->{'server'};
         @servers = ("biblioserver") unless (@servers);
@@ -537,7 +540,7 @@ my $HideMARC = $record_processor->filters->[0]->should_hide_marc(
         interface     => 'opac',
     } );
 
-my $itemtypes = GetItemTypes();
+my $itemtypes = { map { $_->{itemtype} => $_ } @{ Koha::ItemTypes->search_with_localization->unblessed } };
 # imageurl:
 my $itemtype = $dat->{'itemtype'};
 if ( $itemtype ) {
@@ -568,15 +571,22 @@ foreach my $subscription (@subscriptions) {
     $cell{histstartdate}     = $subscription->{histstartdate};
     $cell{histenddate}       = $subscription->{histenddate};
     $cell{branchcode}        = $subscription->{branchcode};
-    $cell{hasalert}          = $subscription->{hasalert};
     $cell{callnumber}        = $subscription->{callnumber};
     $cell{closed}            = $subscription->{closed};
+    $cell{letter}            = $subscription->{letter};
+    $cell{biblionumber}      = $subscription->{biblionumber};
     #get the three latest serials.
     $serials_to_display = $subscription->{opacdisplaycount};
     $serials_to_display = C4::Context->preference('OPACSerialIssueDisplayCount') unless $serials_to_display;
 	$cell{opacdisplaycount} = $serials_to_display;
     $cell{latestserials} =
       GetLatestSerials( $subscription->{subscriptionid}, $serials_to_display );
+    if ( $borrowernumber ) {
+        my $sub = getalert($borrowernumber,'issue',$subscription->{subscriptionid});
+        if (@$sub[0]) {
+            $cell{hasalert} = 1;
+        }
+    }
     push @subs, \%cell;
 }
 
@@ -591,15 +601,16 @@ for ( C4::Context->preference("OPACShowHoldQueueDetails") ) {
 }
 my $has_hold;
 if ( $show_holds_count || $show_priority) {
-    my $reserves = GetReservesFromBiblionumber({ biblionumber => $biblionumber, all_dates => 1 });
-    $template->param( holds_count  => scalar( @$reserves ) ) if $show_holds_count;
-    foreach (@$reserves) {
-        $item_reserves{ $_->{itemnumber} }++ if $_->{itemnumber};
-        if ($show_priority && $_->{borrowernumber} == $borrowernumber) {
+    my $biblio = Koha::Biblios->find( $biblionumber );
+    my $holds = $biblio->holds;
+    $template->param( holds_count  => $holds->count );
+    while ( my $hold = $holds->next ) {
+        $item_reserves{ $hold->itemnumber }++ if $hold->itemnumber;
+        if ($show_priority && $hold->borrowernumber == $borrowernumber) {
             $has_hold = 1;
-            $_->{itemnumber}
-                ? ($priority{ $_->{itemnumber} } = $_->{priority})
-                : ($template->param( priority => $_->{priority} ));
+            $hold->itemnumber
+                ? ($priority{ $hold->itemnumber } = $hold->priority)
+                : ($template->param( priority => $hold->priority ));
         }
     }
 }
@@ -854,7 +865,6 @@ if ( C4::Context->preference("OPACISBD") ) {
 $template->param(
     itemloop            => \@itemloop,
     otheritemloop       => \@otheritemloop,
-    subscriptionsnumber => $subscriptionsnumber,
     biblionumber        => $biblionumber,
     subscriptions       => \@subs,
     subscriptionsnumber => $subscriptionsnumber,

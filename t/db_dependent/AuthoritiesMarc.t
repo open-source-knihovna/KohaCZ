@@ -11,7 +11,9 @@ use Test::Warn;
 use MARC::Record;
 
 use t::lib::Mocks;
+use t::lib::TestBuilder;
 use Koha::Database;
+use Koha::Authority::Types;
 
 BEGIN {
         use_ok('C4::AuthoritiesMarc');
@@ -61,8 +63,14 @@ $module->mock('GetAuthority', sub {
 my $schema  = Koha::Database->new->schema;
 $schema->storage->txn_begin;
 my $dbh = C4::Context->dbh;
+my $builder = t::lib::TestBuilder->new;
 
 t::lib::Mocks::mock_preference('marcflavour', 'MARC21');
+
+# Authority type GEOGR_NAME is hardcoded here
+if( ! Koha::Authority::Types->find('GEOGR_NAME') ) {
+    $builder->build({ source => 'AuthType', value => { authtypecode => 'GEOGR_NAME' }});
+};
 
 is(BuildAuthHierarchies(3, 1), '1,2,3', "Built linked authtrees hierarchy string");
 
@@ -197,7 +205,7 @@ subtest 'AddAuthority should respect AUTO_INCREMENT (BZ 18104)' => sub {
     t::lib::Mocks::mock_preference( 'marcflavour', 'MARC21' );
     my $record = C4::AuthoritiesMarc::GetAuthority(1);
     my $id1 = AddAuthority( $record, undef, 'GEOGR_NAME' );
-    DelAuthority( $id1 );
+    DelAuthority({ authid => $id1 });
     my $id2 = AddAuthority( $record, undef, 'GEOGR_NAME' );
     isnt( $id1, $id2, 'Do not return the same id again' );
     t::lib::Mocks::mock_preference( 'marcflavour', 'UNIMARC' );

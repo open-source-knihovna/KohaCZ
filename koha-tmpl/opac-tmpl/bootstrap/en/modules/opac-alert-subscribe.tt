@@ -25,7 +25,8 @@
                                 <h4>[% bibliotitle %]</h4>
                                 [% IF ( notes ) %]<p>[% notes %]</p>[% END %]
                                 <input type="hidden" name="externalid" value="[% externalid %]">
-                                <input type="hidden" name="alerttype" value="issue">
+                                <input type="hidden" name="alerttype" value="[% alerttype %]">
+                                <input type="hidden" name="referer" value="[% referer %]">
                                 <input type="hidden" name="biblionumber" value="[% biblionumber %]">
                                 <input type="hidden" name="op" value="alert_confirmed">
                                 <input type="submit" class="btn" value="Yes">
@@ -39,7 +40,8 @@
                                 <h4>[% bibliotitle %]</h4>
                                 [% IF ( notes ) %]<p>[% notes %]</p>[% END %]
                                 <input type="hidden" name="externalid" value="[% externalid %]">
-                                <input type="hidden" name="alerttype" value="issue">
+                                <input type="hidden" name="alerttype" value="[% alerttype %]">
+                                <input type="hidden" name="referer" value="[% referer %]">
                                 <input type="hidden" name="biblionumber" value="[% biblionumber %]">
                                 <input type="hidden" name="op" value="cancel_confirmed">
                                 <input type="submit" value="Yes" class="btn">

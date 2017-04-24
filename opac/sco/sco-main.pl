@@ -44,6 +44,7 @@ use C4::Output;
 use C4::Members;
 use C4::Biblio;
 use C4::Items;
+use Koha::DateUtils qw( dt_from_string );
 use Koha::Acquisition::Currencies;
 use Koha::Patron::Images;
 use Koha::Patron::Messages;
@@ -136,25 +137,29 @@ elsif ( $op eq "returnbook" && $allowselfcheckreturns ) {
 elsif ( $op eq "checkout" ) {
     my $impossible  = {};
     my $needconfirm = {};
-    if ( !$confirmed ) {
-        ( $impossible, $needconfirm ) = CanBookBeIssued(
-            $borrower,
-            $barcode,
-            undef,
-            0,
-            C4::Context->preference("AllowItemsOnHoldCheckoutSCO")
-        );
+    ( $impossible, $needconfirm ) = CanBookBeIssued(
+        $borrower,
+        $barcode,
+        undef,
+        0,
+        C4::Context->preference("AllowItemsOnHoldCheckoutSCO")
+    );
+    my $issue_error;
+    if ( $confirm_required = scalar keys %$needconfirm ) {
+        for my $error ( qw( UNKNOWN_BARCODE max_loans_allowed ISSUED_TO_ANOTHER NO_MORE_RENEWALS NOT_FOR_LOAN DEBT WTHDRAWN RESTRICTED RESERVED ITEMNOTSAMEBRANCH EXPIRED DEBARRED CARD_LOST GNA INVALID_DATE UNKNOWN_BARCODE TOO_MANY DEBT_GUARANTEES USERBLOCKEDOVERDUE PATRON_CANT PREVISSUE NOT_FOR_LOAN_FORCING ITEM_LOST) ) {
+            if ( $needconfirm->{$error} ) {
+                $issue_error = $error;
+                $confirmed = 0;
+                last;
+            }
+        }
     }
-    $confirm_required = scalar keys %$needconfirm;
 
     #warn "confirm_required: " . $confirm_required ;
     if (scalar keys %$impossible) {
 
-        #  warn "impossible: numkeys: " . scalar (keys(%$impossible));
-        #warn join " ", keys %$impossible;
-        my $issue_error = (keys %$impossible)[0];
+        my $issue_error = (keys %$impossible)[0]; # FIXME This is wrong, we assume only one error and keys are not ordered
 
-        # FIXME  we assume only one error.
         $template->param(
             impossible                => $issue_error,
             "circ_error_$issue_error" => 1,
@@ -175,7 +180,7 @@ elsif ( $op eq "checkout" ) {
     } elsif ( $needconfirm->{RENEW_ISSUE} ) {
         if ($confirmed) {
             #warn "renewing";
-            AddRenewal( $borrower, $item->{itemnumber} );
+            AddRenewal( $borrower->{borrowernumber}, $item->{itemnumber} );
         } else {
             #warn "renew confirmation";
             $template->param(
@@ -188,9 +193,8 @@ elsif ( $op eq "checkout" ) {
         }
     } elsif ( $confirm_required && !$confirmed ) {
         #warn "failed confirmation";
-        my $issue_error = (keys %$needconfirm)[0];
         $template->param(
-            impossible                => (keys %$needconfirm)[0],
+            impossible                => 1,
             "circ_error_$issue_error" => 1,
             hide_main                 => 1,
         );
@@ -199,13 +203,40 @@ elsif ( $op eq "checkout" ) {
         }
     } else {
         if ( $confirmed || $issuenoconfirm ) {    # we'll want to call getpatroninfo again to get updated issues.
-            # warn "issuing book?";
+            my ( $hold_existed, $item );
+            if ( C4::Context->preference('HoldFeeMode') eq 'any_time_is_collected' ) {
+                # There is no easy way to know if the patron has been charged for this item.
+                # So we check if a hold existed for this item before the check in
+                $item = Koha::Items->find({ barcode => $barcode });
+                $hold_existed = Koha::Holds->search(
+                    {
+                        -and => {
+                            borrowernumber => $borrower->{borrowernumber},
+                            -or            => {
+                                biblionumber => $item->biblionumber,
+                                itemnumber   => $item->itemnumber
+                            }
+                        }
+                    }
+                )->count;
+            }
             AddIssue( $borrower, $barcode );
-            # ($borrower, $flags) = getpatroninformation(undef,undef, $patronid);
-            # $template->param(
-            #   patronid => $patronid,
-            #   validuser => 1,
-            # );
+
+            if ( $hold_existed ) {
+                my $dtf = Koha::Database->new->schema->storage->datetime_parser;
+                $template->param(
+                    # If the hold existed before the check in, let's confirm that the charge line exists
+                    # Note that this should not be needed but since we do not have proper exception handling here we do it this way
+                    patron_has_hold_fee => Koha::Account::Lines->search(
+                        {
+                            borrowernumber => $borrower->{borrowernumber},
+                            accounttype    => 'Res',
+                            description    => 'Reserve Charge - ' . $item->biblio->title,
+                            date           => $dtf->format_date(dt_from_string)
+                        }
+                      )->count,
+                );
+            }
         } else {
             $confirm_required = 1;
             #warn "issue confirmation";

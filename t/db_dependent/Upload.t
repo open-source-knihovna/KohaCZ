@@ -2,7 +2,7 @@
 
 use Modern::Perl;
 use File::Temp qw/ tempdir /;
-use Test::More tests => 10;
+use Test::More tests => 12;
 use Test::Warn;
 
 use Test::MockModule;
@@ -11,13 +11,14 @@ use t::lib::TestBuilder;
 
 use C4::Context;
 use Koha::Database;
+use Koha::DateUtils;
 use Koha::UploadedFile;
 use Koha::UploadedFiles;
 use Koha::Uploader;
 
 my $schema  = Koha::Database->new->schema;
 $schema->storage->txn_begin;
-my $builder = t::lib::TestBuilder->new;
+our $builder = t::lib::TestBuilder->new;
 
 our $current_upload = 0;
 our $uploads = [
@@ -40,6 +41,10 @@ our $uploads = [
     ],
     [
         { name => 'file5', cat => undef, size => 7000 },
+    ],
+    [
+        { name => 'file6', cat => undef, size => 6500 },
+        { name => 'file7', cat => undef, size => 6501 },
     ],
 ];
 
@@ -144,7 +149,7 @@ subtest 'Add same file in same category' => sub {
 };
 
 subtest 'Test delete via UploadedFile as well as UploadedFiles' => sub {
-    plan tests => 8;
+    plan tests => 10;
 
     # add temporary file with same name and contents (file4)
     my $upl = Koha::Uploader->new({ tmp => 1 });
@@ -155,7 +160,7 @@ subtest 'Test delete via UploadedFile as well as UploadedFiles' => sub {
 
     # testing delete via UploadedFiles (plural)
     my $delete = Koha::UploadedFiles->search({ id => $id })->delete;
-    is( $delete, 1, 'Delete successful' );
+    isnt( $delete, "0E0", 'Delete successful' );
     isnt( -e $path, 1, 'File no longer found after delete' );
     is( Koha::UploadedFiles->find( $id ), undef, 'Record also gone' );
 
@@ -166,16 +171,45 @@ subtest 'Test delete via UploadedFile as well as UploadedFiles' => sub {
     my $kohaobj = Koha::UploadedFiles->find( $upl->result );
     $path = $kohaobj->full_path;
     $delete = $kohaobj->delete;
-    is( $delete, 1, 'Delete successful' );
+    ok( $delete=~/^-?1$/, 'Delete successful' );
     isnt( -e $path, 1, 'File no longer found after delete' );
 
     # add another record with TestBuilder, so file does not exist
     # catch warning
     my $upload01 = $builder->build({ source => 'UploadedFile' });
-    warning_like { Koha::UploadedFiles->find( $upload01->{id} )->delete; }
+    warning_like { $delete = Koha::UploadedFiles->find( $upload01->{id} )->delete; }
         qr/file was missing/,
         'delete warns when file is missing';
+    ok( $delete=~/^-?1$/, 'Deleting record was successful' );
     is( Koha::UploadedFiles->count, 4, 'Back to four uploads now' );
+
+    # add another one with TestBuilder and delete twice (file does not exist)
+    $upload01 = $builder->build({ source => 'UploadedFile' });
+    $kohaobj = Koha::UploadedFiles->find( $upload01->{id} );
+    $delete = $kohaobj->delete({ keep_file => 1 });
+    $delete = $kohaobj->delete({ keep_file => 1 });
+    ok( $delete =~ /^(0E0|-1)$/, 'Repeated delete unsuccessful' );
+    # NOTE: Koha::Object->delete does not return 0E0 (yet?)
+};
+
+subtest 'Test delete_missing' => sub {
+    plan tests => 5;
+
+    # If we add files via TestBuilder, they do not exist
+    my $upload01 = $builder->build({ source => 'UploadedFile' });
+    my $upload02 = $builder->build({ source => 'UploadedFile' });
+    # dry run first
+    my $deleted = Koha::UploadedFiles->delete_missing({ keep_record => 1 });
+    is( $deleted, 2, 'Expect two records with missing files' );
+    isnt( Koha::UploadedFiles->find( $upload01->{id} ), undef, 'Not deleted' );
+    $deleted = Koha::UploadedFiles->delete_missing;
+    ok( $deleted =~ /^(2|-1)$/, 'Deleted two records with missing files' );
+    is( Koha::UploadedFiles->search({
+        id => [ $upload01->{id}, $upload02->{id} ],
+    })->count, 0, 'Records are gone' );
+    # Repeat it
+    $deleted = Koha::UploadedFiles->delete_missing;
+    is( $deleted, "0E0", "Return value of 0E0 expected" );
 };
 
 subtest 'Call search_term with[out] private flag' => sub {
@@ -237,6 +271,49 @@ subtest 'Testing allows_add_by' => sub {
     });
     is( Koha::Uploader->allows_add_by( $patron->{userid} ),
         1, 'Patron is still allowed to add uploaded files' );
+};
+
+subtest 'Testing delete_temporary' => sub {
+    plan tests => 9;
+
+    # Add two temporary files: result should be 3 + 3
+    Koha::Uploader->new({ tmp => 1 })->cgi; # add file6 and file7
+    is( Koha::UploadedFiles->search->count, 6, 'Test starting count' );
+    is( Koha::UploadedFiles->search({ permanent => 1 })->count, 3,
+        'Includes 3 permanent' );
+
+    # Move all permanents to today - 1
+    # Move temp 1 to today - 3, and temp 2,3 to today - 5
+    my $today = dt_from_string;
+    $today->subtract( minutes => 2 ); # should be enough :)
+    my $dt = $today->clone->subtract( days => 1 );
+    foreach my $rec ( Koha::UploadedFiles->search({ permanent => 1 }) ) {
+        $rec->dtcreated($dt)->store;
+    }
+    my @recs = Koha::UploadedFiles->search({ permanent => 0 });
+    $dt = $today->clone->subtract( days => 3 );
+    $recs[0]->dtcreated($dt)->store;
+    $dt = $today->clone->subtract( days => 5 );
+    $recs[1]->dtcreated($dt)->store;
+    $recs[2]->dtcreated($dt)->store;
+
+    # Now call delete_temporary with 6, 5 and 0
+    t::lib::Mocks::mock_preference('UploadPurgeTemporaryFilesDays', 6 );
+    my $delete = Koha::UploadedFiles->delete_temporary;
+    ok( $delete =~ /^(-1|0E0)$/, 'Check return value with 6' );
+    is( Koha::UploadedFiles->search->count, 6, 'Delete with pref==6' );
+
+    # use override parameter
+    $delete = Koha::UploadedFiles->delete_temporary({ override_pref => 5 });
+    ok( $delete =~ /^(2|-1)$/, 'Check return value with 5' );
+    is( Koha::UploadedFiles->search->count, 4, 'Delete with override==5' );
+
+    t::lib::Mocks::mock_preference('UploadPurgeTemporaryFilesDays', 0 );
+    $delete = Koha::UploadedFiles->delete_temporary;
+    ok( $delete =~ /^(-1|1)$/, 'Check return value with 0' );
+    is( Koha::UploadedFiles->search->count, 3, 'Delete with pref==0 makes 3' );
+    is( Koha::UploadedFiles->search({ permanent => 1 })->count, 3,
+        'Still 3 permanent uploads' );
 };
 
 # The end

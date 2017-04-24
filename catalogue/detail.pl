@@ -42,6 +42,9 @@ use C4::HTML5Media;
 use C4::CourseReserves qw(GetItemCourseReservesInfo);
 use C4::Acquisition qw(GetOrdersByBiblionumber);
 use Koha::AuthorisedValues;
+use Koha::Biblios;
+use Koha::Items;
+use Koha::ItemTypes;
 use Koha::Patrons;
 use Koha::Virtualshelves;
 
@@ -127,8 +130,8 @@ my $marcurlsarray    = GetMarcUrls    ($record,$marcflavour);
 my $marchostsarray  = GetMarcHosts($record,$marcflavour);
 my $subtitle         = GetRecordValue('subtitle', $record, $fw);
 
-# Get Branches, Itemtypes and Locations
-my $itemtypes = GetItemTypes();
+my $itemtypes = { map { $_->{itemtype} => $_ } @{ Koha::ItemTypes->search->unblessed } };
+
 my $dbh = C4::Context->dbh;
 
 my @all_items = GetItemsInfo( $biblionumber );
@@ -250,24 +253,25 @@ foreach my $item (@items) {
         $itemfields{$_} = 1 if ( $item->{$_} );
     }
 
-    # checking for holds
-    my ($reservedate,$reservedfor,$expectedAt,undef,$wait) = GetReservesFromItemnumber($item->{itemnumber});
-    my $ItemBorrowerReserveInfo = C4::Members::GetMember( borrowernumber => $reservedfor);
-    
     if (C4::Context->preference('HidePatronName')){
-	$item->{'hidepatronname'} = 1;
+        $item->{'hidepatronname'} = 1;
     }
 
-    if ( defined $reservedate ) {
+
+    # checking for holds
+    my $item_object = Koha::Items->find( $item->{itemnumber} );
+    my $holds = $item_object->current_holds;
+    if ( my $first_hold = $holds->next ) {
+        my $ItemBorrowerReserveInfo = C4::Members::GetMember( borrowernumber => $first_hold->borrowernumber); # FIXME could be improved
         $item->{backgroundcolor} = 'reserved';
-        $item->{reservedate}     = $reservedate;
-        $item->{ReservedForBorrowernumber}     = $reservedfor;
+        $item->{reservedate}     = $first_hold->reservedate;
+        $item->{ReservedForBorrowernumber}     = $first_hold->borrowernumber;
         $item->{ReservedForSurname}     = $ItemBorrowerReserveInfo->{'surname'};
         $item->{ReservedForFirstname}   = $ItemBorrowerReserveInfo->{'firstname'};
-        $item->{ExpectedAtLibrary}      = $expectedAt;
+        $item->{ExpectedAtLibrary}      = $first_hold->branchcode;
         $item->{Reservedcardnumber}             = $ItemBorrowerReserveInfo->{'cardnumber'};
         # Check waiting status
-        $item->{waitingdate} = $wait;
+        $item->{waitingdate} = $first_hold->waitingdate;
     }
 
 
@@ -461,8 +465,9 @@ if (C4::Context->preference('TagsEnabled') and $tag_quantity = C4::Context->pref
 }
 
 #we only need to pass the number of holds to the template
-my $holds = C4::Reserves::GetReservesFromBiblionumber({ biblionumber => $biblionumber, all_dates => 1 });
-$template->param( holdcount => scalar ( @$holds ) );
+my $biblio = Koha::Biblios->find( $biblionumber );
+my $holds = $biblio->holds;
+$template->param( holdcount => $holds->count );
 
 my $StaffDetailItemSelection = C4::Context->preference('StaffDetailItemSelection');
 if ($StaffDetailItemSelection) {

@@ -36,6 +36,8 @@ use C4::Letters;
 use Koha::DateUtils;
 use Koha::Holds;
 use Koha::Database;
+use Koha::ItemTypes;
+use Koha::Patron::Attribute::Types;
 use Koha::Patron::Messages;
 use Koha::Patron::Discharge;
 use Koha::Patrons;
@@ -100,7 +102,7 @@ if ($debar) {
         $borr->{'userdebarreddate'} = $debar;
     }
     # FIXME looks like $available is not needed
-    # If a patron is discharged he has a validated discharge available
+    # If a user is discharged they have a validated discharge available
     my $available = Koha::Patron::Discharge::count({
         borrowernumber => $borrowernumber,
         validated      => 1,
@@ -174,7 +176,7 @@ my $count          = 0;
 my $overdues_count = 0;
 my @overdues;
 my @issuedat;
-my $itemtypes = GetItemTypes();
+my $itemtypes = { map { $_->{itemtype} => $_ } @{ Koha::ItemTypes->search_with_localization->unblessed } };
 my $issues = GetPendingIssues($borrowernumber);
 if ($issues){
     foreach my $issue ( sort { $b->{date_due}->datetime() cmp $a->{date_due}->datetime() } @{$issues} ) {
@@ -268,7 +270,8 @@ $template->param( canrenew     => $canrenew );
 $template->param( OVERDUES       => \@overdues );
 $template->param( overdues_count => $overdues_count );
 
-my $show_barcode = C4::Members::AttributeTypes::AttributeTypeExists( ATTRIBUTE_SHOW_BARCODE );
+my $show_barcode = Koha::Patron::Attribute::Types->search(
+    { code => ATTRIBUTE_SHOW_BARCODE } )->count;
 if ($show_barcode) {
     my $patron_show_barcode = GetBorrowerAttributeValue($borrowernumber, ATTRIBUTE_SHOW_BARCODE);
     undef $show_barcode if defined($patron_show_barcode) && !$patron_show_barcode;

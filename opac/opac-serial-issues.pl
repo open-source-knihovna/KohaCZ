@@ -29,7 +29,6 @@ use C4::Letters;
 use C4::Output;
 use C4::Context;
 
-
 my $query      = new CGI;
 my $op         = $query->param('op');
 my $dbh        = C4::Context->dbh;
@@ -63,7 +62,8 @@ if ( $selectview eq "full" ) {
     # now, check is there is an alert subscription for one of the subscriptions
     if ($loggedinuser) {
         foreach (@$subscriptions) {
-            if (getalert($loggedinuser,'issue',$_->{subscriptionid})) {
+            my $sub = getalert($loggedinuser,'issue',$_->{subscriptionid});
+            if ($sub) {
                 $_->{hasalert} = 1;
             }
         }
@@ -72,7 +72,6 @@ if ( $selectview eq "full" ) {
     my $title   = $subscriptions->[0]->{bibliotitle};
     my $yearmin = $subscriptions->[0]->{year};
     my $yearmax = $subscriptions->[ -1 ]->{year};
-
 
     # replace CR by <br> in librarian note
     # $subscription->{opacnote} =~ s/\n/\<br\/\>/g;
@@ -113,9 +112,12 @@ else {
     # replace CR by <br> in librarian note
     # $subscription->{opacnote} =~ s/\n/\<br\/\>/g;
 
+    my $title   = $subscriptions->[0]->{bibliotitle};
+
     $template->param(
         biblionumber      => scalar $query->param('biblionumber'),
         subscription_LOOP => $subscriptions,
+        bibliotitle        => $title,
     );
 }
 output_html_with_http_headers $query, $cookie, $template->output;

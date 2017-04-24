@@ -114,7 +114,6 @@ for (@names) {
 
 $template->param(
     finesview => 1,
-    activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
     RoutingSerials => C4::Context->preference('RoutingSerials'),
 );
 
@@ -232,7 +231,7 @@ sub borrower_add_additional_fields {
         my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
         $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
         $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
-    } elsif ( $b_ref->{category_type} eq 'A' ) {
+    } elsif ( $b_ref->{category_type} eq 'A' || $b_ref->{category_type} eq 'I' ) {
         $b_ref->{adultborrower} = 1;
     }
 

@@ -4,17 +4,18 @@
 
 use Modern::Perl;
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 
 use Getopt::Long;
 use MARC::Record;
 use Test::MockModule;
-use Test::MockObject;
 
 use t::lib::Mocks;
 use t::lib::TestBuilder;
 
 use C4::Biblio;
+use Koha::Authorities;
+use Koha::Authority::MergeRequests;
 use Koha::Database;
 
 BEGIN {
@@ -30,9 +31,39 @@ my $schema  = Koha::Database->new->schema;
 $schema->storage->txn_begin;
 
 # Global variables, mocking and framework modifications
-our ( @zebrarecords, $index );
+our @linkedrecords;
 my $mocks = set_mocks();
 our ( $authtype1, $authtype2 ) = modify_framework();
+
+subtest 'Test postponed merge feature' => sub {
+    plan tests => 6;
+
+    # Set limit to zero, and call merge a few times
+    t::lib::Mocks::mock_preference('AuthorityMergeLimit', 0);
+    my $auth1 = t::lib::TestBuilder->new->build({ source => 'AuthHeader' });
+    my $cnt = Koha::Authority::MergeRequests->count;
+    merge({ mergefrom => '0' });
+    is( Koha::Authority::MergeRequests->count, $cnt, 'No merge request added as expected' );
+    merge({ mergefrom => $auth1->{authid} });
+    is( Koha::Authority::MergeRequests->count, $cnt, 'No merge request added since we have zero hits' );
+    @linkedrecords = ( 1, 2 ); # these biblionumbers do not matter
+    merge({ mergefrom => $auth1->{authid} });
+    is( Koha::Authority::MergeRequests->count, $cnt + 1, 'Merge request added as expected' );
+
+    # Set limit to two (starting with two records)
+    t::lib::Mocks::mock_preference('AuthorityMergeLimit', 2);
+    merge({ mergefrom => $auth1->{authid} });
+    is( Koha::Authority::MergeRequests->count, $cnt + 1, 'No merge request added as we do not exceed the limit' );
+    @linkedrecords = ( 1, 2, 3 ); # these biblionumbers do not matter
+    merge({ mergefrom => $auth1->{authid} });
+    is( Koha::Authority::MergeRequests->count, $cnt + 2, 'Merge request added as we do exceed the limit again' );
+    # Now override
+    merge({ mergefrom => $auth1->{authid}, override_limit => 1 });
+    is( Koha::Authority::MergeRequests->count, $cnt + 2, 'No merge request added as we did override' );
+
+    # Set merge limit high enough for the other subtests
+    t::lib::Mocks::mock_preference('AuthorityMergeLimit', 1000);
+};
 
 subtest 'Test merge A1 to A2 (within same authtype)' => sub {
 # Tests originate from bug 11700
@@ -58,9 +89,8 @@ subtest 'Test merge A1 to A2 (within same authtype)' => sub {
     my ( $biblionumber2 ) = AddBiblio($biblio2, '');
 
     # Time to merge
-    @zebrarecords = ( $biblio1, $biblio2 );
-    $index = 0;
-    my $rv = C4::AuthoritiesMarc::merge( $authid2, $auth2, $authid1, $auth1 );
+    @linkedrecords = ( $biblionumber1, $biblionumber2 );
+    my $rv = C4::AuthoritiesMarc::merge({ mergefrom => $authid2, MARCfrom => $auth2, mergeto => $authid1, MARCto => $auth1 });
     is( $rv, 1, 'We expect one biblio record (out of two) to be updated' );
 
     # Check the results
@@ -102,10 +132,9 @@ subtest 'Test merge A1 to modified A1, test strict mode' => sub {
     my ( $biblionumber2 ) = AddBiblio( $MARC2, '');
 
     # Time to merge in loose mode first
-    @zebrarecords = ( $MARC1, $MARC2 );
-    $index = 0;
+    @linkedrecords = ( $biblionumber1, $biblionumber2 );
     t::lib::Mocks::mock_preference('AuthorityMergeMode', 'loose');
-    my $rv = C4::AuthoritiesMarc::merge( $authid1, $auth1old, $authid1, $auth1new );
+    my $rv = C4::AuthoritiesMarc::merge({ mergefrom => $authid1, MARCfrom => $auth1old, mergeto => $authid1, MARCto => $auth1new });
     is( $rv, 2, 'Both records are updated now' );
 
     #Check the results
@@ -123,9 +152,8 @@ subtest 'Test merge A1 to modified A1, test strict mode' => sub {
     # Merge again in strict mode
     t::lib::Mocks::mock_preference('AuthorityMergeMode', 'strict');
     ModBiblio( $MARC1, $biblionumber1, '' );
-    @zebrarecords = ( $MARC1 );
-    $index = 0;
-    $rv = C4::AuthoritiesMarc::merge( $authid1, $auth1old, $authid1, $auth1new );
+    @linkedrecords = ( $biblionumber1 );
+    $rv = C4::AuthoritiesMarc::merge({ mergefrom => $authid1, MARCfrom => $auth1old, mergeto => $authid1, MARCto => $auth1new });
     $biblio1 = GetMarcBiblio($biblionumber1);
     is( $biblio1->field(109)->subfield('b'), undef, 'Subfield overwritten in strict mode' );
     compare_fields( $MARC1, $biblio1, { 609 => 1 }, 'count' );
@@ -170,9 +198,8 @@ subtest 'Test merge A1 to B1 (changing authtype)' => sub {
     my $oldbiblio = C4::Biblio::GetMarcBiblio( $biblionumber );
 
     # Time to merge
-    @zebrarecords = ( $marc );
-    $index = 0;
-    my $retval = C4::AuthoritiesMarc::merge( $authid1, $auth1, $authid2, $auth2 );
+    @linkedrecords = ( $biblionumber );
+    my $retval = C4::AuthoritiesMarc::merge({ mergefrom => $authid1, MARCfrom => $auth1, mergeto => $authid2, MARCto => $auth2 });
     is( $retval, 1, 'We touched only one biblio' );
 
     # Get new marc record for compares
@@ -219,9 +246,6 @@ subtest 'Test merge A1 to B1 (changing authtype)' => sub {
 subtest 'Merging authorities should handle deletes (BZ 18070)' => sub {
     plan tests => 2;
 
-    # For this test we need dontmerge OFF
-    t::lib::Mocks::mock_preference('dontmerge', '0');
-
     # Add authority and linked biblio, delete authority
     my $auth1 = MARC::Record->new;
     $auth1->append_fields( MARC::Field->new( '109', '', '', 'a' => 'DEL'));
@@ -232,15 +256,14 @@ subtest 'Merging authorities should handle deletes (BZ 18070)' => sub {
         MARC::Field->new( '609', '', '', a => 'DEL', 9 => "$authid1" ),
     );
     my ( $biblionumber ) = C4::Biblio::AddBiblio( $bib1, '' );
-    @zebrarecords = ( $bib1 );
-    $index = 0;
-    DelAuthority( $authid1 ); # this triggers a merge call
+    @linkedrecords = ( $biblionumber );
+    DelAuthority({ authid => $authid1 }); # this triggers a merge call
 
     # See what happened in the biblio record
     my $marc1 = C4::Biblio::GetMarcBiblio( $biblionumber );
     is( $marc1->field('609'), undef, 'Field 609 should be gone too' );
 
-    # Now we simulate the delete as done from the cron job (with dontmerge)
+    # Now we simulate the delete as done in the cron job
     # First, restore auth1 and add 609 back in bib1
     $auth1 = MARC::Record->new;
     $auth1->append_fields( MARC::Field->new( '109', '', '', 'a' => 'DEL'));
@@ -252,42 +275,72 @@ subtest 'Merging authorities should handle deletes (BZ 18070)' => sub {
     # Instead of going through DelAuthority, we manually delete the auth
     # record and call merge afterwards.
     # This mimics deleting an authority and calling merge later in the
-    # merge_authority.pl cron job (when dontmerge is enabled).
+    # merge cron job.
+    # We use the biblionumbers parameter here and unmock linked_biblionumbers.
     C4::Context->dbh->do( "DELETE FROM auth_header WHERE authid=?", undef, $authid1 );
-    @zebrarecords = ( $marc1 );
-    $index = 0;
-    merge( $authid1, undef );
+    @linkedrecords = ();
+    $mocks->{auth_mod}->unmock_all;
+    merge({ mergefrom => $authid1, biblionumbers => [ $biblionumber ] });
     # Final check
     $marc1 = C4::Biblio::GetMarcBiblio( $biblionumber );
     is( $marc1->field('609'), undef, 'Merge removed the 609 again even after deleting the authority record' );
 };
 
+subtest "Test some specific postponed merge issues" => sub {
+    plan tests => 4;
+
+    my $authmarc = MARC::Record->new;
+    $authmarc->append_fields( MARC::Field->new( '109', '', '', 'a' => 'aa', b => 'bb' ));
+    my $oldauthmarc = MARC::Record->new;
+    $oldauthmarc->append_fields( MARC::Field->new( '112', '', '', c => 'cc' ));
+    my $id = AddAuthority( $authmarc, undef, $authtype1 );
+    my $biblio = MARC::Record->new;
+    $biblio->append_fields(
+        MARC::Field->new( '109', '', '', a => 'a1', 9 => $id ),
+        MARC::Field->new( '612', '', '', a => 'a2', c => 'cc', 9 => $id+1 ),
+        MARC::Field->new( '612', '', '', a => 'a3', 9 => $id+2 ),
+    );
+    my ( $biblionumber ) = C4::Biblio::AddBiblio( $biblio, '' );
+
+    # Merge A to B postponed, A is deleted (simulated by id+1)
+    # This proves the !authtypefrom condition in sub merge
+    # Additionally, we test clearing subfield
+    merge({ mergefrom => $id + 1, MARCfrom => $oldauthmarc, mergeto => $id, MARCto => $authmarc, biblionumbers => [ $biblionumber ] });
+    $biblio = C4::Biblio::GetMarcBiblio( $biblionumber );
+    is( $biblio->subfield('609', '9'), $id, '612 moved to 609' );
+    is( $biblio->subfield('609', 'c'), undef, '609c cleared correctly' );
+
+    # Merge A to B postponed, delete B immediately (hits B < hits A)
+    # This proves the !@record_to test in sub merge
+    merge({ mergefrom => $id + 2, mergeto => $id + 1, MARCto => undef, biblionumbers => [ $biblionumber ] });
+    $biblio = C4::Biblio::GetMarcBiblio( $biblionumber );
+    is( $biblio->field('612'), undef, 'Last 612 must be gone' );
+
+    # Show that we 'need' skip_merge; this example is far-fetched.
+    # We *prove* by contradiction.
+    # Suppose: Merge A to B postponed, and delete A would merge rightaway.
+    # (You would need some special race condition with merge.pl to do so.)
+    # The modify merge would be useless after that.
+    @linkedrecords = ( $biblionumber );
+    my $restored_mocks = set_mocks();
+    DelAuthority({ authid => $id, skip_merge => 1 }); # delete A
+    $restored_mocks->{auth_mod}->unmock_all;
+    $biblio = C4::Biblio::GetMarcBiblio( $biblionumber );
+    is( $biblio->subfield('109', '9'), $id, 'If the 109 is no longer present, another modify merge would not bring it back' );
+};
+
 sub set_mocks {
-    # Mock ZOOM objects: They do nothing actually
-    # Get new_record_from_zebra to return the records
+    # After we removed the Zebra code from merge, we only need to mock
+    # get_usage_count and linked_biblionumbers here.
 
     my $mocks;
-    $mocks->{context_mod} = Test::MockModule->new( 'C4::Context' );
-    $mocks->{search_mod} = Test::MockModule->new( 'C4::Search' );
-    $mocks->{zoom_mod} = Test::MockModule->new( 'ZOOM::Query::CCL2RPN', no_auto => 1 );
-    $mocks->{conn_obj} = Test::MockObject->new;
-    $mocks->{zoom_obj} = Test::MockObject->new;
-    $mocks->{zoom_record_obj} = Test::MockObject->new;
-
-    $mocks->{context_mod}->mock( 'Zconn', sub { $mocks->{conn_obj}; } );
-    $mocks->{search_mod}->mock( 'new_record_from_zebra', sub {
-         return if $index >= @zebrarecords;
-         return $zebrarecords[ $index++ ];
+    $mocks->{auth_mod} = Test::MockModule->new( 'Koha::Authorities' );
+    $mocks->{auth_mod}->mock( 'get_usage_count', sub {
+         return scalar @linkedrecords;
     });
-    $mocks->{zoom_mod}->mock( 'new', sub {} );
-
-    $mocks->{conn_obj}->mock( 'search', sub { $mocks->{zoom_obj}; } );
-    $mocks->{zoom_obj}->mock( 'destroy', sub {} );
-    $mocks->{zoom_obj}->mock( 'record', sub { $mocks->{zoom_record_obj}; } );
-    $mocks->{zoom_obj}->mock( 'search', sub {} );
-    $mocks->{zoom_obj}->mock( 'size', sub { @zebrarecords } );
-    $mocks->{zoom_record_obj}->mock( 'raw', sub {} );
-
+    $mocks->{auth_mod}->mock( 'linked_biblionumbers', sub {
+         return @linkedrecords;
+    });
     return $mocks;
 }
 

@@ -40,10 +40,11 @@ use C4::Search::History;
 use Getopt::Long;
 use C4::Log;
 use C4::Accounts;
+use Koha::UploadedFiles;
 
 sub usage {
     print STDERR <<USAGE;
-Usage: $0 [-h|--help] [--sessions] [--sessdays DAYS] [-v|--verbose] [--zebraqueue DAYS] [-m|--mail] [--merged] [--import DAYS] [--logs DAYS] [--searchhistory DAYS] [--restrictions DAYS] [--all-restrictions] [--fees DAYS]
+Usage: $0 [-h|--help] [--sessions] [--sessdays DAYS] [-v|--verbose] [--zebraqueue DAYS] [-m|--mail] [--merged] [--import DAYS] [--logs DAYS] [--searchhistory DAYS] [--restrictions DAYS] [--all-restrictions] [--fees DAYS] [--temp-uploads] [--temp-uploads-days DAYS] [--uploads-missing 0|1 ]
 
    -h --help          prints this help message, and exits, ignoring all
                       other options
@@ -80,6 +81,9 @@ Usage: $0 [-h|--help] [--sessions] [--sessdays DAYS] [-v|--verbose] [--zebraqueu
    --del-exp-selfreg  Delete expired self registration accounts
    --del-unv-selfreg  DAYS  Delete unverified self registrations older than DAYS
    --unique-holidays DAYS  Delete all unique holidays older than DAYS
+   --temp-uploads     Delete temporary uploads.
+   --temp-uploads-days DAYS Override the corresponding preference value.
+   --uploads-missing FLAG Delete upload records for missing files when FLAG is true, count them otherwise
 USAGE
     exit $_[0];
 }
@@ -102,6 +106,9 @@ my $pExpSelfReg;
 my $pUnvSelfReg;
 my $fees_days;
 my $special_holidays_days;
+my $temp_uploads;
+my $temp_uploads_days;
+my $uploads_missing;
 
 GetOptions(
     'h|help'            => \$help,
@@ -122,6 +129,9 @@ GetOptions(
     'del-exp-selfreg'   => \$pExpSelfReg,
     'del-unv-selfreg'   => \$pUnvSelfReg,
     'unique-holidays:i' => \$special_holidays_days,
+    'temp-uploads'      => \$temp_uploads,
+    'temp-uploads-days:i' => \$temp_uploads_days,
+    'uploads-missing:i' => \$uploads_missing,
 ) || usage(1);
 
 # Use default values
@@ -153,6 +163,8 @@ unless ( $sessions
     || $pExpSelfReg
     || $pUnvSelfReg
     || $special_holidays_days
+    || $temp_uploads
+    || defined $uploads_missing
 ) {
     print "You did not specify any cleanup work for the script to do.\n\n";
     usage(1);
@@ -300,6 +312,28 @@ if( $pUnvSelfReg ) {
 
 if ($special_holidays_days) {
     DeleteSpecialHolidays( abs($special_holidays_days) );
+}
+
+if( $temp_uploads ) {
+    # Delete temporary uploads, governed by a pref (unless you override)
+    print "Purging temporary uploads.\n" if $verbose;
+    Koha::UploadedFiles->delete_temporary({
+        defined($temp_uploads_days)
+            ? ( override_pref => $temp_uploads_days )
+            : ()
+    });
+    print "Done purging temporary uploads.\n" if $verbose;
+}
+
+if( defined $uploads_missing ) {
+    print "Looking for missing uploads\n" if $verbose;
+    my $keep = $uploads_missing == 1 ? 0 : 1;
+    my $count = Koha::UploadedFiles->delete_missing({ keep_record => $keep });
+    if( $keep ) {
+        print "Counted $count missing uploaded files\n";
+    } else {
+        print "Removed $count records for missing uploads\n";
+    }
 }
 
 exit(0);

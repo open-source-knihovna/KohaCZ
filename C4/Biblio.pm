@@ -43,6 +43,7 @@ use Koha::Authority::Types;
 use Koha::Acquisition::Currencies;
 use Koha::Biblio::Metadata;
 use Koha::Biblio::Metadatas;
+use Koha::Holds;
 use Koha::SearchEngine;
 use Koha::Libraries;
 
@@ -72,9 +73,6 @@ BEGIN {
       GetBiblionumberFromItemnumber
 
       &GetRecordValue
-      &GetFieldMapping
-      &SetFieldMapping
-      &DeleteFieldMapping
 
       &GetISBDView
 
@@ -409,10 +407,11 @@ sub DelBiblio {
     }
 
     # We delete any existing holds
+    my $biblio = Koha::Biblios->find( $biblionumber );
+    my $holds = $biblio->holds;
     require C4::Reserves;
-    my $reserves = C4::Reserves::GetReservesFromBiblionumber({ biblionumber => $biblionumber });
-    foreach my $res ( @$reserves ) {
-        C4::Reserves::CancelReserve({ reserve_id => $res->{'reserve_id'} });
+    while ( my $hold = $holds->next ) {
+        C4::Reserves::CancelReserve({ reserve_id => $hold->reserve_id }); # TODO Replace with $hold->cancel
     }
 
     # Delete in Zebra. Be careful NOT to move this line after _koha_delete_biblio
@@ -684,66 +683,6 @@ sub GetRecordValue {
     }
 
     return \@result;
-}
-
-=head2 SetFieldMapping
-
-  SetFieldMapping($framework, $field, $fieldcode, $subfieldcode);
-
-Set a Field to MARC mapping value, if it already exists we don't add a new one.
-
-=cut
-
-sub SetFieldMapping {
-    my ( $framework, $field, $fieldcode, $subfieldcode ) = @_;
-    my $dbh = C4::Context->dbh;
-
-    my $sth = $dbh->prepare('SELECT * FROM fieldmapping WHERE fieldcode = ? AND subfieldcode = ? AND frameworkcode = ? AND field = ?');
-    $sth->execute( $fieldcode, $subfieldcode, $framework, $field );
-    if ( not $sth->fetchrow_hashref ) {
-        my @args;
-        $sth = $dbh->prepare('INSERT INTO fieldmapping (fieldcode, subfieldcode, frameworkcode, field) VALUES(?,?,?,?)');
-
-        $sth->execute( $fieldcode, $subfieldcode, $framework, $field );
-    }
-}
-
-=head2 DeleteFieldMapping
-
-  DeleteFieldMapping($id);
-
-Delete a field mapping from an $id.
-
-=cut
-
-sub DeleteFieldMapping {
-    my ($id) = @_;
-    my $dbh = C4::Context->dbh;
-
-    my $sth = $dbh->prepare('DELETE FROM fieldmapping WHERE id = ?');
-    $sth->execute($id);
-}
-
-=head2 GetFieldMapping
-
-  GetFieldMapping($frameworkcode);
-
-Get all field mappings for a specified frameworkcode
-
-=cut
-
-sub GetFieldMapping {
-    my ($framework) = @_;
-    my $dbh = C4::Context->dbh;
-
-    my $sth = $dbh->prepare('SELECT * FROM fieldmapping where frameworkcode = ?');
-    $sth->execute($framework);
-
-    my @return;
-    while ( my $row = $sth->fetchrow_hashref ) {
-        push @return, $row;
-    }
-    return \@return;
 }
 
 =head2 GetBiblioData
@@ -2049,6 +1988,7 @@ sub GetMarcUrls {
         }
         my @urls = $field->subfield('u');
         foreach my $url (@urls) {
+            $url =~ s/^\s+|\s+$//g; # trim
             my $marcurl;
             if ( $marcflavour eq 'MARC21' ) {
                 my $s3   = $field->subfield('3');

@@ -21,9 +21,10 @@ use Modern::Perl;
 
 use Carp;
 
-use C4::Biblio qw( GetRecordValue GetMarcBiblio GetFrameworkCode );
+use C4::Biblio qw();
 
 use Koha::Database;
+use Koha::DateUtils qw( dt_from_string );
 
 use base qw(Koha::Object);
 
@@ -32,6 +33,7 @@ use Koha::Biblioitems;
 use Koha::ArticleRequests;
 use Koha::ArticleRequest::Status;
 use Koha::IssuingRules;
+use Koha::Subscriptions;
 
 =head1 NAME
 
@@ -56,7 +58,7 @@ Keyword to MARC mapping for subtitle must be set for this method to return any p
 sub subtitles {
     my ( $self ) = @_;
 
-    return map { $_->{subfield} } @{ GetRecordValue( 'subtitle', GetMarcBiblio( $self->id ), $self->frameworkcode ) };
+    return map { $_->{subfield} } @{ C4::Biblio::GetRecordValue( 'subtitle', C4::Biblio::GetMarcBiblio( $self->id ), $self->frameworkcode ) };
 }
 
 =head3 can_article_request
@@ -258,10 +260,26 @@ return the current holds placed on this record
 =cut
 
 sub holds {
-    my ( $self ) = @_;
+    my ( $self, $params, $attributes ) = @_;
+    $attributes->{order_by} = 'priority' unless exists $attributes->{order_by};
+    my $hold_rs = $self->_result->reserves->search( $params, $attributes );
+    return Koha::Holds->_new_from_dbic($hold_rs);
+}
 
-    my $holds_rs = $self->_result->reserves;
-    return Koha::Holds->_new_from_dbic( $holds_rs );
+=head3 current_holds
+
+my $holds = $biblio->current_holds
+
+Return the holds placed on this bibliographic record.
+It does not include future holds.
+
+=cut
+
+sub current_holds {
+    my ($self) = @_;
+    my $dtf = Koha::Database->new->schema->storage->datetime_parser;
+    return $self->holds(
+        { reservedate => { '<=' => $dtf->format_date(dt_from_string) } } );
 }
 
 =head3 biblioitem
@@ -279,6 +297,23 @@ sub biblioitem {
 
     return $self->{_biblioitem};
 }
+
+=head3 subscriptions
+
+my $subscriptions = $self->subscriptions
+
+Returns the related Koha::Subscriptions object for this Biblio object
+
+=cut
+
+sub subscriptions {
+    my ($self) = @_;
+
+    $self->{_subscriptions} ||= Koha::Subscriptions->search( { biblionumber => $self->biblionumber } );
+
+    return $self->{_subscriptions};
+}
+
 
 =head3 type
 

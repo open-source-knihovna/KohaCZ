@@ -17,11 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 92;
-
-BEGIN {
-    require_ok('C4::Circulation');
-}
+use Test::More tests => 94;
 
 use DateTime;
 
@@ -31,11 +27,13 @@ use t::lib::TestBuilder;
 use C4::Circulation;
 use C4::Biblio;
 use C4::Items;
+use C4::Log;
 use C4::Members;
 use C4::Reserves;
 use C4::Overdues qw(UpdateFine CalcFine);
 use Koha::DateUtils;
 use Koha::Database;
+use Koha::IssuingRules;
 use Koha::Subscriptions;
 
 my $schema = Koha::Database->schema;
@@ -60,6 +58,7 @@ my $itemtype = $builder->build(
         value  => { notforloan => undef, rentalcharge => 0 }
     }
 )->{itemtype};
+my $patron_category = $builder->build({ source => 'Category', value => { enrolmentfee => 0 } });
 
 my $CircControl = C4::Context->preference('CircControl');
 my $HomeOrHoldingBranch = C4::Context->preference('HomeOrHoldingBranch');
@@ -192,7 +191,7 @@ my $sth = C4::Context->dbh->prepare("SELECT COUNT(*) FROM accountlines WHERE amo
 $sth->execute();
 my ( $original_count ) = $sth->fetchrow_array();
 
-C4::Context->dbh->do("INSERT INTO borrowers ( cardnumber, surname, firstname, categorycode, branchcode ) VALUES ( '99999999999', 'Hall', 'Kyle', 'S', ? )", undef, $library2->{branchcode} );
+C4::Context->dbh->do("INSERT INTO borrowers ( cardnumber, surname, firstname, categorycode, branchcode ) VALUES ( '99999999999', 'Hall', 'Kyle', ?, ? )", undef, $patron_category->{categorycode}, $library2->{branchcode} );
 
 C4::Circulation::ProcessOfflinePayment({ cardnumber => '99999999999', amount => '123.45' });
 
@@ -262,28 +261,28 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my %renewing_borrower_data = (
         firstname =>  'John',
         surname => 'Renewal',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode => $branch,
     );
 
     my %reserving_borrower_data = (
         firstname =>  'Katrin',
         surname => 'Reservation',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode => $branch,
     );
 
     my %hold_waiting_borrower_data = (
         firstname =>  'Kyle',
         surname => 'Reservation',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode => $branch,
     );
 
     my %restricted_borrower_data = (
         firstname =>  'Alice',
         surname => 'Reservation',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         debarred => '3228-01-01',
         branchcode => $branch,
     );
@@ -473,7 +472,21 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             due            => Koha::DateUtils::output_pref($five_weeks_ago)
         }
     );
+    t::lib::Mocks::mock_preference('RenewalLog', 0);
+    my $date = output_pref( { dt => dt_from_string(), datenonly => 1, dateformat => 'iso' } );
+    my $old_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
     AddRenewal( $renewing_borrower->{borrowernumber}, $itemnumber7, $branch );
+    my $new_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
+    is ($new_log_size, $old_log_size, 'renew log not added because of the syspref RenewalLog');
+
+    t::lib::Mocks::mock_preference('RenewalLog', 1);
+    $date = output_pref( { dt => dt_from_string(), datenonly => 1, dateformat => 'iso' } );
+    $old_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
+    AddRenewal( $renewing_borrower->{borrowernumber}, $itemnumber7, $branch );
+    $new_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
+    is ($new_log_size, $old_log_size + 1, 'renew log successfully added');
+
+
     $fine = $schema->resultset('Accountline')->single( { borrowernumber => $renewing_borrower->{borrowernumber}, itemnumber => $itemnumber7 } );
     is( $fine->accounttype, 'F', 'Fine on renewed item is closed out properly' );
     $fine->delete();
@@ -749,7 +762,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my %a_borrower_data = (
         firstname =>  'Fridolyn',
         surname => 'SOMERS',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode => $branch,
     );
 
@@ -829,7 +842,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my %a_borrower_data = (
         firstname =>  'Kyle',
         surname => 'Hall',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode => $branch,
     );
 
@@ -895,13 +908,13 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my $borrowernumber1 = AddMember(
         firstname    => 'Kyle',
         surname      => 'Hall',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode   => $library2->{branchcode},
     );
     my $borrowernumber2 = AddMember(
         firstname    => 'Chelsea',
         surname      => 'Hall',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode   => $library2->{branchcode},
     );
 
@@ -972,7 +985,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my $borrowernumber = AddMember(
         firstname =>  'fn',
         surname => 'dn',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode => $branch,
     );
 
@@ -1222,7 +1235,7 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
 
     my ( $error, $question, $alerts );
 
-    # Patron cannot issue item_1, he has overdues
+    # Patron cannot issue item_1, they have overdues
     my $yesterday = DateTime->today( time_zone => C4::Context->tz() )->add( days => -1 );
     my $issue = AddIssue( $patron, $item_1->{barcode}, $yesterday );    # Add an overdue
 
@@ -1236,7 +1249,7 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
     is( keys(%$question) + keys(%$alerts), 0 );
     is( $error->{USERBLOCKEDOVERDUE},      1 );
 
-    # Patron cannot issue item_1, he is debarred
+    # Patron cannot issue item_1, they are debarred
     my $tomorrow = DateTime->today( time_zone => C4::Context->tz() )->add( days => 1 );
     Koha::Patron::Debarments::AddDebarment( { borrowernumber => $patron->{borrowernumber}, expiration => $tomorrow } );
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron, $item_2->{barcode} );
@@ -1298,7 +1311,7 @@ subtest 'MultipleReserves' => sub {
     my %renewing_borrower_data = (
         firstname =>  'John',
         surname => 'Renewal',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode => $branch,
     );
     my $renewing_borrowernumber = AddMember(%renewing_borrower_data);
@@ -1311,7 +1324,7 @@ subtest 'MultipleReserves' => sub {
     my %reserving_borrower_data1 = (
         firstname =>  'Katrin',
         surname => 'Reservation',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode => $branch,
     );
     my $reserving_borrowernumber1 = AddMember(%reserving_borrower_data1);
@@ -1324,7 +1337,7 @@ subtest 'MultipleReserves' => sub {
     my %reserving_borrower_data2 = (
         firstname =>  'Kirk',
         surname => 'Reservation',
-        categorycode => 'S',
+        categorycode => $patron_category->{categorycode},
         branchcode => $branch,
     );
     my $reserving_borrowernumber2 = AddMember(%reserving_borrower_data2);
@@ -1412,6 +1425,133 @@ subtest 'CanBookBeIssued + AllowMultipleIssuesOnABiblio' => sub {
     t::lib::Mocks::mock_preference('AllowMultipleIssuesOnABiblio', 1);
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron, $item_2->{barcode} );
     is( keys(%$error) + keys(%$question) + keys(%$alerts),  0, 'No BIBLIO_ALREADY_ISSUED flag should be set if it is a subscription' );
+};
+
+subtest 'AddReturn + CumulativeRestrictionPeriods' => sub {
+    plan tests => 8;
+
+    my $library = $builder->build( { source => 'Branch' } );
+    my $patron  = $builder->build( { source => 'Borrower' } );
+
+    # Add 2 items
+    my $biblioitem_1 = $builder->build( { source => 'Biblioitem' } );
+    my $item_1 = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                homebranch    => $library->{branchcode},
+                holdingbranch => $library->{branchcode},
+                notforloan    => 0,
+                itemlost      => 0,
+                withdrawn     => 0,
+                biblionumber  => $biblioitem_1->{biblionumber}
+            }
+        }
+    );
+    my $biblioitem_2 = $builder->build( { source => 'Biblioitem' } );
+    my $item_2 = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                homebranch    => $library->{branchcode},
+                holdingbranch => $library->{branchcode},
+                notforloan    => 0,
+                itemlost      => 0,
+                withdrawn     => 0,
+                biblionumber  => $biblioitem_2->{biblionumber}
+            }
+        }
+    );
+
+    # And the issuing rule
+    Koha::IssuingRules->search->delete;
+    my $rule = Koha::IssuingRule->new(
+        {
+            categorycode => '*',
+            itemtype     => '*',
+            branchcode   => '*',
+            maxissueqty  => 99,
+            issuelength  => 1,
+            firstremind  => 1,        # 1 day of grace
+            finedays     => 2,        # 2 days of fine per day of overdue
+            lengthunit   => 'days',
+        }
+    );
+    $rule->store();
+
+    # Patron cannot issue item_1, they have overdues
+    my $five_days_ago = dt_from_string->subtract( days => 5 );
+    my $ten_days_ago  = dt_from_string->subtract( days => 10 );
+    AddIssue( $patron, $item_1->{barcode}, $five_days_ago );    # Add an overdue
+    AddIssue( $patron, $item_2->{barcode}, $ten_days_ago )
+      ;    # Add another overdue
+
+    t::lib::Mocks::mock_preference( 'CumulativeRestrictionPeriods', '0' );
+    AddReturn( $item_1->{barcode}, $library->{branchcode},
+        undef, undef, dt_from_string );
+    my $debarments = Koha::Patron::Debarments::GetDebarments(
+        { borrowernumber => $patron->{borrowernumber}, type => 'SUSPENSION' } );
+    is( scalar(@$debarments), 1 );
+
+    # FIXME Is it right? I'd have expected 5 * 2 - 1 instead
+    # Same for the others
+    my $expected_expiration = output_pref(
+        {
+            dt         => dt_from_string->add( days => ( 5 - 1 ) * 2 ),
+            dateformat => 'sql',
+            dateonly   => 1
+        }
+    );
+    is( $debarments->[0]->{expiration}, $expected_expiration );
+
+    AddReturn( $item_2->{barcode}, $library->{branchcode},
+        undef, undef, dt_from_string );
+    $debarments = Koha::Patron::Debarments::GetDebarments(
+        { borrowernumber => $patron->{borrowernumber}, type => 'SUSPENSION' } );
+    is( scalar(@$debarments), 1 );
+    $expected_expiration = output_pref(
+        {
+            dt         => dt_from_string->add( days => ( 10 - 1 ) * 2 ),
+            dateformat => 'sql',
+            dateonly   => 1
+        }
+    );
+    is( $debarments->[0]->{expiration}, $expected_expiration );
+
+    Koha::Patron::Debarments::DelUniqueDebarment(
+        { borrowernumber => $patron->{borrowernumber}, type => 'SUSPENSION' } );
+
+    t::lib::Mocks::mock_preference( 'CumulativeRestrictionPeriods', '1' );
+    AddIssue( $patron, $item_1->{barcode}, $five_days_ago );    # Add an overdue
+    AddIssue( $patron, $item_2->{barcode}, $ten_days_ago )
+      ;    # Add another overdue
+    AddReturn( $item_1->{barcode}, $library->{branchcode},
+        undef, undef, dt_from_string );
+    $debarments = Koha::Patron::Debarments::GetDebarments(
+        { borrowernumber => $patron->{borrowernumber}, type => 'SUSPENSION' } );
+    is( scalar(@$debarments), 1 );
+    $expected_expiration = output_pref(
+        {
+            dt         => dt_from_string->add( days => ( 5 - 1 ) * 2 ),
+            dateformat => 'sql',
+            dateonly   => 1
+        }
+    );
+    is( $debarments->[0]->{expiration}, $expected_expiration );
+
+    AddReturn( $item_2->{barcode}, $library->{branchcode},
+        undef, undef, dt_from_string );
+    $debarments = Koha::Patron::Debarments::GetDebarments(
+        { borrowernumber => $patron->{borrowernumber}, type => 'SUSPENSION' } );
+    is( scalar(@$debarments), 1 );
+    $expected_expiration = output_pref(
+        {
+            dt => dt_from_string->add( days => ( 5 - 1 ) * 2 + ( 10 - 1 ) * 2 ),
+            dateformat => 'sql',
+            dateonly   => 1
+        }
+    );
+    is( $debarments->[0]->{expiration}, $expected_expiration );
 };
 
 sub set_userenv {

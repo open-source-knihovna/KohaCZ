@@ -32,7 +32,10 @@ use C4::Context;
 use C4::Members;
 use C4::Overdues;
 use C4::Debug;
+use Koha::AuthorisedValues;
 use Koha::DateUtils;
+use Koha::Items;
+use Koha::ItemTypes;
 use Koha::Libraries;
 use Koha::Patrons;
 use Date::Calc qw/Today Date_to_Days/;
@@ -98,7 +101,7 @@ if ( $reservefee > 0){
     $template->param( RESERVE_CHARGE => sprintf("%.2f",$reservefee));
 }
 
-my $itemTypes = GetItemTypes();
+my $itemtypes = { map { $_->{itemtype} => $_ } @{ Koha::ItemTypes->search_with_localization->unblessed } };
 
 # There are two ways of calling this script, with a single biblio num
 # or multiple biblio nums.
@@ -171,12 +174,12 @@ foreach my $biblioNumber (@biblionumbers) {
     }
 
     # Compute the priority rank.
-    my $reserves = GetReservesFromBiblionumber({ biblionumber => $biblioNumber, all_dates => 1 });
-    my $rank = scalar( @$reserves );
+    my $biblio = Koha::Biblios->find( $biblioNumber );
+    my $holds = $biblio->holds;
+    my $rank = $holds->count;
     $biblioData->{reservecount} = 1;    # new reserve
-    foreach my $res (@{$reserves}) {
-        my $found = $res->{found};
-        if ( $found && $found eq 'W' ) {
+    while ( my $hold = $holds->next ) {
+        if ( $hold->is_waiting ) {
             $rank--;
         }
         else {
@@ -384,7 +387,6 @@ unless ($noreserves) {
 # and items for each biblionumber.
 #
 #
-my $notforloan_label_of = get_notforloan_label_of();
 
 my $biblioLoop = [];
 my $numBibsAvailable = 0;
@@ -407,9 +409,10 @@ foreach my $biblioNum (@biblionumbers) {
         &get_out($query, $cookie, $template->output);
     }
 
+    my $frameworkcode = GetFrameworkCode( $biblioData->{biblionumber} );
     $biblioLoopIter{biblionumber} = $biblioData->{biblionumber};
     $biblioLoopIter{title} = $biblioData->{title};
-    $biblioLoopIter{subtitle} = GetRecordValue('subtitle', $record, GetFrameworkCode($biblioData->{biblionumber}));
+    $biblioLoopIter{subtitle} = GetRecordValue('subtitle', $record, $frameworkcode);
     $biblioLoopIter{author} = $biblioData->{author};
     $biblioLoopIter{rank} = $biblioData->{rank};
     $biblioLoopIter{reservecount} = $biblioData->{reservecount};
@@ -417,20 +420,23 @@ foreach my $biblioNum (@biblionumbers) {
     $biblioLoopIter{reqholdnotes}=0; #TODO: For future use
 
     if (!$itemLevelTypes && $biblioData->{itemtype}) {
-        $biblioLoopIter{translated_description} = $itemTypes->{$biblioData->{itemtype}}{translated_description};
-        $biblioLoopIter{imageurl} = getitemtypeimagesrc() . "/". $itemTypes->{$biblioData->{itemtype}}{imageurl};
+        $biblioLoopIter{translated_description} = $itemtypes->{$biblioData->{itemtype}}{translated_description};
+        $biblioLoopIter{imageurl} = getitemtypeimagesrc() . "/". $itemtypes->{$biblioData->{itemtype}}{imageurl};
     }
 
     foreach my $itemInfo (@{$biblioData->{itemInfos}}) {
         if ($itemLevelTypes && $itemInfo->{itype}) {
-            $itemInfo->{translated_description} = $itemTypes->{$itemInfo->{itype}}{translated_description};
-            $itemInfo->{imageurl} = getitemtypeimagesrc() . "/". $itemTypes->{$itemInfo->{itype}}{imageurl};
+            $itemInfo->{translated_description} = $itemtypes->{$itemInfo->{itype}}{translated_description};
+            $itemInfo->{imageurl} = getitemtypeimagesrc() . "/". $itemtypes->{$itemInfo->{itype}}{imageurl};
         }
 
         if (!$itemInfo->{'notforloan'} && !($itemInfo->{'itemnotforloan'} > 0)) {
             $biblioLoopIter{forloan} = 1;
         }
     }
+
+    my @notforloan_avs = Koha::AuthorisedValues->search_by_koha_field({ kohafield => 'items.notforloan', frameworkcode => $frameworkcode });
+    my $notforloan_label_of = { map { $_->authorised_value => $_->opac_description } @notforloan_avs };
 
     $biblioLoopIter{itemLoop} = [];
     my $numCopiesAvailable = 0;
@@ -466,21 +472,18 @@ foreach my $biblioNum (@biblionumbers) {
         }
 
         # checking reserve
-        my ($reservedate,$reservedfor,$expectedAt,undef,$wait) = GetReservesFromItemnumber($itemNum);
-        my $ItemBorrowerReserveInfo = GetMember( borrowernumber => $reservedfor );
+        my $item = Koha::Items->find( $itemNum );
+        my $holds = $item->current_holds;
 
-        # the item could be reserved for this borrower vi a host record, flag this
-        $reservedfor //= '';
-
-        if ( defined $reservedate ) {
+        if ( my $first_hold = $holds->next ) {
+            my $ItemBorrowerReserveInfo = GetMember( borrowernumber => $first_hold->borrowernumber );
             $itemLoopIter->{backgroundcolor} = 'reserved';
-            $itemLoopIter->{reservedate}     = output_pref({ dt => dt_from_string($reservedate), dateonly => 1 });
-            $itemLoopIter->{ReservedForBorrowernumber} = $reservedfor;
+            $itemLoopIter->{reservedate}     = output_pref({ dt => dt_from_string($first_hold->reservedate), dateonly => 1 }); # FIXME Should be formatted in the template
+            $itemLoopIter->{ReservedForBorrowernumber} = $first_hold->borrowernumber;
             $itemLoopIter->{ReservedForSurname}        = $ItemBorrowerReserveInfo->{'surname'};
             $itemLoopIter->{ReservedForFirstname}      = $ItemBorrowerReserveInfo->{'firstname'};
-            $itemLoopIter->{ExpectedAtLibrary}         = $expectedAt;
-            #waiting status
-            $itemLoopIter->{waitingdate} = $wait;
+            $itemLoopIter->{ExpectedAtLibrary}         = $first_hold->branchcode;
+            $itemLoopIter->{waitingdate} = $first_hold->waitingdate;
         }
 
         $itemLoopIter->{notforloan} = $itemInfo->{notforloan};
@@ -548,7 +551,7 @@ foreach my $biblioNum (@biblionumbers) {
             }
         }
 
-        $itemLoopIter->{imageurl} = getitemtypeimagelocation( 'opac', $itemTypes->{ $itemInfo->{itype} }{imageurl} );
+        $itemLoopIter->{imageurl} = getitemtypeimagelocation( 'opac', $itemtypes->{ $itemInfo->{itype} }{imageurl} );
 
     # Show serial enumeration when needed
         if ($itemLoopIter->{enumchron}) {

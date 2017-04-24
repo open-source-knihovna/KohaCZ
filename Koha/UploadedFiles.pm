@@ -20,6 +20,8 @@ package Koha::UploadedFiles;
 use Modern::Perl;
 
 use C4::Koha;
+use Koha::Database;
+use Koha::DateUtils;
 use Koha::UploadedFile;
 
 use parent qw(Koha::Objects);
@@ -55,21 +57,88 @@ provides a wrapper around search to look for a term in multiple columns.
 =head3 delete
 
 Delete uploaded files.
-Returns true if no errors occur. (So, false may mean partial success.)
 
 Parameter keep_file may be used to delete records, but keep files.
+
+Returns the number of deleted records, 0E0 or -1 (Unknown).
+Please note that the number of deleted records is not automatically the same
+as the number of files.
 
 =cut
 
 sub delete {
     my ( $self, $params ) = @_;
+    $self = Koha::UploadedFiles->new if !ref($self); # handle class call
     # We use the individual delete on each resultset record
-    my $err = 0;
-    while( my $row = $self->_resultset->next ) {
-        my $kohaobj = Koha::UploadedFile->_new_from_dbic( $row );
-        $err++ if !$kohaobj->delete( $params );
+    my $rv = 0;
+    while( my $row = $self->next ) {
+        my $delete= $row->delete( $params ); # 1, 0E0 or -1
+        $rv = ( $delete < 0 || $rv < 0 ) ? -1 : ( $rv + $delete );
     }
-    return $err==0;
+    return $rv==0 ? "0E0" : $rv;
+}
+
+=head3 delete_temporary
+
+Delete_temporary is called by cleanup_database and only removes temporary
+uploads older than [pref UploadPurgeTemporaryFilesDays] days.
+It is possible to override the pref with the override_pref parameter.
+
+Return value: see delete.
+
+=cut
+
+sub delete_temporary {
+    my ( $self, $params ) = @_;
+    my $days = C4::Context->preference('UploadPurgeTemporaryFilesDays');
+    if( exists $params->{override_pref} ) {
+        $days = $params->{override_pref};
+    } elsif( !defined($days) || $days eq '' ) { # allow 0, not NULL or ""
+        return "0E0";
+    }
+    my $dt = dt_from_string();
+    $dt->subtract( days => $days );
+    my $parser = Koha::Database->new->schema->storage->datetime_parser;
+    return $self->search({
+        permanent => [ undef, 0 ],
+        dtcreated => { '<' => $parser->format_datetime($dt) },
+    })->delete;
+}
+
+=head3 delete_missing
+
+    $cnt = Koha::UploadedFiles->delete_missing();
+
+    $cnt = Koha::UploadedFiles->delete_missing({ keep_record => 1 });
+
+Deletes all records where the actual file is not found.
+
+Supports a keep_record hash parameter to do a check only.
+
+Return value: If you pass keep_record, it returns the number of records where
+the file is not found, or 0E0. Otherwise it returns a number, 0E0 or -1 just
+as delete does.
+
+=cut
+
+sub delete_missing {
+    my ( $self, $params ) = @_;
+    $self = Koha::UploadedFiles->new if !ref($self); # handle class call
+    my $rv = 0;
+    while( my $row = $self->next ) {
+        my $file = $row->full_path;
+        next if -e $file;
+        if( $params->{keep_record} ) {
+            $rv++;
+            next;
+        }
+        # We are passing keep_file since we already know that the file
+        # is missing and we do not want to see the warning
+        # Apply the same logic as in delete for the return value
+        my $delete = $row->delete({ keep_file => 1 }); # 1, 0E0 or -1
+        $rv = ( $delete < 0 || $rv < 0 ) ? -1 : ( $rv + $delete );
+    }
+    return $rv==0 ? "0E0" : $rv;
 }
 
 =head3 search_term

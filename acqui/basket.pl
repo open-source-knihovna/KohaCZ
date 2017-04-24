@@ -69,13 +69,13 @@ the supplier this script have to display the basket.
 
 =cut
 
-my $query        = new CGI;
+our $query        = new CGI;
 our $basketno     = $query->param('basketno');
-my $ean          = $query->param('ean');
-my $booksellerid = $query->param('booksellerid');
+our $ean          = $query->param('ean');
+our $booksellerid = $query->param('booksellerid');
 my $duplinbatch =  $query->param('duplinbatch');
 
-my ( $template, $loggedinuser, $cookie, $userflags ) = get_template_and_user(
+our ( $template, $loggedinuser, $cookie, $userflags ) = get_template_and_user(
     {
         template_name   => "acqui/basket.tt",
         query           => $query,
@@ -86,7 +86,7 @@ my ( $template, $loggedinuser, $cookie, $userflags ) = get_template_and_user(
     }
 );
 
-my $basket = GetBasket($basketno);
+our $basket = GetBasket($basketno);
 $booksellerid = $basket->{booksellerid} unless $booksellerid;
 my $bookseller = Koha::Acquisition::Booksellers->find( $booksellerid );
 my $schema = Koha::Database->new()->schema();
@@ -112,7 +112,7 @@ unless (CanUserManageBasket($loggedinuser, $basket, $userflags)) {
 # warn "=>".$basket->{booksellerid};
 my $op = $query->param('op') // 'list';
 
-my $confirm_pref= C4::Context->preference("BasketConfirmations") || '1';
+our $confirm_pref= C4::Context->preference("BasketConfirmations") || '1';
 $template->param( skip_confirm_reopen => 1) if $confirm_pref eq '2';
 
 my @messages;
@@ -476,13 +476,8 @@ sub get_order_infos {
     my $itemcount   = $biblio->items->count;
     my $holds_count = $biblio->holds->count;
     my @items = GetItemnumbersFromOrder( $ordernumber );
-    my $itemholds;
-    foreach my $item (@items){
-        my $nb = GetItemHolds($biblionumber, $item);
-        if ($nb){
-            $itemholds += $nb;
-        }
-    }
+    my $itemholds  = $biblio ? $biblio->holds->search({ itemnumber => { -in => \@items } })->count : 0;
+
     # if the biblio is not in other orders and if there is no items elsewhere and no subscriptions and no holds we can then show the link "Delete order and Biblio" see bug 5680
     $line{can_del_bib}          = 1 if $countbiblio <= 1 && $itemcount == scalar @items && !(@subscriptions) && !($holds_count);
     $line{items}                = ($itemcount) - (scalar @items);

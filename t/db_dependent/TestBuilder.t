@@ -19,19 +19,20 @@
 
 use Modern::Perl;
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 use Test::Warn;
-use Data::Dumper qw(Dumper);
+use File::Basename qw(dirname);
 
 use Koha::Database;
+use Koha::Patrons;
 
 BEGIN {
     use_ok('t::lib::TestBuilder');
 }
 
-my $schema = Koha::Database->new->schema;
+our $schema = Koha::Database->new->schema;
 $schema->storage->txn_begin;
-my $builder;
+our $builder;
 
 
 subtest 'Start with some trivial tests' => sub {
@@ -67,6 +68,8 @@ subtest 'Build all sources' => sub {
     my @source_in_failure;
     for my $source ( @sources ) {
         my $res;
+        # Skip the source if it is a view
+        next if $schema->source($source)->isa('DBIx::Class::ResultSource::View');
         eval { $res = $builder->build( { source => $source } ); };
         push @source_in_failure, $source if $@ || !defined( $res );
     }
@@ -341,6 +344,51 @@ subtest 'Default values' => sub {
     is( $item->{more_subfields_xml}, 'some xml', 'Default should not overwrite assigned value' );
 };
 
-$schema->storage->txn_rollback;
+subtest 'build_object() tests' => sub {
 
-1;
+    plan tests => 6;
+
+    $builder = t::lib::TestBuilder->new();
+
+    my $categorycode = $builder->build( { source => 'Category' } )->{categorycode};
+    my $itemtype = $builder->build( { source => 'Itemtype' } )->{itemtype};
+
+    my $issuing_rule = $builder->build_object(
+        {   class => 'Koha::IssuingRules',
+            value => {
+                categorycode => $categorycode,
+                itemtype     => $itemtype
+            }
+        }
+    );
+
+    is( ref($issuing_rule), 'Koha::IssuingRule', 'Type is correct' );
+    is( $issuing_rule->categorycode,
+        $categorycode, 'Category code correctly set' );
+    is( $issuing_rule->itemtype, $itemtype, 'Item type correctly set' );
+
+    warning_is { $issuing_rule = $builder->build_object( {} ); }
+    { carped => 'Missing class param' },
+        'The class parameter is mandatory, raises a warning if absent';
+    is( $issuing_rule, undef,
+        'If the class parameter is missing, undef is returned' );
+
+    subtest 'Test all classes' => sub {
+        my $Koha_modules_dir = dirname(__FILE__) . '/../../Koha';
+        my @koha_object_based_modules = `/bin/grep -rl 'sub object_class' $Koha_modules_dir`;
+        my @source_in_failure;
+        for my $module_filepath ( @koha_object_based_modules ) {
+            chomp $module_filepath;
+            next unless $module_filepath =~ m|\.pm$|;
+            my $module = $module_filepath;
+            $module =~ s|^.*/(Koha.*)\.pm$|$1|;
+            $module =~ s|/|::|g;
+            next if $module eq 'Koha::Objects';
+            eval "require $module";;
+            my $object = $builder->build_object( { class => $module } );
+            is( ref($object), $module->object_class, "Testing $module" );
+        }
+    };
+};
+
+$schema->storage->txn_rollback;

@@ -41,6 +41,7 @@ use Koha::Database;
 
 use Koha::Biblioitems;
 use Koha::Items;
+use Koha::ItemTypes;
 use Koha::SearchEngine;
 use Koha::SearchEngine::Search;
 use Koha::Libraries;
@@ -67,7 +68,6 @@ BEGIN {
     
         CheckItemPreSave
     
-        GetItemStatus
         GetItemLocation
         GetLostItems
         GetItemsForInventory
@@ -91,7 +91,6 @@ BEGIN {
         ShelfToCart
 
 	GetAnalyticsCount
-        GetItemHolds
 
         SearchItemsByField
         SearchItems
@@ -679,8 +678,6 @@ sub DelItem {
     # FIXME check the item has no current issues
     my $deleted = _koha_delete_item( $itemnumber );
 
-    # get the MARC record
-    my $record = GetMarcBiblio($biblionumber);
     ModZebra( $biblionumber, "specialUpdate", "biblioserver" );
 
     #search item field code
@@ -778,97 +775,6 @@ in C<GetItemsByBiblioitemnumber> and C<GetItemsInfo>
 has copy-and-paste work.
 
 =cut
-
-=head2 GetItemStatus
-
-  $itemstatushash = GetItemStatus($fwkcode);
-
-Returns a list of valid values for the
-C<items.notforloan> field.
-
-NOTE: does B<not> return an individual item's
-status.
-
-Can be MARC dependent.
-fwkcode is optional.
-But basically could be can be loan or not
-Create a status selector with the following code
-
-=head3 in PERL SCRIPT
-
- my $itemstatushash = getitemstatus;
- my @itemstatusloop;
- foreach my $thisstatus (keys %$itemstatushash) {
-     my %row =(value => $thisstatus,
-                 statusname => $itemstatushash->{$thisstatus}->{'statusname'},
-             );
-     push @itemstatusloop, \%row;
- }
- $template->param(statusloop=>\@itemstatusloop);
-
-=head3 in TEMPLATE
-
-<select name="statusloop" id="statusloop">
-    <option value="">Default</option>
-    [% FOREACH statusloo IN statusloop %]
-        [% IF ( statusloo.selected ) %]
-            <option value="[% statusloo.value %]" selected="selected">[% statusloo.statusname %]</option>
-        [% ELSE %]
-            <option value="[% statusloo.value %]">[% statusloo.statusname %]</option>
-        [% END %]
-    [% END %]
-</select>
-
-=cut
-
-sub GetItemStatus {
-
-    # returns a reference to a hash of references to status...
-    my ($fwk) = @_;
-    my %itemstatus;
-    my $dbh = C4::Context->dbh;
-    my $sth;
-    $fwk = '' unless ($fwk);
-    my ( $tag, $subfield ) =
-      GetMarcFromKohaField( "items.notforloan", $fwk );
-    if ( $tag and $subfield ) {
-        my $sth =
-          $dbh->prepare(
-            "SELECT authorised_value
-            FROM marc_subfield_structure
-            WHERE tagfield=?
-                AND tagsubfield=?
-                AND frameworkcode=?
-            "
-          );
-        $sth->execute( $tag, $subfield, $fwk );
-        if ( my ($authorisedvaluecat) = $sth->fetchrow ) {
-            my $authvalsth =
-              $dbh->prepare(
-                "SELECT authorised_value,lib
-                FROM authorised_values 
-                WHERE category=? 
-                ORDER BY lib
-                "
-              );
-            $authvalsth->execute($authorisedvaluecat);
-            while ( my ( $authorisedvalue, $lib ) = $authvalsth->fetchrow ) {
-                $itemstatus{$authorisedvalue} = $lib;
-            }
-            return \%itemstatus;
-        }
-        else {
-
-            #No authvalue list
-            # build default
-        }
-    }
-
-    #No authvalue list
-    #build default
-    $itemstatus{"1"} = "Not For Loan";
-    return \%itemstatus;
-}
 
 =head2 GetItemLocation
 
@@ -2566,27 +2472,6 @@ sub GetAnalyticsCount {
     return ($result);
 }
 
-=head2 GetItemHolds
-
-  $holds = &GetItemHolds($biblionumber, $itemnumber);
-
-This function return the count of holds with $biblionumber and $itemnumber
-
-=cut
-
-sub GetItemHolds {
-    my ($biblionumber, $itemnumber) = @_;
-    my $holds;
-    my $dbh            = C4::Context->dbh;
-    my $query          = "SELECT count(*)
-        FROM  reserves
-        WHERE biblionumber=? AND itemnumber=?";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($biblionumber, $itemnumber);
-    $holds = $sth->fetchrow;
-    return $holds;
-}
-
 =head2 SearchItemsByField
 
     my $items = SearchItemsByField($field, $value);
@@ -3008,12 +2893,12 @@ sub PrepareItemrecordDisplay {
 
                         #----- itemtypes
                     } elsif ( $tagslib->{$tag}->{$subfield}->{authorised_value} eq "itemtypes" ) {
-                        my $itemtypes = GetItemTypes( style => 'array' );
+                        my $itemtypes = Koha::ItemTypes->search_with_localization;
                         push @authorised_values, ""
                           unless ( $tagslib->{$tag}->{$subfield}->{mandatory} );
-                        for my $itemtype ( @$itemtypes ) {
-                            push @authorised_values, $itemtype->{itemtype};
-                            $authorised_lib{$itemtype->{itemtype}} = $itemtype->{translated_description};
+                        while ( my $itemtype = $itemtypes->next ) {
+                            push @authorised_values, $itemtype->itemtype;
+                            $authorised_lib{$itemtype->itemtype} = $itemtype->translated_description;
                         }
                         if ($defaultvalues && $defaultvalues->{'itemtype'}) {
                             $defaultvalue = $defaultvalues->{'itemtype'};

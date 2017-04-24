@@ -198,6 +198,21 @@ __PACKAGE__->has_many(
 # Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-04-29 10:32:00
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:1GiikODklVISOurHX37qjA
 
+# Use the ItemtypeLocalization view to create the join on localization
+our $LANGUAGE;
+__PACKAGE__->has_many(
+  "localization" => "Koha::Schema::Result::ItemtypeLocalization",
+    sub {
+        my $args = shift;
 
-# You can replace this text with custom content, and it will be preserved on regeneration
+        die "no lang specified!" unless $LANGUAGE;
+
+        return ({
+            "$args->{self_alias}.itemtype" => { -ident => "$args->{foreign_alias}.code" },
+            "$args->{foreign_alias}.lang" => $LANGUAGE,
+        });
+
+    }
+);
+
 1;

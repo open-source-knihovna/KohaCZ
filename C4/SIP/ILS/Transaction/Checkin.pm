@@ -80,19 +80,19 @@ sub do_checkin {
         $self->alert_type('99');
     }
     if ($messages->{Wrongbranch}) {
-        $self->destination_loc($messages->{Wrongbranch}->{Rightbranch});
+        $self->{item}->destination_loc($messages->{Wrongbranch}->{Rightbranch});
         $self->alert_type('04');            # send to other branch
     }
     if ($messages->{WrongTransfer}) {
-        $self->destination_loc($messages->{WrongTransfer});
+        $self->{item}->destination_loc($messages->{WrongTransfer});
         $self->alert_type('04');            # send to other branch
     }
     if ($messages->{NeedsTransfer}) {
-        $self->destination_loc($iteminformation->{homebranch});
+        $self->{item}->destination_loc($messages->{NeedsTransfer});
         $self->alert_type('04');            # send to other branch
     }
     if ($messages->{WasTransfered}) { # set into transit so tell unit
-        $self->destination_loc($iteminformation->{homebranch});
+        $self->{item}->destination_loc($iteminformation->{homebranch});
         $self->alert_type('04');            # send to other branch
     }
     if ($messages->{ResFound}) {
@@ -100,12 +100,12 @@ sub do_checkin {
         if ($branch eq $messages->{ResFound}->{branchcode}) {
             $self->alert_type('01');
             ModReserveAffect( $messages->{ResFound}->{itemnumber},
-                $messages->{ResFound}->{borrowernumber}, 0);
+                $messages->{ResFound}->{borrowernumber}, 0, $messages->{ResFound}->{reserve_id});
 
         } else {
             $self->alert_type('02');
             ModReserveAffect( $messages->{ResFound}->{itemnumber},
-                $messages->{ResFound}->{borrowernumber}, 1);
+                $messages->{ResFound}->{borrowernumber}, 1, $messages->{ResFound}->{reserve_id});
             ModItemTransfer( $messages->{ResFound}->{itemnumber},
                 $branch,
                 $messages->{ResFound}->{branchcode}

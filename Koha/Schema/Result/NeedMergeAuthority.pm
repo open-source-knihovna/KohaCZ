@@ -34,6 +34,23 @@ __PACKAGE__->table("need_merge_authorities");
   data_type: 'bigint'
   is_nullable: 0
 
+=head2 authid_new
+
+  data_type: 'bigint'
+  is_nullable: 1
+
+=head2 reportxml
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 timestamp
+
+  data_type: 'timestamp'
+  datetime_undef_if_invalid: 1
+  default_value: current_timestamp
+  is_nullable: 0
+
 =head2 done
 
   data_type: 'tinyint'
@@ -47,6 +64,17 @@ __PACKAGE__->add_columns(
   { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "authid",
   { data_type => "bigint", is_nullable => 0 },
+  "authid_new",
+  { data_type => "bigint", is_nullable => 1 },
+  "reportxml",
+  { data_type => "text", is_nullable => 1 },
+  "timestamp",
+  {
+    data_type => "timestamp",
+    datetime_undef_if_invalid => 1,
+    default_value => \"current_timestamp",
+    is_nullable => 0,
+  },
   "done",
   { data_type => "tinyint", default_value => 0, is_nullable => 1 },
 );
@@ -64,8 +92,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("id");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07025 @ 2013-10-14 20:56:21
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BL9ArSyPrmUG0QrrWgoPSw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-04-12 19:42:42
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BW1u1si2H88+GS/Ok8fuGA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

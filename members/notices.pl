@@ -73,13 +73,12 @@ if (C4::Context->preference('ExtendedPatronAttributes')) {
 }
 
 $template->param(%$borrower);
-
+$template->param( adultborrower => 1 ) if ( $borrower->{category_type} eq 'A' || $borrower->{category_type} eq 'I' );
 $template->param(
     QUEUED_MESSAGES    => $queued_messages,
     borrowernumber     => $borrowernumber,
     sentnotices        => 1,
     categoryname       => $borrower->{'description'},
-    activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
     RoutingSerials => C4::Context->preference('RoutingSerials'),
 );
 output_html_with_http_headers $input, $cookie, $template->output;

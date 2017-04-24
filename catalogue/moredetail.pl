@@ -32,10 +32,10 @@ use C4::Auth;
 use C4::Serials;
 use C4::Members; # to use GetMember
 use C4::Search;		# enabled_staff_search_views
-use C4::Reserves qw(GetReservesFromBiblionumber);
 
 use Koha::Acquisition::Booksellers;
 use Koha::AuthorisedValues;
+use Koha::Biblios;
 use Koha::DateUtils;
 use Koha::Items;
 use Koha::Patrons;
@@ -124,7 +124,8 @@ my $ccodes =
   { map { $_->{authorised_value} => $_->{lib} } Koha::AuthorisedValues->get_descriptions_by_koha_field( { frameworkcode => $fw, kohafield => 'items.ccode' } ) };
 my $copynumbers =
   { map { $_->{authorised_value} => $_->{lib} } Koha::AuthorisedValues->get_descriptions_by_koha_field( { frameworkcode => $fw, kohafield => 'items.copynumber' } ) };
-my $itemtypes = GetItemTypes;
+
+my $itemtypes = { map { $_->{itemtype} => $_ } @{ Koha::ItemTypes->search_with_localization->unblessed } };
 
 $data->{'itemtypename'} = $itemtypes->{$data->{'itemtype'}}->{'translated_description'};
 $data->{'rentalcharge'} = sprintf( "%.2f", $data->{'rentalcharge'} );
@@ -259,9 +260,9 @@ $template->param (countorders => $count_orders_using_biblio);
 my $count_deletedorders_using_biblio = scalar @deletedorders_using_biblio ;
 $template->param (countdeletedorders => $count_deletedorders_using_biblio);
 
-my $holds = GetReservesFromBiblionumber({ biblionumber => $biblionumber, all_dates => 1 });
-my $holdcount = scalar( @$holds );
-$template->param( holdcount => scalar ( @$holds ) );
+my $biblio = Koha::Biblios->find( $biblionumber );
+my $holds = $biblio->holds;
+$template->param( holdcount => $holds->count );
 
 output_html_with_http_headers $query, $cookie, $template->output;
 

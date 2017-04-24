@@ -19,12 +19,14 @@
 
 use Modern::Perl;
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 use C4::Reserves;
 
+use Koha::DateUtils qw( dt_from_string );
 use Koha::Biblios;
 use Koha::Patrons;
+use Koha::Subscriptions;
 use t::lib::TestBuilder;
 use t::lib::Mocks;
 
@@ -43,13 +45,39 @@ my $biblioitem = $schema->resultset('Biblioitem')->new(
     }
 )->insert();
 
-subtest 'holds' => sub {
-    plan tests => 3;
+subtest 'holds + current_holds' => sub {
+    plan tests => 5;
     C4::Reserves::AddReserve( $patron->branchcode, $patron->borrowernumber, $biblio->biblionumber );
     my $holds = $biblio->holds;
     is( ref($holds), 'Koha::Holds', '->holds should return a Koha::Holds object' );
     is( $holds->count, 1, '->holds should only return 1 hold' );
     is( $holds->next->borrowernumber, $patron->borrowernumber, '->holds should return the correct hold' );
+    $holds->delete;
+
+    # Add a hold in the future
+    C4::Reserves::AddReserve( $patron->branchcode, $patron->borrowernumber, $biblio->biblionumber, undef, undef, dt_from_string->add( days => 2 ) );
+    $holds = $biblio->holds;
+    is( $holds->count, 1, '->holds should return future holds' );
+    $holds = $biblio->current_holds;
+    is( $holds->count, 0, '->current_holds should not return future holds' );
+    $holds->delete;
+
+};
+
+subtest 'subscriptions' => sub {
+    plan tests => 2;
+    $builder->build(
+        { source => 'Subscription', value => { biblionumber => $biblio->id } }
+    );
+    $builder->build(
+        { source => 'Subscription', value => { biblionumber => $biblio->id } }
+    );
+    my $biblio        = Koha::Biblios->find( $biblio->id );
+    my $subscriptions = $biblio->subscriptions;
+    is( ref($subscriptions), 'Koha::Subscriptions',
+        'Koha::Biblio->subscriptions should return a Koha::Subscriptions object'
+    );
+    is( $subscriptions->count, 2, 'Koha::Biblio->subscriptions should return the correct number of subscriptions');
 };
 
 $schema->storage->txn_rollback;

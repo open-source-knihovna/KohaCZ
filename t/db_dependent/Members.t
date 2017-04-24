@@ -17,9 +17,9 @@
 
 use Modern::Perl;
 
-use Test::More tests => 64;
+use Test::More tests => 65;
 use Test::MockModule;
-use Data::Dumper;
+use Data::Dumper qw/Dumper/;
 use C4::Context;
 use Koha::Database;
 use Koha::Holds;
@@ -37,7 +37,6 @@ my $schema = Koha::Database->schema;
 $schema->storage->txn_begin;
 my $builder = t::lib::TestBuilder->new;
 my $dbh = C4::Context->dbh;
-$dbh->{RaiseError} = 1;
 
 # Remove invalid guarantorid's as long as we have no FK
 $dbh->do("UPDATE borrowers b1 LEFT JOIN borrowers b2 ON b2.borrowernumber=b1.guarantorid SET b1.guarantorid=NULL where b1.guarantorid IS NOT NULL AND b2.borrowernumber IS NULL");
@@ -48,10 +47,10 @@ my $library1 = $builder->build({
 my $library2 = $builder->build({
     source => 'Branch',
 });
+my $patron_category = $builder->build({ source => 'Category' });
 my $CARDNUMBER   = 'TESTCARD01';
 my $FIRSTNAME    = 'Marie';
 my $SURNAME      = 'Mcknight';
-my $CATEGORYCODE = 'S';
 my $BRANCHCODE   = $library1->{branchcode};
 
 my $CHANGED_FIRSTNAME = "Marry Ann";
@@ -86,7 +85,7 @@ my %data = (
     cardnumber => $CARDNUMBER,
     firstname =>  $FIRSTNAME,
     surname => $SURNAME,
-    categorycode => $CATEGORYCODE,
+    categorycode => $patron_category->{categorycode},
     branchcode => $BRANCHCODE,
     dateofbirth => '',
     dateexpiry => '9999-12-31',
@@ -101,7 +100,7 @@ my $member = GetMember( cardnumber => $CARDNUMBER )
 
 ok ( $member->{firstname}    eq $FIRSTNAME    &&
      $member->{surname}      eq $SURNAME      &&
-     $member->{categorycode} eq $CATEGORYCODE &&
+     $member->{categorycode} eq $patron_category->{categorycode} &&
      $member->{branchcode}   eq $BRANCHCODE
      , "Got member")
   or diag("Mismatching member details: ".Dumper(\%data, $member));
@@ -155,7 +154,7 @@ is ($notice_email, $EMAILPRO, "GetNoticeEmailAddress returns correct value when 
     cardnumber   => "123456789",
     firstname    => "Tomasito",
     surname      => "None",
-    categorycode => "S",
+    categorycode => $patron_category->{categorycode},
     branchcode   => $library2->{branchcode},
     dateofbirth  => '',
     debarred     => '',
@@ -368,10 +367,10 @@ isnt( Koha::Patrons->find( $patron2->{borrowernumber} )->lastseen, undef, 'Lasts
 ## Remove all entries with userid='' (should be only 1 max)
 $dbh->do(q|DELETE FROM borrowers WHERE userid = ''|);
 ## And create a patron with a userid=''
-$borrowernumber = AddMember( categorycode => 'S', branchcode => $library2->{branchcode} );
+$borrowernumber = AddMember( categorycode => $patron_category->{categorycode}, branchcode => $library2->{branchcode} );
 $dbh->do(q|UPDATE borrowers SET userid = '' WHERE borrowernumber = ?|, undef, $borrowernumber);
 # Create another patron and verify the userid has been generated
-$borrowernumber = AddMember( categorycode => 'S', branchcode => $library2->{branchcode} );
+$borrowernumber = AddMember( categorycode => $patron_category->{categorycode}, branchcode => $library2->{branchcode} );
 ok( $borrowernumber > 0, 'AddMember should have inserted the patron even if no userid is given' );
 $borrower = GetMember( borrowernumber => $borrowernumber );
 ok( $borrower->{userid},  'A userid should have been generated correctly' );
@@ -491,4 +490,17 @@ eval {
 is($@, '', 'Bug 16009: GetMember(cardnumber => undef) works');
 is($patron, undef, 'Bug 16009: GetMember(cardnumber => undef) returns undef');
 
-1;
+subtest 'Trivial test for AddMember_Auto' => sub {
+    plan tests => 3;
+    my $members_mock = Test::MockModule->new( 'C4::Members' );
+    $members_mock->mock( 'fixup_cardnumber', sub { 12345; } );
+    my $library = $builder->build({ source => 'Branch' });
+    my $category = $builder->build({ source => 'Category' });
+    my %borr = AddMember_Auto( surname=> 'Dick3', firstname => 'Philip', branchcode => $library->{branchcode}, categorycode => $category->{categorycode}, password => '34567890' );
+    ok( $borr{borrowernumber}, 'Borrower hash contains borrowernumber' );
+    is( $borr{cardnumber}, 12345, 'Borrower hash contains cardnumber' );
+    $patron = Koha::Patrons->find( $borr{borrowernumber} );
+    isnt( $patron, undef, 'Patron found' );
+};
+
+$schema->storage->txn_rollback;

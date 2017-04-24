@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 72;
+use Test::More tests => 71;
 use Test::MockModule;
 use Test::Warn;
 
@@ -268,14 +268,13 @@ AddReserve($branch_1,  $requesters{$branch_1}, $bibnum2,
 ModReserveAffect($itemnum_cpl, $requesters{$branch_3}, 0);
 
 # Now it should have different priorities.
-my $title_reserves = GetReservesFromBiblionumber({biblionumber => $bibnum2});
-# Sort by reserve number in case the database gives us oddly ordered results
-my @reserves = sort { $a->{reserve_id} <=> $b->{reserve_id} } @$title_reserves;
-is($reserves[0]{priority}, 0, 'Item is correctly waiting');
-is($reserves[1]{priority}, 1, 'Item is correctly priority 1');
-is($reserves[2]{priority}, 2, 'Item is correctly priority 2');
+my $biblio = Koha::Biblios->find( $bibnum2 );
+my $holds = $biblio->holds({}, { order_by => 'reserve_id' });;
+is($holds->next->priority, 0, 'Item is correctly waiting');
+is($holds->next->priority, 1, 'Item is correctly priority 1');
+is($holds->next->priority, 2, 'Item is correctly priority 2');
 
-@reserves = Koha::Holds->search({ borrowernumber => $requesters{$branch_3} })->waiting();
+my @reserves = Koha::Holds->search({ borrowernumber => $requesters{$branch_3} })->waiting();
 is( @reserves, 1, 'GetWaiting got only the waiting reserve' );
 is( $reserves[0]->borrowernumber(), $requesters{$branch_3}, 'GetWaiting got the reserve for the correct borrower' );
 
@@ -315,10 +314,10 @@ is( $messages->{ResFound}->{borrowernumber},
     $requesters{$branch_3},
     'for generous library, its items fill first hold request in line (bug 10272)');
 
-my $reserves = GetReservesFromBiblionumber({biblionumber => $biblionumber});
-isa_ok($reserves, 'ARRAY');
-is(scalar @$reserves, 1, "Only one reserves for this biblio");
-my $reserve_id = $reserves->[0]->{reserve_id};
+$biblio = Koha::Biblios->find( $biblionumber );
+$holds = $biblio->holds;
+is($holds->count, 1, "Only one reserves for this biblio");
+my $reserve_id = $holds->next->reserve_id;
 
 $reserve = GetReserve($reserve_id);
 isa_ok($reserve, 'HASH', "GetReserve return");
@@ -405,8 +404,8 @@ is(
 my $letter = ReserveSlip($branch_1, $requesters{$branch_1}, $bibnum);
 ok(defined($letter), 'can successfully generate hold slip (bug 10949)');
 
-# Tests for bug 9788: Does GetReservesFromItemnumber return a future wait?
-# 9788a: GetReservesFromItemnumber does not return future next available hold
+# Tests for bug 9788: Does Koha::Item->current_holds return a future wait?
+# 9788a: current_holds does not return future next available hold
 $dbh->do("DELETE FROM reserves WHERE biblionumber=?",undef,($bibnum));
 t::lib::Mocks::mock_preference('ConfirmFutureHolds', 2);
 t::lib::Mocks::mock_preference('AllowHoldDateInFuture', 1);
@@ -416,19 +415,22 @@ $resdate=output_pref($resdate);
 AddReserve($branch_1,  $requesters{$branch_1}, $bibnum,
            $bibitems,  1, $resdate, $expdate, $notes,
            $title,      $checkitem, $found);
-my @results= GetReservesFromItemnumber($itemnumber);
-is(defined $results[3]?1:0, 0, 'GetReservesFromItemnumber does not return a future next available hold');
-# 9788b: GetReservesFromItemnumber does not return future item level hold
+my $item = Koha::Items->find( $itemnumber );
+$holds = $item->current_holds;
+my $dtf = Koha::Database->new->schema->storage->datetime_parser;
+my $future_holds = $holds->search({ reservedate => { '>' => $dtf->format_date( dt_from_string ) } } );
+is( $future_holds->count, 0, 'current_holds does not return a future next available hold');
+# 9788b: current_holds does not return future item level hold
 $dbh->do("DELETE FROM reserves WHERE biblionumber=?",undef,($bibnum));
 AddReserve($branch_1,  $requesters{$branch_1}, $bibnum,
            $bibitems,  1, $resdate, $expdate, $notes,
            $title,      $itemnumber, $found); #item level hold
-@results= GetReservesFromItemnumber($itemnumber);
-is(defined $results[3]?1:0, 0, 'GetReservesFromItemnumber does not return a future item level hold');
-# 9788c: GetReservesFromItemnumber returns future wait (confirmed future hold)
+$future_holds = $holds->search({ reservedate => { '>' => $dtf->format_date( dt_from_string ) } } );
+is( $future_holds->count, 0, 'current_holds does not return a future item level hold' );
+# 9788c: current_holds returns future wait (confirmed future hold)
 ModReserveAffect( $itemnumber,  $requesters{$branch_1} , 0); #confirm hold
-@results= GetReservesFromItemnumber($itemnumber);
-is(defined $results[3]?1:0, 1, 'GetReservesFromItemnumber returns a future wait (confirmed future hold)');
+$future_holds = $holds->search({ reservedate => { '>' => $dtf->format_date( dt_from_string ) } } );
+is( $future_holds->count, 1, 'current_holds returns a future wait (confirmed future hold)' );
 # End of tests for bug 9788
 
 $dbh->do("DELETE FROM reserves WHERE biblionumber=?",undef,($bibnum));
@@ -533,13 +535,13 @@ C4::Biblio::ModBiblio( $record, $bibnum, $frameworkcode );
 
 is( C4::Reserves::CanBookBeReserved($borrowernumber, $biblionumber) , 'OK', "Reserving an ageRestricted Biblio without a borrower dateofbirth succeeds" );
 
-#Set the dateofbirth for the Borrower making him "too young".
+#Set the dateofbirth for the Borrower making them "too young".
 $borrower->{dateofbirth} = DateTime->now->add( years => -15 );
 C4::Members::ModMember( borrowernumber => $borrowernumber, dateofbirth => $borrower->{dateofbirth} );
 
 is( C4::Reserves::CanBookBeReserved($borrowernumber, $biblionumber) , 'ageRestricted', "Reserving a 'PEGI 16' Biblio by a 15 year old borrower fails");
 
-#Set the dateofbirth for the Borrower making him "too old".
+#Set the dateofbirth for the Borrower making them "too old".
 $borrower->{dateofbirth} = DateTime->now->add( years => -30 );
 C4::Members::ModMember( borrowernumber => $borrowernumber, dateofbirth => $borrower->{dateofbirth} );
 
@@ -548,7 +550,7 @@ is( C4::Reserves::CanBookBeReserved($borrowernumber, $biblionumber) , 'OK', "Res
 ####### EO Bug 13113 <<<
        ####
 
-my $item = GetItem($itemnumber);
+$item = GetItem($itemnumber);
 
 ok( C4::Reserves::IsAvailableForItemLevelRequest($item, $borrower), "Reserving a book on item level" );
 

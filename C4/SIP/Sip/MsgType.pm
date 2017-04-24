@@ -649,14 +649,6 @@ sub handle_checkin {
         $resp .= 'U';
     }
 
-    # apparently we can't trust the returns from Checkin yet (because C4::Circulation::AddReturn is faulty)
-    # So we reproduce the alert logic here.
-    if ( not $status->alert ) {
-        if ( $item->destination_loc and $item->destination_loc ne $my_branch ) {
-            $status->alert(1);
-            $status->alert_type('04');    # no hold, just send it
-        }
-    }
     $resp .= $status->alert ? 'Y' : 'N';
     $resp .= timestamp;
     $resp .= add_field( FID_INST_ID, $inst_id );
@@ -1068,6 +1060,9 @@ sub handle_fee_paid {
     my $status;
     my $resp = FEE_PAID_RESP;
 
+    my $payment_type_writeoff = $server->{account}->{payment_type_writeoff} || q{};
+    my $is_writeoff = $pay_type eq $payment_type_writeoff;
+
     $fee_amt    = $fields->{ (FID_FEE_AMT) };
     $inst_id    = $fields->{ (FID_INST_ID) };
     $patron_id  = $fields->{ (FID_PATRON_ID) };
@@ -1077,7 +1072,7 @@ sub handle_fee_paid {
 
     $ils->check_inst_id( $inst_id, "handle_fee_paid" );
 
-    $status = $ils->pay_fee( $patron_id, $patron_pwd, $fee_amt, $fee_type, $pay_type, $fee_id, $trans_id, $currency );
+    $status = $ils->pay_fee( $patron_id, $patron_pwd, $fee_amt, $fee_type, $pay_type, $fee_id, $trans_id, $currency, $is_writeoff );
 
     $resp .= ( $status->ok ? 'Y' : 'N' ) . timestamp;
     $resp .= add_field( FID_INST_ID,   $inst_id );

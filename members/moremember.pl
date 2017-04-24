@@ -36,8 +36,6 @@
 use strict;
 #use warnings; FIXME - Bug 2505
 use CGI qw ( -utf8 );
-use Digest::MD5 qw(md5_base64);
-use Encode qw( encode );
 use C4::Context;
 use C4::Auth;
 use C4::Output;
@@ -53,6 +51,7 @@ use C4::Form::MessagingPreferences;
 use List::MoreUtils qw/uniq/;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
 use Koha::AuthorisedValues;
+use Koha::CsvProfiles;
 use Koha::Patron::Debarments qw(GetDebarments);
 use Koha::Patron::Images;
 use Module::Load;
@@ -279,10 +278,7 @@ my $patron_image = Koha::Patron::Images->find($data->{borrowernumber});
 $template->param( picture => 1 ) if $patron_image;
 # Generate CSRF token for upload and delete image buttons
 $template->param(
-    csrf_token => Koha::Token->new->generate_csrf({
-        id     => Encode::encode( 'UTF-8', C4::Context->userenv->{id} ),
-        secret => md5_base64( Encode::encode( 'UTF-8', C4::Context->config('pass') ) ),
-    }),
+    csrf_token => Koha::Token->new->generate_csrf({ session_id => $input->cookie('CGISESSID'),}),
 );
 
 
@@ -328,6 +324,10 @@ if (C4::Context->preference('EnhancedMessagingPreferences')) {
     $template->param(TalkingTechItivaPhone => C4::Context->preference("TalkingTechItivaPhoneNotification"));
 }
 
+if ( C4::Context->preference("ExportCircHistory") ) {
+    $template->param(csv_profiles => [ Koha::CsvProfiles->search({ type => 'marc' }) ]);
+}
+
 # in template <TMPL_IF name="I"> => instutitional (A for Adult, C for children)
 $template->param( $data->{'categorycode'} => 1 );
 $template->param(
@@ -348,7 +348,6 @@ $template->param(
     quickslip       => $quickslip,
     housebound_role => $patron->housebound_role,
     privacy_guarantor_checkouts => $data->{'privacy_guarantor_checkouts'},
-    activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
     AutoResumeSuspendedHolds => C4::Context->preference('AutoResumeSuspendedHolds'),
     SuspendHoldsIntranet => C4::Context->preference('SuspendHoldsIntranet'),
     RoutingSerials => C4::Context->preference('RoutingSerials'),

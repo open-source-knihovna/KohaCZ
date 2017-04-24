@@ -21,7 +21,6 @@ use CGI qw ( -utf8 );
 use MARC::File::XML;
 use List::MoreUtils qw(uniq);
 use C4::Auth;
-use C4::Koha;               # GetItemTypes
 use C4::Output;
 
 use Koha::Authority::Types;
@@ -30,6 +29,7 @@ use Koha::CsvProfiles;
 use Koha::Database;
 use Koha::DateUtils qw( dt_from_string output_pref );
 use Koha::Exporter::Record;
+use Koha::ItemTypes;
 use Koha::Libraries;
 
 my $query = new CGI;
@@ -72,11 +72,13 @@ my @branch = $query->multi_param("branch");
 my @messages;
 if ( $op eq 'export' ) {
     my $filename = $query->param('id_list_file');
-    my $mimetype = $query->uploadInfo($filename)->{'Content-Type'};
-    my @valid_mimetypes = qw( application/octet-stream text/csv text/plain );
-    unless ( grep { /^$mimetype$/ } @valid_mimetypes ) {
-        push @messages, { type => 'alert', code => 'invalid_mimetype' };
-        $op = '';
+    if ( $filename ) {
+        my $mimetype = $query->uploadInfo($filename)->{'Content-Type'};
+        my @valid_mimetypes = qw( application/octet-stream text/csv text/plain );
+        unless ( grep { /^$mimetype$/ } @valid_mimetypes ) {
+            push @messages, { type => 'alert', code => 'invalid_mimetype' };
+            $op = '';
+        }
     }
 }
 
@@ -198,12 +200,6 @@ if ( $op eq "export" ) {
         );
 
         my $csv_profile_id = $query->param('csv_profile_id');
-        unless ( $csv_profile_id ) {
-            # FIXME export_format.profile should be a unique key
-            my $default_csv_profiles = Koha::CsvProfiles->search({ profile => C4::Context->preference('ExportWithCsvProfile') });
-            $csv_profile_id = $default_csv_profiles->count ? $default_csv_profiles->next->export_format_id : undef;
-        }
-
         Koha::Exporter::Record::export(
             {   record_type        => $record_type,
                 record_ids         => \@record_ids,
@@ -270,15 +266,7 @@ if ( $op eq "export" ) {
 
 else {
 
-    my $itemtypes = GetItemTypes;
-    my @itemtypesloop;
-    foreach my $thisitemtype ( sort keys %$itemtypes ) {
-        my %row = (
-            value       => $thisitemtype,
-            description => $itemtypes->{$thisitemtype}->{translated_description},
-        );
-        push @itemtypesloop, \%row;
-    }
+    my $itemtypes = Koha::ItemTypes->search_with_localization;
 
     my $authority_types = Koha::Authority::Types->search( {}, { order_by => ['authtypecode'] } );
 
@@ -309,7 +297,7 @@ else {
 
     $template->param(
         libraries                => $libraries,
-        itemtypeloop             => \@itemtypesloop,
+        itemtypes                => $itemtypes,
         authority_types          => $authority_types,
         export_remove_fields     => C4::Context->preference("ExportRemoveFields"),
         csv_profiles             => [ Koha::CsvProfiles->search({ type => 'marc' }) ],

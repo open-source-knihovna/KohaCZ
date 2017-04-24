@@ -28,7 +28,7 @@ parcel.pl
 =head1 DESCRIPTION
 
 This script shows all orders receipt or pending for a given supplier.
-It allows to write an order as 'received' when he arrives.
+It allows to write an order as 'received' when it arrives.
 
 =head1 CGI PARAMETERS
 
@@ -65,11 +65,11 @@ use C4::Items;
 use CGI qw ( -utf8 );
 use C4::Output;
 use C4::Suggestions;
-use C4::Reserves qw/GetReservesFromBiblionumber/;
 
 use Koha::Acquisition::Bookseller;
 use Koha::Biblios;
 use Koha::DateUtils;
+use Koha::Biblios;
 
 use JSON;
 
@@ -140,10 +140,12 @@ for my $order ( @orders ) {
     $line{invoice} = $invoice->{invoicenumber};
     $line{holds} = 0;
     my @itemnumbers = GetItemnumbersFromOrder( $order->{ordernumber} );
-    for my $itemnumber ( @itemnumbers ) {
-        my $holds = GetReservesFromBiblionumber({ biblionumber => $line{biblionumber}, itemnumber => $itemnumber });
-        $line{holds} += scalar( @$holds );
-    }
+    my $biblio = Koha::Biblios->find( $line{biblionumber} );
+    $line{holds} = $biblio ? $biblio->current_holds->search(
+        {
+            itemnumber => { -in => \@itemnumbers },
+        }
+    )->count : 0;
     $line{budget} = GetBudgetByOrderNumber( $line{ordernumber} );
 
     $line{tax_value} = $line{tax_value_on_receiving};
@@ -243,13 +245,7 @@ unless( defined $invoice->{closedate} ) {
         my $itemcount   = $biblio->items->count;
         my $holds_count = $biblio->holds->count;
         my @items = GetItemnumbersFromOrder( $ordernumber );
-        my $itemholds;
-        foreach my $item (@items){
-            my $nb = GetItemHolds($biblionumber, $item);
-            if ($nb){
-                $itemholds += $nb;
-            }
-        }
+        my $itemholds = $biblio ? $biblio->holds->search({ itemnumber => { -in => \@items } })->count : 0;
 
         my $suggestion   = GetSuggestionInfoFromBiblionumber($line{biblionumber});
         $line{suggestionid}         = $suggestion->{suggestionid};

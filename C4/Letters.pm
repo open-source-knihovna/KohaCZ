@@ -572,10 +572,11 @@ sub SendAlerts {
         $letter->{content} =~ s/<order>(.*?)<\/order>/$1/gxms;
 
         # ... then send mail
+        my $library = Koha::Libraries->find( $userenv->{branch} );
         my %mail = (
             To => join( ',', @email),
             Cc             => join( ',', @cc),
-            From           => $userenv->{emailaddress},
+            From           => $library->branchemail || C4::Context->preference('KohaAdminEmailAddress'),
             Subject        => Encode::encode( "UTF-8", "" . $letter->{title} ),
             Message => $letter->{'is_html'}
                             ? _wrap_html( Encode::encode( "UTF-8", $letter->{'content'} ),
@@ -689,15 +690,16 @@ sub GetPreparedLetter {
         or warn( "No $module $letter_code letter transported by " . $mtt ),
             return;
 
-    my $tables = $params{tables};
-    my $substitute = $params{substitute};
+    my $tables = $params{tables} || {};
+    my $substitute = $params{substitute} || {};
+    my $loops  = $params{loops} || {}; # loops is not supported for historical notices syntax
     my $repeat = $params{repeat};
-    $tables || $substitute || $repeat
-      or carp( "ERROR: nothing to substitute - both 'tables' and 'substitute' are empty" ),
+    %$tables || %$substitute || $repeat || %$loops
+      or carp( "ERROR: nothing to substitute - both 'tables', 'loops' and 'substitute' are empty" ),
          return;
     my $want_librarian = $params{want_librarian};
 
-    if ($substitute) {
+    if (%$substitute) {
         while ( my ($token, $val) = each %$substitute ) {
             if ( $token eq 'items.content' ) {
                 $val =~ s|\n|<br/>|g if $letter->{is_html};
@@ -743,7 +745,7 @@ sub GetPreparedLetter {
         }
     }
 
-    if ($tables) {
+    if (%$tables) {
         _substitute_tables( $letter, $tables );
     }
 
@@ -770,6 +772,7 @@ sub GetPreparedLetter {
         {
             content => $letter->{content},
             tables  => $tables,
+            loops  => $loops,
         }
     );
 
@@ -1335,7 +1338,7 @@ sub _send_message_by_email {
     );
 
     $sendmail_params{'Auth'} = {user => $username, pass => $password, method => $method} if $username;
-    if ( my $bcc = C4::Context->preference('OverdueNoticeBcc') ) {
+    if ( my $bcc = C4::Context->preference('NoticeBcc') ) {
        $sendmail_params{ Bcc } = $bcc;
     }
 
@@ -1440,6 +1443,7 @@ sub _process_tt {
 
     my $content = $params->{content};
     my $tables = $params->{tables};
+    my $loops = $params->{loops};
 
     my $use_template_cache = C4::Context->config('template_cache_dir') && defined $ENV{GATEWAY_INTERFACE};
     my $template           = Template->new(
@@ -1454,7 +1458,9 @@ sub _process_tt {
         }
     ) or die Template->error();
 
-    my $tt_params = _get_tt_params( $tables );
+    my $tt_params = { %{ _get_tt_params( $tables ) }, %{ _get_tt_params( $loops, 'is_a_loop' ) } };
+
+    $content = qq|[% USE KohaDates %]$content|;
 
     my $output;
     $template->process( \$content, $tt_params, \$output ) || croak "ERROR PROCESSING TEMPLATE: " . $template->error();
@@ -1463,11 +1469,18 @@ sub _process_tt {
 }
 
 sub _get_tt_params {
-    my ($tables) = @_;
+    my ($tables, $is_a_loop) = @_;
 
     my $params;
+    $is_a_loop ||= 0;
 
     my $config = {
+        article_requests => {
+            module   => 'Koha::ArticleRequests',
+            singular => 'article_request',
+            plural   => 'article_requests',
+            pk       => 'id',
+          },
         biblio => {
             module   => 'Koha::Biblios',
             singular => 'biblio',
@@ -1534,6 +1547,12 @@ sub _get_tt_params {
             plural   => 'checkouts',
             fk       => 'itemnumber',
         },
+        old_issues => {
+            module   => 'Koha::Old::Checkouts',
+            singular => 'old_checkout',
+            plural   => 'old_checkouts',
+            fk       => 'itemnumber',
+        },
         borrower_modifications => {
             module   => 'Koha::Patron::Modifications',
             singular => 'patron_modification',
@@ -1552,7 +1571,16 @@ sub _get_tt_params {
             my $pk = $config->{$table}->{pk};
             my $fk = $config->{$table}->{fk};
 
-            if ( $ref eq q{} || $ref eq 'HASH' ) {
+            if ( $is_a_loop ) {
+                my $values = $tables->{$table} || [];
+                unless ( ref( $values ) eq 'ARRAY' ) {
+                    croak "ERROR processing table $table. Wrong API call.";
+                }
+                my $key = $pk ? $pk : $fk;
+                my $objects = $module->search( { $key => { -in => $values } } );
+                $params->{ $config->{$table}->{plural} } = $objects;
+            }
+            elsif ( $ref eq q{} || $ref eq 'HASH' ) {
                 my $id = ref $ref eq 'HASH' ? $tables->{$table}->{$pk} : $tables->{$table};
                 my $object;
                 if ( $fk ) { # Using a foreign key for lookup
@@ -1561,9 +1589,9 @@ sub _get_tt_params {
                         foreach my $key ( @$fk ) {
                             $search->{$key} = $id->{$key};
                         }
-                        $object = $module->search( $search )->next();
+                        $object = $module->search( $search )->last();
                     } else { # Foreign key is single column
-                        $object = $module->search( { $fk => $id } )->next();
+                        $object = $module->search( { $fk => $id } )->last();
                     }
                 } else { # using the table's primary key for lookup
                     $object = $module->find($id);
@@ -1573,7 +1601,7 @@ sub _get_tt_params {
             else {    # $ref eq 'ARRAY'
                 my $object;
                 if ( @{ $tables->{$table} } == 1 ) {    # Param is a single key
-                    $object = $module->search( { $pk => $tables->{$table} } )->next();
+                    $object = $module->search( { $pk => $tables->{$table} } )->last();
                 }
                 else {                                  # Params are mutliple foreign keys
                     croak "Multiple foreign keys (table $table) should be passed using an hashref";

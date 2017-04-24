@@ -23,6 +23,8 @@ use C4::Debug;
 use C4::Context;
 use Koha::AuthUtils qw(get_script_name);
 use Koha::Database;
+use C4::Members qw( AddMember_Auto );
+use C4::Members::Messaging;
 use Carp;
 use CGI;
 
@@ -102,11 +104,28 @@ sub checkpw_shib {
         return ( 1, $borrower->get_column('cardnumber'), $borrower->get_column('userid') );
     }
 
-    # If we reach this point, the user is not a valid koha user
-    $debug
-      and warn
-      "User with $config->{matchpoint} of $match is not a valid Koha user";
-    return 0;
+    if ( $config->{'autocreate'} ) {
+        return _autocreate( $config, $match );
+    } else {
+        # If we reach this point, the user is not a valid koha user
+         $debug and warn "User with $config->{matchpoint} of $match is not a valid Koha user";
+        return 0;
+    }
+}
+
+sub _autocreate {
+    my ( $config, $match ) = @_;
+
+    my %borrower = ( $config->{matchpoint} => $match );
+
+    while ( my ( $key, $entry ) = each %{$config->{'mapping'}} ) {
+        $borrower{$key} = ( $entry->{'is'} && $ENV{ $entry->{'is'} } ) || $entry->{'content'} || '';
+    }
+
+    %borrower = AddMember_Auto( %borrower );
+    C4::Members::Messaging::SetMessagingPreferencesFromDefaults( { borrowernumber => $borrower{'borrowernumber'}, categorycode => $borrower{'categorycode'} } );
+
+    return ( 1, $borrower{'cardnumber'}, $borrower{'userid'} );
 }
 
 sub _get_uri {
@@ -237,7 +256,7 @@ This is as simple as enabling B<useshibboleth> in koha-conf.xml:
 Map shibboleth attributes to koha fields, and configure authentication match point in koha-conf.xml.
 
  <shibboleth>
-   <matchpoint>userid<matchpoint> <!-- koha borrower field to match upon -->
+   <matchpoint>userid</matchpoint> <!-- koha borrower field to match upon -->
    <mapping>
      <userid is="eduPersonID"></userid> <!-- koha borrower field to shibboleth attribute mapping -->
    </mapping>
@@ -273,9 +292,17 @@ Returns the shibboleth login attribute should it be found present in the http se
 
 =head2 checkpw_shib
 
-Given a database handle and a shib_login attribute, this routine checks for a matching local user and if found returns true, their cardnumber and their userid.  If a match is not found, then this returns false.
+Given a shib_login attribute, this routine checks for a matching local user and if found returns true, their cardnumber and their userid.  If a match is not found, then this returns false.
 
   my ( $retval, $retcard, $retuserid ) = C4::Auth_with_shibboleth::checkpw_shib( $shib_login );
+
+=head2 _autocreate
+
+  my ( $retval, $retcard, $retuserid ) = _autocreate( $config, $match );
+
+Given a shibboleth attribute reference and a userid this internal routine will add the given user to Koha and return their user credentials.
+
+This routine is NOT exported
 
 =head1 SEE ALSO
 

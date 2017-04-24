@@ -63,7 +63,6 @@ use warnings;
 
 use CGI qw ( -utf8 );
 use C4::Context;
-use C4::Koha;   # GetItemTypes
 use C4::Acquisition;
 use C4::Auth;
 use C4::Output;
@@ -72,6 +71,7 @@ use C4::Members;
 use C4::Items;
 use C4::Biblio;
 use C4::Suggestions;
+use C4::Koha;
 
 use Koha::Acquisition::Booksellers;
 use Koha::DateUtils qw( dt_from_string );

@@ -1261,10 +1261,15 @@ CREATE TABLE `matchchecks` (
 --
 
 DROP TABLE IF EXISTS `need_merge_authorities`;
-CREATE TABLE `need_merge_authorities` ( -- keeping track of authority records still to be merged by merge_authority cron job (used only if pref dontmerge is ON)
+CREATE TABLE `need_merge_authorities` ( -- keeping track of authority records still to be merged by merge_authority cron job
   `id` int NOT NULL auto_increment PRIMARY KEY, -- unique id
-  `authid` bigint NOT NULL, -- reference to authority record
-  `done` tinyint DEFAULT 0  -- indication whether merge has been executed (0=not done, 1= done, 2= in progress)
+  `authid` bigint NOT NULL, -- reference to original authority record
+  `authid_new` bigint, -- reference to optional new authority record
+  `reportxml` text, -- xml showing original reporting tag
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- date and time last modified
+  `done` tinyint DEFAULT 0  -- indication whether merge has been executed (0=not done, 1=done, 2=in progress)
+-- Note: authid and authid_new should NOT be FOREIGN keys !
+-- authid may have been deleted; authid_new may be zero
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -1749,7 +1754,6 @@ CREATE TABLE `issues` ( -- information related to check outs or issues
   `branchcode` varchar(10) default NULL, -- foreign key, linking to the branches table for the location the item was checked out
   `returndate` datetime default NULL, -- date the item was returned, will be NULL until moved to old_issues
   `lastreneweddate` datetime default NULL, -- date the item was last renewed
-  `return` varchar(4) default NULL,
   `renewals` tinyint(4) default NULL, -- lists the number of times the item was renewed
   `auto_renew` BOOLEAN default FALSE, -- automatic renewal
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- the date and time this record was last touched
@@ -1778,7 +1782,6 @@ CREATE TABLE `old_issues` ( -- lists items that were checked out and have been r
   `branchcode` varchar(10) default NULL, -- foreign key, linking to the branches table for the location the item was checked out
   `returndate` datetime default NULL, -- date the item was returned
   `lastreneweddate` datetime default NULL, -- date the item was last renewed
-  `return` varchar(4) default NULL,
   `renewals` tinyint(4) default NULL, -- lists the number of times the item was renewed
   `auto_renew` BOOLEAN default FALSE, -- automatic renewal
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- the date and time this record was last touched
@@ -2449,7 +2452,7 @@ DROP TABLE IF EXISTS `serialitems`;
 CREATE TABLE `serialitems` (
 	`itemnumber` int(11) NOT NULL,
 	`serialid` int(11) NOT NULL,
-	UNIQUE KEY `serialitemsidx` (`itemnumber`),
+    PRIMARY KEY (`itemnumber`),
 	KEY `serialitems_sfk_1` (`serialid`),
 	CONSTRAINT `serialitems_sfk_1` FOREIGN KEY (`serialid`) REFERENCES `serial` (`serialid`) ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT `serialitems_sfk_2` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE CASCADE ON UPDATE CASCADE

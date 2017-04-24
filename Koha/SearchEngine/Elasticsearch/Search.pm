@@ -45,6 +45,7 @@ use C4::Context;
 use Koha::ItemTypes;
 use Koha::AuthorisedValues;
 use Koha::SearchEngine::QueryBuilder;
+use Koha::SearchEngine::Search;
 use MARC::Record;
 use Catmandu::Store::ElasticSearch;
 
@@ -268,7 +269,7 @@ sub count_auth_use {
 =head2 simple_search_compat
 
     my ( $error, $marcresults, $total_hits ) =
-      $searcher->simple_search( $query, $offset, $max_results );
+      $searcher->simple_search( $query, $offset, $max_results, %options );
 
 This is a simpler interface to the searching, intended to be similar enough to
 L<C4::Search::SimpleSearch>.
@@ -290,6 +291,10 @@ How many results to skip from the start of the results.
 
 The max number of results to return. The default is 100 (because unlimited
 is a pretty terrible thing to do.)
+
+=item C<%options>
+
+These options are unused by Elasticsearch
 
 =back
 
@@ -338,6 +343,21 @@ sub simple_search_compat {
             push @records, $marc;
         });
     return (undef, \@records, $results->total);
+}
+
+=head2 extract_biblionumber
+
+    my $biblionumber = $searcher->extract_biblionumber( $searchresult );
+
+$searchresult comes from simple_search_compat.
+
+Returns the biblionumber from the search result record.
+
+=cut
+
+sub extract_biblionumber {
+    my ( $self, $searchresultrecord ) = @_;
+    return Koha::SearchEngine::Search::extract_biblionumber( $searchresultrecord );
 }
 
 =head2 json2marc

@@ -22,6 +22,7 @@ use Modern::Perl;
 use Carp;
 
 use Koha::Database;
+use Koha::DateUtils qw( dt_from_string );
 
 use C4::Context;
 use Koha::IssuingRules;
@@ -89,6 +90,20 @@ sub biblio {
     my ( $self ) = @_;
     my $biblio_rs = $self->_result->biblio;
     return Koha::Biblio->_new_from_dbic( $biblio_rs );
+}
+
+=head3 biblioitem
+
+my $biblioitem = $item->biblioitem;
+
+Return the biblioitem record of this item
+
+=cut
+
+sub biblioitem {
+    my ( $self ) = @_;
+    my $biblioitem_rs = $self->_result->biblioitem;
+    return Koha::Biblioitem->_new_from_dbic( $biblioitem_rs );
 }
 
 =head3 get_transfer
@@ -182,6 +197,26 @@ sub article_request_type {
 
     return q{} unless $issuing_rule;
     return $issuing_rule->article_requests || q{}
+}
+
+=head3 current_holds
+
+=cut
+
+sub current_holds {
+    my ( $self ) = @_;
+    my $attributes = { order_by => 'priority' };
+    my $dtf = Koha::Database->new->schema->storage->datetime_parser;
+    my $params = {
+        itemnumber => $self->itemnumber,
+        suspend => 0,
+        -or => [
+            reservedate => { '<=' => $dtf->format_date(dt_from_string) },
+            waitingdate => { '!=' => undef },
+        ],
+    };
+    my $hold_rs = $self->_result->reserves->search( $params, $attributes );
+    return Koha::Holds->_new_from_dbic($hold_rs);
 }
 
 =head3 type

@@ -19,9 +19,10 @@
 
 use Modern::Perl;
 
-use Test::More tests => 18;
+use Test::More tests => 20;
 use Data::Dumper;
 use Koha::Database;
+use t::lib::Mocks;
 
 BEGIN {
     use_ok('Koha::ItemType');
@@ -31,6 +32,7 @@ BEGIN {
 my $database = Koha::Database->new();
 my $schema   = $database->schema();
 $schema->txn_begin;
+Koha::ItemTypes->delete;
 
 Koha::ItemType->new(
     {
@@ -56,6 +58,43 @@ Koha::ItemType->new(
     }
 )->store;
 
+Koha::ItemType->new(
+    {
+        itemtype       => 'type3',
+        description    => 'description',
+        rentalcharge   => '0.00',
+        imageurl       => 'imageurl',
+        summary        => 'summary',
+        checkinmsg     => 'checkinmsg',
+        checkinmsgtype => 'checkinmsgtype',
+    }
+)->store;
+
+Koha::Localization->new(
+    {
+        entity      => 'itemtypes',
+        code        => 'type1',
+        lang        => 'en',
+        translation => 'b translated itemtype desc'
+    }
+)->store;
+Koha::Localization->new(
+    {
+        entity      => 'itemtypes',
+        code        => 'type2',
+        lang        => 'en',
+        translation => 'a translated itemtype desc'
+    }
+)->store;
+Koha::Localization->new(
+    {
+        entity      => 'something_else',
+        code        => 'type2',
+        lang        => 'en',
+        translation => 'another thing'
+    }
+)->store;
+
 my $type = Koha::ItemTypes->find('type1');
 ok( defined($type), 'first result' );
 is( $type->itemtype,       'type1',          'itemtype/code' );
@@ -75,5 +114,16 @@ is( $type->imageurl,       'imageurl',       'imageurl' );
 is( $type->summary,        'summary',        'summary' );
 is( $type->checkinmsg,     'checkinmsg',     'checkinmsg' );
 is( $type->checkinmsgtype, 'checkinmsgtype', 'checkinmsgtype' );
+
+t::lib::Mocks::mock_preference('language', 'en');
+t::lib::Mocks::mock_preference('opaclanguages', 'en');
+my $itemtypes = Koha::ItemTypes->search_with_localization;
+is( $itemtypes->count, 3, 'There are 3 item types' );
+my $first_itemtype = $itemtypes->next;
+is(
+    $first_itemtype->translated_description,
+    'a translated itemtype desc',
+    'item types should be sorted by translated description'
+);
 
 $schema->txn_rollback;

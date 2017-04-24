@@ -4,11 +4,13 @@ use DateTime::TimeZone;
 
 use C4::Context;
 
-use Test::More tests => 60;
+use Test::More tests => 63;
 
 use Test::MockModule;
 use Test::Warn;
 use Time::HiRes qw/ gettimeofday /;
+use Try::Tiny;
+
 use t::lib::Mocks;
 
 BEGIN { use_ok('Koha::DateUtils'); }
@@ -222,13 +224,41 @@ is( output_pref( { dt => $dt, dateonly => 1 } ), '01/01/1900', 'dt_from_string s
 $dt = dt_from_string('2015-01-31 01:02:03');
 is( output_pref( {dt => $dt} ), '31/01/2015 01:02', 'dt_from_string should fallback to sql format' );
 
+# output_pref with no parameters, single parameter (no hash)
+is( output_pref(), undef, 'Call output_pref without parameters' );
+try {
+    output_pref( 'no_dt' );
+    ok( 0, 'Passed single invalid dt to output_pref' );
+} catch {
+    is( ref($_), 'Koha::Exceptions::WrongParameter',
+        'Passed single invalid dt to output_pref' );
+};
+
+# pass invalid dt via hash
+try {
+    output_pref({ dt => 'no_dt' });
+    ok( 0, 'Passed invalid dt in hash to output_pref' );
+} catch {
+    is( ref($_), 'Koha::Exceptions::WrongParameter',
+        'Passed invalid dt in hash to output_pref' );
+};
+
 # output_pref with str parameter
 is( output_pref( { 'str' => $testdate_iso, dateformat => 'iso', dateonly => 1 } ), $testdate_iso, 'output_pref should handle correctly the iso parameter' );
 my $output_for_invalid_date;
-warning_like { $output_for_invalid_date = output_pref( { str => 'invalid_date' } ) }
-             { carped => qr[^Invalid date 'invalid_date' passed to output_pref] },
-             'output_pref should carp if an invalid date is passed for the str parameter';
-is( $output_for_invalid_date, undef, 'output_pref should return undef if an invalid date is passed' );
-warning_is { output_pref( { 'str' => $testdate_iso, dt => $dt, dateformat => 'iso', dateonly => 1 } ) }
-           { carped => 'output_pref should not be called with both dt and str parameters' },
-           'output_pref should carp if str and dt parameters are passed together';
+try {
+    $output_for_invalid_date = output_pref({ str => 'invalid_date' });
+    ok( 0, 'Invalid date string passed to output_pref' );
+} catch {
+    is( ref($_), 'Koha::Exceptions::WrongParameter',
+        'Invalid date string passed to output_pref' );
+};
+is( $output_for_invalid_date, undef, 'No return value from output_pref' );
+try {
+    output_pref({ 'str' => $testdate_iso, dt => $dt, dateformat => 'iso', dateonly => 1 });
+    ok( 0, 'output_pref should carp if str and dt parameters are passed together' );
+} catch {
+    is( ref($_), 'Koha::Exceptions::WrongParameter', 'output_pref should throw an exception if str and dt parameters are passed together' );
+};
+
+# End of tests

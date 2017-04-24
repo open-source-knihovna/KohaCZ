@@ -27,19 +27,18 @@ my $library2 = $builder->build({
 my $library3 = $builder->build({
     source => 'Branch',
 });
+my $itemtype = $builder->build({ source => 'Item' })->{itype};
 
 my $bib_title = "Test Title";
 
 my $borrower = $builder->build({
     source => 'Borrower',
     value => {
-        categorycode => 'S',
         branchcode => $library1->{branchcode},
     }
 });
 
 # Test hold_fulfillment_policy
-my ( $itemtype ) = @{ $dbh->selectrow_arrayref("SELECT itemtype FROM itemtypes LIMIT 1") };
 my $borrowernumber = $borrower->{borrowernumber};
 my $library_A = $library1->{branchcode};
 my $library_B = $library2->{branchcode};
