@@ -79,9 +79,11 @@ $(document).ready(function(){
     [% END %]
 
     $("#add_fine_form #account_amount").val(type_fees[$("#add_fine_form #account_type option:selected").val()]);
+    $("#add_fine_form #account_desc").val($("#account_type option:selected").text());
 
     $("#add_fine_form #account_type").change(function(){
         $("#add_fine_form #account_amount").val(type_fees[$(this).val()]);
+        $("#add_fine_form #account_desc").val($("#account_type option:selected").text());
     });
 });
 function confirm_local_deletion() {
