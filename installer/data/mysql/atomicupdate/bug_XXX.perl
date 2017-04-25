@@ -3,7 +3,7 @@ if( CheckVersion( $DBversion ) ) {
 
 $dbh->do( "
     CREATE TABLE IF NOT EXISTS account_debit_types (
-        type_code varchar(5) NOT NULL,
+        type_code varchar(32) NOT NULL,
         default_amount decimal(28,6) NULL,
         description varchar(200) NULL,
         can_be_deleted tinyint NOT NULL DEFAULT '1',
@@ -14,7 +14,7 @@ $dbh->do( "
 
 $dbh->do( "
     CREATE TABLE IF NOT EXISTS account_credit_types (
-        type_code varchar(5) NOT NULL,
+        type_code varchar(32) NOT NULL,
         description varchar(200) NULL,
         can_be_deleted tinyint NOT NULL DEFAULT '1',
         can_be_added_manually tinyint(4) NOT NULL DEFAULT '1',
@@ -60,7 +60,11 @@ $dbh->do( "
 " );
 
 $dbh->do( "
-    ALTER IGNORE TABLE `accountlines`  ADD `paymenttype` varchar(5) COLLATE 'utf8_unicode_ci' NULL AFTER `accounttype`
+    ALTER TABLE `accountlines` CHANGE COLUMN `accounttype` `accounttype` varchar(32) default NULL
+" );
+
+$dbh->do( "
+    ALTER IGNORE TABLE `accountlines`  ADD `paymenttype` varchar(32) COLLATE 'utf8_unicode_ci' NULL AFTER `accounttype`
 " );
 
     SetVersion( $DBversion );

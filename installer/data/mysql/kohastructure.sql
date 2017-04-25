@@ -2701,7 +2701,7 @@ CREATE TABLE `messages` ( -- circulation messages left via the patron's check ou
 --
 DROP TABLE IF EXISTS `account_credit_types`;
 CREATE TABLE `account_credit_types` (
-  `type_code` varchar(5) COLLATE utf8_unicode_ci NOT NULL,
+  `type_code` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `description` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
   `can_be_deleted` tinyint(4) NOT NULL DEFAULT '1',
   `can_be_added_manually` tinyint(4) NOT NULL DEFAULT '1',
@@ -2713,7 +2713,7 @@ CREATE TABLE `account_credit_types` (
 --
 DROP TABLE IF EXISTS `account_debit_types`;
 CREATE TABLE `account_debit_types` (
-  `type_code` varchar(5) COLLATE utf8_unicode_ci NOT NULL,
+  `type_code` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `default_amount` decimal(28,6) DEFAULT NULL,
   `description` varchar(200) COLLATE utf8_unicode_ci DEFAULT NULL,
   `can_be_deleted` tinyint(4) NOT NULL DEFAULT '1',
@@ -2736,8 +2736,8 @@ CREATE TABLE `accountlines` (
   `amount` decimal(28,6) default NULL,
   `description` mediumtext,
   `dispute` mediumtext,
-  `accounttype` varchar(5) default NULL,
-  `paymenttype` varchar(5) default NULL,
+  `accounttype` varchar(32) default NULL,
+  `paymenttype` varchar(32) default NULL,
   `amountoutstanding` decimal(28,6) default NULL,
   `lastincrement` decimal(28,6) default NULL,
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
