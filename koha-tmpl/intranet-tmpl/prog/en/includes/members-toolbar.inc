@@ -78,10 +78,10 @@ $(document).ready(function(){
         type_fees['[% debit_type.type_code %]'] = "[% debit_type.default_amount %]";
     [% END %]
 
-    $("#add_fine_form #amount").val(type_fees[$("#add_fine_form #type option:selected").val()]);
+    $("#add_fine_form #account_amount").val(type_fees[$("#add_fine_form #account_type option:selected").val()]);
 
-    $("#add_fine_form #type").change(function(){
-        $("#add_fine_form #amount").val(type_fees[$(this).val()]);
+    $("#add_fine_form #account_type").change(function(){
+        $("#add_fine_form #account_amount").val(type_fees[$(this).val()]);
     });
 });
 function confirm_local_deletion() {
@@ -280,24 +280,24 @@ function searchToHold(){
     </div>
     <div class="modal-body">
         <div class="form-group">
-            <label for="type">Type: </label>
-            <select name="type" id="type">
+            <label for="account_type">Type: </label>
+            <select name="type" id="account_type">
             [% FOREACH debit_type IN debit_types %]
                 <option value="[% debit_type.type_code %]">[% debit_type.description %]</options>
             [% END %]
             </select>
         </div>
         <div class="form-group">
-            <label for="barcode">Barcode: </label>
-            <input type="text" name="barcode" id="barcode" />
+            <label for="account_barcode">Barcode: </label>
+            <input type="text" name="barcode" id="account_barcode" />
         </div>
         <div class="form-group">
-            <label for="desc">Description: </label>
-            <input type="text" name="desc" id="desc" size="50" />
+            <label for="account_desc">Description: </label>
+            <input type="text" name="desc" id="account_desc" size="50" />
         </div>
         <div class="form-group">
-            <label for="amount">Amount: </label>
-            <input type="number" name="amount" id="amount" required="required" value="" step="any" min="0" />Example: 5.00
+            <label for="account_amount">Amount: </label>
+            <input type="number" name="amount" id="account_amount" required="required" value="" step="any" min="0" />Example: 5.00
         </div>
     </div>
     <div class="modal-footer">
