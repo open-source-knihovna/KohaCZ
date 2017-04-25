@@ -146,7 +146,7 @@ if ( $total_paid and $total_paid ne '0.00' ) {
             }
 
             print $input->redirect(
-                "/cgi-bin/koha/members/pay.pl?borrowernumber=$borrowernumber");
+                "/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber");
         } else {
             if ($select) {
                 if ( $select =~ /^([\d,]*).*/ ) {
