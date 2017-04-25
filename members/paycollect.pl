@@ -130,12 +130,12 @@ if ( $total_paid and $total_paid ne '0.00' ) {
                     $user, $branch, $payment_note );
                 if ( $writeoffoutstanding ) {
                     my $writeoffamount = $total_due - $total_paid;
-		    WriteOffFee( $borrowernumber, $accountlines_id, $itemnumber, $accounttype,
-		        $writeoffamount, $branch, $payment_note );
+                    WriteOffFee( $borrowernumber, $accountlines_id, $itemnumber, $accounttype,
+                        $writeoffamount, $branch, $payment_note );
                 }
             }
             print $input->redirect(
-                "/cgi-bin/koha/members/pay.pl?borrowernumber=$borrowernumber");
+                "/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber");
         } else {
             if ($select) {
                 if ( $select =~ /^([\d,]*).*/ ) {
