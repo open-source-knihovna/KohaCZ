@@ -74,7 +74,7 @@
                         <strong>[% account_type.type_code %]</strong>
                         <input type="hidden" name="type_code" value="[% type_code %]" />
                     [% ELSE %]
-                    <input type="text" name="type_code" id="type_code" size="10" maxlength="5" class="required" required="required"><span class="required">Required. Maximum length is 5 letters</span>
+                    <input type="text" name="type_code" id="type_code" size="10" maxlength="32" class="required" required="required"><span class="required">Required. Maximum length is 5 letters</span>
                     [% END %]
                 </li>
                 [% IF type == 'debit' %]
