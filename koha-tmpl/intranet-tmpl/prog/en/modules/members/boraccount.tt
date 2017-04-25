@@ -46,7 +46,7 @@ $(document).ready(function() {
     [% IF CAN_user_updatecharges_writeoff %]
         table_toolbar_html += '<a id="woall" href="#" class="btn"><i class="fa fa-times"></i> ' + txtWriteOffAll + '</a>';
     [% END %]
-    table_toolbar_html += ' <a class="btn" href="#"><i class="fa fa-money"></i> ' + txtPaySelected + '</a>';
+    table_toolbar_html += ' <a class="btn" id="payselected"><i class="fa fa-money"></i> ' + txtPaySelected + '</a>';
     $("#table_toolbar").html(table_toolbar_html);
 
     $('#filter_transacs').click(function(e) {
@@ -75,6 +75,11 @@ $(document).ready(function() {
         setCheckboxActions();
     });
     setCheckboxActions();
+
+    $("#payselected").click(function(){
+        $("#payselected_input").val(1);
+        $("#pay_form").submit();
+    });
 });
 </script>
 </head>
@@ -90,7 +95,7 @@ $(document).ready(function() {
 	<div id="yui-main">
 	<div class="yui-b">
 [% INCLUDE 'members-toolbar.inc' %]
-<form action="/cgi-bin/koha/members/boraccount.pl" method="get"><input type="hidden" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" /></form>
+<form action="/cgi-bin/koha/members/boraccount.pl" method="get" ><input type="hidden" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" /></form>
 
 <!-- The manual invoice and credit buttons -->
 <div class="statictabs">
@@ -101,6 +106,9 @@ $(document).ready(function() {
 </ul>
 <div class="tabs-container">
 <!-- The table with the account items -->
+<form id="pay_form" action="/cgi-bin/koha/members/pay.pl" method="get">
+<input type="hidden" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" />
+<input type="hidden" name="payselected" id="payselected_input" value="0" />
 <table id="table_account_fines">
     <thead>
       <tr>
@@ -118,11 +126,22 @@ $(document).ready(function() {
         </tr>
     </thead>
 
-	<!-- FIXME: Shouldn't hardcode dollar signs, since Euro or Pound might be needed -->
+<!-- FIXME: Shouldn't hardcode dollar signs, since Euro or Pound might be needed -->
   [% FOREACH account IN accounts %]
 
    <tr>
-     <td>[% IF ( account.amountoutstanding > 0 ) %]<input type="checkbox" class="cb" name="incl_par_[% account.accountlines_id %]" checked="checked">[% ELSE %]&nbsp;[% END %]</td>
+     <td>[% IF ( account.amountoutstanding > 0 ) %]<input type="checkbox" class="cb" name="incl_par_[% account.accountlines_id %]" checked="checked">[% ELSE %]&nbsp;[% END %]
+     <input type="hidden" name="itemnumber[% account.accountlines_id %]" value="[% account.itemnumber %]" />
+     <input type="hidden" name="description[% account.accountlines_id %]" value="[% account.description %]" />
+     <input type="hidden" name="accounttype[% account.accountlines_id %]" value="[% account.accounttype %]" />
+     <input type="hidden" name="amount[% account.accountlines_id %]" value="[% account.amount %]" />
+     <input type="hidden" name="accountlines_id[% account.accountlines_id %]" value="[% account.accountlines_id %]" />
+     <input type="hidden" name="amountoutstanding[% account.accountlines_id %]" value="[% account.amountoutstanding %]" />
+     <input type="hidden" name="borrowernumber[% account.accountlines_id %]" value="[% account.borrowernumber %]" />
+     <input type="hidden" name="notify_id[% account.accountlines_id %]" value="[% account.notify_id %]" />
+     <input type="hidden" name="notify_level[% account.accountlines_id %]" value="[% account.notify_level %]" />
+     <input type="hidden" name="totals[% account.accountlines_id %]" value="[% account.totals %]" />
+     </td>
      <td><span title="[% account.date %]">[% account.date |$KohaDates %]</span></td>
      <td>
         [% SWITCH account.accounttype %]
@@ -203,6 +222,7 @@ $(document).ready(function() {
   </tr>
   </tfoot>
 </table>
+</form>
 </div></div>
 
 </div>
