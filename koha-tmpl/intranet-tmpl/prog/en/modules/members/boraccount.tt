@@ -44,7 +44,7 @@ $(document).ready(function() {
         + ' | <a id="CheckNone" href="#"><i class="fa fa-remove"></i> ' + txtClearAll + '</a>'
         + '<a class="btn" href="/cgi-bin/koha/members/paycollect.pl?borrowernumber=[% borrowernumber %]"><i class="fa fa-money"></i> ' + txtPayAmount + '</a> ';
     [% IF CAN_user_updatecharges_writeoff %]
-        table_toolbar_html += '<a id="woall" href="#" class="btn"><i class="fa fa-times"></i> ' + txtWriteOffAll + '</a>';
+        table_toolbar_html += '<a id="woall" class="btn"><i class="fa fa-times"></i> ' + txtWriteOffAll + '</a>';
     [% END %]
     table_toolbar_html += ' <a class="btn" id="payselected"><i class="fa fa-money"></i> ' + txtPaySelected + '</a>';
     $("#table_toolbar").html(table_toolbar_html);
@@ -80,6 +80,16 @@ $(document).ready(function() {
         $("#payselected_input").val(1);
         $("#pay_form").submit();
     });
+
+    $("#woall").click(function(){
+        var msg = _("Are you sure you want to write off %s in outstanding fines? This cannot be undone!").format( "[% total | format('%.2f') %]" );
+        var answer = confirm(msg);
+        if (answer){
+            $("#woall_input").val(1);
+            $("#pay_form").submit();
+        }
+    });
+
 });
 </script>
 </head>
@@ -109,6 +119,7 @@ $(document).ready(function() {
 <form id="pay_form" action="/cgi-bin/koha/members/pay.pl" method="get">
 <input type="hidden" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" />
 <input type="hidden" name="payselected" id="payselected_input" value="0" />
+<input type="hidden" name="woall" id="woall_input" value="0" />
 <table id="table_account_fines">
     <thead>
       <tr>
@@ -130,17 +141,20 @@ $(document).ready(function() {
   [% FOREACH account IN accounts %]
 
    <tr>
-     <td>[% IF ( account.amountoutstanding > 0 ) %]<input type="checkbox" class="cb" name="incl_par_[% account.accountlines_id %]" checked="checked">[% ELSE %]&nbsp;[% END %]
-     <input type="hidden" name="itemnumber[% account.accountlines_id %]" value="[% account.itemnumber %]" />
-     <input type="hidden" name="description[% account.accountlines_id %]" value="[% account.description %]" />
-     <input type="hidden" name="accounttype[% account.accountlines_id %]" value="[% account.accounttype %]" />
-     <input type="hidden" name="amount[% account.accountlines_id %]" value="[% account.amount %]" />
-     <input type="hidden" name="accountlines_id[% account.accountlines_id %]" value="[% account.accountlines_id %]" />
-     <input type="hidden" name="amountoutstanding[% account.accountlines_id %]" value="[% account.amountoutstanding %]" />
-     <input type="hidden" name="borrowernumber[% account.accountlines_id %]" value="[% account.borrowernumber %]" />
-     <input type="hidden" name="notify_id[% account.accountlines_id %]" value="[% account.notify_id %]" />
-     <input type="hidden" name="notify_level[% account.accountlines_id %]" value="[% account.notify_level %]" />
-     <input type="hidden" name="totals[% account.accountlines_id %]" value="[% account.totals %]" />
+     <td>
+     [% IF ( account.amountoutstanding > 0 ) %]
+         <input type="checkbox" class="cb" name="incl_par_[% account.accountlines_id %]" checked="checked">
+         <input type="hidden" name="itemnumber[% account.accountlines_id %]" value="[% account.itemnumber %]" />
+         <input type="hidden" name="description[% account.accountlines_id %]" value="[% account.description %]" />
+         <input type="hidden" name="accounttype[% account.accountlines_id %]" value="[% account.accounttype %]" />
+         <input type="hidden" name="amount[% account.accountlines_id %]" value="[% account.amount %]" />
+         <input type="hidden" name="accountlines_id[% account.accountlines_id %]" value="[% account.accountlines_id %]" />
+         <input type="hidden" name="amountoutstanding[% account.accountlines_id %]" value="[% account.amountoutstanding %]" />
+         <input type="hidden" name="borrowernumber[% account.accountlines_id %]" value="[% account.borrowernumber %]" />
+         <input type="hidden" name="notify_id[% account.accountlines_id %]" value="[% account.notify_id %]" />
+         <input type="hidden" name="notify_level[% account.accountlines_id %]" value="[% account.notify_level %]" />
+         <input type="hidden" name="totals[% account.accountlines_id %]" value="[% account.totals %]" />
+    [% ELSE %]&nbsp;[% END %]
      </td>
      <td><span title="[% account.date %]">[% account.date |$KohaDates %]</span></td>
      <td>
