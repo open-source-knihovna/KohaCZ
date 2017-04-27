@@ -13968,9 +13968,9 @@ if ( CheckVersion($DBversion) ) {
     $dbh->do( "
         ALTER IGNORE TABLE `accountlines`  ADD `paymenttype` varchar(32) COLLATE 'utf8_unicode_ci' NULL AFTER `accounttype`
     " );
-    print "Account types update done\n");
+    print "Account types update done\n";
 
-    print "Upgrade to $DBversion done (Koha 16.11.06)\n;
+    print "Upgrade to $DBversion done (Koha 16.11.06)\n";
     SetVersion($DBversion);
 }
 
