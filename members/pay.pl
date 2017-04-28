@@ -94,6 +94,7 @@ if ($payselected) {
 my $writeoff_all = $input->param('woall');    # writeoff all fines
 if ($writeoff_all) {
     writeoff_all(@names);
+    print $input->redirect( "/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber" );
 } elsif ($writeoff_item) {
     my $accountlines_id = $input->param('accountlines_id');
     my $itemno       = $input->param('itemnumber');
@@ -101,6 +102,7 @@ if ($writeoff_all) {
     my $amount       = $input->param('amountoutstanding');
     my $payment_note = $input->param("payment_note");
     WriteOffFee( $borrowernumber, $accountlines_id, $itemno, $account_type, $amount, $branch, $payment_note );
+    print $input->redirect( "/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber" );
 }
 
 for (@names) {
