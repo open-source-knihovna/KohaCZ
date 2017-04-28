@@ -136,25 +136,29 @@ elsif ( $op eq "returnbook" && $allowselfcheckreturns ) {
 elsif ( $op eq "checkout" ) {
     my $impossible  = {};
     my $needconfirm = {};
-    if ( !$confirmed ) {
-        ( $impossible, $needconfirm ) = CanBookBeIssued(
-            $borrower,
-            $barcode,
-            undef,
-            0,
-            C4::Context->preference("AllowItemsOnHoldCheckoutSCO")
-        );
+    ( $impossible, $needconfirm ) = CanBookBeIssued(
+        $borrower,
+        $barcode,
+        undef,
+        0,
+        C4::Context->preference("AllowItemsOnHoldCheckoutSCO")
+    );
+    my $issue_error;
+    if ( $confirm_required = scalar keys %$needconfirm ) {
+        for my $error ( qw( UNKNOWN_BARCODE max_loans_allowed ISSUED_TO_ANOTHER NO_MORE_RENEWALS NOT_FOR_LOAN DEBT WTHDRAWN RESTRICTED RESERVED ITEMNOTSAMEBRANCH EXPIRED DEBARRED CARD_LOST GNA INVALID_DATE UNKNOWN_BARCODE TOO_MANY DEBT_GUARANTEES USERBLOCKEDOVERDUE PATRON_CANT PREVISSUE NOT_FOR_LOAN_FORCING ITEM_LOST) ) {
+            if ( $needconfirm->{$error} ) {
+                $issue_error = $error;
+                $confirmed = 0;
+                last;
+            }
+        }
     }
-    $confirm_required = scalar keys %$needconfirm;
 
     #warn "confirm_required: " . $confirm_required ;
     if (scalar keys %$impossible) {
 
-        #  warn "impossible: numkeys: " . scalar (keys(%$impossible));
-        #warn join " ", keys %$impossible;
-        my $issue_error = (keys %$impossible)[0];
+        my $issue_error = (keys %$impossible)[0]; # FIXME This is wrong, we assume only one error and keys are not ordered
 
-        # FIXME  we assume only one error.
         $template->param(
             impossible                => $issue_error,
             "circ_error_$issue_error" => 1,
@@ -175,7 +179,7 @@ elsif ( $op eq "checkout" ) {
     } elsif ( $needconfirm->{RENEW_ISSUE} ) {
         if ($confirmed) {
             #warn "renewing";
-            AddRenewal( $borrower, $item->{itemnumber} );
+            AddRenewal( $borrower->{borrowernumber}, $item->{itemnumber} );
         } else {
             #warn "renew confirmation";
             $template->param(
@@ -188,9 +192,8 @@ elsif ( $op eq "checkout" ) {
         }
     } elsif ( $confirm_required && !$confirmed ) {
         #warn "failed confirmation";
-        my $issue_error = (keys %$needconfirm)[0];
         $template->param(
-            impossible                => (keys %$needconfirm)[0],
+            impossible                => 1,
             "circ_error_$issue_error" => 1,
             hide_main                 => 1,
         );

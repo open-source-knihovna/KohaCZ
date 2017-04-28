@@ -86,6 +86,7 @@ for my $fwk ( @$frameworks ){
 }
 
 my $statuses = [];
+my @notforloans;
 for my $statfield (qw/items.notforloan items.itemlost items.withdrawn items.damaged/){
     my $hash = {};
     $hash->{fieldname} = $statfield;
@@ -93,6 +94,12 @@ for my $statfield (qw/items.notforloan items.itemlost items.withdrawn items.dama
     $hash->{authcode} = $mss->count ? $mss->next->authorised_value : undef;
     if ($hash->{authcode}){
         my $arr = GetAuthorisedValues($hash->{authcode});
+        if ( $statfield eq 'items.notforloan') {
+            # Add notforloan == 0 to the list of possible notforloan statuses
+            # The lib value is replaced in the template
+            push @$arr, { authorised_value => 0, id => 'stat0' , lib => 'ignore' };
+            @notforloans = map { $_->{'authorised_value'} } @$arr;
+        }
         $hash->{values} = $arr;
         push @$statuses, $hash;
     }
@@ -110,16 +117,6 @@ for my $authvfield (@$statuses) {
     }
 }
 
-my $notforloanlist;
-my $statussth = '';
-for my $authvfield (@$statuses) {
-    if ( scalar @{$staton->{$authvfield->{fieldname}}} > 0 ){
-        my $joinedvals = join ',', @{$staton->{$authvfield->{fieldname}}};
-        $statussth .= "$authvfield->{fieldname} in ($joinedvals) and ";
-        $notforloanlist = $joinedvals if ($authvfield->{fieldname} eq "items.notforloan");
-    }
-}
-$statussth =~ s, and $,,g;
 $template->param(
     authorised_values        => \@authorised_value_list,
     today                    => dt_from_string,
@@ -131,13 +128,7 @@ $template->param(
     branch                   => $branch,
     datelastseen             => $datelastseen,
     compareinv2barcd         => $compareinv2barcd,
-    notforloanlist           => $notforloanlist
 );
-
-my @notforloans;
-if (defined $notforloanlist) {
-    @notforloans = split(/,/, $notforloanlist);
-}
 
 my @scanned_items;
 my @errorloop;

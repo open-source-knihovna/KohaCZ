@@ -343,8 +343,9 @@ sub GetFullSubscription {
     my $sth = $dbh->prepare($query);
     $sth->execute($subscriptionid);
     my $subscriptions = $sth->fetchall_arrayref( {} );
+    my $cannotedit = not can_edit_subscription( $subscriptions->[0] ) if scalar @$subscriptions;
     for my $subscription ( @$subscriptions ) {
-        $subscription->{cannotedit} = not can_edit_subscription( $subscription );
+        $subscription->{cannotedit} = $cannotedit;
     }
     return $subscriptions;
 }
@@ -502,8 +503,9 @@ sub GetFullSubscriptionsFromBiblionumber {
     my $sth = $dbh->prepare($query);
     $sth->execute($biblionumber);
     my $subscriptions = $sth->fetchall_arrayref( {} );
+    my $cannotedit = not can_edit_subscription( $subscriptions->[0] ) if scalar @$subscriptions;
     for my $subscription ( @$subscriptions ) {
-        $subscription->{cannotedit} = not can_edit_subscription( $subscription );
+        $subscription->{cannotedit} = $cannotedit;
     }
     return $subscriptions;
 }
@@ -1545,13 +1547,6 @@ sub ReNewSubscription {
     |;
     $sth = $dbh->prepare($query);
     $sth->execute( $enddate, $subscriptionid );
-    $query = qq|
-        UPDATE subscriptionhistory
-        SET    histenddate=?
-        WHERE  subscriptionid=?
-    |;
-    $sth = $dbh->prepare($query);
-    $sth->execute( $enddate, $subscriptionid );
 
     logaction( "SERIAL", "RENEW", $subscriptionid, "" ) if C4::Context->preference("SubscriptionLog");
     return;
@@ -2508,9 +2503,8 @@ num_type can take :
     -monthabrv
     -season
     -seasonabrv
-=cut
 
-#'
+=cut
 
 sub _numeration {
     my ($value, $num_type, $locale) = @_;
@@ -2576,8 +2570,11 @@ sub is_barcode_in_use {
 }
 
 =head2 CloseSubscription
+
 Close a subscription given a subscriptionid
+
 =cut
+
 sub CloseSubscription {
     my ( $subscriptionid ) = @_;
     return unless $subscriptionid;
@@ -2600,8 +2597,11 @@ sub CloseSubscription {
 }
 
 =head2 ReopenSubscription
+
 Reopen a subscription given a subscriptionid
+
 =cut
+
 sub ReopenSubscription {
     my ( $subscriptionid ) = @_;
     return unless $subscriptionid;
