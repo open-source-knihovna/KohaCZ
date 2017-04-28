@@ -139,6 +139,7 @@ sub pay {
         }
     ) if $balance_remaining > 0;
 
+    my $branch = $userenv ? $userenv->{'branch'} : undef;
     foreach my $fine (@outstanding_fines) {
         my $amount_to_pay =
             $fine->amountoutstanding > $balance_remaining
@@ -170,6 +171,17 @@ sub pay {
             push( @fines_paid, $fine->id );
         }
 
+        UpdateStats(
+            {
+                branch         => $branch,
+                type           => $type,
+                amount         => $amount,
+                borrowernumber => $self->{patron_id},
+                accountno      => $accountno,
+                other          => $fine->id,
+           }
+        );
+
         $balance_remaining = $balance_remaining - $amount_to_pay;
         last unless $balance_remaining > 0;
     }
@@ -194,18 +206,6 @@ sub pay {
             note              => $note,
         }
     )->store();
-
-    $library_id ||= $userenv ? $userenv->{'branch'} : undef;
-
-    UpdateStats(
-        {
-            branch         => $library_id,
-            type           => $type,
-            amount         => $amount,
-            borrowernumber => $self->{patron_id},
-            accountno      => $accountno,
-        }
-    );
 
     if ( C4::Context->preference("FinesLog") ) {
         logaction(
