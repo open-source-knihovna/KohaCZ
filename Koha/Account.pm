@@ -175,7 +175,7 @@ sub pay {
             {
                 branch         => $branch,
                 type           => $type,
-                amount         => $amount,
+                amount         => $amount_to_pay,
                 borrowernumber => $self->{patron_id},
                 accountno      => $accountno,
                 other          => $fine->id,
