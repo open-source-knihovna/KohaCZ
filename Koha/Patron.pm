@@ -242,13 +242,19 @@ $PATRON, 0 otherwise.
 sub do_check_for_previous_checkout {
     my ( $self, $item ) = @_;
 
-    # Find all items for bib and extract item numbers.
-    my @items = Koha::Items->search({biblionumber => $item->{biblionumber}});
+    my $biblio = Koha::Biblios->find( $item->{biblionumber} );
+    my @codes = split('\|', C4::Context->preference('CheckPrevCheckoutSerialFrameworks'));
     my @item_nos;
-    foreach my $item (@items) {
-        push @item_nos, $item->itemnumber;
+    if ( any { $_ eq $biblio->frameworkcode } @codes ) {
+        # It is serial
+        push @item_nos, $item->{itemnumber};
+    } else {
+        # Find all items for bib and extract item numbers.
+        my @items = Koha::Items->search({biblionumber => $item->{biblionumber}});
+        foreach my $item (@items) {
+            push @item_nos, $item->itemnumber;
+        }
     }
-
     # Create (old)issues search criteria
     my $criteria = {
         borrowernumber => $self->borrowernumber,
