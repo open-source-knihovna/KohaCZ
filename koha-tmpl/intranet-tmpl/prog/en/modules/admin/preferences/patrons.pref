@@ -59,6 +59,9 @@ Patrons:
                katipo: Do
          - check and construct borrower card numbers in the Katipo style. This overrides <code>autoMemberNum</code> if on.
      -
+         - "Check previous checkouts by item for biblio record in this frameworks:"
+         - pref: CheckPrevCheckoutSerialFrameworks
+     -
          - pref: EnhancedMessagingPreferences
            choices:
                yes: Allow

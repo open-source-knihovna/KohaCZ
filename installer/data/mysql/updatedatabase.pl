@@ -13976,6 +13976,12 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "16.11.07.000";
 if ( CheckVersion($DBversion) ) {
+
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('CheckPrevCheckoutSerialFrameworks','SER','Framework codes which identifies the biblio records with serial for checking previous checkout','','Free');
+    });
+
     print "Upgrade to $DBversion done (Koha 16.11.07)\n";
     SetVersion($DBversion);
 }
