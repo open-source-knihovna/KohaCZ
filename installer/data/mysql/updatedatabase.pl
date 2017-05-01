@@ -14200,6 +14200,13 @@ if ( CheckVersion($DBversion) ) {
     });
 
     print "Upgrade to $DBversion done (Bug 15498 - Replace ExportWithCsvProfile with ExportCircHistory)'\n";
+
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type)
+        VALUES ('CheckPrevCheckoutSerialFrameworks','SER','Framework codes which identifies the biblio records with serial for checking previous checkout','','Free');
+    });
+
+    print "Upgrade to $DBversion done (CheckPrevCheckoutSerial)\n";
     SetVersion($DBversion);
 }
 
