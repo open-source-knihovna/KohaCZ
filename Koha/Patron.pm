@@ -235,7 +235,7 @@ sub wants_check_for_previous_checkout {
 
     $do_check = $patron->do_check_for_previous_checkout($item);
 
-Return 1 if the bib associated with $ITEM has previously been checked out to
+Return date of last checkout if the bib associated with $ITEM has previously been checked out to
 $PATRON, 0 otherwise.
 
 =cut
@@ -262,13 +262,21 @@ sub do_check_for_previous_checkout {
         itemnumber => \@item_nos,
     };
 
+    my $params = {
+        limit => 1,
+        order_by => { -desc => 'issuedate' },
+        columns => 'issuedate'
+    };
+
     # Check current issues table
-    my $issues = Koha::Checkouts->search($criteria);
-    return 1 if $issues->count; # 0 || N
+    my $issues = Koha::Checkouts->search($criteria, $params);
+    return $issues->next->issuedate if $issues->count;    
 
     # Check old issues table
-    my $old_issues = Koha::Old::Checkouts->search($criteria);
-    return $old_issues->count;  # 0 || N
+    my $old_issues = Koha::Old::Checkouts->search($criteria, $params);
+    return $old_issues->next->issuedate if $old_issues->count;
+
+    return 0;
 }
 
 =head3 is_debarred

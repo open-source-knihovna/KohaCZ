@@ -857,8 +857,8 @@ sub CanBookBeIssued {
     #
     $patron = Koha::Patrons->find($borrower->{borrowernumber});
     my $wants_check = $patron->wants_check_for_previous_checkout;
-    $needsconfirmation{PREVISSUE} = 1
-        if ($wants_check and $patron->do_check_for_previous_checkout($item));
+    my $do_check = $patron->do_check_for_previous_checkout($item);
+    $needsconfirmation{PREVISSUE} = $do_check if $wants_check;
 
     #
     # ITEM CHECKING
