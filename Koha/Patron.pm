@@ -21,6 +21,7 @@ package Koha::Patron;
 use Modern::Perl;
 
 use Carp;
+use List::Util qw(any);
 
 use C4::Context;
 use C4::Log;
