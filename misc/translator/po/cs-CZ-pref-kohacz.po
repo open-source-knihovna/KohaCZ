@@ -1,5 +1,23 @@
+#, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  cs-CZ-pref.po (PACKAGE VERSION)  #-#-#-#-#\n"
+"#-#-#-#-#  cs-CZ-pref-orig.po (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-05-23 08:15+0200\n"
+"PO-Revision-Date: 2017-04-11 21:01+0000\n"
+"Last-Translator: m23 <black23@gmail.com>\n"
+"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
+">\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8-bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Pootle 2.5.1.1\n"
+"X-POOTLE-MTIME: 1491944495.000000\n"
+"#-#-#-#-#  cs-CZ-pref-kohacz.po  #-#-#-#-#\n"
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-05-23 08:15+0200\n"
@@ -14,6 +32,21 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Poedit 1.8.7.1\n"
 "X-POOTLE-MTIME: 1463551297.000000\n"
+"#-#-#-#-#  cs-CZ-pref-orig.po (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-05-23 08:15+0200\n"
+"PO-Revision-Date: 2017-04-11 21:01+0000\n"
+"Last-Translator: m23 <black23@gmail.com>\n"
+"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
+">\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8-bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Pootle 2.5.1.1\n"
+"X-POOTLE-MTIME: 1491944495.000000\n"
 
 # Authorities > General
 msgid "authorities.pref#EnablePushingToAuthorityServer# Don't use"
@@ -28,6 +61,17 @@ msgstr "posílání autorit přes Z39.50 Update."
 # Authorities > General
 msgid "authorities.pref#EnablePushingToAuthorityServer# Use"
 msgstr "Zapnout"
+
+# Cataloging > Display
+msgid "cataloguing.pref#PermanentWithdrawnNumberItemsColumns# Use these"
+msgstr ""
+
+# Cataloging > Display
+msgid ""
+"cataloguing.pref#PermanentWithdrawnNumberItemsColumns# items table columns "
+"to determine which withdrawn number should be set to withdrawned item (use "
+"'|' for dividing more then on column)."
+msgstr ""
 
 # Cataloging > Display
 msgid "cataloguing.pref#UsePermanentWithdrawal# Don't use"
@@ -45,6 +89,41 @@ msgstr ""
 "pro odepisování jednotek režim trvalého odpisu. Zároveň bude generováno "
 "unikátní úbytkové číslo."
 
+# Circulation > Holds Policy
+msgid "circulation.pref#NotifyToReturnItemWhenHoldIsPlaced# ."
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#NotifyToReturnItemWhenHoldIsPlaced# Don't enable"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#NotifyToReturnItemWhenHoldIsPlaced# Enable"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid ""
+"circulation.pref#NotifyToReturnItemWhenHoldIsPlaced# belonging to "
+"requestor's home library"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid "circulation.pref#NotifyToReturnItemWhenHoldIsPlaced# from any library"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid ""
+"circulation.pref#NotifyToReturnItemWhenHoldIsPlaced# having the item "
+"borrowed from requestor's home library"
+msgstr ""
+
+# Circulation > Holds Policy
+msgid ""
+"circulation.pref#NotifyToReturnItemWhenHoldIsPlaced# sending an email to the "
+"patrons to return an item whenever a hold request is placed on it. If "
+"enabled, contact patrons"
+msgstr ""
+
 # OPAC > Features
 msgid ""
 "opac.pref#OpacResetPassword#  to recover their password via e-mail in the "
@@ -55,39 +134,8 @@ msgstr "obnovit heslo přes on-line katalog"
 msgid "opac.pref#OpacResetPassword# Library users are "
 msgstr "Čtenáři si"
 
-# OPAC > Features
-msgid "opac.pref#OpacResetPassword# allowed"
-msgstr "mohou"
-
-# OPAC > Features
-msgid "opac.pref#OpacResetPassword# not allowed"
-msgstr "nemohou"
-
 # Patrons > General
 msgid ""
-"patrons.pref#CheckPrevIssue#  check borrower loan history to see if the "
-"current item has been loaned before."
+"patrons.pref#CheckPrevCheckoutSerialFrameworks# Check previous checkouts by "
+"item for biblio record in this frameworks:"
 msgstr ""
-"historii výpůjček čtenáře a upozornit, pokud již daný dokument měl "
-"vypůjčený."
-
-# Patrons > General
-msgid "patrons.pref#CheckPrevIssue# Unless overridden, do"
-msgstr "Kontrolovat"
-
-# Patrons > General
-msgid "patrons.pref#CheckPrevIssue# Unless overridden, do not"
-msgstr "Nekontrolovat"
-
-# Patrons > General
-msgid "patrons.pref#CheckPrevIssueSerialFrameworks# (separate columns with |)"
-msgstr "(oddělit sloupce svislítkem |)"
-
-# Patrons > General
-msgid ""
-"patrons.pref#CheckPrevIssueSerialFrameworks# The following frameworks are "
-"considered serials while checking for already loaned items:"
-msgstr ""
-"Tyto katalogizační šablony se používají pro katalogizaci periodik "
-"(kontrola, zdali již měli čtenáři půjčeno tak proběhne na základně "
-"jednotek, nikoliv titulů):"
