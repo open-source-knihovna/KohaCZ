@@ -1,3 +1,15 @@
+# #-#-#-#-#  cs-CZ-staff-prog.po  #-#-#-#-#
+# #-#-#-#-#  cs-CZ-staff-prog-orig.po (PACKAGE VERSION)  #-#-#-#-#
+# LibLime Koha Translation Manager
+# Copyright (C) 2007 LibLime
+# http://liblime.com <info@liblime.com>
+# Based on Kartouche http://www.dotmon.com/kartouche/
+# #-#-#-#-#  cs-CZ-staff-prog-kohacz.po  #-#-#-#-#
+# LibLime Koha Translation Manager
+# Copyright (C) 2007 LibLime
+# http://liblime.com <info@liblime.com>
+# Based on Kartouche http://www.dotmon.com/kartouche/
+# #-#-#-#-#  cs-CZ-staff-prog-orig.po (PACKAGE VERSION)  #-#-#-#-#
 # LibLime Koha Translation Manager
 # Copyright (C) 2007 LibLime
 # http://liblime.com <info@liblime.com>
@@ -5,8 +17,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2016-05-26 09:50+0200\n"
-"PO-Revision-Date: 2016-05-26 12:17+0200\n"
+"POT-Creation-Date: 2017-05-03 12:08+0000\n"
+"PO-Revision-Date: 2017-05-03 15:18+0200\n"
 "Last-Translator: Josef Moravec <josef.moravec@gmail.com>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
 ">\n"
@@ -16,92 +28,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Poedit 1.8.7.1\n"
+"X-POOTLE-MTIME: 1492501598.000000\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Poedit 1.8.7.1\n"
 "X-POOTLE-MTIME: 1463580765.000000\n"
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:192
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/memberentrygen.tt:704
-#, c-format
-msgid "Check for previous issues: "
-msgstr "Kontrolovat, zdali již měl půjčeno: "
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:354
-#, c-format
-msgid "Check for previus issues"
-msgstr "Kontrolovat zdali již měl půjčeno"
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod.tt:51
-#, c-format
-msgid "Common withdrawal reason"
-msgstr "Důvod odpisu"
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:78
-#, c-format
-msgid ""
-"Insert barcode and given item will be immediately remove from any collection "
-"and returned back to home library"
-msgstr ""
-"Vložte čárový kód a daná jednotka bude vrácena ze souboru a přesunuta do své "
-"domovské knihovny."
-
-#. For the first occurrence,
-#. %1$s:  borrower.firstname
-#. %2$s:  borrower.surname
-#. %3$s:  borrower.cardnumber
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:51
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:33
-#, c-format
-msgid "Item was issued by %s %s (%s) and now is returned"
-msgstr "Jednotka byla vypůjčena čtenáři %s %s (%s) a nyní byla vrácena"
-
-#. %1$s:  barcode
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:57
-#, c-format
-msgid ""
-"Item with barcode '%s' was removed from a collection and returned to "
-"homebranch."
-msgstr ""
-"Jednotka s čárovým kódem '%s' byla odstraněna ze souboru a vrácena do "
-"domovské knihovny."
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:215
-#, c-format
-msgid "MARC authoritative id field: "
-msgstr "Pole MARCu pro identifikátor: "
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:220
-#, c-format
-msgid "MARC field where to put your message: "
-msgstr "Pole MARCu pro vložení vaší zprávy: "
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:210
-#, c-format
-msgid "MARC fields not to send to update server: "
-msgstr "Pole MARCu, která nebudou odesílána: "
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:225
-#, c-format
-msgid "Message sent when create takes place: "
-msgstr "Zpráva odesílaná při vytváření nového záznamu: "
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:229
-#, c-format
-msgid "Message sent when update takes place: "
-msgstr "Zpráva odesílaná při aktualizaci záznamu: "
-
-#. %1$s:  data.dateofbirth | $KohaDates
-#. %2$s:  data.category_description |html
-#. %3$s:  data.category_type |html
-#. %4$s:  data.branchname |html
-#. %5$s:  data.dateexpiry
-#. %6$s:  IF data.overdues
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/tables/members_results.tt:18
-#, c-format
-msgid ""
-"\", \"dt_dateofbirth\": \"%s\", \"dt_category\": \"%s (%s)\", \"dt_branch\": "
-"\"%s\", \"dt_dateexpiry\": \"%s\", \"dt_od_checkouts\": \"%s"
-msgstr ""
-"\", \"dt_dateofbirth\": \"%s\", \"dt_category\": \"%s (%s)\", \"dt_branch\": "
-"\"%s\", \"dt_dateexpiry\": \"%s\", \"dt_od_checkouts\": \"%s"
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2017-04-16 10:46-0300\n"
+"PO-Revision-Date: 2017-04-18 07:46+0000\n"
+"Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
+"Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
+">\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8-bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Pootle 2.5.1.1\n"
+"X-POOTLE-MTIME: 1492501598.000000\n"
 
 #. %1$s:  END
 #. %2$s:  END
@@ -124,7 +67,7 @@ msgstr ""
 #. %19$s:  lang
 #. %20$s:  END
 #. %21$s:  END
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/includes/authorities-search-results.inc:136
+#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:136
 #, c-format
 msgid ""
 "%s %s %s %s %s %s %s %s %sEnglish %sFrench %sItalian %sGerman %sSpanish "
@@ -142,70 +85,148 @@ msgstr ""
 #. %5$s:  ELSIF (server.servertype||type) == 'zed_update'
 #. %6$s:  END
 #. %7$s:  END
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:1
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:262
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:1
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:271
 #, c-format
 msgid "%s %s %s SRU %s Z39.50 %s Z39.50 Update %s %s "
 msgstr "%s %s %s SRU %s Z39.50 %s Z39.50 Update %s %s "
 
-#. %1$s:  USE To
-#. %2$s:  USE AuthorisedValues
-#. %3$s:  USE KohaDates
-#. %4$s:  sEcho
-#. %5$s:  iTotalRecords
-#. %6$s:  iTotalDisplayRecords
-#. %7$s:  FOREACH data IN aaData
-#. %8$s:  IF CAN_user_tools_manage_patron_lists
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/tables/members_results.tt:1
+#. %1$s:  SWITCH m.code
+#. %2$s:  CASE 'error_on_saving'
+#. %3$s:  CASE 'error_on_delete'
+#. %4$s:  CASE 'success_on_saving'
+#. %5$s:  CASE 'success_on_delete'
+#. %6$s:  CASE
+#. %7$s:  m.code
+#. %8$s:  END
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:43
 #, c-format
 msgid ""
-"%s %s %s { \"sEcho\": %s, \"iTotalRecords\": %s, \"iTotalDisplayRecords\": "
-"%s, \"aaData\": [ %s { %s \"dt_borrowernumber\": \""
+"%s %s An error occurred when saving this account type. %s An error occurred "
+"when deleting this account type. Check the logs. %s Account type saved "
+"successfully. %s Account type deleted successfully. %s %s %s "
 msgstr ""
-"%s %s %s { \"sEcho\": %s, \"iTotalRecords\": %s, \"iTotalDisplayRecords\": "
-"%s, \"aaData\": [ %s { %s \"dt_borrowernumber\": \""
+"%s %s Při ukládání typu účtu se vyskytla chyba. %s Při odstraňování typu "
+"účtu nastala chyba. Zkontrolujte provozní záznamy. %s Typ účtu byl úspěšně "
+"uložen. %s Typ účtu byl úspěšně odstraněn. %s %s %s "
 
-#. For the first occurrence,
-#. %1$s:  IF ( checkprevissue == 'yes' )
-#. %2$s:  ELSIF ( checkprevissue == 'no' )
+#. %1$s:  SWITCH account.accounttype
+#. %2$s:  CASE 'Pay'
+#. %3$s:  CASE 'Pay00'
+#. %4$s:  CASE 'Pay01'
+#. %5$s:  CASE 'Pay02'
+#. %6$s:  CASE 'N'
+#. %7$s:  CASE 'F'
+#. %8$s:  CASE 'A'
+#. %9$s:  CASE 'M'
+#. %10$s:  CASE 'L'
+#. %11$s:  CASE 'W'
+#. %12$s:  CASE 'FU'
+#. %13$s:  CASE 'HE'
+#. %14$s:  CASE 'Rent'
+#. %15$s:  CASE 'FOR'
+#. %16$s:  CASE 'LR'
+#. %17$s:  CASE 'PAY'
+#. %18$s:  CASE 'WO'
+#. %19$s:  CASE 'C'
+#. %20$s:  CASE 'CR'
+#. %21$s:  CASE
+#. %22$s:  account.accounttype
+#. %23$s: - END -
+#: intranet-tmpl/prog/en/modules/members/boraccount.tt:160
+#, c-format
+msgid ""
+"%s %sPayment, thanks %sPayment, thanks (cash via SIP2) %sPayment, thanks "
+"(VISA via SIP2) %sPayment, thanks (credit card via SIP2) %sNew card %sFine "
+"%sAccount management fee %sSundry %sLost item %sWriteoff %sAccruing fine "
+"%sHold waiting too long %sRental fee %sForgiven %sLost item fee refund "
+"%sPayment %sWriteoff %sCredit %sCredit %s%s %s "
+msgstr ""
+"%s %sPlatba, díky %sPlatba, díky (hotově přes SIP2) %sPlatba, díky (VISA "
+"přes SIP2) %sPlatba, díky (kreditní karta přes SIP2) %sNový průkaz "
+"%sUpomínka %sRegistrační poplatek %sOstatní %sZtracený dokument %s Prominuto "
+"%sNabíhající upomínka %sDlouho čekající rezervace %sPoplatek za půjčení "
+"%sProminuto %sVrácení poplatku za ztrátu dokumentu %sPlatba %sProminuto "
+"%sKredit %sKredit %s%s %s "
+
+#. %1$s:  IF op == 'add_form'
+#. %2$s:  IF account_type.type_code
 #. %3$s:  ELSE
 #. %4$s:  END
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:354
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:455
+#. %5$s:  type
+#. %6$s:  ELSIF op == 'delete_confirm'
+#. %7$s:  type
+#. %8$s:  END
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:28
 #, c-format
-msgid "%s Yes %s No %s Inherit %s "
-msgstr "%s Ano %s Ne %s Zděděno %s "
-
-#. %1$s:  IF ( checkprevissue == 'yes' )
-#. %2$s:  ELSIF ( checkprevissue == 'no' )
-#. %3$s:  ELSE
-#. %4$s:  END
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/moremember.tt:376
-#, c-format
-msgid "%s Yes %s No %s Inherited %s "
-msgstr "%s Ano %s Ne %s Zděděno %s "
+msgid ""
+"%s &rsaquo; %sModify%sNew%s Account %s type %s &rsaquo; Confirm deletion of "
+"account %s type %s "
+msgstr ""
+"%s &rsaquo; %sUpravit%sNový%s Typ účtu - %s %s &rsaquo; Potvrdit odstranění "
+"typu účtu - %s %s "
 
 #. %1$s:  not_deleted_items
 #. %2$s:  FOREACH not_deleted_itemnumber IN not_deleted_itemnumbers
 #. %3$s:  not_deleted_itemnumber.itemnumber
 #. %4$s:  END
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:170
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:163
 #, c-format
 msgid "%s item(s) could not be withdrawn: %s%s%s"
 msgstr "%s jednotek nelze odepsat: %s%s%s"
 
 #. %1$s:  withdrawn_items
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:165
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:159
 #, c-format
 msgid "%s item(s) withdrawn."
 msgstr "%s jednotek bylo odepsáno."
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/circ/circulation.tt:310
+#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
 #, c-format
 msgid ". Check out anyway?"
 msgstr ". Přesto vypůjčit?"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/includes/authorities-search-results.inc:134
+#. META http-equiv=refresh
+#: intranet-tmpl/prog/en/modules/installer/step3.tt:2
+msgid "5; url=/cgi-bin/koha/mainpage.pl"
+msgstr "5; url=/cgi-bin/koha/mainpage.pl"
+
+#. %1$s:  type
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:72
+#, c-format
+msgid "Account %s type code: "
+msgstr "Kód typu účtu (%s): "
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:171
+#, c-format
+msgid "Account credit types"
+msgstr "Typy účtovaných poplatků"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:138
+#, c-format
+msgid "Account debit types"
+msgstr "Typy plateb"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:112
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:142
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:175
+#, c-format
+msgid "Account type code"
+msgstr "Kód typu účtu"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:115
+#, c-format
+msgid "Account type description"
+msgstr "Popis typu účtu"
+
+#: intranet-tmpl/prog/en/modules/admin/admin-home.tt:58
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:28
+#: intranet-tmpl/prog/en/includes/admin-menu.inc:40
+#, c-format
+msgid "Account types"
+msgstr "Typy účtu"
+
+#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:134
 #, c-format
 msgid "Another details:"
 msgstr "Další podrobnosti:"
@@ -214,83 +235,174 @@ msgstr "Další podrobnosti:"
 #. %2$s:  ELSIF ( withdrawal )
 #. %3$s:  ELSE
 #. %4$s:  END
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod.tt:25
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:25
 #, c-format
 msgid "Batch item %sdeletion%swithdrawal%smodification%s"
 msgstr "Dávkové %smazání%sodpisy%súprava%s jednotek"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/tools-home.tt:125
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod.tt:15
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:31
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:37
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/includes/tools-menu.inc:57
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:15
+#: intranet-tmpl/prog/en/modules/tools/tools-home.tt:123
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:31
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:37
+#: intranet-tmpl/prog/en/includes/tools-menu.inc:60
 #, c-format
 msgid "Batch item withdrawal"
 msgstr "Dávkové odpisy jednotek"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:37
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:37
 #, c-format
 msgid "Batch item withdrawal results"
 msgstr "Výsledky dávkového odpisu jednotek"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:40
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:41
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:145
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:177
+#, c-format
+msgid "Can be added manually"
+msgstr "Lze vložit ručně"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:91
+#, c-format
+msgid "Can be added manually? "
+msgstr "Lze vložit ručně?"
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:40
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:41
 #, c-format
 msgid "Cannot Withdraw"
 msgstr "Nelze odepsat"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/moremember.tt:376
-#, c-format
-msgid "Check previous loans: "
-msgstr "Kontrolovat, zdali již měl půjčeno: "
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:415
+#: intranet-tmpl/prog/en/modules/admin/categories.tt:351
 #, c-format
 msgid "Check previous íssues"
 msgstr "Kontrolovat zdali již měl půjčeno"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:217
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:186
+#, c-format
+msgid "Create fine"
+msgstr "Vložit poplatek"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:198
+#, c-format
+msgid "Create new credit type"
+msgstr "Vytvořit nový typ platby"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:167
+#, c-format
+msgid "Create new debit type"
+msgstr "Vytvořit nový typ poplatku"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:144
+#, c-format
+msgid "Default amount"
+msgstr "Výchozí částka"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:82
+#, c-format
+msgid "Default amount: "
+msgstr "Výchozí částka:\t"
+
+#: intranet-tmpl/prog/en/modules/admin/admin-home.tt:59
+#, c-format
+msgid "Define debit and credit types."
+msgstr "Definuje typy poplatků a plateb"
+
+#. %1$s:  type
+#. %2$s:  account_type.description
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:110
+#, c-format
+msgid "Delete account %s type \"%s?\""
+msgstr "Odstranit typ účtu (%s) \"%s\"?"
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:226
 #, c-format
 msgid "Example: 100$7"
 msgstr "Příklad: 100$7"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:222
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:300
+#, c-format
+msgid "Example: 5.00 "
+msgstr "Příklad: 5.00 "
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:231
 #, c-format
 msgid "Example: 900$a"
 msgstr "Příklad: 900$a"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/memberentrygen.tt:709
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/memberentrygen.tt:713
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/memberentrygen.tt:717
+#: intranet-tmpl/prog/en/modules/circ/pendingreserves.tt:100
 #, c-format
-msgid "Inherit from patron category default."
-msgstr "Podle kategorie čtenáře."
+msgid "First patron"
+msgstr "První čtenář"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:197
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:201
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:205
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:78
 #, c-format
-msgid "Inherit from system preferences."
-msgstr "Podle nastavení systému."
+msgid ""
+"Insert barcode and given item will be immediately remove from any collection "
+"and returned back to home library"
+msgstr ""
+"Vložte čárový kód a daná jednotka bude vrácena ze souboru a přesunuta do své "
+"domovské knihovny."
+
+#. For the first occurrence,
+#. %1$s:  borrower.firstname
+#. %2$s:  borrower.surname
+#. %3$s:  borrower.cardnumber
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:33
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:51
+#, c-format
+msgid "Item was issued by %s %s (%s) and now is returned"
+msgstr "Jednotka byla vypůjčena čtenáři %s %s (%s) a nyní byla vrácena"
 
 #. %1$s:  barcode
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:40
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:40
 #, c-format
 msgid "Item with barcode '%s' added successfully."
 msgstr "Jednotka s čárovým kódem '%s' byla úspěšně přidána!"
 
 #. %1$s:  barcode
 #. %2$s:  IF ( itemInfo )
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:65
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:65
 #, c-format
 msgid "Item with barcode '%s' was not removed from collection: %s "
 msgstr "Jednotka s čárovým kódem '%s' nemohla být odstraněna ze souboru: %s "
+
+#. %1$s:  barcode
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:57
+#, c-format
+msgid ""
+"Item with barcode '%s' was removed from a collection and returned to "
+"homebranch."
+msgstr ""
+"Jednotka s čárovým kódem '%s' byla odstraněna ze souboru a vrácena do "
+"domovské knihovny."
+
+#. %1$s:  IF op =='add_form'
+#. %2$s:  IF account_type.type_code
+#. %3$s:  type
+#. %4$s:  ELSE
+#. %5$s:  type
+#. %6$s:  END
+#. %7$s:  ELSE
+#. %8$s:  IF op == 'delete_confirm'
+#. %9$s:  type
+#. %10$s:  ELSE
+#. %11$s:  END
+#. %12$s:  END
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:2
+#, c-format
+msgid ""
+"Koha &rsaquo; Administration &rsaquo; %sAccount types &rsaquo; %s Modify "
+"account %s type%s New account %s type%s%s%sAccount types &rsaquo; Confirm "
+"deletion of account %stype%s Account types%s%s"
+msgstr ""
+"Koha &rsaquo; Administrace &rsaquo; %sTypy účtů &rsaquo; %s Upravit typ účtu "
+"(%s) %s Přidat nový typ účtu (%s)%s%s%sTypy účtů &rsaquo; Potvrdit "
+"odstranění typu účtu (%s)%s Typy účtů%s%s"
 
 #. %1$s:  IF ( del )
 #. %2$s:  ELSIF ( withdrawal )
 #. %3$s:  ELSE
 #. %4$s:  END
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod.tt:2
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:2
 #, c-format
 msgid ""
 "Koha &rsaquo; Tools &rsaquo; %sBatch item deletion%sBatch item withdrawal"
@@ -299,82 +411,135 @@ msgstr ""
 "Koha &rsaquo; Nástroje &rsaquo; %s Dávkové mazání jednotek%sDávkový odpis "
 "jednotek%sDávková úprava jednotek%s "
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:2
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:2
 #, c-format
 msgid "Koha &rsaquo; Tools &rsaquo; Batch item withdrawal"
 msgstr "Koha &rsaquo; Nástroje &rsaquo; Dávkový odpis jednotek"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:251
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:224
+#, c-format
+msgid "MARC authoritative id field: "
+msgstr "Pole MARCu pro identifikátor: "
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:229
+#, c-format
+msgid "MARC field where to put your message: "
+msgstr "Pole MARCu pro vložení vaší zprávy: "
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:219
+#, c-format
+msgid "MARC fields not to send to update server: "
+msgstr "Pole MARCu, která nebudou odesílána: "
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:234
+#, c-format
+msgid "Message sent when create takes place: "
+msgstr "Zpráva odesílaná při vytváření nového záznamu: "
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:238
+#, c-format
+msgid "Message sent when update takes place: "
+msgstr "Zpráva odesílaná při aktualizaci záznamu: "
+
+#. %1$s:  type
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:61
+#, c-format
+msgid "Modify an account %s type"
+msgstr "Upravit typ účtu (%s)"
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:260
 #, c-format
 msgid "New Z39.50 Update server"
 msgstr "Nový server Z39.50 pro Update"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/memberentrygen.tt:708
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/memberentrygen.tt:712
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/memberentrygen.tt:716
+#. %1$s:  type
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:63
 #, c-format
-msgid "No and override patron category default."
-msgstr "Ne, bez ohledu na nastavení kategorie"
+msgid "New account %s type"
+msgstr "Nový typ účtu (%s)"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:196
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:200
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:204
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:135
 #, c-format
-msgid "No and override system preferences."
-msgstr "Ne, bez ohledu na nastavení systému"
+msgid "New credit type"
+msgstr "Nový typ platby"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:185
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:134
+#, c-format
+msgid "New debit type"
+msgstr "Nový typ poplatku"
+
+#: intranet-tmpl/prog/en/modules/members/boraccount.tt:133
+#, c-format
+msgid "Notify level"
+msgstr "Úroveň oznámení"
+
+#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
+#, c-format
+msgid "Patron has previously checked out this title: "
+msgstr "Tento dokument již měl tento čtenář vypůjčený: "
+
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:201
 #, c-format
 msgid "Permanent withdrawal:"
 msgstr "Trvalý odpis:"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/includes/authorities-toolbar.inc:67
+#: intranet-tmpl/prog/en/includes/authorities-toolbar.inc:67
 #, c-format
 msgid "Push to Z39.50 server "
 msgstr "Odeslat na Z39.50 server "
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:77
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:77
 #, c-format
 msgid "Remove item"
 msgstr "Odstranit jednotku"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:157
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:200
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:77
+#, c-format
+msgid "Required. Maximum length is 5 letters"
+msgstr "Povinné. Maximální délka je 5 znaků"
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:151
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:193
 #, c-format
 msgid "Return to batch item withdrawal"
 msgstr "Návrat k dávkovému odpisu jednotek"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:132
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:132
 #, c-format
 msgid "Selected withdrawal type is "
 msgstr "Důvod odpisu je "
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:212
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:221
 #, c-format
 msgid ""
 "Separate multiple fields/subfields by commas. Example: 200$7, 005, 900$a"
 msgstr "Více polí/podpolí oddělte čárkou. Například: 200$7, 005, 900$a"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/z3950servers.tt:260
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:269
 #, c-format
 msgid "Server type"
 msgstr "Typ serveru"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/circ/circulation.tt:310
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:197
 #, c-format
-msgid "This item has previously been issued to this patron on "
-msgstr "Tento dokument již měl vypůjčený dne "
+msgid "There are no account credit types defined. "
+msgstr "Nejsou definovány žádné typy plateb. "
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:166
+#, c-format
+msgid "There are no account debit types defined. "
+msgstr "Nejsou definovány žádné typy poplatků. "
 
 #. %1$s:  IF ( too_many_items )
 #. %2$s:  ELSE
 #. %3$s:  END
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:131
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:131
 #, c-format
 msgid "This will withdraw %sall the%sthe selected%s items."
 msgstr "Tímto budou odepsány %s všechny %s vybrané %s jednotky."
 
 #. %1$s:  itemInfo.title
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:58
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:58
 #, c-format
 msgid "Title: %s \" "
 msgstr "Název: %s \" "
@@ -382,74 +547,224 @@ msgstr "Název: %s \" "
 #. For the first occurrence,
 #. %1$s:  itemInfo.title
 #. %2$s:  END
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:68
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:48
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:76
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:48
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:76
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:68
 #, c-format
 msgid "Title: %s %s "
 msgstr "Název: %s %s "
 
 #. INPUT type=submit name=mainformsubmit
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:148
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:142
 msgid "Withdraw ALL submitted items"
 msgstr "Odepsat VŠECHNY vložené jednotky"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/tools-home.tt:126
+#: intranet-tmpl/prog/en/modules/tools/tools-home.tt:124
 #, c-format
 msgid "Withdraw a batch of items"
 msgstr "Odepsat dávku jednotek"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:205
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:217
 #, c-format
 msgid "Withdraw number:"
 msgstr "Úbytkové číslo:"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:198
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:200
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:210
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:212
 #, c-format
 msgid "Withdraw permanently"
 msgstr "Trvale odepsat"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:146
-#, c-format
-msgid "Withdraw records if no items remain."
-msgstr "Odstranit záznamy, jestliže nemají jednotky."
-
 #. INPUT type=submit name=mainformsubmit
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:150
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:144
 msgid "Withdraw selected items"
 msgstr "Odepsat vybrané jednotky"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/tools/batchMod.tt:53
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:51
+#, c-format
+msgid "Withdrawal reason"
+msgstr "Důvod odpisu"
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:53
 #, c-format
 msgid "Withdrawal reason:"
 msgstr "Důvod odpisu:"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:207
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:218
 #, c-format
 msgid "Withdrawn description:"
 msgstr "Popis odpisu:"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/paycollect.tt:151
+#: intranet-tmpl/prog/en/modules/members/paycollect.tt:149
 #, c-format
 msgid "Write off outstanding part"
 msgstr "Prominout zbývající část poplatku"
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/memberentrygen.tt:707
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/memberentrygen.tt:711
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/members/memberentrygen.tt:715
+#. %1$s:  # If there is amount outstanding, we have at least two actions (pay, print, sometimes writeoff), so we need dropdown
+#: intranet-tmpl/prog/en/modules/members/boraccount.tt:197
 #, c-format
-msgid "Yes and override patron category default."
-msgstr "Ano, bez ohledu na nastavení kategorie."
+msgid "a %s "
+msgstr " %s "
 
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:195
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:199
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/admin/categorie.tt:203
-#, c-format
-msgid "Yes and override system preferences."
-msgstr "Ano, bez ohledu na nastavení systému."
-
-#: /usr/share/koha/intranet/htdocs/intranet-tmpl/prog/en/modules/acqui/basket.tt:6
+#: intranet-tmpl/prog/en/modules/acqui/basket.tt:6
 #, c-format
 msgid "default"
 msgstr "výchozí"
+
+#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
+#, c-format
+msgid "on "
+msgstr "dne"
+
+#. %1$s:  END
+#. %2$s:  END
+#. %3$s:  END
+#. %4$s:  END
+#. %5$s:  BLOCK language
+#. %6$s:  SWITCH lang
+#. %7$s:  CASE ['en', 'eng']
+#. %8$s:  CASE ['fr', 'fre']
+#. %9$s:  CASE ['it', 'ita']
+#. %10$s:  CASE ['de', 'ger', 'deu']
+#. %11$s:  CASE ['es', 'spa']
+#. %12$s:  CASE ['heb']
+#. %13$s:  CASE ['ara']
+#. %14$s:  CASE ['gre']
+#. %15$s:  CASE ['grc']
+#. %16$s:  CASE
+#. %17$s:  lang
+#. %18$s:  END
+#. %19$s:  END
+#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:128
+#, c-format
+msgid ""
+"%s %s %s %s %s %s %sEnglish %sFrench %sItalian %sGerman %sSpanish %sHebrew "
+"%sArabic %sGreek (modern) %sGreek (to 1453) %s%s %s %s "
+msgstr ""
+"%s %s %s %s %s %s %sAngličtina %sFrancouzština %sItalština %sNěmčina "
+"%sŠpanělština %sHebrejština %sArabština %sŘečtina (moderní) %sŘečtina (do "
+"roku 1453) %s%s %s %s "
+
+#. %1$s:  INCLUDE 'doc-head-open.inc'
+#. %2$s:  BLOCK ServerType
+#. %3$s:  IF (server.servertype||type) == 'sru'
+#. %4$s:  ELSIF (server.servertype||type) == 'zed'
+#. %5$s:  END
+#. %6$s:  END
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:1
+#, c-format
+msgid "%s %s %s SRU %s Z39.50 %s %s "
+msgstr "%s %s %s SRU %s Z39.50 %s %s "
+
+#. %1$s:  IF ( ERROR )
+#. %2$s:  IF ( ITEMNUMBER )
+#. %3$s:  END
+#. %4$s:  ELSE
+#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:35
+#, c-format
+msgid ""
+"%s %s ERROR an invalid itemnumber was entered, please hit back and try again "
+"%s %s "
+msgstr ""
+"%s %s CHYBA: bylo zadáno neplatné přírůstkové číslo, klikněte na zpět a "
+"zkuste to znovu %s %s "
+
+#. %1$s:  SWITCH account.accounttype
+#. %2$s:  CASE 'Pay'
+#. %3$s:  CASE 'Pay00'
+#. %4$s:  CASE 'Pay01'
+#. %5$s:  CASE 'Pay02'
+#. %6$s:  CASE 'N'
+#. %7$s:  CASE 'F'
+#. %8$s:  CASE 'A'
+#. %9$s:  CASE 'M'
+#. %10$s:  CASE 'L'
+#. %11$s:  CASE 'W'
+#. %12$s:  CASE 'FU'
+#. %13$s:  CASE 'HE'
+#. %14$s:  CASE 'Rent'
+#. %15$s:  CASE 'FOR'
+#. %16$s:  CASE 'LR'
+#. %17$s:  CASE 'PAY'
+#. %18$s:  CASE 'WO'
+#. %19$s:  CASE 'C'
+#. %20$s:  CASE 'CR'
+#. %21$s:  CASE
+#. %22$s:  account.accounttype
+#. %23$s: - END -
+#. %24$s: - IF account.description
+#. %25$s:  account.description
+#. %26$s:  END
+#. %27$s:  IF ( account.itemnumber )
+#: intranet-tmpl/prog/en/modules/members/boraccount.tt:84
+#, c-format
+msgid ""
+"%s %sPayment, thanks %sPayment, thanks (cash via SIP2) %sPayment, thanks "
+"(VISA via SIP2) %sPayment, thanks (credit card via SIP2) %sNew card %sFine "
+"%sAccount management fee %sSundry %sLost item %sWriteoff %sAccruing fine "
+"%sHold waiting too long %sRental fee %sForgiven %sLost item fee refund "
+"%sPayment %sWriteoff %sCredit %sCredit %s%s %s %s, %s%s &nbsp;%s"
+msgstr ""
+"%s %sPlatba, díky %sPlatba, díky (hotově přes SIP2) %sPlatba, díky (VISA "
+"přes SIP2) %sPlatba, díky (kreditní karta přes SIP2) %sDuplikát průkazky "
+"%sPoplatek %sRegistrační poplatek %sOstatní %sZtracený dokument %s Prominuto "
+"%sNabíhající upomínka %sDlouho čekající rezervace %sPoplatek za půjčení "
+"%sProminuto %sVrácení poplatku za ztrátu dokumentu %sPlatba %sProminuto "
+"%sKredit %sKredit %s%s %s %s, %s%s &nbsp;%s"
+
+#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:18
+#, c-format
+msgid "&rsaquo; Manual invoice"
+msgstr "&rsaquo; Další poplatky"
+
+#. META http-equiv=refresh
+#: intranet-tmpl/prog/en/modules/installer/step3.tt:2
+msgid "10; url=/cgi-bin/koha/mainpage.pl"
+msgstr "10; url=/cgi-bin/koha/mainpage.pl"
+
+#. %1$s:  IF ( del )
+#. %2$s:  ELSE
+#. %3$s:  END
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:23
+#, c-format
+msgid "Batch item %sdeletion%smodification%s"
+msgstr "%sDávkové mazání%sDávková úprava%s jednotek"
+
+#: intranet-tmpl/prog/en/modules/members/mancredit.tt:44
+#, c-format
+msgid "Forgiven"
+msgstr "Prominuto"
+
+#. %1$s:  barcode
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:34
+#, c-format
+msgid "Item with barcode '%s' added successfully"
+msgstr "Jednotka s čárovým kódem '%s' byla úspěšně přidána!"
+
+#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:3
+#, c-format
+msgid "Koha &rsaquo; Patrons &rsaquo; Create manual invoice"
+msgstr "Koha &rsaquo; Čtenáři &rsaquo; Další platby"
+
+#. %1$s:  IF ( del )
+#. %2$s:  ELSE
+#. %3$s:  END
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:2
+#, c-format
+msgid ""
+"Koha &rsaquo; Tools &rsaquo; %sBatch item deletion%sBatch item modification"
+"%s "
+msgstr ""
+"Koha &rsaquo; Nástroje &rsaquo; %sZrušení položky v dávce%sZměna položky v "
+"dávce%s "
+
+#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:44
+#, c-format
+msgid "Manual invoice"
+msgstr "Další poplatky"
+
+#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
+#, c-format
+msgid ""
+"This item has previously been checked out to this patron. Check out anyway?"
+msgstr "Tuto jednotku již měl tento čtenář vypůjčenou. Přesto vypůjčit?"
