@@ -141,6 +141,7 @@ BEGIN {
         IsItemOnHoldAndFound
 
         GetMaxPatronHoldsForRecord
+        GetBorrowersToSatisfyHold
     );
     @EXPORT_OK = qw( MergeHolds );
 }
