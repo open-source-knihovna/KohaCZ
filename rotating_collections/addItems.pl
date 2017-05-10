@@ -49,8 +49,6 @@ if ( $query->param('action') eq 'addItem' ) {
     my $itemnumber = GetItemnumberFromBarcode($barcode);
     my $itemInfo = &GetBiblioFromItemNumber($itemnumber, undef);
 
-    my $transferedBefore = WasBiblioTransferedBefore('', $itemInfo->biblionumber);
-
     my ( $success, $errorCode, $errorMessage );
 
     $template->param( barcode => $barcode );
