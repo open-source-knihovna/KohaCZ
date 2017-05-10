@@ -614,7 +614,7 @@ msgstr "výchozí"
 #: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
 #, c-format
 msgid "on "
-msgstr "dne"
+msgstr "dne "
 
 #. %1$s:  END
 #. %2$s:  END
