@@ -76,7 +76,39 @@ function searchauthority() {
         <div class="yui-g">
 
     [% INCLUDE 'authorities-toolbar.inc' %]
-	
+
+[% IF ( pushAuthResult ) %]
+    [% IF ( pushAuthResult.success ) %]
+        <div class="dialog message">Authority was successfully sent.</div>
+    [% ELSE %]
+        <div class="dialog alert">Error sending authority.
+            [% IF ( pushAuthResult.errMsg ) %]<br />Error message: [% pushAuthResult.errMsg %][% END %]
+            [% IF ( pushAuthResult.addInfo ) %]<br />Added information: [% pushAuthResult.addInfo %][% END %]
+            [% IF ( pushAuthResult.record ) %]<br /><a class="" data-toggle="modal" data-target="#pushedRecord">Show sent record</a>[% END %]
+        </div>
+        [% IF ( pushAuthResult.record ) %]
+
+<div class="modal fade" id="pushedRecord" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="closebtn" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Pushed record</h4>
+      </div>
+      <div class="modal-body">
+        <p>[% pushAuthResult.record.as_formatted %]</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default deny" data-dismiss="modal">Cancel</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+        [% END %]
+    [% END %]
+[% END %]
+
 [% IF ( displayhierarchy ) %]
 <div id="hierarchies">
 [% PROCESS showhierarchy trees = loophierarchies %]
