@@ -358,18 +358,6 @@ ALTER TABLE `collections`
   ADD CONSTRAINT `collections_ibfk_1` FOREIGN KEY (`colBranchcode`) REFERENCES `branches` (`branchcode`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Table: collections_tracking
---
-
-DROP TABLE IF EXISTS collections_tracking;
-CREATE TABLE collections_tracking (
-  collections_tracking_id integer(11) NOT NULL auto_increment,
-  colId integer(11) NOT NULL DEFAULT 0 comment 'collections.colId',
-  itemnumber integer(11) NOT NULL DEFAULT 0 comment 'items.itemnumber',
-  PRIMARY KEY (collections_tracking_id)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
 -- Table structure for table `branch_borrower_circ_rules`
 --
 
@@ -1002,6 +990,24 @@ CREATE TABLE `itemtypes` ( -- defines the item types
   PRIMARY KEY  (`itemtype`),
   UNIQUE KEY `itemtype` (`itemtype`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table: collections_tracking
+--
+
+DROP TABLE IF EXISTS collections_tracking;
+CREATE TABLE collections_tracking (
+  collections_tracking_id integer(11) NOT NULL auto_increment,
+  colId integer(11) NOT NULL DEFAULT 0 comment 'collections.colId',
+  itemnumber integer(11) NOT NULL DEFAULT 0 comment 'items.itemnumber',
+  PRIMARY KEY (collections_tracking_id)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `collections_tracking`
+  ADD CONSTRAINT `collections_tracking_ibfk_1` FOREIGN KEY (`colId`) REFERENCES `collections` (`colId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `collections_tracking`
+  ADD CONSTRAINT `collections_tracking_ibfk_2` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Table structure for table `default_branch_item_rules`
