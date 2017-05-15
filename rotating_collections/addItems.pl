@@ -92,16 +92,8 @@ if ( $query->param('action') eq 'addItem' ) {
 my $colId = $query->param('colId');
 my $collection = Koha::RotatingCollections->find($colId);
 
-my $collectionItems = GetItemsInCollection($colId);
-if ($collectionItems) {
-    $template->param( collectionItemsLoop => $collectionItems );
-}
-
 $template->param(
-    colId          => $collection->colId,
-    colTitle       => $collection->colTitle,
-    colDescription => $collection->colDesc,
-    colBranchcode  => $collection->colBranchcode,
+    collection => $collection,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

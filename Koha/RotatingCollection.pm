@@ -22,6 +22,7 @@ use Modern::Perl;
 use Carp;
 
 use Koha::Database;
+use Koha::Items;
 
 use base qw(Koha::Object);
 
@@ -34,6 +35,24 @@ Koha::RotatingCollection - Koha Rotating collection Object class
 =head2 Class Methods
 
 =cut
+
+=head3 items
+
+=cut
+
+sub items {
+    my ( $self ) = @_;
+    my $items = Koha::Items->search(
+        {
+            'collections_trackings.colId' => $self->colId
+        },
+        {
+            join => [ 'collections_trackings' ]
+        }
+    );
+
+    return $items;
+}
 
 =head3 type
 
