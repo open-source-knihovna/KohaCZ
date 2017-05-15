@@ -49,8 +49,6 @@ BEGIN {
     require Exporter;
     @ISA    = qw( Exporter );
     @EXPORT = qw(
-      GetItemsInCollection
-
       AddItemToCollection
       RemoveItemFromCollection
       RemoveItemFromAnyCollection
@@ -59,55 +57,6 @@ BEGIN {
 
       GetCollectionItemBranches
     );
-}
-
-=head2 GetItemsInCollection
-
- ( $results, $success, $errorcode, $errormessage ) = GetItemsInCollection( $colId );
-
- Returns information about the items in the given collection
- 
- Input:
-   $colId: The id of the collection
-
- Output:
-   $results: Reference to an array of associated arrays
-   $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub GetItemsInCollection {
-    my ($colId) = @_;
-
-    ## Parameter check
-    if ( !$colId ) {
-        return ( 0, 0, 1, "NO_ID" );
-    }
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth = $dbh->prepare(
-        "SELECT
-                             biblio.title,
-                             biblio.biblionumber,
-                             items.itemcallnumber,
-                             items.barcode
-                           FROM collections, collections_tracking, items, biblio
-                           WHERE collections.colId = collections_tracking.colId
-                           AND collections_tracking.itemnumber = items.itemnumber
-                           AND items.biblionumber = biblio.biblionumber
-                           AND collections.colId = ? ORDER BY biblio.title"
-    );
-    $sth->execute($colId) or return ( 0, 0, 2, $sth->errstr() );
-
-    my @results;
-    while ( my $row = $sth->fetchrow_hashref ) {
-        push( @results, $row );
-    }
-
-    return \@results;
 }
 
 =head2 AddItemToCollection
