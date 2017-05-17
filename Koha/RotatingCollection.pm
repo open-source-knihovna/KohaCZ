@@ -87,6 +87,34 @@ sub add_item {
     return $col_tracking;
 }
 
+=head3 remove_item
+
+$collection->remove_item( $item_object )
+
+throws
+    Koha::Exceptions::MissingParameter
+    Koha::Exceptions::ObjectNotFound
+
+=cut
+
+sub remove_item {
+    my ( $self, $item ) = @_;
+
+    Koha::Exceptions::MissingParameter->throw if not defined $item;
+
+    Koha::Exceptions::ObjectNotFound->throw if ref($item) ne 'Koha::Item';
+
+    my $collection_tracking = Koha::RotatingCollection::Trackings->find(
+        {
+            itemnumber => $item->itemnumber,
+            colId      => $self->colId,
+        } );
+
+    Koha::Exceptions::ObjectNotFound->throw if not defined $collection_tracking;
+
+    return $collection_tracking->delete;
+}
+
 =head3 type
 
 =cut
