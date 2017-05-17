@@ -21,8 +21,8 @@ use Modern::Perl;
 use C4::Output;
 use C4::Auth;
 use C4::Context;
-use C4::RotatingCollections;
 
+use Koha::Libraries;
 use Koha::RotatingCollections;
 
 use CGI qw ( -utf8 );
@@ -31,6 +31,8 @@ my $query = new CGI;
 
 my $colId    = $query->param('colId');
 my $toBranch = $query->param('toBranch');
+
+my $collection = Koha::RotatingCollections->find( $colId );
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     {
@@ -44,31 +46,20 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 );
 
 ## Transfer collection
-my ( $success, $errorCode, $errorMessage );
 if ($toBranch) {
-    ( $success, $errorCode, $errorMessage ) =
-      TransferCollection( $colId, $toBranch );
+    my $branch = Koha::Libraries->find( $toBranch );
 
-    if ($success) {
+    my $transferred = eval ( $collection->transfer( $branch ) );
+
+    if ( $@ and not $transferred ) {
+        $template->param( transferFailure => 1 );
+    } else {
         $template->param( transferSuccess => 1 );
-    }
-    else {
-        $template->param(
-            transferFailure => 1,
-            errorCode       => $errorCode,
-            errorMessage    => $errorMessage
-        );
     }
 }
 
-## Get data about collection
-my $collection = Koha::RotatingCollections->find($colId);
-
 $template->param(
-    colId            => $collection->colId,
-    colTitle         => $collection->colTitle,
-    colDesc          => $collection->colDesc,
-    colBranchcode    => $collection->colBranchcode,
+    collection => $collection,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

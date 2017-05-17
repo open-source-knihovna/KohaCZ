@@ -1,6 +1,6 @@
 package Koha::RotatingCollection;
 
-# Copyright Josef Moravec 2016
+# Copyright Josef Moravec 2017
 #
 # This file is part of Koha.
 #
@@ -22,7 +22,9 @@ use Modern::Perl;
 use Carp;
 
 use Koha::Database;
+use Koha::DateUtils;
 use Koha::Exceptions;
+use Koha::Holds;
 use Koha::Items;
 use Koha::RotatingCollection::Trackings;
 
@@ -113,6 +115,50 @@ sub remove_item {
     Koha::Exceptions::ObjectNotFound->throw if not defined $collection_tracking;
 
     return $collection_tracking->delete;
+}
+
+=head3 transfer
+
+$collection->transfer( $library_object )
+
+throws
+    Koha::Exceptions::MissingParameter
+    Koha::Exceptions::ObjectNotFound
+
+=cut
+
+sub transfer {
+    my ( $self, $library ) = @_;
+
+    Koha::Exceptions::MissingParameter->throw if not defined $library;
+
+    Koha::Exceptions::ObjectNotFound->throw if ref($library) ne 'Koha::Library';
+
+    $self->colBranchcode( $library->branchcode )->store;
+
+    my $from = C4::Context->userenv->{'branch'} if C4::Context->userenv;
+
+    my $items = $self->items;
+    while ( my $item = $items->next ) {
+        my $holds = Koha::Holds->search( {
+            itemnumber => $item->itemnumber,
+            found      => 'W',
+        } );
+
+
+        # If no user context is defined the default from library for transfer will be the 'holding' one
+        $from = $item->holdingbranch if not defined $from;
+        unless ($holds->count || $item->get_transfer) {
+            my $transfer = Koha::Item::Transfer->new( {
+                frombranch => $from,
+                tobranch => $library->branchcode,
+                itemnumber => $item->itemnumber,
+                datesent => output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }),
+                comments => $self->colTitle,
+            } )->store;
+            $item->holdingbranch( $library->branchcode )->store;
+        }
+    }
 }
 
 =head3 type

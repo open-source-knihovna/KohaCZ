@@ -49,67 +49,8 @@ BEGIN {
     require Exporter;
     @ISA    = qw( Exporter );
     @EXPORT = qw(
-      TransferCollection
       WasBiblioTransferedBefore
     );
-}
-
-=head2 TransferCollection
-
- ( $success, $errorcode, $errormessage ) = TransferCollection( $colId, $colBranchcode );
-
-Transfers a collection to another branch
-
- Input:
-   $colId: id of the collection to be updated
-   $colBranchcode: branch where collection is moving to
-
- Output:
-   $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub TransferCollection {
-    my ( $colId, $colBranchcode ) = @_;
-
-    ## Check for all necessary parameters
-    if ( !$colId ) {
-        return ( 0, 1, "NO_ID" );
-    }
-    if ( !$colBranchcode ) {
-        return ( 0, 2, "NO_BRANCHCODE" );
-    }
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth;
-    $sth = $dbh->prepare(
-        "UPDATE collections
-                        SET 
-                        colBranchcode = ? 
-                        WHERE colId = ?"
-    );
-    $sth->execute( $colBranchcode, $colId ) or return ( 0, 4, $sth->errstr() );
-
-    $sth = $dbh->prepare(q{
-        SELECT items.itemnumber, items.barcode FROM collections_tracking
-        LEFT JOIN items ON collections_tracking.itemnumber = items.itemnumber
-        LEFT JOIN issues ON items.itemnumber = issues.itemnumber
-        WHERE issues.borrowernumber IS NULL
-          AND collections_tracking.colId = ?
-    });
-    $sth->execute($colId) or return ( 0, 4, $sth->errstr );
-    my @results;
-    while ( my $item = $sth->fetchrow_hashref ) {
-        my ($status) = CheckReserves( $item->{itemnumber} );
-        my @transfers = C4::Circulation::GetTransfers( $item->{itemnumber} );
-        C4::Circulation::transferbook( $colBranchcode, $item->{barcode}, my $ignore_reserves = 1 ) unless ( $status eq 'Waiting' || @transfers );
-    }
-
-    return 1;
-
 }
 
 =head2 WasBiblioTransferedBefore
