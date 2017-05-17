@@ -228,10 +228,23 @@ __PACKAGE__->belongs_to(
   },
 );
 
+=head2 pos_terminal_transactions
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-11-23 12:41:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JiVg7P7Y+CRHQ1jxn2OSxg
+Type: has_many
 
+Related object: L<Koha::Schema::Result::PosTerminalTransaction>
+
+=cut
+
+__PACKAGE__->has_many(
+  "pos_terminal_transactions",
+  "Koha::Schema::Result::PosTerminalTransaction",
+  { "foreign.accountlines_id" => "self.accountlines_id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-02-24 05:19:32
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:OcykebNXzfbeJ3cwHzmUXA
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;
