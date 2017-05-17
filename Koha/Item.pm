@@ -30,6 +30,7 @@ use Koha::IssuingRules;
 use Koha::Item::Transfer;
 use Koha::Patrons;
 use Koha::Libraries;
+use Koha::RotatingCollections;
 
 use base qw(Koha::Object);
 
@@ -233,6 +234,24 @@ sub current_holds {
     };
     my $hold_rs = $self->_result->reserves->search( $params, $attributes );
     return Koha::Holds->_new_from_dbic($hold_rs);
+}
+
+=head3 rotating_collection
+
+=cut
+
+sub rotating_collection {
+    my ( $self ) = @_;
+    my $collection = Koha::RotatingCollections->search(
+        {
+            'collections_trackings.itemnumber' => $self->itemnumber
+        },
+        {
+            join => [ 'collections_trackings' ]
+        }
+    );
+
+    return $collection->single;
 }
 
 =head3 type
