@@ -25,14 +25,6 @@ package C4::RotatingCollections;
 use Modern::Perl;
 
 use C4::Context;
-use C4::Circulation;
-use C4::Reserves qw(CheckReserves);
-use Koha::Database;
-use C4::Items;
-
-use DBI;
-
-use Data::Dumper;
 
 use vars qw(@ISA @EXPORT);
 
@@ -63,9 +55,9 @@ BEGIN {
 
 sub WasBiblioTransferedBefore {
     my ($branchcode, $biblionumber ) = @_;
-    
+
     my $dbh = C4::Context->dbh;
-    
+
     my $sth = $dbh->prepare(
         "SELECT branchtransfers.datesent
         FROM branchtransfers
