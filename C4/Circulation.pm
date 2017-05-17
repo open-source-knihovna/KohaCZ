@@ -35,7 +35,6 @@ use C4::Message;
 use C4::Debug;
 use C4::Log; # logaction
 use C4::Overdues qw(CalcFine UpdateFine get_chargeable_units);
-use C4::RotatingCollections;
 use Algorithm::CheckDigits;
 
 use Data::Dumper;
@@ -53,6 +52,7 @@ use Koha::Libraries;
 use Koha::Holds;
 use Koha::RefundLostItemFeeRule;
 use Koha::RefundLostItemFeeRules;
+use Koha::RotatingCollection::Trackings;
 use Carp;
 use List::MoreUtils qw( uniq );
 use Scalar::Util qw( looks_like_number );
@@ -1972,7 +1972,7 @@ sub AddReturn {
     my ($datesent,$frombranch,$tobranch) = GetTransfers( $item->{'itemnumber'} );
 
     # if we have a transfer to do, we update the line of transfers with the datearrived
-    my $is_in_rotating_collection = C4::RotatingCollections::isItemInAnyCollection( $item->{'itemnumber'} );
+    my $is_in_rotating_collection = Koha::RotatingCollection::Trackings->search( { itemnumber => $item->{'itemnumber'} } )->count;
     if ($datesent) {
         if ( $tobranch eq $branch ) {
             my $sth = C4::Context->dbh->prepare(

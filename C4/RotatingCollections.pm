@@ -51,34 +51,6 @@ BEGIN {
     );
 }
 
-=head2 isItemInAnyCollection
-
-$inCollection = isItemInAnyCollection( $itemnumber );
-
-=cut
-
-sub isItemInAnyCollection {
-    my ($itemnumber) = @_;
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth = $dbh->prepare(
-        "SELECT itemnumber FROM collections_tracking WHERE itemnumber = ?");
-    $sth->execute($itemnumber) or return (0);
-
-    my $row = $sth->fetchrow_hashref;
-
-    $itemnumber = $row->{itemnumber};
-    if ($itemnumber) {
-        return 1;
-    }
-    else {
-        return 0;
-    }
-}
-
-1;
-
 __END__
 
 =head1 AUTHOR
