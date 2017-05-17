@@ -21,7 +21,6 @@ use Modern::Perl;
 use C4::Output;
 use C4::Auth;
 use C4::Context;
-use C4::RotatingCollections;
 use C4::Items;
 
 use Koha::RotatingCollections;
