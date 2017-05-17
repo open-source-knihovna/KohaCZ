@@ -23,6 +23,7 @@ use Carp;
 
 use Koha::Database;
 use Koha::Exceptions;
+use Koha::Holds;
 use Koha::Items;
 use Koha::RotatingCollection::Trackings;
 
@@ -62,7 +63,8 @@ $collection->add_item( $itemnumber );
 
 throws
     Koha::Exceptions::MissingParameter
-    Koha::Exceptions::WrongParameter
+    Koha::Exceptions::DuplicateObject
+    Koha::Exceptions::ObjectNotFound
 
 =cut
 
@@ -73,6 +75,8 @@ sub add_item {
 
     Koha::Exceptions::DuplicateObject->throw
         if Koha::RotatingCollection::Trackings->search( { itemnumber => $itemnumber } )->count;
+
+    Koha::Exceptions::ObjectNotFound->throw if not Koha::Items->find( $itemnumber );
 
     my $col_tracking = Koha::RotatingCollection::Tracking->new(
         {
@@ -126,10 +130,13 @@ sub transfer {
 
     $self->colBranchcode( $branchcode )->store;
 
-    for ( my $item = $self->items ) {
-        my ( $status ) = C4::Reserves::CheckReserves( $item->itemnumber );
-        my @transfers = C4::Circulation::GetTransfers( $item->itemnumber );
-        C4::Circulation::transferbook( $branchcode, $item->barcode, my $ignore_reserves = 1 ) unless ( $status eq 'Waiting' || @transfers );
+    my $items = $self->items;
+    while ( my $item = $items->next ) {
+        my $holds = Koha::Holds->search( {
+            itemnumber => $item->itemnumber,
+            found      => 'W',
+        } );
+        C4::Circulation::transferbook( $branchcode, $item->barcode, my $ignore_reserves = 1 ) unless ( $holds->count || $item->get_transfer );
     }
 }
 

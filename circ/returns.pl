@@ -645,7 +645,9 @@ $itemnumber = GetItemnumberFromBarcode( $barcode );
 if ( $itemnumber ) {
     my $item = Koha::Items->find( $itemnumber );
     my $holdingBranch = $item->holdingbranch;
-    my $collectionBranch = $item->rotating_collection->colBranchcode;
+    my $collection = $item->rotating_collection;
+    my $collectionBranch;
+    $collectionBranch = $collection->colBranchcode if $collection;
     if ( $holdingBranch and $collectionBranch and ( $holdingBranch ne $collectionBranch ) ) {
         $template->param(
           collectionItemNeedsTransferred => 1,
