@@ -46,7 +46,6 @@ use C4::Items;
 use C4::Members;
 use C4::Members::Messaging;
 use C4::Koha;   # FIXME : is it still useful ?
-use C4::RotatingCollections;
 use Koha::AuthorisedValues;
 use Koha::DateUtils;
 use Koha::Calendar;
@@ -644,17 +643,15 @@ $template->param(
 
 $itemnumber = GetItemnumberFromBarcode( $barcode );
 if ( $itemnumber ) {
-    my ( $holdingBranch, $collectionBranch ) = GetCollectionItemBranches( $itemnumber );
-    if ( $holdingBranch and $collectionBranch ) {
-        $holdingBranch //= '';
-        $collectionBranch //= $returnbranch;
-        if ( ! ( $holdingBranch eq $collectionBranch ) ) {
-            $template->param(
-              collectionItemNeedsTransferred => 1,
-              collectionBranch => $collectionBranch,
-              itemnumber => $itemnumber,
-            );
-        }
+    my $item = Koha::Items->find( $itemnumber );
+    my $holdingBranch = $item->holdingbranch;
+    my $collectionBranch = $item->rotating_collection->colBranchcode;
+    if ( $holdingBranch and $collectionBranch and ( $holdingBranch ne $collectionBranch ) ) {
+        $template->param(
+          collectionItemNeedsTransferred => 1,
+          collectionBranch => $collectionBranch,
+          itemnumber => $itemnumber,
+        );
     }
 }
 

@@ -35,7 +35,7 @@ use C4::Message;
 use C4::Debug;
 use C4::Log; # logaction
 use C4::Overdues qw(CalcFine UpdateFine get_chargeable_units);
-use C4::RotatingCollections qw(GetCollectionItemBranches);
+use C4::RotatingCollections;
 use Algorithm::CheckDigits;
 
 use Data::Dumper;
