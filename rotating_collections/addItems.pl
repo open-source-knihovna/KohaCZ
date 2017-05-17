@@ -26,6 +26,7 @@ use C4::Items;
 use C4::Biblio;
 use C4::Circulation;
 
+use Koha::Items;
 use Koha::RotatingCollections;
 
 use CGI qw ( -utf8 );
@@ -43,39 +44,39 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
+my @errors;
+my @messages;
+my $colId = $query->param('colId');
+my $collection = Koha::RotatingCollections->find($colId);
+
 if ( $query->param('action') eq 'addItem' ) {
     ## Add the given item to the collection
-    my $colId      = $query->param('colId');
     my $barcode    = $query->param('barcode');
     my $removeItem = $query->param('removeItem');
-    my $itemnumber = GetItemnumberFromBarcode($barcode);
-    my $itemInfo = &GetBiblioFromItemNumber($itemnumber, undef);
+    my $item       = Koha::Items->search( { barcode => $barcode } )->next;
 
     my ( $success, $errorCode, $errorMessage );
 
     $template->param( barcode => $barcode );
-    $template->param( itemInfo => $itemInfo );
+    $template->param( item => $item );
 
     if ( !$removeItem ) {
-        ( $success, $errorCode, $errorMessage ) =
-          AddItemToCollection( $colId, $itemnumber );
+        my $added = eval { $collection->add_item( $item ) };
+
+        if ( $@ or not $added ) {
+            push @errors, { code => 'error_adding_item' };
+        } else {
+            push @messages, { code => 'success_adding_item' };
+        }
 
         $template->param(
             previousActionAdd => 1,
         );
-
-        if ($success) {
-            $template->param( addSuccess => 1 );
-        }
-        else {
-            $template->param( addFailure     => 1 );
-            $template->param( failureMessage => $errorMessage );
-        }
     }
     else {
         ## Remove the given item from the collection
         ( $success, $errorCode, $errorMessage ) =
-          RemoveItemFromCollection( $colId, $itemnumber );
+          RemoveItemFromCollection( $colId, $item->itemnumber );
 
         my ($doreturn, $messages, $iteminformation, $borrower);
 
@@ -102,11 +103,10 @@ if ( $query->param('action') eq 'addItem' ) {
     }
 }
 
-my $colId = $query->param('colId');
-my $collection = Koha::RotatingCollections->find($colId);
-
 $template->param(
     collection => $collection,
+    messages   => \@messages,
+    errors     => \@errors,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

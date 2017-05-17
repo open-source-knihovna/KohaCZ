@@ -22,7 +22,9 @@ use Modern::Perl;
 use Carp;
 
 use Koha::Database;
+use Koha::Exceptions;
 use Koha::Items;
+use Koha::RotatingCollection::Trackings;
 
 use base qw(Koha::Object);
 
@@ -52,6 +54,37 @@ sub items {
     );
 
     return $items;
+}
+
+=head3 add_item
+
+$collection->add_item( $item_object );
+
+throws
+    Koha::Exceptions::MissingParameter
+    Koha::Exceptions::DuplicateObject
+    Koha::Exceptions::ObjectNotFound
+
+=cut
+
+sub add_item {
+    my ( $self, $item ) = @_;
+
+    Koha::Exceptions::MissingParameter->throw if not defined $item;
+
+    Koha::Exceptions::ObjectNotFound->throw if ref($item) ne 'Koha::Item';
+
+    Koha::Exceptions::DuplicateObject->throw
+        if Koha::RotatingCollection::Trackings->search( { itemnumber => $item->itemnumber } )->count;
+
+    my $col_tracking = Koha::RotatingCollection::Tracking->new(
+        {
+            colId => $self->colId,
+            itemnumber => $item->itemnumber,
+        }
+    )->store;
+
+    return $col_tracking;
 }
 
 =head3 type

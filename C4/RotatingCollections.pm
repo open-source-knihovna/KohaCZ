@@ -49,61 +49,11 @@ BEGIN {
     require Exporter;
     @ISA    = qw( Exporter );
     @EXPORT = qw(
-      AddItemToCollection
       RemoveItemFromCollection
       RemoveItemFromAnyCollection
       TransferCollection
       WasBiblioTransferedBefore
     );
-}
-
-=head2 AddItemToCollection
-
- ( $success, $errorcode, $errormessage ) = AddItemToCollection( $colId, $itemnumber );
-
-Adds an item to a rotating collection.
-
- Input:
-   $colId: Collection to add the item to.
-   $itemnumber: Item to be added to the collection
- Output:
-   $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub AddItemToCollection {
-    my ( $colId, $itemnumber ) = @_;
-
-    ## Check for all necessary parameters
-    if ( !$colId ) {
-        return ( 0, 1, "NO_ID" );
-    }
-    if ( !$itemnumber ) {
-        return ( 0, 2, "NO_ITEM" );
-    }
-
-    if ( isItemInThisCollection( $itemnumber, $colId ) ) {
-        return ( 0, 2, "IN_COLLECTION" );
-    }
-    elsif ( isItemInAnyCollection($itemnumber) ) {
-        return ( 0, 3, "IN_COLLECTION_OTHER" );
-    }
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth;
-    $sth = $dbh->prepare("
-        INSERT INTO collections_tracking (
-            colId,
-            itemnumber
-        ) VALUES ( ?, ? )
-    ");
-    $sth->execute( $colId, $itemnumber ) or return ( 0, 3, $sth->errstr() );
-
-    return 1;
-
 }
 
 =head2  RemoveItemFromCollection
