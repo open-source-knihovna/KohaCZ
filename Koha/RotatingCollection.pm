@@ -110,6 +110,29 @@ sub remove_item {
     return $collection_tracking->delete;
 }
 
+=head3 transfer
+
+$collection->transfer( $branchcode)
+
+throws
+    Koha::Exceptions::MissingParameter
+
+=cut
+
+sub transfer {
+    my ( $self, $branchcode ) = @_;
+
+    Koha::Exceptions::MissingParameter->throw if not defined $branchcode;
+
+    $self->colBranchcode( $branchcode )->store;
+
+    for ( my $item = $self->items ) {
+        my ( $status ) = C4::Reserves::CheckReserves( $item->itemnumber );
+        my @transfers = C4::Circulation::GetTransfers( $item->itemnumber );
+        C4::Circulation::transferbook( $branchcode, $item->barcode, my $ignore_reserves = 1 ) unless ( $status eq 'Waiting' || @transfers );
+    }
+}
+
 =head3 type
 
 =cut
