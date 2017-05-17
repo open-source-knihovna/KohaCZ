@@ -48,50 +48,8 @@ BEGIN {
     require Exporter;
     @ISA    = qw( Exporter );
     @EXPORT = qw(
-      RemoveItemFromCollection
       TransferCollection
     );
-}
-
-=head2  RemoveItemFromCollection
-
- ( $success, $errorcode, $errormessage ) = RemoveItemFromCollection( $colId, $itemnumber );
-
-Removes an item to a collection
-
- Input:
-   $colId: Collection to add the item to.
-   $itemnumber: Item to be removed from collection
-
- Output:
-   $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
-
-=cut
-
-sub RemoveItemFromCollection {
-    my ( $colId, $itemnumber ) = @_;
-
-    ## Check for all necessary parameters
-    if ( !$itemnumber ) {
-        return ( 0, 2, "NO_ITEM" );
-    }
-
-    if ( !isItemInThisCollection( $itemnumber, $colId ) ) {
-        return ( 0, 2, "NOT_IN_COLLECTION" );
-    }
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth;
-    $sth = $dbh->prepare(
-        "DELETE FROM collections_tracking
-                        WHERE itemnumber = ?"
-    );
-    $sth->execute($itemnumber) or return ( 0, 3, $sth->errstr() );
-
-    return 1;
 }
 
 =head2 TransferCollection

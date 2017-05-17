@@ -64,29 +64,19 @@ if ( $query->param('action') eq 'addItem' ) {
         } else {
             push @messages, { code => 'success_adding_item' };
         }
-
-        $template->param(
-            previousActionAdd => 1,
-        );
-    }
-    else {
+    } else {
         ## Remove the given item from the collection
-        ( $success, $errorCode, $errorMessage ) =
-          RemoveItemFromCollection( $colId, $itemnumber );
+        my $deleted = eval { $collection->remove_item( $itemnumber ) };
+
+        if ( $@ or not $deleted ) {
+            push @errors, { code => 'error_removing_item' };
+        } else {
+            push @messages, { code => 'success_removing_item' };
+        }
 
         $template->param(
-            previousActionRemove => 1,
-            removeChecked        => 1,
+            removeChecked => 1,
         );
-
-        if ($success) {
-            $template->param( removeSuccess => 1 );
-        }
-        else {
-            $template->param( removeFailure  => 1 );
-            $template->param( failureMessage => $errorMessage );
-        }
-
     }
 }
 
