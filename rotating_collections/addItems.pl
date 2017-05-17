@@ -41,9 +41,13 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
+my @errors;
+my @messages;
+my $colId = $query->param('colId');
+my $collection = Koha::RotatingCollections->find($colId);
+
 if ( $query->param('action') eq 'addItem' ) {
     ## Add the given item to the collection
-    my $colId      = $query->param('colId');
     my $barcode    = $query->param('barcode');
     my $removeItem = $query->param('removeItem');
     my $itemnumber = GetItemnumberFromBarcode($barcode);
@@ -53,20 +57,17 @@ if ( $query->param('action') eq 'addItem' ) {
     $template->param( barcode => $barcode );
 
     if ( !$removeItem ) {
-        ( $success, $errorCode, $errorMessage ) =
-          AddItemToCollection( $colId, $itemnumber );
+        my $added = eval { $collection->add_item( $itemnumber ) };
+
+        if ( $@ or not $added ) {
+            push @errors, { code => 'error_adding_item' };
+        } else {
+            push @messages, { code => 'success_adding_item' };
+        }
 
         $template->param(
             previousActionAdd => 1,
         );
-
-        if ($success) {
-            $template->param( addSuccess => 1 );
-        }
-        else {
-            $template->param( addFailure     => 1 );
-            $template->param( failureMessage => $errorMessage );
-        }
     }
     else {
         ## Remove the given item from the collection
@@ -89,11 +90,10 @@ if ( $query->param('action') eq 'addItem' ) {
     }
 }
 
-my $colId = $query->param('colId');
-my $collection = Koha::RotatingCollections->find($colId);
-
 $template->param(
     collection => $collection,
+    messages   => \@messages,
+    errors     => \@errors,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;
