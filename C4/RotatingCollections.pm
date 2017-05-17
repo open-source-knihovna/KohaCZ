@@ -85,27 +85,6 @@ sub WasBiblioTransferedBefore {
      }
 }
 
-=head2 isItemInThisCollection
-
-  $inCollection = isItemInThisCollection( $itemnumber, $colId );
-
-=cut
-
-sub isItemInThisCollection {
-    my ( $itemnumber, $colId ) = @_;
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth = $dbh->prepare(
-"SELECT COUNT(*) as inCollection FROM collections_tracking WHERE itemnumber = ? AND colId = ?"
-    );
-    $sth->execute( $itemnumber, $colId ) or return (0);
-
-    my $row = $sth->fetchrow_hashref;
-
-    return $$row{'inCollection'};
-}
-
 =head2 isItemInAnyCollection
 
 $inCollection = isItemInAnyCollection( $itemnumber );
