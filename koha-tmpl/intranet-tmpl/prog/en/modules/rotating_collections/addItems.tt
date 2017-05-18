@@ -34,58 +34,34 @@
                       </div>
                 [% END %]
 
-              [% IF ( previousActionAdd ) %]
-                [% IF ( addSuccess ) %]
-                  <div class="dialog message">Item with barcode '[% barcode %]' added successfully.<br/>
-                  Author: [% itemInfo.author %]<br />
-                  Title: [% itemInfo.title %]</div>
-                [% ELSE %]
-                  <div class="dialog alert">
-                    <p>Failed to add item with barcode <i>[% barcode %]</i>:
-                    [% IF ( itemInfo ) %]
-                      <br/>
-                      Author: [% itemInfo.author %]<br />
-                      Title: [% itemInfo.title %]
+              [% IF ( messages ) %]
+                <div class="dialog message">
+                  [% FOR message IN messages %]
+                    [% IF message.code == 'success_adding_item' %]
+                      Item with barcode '[% barcode %]' added successfully<br />
+                      Author: [% item.biblio.author %]<br />
+                      Title: [% item.biblio.title %]
+                    [% ELSIF message.code == 'success_removing_item' %]
+                      Item with barcode '[% barcode %]' removed successfully<br />
                     [% END %]
-                    <p>
-                        [% IF failureMessage == "NO_ITEM" %]
-                            No item with matching barcode found
-                        [% ELSIF failureMessage == "IN_COLLECTION_OTHER" %]
-                            Item is already in a different rotating collection
-                        [% ELSIF failureMessage == "IN_COLLECTION" %]
-                            Item is already in this collection
-                        [% ELSE %]
-                            [% failureMessage %]
-                        [% END %]
-                    </p>
+                  [% END %]
                 </div>
-                [% END %]
               [% END %]
 
-              [% IF ( previousActionRemove ) %]
-                [% IF ( removeSuccess ) %]
-                  <div class="dialog message">Item with barcode <i>[% barcode %]</i> removed successfully<br/>
-                  Author: [% itemInfo.author %]<br />
-                  Title: [% itemInfo.title %]</div>
-                [% ELSE %]
-                  <div class="dialog alert">
-                    Failed to remove item with barcode <i>[% barcode %]</i>:
-                    [% IF ( itemInfo ) %]
-                      <br/>           
-                      Author: [% itemInfo.author %]<br />
-                      Title: [% itemInfo.title %]
+              [% IF ( errors ) %]
+                <div class="dialog alert">
+                  [% FOR error IN errors %]
+                    [% IF error.code == 'error_adding_item' %]
+                      Failed to add item with barcode '[% barcode %]'<br />
+                      [% IF ( item ) %]
+                        Author: [% item.biblio.author %]<br />
+                        Title: [% item.biblio.title %]
+                      [% END %]
+                    [% ELSIF error.code == 'error_removing_item' %]
+                      Failed to remove item with barcode <i>[% barcode %]</i><br />
                     [% END %]
-                    <p>
-                        [% IF failureMessage == "NO_ITEM" %]
-                            No item with matching barcode found
-                        [% ELSIF failureMessage == "NOT_IN_COLLECTION" %]
-                            Item is not in this collection
-                        [% ELSE %]
-                            [% failureMessage %]
-                        [% END %]
-                    </p>
+                  [% END %]
                 </div>
-                [% END %]
               [% END %]
 
               <div>

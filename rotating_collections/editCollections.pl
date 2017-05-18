@@ -29,6 +29,7 @@ use Koha::RotatingCollections;
 my $query = new CGI;
 my $action = $query->param('action');
 my @messages;
+my @errors;
 
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     {
@@ -45,6 +46,7 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 if ( $action eq 'create' ) {
     my $title       = $query->param('title');
     my $description = $query->param('description');
+    $template->param( createdTitle => $title );
 
     my $collection = Koha::RotatingCollection->new(
         {   colTitle => $title,
@@ -55,12 +57,10 @@ if ( $action eq 'create' ) {
     eval { $collection->store; };
 
     if ($@) {
-        push @messages, { type => 'error', code => 'error_on_insert' };
+        push @errors, { code => 'error_on_insert' };
     } else {
-        push @messages, { type => 'message', code => 'success_on_insert' };
+        push @messages, { code => 'success_on_insert' };
     }
-
-    $action = "list";
 
 } elsif ( $action eq 'delete' ) { # Delete collection
     my $colId = $query->param('colId');
@@ -68,27 +68,25 @@ if ( $action eq 'create' ) {
     my $deleted = eval { $collection->delete; };
 
     if ( $@ or not $deleted ) {
-        push @messages, { type => 'error', code => 'error_on_delete' };
+        push @errors, { code => 'error_on_delete' };
     } else {
-        push @messages, { type => 'message', code => 'success_on_delete' };
+        push @messages, { code => 'success_on_delete' };
     }
-
-    $action = "list";
 
 } elsif ( $action eq 'edit' ) { # Edit page of collection
     my $collection = Koha::RotatingCollections->find($query->param('colId'));
 
     $template->param(
         previousActionEdit => 1,
-        editColId          => $collection->colId,
-        editColTitle       => $collection->colTitle,
-        editColDescription => $collection->colDesc,
+        collection         => $collection,
     );
 
 } elsif ( $action eq 'update' ) { # Update collection
     my $colId       = $query->param('colId');
     my $title       = $query->param('title');
     my $description = $query->param('description');
+
+    $template->param( updatedTitle => $title );
 
     if ($colId) {
         my $collection = Koha::RotatingCollections->find($colId);
@@ -98,19 +96,17 @@ if ( $action eq 'create' ) {
         eval { $collection->store; };
 
         if ($@) {
-            push @messages, { type => 'error', code => 'error_on_update' };
+            push @errors, { code => 'error_on_update' };
         } else {
-            push @messages, { type => 'message', code => 'success_on_update' };
+            push @messages, { code => 'success_on_update' };
         }
-
-        $action = "list";
     }
-
 }
 
 $template->param(
     action   => $action,
     messages => \@messages,
+    errors   => \@errors,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

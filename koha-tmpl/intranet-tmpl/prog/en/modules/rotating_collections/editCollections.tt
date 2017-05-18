@@ -3,7 +3,7 @@
     [%- IF ( action == "new" ) %]
         Add a new collection
     [% ELSE %]
-        Edit collection [% editColTitle %]
+        Edit collection [% collection.colTitle %]
     [% END -%]
 </title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -16,7 +16,7 @@
     [%- IF ( action == "new" ) %]
         Add a new collection
     [% ELSE %]
-        <a href="/cgi-bin/koha/rotating_collections/addItems.pl?colId=[% editColId %]">Collection <i>[% editColTitle %]</i></a> &rsaquo; Edit
+        <a href="/cgi-bin/koha/rotating_collections/addItems.pl?colId=[% collection.colId %]">Collection <i>[% collection.colTitle %]</i></a> &rsaquo; Edit
     [% END -%]
 </div>
 
@@ -25,68 +25,41 @@
         <div id="yui-main">
             <div class="yui-b">
 
-              [% IF ( previousActionCreate ) %]
-                [% IF ( createSuccess ) %]
-                    <div class="dialog message">
-                        <p>Collection <i>[% createdTitle %]</i> added successfully</p>
-                        <p><a href="/cgi-bin/koha/rotating_collections/rotatingCollections.pl">Return to rotating collections home</a></p>
-                    </div>
-                [% ELSE %]
-                  <div class="dialog alert">
-                    <p>Collection <i>[% createdTitle %]</i> failed to be added</p>
-                    <p>
-                        [% IF failureMessage == "NO_TITLE" %]
-                            No title entered.
-                        [% ELSIF failureMessage == "DUPLICATE_TITLE" %]
-                            Title already in use.
-                        [% ELSIF failureMessage == "NO_DESCRIPTION" %]
-                            No description entered.
-                        [% ELSE %]
-                            [% failureMessage %]
-                        [% END %]
-                    </p>
-                  </div>
-                [% END %]
-              [% END %]
-
-              [% IF ( previousActionDelete ) %]
-                [% IF ( deleteSuccess ) %]
-                  <div class="dialog message">
-                    <p>Collection deleted successfully</p>
-                    <p><a href="/cgi-bin/koha/rotating_collections/rotatingCollections.pl">Return to rotating collections home</a></p>
-                  </div>
-                [% ELSE %]
-                  <div class="dialog alert">Collection failed to be deleted</div>
-                [% END %]
-              [% END %]
-
-              [% IF ( previousActionUpdate ) %]
-                [% IF ( updateSuccess ) %]
-                  <div class="dialog message">
+              [% IF messages %]
+                <div class="dialog message">
+                  [% FOR message IN messages %]
+                    [% IF message.code == "success_on_insert" %]
+                      <p>Collection <i>[% createdTitle %]</i> added successfully</p>
+                    [% ELSIF message.code == "success_on_delete" %]
+                      <p>Collection deleted successfully</p>
+                    [% ELSIF message.code == "success_on_update" %]
                       <p>Collection <i>[% updatedTitle %]</i> updated successfully</p>
-                      <p><a href="/cgi-bin/koha/rotating_collections/rotatingCollections.pl">Return to rotating collections home</a></p>
-                  </div>
-                [% ELSE %]
-                  <div class="dialog alert">
-                    <p>Collection <i>[% updatedTitle %]</i> failed to be updated</p>
-                    <p>
-                        [% IF failureMessage == "NO_ID" %]
-                            No collection id given.
-                        [% ELSIF failureMessage == "DUPLICATE_TITLE" %]
-                            Title already in use.
-                        [% ELSE %]
-                            [% failureMessage %]
-                        [% END %]
-                    </p>
+                    [% END %]
+                  [% END %]
+                  <p><a href="/cgi-bin/koha/rotating_collections/rotatingCollections.pl">Return to rotating collections home</a></p>
                 </div>
-                [% END %]
+              [% END %]
+
+              [% IF errors %]
+                <div class="dialog alert">
+                  [% FOR error IN errors %]
+                    [% IF error.code == "error_on_insert" %]
+                      <p>Collection <i>[% createdTitle %]</i> failed to be added</p>
+                    [% ELSIF  error.code == "error_on_delete" %]
+                      <p>Collection failed to be deleted</p>
+                    [% ELSIF  error.code == "error_on_updated" %]
+                      <p>Collection <i>[% updatedTitle %]</i> failed to be updated</p>
+                    [% END %]
+                  [% END %]
+                  <p><a href="/cgi-bin/koha/rotating_collections/rotatingCollections.pl">Return to rotating collections home</a></p>
+                </div>
               [% END %]
 
               <div>
 
                 [% IF action == "new" || action == "edit" %]
                     [% IF ( previousActionEdit ) %]
-                      <h1>Edit collection <i>[% editColTitle %]</i></h1>
+                      <h1>Edit collection <i>[% collection.colTitle %]</i></h1>
                     [% ELSE %]
                       <h1>Add new collection</h1>
                     [% END %]
@@ -94,7 +67,7 @@
                     <form action="editCollections.pl" method="post" class="validated">
                         [% IF ( previousActionEdit ) %]
                             <input type="hidden" name="action" value="update" />
-                            <input type="hidden" name="colId" value="[% editColId %]" />
+                            <input type="hidden" name="colId" value="[% collection.colId %]" />
                         [% ELSE %]
                             <input type="hidden" name="action" value="create" />
                         [% END %]
@@ -103,8 +76,8 @@
                             <ol>
                                 <li>
                                     <label class="required" for="title">Title: </label>
-                                    [% IF ( editColTitle ) %]
-                                        <input type="text" name="title" value="[% editColTitle %]" required="required" />
+                                    [% IF ( collection.colTitle ) %]
+                                        <input type="text" name="title" value="[% collection.colTitle %]" required="required" />
                                         <span class="required">Required</span>
                                     [% ELSE %]
                                         <input type="text" name="title" required="required" />
@@ -113,8 +86,8 @@
                                 </li>
                                 <li>
                                     <label for="description">Description: </label>
-                                    [% IF (editColDescription ) %]
-                                        <input type="text" size="50" name="description" value="[% editColDescription %]" />
+                                    [% IF (collection.colDesc ) %]
+                                        <input type="text" size="50" name="description" value="[% collection.colDesc %]" />
                                     [% ELSE %]
                                         <input type="text" size="50" name="description" />
                                     [% END %]
