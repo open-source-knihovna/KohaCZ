@@ -19,12 +19,13 @@
 
 use Modern::Perl;
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 
 use C4::Circulation;
 use Koha::Item;
 use Koha::Items;
 use Koha::Database;
+use Koha::RotatingCollections;
 
 use t::lib::TestBuilder;
 
@@ -116,6 +117,22 @@ subtest 'checkout' => sub {
     # There is no more checkout on this item, making sure it will not return old checkouts
     $checkout = $item->checkout;
     is( $checkout, undef, 'Koha::Item->checkout should return undef if there is no *current* checkout on this item' );
+};
+
+subtest 'rotating_collection' => sub {
+    plan tests => 2;
+
+    my $collection = Koha::RotatingCollection->new( {
+        colTitle => 'Collection title',
+        colDesc  => 'Collection description',
+    } )->store;
+
+    my $item = Koha::Items->find( $new_item_1->itemnumber );
+    $collection->add_item( $item->itemnumber );
+    my $retrieved_collection = $item->rotating_collection;
+
+    is( ref( $retrieved_collection ), 'Koha::RotatingCollection', 'Koha::Item->rotating_collection should return a Koha::RotatingCollection' );
+    is( $retrieved_collection->colId, $collection->colId, 'Koha::Item->rotating_collection should return right collection' );
 };
 
 $retrieved_item_1->delete;
