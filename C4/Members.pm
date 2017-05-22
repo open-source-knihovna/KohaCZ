@@ -506,6 +506,14 @@ true on success, or false on failure
 
 sub ModMember {
     my (%data) = @_;
+
+    # trim whitespace from data which has some non-whitespace in it.
+    foreach my $field_name (keys(%data)) {
+        if ( defined $data{$field_name} && $data{$field_name} =~ /\S/ ) {
+            $data{$field_name} =~ s/^\s*|\s*$//g;
+        }
+    }
+
     # test to know if you must update or not the borrower password
     if (exists $data{password}) {
         if ($data{password} eq '****' or $data{password} eq '') {
@@ -594,6 +602,13 @@ sub AddMember {
     my $dbh = C4::Context->dbh;
     my $schema = Koha::Database->new()->schema;
 
+    # trim whitespace from data which has some non-whitespace in it.
+    foreach my $field_name (keys(%data)) {
+        if ( defined $data{$field_name} && $data{$field_name} =~ /\S/ ) {
+            $data{$field_name} =~ s/^\s*|\s*$//g;
+        }
+    }
+
     # generate a proper login if none provided
     $data{'userid'} = Generate_Userid( $data{'borrowernumber'}, $data{'firstname'}, $data{'surname'} )
       if ( $data{'userid'} eq '' || !Check_Userid( $data{'userid'} ) );
@@ -625,6 +640,7 @@ sub AddMember {
     $data{'dateofbirth'}     = undef if ( not $data{'dateofbirth'} );
     $data{'debarred'}        = undef if ( not $data{'debarred'} );
     $data{'sms_provider_id'} = undef if ( not $data{'sms_provider_id'} );
+    $data{'guarantorid'}     = undef if ( not $data{'guarantorid'} );
 
     # get only the columns of Borrower
     # FIXME Do we really need this check?

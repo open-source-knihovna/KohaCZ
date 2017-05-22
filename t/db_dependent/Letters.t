@@ -18,7 +18,7 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Test::More tests => 80;
+use Test::More tests => 81;
 use Test::MockModule;
 use Test::Warn;
 
@@ -61,12 +61,12 @@ $dbh->do(q|DELETE FROM message_transport_types|);
 my $library = $builder->build({
     source => 'Branch',
 });
-my $patron_category = $builder->build({ source => 'Category' });
+my $patron_category = $builder->build({ source => 'Category' })->{categorycode};
 my $date = dt_from_string;
 my $borrowernumber = AddMember(
     firstname    => 'Jane',
     surname      => 'Smith',
-    categorycode => $patron_category,,
+    categorycode => $patron_category,
     branchcode   => $library->{branchcode},
     dateofbirth  => $date,
 );
@@ -491,3 +491,16 @@ is($err2, 1, "Successfully sent serial notification");
 is($mail{'To'}, 'john.smith@test.de', "mailto correct in sent serial notification");
 is($mail{'Message'}, 'Silence in the library,'.$subscriptionid.',No. 0', 'Serial notification text constructed successfully');
 }
+
+subtest 'SendQueuedMessages' => sub {
+    plan tests => 1;
+    t::lib::Mocks::mock_preference( 'SMSSendDriver', 'Email' );
+    my $patron = Koha::Patrons->find($borrowernumber);
+    $dbh->do(q|
+        INSERT INTO message_queue(borrowernumber, subject, content, message_transport_type, status, letter_code)
+        VALUES (?, 'subject', 'content', 'sms', 'pending', 'just_a_code')
+        |, undef, $borrowernumber
+    );
+    eval { C4::Letters::SendQueuedMessages(); };
+    is( $@, '', 'SendQueuedMessages should not explode if the patron does not have a sms provider set' );
+};
