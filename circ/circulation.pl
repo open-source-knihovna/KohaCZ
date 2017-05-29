@@ -220,7 +220,8 @@ if ( $print eq 'yes' && $borrowernumber ne '' ) {
         NetworkPrint($letter->{content});
     }
     $query->param( 'borrowernumber', '' );
-    $borrowernumber = '';
+    $borrowernumber = ''; # FIXME This is terrible
+    $borrower = {};
 }
 
 #
@@ -643,7 +644,6 @@ $template->param(
     AudioAlerts           => C4::Context->preference("AudioAlerts"),
     fast_cataloging   => $fast_cataloging,
     CircAutoPrintQuickSlip   => C4::Context->preference("CircAutoPrintQuickSlip"),
-    activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
     SuspendHoldsIntranet => C4::Context->preference('SuspendHoldsIntranet'),
     AutoResumeSuspendedHolds => C4::Context->preference('AutoResumeSuspendedHolds'),
     RoutingSerials => C4::Context->preference('RoutingSerials'),

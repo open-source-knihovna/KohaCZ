@@ -106,7 +106,7 @@ if ($add){
         $template->param( 'catcode' =>    $catcodes->[0])  if $cnt == 1;
     }
 
-    $template->param( adultborrower => 1 ) if ( $data->{'category_type'} eq 'A' );
+    $template->param( adultborrower => 1 ) if ( $data->{'category_type'} eq 'A' || $data->{'category_type'} eq 'I' );
     my $patron_image = Koha::Patron::Images->find($data->{borrowernumber});
     $template->param( picture => 1 ) if $patron_image;
 
@@ -125,7 +125,6 @@ if ($add){
         categoryname   => $data->{'description'},
         branchname     => GetBranchName($data->{'branchcode'}),
         is_child       => ($data->{'category_type'} eq 'C'),
-        activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
         RoutingSerials => C4::Context->preference('RoutingSerials'),
     );
     output_html_with_http_headers $input, $cookie, $template->output;

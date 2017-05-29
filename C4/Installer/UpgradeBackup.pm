@@ -1,4 +1,4 @@
-package install_misc::UpgradeBackup;
+package C4::Installer::UpgradeBackup;
 
 # Copyright (C) 2008 LibLime
 #
@@ -33,7 +33,7 @@ use vars qw(@ISA @EXPORT );
 
 =head1 NAME
 
-install_misc::UpgradeBackup
+C4::Installer::UpgradeBackup
 
 =head1 DESCRIPTION
 
@@ -56,7 +56,7 @@ sub backup_changed_files {
         next unless -d $currdir;
 
         chdir $currdir or die "could not change to $currdir: $!";
-       
+
         # expand path
         find(sub {
             return unless -f $_;
@@ -72,7 +72,7 @@ sub backup_changed_files {
                 my $backup = $targetfile . $suffix;
                 unless (-s $targetfile == $size and not compare($sourcefile, $targetfile)) {
                     print "Backed up $targetfile to $backup\n";
-                    File::Copy::copy($targetfile, $backup);        
+                    File::Copy::copy($targetfile, $backup);
                 }
             }
         }, ".");

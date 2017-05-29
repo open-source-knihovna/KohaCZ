@@ -17,8 +17,9 @@ use C4::Circulation;
 use CGI qw ( -utf8 );
 use C4::Members::Attributes qw(GetBorrowerAttributes);
 use Koha::Patron::Images;
+use Koha::Token;
 
-use Digest::MD5 qw(md5_base64);
+use Koha::Patron::Categories;
 
 my $input = new CGI;
 
@@ -63,8 +64,15 @@ my $minpw = C4::Context->preference('minPasswordLength');
 push( @errors, 'SHORTPASSWORD' ) if ( $newpassword && $minpw && ( length($newpassword) < $minpw ) );
 
 if ( $newpassword && !scalar(@errors) ) {
-    my $digest = Koha::AuthUtils::hash_password( $input->param('newpassword') );
-    my $uid    = $input->param('newuserid');
+
+    die "Wrong CSRF token"
+        unless Koha::Token->new->check_csrf({
+            session_id => scalar $input->cookie('CGISESSID'),
+            token  => scalar $input->param('csrf_token'),
+        });
+
+    my $digest = Koha::AuthUtils::hash_password( scalar $input->param('newpassword') );
+    my $uid    = $input->param('newuserid') || $bor->{userid};
     my $dbh    = C4::Context->dbh;
     if ( changepassword( $uid, $member, $digest ) ) {
         $template->param( newpassword => $newpassword );
@@ -99,7 +107,7 @@ if ( $bor->{'category_type'} eq 'C' ) {
     $template->param( 'catcode' => $catcodes->[0] ) if $cnt == 1;
 }
 
-$template->param( adultborrower => 1 ) if ( $bor->{'category_type'} eq 'A' );
+$template->param( adultborrower => 1 ) if ( $bor->{'category_type'} eq 'A' || $bor->{'category_type'} eq 'I' );
 
 my $patron_image = Koha::Patron::Images->find($bor->{borrowernumber});
 $template->param( picture => 1 ) if $patron_image;
@@ -138,9 +146,9 @@ $template->param(
     userid                     => $bor->{'userid'},
     destination                => $destination,
     is_child                   => ( $bor->{'category_type'} eq 'C' ),
-    activeBorrowerRelationship => ( C4::Context->preference('borrowerRelationship') ne '' ),
     minPasswordLength          => $minpw,
     RoutingSerials             => C4::Context->preference('RoutingSerials'),
+    csrf_token                 => Koha::Token->new->generate_csrf({ session_id => scalar $input->cookie('CGISESSID'), }),
 );
 
 if ( scalar(@errors) ) {

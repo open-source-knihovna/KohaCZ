@@ -22,12 +22,12 @@ use MARC::File::XML;
 use List::MoreUtils qw(uniq);
 use C4::Auth;
 use C4::Branch;             # GetBranches
-use C4::Csv;
 use C4::Koha;               # GetItemTypes
 use C4::Output;
 
 use Koha::Authority::Types;
 use Koha::Biblioitems;
+use Koha::CsvProfiles;
 use Koha::Database;
 use Koha::DateUtils qw( dt_from_string output_pref );
 use Koha::Exporter::Record;
@@ -85,6 +85,19 @@ if (
 }
 
 my %branchmap = map { $_ => 1 } @branch; # for quick lookups
+
+my @messages;
+if ( $op eq 'export' ) {
+    my $filename = $query->param('id_list_file');
+    if ( $filename ) {
+        my $mimetype = $query->uploadInfo($filename)->{'Content-Type'};
+        my @valid_mimetypes = qw( application/octet-stream text/csv text/plain );
+        unless ( grep { /^$mimetype$/ } @valid_mimetypes ) {
+            push @messages, { type => 'alert', code => 'invalid_mimetype' };
+            $op = '';
+        }
+    }
+}
 
 if ( $op eq "export" ) {
 
@@ -192,6 +205,13 @@ if ( $op eq "export" ) {
             -attachment => $filename,
         );
 
+        my $csv_profile_id = $query->param('csv_profile_id');
+        unless ( $csv_profile_id ) {
+            # FIXME export_format.profile should be a unique key
+            my $default_csv_profiles = Koha::CsvProfiles->search({ profile => C4::Context->preference('ExportWithCsvProfile') });
+            $csv_profile_id = $default_csv_profiles->count ? $default_csv_profiles->next->export_format_id : undef;
+        }
+
         Koha::Exporter::Record::export(
             {   record_type        => $record_type,
                 record_ids         => \@record_ids,
@@ -199,7 +219,7 @@ if ( $op eq "export" ) {
                 filename           => $filename,
                 itemnumbers        => \@itemnumbers,
                 dont_export_fields => $export_remove_fields,
-                csv_profile_id     => ( $query->param('csv_profile_id') || GetCsvProfileId( C4::Context->preference('ExportWithCsvProfile') ) || undef ),
+                csv_profile_id     => $csv_profile_id,
                 export_items       => (not $dont_export_items),
             }
         );
@@ -309,7 +329,8 @@ else {
         itemtypeloop             => \@itemtypesloop,
         authority_types          => $authority_types,
         export_remove_fields     => C4::Context->preference("ExportRemoveFields"),
-        csv_profiles             => C4::Csv::GetCsvProfiles('marc'),
+        csv_profiles             => [ Koha::CsvProfiles->search({ type => 'marc' }) ],
+        messages                 => \@messages,
     );
 
     output_html_with_http_headers $query, $cookie, $template->output;

@@ -7,7 +7,7 @@ use MARC::File::USMARC;
 use C4::AuthoritiesMarc;
 use C4::Biblio;
 use C4::Record;
-use Koha::Logger;
+use Koha::CsvProfiles;
 
 sub _get_record_for_export {
     my ($params)           = @_;
@@ -142,7 +142,12 @@ sub export {
         print MARC::File::XML::footer();
         print "\n";
     } elsif ( $format eq 'csv' ) {
-        $csv_profile_id ||= C4::Csv::GetCsvProfileId( C4::Context->preference('ExportWithCsvProfile') );
+        unless ( $csv_profile_id ) {
+            # FIXME export_format.profile should be a unique key
+            my $csv_profiles = Koha::CsvProfiles->search({ profile => C4::Context->preference('ExportWithCsvProfile') });
+            die "The ExportWithCsvProfile system preference is not defined or does not match a valid csv profile" unless $csv_profiles->count;
+            $csv_profile_id = $csv_profiles->next->export_format_id;
+        }
         print marc2csv( $record_ids, $csv_profile_id, $itemnumbers );
     }
 

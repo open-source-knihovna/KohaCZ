@@ -183,7 +183,7 @@ sub get_template_and_user {
 
     # If the user logged in is the SCO user and he tries to go out the SCO module, log the user out removing the CGISESSID cookie
     if ( $in->{type} eq 'opac' and $in->{template_name} !~ m|sco/| ) {
-        if (  C4::Context->preference('AutoSelfCheckID') && $user eq C4::Context->preference('AutoSelfCheckID') ) {
+        if ( $user && C4::Context->preference('AutoSelfCheckID') && $user eq C4::Context->preference('AutoSelfCheckID') ) {
             $template = C4::Templates::gettemplate( 'opac-auth.tt', 'opac', $in->{query} );
             my $cookie = $in->{query}->cookie(
                 -name     => 'CGISESSID',
@@ -921,14 +921,13 @@ sub checkauth {
             -value    => $session->id,
             -HttpOnly => 1
         );
-        $userid = $q_userid;
         my $pki_field = C4::Context->preference('AllowPKIAuth');
         if ( !defined($pki_field) ) {
             print STDERR "ERROR: Missing system preference AllowPKIAuth.\n";
             $pki_field = 'None';
         }
         if ( ( $cas && $query->param('ticket') )
-            || $userid
+            || $q_userid
             || ( $shib && $shib_login )
             || $pki_field ne 'None'
             || $persona )
@@ -943,7 +942,7 @@ sub checkauth {
                 my $retuserid;
 
                 # Do not pass password here, else shib will not be checked in checkpw.
-                ( $return, $cardnumber, $retuserid ) = checkpw( $dbh, $userid, undef, $query );
+                ( $return, $cardnumber, $retuserid ) = checkpw( $dbh, $q_userid, undef, $query );
                 $userid      = $retuserid;
                 $shibSuccess = $return;
                 $info{'invalidShibLogin'} = 1 unless ($return);
@@ -1015,7 +1014,7 @@ sub checkauth {
                 else {
                     my $retuserid;
                     ( $return, $cardnumber, $retuserid ) =
-                      checkpw( $dbh, $userid, $password, $query, $type );
+                      checkpw( $dbh, $q_userid, $password, $query, $type );
                     $userid = $retuserid if ($retuserid);
                     $info{'invalid_username_or_password'} = 1 unless ($return);
                 }
@@ -1023,6 +1022,8 @@ sub checkauth {
 
             # $return: 1 = valid user, 2 = superlibrarian
             if ($return) {
+                # If DB user is logged in
+                $userid ||= $q_userid if $return == 2;
 
                 #_session_log(sprintf "%20s from %16s logged in  at %30s.\n", $userid,$ENV{'REMOTE_ADDR'},(strftime '%c', localtime));
                 if ( $flags = haspermission( $userid, $flagsrequired ) ) {
@@ -1164,7 +1165,7 @@ sub checkauth {
                 $session->param( 'ip',       $session->remote_addr() );
                 $session->param( 'sessiontype', 'anon' );
             }
-        }    # END if ( $userid    = $query->param('userid') )
+        }    # END if ( $q_userid
         elsif ( $type eq "opac" ) {
 
             # if we are here this is an anonymous session; add public lists to it and a few other items...

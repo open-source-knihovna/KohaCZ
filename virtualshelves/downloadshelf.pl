@@ -17,8 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-use warnings;
+use Modern::Perl;
 
 use CGI qw ( -utf8 );
 use Encode qw(encode);
@@ -29,8 +28,8 @@ use C4::Items;
 use C4::Output;
 use C4::Record;
 use C4::Ris;
-use C4::Csv;
 
+use Koha::CsvProfiles;
 use Koha::Virtualshelves;
 
 use utf8;
@@ -84,6 +83,10 @@ if ($shelfid && $format) {
                     }
                 }
             }
+
+            # If it was a CSV export we change the format after the export so the file extension is fine
+            $format = "csv" if ($format =~ m/^\d+$/);
+
             print $query->header(
             -type => 'application/octet-stream',
             -'Content-Transfer-Encoding' => 'binary',
@@ -96,12 +99,9 @@ if ($shelfid && $format) {
     } else {
         push @messages, { type => 'error', code => 'does_not_exist' };
     }
-
-    # If it was a CSV export we change the format after the export so the file extension is fine
-    $format = "csv" if ($format =~ m/^\d+$/);
 }
 else {
-    $template->param(csv_profiles => GetCsvProfilesLoop('marc'));
+    $template->param(csv_profiles => [ Koha::CsvProfiles->search({ type => 'marc' }) ]);
     $template->param(shelfid => $shelfid); 
 }
 $template->param( messages => \@messages );

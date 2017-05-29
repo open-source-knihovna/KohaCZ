@@ -36,6 +36,7 @@
 use strict;
 #use warnings; FIXME - Bug 2505
 use CGI qw ( -utf8 );
+use Digest::MD5 qw(md5_base64);
 use C4::Context;
 use C4::Auth;
 use C4::Output;
@@ -62,6 +63,9 @@ if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preferen
 use DateTime;
 use Koha::DateUtils;
 use Koha::Database;
+
+use Koha::Patron::Categories;
+use Koha::Token;
 
 use vars qw($debug);
 
@@ -274,6 +278,10 @@ if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preferen
 # patronimage related interface on
 my $patron_image = Koha::Patron::Images->find($data->{borrowernumber});
 $template->param( picture => 1 ) if $patron_image;
+# Generate CSRF token for upload and delete image buttons
+$template->param(
+    csrf_token => Koha::Token->new->generate_csrf({ session_id => $input->cookie('CGISESSID'),}),
+);
 
 my $branch=C4::Context->userenv->{'branch'};
 
@@ -336,7 +344,6 @@ $template->param(
     samebranch      => $samebranch,
     quickslip       => $quickslip,
     privacy_guarantor_checkouts => $data->{'privacy_guarantor_checkouts'},
-    activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
     AutoResumeSuspendedHolds => C4::Context->preference('AutoResumeSuspendedHolds'),
     SuspendHoldsIntranet => C4::Context->preference('SuspendHoldsIntranet'),
     RoutingSerials => C4::Context->preference('RoutingSerials'),

@@ -23,9 +23,7 @@ $(document).ready(function(){
             });
         [% ELSE %]
             $("#deletepatron").click(function(){
-                confirm_deletion();
-                $(".btn-group").removeClass("open");
-                return false;
+                window.location='/cgi-bin/koha/members/deletemem.pl?member=[% borrowernumber | url%]';
             });
         [% END %]
         $("#renewpatron").click(function(){
@@ -69,12 +67,6 @@ $(document).ready(function(){
         return false;
     })
 });
-function confirm_deletion() {
-    var is_confirmed = window.confirm(_("Are you sure you want to delete this patron? This cannot be undone."));
-    if (is_confirmed) {
-        window.location='/cgi-bin/koha/members/deletemem.pl?member=[% borrowernumber %]';
-    }
-}
 function confirm_local_deletion() {
     var is_confirmed = window.confirm(_("Are you sure you want to delete this patron from the local database? This cannot be undone."));
     if (is_confirmed) {
@@ -145,8 +137,8 @@ function searchToHold(){
     [% END %]
 
     [% IF ( CAN_user_borrowers ) %]
-        [% IF ( adultborrower AND activeBorrowerRelationship ) %]
-            <a id="addchild" class="btn btn-small" href="/cgi-bin/koha/members/memberentry.pl?op=add&amp;guarantorid=[% borrowernumber %]"><i class="fa fa-plus"></i> Add child</a>
+        [% IF adultborrower AND Koha.Preference("borrowerRelationship") %]
+            <a id="addchild" class="btn btn-default btn-sm" href="/cgi-bin/koha/members/memberentry.pl?op=add&amp;guarantorid=[% borrowernumber %]"><i class="fa fa-plus"></i> Add child</a>
         [% END %]
         [% IF ( CAN_user_borrowers ) %]
             <a id="changepassword" class="btn btn-small" href="/cgi-bin/koha/members/member-password.pl?member=[% borrowernumber %]"><i class="fa fa-lock"></i> Change password</a>

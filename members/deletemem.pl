@@ -25,6 +25,7 @@ use strict;
 #use warnings; FIXME - Bug 2505
 
 use CGI qw ( -utf8 );
+use Digest::MD5 qw(md5_base64);
 use C4::Context;
 use C4::Output;
 use C4::Auth;
@@ -32,6 +33,8 @@ use C4::Members;
 use C4::Branch; # GetBranches
 use Module::Load;
 use Koha::Patron::Images;
+use Koha::Token;
+
 if ( C4::Context->preference('NorwegianPatronDBEnable') && C4::Context->preference('NorwegianPatronDBEnable') == 1 ) {
     load Koha::NorwegianPatronDB, qw( NLMarkForDeletion NLSync );
 }
@@ -101,15 +104,14 @@ if (C4::Context->preference("IndependentBranches")) {
     }
 }
 
+my $op = $input->param('op') || 'delete_confirm';
 my $dbh = C4::Context->dbh;
-my $sth=$dbh->prepare("Select * from borrowers where guarantorid=?");
-$sth->execute($member);
-my $data=$sth->fetchrow_hashref;
-if ($countissues > 0 or $flags->{'CHARGES'}  or $data->{'borrowernumber'} or $deletelocal == 0){
-    #   print $input->header;
-
+my $is_guarantor = $dbh->selectrow_array("SELECT COUNT(*) FROM borrowers WHERE guarantorid=?", undef, $member);
+if ( $op eq 'delete_confirm' or $countissues > 0 or $flags->{'CHARGES'}  or $is_guarantor or $deletelocal == 0) {
     my $patron_image = Koha::Patron::Images->find($bor->{borrowernumber});
     $template->param( picture => 1 ) if $patron_image;
+
+    $template->param( adultborrower => 1 ) if ( $bor->{category_type} eq 'A' || $bor->{category_type} eq 'I' );
 
     $template->param(borrowernumber => $member,
         surname => $bor->{'surname'},
@@ -127,8 +129,6 @@ if ($countissues > 0 or $flags->{'CHARGES'}  or $data->{'borrowernumber'} or $de
         phone => $bor->{'phone'},
         email => $bor->{'email'},
         branchcode => $bor->{'branchcode'},
-        branchname => GetBranchName($bor->{'branchcode'}),
-		activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
         RoutingSerials => C4::Context->preference('RoutingSerials'),
     );
     if ($countissues >0) {
@@ -137,20 +137,33 @@ if ($countissues > 0 or $flags->{'CHARGES'}  or $data->{'borrowernumber'} or $de
     if ($flags->{'CHARGES'} ne '') {
         $template->param(charges => $flags->{'CHARGES'}->{'amount'});
     }
-    if ($data->{'borrowernumber'}) {
+    if ($is_guarantor) {
         $template->param(guarantees => 1);
     }
     if ($deletelocal == 0) {
         $template->param(keeplocal => 1);
     }
-output_html_with_http_headers $input, $cookie, $template->output;
+    # This is silly written but reflect the same conditions as above
+    if ( not $countissues > 0 and not $flags->{CHARGES} ne '' and not $is_guarantor and not $deletelocal == 0 ) {
+        $template->param(
+            op         => 'delete_confirm',
+            csrf_token => Koha::Token->new->generate_csrf({ session_id => scalar $input->cookie('CGISESSID') }),
+        );
+    }
+} elsif ( $op eq 'delete_confirmed' ) {
 
-} else {
+    die "Wrong CSRF token"
+
+        unless Koha::Token->new->check_csrf( {
+            session_id => $input->cookie('CGISESSID'),
+            token  => scalar $input->param('csrf_token'),
+        });
     MoveMemberToDeleted($member);
     C4::Members::HandleDelBorrower($member);
     DelMember($member);
+    # TODO Tell the user everything went ok
     print $input->redirect("/cgi-bin/koha/members/members-home.pl");
     exit 0; # Exit without error
 }
 
-
+output_html_with_http_headers $input, $cookie, $template->output;

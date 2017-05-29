@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Koha 3.0.2\n"
-"POT-Creation-Date: 2017-02-15 15:19-0300\n"
-"PO-Revision-Date: 2017-02-16 13:39+0000\n"
+"POT-Creation-Date: 2017-05-14 23:59-0300\n"
+"PO-Revision-Date: 2017-04-25 14:55+0000\n"
 "Last-Translator: Nikunj <nikunj1@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: hi\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1487252392.000000\n"
+"X-POOTLE-MTIME: 1493132122.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -1000,7 +1000,7 @@ msgstr "-8 =&gt; झंडा"
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; भविष्य का उपयोग"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
@@ -1981,7 +1981,7 @@ msgstr "बजट जोड़ें"
 msgid "Adding a group"
 msgstr "एक समूह जोड़ना"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, c-format
 msgid "Adding a new alert"
 msgstr "एक नई चेतावनी जोड़ना"
@@ -2795,7 +2795,7 @@ msgstr ""
 "बहुत कम से कम, अगर आप आइटम घूम पर योजना, निम्नलिखित क्षेत्रों के लिए नए आइटम के लिए "
 "दर्ज किया जाना चाहिए:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -3293,11 +3293,11 @@ msgid "Build sets"
 msgstr "सेट बनाएँ"
 
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:19
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "By default all item types and all patrons are notified of check ins and "
-"check outs. To change this, click on the item/patron type combination that "
-"you would like to stop notices for."
+"check outs. To change this, click on the item type/patron category "
+"combination that you would like to stop notices for."
 msgstr ""
 "डिफ़ॉल्ट रूप से सभी आइटम प्रकार के और सभी संरक्षक की जांच भारतीय नौसेना पोत और बहिष्कार "
 "की जांच की अधिसूचित कर रहे हैं। इसे बदलने के लिए, मद / संरक्षक प्रकार संयोजन है कि आप के "
@@ -4228,7 +4228,7 @@ msgstr ""
 msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr "क्लिक करें \"भुगतान\" ठीक बगल में आप पूर्ण में भुगतान करना चाहते "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr "क्लिक करें \"सहेजें चेतावनी\" और आपने किया !"
@@ -5159,7 +5159,7 @@ msgstr "सार्वजनिक सूची को हटाएँ"
 msgid "Deleting Item Types"
 msgstr "आइटम प्रकार हटाना"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, c-format
 msgid "Deleting alerts"
 msgstr "अलर्ट हटाना"
@@ -5650,7 +5650,7 @@ msgstr "एक सूची का नाम दर्ज करें और �
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "'विवरण' फ़ील्ड में श्रेणी के एक सादे पाठ संस्करण दर्ज करें।"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
@@ -5658,7 +5658,7 @@ msgid ""
 msgstr ""
 "एक चयनकर्ता दर्ज इनपुट में \"चयनकर्ता\", आप jQuery चयनकर्ताओं पर प्रलेखन देख सकते हैं"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -6211,11 +6211,11 @@ msgstr ""
 "अंत में आप क्या डेटा आप अगर कोई डुप्लिकेट हैं बदलना चाहते हैं के बारे में फैसला करने की जरूरत है।"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:86
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Finally, if you charge a rental fee for the item type and want to give a "
-"specific patron type a discount on that fee, enter the percentage discount "
-"(without the %% symbol) in the 'Rental Discount' field"
+"specific patron category a discount on that fee, enter the percentage "
+"discount (without the %% symbol) in the 'Rental Discount' field"
 msgstr ""
 "अंत में, यदि आप आइटम प्रकार के लिए एक किराये की फीस चार्ज और एक विशिष्ट संरक्षक कि शुल्क "
 "पर छूट टाइप देना चाहते हैं, प्रतिशत छूट (बिना प्रवेश %% 'किराये डिस्काउंट' क्षेत्र में प्रतीक)"
@@ -7347,10 +7347,10 @@ msgstr ""
 "रिकॉर्ड केवल एक शर्त मैच के लिए सेट करने के लिए संबंधित करने की जरूरत है।"
 
 #: intranet-tmpl/prog/en/modules/help/members/boraccount.tt:13
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"Hold fees will be charged based on the rules you set in the Patron Types "
-"&amp; Categories administration area"
+"Hold fees will be charged based on the rules you set for the patron category "
+"in administration"
 msgstr ""
 "होल्ड फीस नियम आप संरक्षक प्रकार सेट के आधार पर शुल्क लिया जाएगा &amp; श्रेणियाँ प्रशासन "
 "क्षेत्र"
@@ -9630,16 +9630,16 @@ msgstr ""
 "की संख्या के आधार पर देर से माना जाता है।"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:31
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Important: At the very least you will need to set a default circulation "
 "rule. This rule should be set for all item types, all libraries and all "
 "patron categories. That will catch all instances that do not match a "
 "specific rule. When checking out if you do not have a rule for all "
-"libraries, all item types and all patron types then you may see patrons "
+"libraries, all item types and all patron categories then you may see patrons "
 "getting blocked from placing holds. You will also want a rule for your "
-"specific library set for all item types and all patron types to avoid this "
-"holds issue. Koha needs to know what rule to fall back on."
+"specific library set for all item types and all patron categories to avoid "
+"this holds issue. Koha needs to know what rule to fall back on."
 msgstr ""
 "महत्वपूर्ण: बहुत कम से कम आप एक डिफ़ॉल्ट परिसंचरण नियम निर्धारित करने की आवश्यकता होगी। "
 "यह नियम सभी आइटम प्रकार, सभी पुस्तकालयों और सभी संरक्षक श्रेणियों के लिए निर्धारित किया "
@@ -11306,7 +11306,7 @@ msgstr "स्थानीय सिस्टम वरीयताएँ"
 msgid "Local Use:"
 msgstr "स्थानीय का प्रयोग करें"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "Locate the \"Add new alert\" form."
 msgstr "पता लगाएँ फार्म \"नई चेतावनी जोड़ें\""
@@ -11699,8 +11699,9 @@ msgid "Most circulated items"
 msgstr "अधिकांश परिचालित आइटम "
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:12
-#, c-format
-msgid "Most common patron type, usually used for a general 'Patron' category."
+#, fuzzy, c-format
+msgid ""
+"Most common patron category, usually used for a general 'Patron' category."
 msgstr "सबसे आम प्रकार संरक्षक, आमतौर पर एक सामान्य 'संरक्षक' श्रेणी के लिए इस्तेमाल किया।"
 
 #: intranet-tmpl/prog/en/modules/help/members/boraccount.tt:9
@@ -12086,6 +12087,12 @@ msgstr "नोट: कृपया ध्यान दें कि edit_items �
 #, c-format
 msgid "Note: Please note that items_batchmod permission is still required"
 msgstr "नोट: कृपया ध्यान दें कि items_batchmod अनुमति अभी भी आवश्यक है"
+
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
+msgstr ""
+"नोट: ध्वनि सक्षम/अक्षम करने के लिए सिस्टम प्राथमिकता 'ऑडियो अलर्ट' का उपयोग करें."
 
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
 #, c-format
@@ -13185,10 +13192,10 @@ msgstr ""
 "ExtendedPatronAttributes प्रणाली वरीयता निर्धारित करने की जरूरत है।"
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:5
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Patron categories allow you to organize your patrons into different roles, "
-"age groups, and patron types."
+"age groups, and patron categories."
 msgstr ""
 "संरक्षक श्रेणियों में आप अलग अलग भूमिकाओं, आयु समूहों, और संरक्षक प्रकार में अपने संरक्षकों को "
 "व्यवस्थित करने के लिए अनुमति देते हैं।"
@@ -15168,12 +15175,12 @@ msgstr "क्रमबद्ध क्षेत्र 1"
 msgid "Sort field 2 "
 msgstr "क्रमबद्ध क्षेत्र 2"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr "ध्वनि पूर्वता"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -17259,8 +17266,8 @@ msgstr ""
 "बुनियादी मानकों को स्थापित करने के लिए सबसे अच्छा है।"
 
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:7
-#, c-format
-msgid "These preferences are set based on patron types and item types."
+#, fuzzy, c-format
+msgid "These preferences are set based on patron categories and item types."
 msgstr "ये प्राथमिकताएं संरक्षक प्रकार और आइटम प्रकार के आधार पर स्थापित कर रहे हैं।"
 
 #: intranet-tmpl/prog/en/modules/help/reports/reserves_stats.tt:5
@@ -17650,10 +17657,10 @@ msgstr ""
 "जाएगा।"
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:37
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"This patron type is used strictly for statistical purposes, such as in house "
-"use of items."
+"This patron category is used strictly for statistical purposes, such as in "
+"house use of items."
 msgstr ""
 "इस प्रकार संरक्षक सख्ती से ऐसी वस्तुओं के घर में उपयोग में के रूप में सांख्यिकीय प्रयोजनों के लिए "
 "प्रयोग किया जाता है।"
@@ -18388,7 +18395,7 @@ msgstr ""
 "एक नया संरक्षक गुण प्रकार जोड़ने के लिए, पृष्ठ के शीर्ष पर बटन 'नए संरक्षक प्रकार की "
 "विशेषता' पर क्लिक करें"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, c-format
 msgid "To add a new alert:"
 msgstr "एक नई चेतावनी जोड़ने के लिए:"
@@ -18598,7 +18605,7 @@ msgstr ""
 msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr "एक विक्रेता से ऑर्डर करने के लिए, आप उन्हें करना चाहिए सक्षम होने के लिए 'सक्रिय'।"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
@@ -18719,7 +18726,7 @@ msgstr ""
 "सारांश पर क्लिक करने के बाद प्रकट होता है के रूप में रिकॉर्ड के अधिकार के लिए दिखाई देगा।"
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -20097,11 +20104,11 @@ msgstr ""
 "कुंजी।"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:89
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "When finished, click 'Add' to save your changes. To modify a rule, create a "
-"new one with the same patron type and item type. If you would like to delete "
-"your rule, simply click the 'Delete' link to the right of the rule."
+"new one with the same patron category and item type. If you would like to "
+"delete your rule, simply click the 'Delete' link to the right of the rule."
 msgstr ""
 "जब समाप्त हो, 'जोड़ें' अपने परिवर्तनों को सहेजने के लिए क्लिक करें। एक नियम को संशोधित करने "
 "के लिए, एक ही प्रकार संरक्षक और आइटम प्रकार के साथ एक नया बनाएँ। आप अपने नियम को नष्ट "
@@ -21557,23 +21564,23 @@ msgid "acquisition "
 msgstr "अधिग्रहण "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:17
-#, c-format
-msgid "all libraries, all patron types, all item types"
+#, fuzzy, c-format
+msgid "all libraries, all patron categories, all item types"
 msgstr "सभी पुस्तकालयों, सभी प्रकार के संरक्षक, सभी प्रकार के आइटम"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:16
-#, c-format
-msgid "all libraries, all patron types, same item type"
+#, fuzzy, c-format
+msgid "all libraries, all patron categories, same item type"
 msgstr "सभी पुस्तकालयों, सभी संरक्षक प्रकार, एक ही मद प्रकार"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:15
-#, c-format
-msgid "all libraries, same patron type, all item types"
+#, fuzzy, c-format
+msgid "all libraries, same patron category, all item types"
 msgstr "सभी पुस्तकालयों, उसी प्रकार संरक्षक, सभी प्रकार के आइटम"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:14
-#, c-format
-msgid "all libraries, same patron type, same item type"
+#, fuzzy, c-format
+msgid "all libraries, same patron category, same item type"
 msgstr "सभी पुस्तकालयों, उसी प्रकार संरक्षक, एक ही मद प्रकार"
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:120
@@ -22062,7 +22069,7 @@ msgstr "एक आरएसएस मिल / एटम इन नए आइट�
 msgid "group_manage "
 msgstr "group_manage"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr "यहाँ"
@@ -22734,23 +22741,23 @@ msgid "routing "
 msgstr "राउटिगं"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:13
-#, c-format
-msgid "same library, all patron types, all item types"
+#, fuzzy, c-format
+msgid "same library, all patron categories, all item types"
 msgstr "एक ही पुस्तकालय, सभी प्रकार के संरक्षक, सभी प्रकार के आइटम"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:12
-#, c-format
-msgid "same library, all patron types, same item type"
+#, fuzzy, c-format
+msgid "same library, all patron categories, same item type"
 msgstr "एक ही पुस्तकालय, सभी संरक्षक प्रकार, एक ही मद प्रकार"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:11
-#, c-format
-msgid "same library, same patron type, all item type"
+#, fuzzy, c-format
+msgid "same library, same patron category, all item type"
 msgstr "एक ही पुस्तकालय, उसी प्रकार संरक्षक, सभी आइटम प्रकार"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:10
-#, c-format
-msgid "same library, same patron type, same item type"
+#, fuzzy, c-format
+msgid "same library, same patron category, same item type"
 msgstr "एक ही पुस्तकालय, एक ही संरक्षक प्रकार, एक ही मद प्रकार"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:471

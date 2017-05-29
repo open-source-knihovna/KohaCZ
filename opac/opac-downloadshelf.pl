@@ -17,8 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
-use strict;
-use warnings;
+use Modern::Perl;
 
 use CGI qw ( -utf8 );
 use Encode qw(encode);
@@ -29,8 +28,8 @@ use C4::Items;
 use C4::Output;
 use C4::Record;
 use C4::Ris;
-use C4::Csv;
 
+use Koha::CsvProfiles;
 use Koha::Virtualshelves;
 
 use utf8;
@@ -118,7 +117,7 @@ if ( $shelf and $shelf->can_be_viewed( $borrowernumber ) ) {
         } else {
             $template->param(fullpage => 1);
         }
-        $template->param(csv_profiles => GetCsvProfilesLoop('marc'));
+        $template->param(csv_profiles => [ Koha::CsvProfiles->search({ type => 'marc' }) ]);
         $template->param( shelf => $shelf );
         output_html_with_http_headers $query, $cookie, $template->output;
     }
