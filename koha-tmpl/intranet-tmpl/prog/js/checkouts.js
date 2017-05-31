@@ -77,6 +77,9 @@ $(document).ready(function() {
                     content = CIRCULATION_RETURNED;
                     $(id).parent().parent().addClass('ok');
                     $('#date_due_' + data.itemnumber).html(CIRCULATION_RETURNED);
+                    if ( data.patronnote != null ) {
+                        $('.patron_note_' + data.itemnumber).html("Patron note: " + data.patronnote);
+                    }
                 } else {
                     content = CIRCULATION_NOT_RETURNED;
                     $(id).parent().parent().addClass('warn');
@@ -223,13 +226,15 @@ $(document).ready(function() {
                             due += "<span class='dmg'>" + oObj.damaged + "</span>";
                         }
 
+                        var patron_note = " <span class='patron_note_" + oObj.itemnumber + "'></span>";
+                        due +="<br>" + patron_note;
 
                         return due;
                     }
                 },
                 {
                     "mDataProp": function ( oObj ) {
-                        title = "<span class='strong'><a href='/cgi-bin/koha/catalogue/detail.pl?biblionumber="
+                        title = "<span id='title_" + oObj.itemnumber + "' class='strong'><a href='/cgi-bin/koha/catalogue/detail.pl?biblionumber="
                               + oObj.biblionumber
                               + "'>"
                               + oObj.title;
@@ -250,12 +255,18 @@ $(document).ready(function() {
 
                         if ( oObj.itemnotes ) {
                             var span_class = "text-muted";
-                            title += " - <span class='" + span_class + "'>" + oObj.itemnotes + "</span>"
+                            if ( $.datepicker.formatDate('yy-mm-dd', new Date(oObj.issuedate) ) == ymd ) {
+                                span_class = "circ-hlt";
+                            }
+                            title += " - <span class='" + span_class + "'>" + oObj.itemnotes + "</span>";
                         }
 
                         if ( oObj.itemnotes_nonpublic ) {
                             var span_class = "text-danger";
-                            title += " - <span class='" + span_class + "'>" + oObj.itemnotes_nonpublic + "</span>"
+                            if ( $.datepicker.formatDate('yy-mm-dd', new Date(oObj.issuedate) ) == ymd ) {
+                                span_class = "circ-hlt";
+                            }
+                            title += " - <span class='" + span_class + "'>" + oObj.itemnotes_nonpublic + "</span>";
                         }
 
                         var onsite_checkout = '';
@@ -273,7 +284,7 @@ $(document).ready(function() {
                               + "'>"
                               + oObj.barcode
                               + "</a>"
-                              + onsite_checkout;
+                              + onsite_checkout
 
                         return title;
                     },
@@ -365,6 +376,13 @@ $(document).ready(function() {
 
                             span_style = "display: none";
                             span_class = "renewals-allowed";
+                        } else if ( oObj.can_renew_error == "auto_too_much_oweing" ) {
+                            content += "<span class='renewals-disabled'>"
+                                    + NOT_RENEWABLE_AUTO_TOO_MUCH_OWEING
+                                    + "</span>";
+
+                            span_style = "display: none";
+                            span_class = "renewals-allowed";
                         } else if ( oObj.can_renew_error == "auto_renew" ) {
                             content += "<span class='renewals-disabled'>"
                                     + NOT_RENEWABLE_AUTO_RENEW
@@ -416,7 +434,7 @@ $(document).ready(function() {
                     }
                 },
                 {
-                    "bVisible": exports_enabled ? true : false,
+                    "bVisible": exports_enabled == 1 ? true : false,
                     "bSortable": false,
                     "mDataProp": function ( oObj ) {
                         var s = "<input type='checkbox' name='itemnumbers' value='" + oObj.itemnumber + "' style='visibility:hidden;' />";

@@ -105,11 +105,13 @@ $(document).ready(function() {
             $("#sms_counter").css("color", "black");
         }
     });
-    $( "#transport-types" ).accordion({ collapsible: true, active:false, animate: 200 });
+    $( ".transport-types" ).accordion({ collapsible: true, active:false, animate: 200 });
     $(".insert").on("click",function(){
         var containerid = $(this).data("containerid");
         insertValueQuery( containerid );
     })
+
+    $("#tabs").tabs();
 });
 [% IF add_form or copy_form %]
 	
@@ -136,8 +138,8 @@ $(document).ready(function() {
 		}
 		return true;
 		}
-        function insertValueQuery(mtt_id) {
-            var fieldset = $("#" + mtt_id);
+        function insertValueQuery(containerid) {
+            var fieldset = $("#" + containerid);
             var myQuery = $(fieldset).find('textarea[name="content"]');
             var myListBox = $(fieldset).find('select[name="SQLfieldname"]');
 
@@ -374,8 +376,28 @@ $(document).ready(function() {
             </li>
         </ol>
     </fieldset>
-        <div id="transport-types" style="clear:both">
-        [% FOREACH letter IN letters %]
+        [% IF Koha.Preference('TranslateNotices') %]
+        <div style="clear:both"></div>
+            <div id="tabs">
+                <ul>
+                    <li><a href="#lang_default">Default</a></li>
+                    [% FOR language IN languages %]
+                        [% FOR sublanguage IN language.sublanguages_loop %]
+                            [% IF language.plural %]
+                                <li><a href="#lang_[% sublanguage.rfc4646_subtag %]">[% sublanguage.native_description %] [% sublanguage.region_description %] ([% sublanguage.rfc4646_subtag %])</a></li>
+                            [% ELSE %]
+                                <li><a href="#lang_[% sublanguage.rfc4646_subtag %]">[% sublanguage.native_description %] ([% sublanguage.rfc4646_subtag %])</a></li>
+                            [% END %]
+                        [% END %]
+                    [% END %]
+                </ul>
+        [% END %]
+
+        [% FOREACH lang IN letters.keys %]
+            <div id="lang_[% lang %]">
+        <div class="transport-types" style="clear:both">
+        [% FOR mtt IN letters.$lang.templates.keys.sort %]
+            [% SET letter = letters.$lang.templates.$mtt %]
             <h3>
                 [% SWITCH letter.message_transport_type %]
                 [% CASE 'email' %]
@@ -393,17 +415,18 @@ $(document).ready(function() {
                 [% END %]
             </h3>
             [% IF letter.message_transport_type == "sms" and not Koha.Preference("SMSSendDriver") %]
-              <fieldset class="rows mtt" id="[% letter.message_transport_type %]" disabled="disabled">
+              <fieldset class="rows mtt" id="[% letter.message_transport_type %]_[% lang %]" disabled="disabled">
                 <div class="dialog message">You should enable the SMSSendDriver preference to use the SMS templates.</div>
             [% ELSIF letter.message_transport_type == "phone" and not Koha.Preference("TalkingTechItivaPhoneNotification") %]
-              <fieldset class="rows mtt" id="[% letter.message_transport_type %]" disabled="disabled">
+              <fieldset class="rows mtt" id="[% letter.message_transport_type %]_[% lang %]" disabled="disabled">
                 <div class="dialog message">You should enable the TalkingTechItivaPhoneNotification preference to use the phone templates.</div>
             [% ELSE %]
-              <fieldset class="rows mtt" id="[% letter.message_transport_type %]">
+              <fieldset class="rows mtt" id="[% letter.message_transport_type %]_[% lang %]">
             [% END %]
               <ol>
                 <li>
                   <input type="hidden" name="message_transport_type" value="[% letter.message_transport_type %]" />
+                  <input type="hidden" name="lang" value="[% lang %]" />
                   <label for="is_html_[% letter.message_transport_type %]">HTML message:</label>
                   [% IF letter.is_html %]
                     <input type="checkbox" name="is_html_[% letter.message_transport_type %]" id="is_html_[% letter.message_transport_type %]" value="1" checked="checked" />
@@ -429,7 +452,7 @@ $(document).ready(function() {
                         </select>
                       </td>
                         <td class="actions">
-                            <button type="button" data-containerid="[% letter.message_transport_type %]" class="btn btn-default btn-sm insert">Insert <i class="fa fa-long-arrow-right"></i></button>
+                            <button type="button" data-containerid="[% letter.message_transport_type %]_[% lang %]" class="btn btn-default btn-sm insert">Insert <i class="fa fa-long-arrow-right"></i></button>
                         </td>
                       <td><textarea name="content" id="content_[% letter.message_transport_type %]" cols="80" rows="15">[% letter.content %]</textarea></td>
                     </tr>
@@ -437,8 +460,13 @@ $(document).ready(function() {
                 </li>
               </ol>
             </fieldset>
-        [% END %]
+            [% END %]
+            </div>
         </div> <!-- / #transport-types -->
+        [% END %]
+        [% IF Koha.Preference('TranslateNotices') %]
+        </div>
+        [% END %]
 
         [% IF code.search('DGST') %] <span class="overdue">Warning, this is a template for a Digest, as such, any references to branch data ( e.g. branches.branchname ) will refer to the borrower's home branch.</span> [% END %]
         <fieldset class="action"><input type="submit" id="submit_form" value="Submit" class="button" /> <a class="cancel" href="/cgi-bin/koha/tools/letter.pl">Cancel</a></fieldset>

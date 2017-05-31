@@ -14332,6 +14332,376 @@ if( CheckVersion( $DBversion ) ) {
     print "Upgrade to $DBversion done (Bug 18427 - Add a primary key to serialitems)\n";
 }
 
+$DBversion = '16.12.00.027';
+if( CheckVersion( $DBversion ) ) {
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS club_templates (
+          id int(11) NOT NULL AUTO_INCREMENT,
+          `name` tinytext NOT NULL,
+          description text,
+          is_enrollable_from_opac tinyint(1) NOT NULL DEFAULT '0',
+          is_email_required tinyint(1) NOT NULL DEFAULT '0',
+          branchcode varchar(10) NULL DEFAULT NULL,
+          date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          date_updated timestamp NULL DEFAULT NULL,
+          is_deletable tinyint(1) NOT NULL DEFAULT '1',
+          PRIMARY KEY (id),
+          KEY ct_branchcode (branchcode),
+          CONSTRAINT `club_templates_ibfk_1` FOREIGN KEY (branchcode) REFERENCES `branches` (branchcode) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS clubs (
+          id int(11) NOT NULL AUTO_INCREMENT,
+          club_template_id int(11) NOT NULL,
+          `name` tinytext NOT NULL,
+          description text,
+          date_start date DEFAULT NULL,
+          date_end date DEFAULT NULL,
+          branchcode varchar(10) NULL DEFAULT NULL,
+          date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          date_updated timestamp NULL DEFAULT NULL,
+          PRIMARY KEY (id),
+          KEY club_template_id (club_template_id),
+          KEY branchcode (branchcode),
+          CONSTRAINT clubs_ibfk_1 FOREIGN KEY (club_template_id) REFERENCES club_templates (id) ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT clubs_ibfk_2 FOREIGN KEY (branchcode) REFERENCES branches (branchcode)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS club_enrollments (
+          id int(11) NOT NULL AUTO_INCREMENT,
+          club_id int(11) NOT NULL,
+          borrowernumber int(11) NOT NULL,
+          date_enrolled timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          date_canceled timestamp NULL DEFAULT NULL,
+          date_created timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+          date_updated timestamp NULL DEFAULT NULL,
+          branchcode varchar(10) NULL DEFAULT NULL,
+          PRIMARY KEY (id),
+          KEY club_id (club_id),
+          KEY borrowernumber (borrowernumber),
+          KEY branchcode (branchcode),
+          CONSTRAINT club_enrollments_ibfk_1 FOREIGN KEY (club_id) REFERENCES clubs (id) ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT club_enrollments_ibfk_2 FOREIGN KEY (borrowernumber) REFERENCES borrowers (borrowernumber) ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT club_enrollments_ibfk_3 FOREIGN KEY (branchcode) REFERENCES branches (branchcode) ON DELETE SET NULL ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS club_template_enrollment_fields (
+          id int(11) NOT NULL AUTO_INCREMENT,
+          club_template_id int(11) NOT NULL,
+          `name` tinytext NOT NULL,
+          description text,
+          authorised_value_category varchar(16) DEFAULT NULL,
+          PRIMARY KEY (id),
+          KEY club_template_id (club_template_id),
+          CONSTRAINT club_template_enrollment_fields_ibfk_1 FOREIGN KEY (club_template_id) REFERENCES club_templates (id) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS club_enrollment_fields (
+          id int(11) NOT NULL AUTO_INCREMENT,
+          club_enrollment_id int(11) NOT NULL,
+          club_template_enrollment_field_id int(11) NOT NULL,
+          `value` text NOT NULL,
+          PRIMARY KEY (id),
+          KEY club_enrollment_id (club_enrollment_id),
+          KEY club_template_enrollment_field_id (club_template_enrollment_field_id),
+          CONSTRAINT club_enrollment_fields_ibfk_1 FOREIGN KEY (club_enrollment_id) REFERENCES club_enrollments (id) ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT club_enrollment_fields_ibfk_2 FOREIGN KEY (club_template_enrollment_field_id) REFERENCES club_template_enrollment_fields (id) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS club_template_fields (
+          id int(11) NOT NULL AUTO_INCREMENT,
+          club_template_id int(11) NOT NULL,
+          `name` tinytext NOT NULL,
+          description text,
+          authorised_value_category varchar(16) DEFAULT NULL,
+          PRIMARY KEY (id),
+          KEY club_template_id (club_template_id),
+          CONSTRAINT club_template_fields_ibfk_1 FOREIGN KEY (club_template_id) REFERENCES club_templates (id) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+
+    $dbh->do(q{
+        CREATE TABLE IF NOT EXISTS club_fields (
+          id int(11) NOT NULL AUTO_INCREMENT,
+          club_template_field_id int(11) NOT NULL,
+          club_id int(11) NOT NULL,
+          `value` text,
+          PRIMARY KEY (id),
+          KEY club_template_field_id (club_template_field_id),
+          KEY club_id (club_id),
+          CONSTRAINT club_fields_ibfk_3 FOREIGN KEY (club_template_field_id) REFERENCES club_template_fields (id) ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT club_fields_ibfk_4 FOREIGN KEY (club_id) REFERENCES clubs (id) ON DELETE CASCADE ON UPDATE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    });
+
+    $dbh->do(q{
+        INSERT IGNORE INTO userflags (bit, flag, flagdesc, defaulton) VALUES (21, 'clubs', 'Patron clubs', '0');
+    });
+
+    $dbh->do(q{
+        INSERT IGNORE INTO permissions (module_bit, code, description) VALUES
+           (21, 'edit_templates', 'Create and update club templates'),
+           (21, 'edit_clubs', 'Create and update clubs'),
+           (21, 'enroll', 'Enroll patrons in clubs')
+        ;
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 12461 - Add patron clubs feature)\n";
+}
+
+$DBversion = '16.12.00.028';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        UPDATE systempreferences  SET options = 'us|de|fr' WHERE variable = 'AddressFormat';
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18110 - Adds FR to the syspref AddressFormat)\n";
+}
+
+$DBversion = '16.12.00.029';
+if( CheckVersion( $DBversion ) ) {
+    unless( column_exists( 'issues', 'note' ) ) {
+        $dbh->do(q|ALTER TABLE issues ADD note mediumtext default NULL AFTER onsite_checkout|);
+    }
+    unless( column_exists( 'issues', 'notedate' ) ) {
+        $dbh->do(q|ALTER TABLE issues ADD notedate datetime default NULL AFTER note|);
+    }
+    unless( column_exists( 'old_issues', 'note' ) ) {
+        $dbh->do(q|ALTER TABLE old_issues ADD note mediumtext default NULL AFTER onsite_checkout|);
+    }
+    unless( column_exists( 'old_issues', 'notedate' ) ) {
+        $dbh->do(q|ALTER TABLE old_issues ADD notedate datetime default NULL AFTER note|);
+    }
+
+    $dbh->do(q|
+        INSERT IGNORE INTO letter (`module`, `code`, `branchcode`, `name`, `is_html`, `title`, `content`, `message_transport_type`)
+        VALUES ('circulation', 'PATRON_NOTE', '', 'Patron note on item', '0', 'Patron issue note', '<<borrowers.firstname>> <<borrowers.surname>> has added a note to the item <<biblio.item>> - <<biblio.author>> (<<biblio.biblionumber>>).','email');
+    |);
+
+    $dbh->do(q|
+        INSERT IGNORE INTO systempreferences (`variable`, `value`, `options`, `explanation`,`type`)
+        VALUES ('AllowCheckoutNotes', '0', NULL, 'Allow patrons to submit notes about checked out items.','YesNo');
+    |);
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 14224: Add column issues.note and issues.notedate)\n";
+}
+
+$DBversion = '16.12.00.030';
+if( CheckVersion( $DBversion ) ) {
+    unless( column_exists( 'issuingrules', 'no_auto_renewal_after_hard_limit' ) ) {
+        $dbh->do(q{
+            ALTER TABLE issuingrules ADD COLUMN no_auto_renewal_after_hard_limit DATE DEFAULT NULL AFTER no_auto_renewal_after;
+        });
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 16344 - Add a circ rule to limit the auto renewals given a specific date)\n";
+}
+
+$DBversion = '16.12.00.031';
+if( CheckVersion( $DBversion ) ) {
+    if ( !index_exists( 'biblioitems', 'timestamp' ) ) {
+        $dbh->do("ALTER TABLE biblioitems ADD KEY `timestamp` (`timestamp`);");
+    }
+    if ( !index_exists( 'deletedbiblioitems', 'timestamp' ) ) {
+        $dbh->do("ALTER TABLE deletedbiblioitems ADD KEY `timestamp` (`timestamp`);");
+    }
+    if ( !index_exists( 'items', 'timestamp' ) ) {
+        $dbh->do("ALTER TABLE items ADD KEY `timestamp` (`timestamp`);");
+    }
+    if ( !index_exists( 'deleteditems', 'timestamp' ) ) {
+        $dbh->do("ALTER TABLE deleteditems ADD KEY `timestamp` (`timestamp`);");
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 15108: OAI-PMH provider improvements)\n";
+}
+
+$DBversion = '16.12.00.032';
+if( CheckVersion( $DBversion ) ) {
+    require Koha::Calendar;
+    require Koha::Holds;
+
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) 
+        VALUES ('ExcludeHolidaysFromMaxPickUpDelay', '0', 'If ON, reserves max pickup delay takes into account the closed days.', NULL, 'Integer');
+    });
+
+    my $waiting_holds = Koha::Holds->search({ found => 'W', priority => 0 });
+    my $max_pickup_delay = C4::Context->preference("ReservesMaxPickUpDelay");
+    while ( my $hold = $waiting_holds->next ) {
+
+        my $requested_expiration;
+        if ($hold->expirationdate) {
+            $requested_expiration = dt_from_string($hold->expirationdate);
+        }
+
+        my $calendar = Koha::Calendar->new( branchcode => $hold->branchcode );
+        my $expirationdate = dt_from_string();
+        $expirationdate->add(days => $max_pickup_delay);
+
+        if ( C4::Context->preference("ExcludeHolidaysFromMaxPickUpDelay") ) {
+            $expirationdate = $calendar->days_forward( dt_from_string(), $max_pickup_delay );
+        }
+
+        my $cmp = $requested_expiration ? DateTime->compare($requested_expiration, $expirationdate) : 0;
+        $hold->expirationdate($cmp == -1 ? $requested_expiration->ymd : $expirationdate->ymd)->store;
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 12063 - Update reserves.expirationdate)\n";
+}
+
+$DBversion = '16.12.00.033';
+if( CheckVersion( $DBversion ) ) {
+
+    if( !column_exists( 'letter', 'lang' ) ) {
+        $dbh->do( "ALTER TABLE letter ADD COLUMN lang VARCHAR(25) NOT NULL DEFAULT 'default' AFTER message_transport_type" );
+    }
+
+    if( !column_exists( 'borrowers', 'lang' ) ) {
+        $dbh->do( "ALTER TABLE borrowers ADD COLUMN lang VARCHAR(25) NOT NULL DEFAULT 'default' AFTER lastseen" );
+        $dbh->do( "ALTER TABLE deletedborrowers ADD COLUMN lang VARCHAR(25) NOT NULL DEFAULT 'default' AFTER lastseen" );
+    }
+
+    # Add test on existene of this key
+    $dbh->do( "ALTER TABLE message_transports DROP FOREIGN KEY message_transports_ibfk_3 ");
+    $dbh->do( "ALTER TABLE letter DROP PRIMARY KEY ");
+    $dbh->do( "ALTER TABLE letter ADD PRIMARY KEY (`module`, `code`, `branchcode`, `message_transport_type`, `lang`) ");
+
+    $dbh->do( "INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('TranslateNotices',  '0',  NULL,  'Allow notices to be translated',  'YesNo') ");
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17762 - Add columns letter.lang and borrowers.lang to allow translation of notices)\n";
+}
+
+$DBversion = '16.12.00.034';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` )
+        VALUES ('OPACFineNoRenewalsBlockAutoRenew','0','','Block/Allow auto renewals if the patron owe more than OPACFineNoRenewals','YesNo')
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 15582 - Ability to block auto renewals if the OPACFineNoRenewals amount is reached)\n";
+}
+
+$DBversion = '16.12.00.035';
+if( CheckVersion( $DBversion ) ) {
+    if( !column_exists( 'issues', 'auto_renew_error' ) ) {
+        $dbh->do(q{
+           ALTER TABLE issues ADD COLUMN auto_renew_error VARCHAR(32) DEFAULT NULL AFTER auto_renew;
+        });
+    }
+
+    if( !column_exists( 'old_issues', 'auto_renew_error' ) ) {
+        $dbh->do(q{
+            ALTER TABLE old_issues ADD COLUMN auto_renew_error VARCHAR(32) DEFAULT NULL AFTER auto_renew;
+        });
+    }
+
+    $dbh->do(q{
+        INSERT INTO letter (module, code, name, title, content, message_transport_type) VALUES ('circulation', 'AUTO_RENEWALS', 'notification on auto renewing', 'Auto renewals',
+"Dear [% borrower.firstname %] [% borrower.surname %],
+[% IF checkout.auto_renew_error %]
+The following item [% biblio.title %] has not been correctly renewed
+[% IF checkout.auto_renew_error == 'too_many' %]
+You have reach the maximum of checkouts possible.
+[% ELSIF checkout.auto_renew_error == 'on_reserve' %]
+This item is on hold for another patron.
+[% ELSIF checkout.auto_renew_error == 'restriction' %]
+You are currently restricted.
+[% ELSIF checkout.auto_renew_error == 'overdue' %]
+You have overdues.
+[% ELSIF checkout.auto_renew_error == 'auto_too_late' %]
+It\'s too late to renew this checkout.
+[% ELSIF checkout.auto_renew_error == 'auto_too_much_oweing' %]
+You have too much unpaid fines.
+[% END %]
+[% ELSE %]
+The following item [% biblio.title %] has correctly been renewed and is now due [% checkout.date_due %]
+[% END %]", 'email');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 15705 - Notify the user on auto renewing)\n";
+}
+
+$DBversion = '16.12.00.036';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (`variable`, `value`, `options`, `explanation`, `type`)
+        VALUES ('NumSavedReports', '20', NULL, 'By default, show this number of saved reports.', 'Integer');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17465 - Add a System Preference to control number of Saved Reports displayed)\n";
+}
+
+$DBversion = '16.12.00.037';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do( q|
+        INSERT IGNORE INTO systempreferences (`variable`, `value`, `options`, `explanation`, `type`)
+        VALUES ('FailedLoginAttempts','','','Number of login attempts before lockout the patron account','Integer');
+    |);
+
+    unless( column_exists( 'borrowers', 'login_attempts' ) ) {
+        $dbh->do(q|
+            ALTER TABLE borrowers ADD COLUMN login_attempts INT(4) DEFAULT 0 AFTER lastseen
+        |);
+        $dbh->do(q|
+            ALTER TABLE deletedborrowers ADD COLUMN login_attempts INT(4) DEFAULT 0 AFTER lastseen
+        |);
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18314 - Add FailedLoginAttempts and borrowers.login_attempts)\n";
+}
+
+$DBversion = '16.12.00.038';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('ExportRemoveFields','',NULL,'List of fields for non export in circulation.pl (separated by a space)','Free');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18663 - Missing db update for ExportRemoveFields)\n";
+}
+
+$DBversion = '16.12.00.039';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('TalkingTechItivaPhoneNotification','0',NULL,'If ON, enables Talking Tech I-tiva phone notifications','YesNo');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18600 - Missing db update for TalkingTechItivaPhoneNotification)\n";
+}
+
+$DBversion = '17.05.00.000';
+if( CheckVersion( $DBversion ) ) {
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Koha 17.05)\n";
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.

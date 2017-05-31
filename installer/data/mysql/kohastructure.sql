@@ -200,6 +200,7 @@ CREATE TABLE `biblioitems` ( -- information related to bibliographic records in 
   KEY `isbn` (`isbn`(255)),
   KEY `issn` (`issn`(255)),
   KEY `publishercode` (`publishercode`),
+  KEY `timestamp` (`timestamp`),
   CONSTRAINT `biblioitems_ibfk_1` FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -553,7 +554,8 @@ CREATE TABLE `deletedbiblioitems` ( -- information about bibliographic records t
   KEY `bibnoidx` (`biblionumber`),
   KEY `itemtype_idx` (`itemtype`),
   KEY `isbn` (`isbn`(255)),
-  KEY `publishercode` (`publishercode`)
+  KEY `publishercode` (`publishercode`),
+  KEY `timestamp` (`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -632,6 +634,8 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron if this item has previously been checked out to this patron if 'yes', not if 'no', defer to category setting if 'inherit'.
   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
   `lastseen` datetime default NULL, -- last time a patron has been seed (connected at the OPAC or staff interface)
+  `lang` varchar(25) NOT NULL default 'default', -- lang to use to send notices to this patron
+  `login_attempts` int(4) default 0, -- number of failed login attemps
   `overdrive_auth_token` text default NULL, -- persist OverDrive auth token
   KEY borrowernumber (borrowernumber),
   KEY `cardnumber` (`cardnumber`),
@@ -678,7 +682,7 @@ CREATE TABLE `deleteditems` (
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- date and time this item was last altered
   `location` varchar(80) default NULL, -- authorized value for the shelving location for this item (MARC21 952$c)
   `permanent_location` varchar(80) default NULL, -- linked to the CART and PROC temporary locations feature, stores the permanent shelving location
-  `onloan` date default NULL, -- defines if item is checked out (NULL for not checked out, and checkout date for checked out)
+  `onloan` date default NULL, -- defines if item is checked out (NULL for not checked out, and due date for checked out)
   `cn_source` varchar(10) default NULL, -- classification source used on this item (MARC21 952$2)
   `cn_sort` varchar(255) default NULL, -- normalized form of the call number (MARC21 952$o) used for sorting
   `ccode` varchar(10) default NULL, -- authorized value for the collection code associated with this item (MARC21 952$8)
@@ -697,7 +701,8 @@ CREATE TABLE `deleteditems` (
   KEY `delitembibnoidx` (`biblionumber`),
   KEY `delhomebranch` (`homebranch`),
   KEY `delholdingbranch` (`holdingbranch`),
-  KEY `itype_idx` (`itype`)
+  KEY `itype_idx` (`itype`),
+  KEY `timestamp` (`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -873,6 +878,7 @@ CREATE TABLE `issuingrules` ( -- circulation and fine rules
   `norenewalbefore` int(4) default NULL, -- no renewal allowed until X days or hours before due date.
   `auto_renew` BOOLEAN default FALSE, -- automatic renewal
   `no_auto_renewal_after` int(4) default NULL, -- no auto renewal allowed after X days or hours after the issue date
+  `no_auto_renewal_after_hard_limit` date default NULL, -- no auto renewal allowed after a given date
   `reservesallowed` smallint(6) NOT NULL default "0", -- how many holds are allowed
   `holds_per_record` SMALLINT(6) NOT NULL DEFAULT 1, -- How many holds a patron can have on a given bib
   `branchcode` varchar(10) NOT NULL default '', -- the branch this rule is for (branches.branchcode)
@@ -902,7 +908,7 @@ CREATE TABLE `refund_lost_item_fee_rules` ( -- refund lost item fee rules tbale
 --
 
 DROP TABLE IF EXISTS `items`;
-CREATE TABLE `items` ( -- holdings/item information 
+CREATE TABLE `items` ( -- holdings/item information
   `itemnumber` int(11) NOT NULL auto_increment, -- primary key and unique identifier added by Koha
   `biblionumber` int(11) NOT NULL default 0, -- foreign key from biblio table used to link this item to the right bib record
   `biblioitemnumber` int(11) NOT NULL default 0, -- foreign key from the biblioitems table to link to item to additional information
@@ -937,7 +943,7 @@ CREATE TABLE `items` ( -- holdings/item information
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- date and time this item was last altered
   `location` varchar(80) default NULL, -- authorized value for the shelving location for this item (MARC21 952$c)
   `permanent_location` varchar(80) default NULL, -- linked to the CART and PROC temporary locations feature, stores the permanent shelving location
-  `onloan` date default NULL, -- defines if item is checked out (NULL for not checked out, and checkout date for checked out)
+  `onloan` date default NULL, -- defines if item is checked out (NULL for not checked out, and due date for checked out)
   `cn_source` varchar(10) default NULL, -- classification source used on this item (MARC21 952$2)
   `cn_sort` varchar(255) default NULL,  -- normalized form of the call number (MARC21 952$o) used for sorting
   `ccode` varchar(10) default NULL, -- authorized value for the collection code associated with this item (MARC21 952$8)
@@ -962,6 +968,7 @@ CREATE TABLE `items` ( -- holdings/item information
   KEY `itype_idx` (`itype`),
   KEY `booksellerid` (`booksellerid`(32)),
   KEY `withdrawn_permanent` (`withdrawn_permanent`),
+  KEY `timestamp` (`timestamp`),
   CONSTRAINT `items_ibfk_1` FOREIGN KEY (`biblioitemnumber`) REFERENCES `biblioitems` (`biblioitemnumber`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `items_ibfk_2` FOREIGN KEY (`homebranch`) REFERENCES `branches` (`branchcode`) ON UPDATE CASCADE,
   CONSTRAINT `items_ibfk_3` FOREIGN KEY (`holdingbranch`) REFERENCES `branches` (`branchcode`) ON UPDATE CASCADE,
@@ -1669,6 +1676,8 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron if this item has previously been checked out to this patron if 'yes', not if 'no', defer to category setting if 'inherit'.
   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
   `lastseen` datetime default NULL, -- last time a patron has been seed (connected at the OPAC or staff interface)
+  `lang` varchar(25) NOT NULL default 'default', -- lang to use to send notices to this patron
+  `login_attempts` int(4) default 0, -- number of failed login attemps
   `overdrive_auth_token` text default NULL, -- persist OverDrive auth token
   UNIQUE KEY `cardnumber` (`cardnumber`),
   PRIMARY KEY `borrowernumber` (`borrowernumber`),
@@ -1756,9 +1765,12 @@ CREATE TABLE `issues` ( -- information related to check outs or issues
   `lastreneweddate` datetime default NULL, -- date the item was last renewed
   `renewals` tinyint(4) default NULL, -- lists the number of times the item was renewed
   `auto_renew` BOOLEAN default FALSE, -- automatic renewal
+  `auto_renew_error` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL, -- automatic renewal error
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- the date and time this record was last touched
   `issuedate` datetime default NULL, -- date the item was checked out or issued
   `onsite_checkout` int(1) NOT NULL default 0, -- in house use flag
+  `note` mediumtext default NULL, -- issue note text
+  `notedate` datetime default NULL, -- datetime of issue note (yyyy-mm-dd hh:mm::ss)
   PRIMARY KEY (`issue_id`),
   UNIQUE KEY `itemnumber` (`itemnumber`),
   KEY `issuesborridx` (`borrowernumber`),
@@ -1784,9 +1796,12 @@ CREATE TABLE `old_issues` ( -- lists items that were checked out and have been r
   `lastreneweddate` datetime default NULL, -- date the item was last renewed
   `renewals` tinyint(4) default NULL, -- lists the number of times the item was renewed
   `auto_renew` BOOLEAN default FALSE, -- automatic renewal
+  `auto_renew_error` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL, -- automatic renewal error
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- the date and time this record was last touched
   `issuedate` datetime default NULL, -- date the item was checked out or issued
   `onsite_checkout` int(1) NOT NULL default 0, -- in house use flag
+  `note` mediumtext default NULL, -- issue note text
+  `notedate` datetime default NULL, -- datetime of issue note (yyyy-mm-dd hh:mm::ss)
   PRIMARY KEY (`issue_id`),
   KEY `old_issuesborridx` (`borrowernumber`),
   KEY `old_issuesitemidx` (`itemnumber`),
@@ -2250,7 +2265,7 @@ CREATE TABLE `userflags` (
 --
 
 DROP TABLE IF EXISTS `virtualshelves`;
-CREATE TABLE `virtualshelves` ( -- information about lists (or virtual shelves) 
+CREATE TABLE `virtualshelves` ( -- information about lists (or virtual shelves)
   `shelfnumber` int(11) NOT NULL auto_increment, -- unique identifier assigned by Koha
   `shelfname` varchar(255) default NULL, -- name of the list
   `owner` int default NULL, -- foreign key linking to the borrowers table (using borrowernumber) for the creator of this list (changed from varchar(80) to int)
@@ -2545,7 +2560,8 @@ CREATE TABLE `letter` ( -- table for all notice templates in Koha
   `title` varchar(200) NOT NULL default '', -- subject line of the notice
   `content` text, -- body text for the notice or slip
   `message_transport_type` varchar(20) NOT NULL DEFAULT 'email', -- transport type for this notice
-  PRIMARY KEY  (`module`,`code`, `branchcode`, `message_transport_type`),
+  `lang` varchar(25) NOT NULL DEFAULT 'default', -- lang of the notice
+  PRIMARY KEY  (`module`,`code`, `branchcode`, `message_transport_type`, `lang`),
   CONSTRAINT `message_transport_type_fk` FOREIGN KEY (`message_transport_type`)
   REFERENCES `message_transport_types` (`message_transport_type`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -2594,8 +2610,7 @@ CREATE TABLE `message_transports` (
   KEY `message_transport_type` (`message_transport_type`),
   KEY `letter_module` (`letter_module`,`letter_code`),
   CONSTRAINT `message_transports_ibfk_1` FOREIGN KEY (`message_attribute_id`) REFERENCES `message_attributes` (`message_attribute_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `message_transports_ibfk_2` FOREIGN KEY (`message_transport_type`) REFERENCES `message_transport_types` (`message_transport_type`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `message_transports_ibfk_3` FOREIGN KEY (`letter_module`, `letter_code`, `branchcode`) REFERENCES `letter` (`module`, `code`, `branchcode`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `message_transports_ibfk_2` FOREIGN KEY (`message_transport_type`) REFERENCES `message_transport_types` (`message_transport_type`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -3995,6 +4010,130 @@ CREATE TABLE deletedbiblio_metadata (
     PRIMARY KEY(id),
     UNIQUE KEY `deletedbiblio_metadata_uniq_key` (`biblionumber`,`format`,`marcflavour`),
     CONSTRAINT `deletedrecord_metadata_fk_1` FOREIGN KEY (biblionumber) REFERENCES deletedbiblio (biblionumber) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table 'club_templates'
+--
+
+CREATE TABLE IF NOT EXISTS club_templates (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  `name` tinytext NOT NULL,
+  description text,
+  is_enrollable_from_opac tinyint(1) NOT NULL DEFAULT '0',
+  is_email_required tinyint(1) NOT NULL DEFAULT '0',
+  branchcode varchar(10) NULL DEFAULT NULL,
+  date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  date_updated timestamp NULL DEFAULT NULL,
+  is_deletable tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (id),
+  KEY ct_branchcode (branchcode),
+  CONSTRAINT `club_templates_ibfk_1` FOREIGN KEY (`branchcode`) REFERENCES `branches` (`branchcode`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table 'clubs'
+--
+
+CREATE TABLE IF NOT EXISTS clubs (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  club_template_id int(11) NOT NULL,
+  `name` tinytext NOT NULL,
+  description text,
+  date_start date DEFAULT NULL,
+  date_end date DEFAULT NULL,
+  branchcode varchar(10) NULL DEFAULT NULL,
+  date_created timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  date_updated timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY club_template_id (club_template_id),
+  KEY branchcode (branchcode),
+  CONSTRAINT clubs_ibfk_1 FOREIGN KEY (club_template_id) REFERENCES club_templates (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT clubs_ibfk_2 FOREIGN KEY (branchcode) REFERENCES branches (branchcode)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table 'club_enrollments'
+--
+
+CREATE TABLE IF NOT EXISTS club_enrollments (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  club_id int(11) NOT NULL,
+  borrowernumber int(11) NOT NULL,
+  date_enrolled timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  date_canceled timestamp NULL DEFAULT NULL,
+  date_created timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  date_updated timestamp NULL DEFAULT NULL,
+  branchcode varchar(10) NULL DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY club_id (club_id),
+  KEY borrowernumber (borrowernumber),
+  KEY branchcode (branchcode),
+  CONSTRAINT club_enrollments_ibfk_1 FOREIGN KEY (club_id) REFERENCES clubs (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT club_enrollments_ibfk_2 FOREIGN KEY (borrowernumber) REFERENCES borrowers (borrowernumber) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT club_enrollments_ibfk_3 FOREIGN KEY (branchcode) REFERENCES branches (branchcode) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table 'club_template_enrollment_fields'
+--
+
+CREATE TABLE IF NOT EXISTS club_template_enrollment_fields (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  club_template_id int(11) NOT NULL,
+  `name` tinytext NOT NULL,
+  description text,
+  authorised_value_category varchar(16) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY club_template_id (club_template_id),
+  CONSTRAINT club_template_enrollment_fields_ibfk_1 FOREIGN KEY (club_template_id) REFERENCES club_templates (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table 'club_enrollment_fields'
+--
+
+CREATE TABLE IF NOT EXISTS club_enrollment_fields (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  club_enrollment_id int(11) NOT NULL,
+  club_template_enrollment_field_id int(11) NOT NULL,
+  `value` text NOT NULL,
+  PRIMARY KEY (id),
+  KEY club_enrollment_id (club_enrollment_id),
+  KEY club_template_enrollment_field_id (club_template_enrollment_field_id),
+  CONSTRAINT club_enrollment_fields_ibfk_1 FOREIGN KEY (club_enrollment_id) REFERENCES club_enrollments (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT club_enrollment_fields_ibfk_2 FOREIGN KEY (club_template_enrollment_field_id) REFERENCES club_template_enrollment_fields (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table 'club_template_fields'
+--
+
+CREATE TABLE IF NOT EXISTS club_template_fields (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  club_template_id int(11) NOT NULL,
+  `name` tinytext NOT NULL,
+  description text,
+  authorised_value_category varchar(16) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY club_template_id (club_template_id),
+  CONSTRAINT club_template_fields_ibfk_1 FOREIGN KEY (club_template_id) REFERENCES club_templates (id) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table 'club_fields'
+--
+
+CREATE TABLE IF NOT EXISTS club_fields (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  club_template_field_id int(11) NOT NULL,
+  club_id int(11) NOT NULL,
+  `value` text,
+  PRIMARY KEY (id),
+  KEY club_template_field_id (club_template_field_id),
+  KEY club_id (club_id),
+  CONSTRAINT club_fields_ibfk_3 FOREIGN KEY (club_template_field_id) REFERENCES club_template_fields (id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT club_fields_ibfk_4 FOREIGN KEY (club_id) REFERENCES clubs (id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

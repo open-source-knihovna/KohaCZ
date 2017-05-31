@@ -4,6 +4,9 @@
 [% USE ItemTypes %]
 [% USE Price %]
 
+[% SET borrower_club_enrollments =  borrower.get_club_enrollments(1) %]
+[% SET borrower_enrollable_clubs = borrower.get_enrollable_clubs(1,1) %]
+
 [% INCLUDE 'doc-head-open.inc' %]
 <title>[% IF ( LibraryNameTitle ) %][% LibraryNameTitle %][% ELSE %]Koha online[% END %] catalog &rsaquo; Your library home</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -11,6 +14,12 @@
 </head>
 [% INCLUDE 'bodytag.inc' bodyid='opac-user' bodyclass='scrollto' %]
 [% INCLUDE 'masthead.inc' %]
+
+[% IF Koha.Preference('AmazonAssocTag') %]
+    [% AmazonAssocTag = '?tag=' _ Koha.Preference('AmazonAssocTag') %]
+[% ELSE %]
+    [% AmazonAssocTag = '' %]
+[% END %]
 
 <div class="main">
     <ul class="breadcrumb">
@@ -82,7 +91,7 @@ Using this account is not recommended because some parts of Koha will not functi
                                     [% ELSIF error == 'too_soon' %]
                                         It is too soon after the checkout date for this item to be renewed.
                                     [% ELSIF error == 'on_reserve' %]
-                                        This item is on hold for another patron.
+                                        This item is on hold for another borrower.
                                     [% END %]
                                 [% END %]
                             </span>
@@ -120,6 +129,8 @@ Using this account is not recommended because some parts of Koha will not functi
                         </div>
                     [% END # / IF patron_flagged %]
 
+                    <div class="alert alert-info" id="notesaved" style="display:none;"></div>
+
                     [% SET OPACMySummaryNote = Koha.Preference('OPACMySummaryNote') %]
                     [% IF OPACMySummaryNote %][% OPACMySummaryNote %][% END %]
 
@@ -133,6 +144,15 @@ Using this account is not recommended because some parts of Koha will not functi
                                 [% IF ( BORROWER_INFO.amountoverzero ) %]<li><a href="#opac-user-fines">Fines ([% amountoutstanding | $Price %])</a></li>[% END %]
                                 [% IF ( BORROWER_INFO.amountlessthanzero ) %]<li><a href="#opac-user-fines">Credits ([% amountoutstanding | $Price %])</a></li>[% END %]
                             [% END %]
+
+                            [% IF borrower_club_enrollments.count || borrower_enrollable_clubs.count %]
+                                <li>
+                                    <a id="opac-user-clubs-tab-link" href="#opac-user-clubs">
+                                        Clubs ([% borrower_club_enrollments.count || 0 %]/[% borrower_enrollable_clubs.count || 0 %])
+                                    </a>
+                                </li>
+                            [% END %]
+
                             [% IF ( RESERVES.count ) %]<li><a href="#opac-user-holds">Holds ([% RESERVES.count %])</a></li>[% END %]
                             [% IF Koha.Preference('ArticleRequests') && borrower.article_requests_current %]<li><a href="#opac-user-article-requests">Article requests ([% borrower.article_requests_current.count %])</a></li>[% END %]
                             [% IF ( OverDriveCirculation ) %]
@@ -171,6 +191,9 @@ Using this account is not recommended because some parts of Koha will not functi
                                                 [% IF ( OPACMySummaryHTML ) %]
                                                     <th class="nosort">Links</th>
                                                 [% END %]
+                                                [% IF ( Koha.Preference('AllowCheckoutNotes') ) %]
+                                                    <th class="nosort">Note</th>
+                                                [% END %]
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -180,7 +203,7 @@ Using this account is not recommended because some parts of Koha will not functi
 
                                                     [% IF ( OPACAmazonCoverImages ) %]
                                                         [% IF ( ISSUE.normalized_isbn ) %]
-                                                            <a href="http://www.amazon.com/gp/reader/[% ISSUE.normalized_isbn %]/ref=sib_dp_pt/002-7879865-0184864#reader-link" title="View on Amazon.com"><img src="https://images-na.ssl-images-amazon.com/images/P/[% ISSUE.normalized_isbn %].01.THUMBZZZ.jpg" alt="View on Amazon.com" class="item-thumbnail"/></a>
+                                                            <a href="http://www.amazon.com/gp/reader/[% ISSUE.normalized_isbn %][% AmazonAssocTag %]#reader-link" title="View on Amazon.com"><img src="https://images-na.ssl-images-amazon.com/images/P/[% ISSUE.normalized_isbn %].01.THUMBZZZ.jpg" alt="View on Amazon.com" class="item-thumbnail"/></a>
                                                         [% ELSE %]
                                                             <a href="#"><span class="no-image">No cover image available</span></a>
                                                         [% END %]
@@ -217,8 +240,8 @@ Using this account is not recommended because some parts of Koha will not functi
                                                     <a class="title" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ISSUE.biblionumber %]">[% ISSUE.title |html %] [% FOREACH subtitl IN ISSUE.subtitle %] [% subtitl.subfield %][% END %]</a>
                                                     [% IF ( ISSUE.enumchron ) %] [% ISSUE.enumchron %][% END %]
                                                 </td>
+
                                                 <td class="author">[% ISSUE.author %]</td>
-                                                </td>
                                                 [% IF ( ISSUE.overdue ) %]
                                                     <td class="date_due overdue">
                                                         <span title="[% ISSUE.date_due %]">
@@ -268,6 +291,9 @@ Using this account is not recommended because some parts of Koha will not functi
                                                         Not allowed <span class="renewals">(overdue)</span>
                                                     [% ELSIF ( ISSUE.auto_too_late ) %]
                                                         No longer renewable
+                                                    [% ELSIF ISSUE.auto_too_much_oweing %]
+                                                        Automatic renewal failed, you have unpaid fines.
+                                                        <span class="renewals">([% ISSUE.renewsleft %] of [% ISSUE.renewsallowed %] renewals remaining)</span>
                                                     [% ELSIF ( ISSUE.auto_renew || ISSUE.auto_too_soon ) %]
                                                         Automatic renewal
                                                         <span class="renewals">([% ISSUE.renewsleft %] of [% ISSUE.renewsallowed %] renewals remaining)</span>
@@ -281,7 +307,9 @@ Using this account is not recommended because some parts of Koha will not functi
                                                     <td class="fines">
                                                         <span class="tdlabel">Fines:</span>
                                                         [% IF ( ISSUE.charges ) %]
-                                                            Yes
+                                                            Yes (Item overdue or lost)
+                                                        [% ELSIF ( ISSUE.rentalfines ) %]
+                                                            Yes (Rental fees)
                                                         [% ELSE %]
                                                             No
                                                         [% END %]
@@ -289,6 +317,13 @@ Using this account is not recommended because some parts of Koha will not functi
                                                 [% END %]
                                                 [% IF ( OPACMySummaryHTML ) %]
                                                     <td class="links">[% ISSUE.MySummaryHTML %]</td>
+                                                [% END %]
+                                                [% IF ( Koha.Preference('AllowCheckoutNotes') ) %]
+                                                    <td class="note">
+                                                        <input type="text" name="note" data-issue_id="[% ISSUE.issue_id %]" data-origvalue="[% ISSUE.note %]" value="[% ISSUE.note %]" readonly>
+                                                        <a class="btn" name="js_submitnote" id="save_[% ISSUE.issue_id %]" style="display:none;">Submit note</a>
+                                                        <a class="btn" name="nonjs_submitnote" href="/cgi-bin/koha/opac-issue-note.pl?issue_id=[% ISSUE.issue_id | url %]">Edit / Create note</a>
+                                                    </td>
                                                 [% END %]
                                             </tr>
                                         [% END # /FOREACH ISSUES %]
@@ -317,6 +352,12 @@ Using this account is not recommended because some parts of Koha will not functi
                             [% END # IF issues_count %]
                         </div> <!-- / .opac-user-checkouts -->
 
+                        [% IF borrower_club_enrollments.count || borrower_enrollable_clubs.count %]
+                            <div id="opac-user-clubs">
+                                Loading...
+                            </div>
+                        [% END %]
+
                         [% IF ( OPACFinesTab ) %]
                             <!-- FINES BOX -->
                             [% IF BORROWER_INFO.amountoverfive %]
@@ -340,7 +381,7 @@ Using this account is not recommended because some parts of Koha will not functi
                                         <tbody>
                                             <tr>
                                                 <td>You currently owe fines and charges amounting to:</td>
-                                                <td><a href="/cgi-bin/koha/opac-account.pl">[% amountoutstanding %]</a></td>
+                                                <td><a href="/cgi-bin/koha/opac-account.pl">[% amountoutstanding | $Price %]</a></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -353,7 +394,7 @@ Using this account is not recommended because some parts of Koha will not functi
                                         <thead><tr><th colspan="2">Amount</th></tr></thead>
                                         <tbody>
                                             <tr>
-                                                <td>You have a credit of:</td><td><a href="/cgi-bin/koha/opac-account.pl">[% amountoutstanding %]</a></td>
+                                                <td>You have a credit of:</td><td><a href="/cgi-bin/koha/opac-account.pl">[% amountoutstanding | $Price %]</a></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -435,7 +476,7 @@ Using this account is not recommended because some parts of Koha will not functi
                                                     <td class="jacketcell">
                                                     [% IF ( OPACAmazonCoverImages ) %]
                                                         [% IF ( OVERDUE.normalized_isbn ) %]
-                                                            <a href="http://www.amazon.com/gp/reader/[% OVERDUE.normalized_isbn %]/ref=sib_dp_pt/002-7879865-0184864#reader-link" title="View on Amazon.com"><img src="https://images-na.ssl-images-amazon.com/images/P/[% OVERDUE.normalized_isbn %].01.THUMBZZZ.jpg" alt="View on Amazon.com" class="item-thumbnail" /></a>
+                                                            <a href="http://www.amazon.com/gp/reader/[% OVERDUE.normalized_isbn %][% AmazonAssocTag %]#reader-link" title="View on Amazon.com"><img src="https://images-na.ssl-images-amazon.com/images/P/[% OVERDUE.normalized_isbn %].01.THUMBZZZ.jpg" alt="View on Amazon.com" class="item-thumbnail" /></a>
                                                         [% ELSE %]
                                                             <a href="#"><span class="no-image">No cover image available</span></a>
                                                         [% END %]
@@ -540,8 +581,8 @@ Using this account is not recommended because some parts of Koha will not functi
                                     <thead>
                                         <tr>
                                             <th class="anti-the">Title</th>
-                                            <th class="psort">Placed on</th>
-                                            <th>Expires on</th>
+                                            <th class="psort title-string">Placed on</th>
+                                            <th class="title-string">Expires on</th>
                                             <th>Pick up location</th>
                                             [% IF ( showpriority ) %]
                                                 <th>Priority</th>
@@ -587,16 +628,18 @@ Using this account is not recommended because some parts of Koha will not functi
                                             <td class="expirationdate">
                                                 [% IF ! RESERVE.found %]
                                                     [% IF ( RESERVE.expirationdate ) %]
-                                                        <span>
+                                                        <span title="[% RESERVE.expirationdate %]">
                                                             <span class="tdlabel">Expiration:</span>
                                                                 [% RESERVE.expirationdate | $KohaDates %]
                                                         </span>
                                                     [% ELSE %]
-                                                        <span class="tdlabel">Expiration:</span>
-                                                        Never expires
+                                                        <span title="0000-00-00">
+                                                            <span class="tdlabel">Expiration:</span>
+                                                            Never expires
+                                                        </span>
                                                     [% END %]
                                                 [% ELSE %]
-                                                    -
+                                                    <span title="0000-00-00">-</span>
                                                 [% END %]
                                             </td>
                                             <td class="branch">
@@ -617,8 +660,8 @@ Using this account is not recommended because some parts of Koha will not functi
                                                             Item waiting at <b> [% RESERVE.branch.branchname %]</b>
                                                             [% IF ( RESERVE.waitingdate ) %]
                                                                 since [% RESERVE.waitingdate | $KohaDates %]
-                                                                [% IF RESERVE.waiting_expires_on %]
-                                                                    until [% RESERVE.waiting_expires_on | $KohaDates %]
+                                                                [% IF RESERVE.expirationdate %]
+                                                                    until [% RESERVE.expirationdate | $KohaDates %]
                                                                 [% END %]
                                                             [% END %]
                                                             <input type="hidden" name="pickup" value="[% RESERVE.branchcode %]" />
@@ -727,100 +770,106 @@ Using this account is not recommended because some parts of Koha will not functi
                         </div> <!-- / #opac-user-holds -->
                         [% END # / #RESERVES.count %]
 
-                        [% IF Koha.Preference('ArticleRequests') && borrower.article_requests_current.count %]
+                        [% IF Koha.Preference('ArticleRequests') %]
                             <div id="opac-user-article-requests">
-                                <table id="article-requests-table" class="table table-bordered table-striped">
-                                    <caption>Article requests <span class="count">([% borrower.article_requests_current.count %] total)</span></caption>
-                                    <thead>
-                                        <tr>
-                                            <th class="anti-the article-request-record-title">Record title</th>
-                                            <th class="psort article-request-created-on">Placed on</th>
-                                            <th class="anti-the article-request-title">Title</th>
-                                            <th class="article-request-author">Author</th>
-                                            <th class="article-request-volume">Volume</th>
-                                            <th class="article-request-issue">Issue</th>
-                                            <th class="article-request-date">Date</th>
-                                            <th class="article-request-pages">Pages</th>
-                                            <th class="article-request-chapters">Chapters</th>
-                                            <th class="article-request-patron-notes">Notes</th>
-                                            <th class="article-request-status">Status</th>
-                                            <th class="article-request-branchcode">Pickup library</th>
-                                            <th class="nosort article-request-cancel">&nbsp;</th>
-                                        </tr>
-                                    </thead>
+                                [% IF borrower.article_requests_current.count %]
+                                    <table id="article-requests-table" class="table table-bordered table-striped">
+                                        <caption>Article requests <span class="count">([% borrower.article_requests_current.count %] total)</span></caption>
+                                        <thead>
+                                            <tr>
+                                                <th class="anti-the article-request-record-title">Record title</th>
+                                                <th class="psort article-request-created-on">Placed on</th>
+                                                <th class="anti-the article-request-title">Title</th>
+                                                <th class="article-request-author">Author</th>
+                                                <th class="article-request-volume">Volume</th>
+                                                <th class="article-request-issue">Issue</th>
+                                                <th class="article-request-date">Date</th>
+                                                <th class="article-request-pages">Pages</th>
+                                                <th class="article-request-chapters">Chapters</th>
+                                                <th class="article-request-patron-notes">Notes</th>
+                                                <th class="article-request-status">Status</th>
+                                                <th class="article-request-branchcode">Pickup library</th>
+                                                <th class="nosort article-request-cancel">&nbsp;</th>
+                                            </tr>
+                                        </thead>
 
-                                    <tbody>
-                                    [% FOREACH ar IN borrower.article_requests_current %]
-                                            <td class="article-request-record-title">
-                                                <a class="article-request-title" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ar.biblionumber %]">
-                                                    [% ar.biblio.title %]
-                                                    [% ar.item.enumchron %]
-                                                </a>
-                                                [% ar.biblio.author %]
-                                                [% IF ar.itemnumber %] <i>(only [% ar.item.barcode %])</i>[% END %]
-                                            </td>
+                                        <tbody>
+                                        [% FOREACH ar IN borrower.article_requests_current %]
+                                                <td class="article-request-record-title">
+                                                    <a class="article-request-title" href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% ar.biblionumber %]">
+                                                        [% ar.biblio.title %]
+                                                        [% ar.item.enumchron %]
+                                                    </a>
+                                                    [% ar.biblio.author %]
+                                                    [% IF ar.itemnumber %] <i>(only [% ar.item.barcode %])</i>[% END %]
+                                                </td>
 
-                                            <td class="article-request-created_on">
-                                                [% ar.created_on | $KohaDates %]
-                                            </td>
+                                                <td class="article-request-created_on">
+                                                    [% ar.created_on | $KohaDates %]
+                                                </td>
 
-                                            <td class="article-request-title">
-                                                [% ar.title %]
-                                            </td>
+                                                <td class="article-request-title">
+                                                    [% ar.title %]
+                                                </td>
 
-                                            <td class="article-request-author">
-                                                [% ar.author %]
-                                            </td>
+                                                <td class="article-request-author">
+                                                    [% ar.author %]
+                                                </td>
 
-                                            <td class="article-request-volume">
-                                                [% ar.volume %]
-                                            </td>
+                                                <td class="article-request-volume">
+                                                    [% ar.volume %]
+                                                </td>
 
-                                            <td class="article-request-issue">
-                                                [% ar.issue %]
-                                            </td>
+                                                <td class="article-request-issue">
+                                                    [% ar.issue %]
+                                                </td>
 
-                                            <td class="article-request-date">
-                                                [% ar.date %]
-                                            </td>
+                                                <td class="article-request-date">
+                                                    [% ar.date %]
+                                                </td>
 
-                                            <td class="article-request-pages">
-                                                [% ar.pages %]
-                                            </td>
+                                                <td class="article-request-pages">
+                                                    [% ar.pages %]
+                                                </td>
 
-                                            <td class="article-request-chapters">
-                                                [% ar.chapters %]
-                                            </td>
+                                                <td class="article-request-chapters">
+                                                    [% ar.chapters %]
+                                                </td>
 
-                                            <td class="article-request-patron-notes">
-                                                [% ar.patron_notes %]
-                                            </td>
+                                                <td class="article-request-patron-notes">
+                                                    [% ar.patron_notes %]
+                                                </td>
 
-                                            <td class="article-request-status">
-                                                [% IF ar.status == 'PENDING' %]
-                                                    Pending
-                                                [% ELSIF ar.status == 'PROCESSING' %]
-                                                    Processing
-                                                [% ELSIF ar.status == 'COMPLETED' %]
-                                                    Completed
-                                                [% ELSIF ar.status == 'CANCELED' %]
-                                                    Canceled
-                                                [% END %]
-                                            </td>
+                                                <td class="article-request-status">
+                                                    [% IF ar.status == 'PENDING' %]
+                                                        Pending
+                                                    [% ELSIF ar.status == 'PROCESSING' %]
+                                                        Processing
+                                                    [% ELSIF ar.status == 'COMPLETED' %]
+                                                        Completed
+                                                    [% ELSIF ar.status == 'CANCELED' %]
+                                                        Canceled
+                                                    [% END %]
+                                                </td>
 
-                                            <td class="article-request-branchcode">
-                                                [% ar.branch.branchname %]
-                                            </td>
+                                                <td class="article-request-branchcode">
+                                                    [% ar.branch.branchname %]
+                                                </td>
 
-                                            <td class="article-request-cancel">
-                                                <span class="tdlabel">Cancel:</span>
-                                                <a class="btn btn-mini btn-danger" href="opac-article-request-cancel.pl?id=[% ar.id %]" onclick="return confirmDelete(MSG_CONFIRM_DELETE_HOLD);"><i class="icon-remove icon-white"></i> Cancel</a>
-                                                <!-- TODO: replace MSG_CONFIRM_DELETE_HOLD with correct message -->
-                                            </td>
-                                        </tr>
-                                    [% END %]
-                                </tbody>
-                            </table>
+                                                <td class="article-request-cancel">
+                                                    <span class="tdlabel">Cancel:</span>
+                                                    <a class="btn btn-mini btn-danger" href="opac-article-request-cancel.pl?id=[% ar.id %]" onclick="return confirmDelete(MSG_CONFIRM_DELETE_HOLD);"><i class="icon-remove icon-white"></i> Cancel</a>
+                                                    <!-- TODO: replace MSG_CONFIRM_DELETE_HOLD with correct message -->
+                                                </td>
+                                            </tr>
+                                        [% END %]
+                                    </tbody>
+                                </table>
+                            [% ELSE %]
+                                <table class="table table-bordered table-striped">
+                                    <tr><td>You have no article requests currently.</td></tr>
+                                </table>
+                            [% END # IF article_requests_current.count %]
                         </div> <!-- / #opac-user-article-requests -->
                     [% END %]
 
@@ -894,7 +943,96 @@ Using this account is not recommended because some parts of Koha will not functi
                 [% END %]
             [% END %]
 
+            [% IF ( Koha.Preference('AllowCheckoutNotes') ) %]
+
+                /* If JS enabled, show button, otherwise show link to redirect to a page where note can be submitted */
+                $("a[name='nonjs_submitnote']").hide();
+
+                $("input[name='note']").prop('readonly', false);
+                $("input[name='note']").keypress(function(e){
+                    /* prevent submitting of renewselected form */
+                    if(e.which == 13)
+                        e.preventDefault();
+                });
+
+                $("input[name='note']").keyup(function(e){
+                    var $btn_save = $('#save_'+$(this).data('issue_id'));
+                    var origvalue = $(this).data('origvalue');
+                    var value = $(this).val();
+
+                    if(origvalue != value) {
+                        if(origvalue != "")
+                            $btn_save.text(_("Submit changes"));
+                        else
+                            $btn_save.text(_("Submit note"));
+                        $btn_save.show();
+                    } else {
+                        $btn_save.hide();
+                    }
+                });
+
+                $("a[name='js_submitnote']").click(function(e){
+                    var $self = $(this);
+                    var title = $(this).parent().siblings('.title').html();
+                    var $noteinput = $(this).siblings('input[name="note"]').first();
+
+                    var ajaxData = {
+                        'action': 'issuenote',
+                        'issue_id': $noteinput.data('issue_id'),
+                        'note': $noteinput.val(),
+                    };
+
+                    $.ajax({
+                        url: '/cgi-bin/koha/svc/patron_notes/',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: ajaxData,
+                    })
+                    .done(function(data) {
+                        var message = "";
+                        if(data.status == 'saved') {
+                            $("#notesaved").removeClass("alert-error");
+                            $("#notesaved").addClass("alert-info");
+                            $noteinput.data('origvalue', data.note);
+                            $noteinput.val(data.note);
+                            message = "<p>" + _("Your note about %s has been saved and sent to the library.").format(title) + "</p>";
+                            message += "<p style=\"font-style:italic;\">" + data.note + "</p>";
+                            $self.hide();
+                        } else if(data.status == 'removed') {
+                            $("#notesaved").removeClass("alert-error");
+                            $("#notesaved").addClass("alert-info");
+                            $noteinput.data('origvalue', "");
+                            $noteinput.val("");
+                            message = "<p>" + _("Your note about %s was removed.").format(title) + "</p>";
+                            $self.hide();
+                        } else {
+                            $("#notesaved").removeClass("alert-info");
+                            $("#notesaved").addClass("alert-error");
+                            message =  "<p>" + _("Your note about %s could not be saved.").format(title) + "</p>";
+                            message += "<p style=\"font-weight:bold;\">" + _("Something went wrong. The note has not been saved") + "</p>";
+                        }
+                        $("#notesaved").html(message);
+                    })
+                    .fail(function(data) {
+                        $("#notesaved").removeClass("alert-info");
+                        $("#notesaved").addClass("alert-error");
+                        var message = "<p style=\"font-weight:bold;\">" + _("Something went wrong. The note has not been saved") + "</p>";
+                        $("#notesaved").html(message);
+                    })
+                    .always(function() {
+                        $("#notesaved").show();
+                    });
+                });
+            [% END %]
+
             $( ".suspend-until" ).datepicker({ minDate: 1 }); // Require that "until date" be in the future
+
+            if ( $('#opac-user-clubs').length ) {
+                $('#opac-user-clubs-tab-link').on('click', function() {
+                    $('#opac-user-clubs').text(_("Loading..."));
+                    $('#opac-user-clubs').load('/cgi-bin/koha/clubs/clubs-tab.pl?borrowernumber=[% borrowernumber %]');
+                });
+            }
         });
         //]]>
     </script>

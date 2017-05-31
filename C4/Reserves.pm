@@ -236,6 +236,7 @@ sub AddReserve {
             module => 'reserves',
             letter_code => 'HOLDPLACED',
             branchcode => $branch,
+            lang => $borrower->{lang},
             tables => {
                 'branches'    => $library,
                 'borrowers'   => $borrower,
@@ -730,7 +731,7 @@ sub GetReservesForBranch {
     my $dbh = C4::Context->dbh;
 
     my $query = "
-        SELECT reserve_id,borrowernumber,reservedate,itemnumber,waitingdate
+        SELECT reserve_id,borrowernumber,reservedate,itemnumber,waitingdate, expirationdate
         FROM   reserves
         WHERE   priority='0'
         AND found='W'
@@ -950,47 +951,28 @@ Cancels all reserves with an expiration date from before today.
 
 sub CancelExpiredReserves {
 
-    # Cancel reserves that have passed their expiration date.
+    my $today = dt_from_string();
+    my $cancel_on_holidays = C4::Context->preference('ExpireReservesOnHolidays');
+
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare( "
         SELECT * FROM reserves WHERE DATE(expirationdate) < DATE( CURDATE() )
         AND expirationdate IS NOT NULL
-        AND found IS NULL
     " );
     $sth->execute();
 
     while ( my $res = $sth->fetchrow_hashref() ) {
-        CancelReserve({ reserve_id => $res->{'reserve_id'} });
-    }
+        my $calendar = Koha::Calendar->new( branchcode => $res->{'branchcode'} );
+        my $cancel_params = { reserve_id => $res->{'reserve_id'} };
 
-    # Cancel reserves that have been waiting too long
-    if ( C4::Context->preference("ExpireReservesMaxPickUpDelay") ) {
-        my $max_pickup_delay = C4::Context->preference("ReservesMaxPickUpDelay");
-        my $cancel_on_holidays = C4::Context->preference('ExpireReservesOnHolidays');
+        next if !$cancel_on_holidays && $calendar->is_holiday( $today );
 
-        my $today = dt_from_string();
-
-        my $query = "SELECT * FROM reserves WHERE TO_DAYS( NOW() ) - TO_DAYS( waitingdate ) > ? AND found = 'W' AND priority = 0";
-        $sth = $dbh->prepare( $query );
-        $sth->execute( $max_pickup_delay );
-
-        while ( my $res = $sth->fetchrow_hashref ) {
-            my $do_cancel = 1;
-            unless ( $cancel_on_holidays ) {
-                my $calendar = Koha::Calendar->new( branchcode => $res->{'branchcode'} );
-                my $is_holiday = $calendar->is_holiday( $today );
-
-                if ( $is_holiday ) {
-                    $do_cancel = 0;
-                }
-            }
-
-            if ( $do_cancel ) {
-                CancelReserve({ reserve_id => $res->{'reserve_id'}, charge_cancel_fee => 1 });
-            }
+        if ( $res->{found} eq 'W' ) {
+            $cancel_params->{charge_cancel_fee} = 1;
         }
-    }
 
+        CancelReserve($cancel_params);
+    }
 }
 
 =head2 AutoUnsuspendReserves
@@ -1269,33 +1251,10 @@ sub ModReserveAffect {
 
     return unless $hold;
 
-    $reserve_id = $hold->id();
-
     my $already_on_shelf = $hold->found && $hold->found eq 'W';
 
-    # If we affect a reserve that has to be transferred, don't set to Waiting
-    my $query;
-    if ($transferToDo) {
-        $hold->set(
-            {
-                priority   => 0,
-                itemnumber => $itemnumber,
-                found      => 'T',
-            }
-        );
-    }
-    else {
-        # affect the reserve to Waiting as well.
-        $hold->set(
-            {
-                priority    => 0,
-                itemnumber  => $itemnumber,
-                found       => 'W',
-                waitingdate => dt_from_string(),
-            }
-        );
-    }
-    $hold->store();
+    $hold->itemnumber($itemnumber);
+    $hold->set_waiting($transferToDo);
 
     _koha_notify_reserve( $hold->reserve_id )
       if ( !$transferToDo && !$already_on_shelf );
@@ -1951,6 +1910,7 @@ sub _koha_notify_reserve {
     my %letter_params = (
         module => 'reserves',
         branchcode => $hold->branchcode,
+        lang => $borrower->{lang},
         tables => {
             'branches'       => $library,
             'borrowers'      => $borrower,
@@ -2296,6 +2256,7 @@ sub ReserveSlip {
     my ($branch, $borrowernumber, $biblionumber) = @_;
 
 #   return unless ( C4::Context->boolean_preference('printreserveslips') );
+    my $patron = Koha::Patrons->find( $borrowernumber );
 
     my $reserve_id = GetReserveId({
         biblionumber => $biblionumber,
@@ -2307,6 +2268,7 @@ sub ReserveSlip {
         module => 'circulation',
         letter_code => 'HOLD_SLIP',
         branchcode => $branch,
+        lang => $patron->lang,
         tables => {
             'reserves'    => $reserve,
             'branches'    => $reserve->{branchcode},

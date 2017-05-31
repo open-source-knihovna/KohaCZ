@@ -75,6 +75,12 @@ __PACKAGE__->table("old_issues");
   default_value: 0
   is_nullable: 1
 
+=head2 auto_renew_error
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 32
+
 =head2 timestamp
 
   data_type: 'timestamp'
@@ -93,6 +99,17 @@ __PACKAGE__->table("old_issues");
   data_type: 'integer'
   default_value: 0
   is_nullable: 0
+
+=head2 note
+
+  data_type: 'mediumtext'
+  is_nullable: 1
+
+=head2 notedate
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  is_nullable: 1
 
 =cut
 
@@ -127,6 +144,8 @@ __PACKAGE__->add_columns(
   { data_type => "tinyint", is_nullable => 1 },
   "auto_renew",
   { data_type => "tinyint", default_value => 0, is_nullable => 1 },
+  "auto_renew_error",
+  { data_type => "varchar", is_nullable => 1, size => 32 },
   "timestamp",
   {
     data_type => "timestamp",
@@ -142,6 +161,14 @@ __PACKAGE__->add_columns(
   },
   "onsite_checkout",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
+  "note",
+  { data_type => "mediumtext", is_nullable => 1 },
+  "notedate",
+  {
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    is_nullable => 1,
+  },
 );
 
 =head1 PRIMARY KEY
@@ -199,8 +226,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-03-07 14:25:37
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Nqm7crVG/Y5G3kuLAAKdSQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-05-03 04:12:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rvUGkBhLE7AwPNp1viI23Q
 
 sub koha_objects_class {
     'Koha::Old::Checkouts';

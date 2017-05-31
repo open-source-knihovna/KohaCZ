@@ -72,7 +72,9 @@ sub _processrecord {
     my $record = shift;
 
     my ($biblionumber_field, $biblionumber_subfield) = GetMarcFromKohaField("biblio.biblionumber", '');
-    my $biblionumber = $record->field($biblionumber_field)->subfield($biblionumber_subfield);
+    my $biblionumber  = ( $biblionumber_field > 9 )
+                      ? $record->field($biblionumber_field)->subfield($biblionumber_subfield)
+                      : $record->field($biblionumber_field)->data();
 
     my $not_onloan_items = Koha::Items->search({
         biblionumber => $biblionumber,
@@ -88,7 +90,7 @@ sub _processrecord {
     else {
         # no field, create one
         $destination_field = MARC::Field->new( '999', '', '', x => $not_onloan_items );
-        $record->append_fields([$destination_field]);
+        $record->append_fields($destination_field);
     }
 
     return $record;

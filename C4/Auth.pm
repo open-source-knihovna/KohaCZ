@@ -260,7 +260,7 @@ sub get_template_and_user {
         my $all_perms = get_all_subpermissions();
 
         my @flagroots = qw(circulate catalogue parameters borrowers permissions reserveforothers borrow
-          editcatalogue updatecharges management tools editauthorities serials reports acquisition);
+          editcatalogue updatecharges management tools editauthorities serials reports acquisition clubs);
 
         # We are going to use the $flags returned by checkauth
         # to create the template's parameters that will indicate
@@ -283,8 +283,9 @@ sub get_template_and_user {
             $template->param( CAN_user_staffaccess      => 1 );
             $template->param( CAN_user_plugins          => 1 );
             $template->param( CAN_user_coursereserves   => 1 );
-            foreach my $module ( keys %$all_perms ) {
+            $template->param( CAN_user_clubs            => 1 );
 
+            foreach my $module ( keys %$all_perms ) {
                 foreach my $subperm ( keys %{ $all_perms->{$module} } ) {
                     $template->param( "CAN_user_${module}_${subperm}" => 1 );
                 }
@@ -1020,6 +1021,8 @@ sub checkauth {
 
             # $return: 1 = valid user, 2 = superlibrarian
             if ($return) {
+                # If DB user is logged in
+                $userid ||= $q_userid if $return == 2;
 
                 #_session_log(sprintf "%20s from %16s logged in  at %30s.\n", $userid,$ENV{'REMOTE_ADDR'},(strftime '%c', localtime));
                 if ( $flags = haspermission( $userid, $flagsrequired ) ) {
@@ -1206,6 +1209,8 @@ sub checkauth {
         push @inputs, { name => $name, value => $value };
     }
 
+    my $patron = Koha::Patrons->find({ userid => $q_userid }); # Not necessary logged in!
+
     my $LibraryNameTitle = C4::Context->preference("LibraryName");
     $LibraryNameTitle =~ s/<(?:\/?)(?:br|p)\s*(?:\/?)>/ /sgi;
     $LibraryNameTitle =~ s/<(?:[^<>'"]|'(?:[^']*)'|"(?:[^"]*)")*>//sg;
@@ -1255,6 +1260,7 @@ sub checkauth {
         PatronSelfRegistration                => C4::Context->preference("PatronSelfRegistration"),
         PatronSelfRegistrationDefaultCategory => C4::Context->preference("PatronSelfRegistrationDefaultCategory"),
         opac_css_override                     => $ENV{'OPAC_CSS_OVERRIDE'},
+        too_many_login_attempts               => ( $patron and $patron->account_locked ),
     );
 
     $template->param( SCO_login => 1 ) if ( $query->param('sco_user_login') );
@@ -1753,28 +1759,39 @@ sub get_session {
 sub checkpw {
     my ( $dbh, $userid, $password, $query, $type, $no_set_userenv ) = @_;
     $type = 'opac' unless $type;
-    if ($ldap) {
+
+    my @return;
+    my $patron = Koha::Patrons->find({ userid => $userid });
+
+    if ( $patron and $patron->account_locked ) {
+        @return = (0);
+    } elsif ($ldap) {
         $debug and print STDERR "## checkpw - checking LDAP\n";
         my ( $retval, $retcard, $retuserid ) = checkpw_ldap(@_);    # EXTERNAL AUTH
-        return 0 if $retval == -1;                                  # Incorrect password for LDAP login attempt
-        ($retval) and return ( $retval, $retcard, $retuserid );
-    }
+        if ( $retval ) {
+            @return = ( $retval, $retcard, $retuserid );
+        } else {
+            @return = (0);
+        }
 
-    if ( $cas && $query && $query->param('ticket') ) {
+    } elsif ( $cas && $query && $query->param('ticket') ) {
         $debug and print STDERR "## checkpw - checking CAS\n";
 
         # In case of a CAS authentication, we use the ticket instead of the password
         my $ticket = $query->param('ticket');
         $query->delete('ticket');                                   # remove ticket to come back to original URL
         my ( $retval, $retcard, $retuserid ) = checkpw_cas( $dbh, $ticket, $query, $type );    # EXTERNAL AUTH
-        ($retval) and return ( $retval, $retcard, $retuserid );
-        return 0;
+        if ( $retval ) {
+            @return = ( $retval, $retcard, $retuserid );
+        } else {
+            @return = (0);
+        }
     }
 
     # If we are in a shibboleth session (shibboleth is enabled, and a shibboleth match attribute is present)
     # Check for password to asertain whether we want to be testing against shibboleth or another method this
     # time around.
-    if ( $shib && $shib_login && !$password ) {
+    elsif ( $shib && $shib_login && !$password ) {
 
         $debug and print STDERR "## checkpw - checking Shibboleth\n";
 
@@ -1785,13 +1802,27 @@ sub checkpw {
         # Then, we check if it matches a valid koha user
         if ($shib_login) {
             my ( $retval, $retcard, $retuserid ) = C4::Auth_with_shibboleth::checkpw_shib($shib_login);    # EXTERNAL AUTH
-            ($retval) and return ( $retval, $retcard, $retuserid );
-            return 0;
+            if ( $retval ) {
+                @return = ( $retval, $retcard, $retuserid );
+            } else {
+                @return = (0);
+            }
         }
     }
 
     # INTERNAL AUTH
-    return checkpw_internal( $dbh, $userid, $password, $no_set_userenv);
+    @return = checkpw_internal( $dbh, $userid, $password, $no_set_userenv) unless @return;
+
+    if ( $return[0] == 0 ) {
+        $patron->update({ login_attempts => $patron->login_attempts + 1 }) if $patron;
+    } elsif ( $return[0] == 1 ) {
+        if ( $patron ) {
+            # FIXME Koha::Object->update should return a Koha::Object to allow chaining
+            $patron->update({ login_attempts => 0 });
+            $patron->store;
+        }
+    }
+    return @return;
 }
 
 sub checkpw_internal {

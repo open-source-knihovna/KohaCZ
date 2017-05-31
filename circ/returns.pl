@@ -282,7 +282,9 @@ if ($barcode) {
 
     my $materials = $biblio->{'materials'};
     my $descriptions = Koha::AuthorisedValues->get_description_by_koha_field({frameworkcode => '', kohafield =>'items.materials', authorised_value => $materials });
-    $materials = $descriptions->{lib} // '';
+    $materials = $descriptions->{lib} // $materials;
+
+    my $issue = Koha::Checkouts->find( { itemnumber => $itemnumber } );
 
     $template->param(
         title            => $biblio->{'title'},
@@ -297,6 +299,7 @@ if ($barcode) {
         biblionumber     => $biblio->{'biblionumber'},
         borrower         => $borrower,
         additional_materials => $materials,
+        issue            => $issue,
     );
 
     my %input = (

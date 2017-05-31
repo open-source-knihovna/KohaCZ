@@ -25,7 +25,7 @@ use Data::Dumper qw(Dumper);
 use C4::Context qw(preference);
 use C4::Log;
 
-use Koha::DateUtils qw(dt_from_string);
+use Koha::DateUtils qw(dt_from_string output_pref);
 use Koha::Patrons;
 use Koha::Biblios;
 use Koha::Items;
@@ -107,28 +107,50 @@ sub delete {
     return $deleted;
 }
 
-=head3 waiting_expires_on
-
-Returns a DateTime for the date a waiting holds expires on.
-Returns undef if the system peference ReservesMaxPickUpDelay is not set.
-Returns undef if the hold is not waiting ( found = 'W' ).
+=head3 set_waiting
 
 =cut
 
-sub waiting_expires_on {
-    my ($self) = @_;
+sub set_waiting {
+    my ( $self, $transferToDo ) = @_;
 
-    my $found = $self->found;
-    return unless $found && $found eq 'W';
+    $self->priority(0);
 
-    my $ReservesMaxPickUpDelay = C4::Context->preference('ReservesMaxPickUpDelay');
-    return unless $ReservesMaxPickUpDelay;
+    if ($transferToDo) {
+        $self->found('T')->store();
+        return $self;
+    }
 
-    my $dt = dt_from_string( $self->waitingdate() );
+    my $today = dt_from_string();
+    my $values = {
+        found => 'W',
+        waitingdate => $today->ymd,
+    };
 
-    $dt->add( days => $ReservesMaxPickUpDelay );
+    my $requested_expiration;
+    if ($self->expirationdate) {
+        $requested_expiration = dt_from_string($self->expirationdate);
+    }
 
-    return $dt;
+    my $max_pickup_delay = C4::Context->preference("ReservesMaxPickUpDelay");
+    my $cancel_on_holidays = C4::Context->preference('ExpireReservesOnHolidays');
+    my $calendar = Koha::Calendar->new( branchcode => $self->branchcode );
+
+    my $expirationdate = $today->clone;
+    $expirationdate->add(days => $max_pickup_delay);
+
+    if ( C4::Context->preference("ExcludeHolidaysFromMaxPickUpDelay") ) {
+        $expirationdate = $calendar->days_forward( dt_from_string(), $max_pickup_delay );
+    }
+
+    # If patron's requested expiration date is prior to the
+    # calculated one, we keep the patron's one.
+    my $cmp = $requested_expiration ? DateTime->compare($requested_expiration, $expirationdate) : 0;
+    $values->{expirationdate} = $cmp == -1 ? $requested_expiration->ymd : $expirationdate->ymd;
+
+    $self->set($values)->store();
+
+    return $self;
 }
 
 =head3 is_found

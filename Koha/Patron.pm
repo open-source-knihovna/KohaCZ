@@ -36,6 +36,7 @@ use Koha::Patron::HouseboundRole;
 use Koha::Patron::Images;
 use Koha::Patrons;
 use Koha::Virtualshelves;
+use Koha::Club::Enrollments;
 
 use base qw(Koha::Object);
 
@@ -348,7 +349,12 @@ sub update_password {
     my ( $self, $userid, $password ) = @_;
     eval { $self->userid($userid)->store; };
     return if $@; # Make sure the userid is not already in used by another patron
-    $self->password($password)->store;
+    $self->update(
+        {
+            password       => $password,
+            login_attempts => 0,
+        }
+    );
     logaction( "MEMBERS", "CHANGE PASS", $self->borrowernumber, "" ) if C4::Context->preference("BorrowersLog");
     return 1;
 }
@@ -597,6 +603,69 @@ sub holds {
     my ($self) = @_;
     my $holds_rs = $self->_result->reserves->search( {}, { order_by => 'reservedate' } );
     return Koha::Holds->_new_from_dbic($holds_rs);
+}
+
+=head3 first_valid_email_address
+
+=cut
+
+sub first_valid_email_address {
+    my ($self) = @_;
+
+    return $self->email() || $self->emailpro() || $self->B_email() || q{};
+}
+
+=head3 get_club_enrollments
+
+=cut
+
+sub get_club_enrollments {
+    my ( $self, $return_scalar ) = @_;
+
+    my $e = Koha::Club::Enrollments->search( { borrowernumber => $self->borrowernumber(), date_canceled => undef } );
+
+    return $e if $return_scalar;
+
+    return wantarray ? $e->as_list : $e;
+}
+
+=head3 get_enrollable_clubs
+
+=cut
+
+sub get_enrollable_clubs {
+    my ( $self, $is_enrollable_from_opac, $return_scalar ) = @_;
+
+    my $params;
+    $params->{is_enrollable_from_opac} = $is_enrollable_from_opac
+      if $is_enrollable_from_opac;
+    $params->{is_email_required} = 0 unless $self->first_valid_email_address();
+
+    $params->{borrower} = $self;
+
+    my $e = Koha::Clubs->get_enrollable($params);
+
+    return $e if $return_scalar;
+
+    return wantarray ? $e->as_list : $e;
+}
+
+=head3 account_locked
+
+my $is_locked = $patron->account_locked
+
+Return true if the patron has reach the maximum number of login attempts (see pref FailedLoginAttempts).
+Otherwise return false.
+If the pref is not set (empty string, null or 0), the feature is considered as disabled.
+
+=cut
+
+sub account_locked {
+    my ($self) = @_;
+    my $FailedLoginAttempts = C4::Context->preference('FailedLoginAttempts');
+    return ( $FailedLoginAttempts
+          and $self->login_attempts
+          and $self->login_attempts >= $FailedLoginAttempts )? 1 : 0;
 }
 
 =head3 type

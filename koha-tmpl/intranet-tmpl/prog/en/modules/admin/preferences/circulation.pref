@@ -144,6 +144,12 @@ Circulation:
                   yes: Show
                   no: "Do not show"
             - all items in the "Checked-in items" list, even items that were not checked out.
+        -
+            - pref: AllowCheckoutNotes
+              choices:
+                  yes: Allow
+                  no: "Don't allow"
+            - patrons to submit notes about checked out items.
 
     Checkout Policy:
         -
@@ -446,6 +452,13 @@ Circulation:
                   yes: Block
                   no: Allow
             - renewing of items.
+        -
+            - If a patron owes more than the value of OPACFineNoRenewals,
+            - pref: OPACFineNoRenewalsBlockAutoRenew
+              choices:
+                  yes: Block
+                  no: Allow
+            - his/her auto renewals.
     Checkin Policy:
         -
             - pref: BlockReturnOfWithdrawnItems
@@ -617,6 +630,12 @@ Circulation:
                   yes: Allow
                   no: "Don't allow"
             - expired holds to be canceled on days the library is closed.
+        -
+            - pref: ExcludeHolidaysFromMaxPickUpDelay
+              choices:
+                  yes: Allow
+                  no: "Don't allow"
+            - Closed days to be taken into account in reserves max pickup delay.
         -
             - pref: decreaseLoanHighHolds
               choices:

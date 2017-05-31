@@ -37,7 +37,6 @@ $(document).ready(function() {
         }
     });
 
-    $("#patron_list_dialog").hide();
     $("#add_to_patron_list_submit").on('click', function(e){
         if ( $('#add_to_patron_list').val() == 'new' ) {
             if ( $('#new_patron_list').val() ) {
@@ -132,8 +131,9 @@ $(document).ready(function() {
     [% END %]
 
     [% IF view != "show_results" %]
-        $("#searchresults").hide();
         search = 0;
+    [% ELSE %]
+        $("#searchresults").show();
     [% END %]
 
     // Build the aLengthMenu
@@ -162,6 +162,10 @@ $(document).ready(function() {
 
     // Apply DataTables on the results table
     var columns_settings = [% ColumnsSettings.GetColumns( 'members', 'member', 'memberresultst', 'json' ) %];
+    [% UNLESS CAN_user_tools_manage_patron_lists %]
+        [%# Remove the first column if we do not display the checkbox %]
+        columns_settings.splice(0, 1);
+    [% END %]
     dtMemberResults = KohaTable("#memberresultst", {
         'bServerSide': true,
         'sAjaxSource': "/cgi-bin/koha/svc/members/search",

@@ -1,4 +1,5 @@
 [% USE KohaDates %]
+[% USE Koha %]
 
 [%- BLOCK area_name -%]
     [%- SWITCH area -%]
@@ -86,6 +87,7 @@ $("#delColumn").on("click",function(){
 
 [% IF (saved1) %]
     var rtable = $("#table_reports").dataTable($.extend(true, {}, dataTablesDefaults, {
+        'iDisplayLength': [% Koha.Preference('NumSavedReports') %],
         'bAutoWidth': false,
         'sPaginationType': 'four_button',
         'aaSorting': [[ 1, "asc" ]],
@@ -95,7 +97,7 @@ $("#delColumn").on("click",function(){
             { "aTargets": [ 1, 2 ], "sType": "natural"  }
         ],
         "aoColumns": [
-            null,null,null,null,null,null,null,null,{ "sType": "title-string" },null,null,null,[% IF (usecache) %]null,[% END %]null,null
+            null,null,null,null,null,null,null,null,{ "sType": "title-string" },null,null,null,[% IF (usecache) %]null,[% END %]null,null[% IF has_obsolete_reports %],null[% END %]
         ],
         'oLanguage': {
             'sZeroRecords': _("No matching reports found")
@@ -163,6 +165,20 @@ $("#delColumn").on("click",function(){
             $(checkedItems).parents('tr').removeClass("warn");
             return false;
         }
+    });
+
+    $("body").on("click", ".update_sql", function(e){
+        e.preventDefault();
+        var ltitle = $(this).text();
+        var report_id = $(this).data("report_id");
+        var page = $(this).attr("href");
+        $("#update_sql .modal-body").load(page + " div");
+        $('#update_sql').modal('show');
+        $("#update_sql_button").attr("href", "/cgi-bin/koha/reports/guided_reports.pl?phase=Use saved&op=convert&report_id=" + report_id);
+    });
+    $("#update_sql").on("hidden", function(){
+        $("#update_sql_label").html("");
+        $("#update_sql .modal-body").html("<div id=\"loading\"><img src=\"[% interface %]/[% theme %]/img/spinner-small.gif\" alt=\"\" /> "+_("Loading")+"</div>");
     });
 [% END %]
 
@@ -265,6 +281,24 @@ $("#delColumn").on("click",function(){
 [% END %]
 </div>
 
+<div id="update_sql" class="modal" tabindex="-1" role="dialog" aria-labelledby="update_sql_label" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="closebtn" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="update_sql_label">Update SQL</h3>
+    </div>
+    <div class="modal-body">
+        <div id="loading"> <img src="[% interface %]/[% theme %]/img/spinner-small.gif" alt="" /> Loading </div>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn btn-default" id="update_sql_button" role="button" data-toggle="modal">Update</a>
+        <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
+    </div>
+    </div>
+    </div>
+</div>
+
 <div id="doc3" class="yui-t1">
 <div id="bd">
 <div id="yui-main">
@@ -304,6 +338,12 @@ canned reports and writing custom SQL reports.</p>
 </form>
 [% END %]
 
+[% IF report_converted %]
+    <div class="dialog message">
+        The report "[% report_converted %]" has been converted.
+    </div>
+[% END %]
+
 [% IF ( saved1 ) %]
 [% IF ( savedreports ) %]<h1>Saved reports</h1>
 
@@ -340,6 +380,7 @@ canned reports and writing custom SQL reports.</p>
                     <th>Public</th>
                     [% IF (usecache) %] <th>Cache expiry (seconds)</th> [% END %]
                     <th>Saved results</th>
+                    [% IF has_obsolete_reports %]<th>Update</th>[% END %]
                     <th>&nbsp;</th>
                 </tr>
             </thead>
@@ -379,6 +420,14 @@ canned reports and writing custom SQL reports.</p>
                                 <br/>
                             [% END %]
                         </td>
+                        [% IF has_obsolete_reports %]
+                        <td>
+                            [% IF savedreport.seems_obsolete %]
+                                This report seems obsolete, it uses biblioitems.marcxml field.
+                                <a href="/cgi-bin/koha/svc/convert_report?report_id=[% savedreport.id %]" data-report_id="[% savedreport.id %]" class="update_sql btn btn-default btn-xs" title="Update SQL"><i class="fa fa-eye"></i> Update SQL</a>
+                            [% END %]
+                        </td>
+                        [% END %]
                         <td>
                             <div class="dropup">
                                 <div class="btn-group">

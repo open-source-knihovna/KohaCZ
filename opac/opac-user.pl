@@ -33,6 +33,7 @@ use C4::Output;
 use C4::Biblio;
 use C4::Items;
 use C4::Letters;
+use Koha::Libraries;
 use Koha::DateUtils;
 use Koha::Holds;
 use Koha::Database;
@@ -188,6 +189,7 @@ if ($issues){
 
         my ( $total , $accts, $numaccts) = GetMemberAccountRecords( $borrowernumber );
         my $charges = 0;
+        my $rentalfines = 0;
         foreach my $ac (@$accts) {
             if ( $ac->{'itemnumber'} == $issue->{'itemnumber'} ) {
                 $charges += $ac->{'amountoutstanding'}
@@ -196,9 +198,12 @@ if ($issues){
                   if $ac->{'accounttype'} eq 'FU';
                 $charges += $ac->{'amountoutstanding'}
                   if $ac->{'accounttype'} eq 'L';
+                $rentalfines += $ac->{'amountoutstanding'}
+                  if $ac->{'accounttype'} eq 'Rent';
             }
         }
         $issue->{'charges'} = $charges;
+        $issue->{'rentalfines'} = $rentalfines;
         my $marcrecord = GetMarcBiblio( $issue->{'biblionumber'} );
         $issue->{'subtitle'} = GetRecordValue('subtitle', $marcrecord, GetFrameworkCode($issue->{'biblionumber'}));
         # check if item is renewable
@@ -217,6 +222,7 @@ if ($issues){
             $issue->{'auto_renew'}     = 1 if $renewerror eq 'auto_renew';
             $issue->{'auto_too_soon'}  = 1 if $renewerror eq 'auto_too_soon';
             $issue->{'auto_too_late'}  = 1 if $renewerror eq 'auto_too_late';
+            $issue->{'auto_too_much_oweing'}  = 1 if $renewerror eq 'auto_too_much_oweing';
 
             if ( $renewerror eq 'too_soon' ) {
                 $issue->{'too_soon'}         = 1;
@@ -264,6 +270,7 @@ if ($issues){
 }
 my $overduesblockrenewing = C4::Context->preference('OverduesBlockRenewing');
 $canrenew = 0 if ($overduesblockrenewing ne 'allow' and $overdues_count == $count);
+
 $template->param( ISSUES       => \@issuedat );
 $template->param( issues_count => $count );
 $template->param( canrenew     => $canrenew );
@@ -311,8 +318,8 @@ if (C4::Context->preference("OPACAmazonCoverImages") or
 
 $template->param(
     OverDriveCirculation => C4::Context->preference('OverDriveCirculation') || 0,
-    overdrive_error      => $query->param('overdrive_error') || undef,
-    overdrive_tab        => $query->param('overdrive_tab') || 0,
+    overdrive_error      => scalar $query->param('overdrive_error') || undef,
+    overdrive_tab        => scalar $query->param('overdrive_tab') || 0,
 );
 
 my $patron_messages = Koha::Patron::Messages->search(

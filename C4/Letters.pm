@@ -106,7 +106,6 @@ sub GetLetters {
     );
 
     Return a hashref of letter templates.
-    The key will be the message transport type.
 
 =cut
 
@@ -117,16 +116,15 @@ sub GetLetterTemplates {
     my $code      = $params->{code};
     my $branchcode = $params->{branchcode} // '';
     my $dbh       = C4::Context->dbh;
-    my $letters   = $dbh->selectall_hashref(
+    my $letters   = $dbh->selectall_arrayref(
         q|
-            SELECT module, code, branchcode, name, is_html, title, content, message_transport_type
+            SELECT module, code, branchcode, name, is_html, title, content, message_transport_type, lang
             FROM letter
             WHERE module = ?
             AND code = ?
             and branchcode = ?
         |
-        , 'message_transport_type'
-        , undef
+        , { Slice => {} }
         , $module, $code, $branchcode
     );
 
@@ -200,8 +198,10 @@ sub GetLettersAvailableForALibrary {
 }
 
 sub getletter {
-    my ( $module, $code, $branchcode, $message_transport_type ) = @_;
+    my ( $module, $code, $branchcode, $message_transport_type, $lang) = @_;
     $message_transport_type //= '%';
+    $lang = 'default' unless( $lang && C4::Context->preference('TranslateNotices') );
+
 
     if ( C4::Context->preference('IndependentBranches')
             and $branchcode
@@ -217,9 +217,10 @@ sub getletter {
         FROM letter
         WHERE module=? AND code=? AND (branchcode = ? OR branchcode = '')
         AND message_transport_type LIKE ?
+        AND lang =?
         ORDER BY branchcode DESC LIMIT 1
     });
-    $sth->execute( $module, $code, $branchcode, $message_transport_type );
+    $sth->execute( $module, $code, $branchcode, $message_transport_type, $lang );
     my $line = $sth->fetchrow_hashref
       or return;
     $line->{'content-type'} = 'text/html; charset="UTF-8"' if $line->{is_html};
@@ -249,14 +250,17 @@ sub DelLetter {
     my $module     = $params->{module};
     my $code       = $params->{code};
     my $mtt        = $params->{mtt};
+    my $lang       = $params->{lang};
     my $dbh        = C4::Context->dbh;
     $dbh->do(q|
         DELETE FROM letter
         WHERE branchcode = ?
           AND module = ?
           AND code = ?
-    | . ( $mtt ? q| AND message_transport_type = ?| : q|| )
-    , undef, $branchcode, $module, $code, ( $mtt ? $mtt : () ) );
+    |
+    . ( $mtt ? q| AND message_transport_type = ?| : q|| )
+    . ( $lang? q| AND lang = ?| : q|| )
+    , undef, $branchcode, $module, $code, ( $mtt ? $mtt : () ), ( $lang ? $lang : () ) );
 }
 
 =head2 addalert ($borrowernumber, $type, $externalid)
@@ -685,10 +689,15 @@ sub GetPreparedLetter {
     my $letter_code = $params{letter_code} or croak "No letter_code";
     my $branchcode  = $params{branchcode} || '';
     my $mtt         = $params{message_transport_type} || 'email';
+    my $lang        = $params{lang} || 'default';
 
-    my $letter = getletter( $module, $letter_code, $branchcode, $mtt )
-        or warn( "No $module $letter_code letter transported by " . $mtt ),
-            return;
+    my $letter = getletter( $module, $letter_code, $branchcode, $mtt, $lang );
+
+    unless ( $letter ) {
+        $letter = getletter( $module, $letter_code, $branchcode, $mtt, 'default' )
+            or warn( "No $module $letter_code letter transported by " . $mtt ),
+               return;
+    }
 
     my $tables = $params{tables} || {};
     my $substitute = $params{substitute} || {};
@@ -871,17 +880,7 @@ sub _parseletter {
     }
 
     if ( $table eq 'reserves' && $values->{'waitingdate'} ) {
-        my @waitingdate = split /-/, $values->{'waitingdate'};
-
-        $values->{'expirationdate'} = '';
-        if ( C4::Context->preference('ReservesMaxPickUpDelay') ) {
-            my $dt = dt_from_string();
-            $dt->add( days => C4::Context->preference('ReservesMaxPickUpDelay') );
-            $values->{'expirationdate'} = output_pref( { dt => $dt, dateonly => 1 } );
-        }
-
         $values->{'waitingdate'} = output_pref({ dt => dt_from_string( $values->{'waitingdate'} ), dateonly => 1 });
-
     }
 
     if ($letter->{content} && $letter->{content} =~ /<<today>>/) {
@@ -1050,7 +1049,19 @@ sub SendQueuedMessages {
             if ( C4::Context->preference('SMSSendDriver') eq 'Email' ) {
                 my $member = C4::Members::GetMember( 'borrowernumber' => $message->{'borrowernumber'} );
                 my $sms_provider = Koha::SMS::Providers->find( $member->{'sms_provider_id'} );
+                unless ( $sms_provider ) {
+                    warn sprintf( "Patron %s has no sms provider id set!", $message->{'borrowernumber'} ) if $params->{'verbose'} or $debug;
+                    _set_message_status( { message_id => $message->{'message_id'}, status => 'failed' } );
+                    next MESSAGE;
+                }
+                $message->{to_address} ||= $member->{'smsalertnumber'};
+                unless ( $message->{to_address} && $member->{'smsalertnumber'} ) {
+                    _set_message_status( { message_id => $message->{'message_id'}, status => 'failed' } );
+                    warn sprintf( "No smsalertnumber found for patron %s!", $message->{'borrowernumber'} ) if $params->{'verbose'} or $debug;
+                    next MESSAGE;
+                }
                 $message->{to_address} .= '@' . $sms_provider->domain();
+                _update_message_to_address($message->{'message_id'},$message->{to_address});
                 _send_message_by_email( $message, $params->{'username'}, $params->{'password'}, $params->{'method'} );
             } else {
                 _send_message_by_sms( $message );

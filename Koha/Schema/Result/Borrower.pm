@@ -427,6 +427,19 @@ __PACKAGE__->table("borrowers");
   datetime_undef_if_invalid: 1
   is_nullable: 1
 
+=head2 lang
+
+  data_type: 'varchar'
+  default_value: 'default'
+  is_nullable: 0
+  size: 25
+
+=head2 login_attempts
+
+  data_type: 'integer'
+  default_value: 0
+  is_nullable: 1
+
 =head2 overdrive_auth_token
 
   data_type: 'text'
@@ -621,6 +634,15 @@ __PACKAGE__->add_columns(
     datetime_undef_if_invalid => 1,
     is_nullable => 1,
   },
+  "lang",
+  {
+    data_type => "varchar",
+    default_value => "default",
+    is_nullable => 0,
+    size => 25,
+  },
+  "login_attempts",
+  { data_type => "integer", default_value => 0, is_nullable => 1 },
   "overdrive_auth_token",
   { data_type => "text", is_nullable => 1 },
 );
@@ -858,6 +880,21 @@ __PACKAGE__->belongs_to(
   "Koha::Schema::Result::Category",
   { categorycode => "categorycode" },
   { is_deferrable => 1, on_delete => "RESTRICT", on_update => "RESTRICT" },
+);
+
+=head2 club_enrollments
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::ClubEnrollment>
+
+=cut
+
+__PACKAGE__->has_many(
+  "club_enrollments",
+  "Koha::Schema::Result::ClubEnrollment",
+  { "foreign.borrowernumber" => "self.borrowernumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
 );
 
 =head2 course_instructors
@@ -1341,8 +1378,8 @@ Composing rels: L</aqorder_users> -> ordernumber
 __PACKAGE__->many_to_many("ordernumbers", "aqorder_users", "ordernumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-02-10 07:30:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:35WEsGd5LmkZ3bB486M1yA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-05-09 21:24:02
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7llO928plwtX2Q+I9nQA8A
 
 __PACKAGE__->belongs_to(
     "guarantor",

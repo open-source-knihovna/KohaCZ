@@ -5,6 +5,11 @@
 [% USE AuthorisedValues %]
 [% SET TagsShowEnabled = ( ( Koha.Preference( 'TagsEnabled' ) == 1 ) && TagsShowOnDetail ) %]
 [% SET TagsInputEnabled = ( ( Koha.Preference( 'opacuserlogin' ) == 1 ) && ( Koha.Preference( 'TagsEnabled' ) == 1 ) && TagsInputOnDetail ) %]
+[% IF Koha.Preference('AmazonAssocTag') %]
+    [% AmazonAssocTag = '?tag=' _ Koha.Preference('AmazonAssocTag') %]
+[% ELSE %]
+    [% AmazonAssocTag = '' %]
+[% END %]
 
 [% ShowCourseReservesHeader = 0 %]
 [% IF Koha.Preference( 'UseCourseReserves' ) == 1 %]
@@ -55,9 +60,9 @@
                     [% END %]
                     [% IF ( OPACAmazonCoverImages ) %]
                         [% IF ( OPACURLOpenInNewWindow ) %]
-                            <a href="http://www.amazon[% AmazonTld %]/gp/reader/[% normalized_isbn %]/ref=sib_dp_pt/002-7879865-0184864#reader-link" target="_blank" rel="noreferrer">
+                            <a href="http://www.amazon[% AmazonTld %]/gp/reader/[% normalized_isbn %][% AmazonAssocTag %]#reader-link" target="_blank" rel="noreferrer">
                         [% ELSE %]
-                            <a href="http://www.amazon[% AmazonTld %]/dp/[% normalized_isbn %]">
+                            <a href="http://www.amazon[% AmazonTld %]/dp/[% normalized_isbn %][% AmazonAssocTag %]">
                         [% END %]
                             <img border="0" src="https://images-na.ssl-images-amazon.com/images/P/[% normalized_isbn %].01.MZZZZZZZ.jpg" alt="Cover image" /></a>
                     [% END %]
@@ -414,7 +419,14 @@
                                     </span>
                                     <a class="tag_add" id="tag_add[% biblionumber %]" href="#">Add tag(s)</a>
                                 [% ELSE %]
-                                    <span id="login4tags"><a class="loginModal-trigger" data-toggle="modal" role="button" href="/cgi-bin/koha/opac-user.pl">Log in to add tags.</a></span>
+                                    <span id="login4tags">
+                                        [% IF Koha.Preference('casAuthentication') %]
+                                            [%# CAS authentication is too complicated for modal window %]
+                                            <a href="/cgi-bin/koha/opac-user.pl">Log in to add tags.</a>
+                                        [% ELSE %]
+                                            <a class="loginModal-trigger" data-toggle="modal" role="button" href="/cgi-bin/koha/opac-user.pl">Log in to add tags.</a>
+                                        [% END %]
+                                    </span>
                                 [% END %]
                             [% END # / IF TagsInputEnabled %]
                         </div>
@@ -793,7 +805,7 @@
                     [% IF ( subscriptionsnumber ) %]
                         <div id="subscriptions">
                             <h2>This is a serial</h2>
-                            <p>There are [% subscriptionsnumber %] subscription(s) associated with this title.</p>
+                            <p class="subscription_count">There are [% subscriptionsnumber %] subscription(s) associated with this title.</p>
                             [% FOREACH subscription IN subscriptions %]
                                 [% IF ( subscription.branchcode ) %]
                                     <h3>At library: [% Branches.GetName( subscription.branchcode ) %]</h3>
@@ -803,13 +815,15 @@
                                     [% END %]
                                 [% END %]
                                 [% IF ( subscription.closed ) %]
-                                    <p>This subscription is closed.</p>
+                                    <p class="subscription_closed">This subscription is closed.</p>
                                 [% END %]
-                                <span style="display:none;"> [% IF ( subscription.callnumber ) %]<p>Call number: [% subscription.callnumber %]</p>[% END %]</span>
+                                [% IF ( subscription.callnumber ) %]
+                                  <p class="subscription_callnumber">Call number: [% subscription.callnumber %]</p>
+                                [% END %]
                                 [% IF ( subscription.subscriptionnotes ) %]
-                                    <p>[% subscription.subscriptionnotes FILTER html_line_break %] </p>
+                                    <p class="subscription_notes">[% subscription.subscriptionnotes FILTER html_line_break %] </p>
                                 [% END %]
-                                <p>Subscription from: [% subscription.histstartdate | $KohaDates %] to:[% IF ( subscription.histenddate ) %] [% subscription.histenddate | $KohaDates %] [% ELSE %] now (current)[% END %]</p>
+                                <p class="subscription_dates">Subscription from: [% subscription.histstartdate | $KohaDates %] to:[% IF ( subscription.histenddate ) %] [% subscription.histenddate | $KohaDates %] [% ELSE %] now (current)[% END %]</p>
                                 [% IF ( subscription.letter ) %]<span class="email_notifications">
                                     [% IF ( loggedinusername ) %]
                                         [% IF ( subscription.hasalert ) %]
@@ -822,16 +836,13 @@
                                     [% END %]
                                 </span>[% END %]
                                 [% IF ( subscription.missinglist ) %]
-                                    <p>Missing issues: [% subscription.missinglist %] </p>
+                                    <p class="subscription_missing">Missing issues: [% subscription.missinglist %] </p>
                                 [% END %]
                                 [% IF ( subscription.opacnote ) %]
-                                    <p>[% subscription.opacnote FILTER html_line_break %]</p>
-                                [% END %]
-                                [% IF ( subscription.callnumber ) %]
-                                  <p>Call number: [% subscription.callnumber %]</p>
+                                    <p class="subscription_opacnote">[% subscription.opacnote FILTER html_line_break %]</p>
                                 [% END %]
                                 [% IF ( subscription.latestserials ) %]
-                                    <p> The [% subscription.opacdisplaycount %] latest issues for this subscription:</p>
+                                    <p class="subscription_latestissues"> The [% subscription.opacdisplaycount %] latest issues for this subscription:</p>
                                     <table class="table table-bordered table-striped">
                                         <tr>
                                             <th>Issue #</th>
@@ -863,7 +874,7 @@
                                     </table>
                                 [% END # / IF subscription.latestserials %]
                             [% END # / FOREACH subscriptions %]
-                            <p><a href="opac-serial-issues.pl?biblionumber=[% biblionumber %]">More details</a></p>
+                            <p class="subscription_moredetails"><a href="opac-serial-issues.pl?biblionumber=[% biblionumber %]">More details</a></p>
                         </div> <!-- / #subscriptions -->
                     [% END # IF subscriptionsnumber %]
 
@@ -1182,7 +1193,7 @@
                 [% IF ( itemdata_ccode ) %]<th id="item_ccode" class="collection">Collection</th>[% END %]
                 <th id="item_callnumber" class="call_no">Call number</th>
                 [% IF ( itemdata_enumchron ) %]<th id="item_enumchron" class="vol_info">Vol info</th>[% END %]
-                [% IF ( itemdata_uri ) %]<th id="item_url" class="url">url</th>[% END %]
+                [% IF ( itemdata_uri ) %]<th id="item_url" class="url">URL</th>[% END %]
                 [% IF ( itemdata_copynumber ) %]<th id="item_copy" class="copynumber">Copy number</th>[% END %]
                 <th id="item_status" class="status">Status</th>
                 [% IF ( itemdata_itemnotes ) %]<th id="item_notes" class="notes">Notes</th>[% END %]

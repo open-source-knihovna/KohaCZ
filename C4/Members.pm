@@ -355,6 +355,14 @@ true on success, or false on failure
 
 sub ModMember {
     my (%data) = @_;
+
+    # trim whitespace from data which has some non-whitespace in it.
+    foreach my $field_name (keys(%data)) {
+        if ( defined $data{$field_name} && $data{$field_name} =~ /\S/ ) {
+            $data{$field_name} =~ s/^\s*|\s*$//g;
+        }
+    }
+
     # test to know if you must update or not the borrower password
     if (exists $data{password}) {
         if ($data{password} eq '****' or $data{password} eq '') {
@@ -442,6 +450,13 @@ sub AddMember {
     my $dbh = C4::Context->dbh;
     my $schema = Koha::Database->new()->schema;
 
+    # trim whitespace from data which has some non-whitespace in it.
+    foreach my $field_name (keys(%data)) {
+        if ( defined $data{$field_name} && $data{$field_name} =~ /\S/ ) {
+            $data{$field_name} =~ s/^\s*|\s*$//g;
+        }
+    }
+
     # generate a proper login if none provided
     $data{'userid'} = Generate_Userid( $data{'borrowernumber'}, $data{'firstname'}, $data{'surname'} )
       if ( $data{'userid'} eq '' || !Check_Userid( $data{'userid'} ) );
@@ -479,6 +494,7 @@ sub AddMember {
     $data{'dateofbirth'}     = undef if ( not $data{'dateofbirth'} );
     $data{'debarred'}        = undef if ( not $data{'debarred'} );
     $data{'sms_provider_id'} = undef if ( not $data{'sms_provider_id'} );
+    $data{'guarantorid'}     = undef if ( not $data{'guarantorid'} );
 
     # get only the columns of Borrower
     # FIXME Do we really need this check?
@@ -974,20 +990,10 @@ addresses.
 
 sub GetFirstValidEmailAddress {
     my $borrowernumber = shift;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare( "SELECT email, emailpro, B_email FROM borrowers where borrowernumber = ? ");
-    $sth->execute( $borrowernumber );
-    my $data = $sth->fetchrow_hashref;
 
-    if ($data->{'email'}) {
-       return $data->{'email'};
-    } elsif ($data->{'emailpro'}) {
-       return $data->{'emailpro'};
-    } elsif ($data->{'B_email'}) {
-       return $data->{'B_email'};
-    } else {
-       return '';
-    }
+    my $borrower = Koha::Patrons->find( $borrowernumber );
+
+    return $borrower->first_valid_email_address();
 }
 
 =head2 GetNoticeEmailAddress
@@ -1167,6 +1173,9 @@ sub IssueSlip {
     # FIXME Check callers before removing this statement
     #return unless $borrowernumber;
 
+    my $patron = Koha::Patrons->find( $borrowernumber );
+    return unless $patron;
+
     my @issues = @{ GetPendingIssues($borrowernumber) };
 
     for my $issue (@issues) {
@@ -1227,6 +1236,7 @@ sub IssueSlip {
         module => 'circulation',
         letter_code => $letter_code,
         branchcode => $branch,
+        lang => $patron->lang,
         tables => {
             'branches'    => $branch,
             'borrowers'   => $borrowernumber,

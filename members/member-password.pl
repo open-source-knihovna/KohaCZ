@@ -144,6 +144,7 @@ $template->param(
     country                    => $bor->{'country'},
     phone                      => $bor->{'phone'},
     phonepro                   => $bor->{'phonepro'},
+    streetnumber               => $bor->{'streetnumber'},
     mobile                     => $bor->{'mobile'},
     email                      => $bor->{'email'},
     emailpro                   => $bor->{'emailpro'},

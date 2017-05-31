@@ -147,6 +147,7 @@ if ($op eq ""){
     my $biblio_count = 0;
     for my $biblio (@$biblios){
         $biblio_count++;
+        my $duplifound = 0;
         # Check if this import_record_id was selected
         next if not grep { $_ eq $$biblio{import_record_id} } @import_record_id_selected;
         my ( $marcblob, $encoding ) = GetImportRecordMarc( $biblio->{'import_record_id'} );
@@ -164,15 +165,15 @@ if ($op eq ""){
         unless ( $biblionumber ) {
             if ($matcher_id) {
                 if ( $matcher_id eq '_TITLE_AUTHOR_' ) {
-                    $duplinbatch = $import_batch_id if FindDuplicate($marcrecord);
+                    $duplifound = 1 if FindDuplicate($marcrecord);
                 }
                 else {
                     my $matcher = C4::Matcher->fetch($matcher_id);
                     my @matches = $matcher->get_matches( $marcrecord, my $max_matches = 1 );
-                    $duplinbatch = $import_batch_id if @matches;
+                    $duplifound = 1 if @matches;
                 }
 
-                next if $duplinbatch;
+                $duplinbatch = $import_batch_id and next if $duplifound;
             }
 
             # add the biblio
@@ -216,6 +217,8 @@ if ($op eq ""){
         my @replacementprices = $input->multi_param('replacementprice_' . $biblio_count);
         my @itemcallnumbers = $input->multi_param('itemcallnumber_' . $biblio_count);
         my $itemcreation = 0;
+
+        my @itemnumbers;
         for (my $i = 0; $i < $count; $i++) {
             $itemcreation = 1;
             my ($item_bibnum, $item_bibitemnum, $itemnumber) = AddItem({
@@ -233,6 +236,7 @@ if ($op eq ""){
                 replacementprice => $replacementprices[$i],
                 itemcallnumber => $itemcallnumbers[$i],
             }, $biblionumber);
+            push( @itemnumbers, $itemnumber );
         }
         if ($itemcreation == 1) {
             # Group orderlines from MarcItemFieldsToOrder
@@ -261,6 +265,7 @@ if ($op eq ""){
                         $price = Koha::Number::Price->new($price)->unformat;
                         $orderinfo{tax_rate} = $bookseller->tax_rate;
                         my $c = $c_discount ? $c_discount : $bookseller->discount / 100;
+                        $orderinfo{discount} = $c;
                         if ( $bookseller->listincgst ) {
                             if ( $c_discount ) {
                                 $orderinfo{ecost} = $price;
@@ -300,6 +305,7 @@ if ($op eq ""){
                     };
 
                     my $order = Koha::Acquisition::Order->new( \%orderinfo )->insert;
+                    $order->add_item( $_ ) for @itemnumbers;
                 }
             }
         } else {
@@ -329,6 +335,7 @@ if ($op eq ""){
                 $price = Koha::Number::Price->new($price)->unformat;
                 $orderinfo{tax_rate} = $bookseller->tax_rate;
                 my $c = $c_discount ? $c_discount : $bookseller->discount / 100;
+                $orderinfo{discount} = $c;
                 if ( $bookseller->listincgst ) {
                     if ( $c_discount ) {
                         $orderinfo{ecost} = $price;

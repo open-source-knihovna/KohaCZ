@@ -45,6 +45,13 @@ var MSG_EXPORT_SELECT_CHECKOUTS = _("You must select checkout(s) to export");
 columns_settings = [% ColumnsSettings.GetColumns( 'members', 'moremember', 'issues-table', 'json' ) %]
 
 $(document).ready(function() {
+    if ( $('#clubs-tab').length ) {
+        $('#clubs-tab-link').on('click', function() {
+            $('#clubs-tab').text(_("Loading..."));
+            $('#clubs-tab').load('/cgi-bin/koha/clubs/patron-clubs-tab.pl?borrowernumber=[% borrowernumber %]');
+        });
+    }
+
     $('#finesholdsissues').tabs({
         // Correct table sizing for tables hidden in tabs
         // http://www.datatables.net/examples/api/tabs_and_scrolling.html
@@ -453,6 +460,12 @@ function validate1(date) {
         [% END %]
       </li>
     [% END %]
+    [% IF Koha.Preference('TranslateNotices') %]
+        <li>
+            <span class="label">Preferred language for notices: </span>
+            [% translated_language %]
+        </li>
+    [% END %]
 	</ol>
 	</div>
  </div>
@@ -516,6 +529,16 @@ function validate1(date) {
             </li>
         [% END %]
         <li><a id="debarments-tab-link" href="#reldebarments">[% debarments.size %] Restrictions</a></li>
+
+        [% SET enrollments = patron.get_club_enrollments(1) %]
+        [% SET enrollable  = patron.get_enrollable_clubs(0,1) %]
+        [% IF CAN_user_clubs && ( enrollable.count || enrollments.count ) %]
+            <li>
+                <a id="clubs-tab-link" href="#clubs-tab">
+                    Clubs ([% enrollments.count %]/[% enrollable.count %])
+                </a>
+            </li>
+        [% END %]
     </ul>
 
 [% INCLUDE "checkouts-table.inc" %]
@@ -550,6 +573,12 @@ function validate1(date) {
         <p>No outstanding charges</p>
     [% END %]
 </div>
+
+[% IF CAN_user_clubs && ( enrollments.count || enrollable.count ) %]
+    <div id="clubs-tab">
+        Loading...
+    </div>
+[% END %]
 
 [% INCLUDE borrower_debarments.inc %]
 
