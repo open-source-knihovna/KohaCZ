@@ -131,8 +131,8 @@
 [% IF op == 'list' %]
 
     <div id="toolbar" class="btn-toolbar">
-        <a class="btn btn-small" id="newdebittype" href="/cgi-bin/koha/admin/account_types.pl?op=add_form&type=debit"><i class="fa fa-plus"></i> New debit type</a>
-        <a class="btn btn-small" id="newcreditype" href="/cgi-bin/koha/admin/account_types.pl?op=add_form&type=credit"><i class="fa fa-plus"></i> New credit type</a>
+        <a class="btn btn-default btn-sm" id="newdebittype" href="/cgi-bin/koha/admin/account_types.pl?op=add_form&type=debit"><i class="fa fa-plus"></i> New debit type</a>
+        <a class="btn btn-default btn-sm" id="newcreditype" href="/cgi-bin/koha/admin/account_types.pl?op=add_form&type=credit"><i class="fa fa-plus"></i> New credit type</a>
     </div>
 
     <h2>Account debit types</h2>
@@ -153,9 +153,9 @@
                     <td>[% debit_type.default_amount %]</td>
                     <td>[% IF debit_type.can_be_added_manually %]Yes[% ELSE %]No[% END %]</td>
                     <td class="actions">
-                        <a class="btn btn-mini" href="/cgi-bin/koha/admin/account_types.pl?op=add_form&amp;type_code=[% debit_type.type_code %]&type=debit"><i class="fa fa-pencil"></i> Edit</a>
+                        <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/account_types.pl?op=add_form&amp;type_code=[% debit_type.type_code %]&type=debit"><i class="fa fa-pencil"></i> Edit</a>
                         [% IF debit_type.can_be_deleted %]
-                            <a class="btn btn-mini" href="/cgi-bin/koha/admin/account_types.pl?op=delete_confirm&amp;type_code=[% debit_type.type_code %]&type=debit"><i class="fa fa-trash"></i> Delete</a>
+                            <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/account_types.pl?op=delete_confirm&amp;type_code=[% debit_type.type_code %]&type=debit"><i class="fa fa-trash"></i> Delete</a>
                         [% END %]
                     </td>
                 </tr>
@@ -184,9 +184,9 @@
                      <td>[% credit_type.description %]</td>
                      <td>[% IF credit_type.can_be_added_manually %]Yes[% ELSE %]No[% END %]</td>
                      <td class="actions">
-                         <a class="btn btn-mini" href="/cgi-bin/koha/admin/account_types.pl?op=add_form&amp;type_code=[% credit_type.type_code %]&type=credit"><i class="fa fa-pencil"></i> Edit</a>
+                         <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/account_types.pl?op=add_form&amp;type_code=[% credit_type.type_code %]&type=credit"><i class="fa fa-pencil"></i> Edit</a>
                          [% IF credit_type.can_be_deleted %]
-                             <a class="btn btn-mini" href="/cgi-bin/koha/admin/account_types.pl?op=delete_confirm&amp;type_code=[% credit_type.type_code %]&type=credit"><i class="fa fa-trash"></i> Delete</a>
+                             <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/account_types.pl?op=delete_confirm&amp;type_code=[% credit_type.type_code %]&type=credit"><i class="fa fa-trash"></i> Delete</a>
                          [% END %]
                      </td>
                  </tr>

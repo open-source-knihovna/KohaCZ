@@ -64,7 +64,7 @@
     </div>
     [% IF ( z3950updateservers ) %]
         <div class="btn-group">
-            <a class="btn btn-small dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-download"></i> Push to Z39.50 server
+            <a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-download"></i> Push to Z39.50 server
             <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">

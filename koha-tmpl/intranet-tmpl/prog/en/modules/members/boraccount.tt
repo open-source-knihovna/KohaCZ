@@ -42,11 +42,11 @@ $(document).ready(function() {
     var table_toolbar_html = '<p><a href="#" id="filter_transacs"><i class="fa fa-filter"></i> '+txtActivefilter+'</a>'
         + ' | <a id="CheckAll" href="#"><i class="fa fa-check"></i> ' + txtSelectAll + '</a>'
         + ' | <a id="CheckNone" href="#"><i class="fa fa-remove"></i> ' + txtClearAll + '</a>'
-        + '<a class="btn" href="/cgi-bin/koha/members/paycollect.pl?borrowernumber=[% borrowernumber %]"><i class="fa fa-money"></i> ' + txtPayAmount + '</a> ';
+        + '<a class="btn btn-default btn-sm" href="/cgi-bin/koha/members/paycollect.pl?borrowernumber=[% borrowernumber %]"><i class="fa fa-money"></i> ' + txtPayAmount + '</a> ';
     [% IF CAN_user_updatecharges_writeoff %]
-        table_toolbar_html += '<a id="woall" class="btn"><i class="fa fa-times"></i> ' + txtWriteOffAll + '</a>';
+        table_toolbar_html += '<a id="woall" class="btn btn-default btn-sm"><i class="fa fa-times"></i> ' + txtWriteOffAll + '</a>';
     [% END %]
-    table_toolbar_html += ' <a class="btn" id="payselected"><i class="fa fa-money"></i> ' + txtPaySelected + '</a>';
+    table_toolbar_html += ' <a class="btn btn-default btn-sm" id="payselected"><i class="fa fa-money"></i> ' + txtPaySelected + '</a>';
     $("#table_toolbar").html(table_toolbar_html);
 
     $('#filter_transacs').click(function(e) {
