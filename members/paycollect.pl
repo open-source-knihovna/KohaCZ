@@ -134,7 +134,7 @@ if ( $total_paid and $total_paid ne '0.00' ) {
 
             if ($writeoffoutstanding ) {
                 my $writeoffamount = $total_due - $total_paid;
-                Koha::Account->new( { patron_id => $bborrowernumber } )->pay(
+                Koha::Account->new( { patron_id => $borrowernumber } )->pay(
                     {
                         amount     => $writeoffamount,
                         lines      => [$line],
