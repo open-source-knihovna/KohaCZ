@@ -233,6 +233,7 @@
                         [% IF ediaccount %]
                         <div class="btn-group"><a href="/cgi-bin/koha/acqui/edi_ean.pl?op=ediorder&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-default btn-sm" id="ediorderbutton"><i class="fa fa-download"></i> Create EDIFACT order</a></div>
                         [% END %]
+
                         [% IF ( active && books_loop ) %]
                             <div class="btn-group">
                                 <form action="/cgi-bin/koha/acqui/basket.pl" method="post">
@@ -244,7 +245,8 @@
                         [% END %]
                 </div>
             [% END %]
-<!-- Modal for confirm deletion box-->
+
+            <!-- Modal for confirm deletion box-->
                 <div class="modal" id="deleteBasketModal" tabindex="-1" role="dialog" aria-labelledby="delbasketModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                     <div class="modal-content">
@@ -301,6 +303,7 @@
             [% ELSE %]
                 [% UNLESS ( grouped ) %]
                 <div id="toolbar" class="btn-toolbar">
+
                     <div class="btn-group"><a href="#" class="btn btn-default btn-sm" id="reopenbutton"><i class="fa fa-refresh"></i> Reopen this basket</a></div>
                     [% PROCESS btn_group %]
                     <div class="btn-group"><a href="/cgi-bin/koha/acqui/basket.pl?op=export&amp;basketno=[% basketno %]&amp;booksellerid=[% booksellerid %]" class="btn btn-default btn-sm" id="exportbutton"><i class="fa fa-download"></i> Export this basket as CSV</a></div>
@@ -583,7 +586,8 @@
                                 [% IF ( books_loo.isbn ) %] - [% books_loo.isbn %][% END %]
                                 [% IF ( books_loo.issn ) %] - [% books_loo.issn %][% END %]
                                 [% IF ( books_loo.publishercode ) %], [% books_loo.publishercode %][% END %]
-                                [% IF ( books_loo.publicationyear ) %], [% books_loo.publicationyear %][% END %]
+                                [% IF ( books_loo.publicationyear ) %], [% books_loo.publicationyear %]
+                                [% ELSIF ( books_loo.copyrightdate ) %] [% books_loo.copyrightdate %][% END %]
                                 [% IF ( books_loo.editionstatement ) %], [% books_loo.editionstatement %][% END %]
                                 [% IF ( books_loo.suggestionid ) %]
                                     <br/>
@@ -709,7 +713,8 @@
                         [% IF ( order.isbn ) %] - [% order.isbn %][% END %]
                         [% IF ( order.issn ) %] - [% order.issn %][% END %]
                         [% IF ( order.publishercode ) %], [% order.publishercode %][% END %]
-                        [% IF ( order.publicationyear ) %], [% order.publicationyear %][% END %]
+                        [% IF ( order.publicationyear ) %], [% order.publicationyear %]
+                        [% ELSIF ( order.copyrightdate ) %] [% order.copyrightdate %][% END %]
                         [% IF ( books_loo.editionstatement ) %], [% books_loo.editionstatement %][% END %]
                         [% IF ( order.cancellationreason ) %]
                           <br />

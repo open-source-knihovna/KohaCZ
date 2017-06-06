@@ -68,8 +68,6 @@ BEGIN {
     
         CheckItemPreSave
     
-        GetItemLocation
-        GetLostItems
         GetItemsForInventory
         GetItemInfosOf
         GetItemsByBiblioitemnumber
@@ -77,7 +75,6 @@ BEGIN {
 	GetItemsLocationInfo
 	GetHostItemsInfo
         GetItemnumbersForBiblio
-        get_itemnumbers_of
 	get_hostitemnumbers_of
         GetItemnumberFromBarcode
         GetBarcodeFromItemnumber
@@ -776,154 +773,6 @@ has copy-and-paste work.
 
 =cut
 
-=head2 GetItemLocation
-
-  $itemlochash = GetItemLocation($fwk);
-
-Returns a list of valid values for the
-C<items.location> field.
-
-NOTE: does B<not> return an individual item's
-location.
-
-where fwk stands for an optional framework code.
-Create a location selector with the following code
-
-=head3 in PERL SCRIPT
-
-  my $itemlochash = getitemlocation;
-  my @itemlocloop;
-  foreach my $thisloc (keys %$itemlochash) {
-      my $selected = 1 if $thisbranch eq $branch;
-      my %row =(locval => $thisloc,
-                  selected => $selected,
-                  locname => $itemlochash->{$thisloc},
-               );
-      push @itemlocloop, \%row;
-  }
-  $template->param(itemlocationloop => \@itemlocloop);
-
-=head3 in TEMPLATE
-
-  <select name="location">
-      <option value="">Default</option>
-  <!-- TMPL_LOOP name="itemlocationloop" -->
-      <option value="<!-- TMPL_VAR name="locval" -->" <!-- TMPL_IF name="selected" -->selected<!-- /TMPL_IF -->><!-- TMPL_VAR name="locname" --></option>
-  <!-- /TMPL_LOOP -->
-  </select>
-
-=cut
-
-sub GetItemLocation {
-
-    # returns a reference to a hash of references to location...
-    my ($fwk) = @_;
-    my %itemlocation;
-    my $dbh = C4::Context->dbh;
-    my $sth;
-    $fwk = '' unless ($fwk);
-    my ( $tag, $subfield ) =
-      GetMarcFromKohaField( "items.location", $fwk );
-    if ( $tag and $subfield ) {
-        my $sth =
-          $dbh->prepare(
-            "SELECT authorised_value
-            FROM marc_subfield_structure 
-            WHERE tagfield=? 
-                AND tagsubfield=? 
-                AND frameworkcode=?"
-          );
-        $sth->execute( $tag, $subfield, $fwk );
-        if ( my ($authorisedvaluecat) = $sth->fetchrow ) {
-            my $authvalsth =
-              $dbh->prepare(
-                "SELECT authorised_value,lib
-                FROM authorised_values
-                WHERE category=?
-                ORDER BY lib"
-              );
-            $authvalsth->execute($authorisedvaluecat);
-            while ( my ( $authorisedvalue, $lib ) = $authvalsth->fetchrow ) {
-                $itemlocation{$authorisedvalue} = $lib;
-            }
-            return \%itemlocation;
-        }
-        else {
-
-            #No authvalue list
-            # build default
-        }
-    }
-
-    #No authvalue list
-    #build default
-    $itemlocation{"1"} = "Not For Loan";
-    return \%itemlocation;
-}
-
-=head2 GetLostItems
-
-  $items = GetLostItems( $where );
-
-This function gets a list of lost items.
-
-=over 2
-
-=item input:
-
-C<$where> is a hashref. it containts a field of the items table as key
-and the value to match as value. For example:
-
-{ barcode    => 'abc123',
-  homebranch => 'CPL',    }
-
-=item return:
-
-C<$items> is a reference to an array full of hashrefs with columns
-from the "items" table as keys.
-
-=item usage in the perl script:
-
-  my $where = { barcode => '0001548' };
-  my $items = GetLostItems( $where );
-  $template->param( itemsloop => $items );
-
-=back
-
-=cut
-
-sub GetLostItems {
-    # Getting input args.
-    my $where   = shift;
-    my $dbh     = C4::Context->dbh;
-
-    my $query   = "
-        SELECT title, author, lib, itemlost, authorised_value, barcode, datelastseen, price, replacementprice, homebranch,
-               itype, itemtype, holdingbranch, location, itemnotes, items.biblionumber as biblionumber, itemcallnumber
-        FROM   items
-            LEFT JOIN biblio ON (items.biblionumber = biblio.biblionumber)
-            LEFT JOIN biblioitems ON (items.biblionumber = biblioitems.biblionumber)
-            LEFT JOIN authorised_values ON (items.itemlost = authorised_values.authorised_value)
-        WHERE
-        	authorised_values.category = 'LOST'
-          	AND itemlost IS NOT NULL
-         	AND itemlost <> 0
-    ";
-    my @query_parameters;
-    foreach my $key (keys %$where) {
-        $query .= " AND $key LIKE ?";
-        push @query_parameters, "%$where->{$key}%";
-    }
-
-    my $sth = $dbh->prepare($query);
-    $sth->execute( @query_parameters );
-    my $items = [];
-    while ( my $row = $sth->fetchrow_hashref ){
-        push @$items, $row;
-    }
-    return $items;
-}
-
 =head2 GetItemsForInventory
 
 ($itemlist, $iTotalRecords) = GetItemsForInventory( {
@@ -1478,41 +1327,6 @@ sub GetItemnumbersForBiblio {
     return \@items;
 }
 
-=head2 get_itemnumbers_of
-
-  my @itemnumbers_of = get_itemnumbers_of(@biblionumbers);
-
-Given a list of biblionumbers, return the list of corresponding itemnumbers
-for each biblionumber.
-
-Return a reference on a hash where keys are biblionumbers and values are
-references on array of itemnumbers.
-
-=cut
-
-sub get_itemnumbers_of {
-    my @biblionumbers = @_;
-
-    my $dbh = C4::Context->dbh;
-
-    my $query = '
-        SELECT itemnumber,
-            biblionumber
-        FROM items
-        WHERE biblionumber IN (?' . ( ',?' x scalar @biblionumbers - 1 ) . ')
-    ';
-    my $sth = $dbh->prepare($query);
-    $sth->execute(@biblionumbers);
-
-    my %itemnumbers_of;
-
-    while ( my ( $itemnumber, $biblionumber ) = $sth->fetchrow_array ) {
-        push @{ $itemnumbers_of{$biblionumber} }, $itemnumber;
-    }
-
-    return \%itemnumbers_of;
-}
-
 =head2 get_hostitemnumbers_of
 
   my @itemnumbers_of = get_hostitemnumbers_of($biblionumber);
@@ -1548,18 +1362,9 @@ sub get_hostitemnumbers_of {
     foreach my $hostfield ( $marcrecord->field($tag) ) {
         my $hostbiblionumber = $hostfield->subfield($biblio_s);
         my $linkeditemnumber = $hostfield->subfield($item_s);
-        my @itemnumbers;
-        if ( my $itemnumbers =
-            get_itemnumbers_of($hostbiblionumber)->{$hostbiblionumber} )
-        {
-            @itemnumbers = @$itemnumbers;
-        }
-        foreach my $itemnumber (@itemnumbers) {
-            if ( $itemnumber eq $linkeditemnumber ) {
-                push( @returnhostitemnumbers, $itemnumber );
-                last;
-            }
-        }
+        my $is_from_biblio = Koha::Items->search({ itemnumber => $linkeditemnumber, biblionumber => $hostbiblionumber });
+        push @returnhostitemnumbers, $linkeditemnumber
+          if $is_from_biblio;
     }
 
     return @returnhostitemnumbers;

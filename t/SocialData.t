@@ -34,12 +34,7 @@ BEGIN {
     use_ok('C4::SocialData');
 }
 
-use Test::DBIx::Class {
-    schema_class => 'Koha::Schema',
-    connect_info => ['dbi:SQLite:dbname=:memory:','',''],
-    connect_opts => { name_sep => '.', quote_char => '`', },
-    fixture_class => '::Populate',
-}, 'SocialData', 'Biblioitem' ;
+use Test::DBIx::Class;
 
 fixtures_ok [
     Biblioitem => [
@@ -61,6 +56,7 @@ fixtures_ok [
 
 my $db = Test::MockModule->new('Koha::Database');
 $db->mock( _new_schema => sub { return Schema(); } );
+Koha::Database::flush_schema_cache();
 
 my $data = C4::SocialData::get_data();
 is( $data, undef, 'get_data should return undef if no param given');

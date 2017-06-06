@@ -270,7 +270,12 @@
                   <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% loop_order.biblionumber %]">[% loop_order.title |html %]</a>
                 [% IF ( loop_order.author ) %] by [% loop_order.author %][% END %]
                 [% IF ( loop_order.isbn ) %] &ndash; [% loop_order.isbn %][% END %]
-                [% IF ( loop_order.publishercode ) %]<br />Publisher:[% loop_order.publishercode %][% END %]
+                [% IF ( loop_order.publishercode ) %]
+                    <br />Publisher: [% loop_order.publishercode %]
+                    [%- IF    ( loop_order.publicationyear > 0) -%], [% loop_order.publicationyear %]
+                    [%- ELSIF ( loop_order.copyrightdate   > 0) -%] [% loop_order.copyrightdate %]
+                    [% END %]
+                [% END %]
                 [% IF ( loop_order.suggestionid ) %]
                     <br/>
                     Suggested by: [% loop_order.surnamesuggestedby %][% IF ( loop_order.firstnamesuggestedby ) %], [% loop_order.firstnamesuggestedby %] [% END %]
@@ -417,7 +422,12 @@
                 <td><a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% order.biblionumber %]">[% order.title |html %]</a>
                 [% IF ( order.author ) %] / [% order.author %][% END %]
                 [% IF ( order.isbn ) %] - [% order.isbn %][% END %]
-                [% IF ( order.publishercode ) %]<br />Publisher :[% order.publishercode %][% END %]
+                [% IF ( order.publishercode ) %]
+                    <br />Publisher: [% order.publishercode %]
+                    [%- IF    ( order.publicationyear > 0) -%], [% order.publicationyear %]
+                    [%- ELSIF ( order.copyrightdate   > 0) -%] [% order.copyrightdate %]
+                    [% END %]
+                [% END %]
                 [% IF ( order.suggestionid ) %]
                     <br/>
                     Suggested by: [% order.surnamesuggestedby %][% IF ( order.firstnamesuggestedby ) %], [% order.firstnamesuggestedby %] [% END %]
