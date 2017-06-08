@@ -198,6 +198,7 @@ if (
     undef $exemptfine;
 }
 my $dropboxmode = $query->param('dropboxmode');
+my $dontchecktransfers = $query->param('dontchecktransfers');
 my $dotransfer  = $query->param('dotransfer');
 my $canceltransfer = $query->param('canceltransfer');
 my $dest = $query->param('dest');
@@ -305,7 +306,7 @@ if ($barcode) {
 
     # do the return
     ( $returned, $messages, $issueinformation, $borrower ) =
-      AddReturn( $barcode, $userenv_branch, $exemptfine, $dropboxmode, $return_date_override, $dropboxdate );
+      AddReturn( $barcode, $userenv_branch, $exemptfine, $dropboxmode, $return_date_override, $dropboxdate, $dontchecktransfers );
 
     if ($returned) {
         my $time_now = DateTime->now( time_zone => C4::Context->tz )->truncate( to => 'minute');
@@ -627,6 +628,7 @@ $template->param(
     errmsgloop     => \@errmsgloop,
     exemptfine     => $exemptfine,
     dropboxmode    => $dropboxmode,
+    dontchecktransfers => $dontchecktransfers,
     dropboxdate    => output_pref($dropboxdate),
     forgivemanualholdsexpire => $forgivemanualholdsexpire,
     overduecharges => $overduecharges,

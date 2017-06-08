@@ -768,3 +768,8 @@ msgstr "Další poplatky"
 msgid ""
 "This item has previously been checked out to this patron. Check out anyway?"
 msgstr "Tuto jednotku již měl tento čtenář vypůjčenou. Přesto vypůjčit?"
+
+#: intranet-tmpl/prog/en/modules/circ/returns.tt
+#, c-format
+msgid "Don't check for transfers"
+msgstr "Nepokoušet se o přesun na domovskou knihovnu"

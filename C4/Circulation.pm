@@ -1805,7 +1805,7 @@ patron who last borrowed the book.
 =cut
 
 sub AddReturn {
-    my ( $barcode, $branch, $exemptfine, $dropbox, $return_date, $dropboxdate ) = @_;
+    my ( $barcode, $branch, $exemptfine, $dropbox, $return_date, $dropboxdate, $dontchecktransfers ) = @_;
 
     if ($branch and not Koha::Libraries->find($branch)) {
         warn "AddReturn error: branch '$branch' not found.  Reverting to " . C4::Context->userenv->{'branch'};
@@ -2087,7 +2087,7 @@ sub AddReturn {
     }
 
     # Transfer to returnbranch if Automatic transfer set or append message NeedsTransfer
-    if (!$is_in_rotating_collection && ($doreturn or $messages->{'NotIssued'}) and !$resfound and ($branch ne $returnbranch) and not $messages->{'WrongTransfer'}){
+    if (!$is_in_rotating_collection && !$dontchecktransfers && ($doreturn or $messages->{'NotIssued'}) and !$resfound and ($branch ne $returnbranch) and not $messages->{'WrongTransfer'}){
         if  (C4::Context->preference("AutomaticItemReturn"    ) or
             (C4::Context->preference("UseBranchTransferLimits") and
              ! IsBranchTransferAllowed($branch, $returnbranch, $item->{C4::Context->preference("BranchTransferLimitsType")} )

@@ -709,6 +709,14 @@ $(document).ready(function () {
                         [% END %]
                         <label for="dropboxcheck">Book drop mode</label>
                     </p>
+                    <p>
+                        [% IF ( dontchecktransfers ) %]
+                        <input type="checkbox" id="dontchecktransfers" name="dontchecktransfers" value="dontchecktransfers" checked="checked" />
+                        [% ELSE %]
+                        <input type="checkbox" id="dontchecktransfers" name="dontchecktransfers" value="dontchecktransfers" />
+                        [% END %]
+                        <label for="dontchecktransfers">Don't check for transfers</label>
+                    </p>
                     [% IF Koha.Preference('ExpireReservesMaxPickUpDelayCharge') %]
                     <p>
                         [% IF ( forgivemanualholdsexpire ) %]
