@@ -414,6 +414,9 @@ INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `
 ('PayPalUser',  '', NULL ,  'Your PayPal API username ( email address )',  'Free'),
 ('PermanentWithdrawnNumberItemsColumns', 'homebranch', NULL, 'Which columns of items table use to determinate the new withdraw number', 'Free'),
 ('Persona','0','','Use Mozilla Persona for login','YesNo'),
+('PosTerminalCurrencyCode',  '', NULL ,  'POS Terminal currency code number',  'Integer')
+('PosTerminalIP',  '', NULL ,  'POS Terminal IP address',  'Free'),
+('PosTerminalPort',  '', NULL ,  'POS Terminal port',  'Integer'),
 ('PrefillItem','0','','When a new item is added, should it be prefilled with last created item values?','YesNo'),
 ('previousIssuesDefaultSortOrder','asc','asc|desc','Specify the sort order of Previous Issues on the circulation page','Choice'),
 ('printcirculationslips','1','','If ON, enable printing circulation receipts','YesNo'),

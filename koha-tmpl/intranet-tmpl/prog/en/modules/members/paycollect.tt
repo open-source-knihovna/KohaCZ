@@ -3,6 +3,8 @@
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Patrons &rsaquo; Collect fine payment for  [% borrower.firstname %] [% borrower.surname %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
+[% INCLUDE 'members-pos-terminal-messages.inc' %]
+<script type="text/javascript" src="[% interface %]/[% theme %]/js/payments.js"></script>
 <script type= "text/javascript">
 //<![CDATA[
 $(document).ready(function() {
@@ -97,7 +99,7 @@ function moneyFormat(textObj) {
 [% END %]
 
 [% IF ( pay_individual ) %]
-    <form name="payindivfine" id="payindivfine" onsubmit="return validatePayment(this);" method="post" action="/cgi-bin/koha/members/paycollect.pl">
+    <form name="payindivfine" id="payindivfine" onsubmit="return makePayment(this);" method="post" action="/cgi-bin/koha/members/paycollect.pl">
     <input type="hidden" name="borrowernumber" id="borrowernumber" value="[% borrower.borrowernumber %]" />
     <input type="hidden" name="pay_individual" id="pay_individual" value="[% pay_individual %]" />
     <input type="hidden" name="itemnumber" id="itemnumber" value="[% itemnumber %]" />
@@ -149,6 +151,12 @@ function moneyFormat(textObj) {
         <label for="writeOffOutstanding">Write off outstanding part</label>
         <input name="writeOffOutstanding" id="writeOffOutstanding" type="checkbox" value="1"/>
     </li>
+[% IF Koha.Preference('PosTerminalIP') %]
+    <li>
+        <label for="bycard">Pay by card: </label>
+        <input type="checkbox" name="bycard" id="bycard" value="1"/>
+    </li>
+[% END %]
 </ol>
 </fieldset>
 
@@ -232,5 +240,5 @@ function moneyFormat(textObj) {
 [% INCLUDE 'circ-menu.inc' %]
 </div>
 </div>
+[% INCLUDE 'members-pos-terminal-dialog.inc' %]
 [% INCLUDE 'intranet-bottom.inc' %]
-

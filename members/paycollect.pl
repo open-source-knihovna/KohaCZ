@@ -63,6 +63,7 @@ my $branch         = C4::Context->userenv->{'branch'};
 
 my ( $total_due, $accts, $numaccts ) = GetMemberAccountRecords($borrowernumber);
 my $total_paid = $input->param('paid');
+my $by_card    = $input->param('bycard');
 
 my $individual   = $input->param('pay_individual');
 my $writeoff     = $input->param('writeoff_individual');

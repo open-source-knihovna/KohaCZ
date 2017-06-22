@@ -1,0 +1,250 @@
+#!/usr/bin/perl
+
+# Copyright 2017 R-Bit technology, s.r.o.
+#
+# This file is part of Koha.
+#
+# Koha is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# Koha is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Koha; if not, see <http://www.gnu.org/licenses>.
+#
+
+use Modern::Perl;
+
+use CGI qw ( -utf8 );
+use C4::Auth qw( check_api_auth );
+use C4::Context;
+use JSON qw( to_json );
+use IO::Socket::INET;
+use Koha::PosTerminal::Message;
+use Koha::PosTerminal::Client;
+use Koha::PosTerminal::Transaction;
+use Koha::PosTerminal::Transactions;
+use XML::Simple;
+use Scalar::Util qw( looks_like_number );
+use DateTime;
+use Data::Dumper;
+
+my $query = new CGI;
+my ($status, $cookie, $sessionID) = check_api_auth($query, { updatecharges => 1 } );
+my $transactionId = $query->param('transaction_id');
+my $accountlinesId = $query->param('accountlines_id');
+my $action = $query->param('action') || q{};
+my $result = {
+    status => $status,
+    transaction_id => defined($transactionId) ? $transactionId : -1
+};
+
+binmode STDOUT, ":encoding(UTF-8)";
+print $query->header(
+    -type => 'text/xml',
+    -charset => 'UTF-8'
+);
+
+if ($status eq 'ok') {
+
+    if (!$action) {
+        start_transaction($result, $accountlinesId);
+    }
+
+    elsif ($action eq 'status') {
+        get_transaction_status($result, $transactionId);
+    }
+
+    elsif (($action eq 'request-payment') || ($action eq 'request-refund') || ($action eq 'abort')) {
+        my $transaction = Koha::PosTerminal::Transactions->find($transactionId);
+        my $client = new Koha::PosTerminal::Client(
+            C4::Context->preference('PosTerminalIP'),
+            C4::Context->preference('PosTerminalPort'),
+        );
+
+        if ($client->connect()) {
+            $transaction->set({status => 'connected'})->store();
+
+            if ($action eq 'abort') {
+                my $abort = abort_transaction($client, $transaction);
+                my $field = $abort->getField($abort->F_RESPONSE_CODE);
+                $result->{response_code} = $field ? $field->value : 0;
+                $result->{status} = "abort";
+                $transaction->set({status => $result->{status}, response_code => $result->{response_code}})->store();
+                print XMLout($result, NoAttr => 1, RootName => 'response', XMLDecl => 1);
+                exit 0;
+            }
+
+            my $transactionRequest  = send_transaction_request($client, $transaction, $action eq 'request-payment' ? Koha::PosTerminal::Message->TTYPE_SALE : Koha::PosTerminal::Message->TTYPE_REFUND, scalar $query->param('paid'));
+
+            my $transactionMessage  = receive_transaction_message($client, $transaction);
+
+            my $field = $transactionMessage->getField($transactionMessage->F_RESPONSE_CODE);
+            $result->{response_code} = $field ? $field->value : 0;
+            if ($result->{response_code} <= 10) {
+
+                my $transactionResponse = receive_transaction_response($client, $transaction);
+                if (!looks_like_number($transactionResponse)) {
+                    send_confirmation_message($client, $transaction, $transactionResponse);
+
+                    $client->disconnect();
+                    $transaction->set({status => 'disconnected'})->store();
+
+                    $field = $transactionResponse->getField($transactionResponse->F_RESPONSE_CODE);
+                    $result->{response_code} = $field ? $field->value : 0;
+
+                    if ($result->{response_code} <= 10) {
+                        if ( $field = $transactionResponse->getField($transactionResponse->F_CARD_NUMBER) ) {
+                            $result->{cardnumber} = $field->value;
+                            $result->{status} = "success";
+                        }
+                        else {
+                            $result->{status} = "ERR_NO_CARD_NUMBER";
+                        }
+                    }
+                    else {
+                        $result->{status} = "ERR_TRANSACTION_REJECTED";
+                    }
+                }
+                else {
+                    $result->{status} = "ERR_CONNECTION_FAILED";
+                }
+            }
+            else {
+                $result->{status} = "ERR_REQUEST_REJECTED";
+            }
+        }
+        else {
+            $result->{status} = "ERR_NO_CONNECTION";
+        }
+        $transaction->set({status => $result->{status}, response_code => $result->{response_code}})->store();
+    }
+    elsif ($action eq 'request-refund') {
+    }
+}
+
+print XMLout($result, NoAttr => 1, RootName => 'response', XMLDecl => 1);
+
+exit 0;
+
+sub log_communication {
+    my ( $terminalMsg, $transactionId ) = @_;
+
+    my $transaction = Koha::PosTerminal::Transactions->find($transactionId);
+    my $now = DateTime->now();
+    my $message = "[" . $now->ymd . " " . $now->hms ."] data: ";
+    if (looks_like_number($terminalMsg)) {
+        $message .= "error " . $terminalMsg . "\n";
+    }
+    else {
+        $message .= $terminalMsg->fieldCount() . ", " . $terminalMsg->getDirection() . ": " . $terminalMsg->decodeControlCharacters($terminalMsg->getContent()) . "\n";
+    }
+    $transaction->set({message_log => (defined $transaction->message_log ? $transaction->message_log : "") . $message})->store();
+}
+
+sub start_transaction {
+    my ( $result, $accountlinesId ) = @_;
+
+    my $transaction = Koha::PosTerminal::Transaction->new({accountlines_id => $accountlinesId, status => 'new' })->store();
+    $result->{status} = $transaction->status;
+    $result->{transaction_id} = $transaction->id;
+}
+
+sub abort_transaction {
+    my ( $client, $transaction ) = @_;
+
+    # send abort message
+    my $abort = new Koha::PosTerminal::Message(Koha::PosTerminal::Message::DIR_SENT);
+    my $hdrAbort = $abort->getHeader();
+die(Dumper($transaction ? $transaction->getHeader() : "BUBU"));
+    my $hdrTransaction = $transaction->getHeader();
+
+    $hdrAbort->dateTime($hdrTransaction->dateTime());
+    $hdrAbort->terminalID($hdrTransaction->terminalID());
+    $hdrAbort->protocolType($hdrTransaction->protocolType());
+    $hdrAbort->protocolVersion($hdrTransaction->protocolVersion());
+    $abort->addField($abort->F_TRANSACTION_TYPE, $abort->TTYPE_ABORT);
+    $client->send($abort);
+
+    $abort->set({status => 'abort'})->store();
+    log_communication($abort, $transaction->id);
+
+    return $abort;
+}
+
+sub get_transaction_status {
+    my ( $result, $transactionId ) = @_;
+
+    my $transaction = Koha::PosTerminal::Transactions->find($transactionId);
+    $result->{status} = $transaction->status;
+}
+
+sub send_transaction_request {
+    my ( $client, $transaction, $type, $paid ) = @_;
+
+    # send transaction request
+    my $transactionRequest = new Koha::PosTerminal::Message(Koha::PosTerminal::Message::DIR_SENT);
+    $transactionRequest->getHeader()->dateTime(0);
+    $transactionRequest->addField($transactionRequest->F_TRANSACTION_TYPE, $type);
+    $transactionRequest->addField($transactionRequest->F_PAID_AMOUNT, $paid * 100);
+    $transactionRequest->addField($transactionRequest->F_INVOICE_NUMBER, $transaction->accountlines_id);
+    $transactionRequest->addField($transactionRequest->F_CURRENCY_CODE, C4::Context->preference('PosTerminalCurrencyCode'));
+    $client->send($transactionRequest);
+    $transaction->set({status => 'sent-request'})->store();
+    log_communication($transactionRequest, $transaction->id);
+
+    return $transactionRequest;
+}
+
+sub receive_transaction_message {
+    my ( $client, $transaction ) = @_;
+
+    # receive transaction message
+    my $transactionMessage = $client->receive();
+
+    $transaction->set({status => 'received-message'})->store();
+    log_communication($transactionMessage, $transaction->id);
+
+    return $transactionMessage;
+}
+
+sub receive_transaction_response {
+    my ( $client, $transaction ) = @_;
+    my $transactionResponse;
+    my $status;
+
+    # receive transaction response
+    for (;;) {
+        $transactionResponse = $client->receive();
+        $status = looks_like_number($transactionResponse) ? 'ERR_CONNECTION_FAILED'
+                                                          : ($transactionResponse->fieldCount() ? 'received-response' : 'activity-message');
+        $transaction->set({status => $status})->store();
+        log_communication($transactionResponse, $transaction->id);
+
+        last if (looks_like_number($transactionResponse) || $transactionResponse->fieldCount());
+    }
+
+    return $transactionResponse;
+}
+
+sub send_confirmation_message {
+    my ( $client, $transaction, $transactionResponse ) = @_;
+
+    # send confirmation message
+    my $confirmation = new Koha::PosTerminal::Message(Koha::PosTerminal::Message::DIR_SENT);
+    my $hdrConfirm = $confirmation->getHeader();
+    my $hdrResponse = $transactionResponse->getHeader();
+    $hdrConfirm->dateTime($hdrResponse->dateTime());
+    $hdrConfirm->terminalID($hdrResponse->terminalID());
+    $hdrConfirm->protocolType($hdrResponse->protocolType());
+    $hdrConfirm->protocolVersion($hdrResponse->protocolVersion());
+    $client->send($confirmation);
+
+    $transaction->set({status => 'sent-confirmation'})->store();
+    log_communication($confirmation, $transaction->id);
+}

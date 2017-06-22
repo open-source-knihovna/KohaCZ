@@ -136,6 +136,18 @@ Circulation:
                   yes: Show
                   no: "Do not show"
             - all items in the "Checked-in items" list, even items that were not checked out.
+        -
+            - Payment terminal communicates at IP address
+            - pref: PosTerminalIP
+            - and port
+            - pref: PosTerminalPort
+              class: integer
+            - . Leave the IP address blank to disable this payment option.
+        -
+            - Payment terminal uses
+            - pref: PosTerminalCurrencyCode
+              class: integer
+            - as currency code number. Please see <a href="http://www.iso.org/iso/home/standards/currency_codes.htm" target="_blank">ISO 4217</a> for a full list of assigned numbers.
 
     Checkout Policy:
         -
