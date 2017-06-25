@@ -1370,21 +1370,6 @@ CREATE TABLE pending_offline_operations (
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Table structure for table `pos_terminal_transactions`
---
-
-CREATE TABLE `pos_terminal_transactions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `accountlines_id` int(11) NOT NULL,
-  `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'new',
-  `response_code` varchar(5) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-  `message_log` text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-  PRIMARY KEY (`id`),
-  KEY `accountlines_id` (`accountlines_id`),
-  CONSTRAINT `pos_terminal_transactions_ibfk1` FOREIGN KEY (`accountlines_id`) REFERENCES `accountlines` (`accountlines_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
 -- Table structure for table `printers`
 --
 
@@ -2772,6 +2757,21 @@ CREATE TABLE `accountoffsets` (
   `offsetamount` decimal(28,6) default NULL,
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   CONSTRAINT `accountoffsets_ibfk_1` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table `pos_terminal_transactions`
+--
+
+CREATE TABLE `pos_terminal_transactions` (
+	  `id` int(11) NOT NULL AUTO_INCREMENT,
+	  `accountlines_id` int(11) NOT NULL,
+	  `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'new',
+	  `response_code` varchar(5) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+	  `message_log` text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+	  PRIMARY KEY (`id`),
+	  KEY `accountlines_id` (`accountlines_id`),
+	  CONSTRAINT `pos_terminal_transactions_ibfk1` FOREIGN KEY (`accountlines_id`) REFERENCES `accountlines` (`accountlines_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
