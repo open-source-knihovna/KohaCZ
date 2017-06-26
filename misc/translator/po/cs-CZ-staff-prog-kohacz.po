@@ -1,3 +1,15 @@
+# #-#-#-#-#  cs-CZ-staff-prog-orig.po (PACKAGE VERSION)  #-#-#-#-#
+# LibLime Koha Translation Manager
+# Copyright (C) 2007 LibLime
+# http://liblime.com <info@liblime.com>
+# Based on Kartouche http://www.dotmon.com/kartouche/
+# #-#-#-#-#  cs-CZ-staff-prog.po (PACKAGE VERSION)  #-#-#-#-#
+# #-#-#-#-#  cs-CZ-staff-prog-orig.po (PACKAGE VERSION)  #-#-#-#-#
+# LibLime Koha Translation Manager
+# Copyright (C) 2007 LibLime
+# http://liblime.com <info@liblime.com>
+# Based on Kartouche http://www.dotmon.com/kartouche/
+# #-#-#-#-#  cs-CZ-staff-prog-kohacz.po  #-#-#-#-#
 # #-#-#-#-#  cs-CZ-staff-prog.po  #-#-#-#-#
 # #-#-#-#-#  cs-CZ-staff-prog-orig.po (PACKAGE VERSION)  #-#-#-#-#
 # LibLime Koha Translation Manager
@@ -17,8 +29,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2017-05-03 12:08+0000\n"
-"PO-Revision-Date: 2017-05-03 15:18+0200\n"
+"POT-Creation-Date: 2017-05-14 18:10-0300\n"
+"PO-Revision-Date: 2017-06-26 12:46+0200\n"
 "Last-Translator: Josef Moravec <josef.moravec@gmail.com>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
 ">\n"
@@ -27,13 +39,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.7.1\n"
-"X-POOTLE-MTIME: 1492501598.000000\n"
-"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.7.1\n"
-"X-POOTLE-MTIME: 1463580765.000000\n"
+"X-Generator: Poedit 2.0.1\n"
+"X-POOTLE-MTIME: 1493972402.000000\n"
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2017-04-16 10:46-0300\n"
+"POT-Creation-Date: 2017-06-26 10:30+0000\n"
 "PO-Revision-Date: 2017-04-18 07:46+0000\n"
 "Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
@@ -44,577 +53,16 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
+"X-POOTLE-MTIME: 1493972402.000000\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Poedit 1.8.7.1\n"
 "X-POOTLE-MTIME: 1492501598.000000\n"
-
-#. %1$s:  END
-#. %2$s:  END
-#. %3$s:  END
-#. %4$s:  END
-#. %5$s:  END
-#. %6$s:  END
-#. %7$s:  BLOCK language
-#. %8$s:  SWITCH lang
-#. %9$s:  CASE ['en', 'eng']
-#. %10$s:  CASE ['fr', 'fre']
-#. %11$s:  CASE ['it', 'ita']
-#. %12$s:  CASE ['de', 'ger', 'deu']
-#. %13$s:  CASE ['es', 'spa']
-#. %14$s:  CASE ['heb']
-#. %15$s:  CASE ['ara']
-#. %16$s:  CASE ['gre']
-#. %17$s:  CASE ['grc']
-#. %18$s:  CASE
-#. %19$s:  lang
-#. %20$s:  END
-#. %21$s:  END
-#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:136
-#, c-format
-msgid ""
-"%s %s %s %s %s %s %s %s %sEnglish %sFrench %sItalian %sGerman %sSpanish "
-"%sHebrew %sArabic %sGreek (modern) %sGreek (to 1453) %s%s %s %s "
-msgstr ""
-"%s %s %s %s %s %s %s %s %sAngličtina%sFrancouzština %sItalština %sNěmčina "
-"%sŠpanělština %sHebrejština %sArabština %sŘečtina (moderní) %sŘečtina (do "
-"roku 1453) %s%s %s %s "
-
-#. For the first occurrence,
-#. %1$s:  INCLUDE 'doc-head-open.inc'
-#. %2$s:  BLOCK ServerType
-#. %3$s:  IF (server.servertype||type) == 'sru'
-#. %4$s:  ELSIF (server.servertype||type) == 'zed'
-#. %5$s:  ELSIF (server.servertype||type) == 'zed_update'
-#. %6$s:  END
-#. %7$s:  END
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:1
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:271
-#, c-format
-msgid "%s %s %s SRU %s Z39.50 %s Z39.50 Update %s %s "
-msgstr "%s %s %s SRU %s Z39.50 %s Z39.50 Update %s %s "
-
-#. %1$s:  SWITCH m.code
-#. %2$s:  CASE 'error_on_saving'
-#. %3$s:  CASE 'error_on_delete'
-#. %4$s:  CASE 'success_on_saving'
-#. %5$s:  CASE 'success_on_delete'
-#. %6$s:  CASE
-#. %7$s:  m.code
-#. %8$s:  END
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:43
-#, c-format
-msgid ""
-"%s %s An error occurred when saving this account type. %s An error occurred "
-"when deleting this account type. Check the logs. %s Account type saved "
-"successfully. %s Account type deleted successfully. %s %s %s "
-msgstr ""
-"%s %s Při ukládání typu účtu se vyskytla chyba. %s Při odstraňování typu "
-"účtu nastala chyba. Zkontrolujte provozní záznamy. %s Typ účtu byl úspěšně "
-"uložen. %s Typ účtu byl úspěšně odstraněn. %s %s %s "
-
-#. %1$s:  SWITCH account.accounttype
-#. %2$s:  CASE 'Pay'
-#. %3$s:  CASE 'Pay00'
-#. %4$s:  CASE 'Pay01'
-#. %5$s:  CASE 'Pay02'
-#. %6$s:  CASE 'N'
-#. %7$s:  CASE 'F'
-#. %8$s:  CASE 'A'
-#. %9$s:  CASE 'M'
-#. %10$s:  CASE 'L'
-#. %11$s:  CASE 'W'
-#. %12$s:  CASE 'FU'
-#. %13$s:  CASE 'HE'
-#. %14$s:  CASE 'Rent'
-#. %15$s:  CASE 'FOR'
-#. %16$s:  CASE 'LR'
-#. %17$s:  CASE 'PAY'
-#. %18$s:  CASE 'WO'
-#. %19$s:  CASE 'C'
-#. %20$s:  CASE 'CR'
-#. %21$s:  CASE
-#. %22$s:  account.accounttype
-#. %23$s: - END -
-#: intranet-tmpl/prog/en/modules/members/boraccount.tt:160
-#, c-format
-msgid ""
-"%s %sPayment, thanks %sPayment, thanks (cash via SIP2) %sPayment, thanks "
-"(VISA via SIP2) %sPayment, thanks (credit card via SIP2) %sNew card %sFine "
-"%sAccount management fee %sSundry %sLost item %sWriteoff %sAccruing fine "
-"%sHold waiting too long %sRental fee %sForgiven %sLost item fee refund "
-"%sPayment %sWriteoff %sCredit %sCredit %s%s %s "
-msgstr ""
-"%s %sPlatba, díky %sPlatba, díky (hotově přes SIP2) %sPlatba, díky (VISA "
-"přes SIP2) %sPlatba, díky (kreditní karta přes SIP2) %sNový průkaz "
-"%sUpomínka %sRegistrační poplatek %sOstatní %sZtracený dokument %s Prominuto "
-"%sNabíhající upomínka %sDlouho čekající rezervace %sPoplatek za půjčení "
-"%sProminuto %sVrácení poplatku za ztrátu dokumentu %sPlatba %sProminuto "
-"%sKredit %sKredit %s%s %s "
-
-#. %1$s:  IF op == 'add_form'
-#. %2$s:  IF account_type.type_code
-#. %3$s:  ELSE
-#. %4$s:  END
-#. %5$s:  type
-#. %6$s:  ELSIF op == 'delete_confirm'
-#. %7$s:  type
-#. %8$s:  END
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:28
-#, c-format
-msgid ""
-"%s &rsaquo; %sModify%sNew%s Account %s type %s &rsaquo; Confirm deletion of "
-"account %s type %s "
-msgstr ""
-"%s &rsaquo; %sUpravit%sNový%s Typ účtu - %s %s &rsaquo; Potvrdit odstranění "
-"typu účtu - %s %s "
-
-#. %1$s:  not_deleted_items
-#. %2$s:  FOREACH not_deleted_itemnumber IN not_deleted_itemnumbers
-#. %3$s:  not_deleted_itemnumber.itemnumber
-#. %4$s:  END
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:163
-#, c-format
-msgid "%s item(s) could not be withdrawn: %s%s%s"
-msgstr "%s jednotek nelze odepsat: %s%s%s"
-
-#. %1$s:  withdrawn_items
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:159
-#, c-format
-msgid "%s item(s) withdrawn."
-msgstr "%s jednotek bylo odepsáno."
-
-#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
-#, c-format
-msgid ". Check out anyway?"
-msgstr ". Přesto vypůjčit?"
-
-#. META http-equiv=refresh
-#: intranet-tmpl/prog/en/modules/installer/step3.tt:2
-msgid "5; url=/cgi-bin/koha/mainpage.pl"
-msgstr "5; url=/cgi-bin/koha/mainpage.pl"
-
-#. %1$s:  type
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:72
-#, c-format
-msgid "Account %s type code: "
-msgstr "Kód typu účtu (%s): "
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:171
-#, c-format
-msgid "Account credit types"
-msgstr "Typy účtovaných poplatků"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:138
-#, c-format
-msgid "Account debit types"
-msgstr "Typy plateb"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:112
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:142
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:175
-#, c-format
-msgid "Account type code"
-msgstr "Kód typu účtu"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:115
-#, c-format
-msgid "Account type description"
-msgstr "Popis typu účtu"
-
-#: intranet-tmpl/prog/en/modules/admin/admin-home.tt:58
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:28
-#: intranet-tmpl/prog/en/includes/admin-menu.inc:40
-#, c-format
-msgid "Account types"
-msgstr "Typy účtu"
-
-#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:134
-#, c-format
-msgid "Another details:"
-msgstr "Další podrobnosti:"
-
-#. %1$s:  IF ( del )
-#. %2$s:  ELSIF ( withdrawal )
-#. %3$s:  ELSE
-#. %4$s:  END
-#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:25
-#, c-format
-msgid "Batch item %sdeletion%swithdrawal%smodification%s"
-msgstr "Dávkové %smazání%sodpisy%súprava%s jednotek"
-
-#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:15
-#: intranet-tmpl/prog/en/modules/tools/tools-home.tt:123
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:31
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:37
-#: intranet-tmpl/prog/en/includes/tools-menu.inc:60
-#, c-format
-msgid "Batch item withdrawal"
-msgstr "Dávkové odpisy jednotek"
-
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:37
-#, c-format
-msgid "Batch item withdrawal results"
-msgstr "Výsledky dávkového odpisu jednotek"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:145
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:177
-#, c-format
-msgid "Can be added manually"
-msgstr "Lze vložit ručně"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:91
-#, c-format
-msgid "Can be added manually? "
-msgstr "Lze vložit ručně?"
-
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:40
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:41
-#, c-format
-msgid "Cannot Withdraw"
-msgstr "Nelze odepsat"
-
-#: intranet-tmpl/prog/en/modules/admin/categories.tt:351
-#, c-format
-msgid "Check previous íssues"
-msgstr "Kontrolovat zdali již měl půjčeno"
-
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:186
-#, c-format
-msgid "Create fine"
-msgstr "Vložit poplatek"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:198
-#, c-format
-msgid "Create new credit type"
-msgstr "Vytvořit nový typ platby"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:167
-#, c-format
-msgid "Create new debit type"
-msgstr "Vytvořit nový typ poplatku"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:144
-#, c-format
-msgid "Default amount"
-msgstr "Výchozí částka"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:82
-#, c-format
-msgid "Default amount: "
-msgstr "Výchozí částka:\t"
-
-#: intranet-tmpl/prog/en/modules/admin/admin-home.tt:59
-#, c-format
-msgid "Define debit and credit types."
-msgstr "Definuje typy poplatků a plateb"
-
-#. %1$s:  type
-#. %2$s:  account_type.description
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:110
-#, c-format
-msgid "Delete account %s type \"%s?\""
-msgstr "Odstranit typ účtu (%s) \"%s\"?"
-
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:226
-#, c-format
-msgid "Example: 100$7"
-msgstr "Příklad: 100$7"
-
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:300
-#, c-format
-msgid "Example: 5.00 "
-msgstr "Příklad: 5.00 "
-
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:231
-#, c-format
-msgid "Example: 900$a"
-msgstr "Příklad: 900$a"
-
-#: intranet-tmpl/prog/en/modules/circ/pendingreserves.tt:100
-#, c-format
-msgid "First patron"
-msgstr "První čtenář"
-
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:78
-#, c-format
-msgid ""
-"Insert barcode and given item will be immediately remove from any collection "
-"and returned back to home library"
-msgstr ""
-"Vložte čárový kód a daná jednotka bude vrácena ze souboru a přesunuta do své "
-"domovské knihovny."
-
-#. For the first occurrence,
-#. %1$s:  borrower.firstname
-#. %2$s:  borrower.surname
-#. %3$s:  borrower.cardnumber
-#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:33
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:51
-#, c-format
-msgid "Item was issued by %s %s (%s) and now is returned"
-msgstr "Jednotka byla vypůjčena čtenáři %s %s (%s) a nyní byla vrácena"
-
-#. %1$s:  barcode
-#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:40
-#, c-format
-msgid "Item with barcode '%s' added successfully."
-msgstr "Jednotka s čárovým kódem '%s' byla úspěšně přidána!"
-
-#. %1$s:  barcode
-#. %2$s:  IF ( itemInfo )
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:65
-#, c-format
-msgid "Item with barcode '%s' was not removed from collection: %s "
-msgstr "Jednotka s čárovým kódem '%s' nemohla být odstraněna ze souboru: %s "
-
-#. %1$s:  barcode
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:57
-#, c-format
-msgid ""
-"Item with barcode '%s' was removed from a collection and returned to "
-"homebranch."
-msgstr ""
-"Jednotka s čárovým kódem '%s' byla odstraněna ze souboru a vrácena do "
-"domovské knihovny."
-
-#. %1$s:  IF op =='add_form'
-#. %2$s:  IF account_type.type_code
-#. %3$s:  type
-#. %4$s:  ELSE
-#. %5$s:  type
-#. %6$s:  END
-#. %7$s:  ELSE
-#. %8$s:  IF op == 'delete_confirm'
-#. %9$s:  type
-#. %10$s:  ELSE
-#. %11$s:  END
-#. %12$s:  END
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:2
-#, c-format
-msgid ""
-"Koha &rsaquo; Administration &rsaquo; %sAccount types &rsaquo; %s Modify "
-"account %s type%s New account %s type%s%s%sAccount types &rsaquo; Confirm "
-"deletion of account %stype%s Account types%s%s"
-msgstr ""
-"Koha &rsaquo; Administrace &rsaquo; %sTypy účtů &rsaquo; %s Upravit typ účtu "
-"(%s) %s Přidat nový typ účtu (%s)%s%s%sTypy účtů &rsaquo; Potvrdit "
-"odstranění typu účtu (%s)%s Typy účtů%s%s"
-
-#. %1$s:  IF ( del )
-#. %2$s:  ELSIF ( withdrawal )
-#. %3$s:  ELSE
-#. %4$s:  END
-#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:2
-#, c-format
-msgid ""
-"Koha &rsaquo; Tools &rsaquo; %sBatch item deletion%sBatch item withdrawal"
-"%sBatch item modification%s "
-msgstr ""
-"Koha &rsaquo; Nástroje &rsaquo; %s Dávkové mazání jednotek%sDávkový odpis "
-"jednotek%sDávková úprava jednotek%s "
-
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:2
-#, c-format
-msgid "Koha &rsaquo; Tools &rsaquo; Batch item withdrawal"
-msgstr "Koha &rsaquo; Nástroje &rsaquo; Dávkový odpis jednotek"
-
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:224
-#, c-format
-msgid "MARC authoritative id field: "
-msgstr "Pole MARCu pro identifikátor: "
-
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:229
-#, c-format
-msgid "MARC field where to put your message: "
-msgstr "Pole MARCu pro vložení vaší zprávy: "
-
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:219
-#, c-format
-msgid "MARC fields not to send to update server: "
-msgstr "Pole MARCu, která nebudou odesílána: "
-
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:234
-#, c-format
-msgid "Message sent when create takes place: "
-msgstr "Zpráva odesílaná při vytváření nového záznamu: "
-
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:238
-#, c-format
-msgid "Message sent when update takes place: "
-msgstr "Zpráva odesílaná při aktualizaci záznamu: "
-
-#. %1$s:  type
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:61
-#, c-format
-msgid "Modify an account %s type"
-msgstr "Upravit typ účtu (%s)"
-
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:260
-#, c-format
-msgid "New Z39.50 Update server"
-msgstr "Nový server Z39.50 pro Update"
-
-#. %1$s:  type
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:63
-#, c-format
-msgid "New account %s type"
-msgstr "Nový typ účtu (%s)"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:135
-#, c-format
-msgid "New credit type"
-msgstr "Nový typ platby"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:134
-#, c-format
-msgid "New debit type"
-msgstr "Nový typ poplatku"
-
-#: intranet-tmpl/prog/en/modules/members/boraccount.tt:133
-#, c-format
-msgid "Notify level"
-msgstr "Úroveň oznámení"
-
-#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
-#, c-format
-msgid "Patron has previously checked out this title: "
-msgstr "Tento dokument již měl tento čtenář vypůjčený: "
-
-#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:201
-#, c-format
-msgid "Permanent withdrawal:"
-msgstr "Trvalý odpis:"
-
-#: intranet-tmpl/prog/en/includes/authorities-toolbar.inc:67
-#, c-format
-msgid "Push to Z39.50 server "
-msgstr "Odeslat na Z39.50 server "
-
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:77
-#, c-format
-msgid "Remove item"
-msgstr "Odstranit jednotku"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:77
-#, c-format
-msgid "Required. Maximum length is 5 letters"
-msgstr "Povinné. Maximální délka je 5 znaků"
-
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:151
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:193
-#, c-format
-msgid "Return to batch item withdrawal"
-msgstr "Návrat k dávkovému odpisu jednotek"
-
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:132
-#, c-format
-msgid "Selected withdrawal type is "
-msgstr "Důvod odpisu je "
-
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:221
-#, c-format
-msgid ""
-"Separate multiple fields/subfields by commas. Example: 200$7, 005, 900$a"
-msgstr "Více polí/podpolí oddělte čárkou. Například: 200$7, 005, 900$a"
-
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:269
-#, c-format
-msgid "Server type"
-msgstr "Typ serveru"
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:197
-#, c-format
-msgid "There are no account credit types defined. "
-msgstr "Nejsou definovány žádné typy plateb. "
-
-#: intranet-tmpl/prog/en/modules/admin/account_types.tt:166
-#, c-format
-msgid "There are no account debit types defined. "
-msgstr "Nejsou definovány žádné typy poplatků. "
-
-#. %1$s:  IF ( too_many_items )
-#. %2$s:  ELSE
-#. %3$s:  END
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:131
-#, c-format
-msgid "This will withdraw %sall the%sthe selected%s items."
-msgstr "Tímto budou odepsány %s všechny %s vybrané %s jednotky."
-
-#. %1$s:  itemInfo.title
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:58
-#, c-format
-msgid "Title: %s \" "
-msgstr "Název: %s \" "
-
-#. For the first occurrence,
-#. %1$s:  itemInfo.title
-#. %2$s:  END
-#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:48
-#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:76
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:68
-#, c-format
-msgid "Title: %s %s "
-msgstr "Název: %s %s "
-
-#. INPUT type=submit name=mainformsubmit
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:142
-msgid "Withdraw ALL submitted items"
-msgstr "Odepsat VŠECHNY vložené jednotky"
-
-#: intranet-tmpl/prog/en/modules/tools/tools-home.tt:124
-#, c-format
-msgid "Withdraw a batch of items"
-msgstr "Odepsat dávku jednotek"
-
-#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:217
-#, c-format
-msgid "Withdraw number:"
-msgstr "Úbytkové číslo:"
-
-#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:210
-#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:212
-#, c-format
-msgid "Withdraw permanently"
-msgstr "Trvale odepsat"
-
-#. INPUT type=submit name=mainformsubmit
-#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:144
-msgid "Withdraw selected items"
-msgstr "Odepsat vybrané jednotky"
-
-#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:51
-#, c-format
-msgid "Withdrawal reason"
-msgstr "Důvod odpisu"
-
-#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:53
-#, c-format
-msgid "Withdrawal reason:"
-msgstr "Důvod odpisu:"
-
-#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:218
-#, c-format
-msgid "Withdrawn description:"
-msgstr "Popis odpisu:"
-
-#: intranet-tmpl/prog/en/modules/members/paycollect.tt:149
-#, c-format
-msgid "Write off outstanding part"
-msgstr "Prominout zbývající část poplatku"
-
-#. %1$s:  # If there is amount outstanding, we have at least two actions (pay, print, sometimes writeoff), so we need dropdown
-#: intranet-tmpl/prog/en/modules/members/boraccount.tt:197
-#, c-format
-msgid "a %s "
-msgstr " %s "
-
-#: intranet-tmpl/prog/en/modules/acqui/basket.tt:6
-#, c-format
-msgid "default"
-msgstr "výchozí"
-
-#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
-#, c-format
-msgid "on "
-msgstr "dne "
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"X-POOTLE-MTIME: 1463580765.000000\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Pootle 2.5.1.1\n"
+"X-POOTLE-MTIME: 1492501598.000000\n"
 
 #. %1$s:  END
 #. %2$s:  END
@@ -719,8 +167,8 @@ msgstr "&rsaquo; Další poplatky"
 
 #. META http-equiv=refresh
 #: intranet-tmpl/prog/en/modules/installer/step3.tt:2
-msgid "10; url=/cgi-bin/koha/mainpage.pl"
-msgstr "10; url=/cgi-bin/koha/mainpage.pl"
+msgid "5; url=/cgi-bin/koha/mainpage.pl"
+msgstr "5; url=/cgi-bin/koha/mainpage.pl"
 
 #. %1$s:  IF ( del )
 #. %2$s:  ELSE
@@ -769,7 +217,870 @@ msgid ""
 "This item has previously been checked out to this patron. Check out anyway?"
 msgstr "Tuto jednotku již měl tento čtenář vypůjčenou. Přesto vypůjčit?"
 
-#: intranet-tmpl/prog/en/modules/circ/returns.tt
+#. %1$s:  END
+#. %2$s:  END
+#. %3$s:  END
+#. %4$s:  END
+#. %5$s:  END
+#. %6$s:  END
+#. %7$s:  BLOCK language
+#. %8$s:  SWITCH lang
+#. %9$s:  CASE ['en', 'eng']
+#. %10$s:  CASE ['fr', 'fre']
+#. %11$s:  CASE ['it', 'ita']
+#. %12$s:  CASE ['de', 'ger', 'deu']
+#. %13$s:  CASE ['es', 'spa']
+#. %14$s:  CASE ['heb']
+#. %15$s:  CASE ['ara']
+#. %16$s:  CASE ['gre']
+#. %17$s:  CASE ['grc']
+#. %18$s:  CASE
+#. %19$s:  lang
+#. %20$s:  END
+#. %21$s:  END
+#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:136
+#, c-format
+msgid ""
+"%s %s %s %s %s %s %s %s %sEnglish %sFrench %sItalian %sGerman %sSpanish "
+"%sHebrew %sArabic %sGreek (modern) %sGreek (to 1453) %s%s %s %s "
+msgstr ""
+"%s %s %s %s %s %s %s %s %sAngličtina%sFrancouzština %sItalština %sNěmčina "
+"%sŠpanělština %sHebrejština %sArabština %sŘečtina (moderní) %sŘečtina (do "
+"roku 1453) %s%s %s %s "
+
+#. For the first occurrence,
+#. %1$s:  INCLUDE 'doc-head-open.inc'
+#. %2$s:  BLOCK ServerType
+#. %3$s:  IF (server.servertype||type) == 'sru'
+#. %4$s:  ELSIF (server.servertype||type) == 'zed'
+#. %5$s:  ELSIF (server.servertype||type) == 'zed_update'
+#. %6$s:  END
+#. %7$s:  END
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:1
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:271
+#, c-format
+msgid "%s %s %s SRU %s Z39.50 %s Z39.50 Update %s %s "
+msgstr "%s %s %s SRU %s Z39.50 %s Z39.50 Update %s %s "
+
+#. %1$s:  SWITCH m.code
+#. %2$s:  CASE 'error_on_saving'
+#. %3$s:  CASE 'error_on_delete'
+#. %4$s:  CASE 'success_on_saving'
+#. %5$s:  CASE 'success_on_delete'
+#. %6$s:  CASE
+#. %7$s:  m.code
+#. %8$s:  END
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:43
+#, c-format
+msgid ""
+"%s %s An error occurred when saving this account type. %s An error occurred "
+"when deleting this account type. Check the logs. %s Account type saved "
+"successfully. %s Account type deleted successfully. %s %s %s "
+msgstr ""
+"%s %s Při ukládání typu účtu se vyskytla chyba. %s Při odstraňování typu "
+"účtu nastala chyba. Zkontrolujte provozní záznamy. %s Typ účtu byl úspěšně "
+"uložen. %s Typ účtu byl úspěšně odstraněn. %s %s %s "
+
+#. %1$s:  SWITCH account.accounttype
+#. %2$s:  CASE 'Pay'
+#. %3$s:  CASE 'Pay00'
+#. %4$s:  CASE 'Pay01'
+#. %5$s:  CASE 'Pay02'
+#. %6$s:  CASE 'N'
+#. %7$s:  CASE 'F'
+#. %8$s:  CASE 'A'
+#. %9$s:  CASE 'M'
+#. %10$s:  CASE 'L'
+#. %11$s:  CASE 'W'
+#. %12$s:  CASE 'FU'
+#. %13$s:  CASE 'HE'
+#. %14$s:  CASE 'Rent'
+#. %15$s:  CASE 'FOR'
+#. %16$s:  CASE 'LR'
+#. %17$s:  CASE 'PAY'
+#. %18$s:  CASE 'WO'
+#. %19$s:  CASE 'C'
+#. %20$s:  CASE 'CR'
+#. %21$s:  CASE
+#. %22$s:  account.accounttype
+#. %23$s: - END -
+#: intranet-tmpl/prog/en/modules/members/boraccount.tt:162
+#, c-format
+msgid ""
+"%s %sPayment, thanks %sPayment, thanks (cash via SIP2) %sPayment, thanks "
+"(VISA via SIP2) %sPayment, thanks (credit card via SIP2) %sNew card %sFine "
+"%sAccount management fee %sSundry %sLost item %sWriteoff %sAccruing fine "
+"%sHold waiting too long %sRental fee %sForgiven %sLost item fee refund "
+"%sPayment %sWriteoff %sCredit %sCredit %s%s %s "
+msgstr ""
+"%s %sPlatba, díky %sPlatba, díky (hotově přes SIP2) %sPlatba, díky (VISA "
+"přes SIP2) %sPlatba, díky (kreditní karta přes SIP2) %sNový průkaz "
+"%sUpomínka %sRegistrační poplatek %sOstatní %sZtracený dokument %s Prominuto "
+"%sNabíhající upomínka %sDlouho čekající rezervace %sPoplatek za půjčení "
+"%sProminuto %sVrácení poplatku za ztrátu dokumentu %sPlatba %sProminuto "
+"%sKredit %sKredit %s%s %s "
+
+#. %1$s:  IF op == 'add_form'
+#. %2$s:  IF account_type.type_code
+#. %3$s:  ELSE
+#. %4$s:  END
+#. %5$s:  type
+#. %6$s:  ELSIF op == 'delete_confirm'
+#. %7$s:  type
+#. %8$s:  END
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:28
+#, c-format
+msgid ""
+"%s &rsaquo; %sModify%sNew%s Account %s type %s &rsaquo; Confirm deletion of "
+"account %s type %s "
+msgstr ""
+"%s &rsaquo; %sUpravit%sNový%s Typ účtu - %s %s &rsaquo; Potvrdit odstranění "
+"typu účtu - %s %s "
+
+#. %1$s:  not_deleted_items
+#. %2$s:  FOREACH not_deleted_itemnumber IN not_deleted_itemnumbers
+#. %3$s:  not_deleted_itemnumber.itemnumber
+#. %4$s:  END
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:163
+#, c-format
+msgid "%s item(s) could not be withdrawn: %s%s%s"
+msgstr "%s jednotek nelze odepsat: %s%s%s"
+
+#. %1$s:  withdrawn_items
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:159
+#, c-format
+msgid "%s item(s) withdrawn."
+msgstr "%s jednotek bylo odepsáno."
+
+#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
+#, c-format
+msgid ". Check out anyway?"
+msgstr ". Přesto vypůjčit?"
+
+#. %1$s:  type
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:72
+#, c-format
+msgid "Account %s type code: "
+msgstr "Kód typu účtu (%s): "
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:171
+#, c-format
+msgid "Account credit types"
+msgstr "Typy účtovaných poplatků"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:138
+#, c-format
+msgid "Account debit types"
+msgstr "Typy plateb"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:112
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:142
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:175
+#, c-format
+msgid "Account type code"
+msgstr "Kód typu účtu"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:115
+#, c-format
+msgid "Account type description"
+msgstr "Popis typu účtu"
+
+#: intranet-tmpl/prog/en/modules/admin/admin-home.tt:58
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:28
+#: intranet-tmpl/prog/en/includes/admin-menu.inc:40
+#, c-format
+msgid "Account types"
+msgstr "Typy účtu"
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Activity message received."
+msgstr "Zpráva o akci přijata."
+
+#. %1$s:  pushAuthResult.addInfo
+#. %2$s:  END
+#. %3$s:  IF ( pushAuthResult.record )
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:86
+#, c-format
+msgid "Added information: %s%s %s"
+msgstr "Doplňující informace: %s%s %s "
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:100
+#, c-format
+msgid "Advanced cataloguing editor"
+msgstr "Pokročilý katalogizační editor"
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:55
+#, c-format
+msgid "Agenda"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:143
+#, c-format
+msgid "All subscriptions"
+msgstr ""
+
+#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:134
+#, c-format
+msgid "Another details:"
+msgstr "Další podrobnosti:"
+
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:82
+#, c-format
+msgid "Authority was successfully sent."
+msgstr "Autoritní záznam byl odeslán."
+
+#. %1$s:  IF ( del )
+#. %2$s:  ELSIF ( withdrawal )
+#. %3$s:  ELSE
+#. %4$s:  END
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:25
+#, c-format
+msgid "Batch item %sdeletion%swithdrawal%smodification%s"
+msgstr "Dávkové %smazání%sodpisy%súprava%s jednotek"
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:15
+#: intranet-tmpl/prog/en/modules/tools/tools-home.tt:123
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:31
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:37
+#: intranet-tmpl/prog/en/includes/tools-menu.inc:60
+#, c-format
+msgid "Batch item withdrawal"
+msgstr "Dávkové odpisy jednotek"
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:37
+#, c-format
+msgid "Batch item withdrawal results"
+msgstr "Výsledky dávkového odpisu jednotek"
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:130
+#, c-format
+msgid "Budget used: 45 %%"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:145
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:177
+#, c-format
+msgid "Can be added manually"
+msgstr "Lze vložit ručně"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:91
+#, c-format
+msgid "Can be added manually? "
+msgstr "Lze vložit ručně?"
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:40
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:41
+#, c-format
+msgid "Cannot Withdraw"
+msgstr "Nelze odepsat"
+
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-dialog.inc:6
+#, c-format
+msgid "Card payment"
+msgstr "Platba kartou"
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:93
+#, c-format
+msgid "Catalogue"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:93
+#, c-format
+msgid "Cataloguing"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:79
+#, c-format
+msgid "Circulation guided reports"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:78
+#, c-format
+msgid "Circulation statistics wizard"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:111
+#, c-format
+msgid "Comments to approve: 4"
+msgstr ""
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Conection interrupted."
+msgstr "Spojení přerušeno."
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Connection aborted."
+msgstr "Spojení bylo zrušeno."
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Connection request rejected."
+msgstr "Požadavek na připojení byl odmítnut."
+
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:186
+#, c-format
+msgid "Create fine"
+msgstr "Vložit poplatek"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:198
+#, c-format
+msgid "Create new credit type"
+msgstr "Vytvořit nový typ platby"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:167
+#, c-format
+msgid "Create new debit type"
+msgstr "Vytvořit nový typ poplatku"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:144
+#, c-format
+msgid "Default amount"
+msgstr "Výchozí částka"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:82
+#, c-format
+msgid "Default amount: "
+msgstr "Výchozí částka:\t"
+
+#: intranet-tmpl/prog/en/modules/admin/admin-home.tt:59
+#, c-format
+msgid "Define debit and credit types."
+msgstr "Definuje typy poplatků a plateb"
+
+#. %1$s:  type
+#. %2$s:  account_type.description
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:110
+#, c-format
+msgid "Delete account %s type \"%s?\""
+msgstr "Odstranit typ účtu (%s) \"%s\"?"
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Device disconnected."
+msgstr "Zařízení bylo odpojeno."
+
+#: intranet-tmpl/prog/en/modules/circ/returns.tt:718
 #, c-format
 msgid "Don't check for transfers"
 msgstr "Nepokoušet se o přesun na domovskou knihovnu"
+
+#. %1$s:  pushAuthResult.errMsg
+#. %2$s:  END
+#. %3$s:  IF ( pushAuthResult.addInfo )
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:85
+#, c-format
+msgid "Error message: %s%s %s"
+msgstr "Chybová zpráva: %s%s %s"
+
+#. %1$s:  IF ( pushAuthResult.errMsg )
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:84
+#, c-format
+msgid "Error sending authority. %s"
+msgstr "Při odesílání autoritního záznamu nastala chyba. %s"
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:226
+#, c-format
+msgid "Example: 100$7"
+msgstr "Příklad: 100$7"
+
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:300
+#, c-format
+msgid "Example: 5.00 "
+msgstr "Příklad: 5.00 "
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:231
+#, c-format
+msgid "Example: 900$a"
+msgstr "Příklad: 900$a"
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:148
+#, c-format
+msgid "Expired subscriptions: 10"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:109
+#, c-format
+msgid "Fast added records: 13"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/circ/pendingreserves.tt:100
+#, c-format
+msgid "First patron"
+msgstr "První čtenář"
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:68
+#, c-format
+msgid "Holds to pull: 12"
+msgstr ""
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Initializing connection..."
+msgstr "Připojuji..."
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:78
+#, c-format
+msgid ""
+"Insert barcode and given item will be immediately remove from any collection "
+"and returned back to home library"
+msgstr ""
+"Vložte čárový kód a daná jednotka bude vrácena ze souboru a přesunuta do své "
+"domovské knihovny."
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:150
+#, c-format
+msgid "Issues awaited today: 18"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:149
+#, c-format
+msgid "Issues to claim: 2"
+msgstr ""
+
+#. For the first occurrence,
+#. %1$s:  borrower.firstname
+#. %2$s:  borrower.surname
+#. %3$s:  borrower.cardnumber
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:33
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:51
+#, c-format
+msgid "Item was issued by %s %s (%s) and now is returned"
+msgstr "Jednotka byla vypůjčena čtenáři %s %s (%s) a nyní byla vrácena"
+
+#. %1$s:  barcode
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:40
+#, c-format
+msgid "Item with barcode '%s' added successfully."
+msgstr "Jednotka s čárovým kódem '%s' byla úspěšně přidána!"
+
+#. %1$s:  barcode
+#. %2$s:  IF ( itemInfo )
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:65
+#, c-format
+msgid "Item with barcode '%s' was not removed from collection: %s "
+msgstr "Jednotka s čárovým kódem '%s' nemohla být odstraněna ze souboru: %s "
+
+#. %1$s:  barcode
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:57
+#, c-format
+msgid ""
+"Item with barcode '%s' was removed from a collection and returned to "
+"homebranch."
+msgstr ""
+"Jednotka s čárovým kódem '%s' byla odstraněna ze souboru a vrácena do "
+"domovské knihovny."
+
+#. %1$s:  IF op =='add_form'
+#. %2$s:  IF account_type.type_code
+#. %3$s:  type
+#. %4$s:  ELSE
+#. %5$s:  type
+#. %6$s:  END
+#. %7$s:  ELSE
+#. %8$s:  IF op == 'delete_confirm'
+#. %9$s:  type
+#. %10$s:  ELSE
+#. %11$s:  END
+#. %12$s:  END
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:2
+#, c-format
+msgid ""
+"Koha &rsaquo; Administration &rsaquo; %sAccount types &rsaquo; %s Modify "
+"account %s type%s New account %s type%s%s%sAccount types &rsaquo; Confirm "
+"deletion of account %stype%s Account types%s%s"
+msgstr ""
+"Koha &rsaquo; Administrace &rsaquo; %sTypy účtů &rsaquo; %s Upravit typ účtu "
+"(%s) %s Přidat nový typ účtu (%s)%s%s%sTypy účtů &rsaquo; Potvrdit "
+"odstranění typu účtu (%s)%s Typy účtů%s%s"
+
+#. %1$s:  IF ( del )
+#. %2$s:  ELSIF ( withdrawal )
+#. %3$s:  ELSE
+#. %4$s:  END
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:2
+#, c-format
+msgid ""
+"Koha &rsaquo; Tools &rsaquo; %sBatch item deletion%sBatch item withdrawal"
+"%sBatch item modification%s "
+msgstr ""
+"Koha &rsaquo; Nástroje &rsaquo; %s Dávkové mazání jednotek%sDávkový odpis "
+"jednotek%sDávková úprava jednotek%s "
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:2
+#, c-format
+msgid "Koha &rsaquo; Tools &rsaquo; Batch item withdrawal"
+msgstr "Koha &rsaquo; Nástroje &rsaquo; Dávkový odpis jednotek"
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:129
+#, c-format
+msgid "Late orders: 9"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:224
+#, c-format
+msgid "MARC authoritative id field: "
+msgstr "Pole MARCu pro identifikátor: "
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:229
+#, c-format
+msgid "MARC field where to put your message: "
+msgstr "Pole MARCu pro vložení vaší zprávy: "
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:219
+#, c-format
+msgid "MARC fields not to send to update server: "
+msgstr "Pole MARCu, která nebudou odesílána: "
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:145
+#, c-format
+msgid "Manage frequencies"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:146
+#, c-format
+msgid "Manage numbering patterns"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:234
+#, c-format
+msgid "Message sent when create takes place: "
+msgstr "Zpráva odesílaná při vytváření nového záznamu: "
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:238
+#, c-format
+msgid "Message sent when update takes place: "
+msgstr "Zpráva odesílaná při aktualizaci záznamu: "
+
+#. %1$s:  type
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:61
+#, c-format
+msgid "Modify an account %s type"
+msgstr "Upravit typ účtu (%s)"
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:260
+#, c-format
+msgid "New Z39.50 Update server"
+msgstr "Nový server Z39.50 pro Update"
+
+#. %1$s:  type
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:63
+#, c-format
+msgid "New account %s type"
+msgstr "Nový typ účtu (%s)"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:135
+#, c-format
+msgid "New credit type"
+msgstr "Nový typ platby"
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:134
+#, c-format
+msgid "New debit type"
+msgstr "Nový typ poplatku"
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:60
+#, c-format
+msgid "New patron"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:99
+#, c-format
+msgid "New record with Z39.50"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:110
+#, c-format
+msgid "Not imported staged batches: 2"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/members/boraccount.tt:135
+#, c-format
+msgid "Notify level"
+msgstr "Úroveň oznámení"
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:69
+#, c-format
+msgid "Overdues: 481"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:62
+#, c-format
+msgid "Patron cards creator"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
+#, c-format
+msgid "Patron has previously checked out this title: "
+msgstr "Tento dokument již měl tento čtenář vypůjčený: "
+
+#: intranet-tmpl/prog/en/modules/members/paycollect.tt:156
+#, c-format
+msgid "Pay by card: "
+msgstr "Zaplatit kartou: "
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:65
+#, c-format
+msgid "Pending actions"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:74
+#, c-format
+msgid "Pending article requests: 3"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:73
+#, c-format
+msgid "Pending discharge requests: 1"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:67
+#, c-format
+msgid "Pending offline circulatin actions: 49"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:72
+#, c-format
+msgid "Pending patron modification: 2"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:201
+#, c-format
+msgid "Permanent withdrawal:"
+msgstr "Trvalý odpis:"
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:128
+#, c-format
+msgid "Purchase suggestions: 19"
+msgstr ""
+
+#: intranet-tmpl/prog/en/includes/authorities-toolbar.inc:67
+#, c-format
+msgid "Push to Z39.50 server "
+msgstr "Odeslat na Z39.50 server "
+
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:96
+#, c-format
+msgid "Pushed record"
+msgstr "Odeslaný záznam"
+
+# Návrat k záznamu?
+#: intranet-tmpl/prog/en/modules/members/boraccount.tt:207
+#, c-format
+msgid "Refund to card"
+msgstr "Vrátit platbu"
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:77
+#, c-format
+msgid "Remove item"
+msgstr "Odstranit jednotku"
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Request confirmed."
+msgstr "Požadavek potvrzen."
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Request sent."
+msgstr "Požadavek odeslán."
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Requesting payment transaction..."
+msgstr "Vytvářím požadavek na platbu..."
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Requesting refund transaction..."
+msgstr "Vytvářím požadavek na vrácení platby..."
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:77
+#, c-format
+msgid "Required. Maximum length is 5 letters"
+msgstr "Povinné. Maximální délka je 5 znaků"
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Response received."
+msgstr "Obddržena odpověď"
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:151
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:193
+#, c-format
+msgid "Return to batch item withdrawal"
+msgstr "Návrat k dávkovému odpisu jednotek"
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:132
+#, c-format
+msgid "Selected withdrawal type is "
+msgstr "Důvod odpisu je "
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:71
+#, c-format
+msgid "Self registered patrons: 2"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:221
+#, c-format
+msgid ""
+"Separate multiple fields/subfields by commas. Example: 200$7, 005, 900$a"
+msgstr "Více polí/podpolí oddělte čárkou. Například: 200$7, 005, 900$a"
+
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:269
+#, c-format
+msgid "Server type"
+msgstr "Typ serveru"
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Session timed out. Please log in again."
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:86
+#, c-format
+msgid "Set links"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:87
+#, c-format
+msgid "Show sent record"
+msgstr "Zobrazit odeslaný záznam"
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:106
+#, c-format
+msgid "Spine label creator"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:112
+#, c-format
+msgid "Tags to approve: 11"
+msgstr ""
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:197
+#, c-format
+msgid "There are no account credit types defined. "
+msgstr "Nejsou definovány žádné typy plateb. "
+
+#: intranet-tmpl/prog/en/modules/admin/account_types.tt:166
+#, c-format
+msgid "There are no account debit types defined. "
+msgstr "Nejsou definovány žádné typy poplatků. "
+
+#. %1$s:  IF ( too_many_items )
+#. %2$s:  ELSE
+#. %3$s:  END
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:131
+#, c-format
+msgid "This will withdraw %sall the%sthe selected%s items."
+msgstr "Tímto budou odepsány %s všechny %s vybrané %s jednotky."
+
+#. %1$s:  itemInfo.title
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:58
+#, c-format
+msgid "Title: %s \" "
+msgstr "Název: %s \" "
+
+#. For the first occurrence,
+#. %1$s:  itemInfo.title
+#. %2$s:  END
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:48
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:76
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:68
+#, c-format
+msgid "Title: %s %s "
+msgstr "Název: %s %s "
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:70
+#, c-format
+msgid "Tranfers to receive: 8"
+msgstr ""
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Transaction confirmed."
+msgstr "Transakce potvrzena."
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Transaction is in progress..."
+msgstr "Porbíhá transakce..."
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Transaction rejected."
+msgstr "Transakce zamítnuta"
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/members-pos-terminal-messages.inc:1
+msgid "Transaction successfully finished, thank you."
+msgstr "Transakce byla úspěšně dokončena, děkujeme."
+
+#: intranet-tmpl/prog/en/modules/dashboard.tt:125
+#, c-format
+msgid "Vendors"
+msgstr ""
+
+#. INPUT type=submit name=mainformsubmit
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:142
+msgid "Withdraw ALL submitted items"
+msgstr "Odepsat VŠECHNY vložené jednotky"
+
+#: intranet-tmpl/prog/en/modules/tools/tools-home.tt:124
+#, c-format
+msgid "Withdraw a batch of items"
+msgstr "Odepsat dávku jednotek"
+
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:217
+#, c-format
+msgid "Withdraw number:"
+msgstr "Úbytkové číslo:"
+
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:210
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:212
+#, c-format
+msgid "Withdraw permanently"
+msgstr "Trvale odepsat"
+
+#. INPUT type=submit name=mainformsubmit
+#: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:144
+msgid "Withdraw selected items"
+msgstr "Odepsat vybrané jednotky"
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:51
+#, c-format
+msgid "Withdrawal reason"
+msgstr "Důvod odpisu"
+
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:53
+#, c-format
+msgid "Withdrawal reason:"
+msgstr "Důvod odpisu:"
+
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:218
+#, c-format
+msgid "Withdrawn description:"
+msgstr "Popis odpisu:"
+
+#: intranet-tmpl/prog/en/modules/members/paycollect.tt:151
+#, c-format
+msgid "Write off outstanding part"
+msgstr "Prominout zbývající část poplatku"
+
+#. %1$s:  # If there is amount outstanding, we have at least two actions (pay, print, sometimes writeoff), so we need dropdown
+#: intranet-tmpl/prog/en/modules/members/boraccount.tt:199
+#, c-format
+msgid "a %s "
+msgstr " %s "
+
+#: intranet-tmpl/prog/en/modules/acqui/basket.tt:6
+#, c-format
+msgid "default"
+msgstr "výchozí"
+
+#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
+#, c-format
+msgid "on "
+msgstr "dne "
