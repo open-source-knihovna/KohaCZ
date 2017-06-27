@@ -17,41 +17,47 @@
 
 use Modern::Perl;
 
-use t::lib::TestBuilder;
-
 use Test::More tests => 3;
 use Test::Mojo;
+use Test::Warn;
+
+use t::lib::TestBuilder;
+use t::lib::Mocks;
+
 use Data::Dumper;
 use C4::Auth;
 use C4::Context;
+
 use Koha::Database;
-use MARC::File::XML ( BinaryEncoding => 'utf8', RecordFormat => 'UNIMARC' );
+use MARC::File::XML ( BinaryEncoding => 'utf8', RecordFormat => 'MARC21' );
+
+my $schema  = Koha::Database->new->schema;
+my $builder = t::lib::TestBuilder->new;
+
+t::lib::Mocks::mock_preference( 'SessionStorage', 'tmp' );
+
+my $remote_address = '127.0.0.1';
+my $t              = Test::Mojo->new('Koha::REST::V1');
 
 BEGIN {
     use_ok('Koha::Biblios');
 }
 
-my $schema  = Koha::Database->schema;
 my $dbh     = C4::Context->dbh;
-my $builder = t::lib::TestBuilder->new;
-
-$ENV{REMOTE_ADDR} = '127.0.0.1';
-my $t = Test::Mojo->new('Koha::REST::V1');
-
-$schema->storage->txn_begin;
 
 my $file = MARC::File::XML->in( 't/db_dependent/Record/testrecords/marcxml_utf8.xml' );
 my $record = $file->next();
-my ( $biblionumber, $itemnumber );
+
+$schema->storage->txn_begin;
 
 my $librarian = $builder->build({
-    source => "Borrower",
-    value => {
-        categorycode => 'S',
-        branchcode => 'NPL',
-        flags => 1, # editcatalogue
-    },
-});
+        source => "Borrower",
+        value => {
+            categorycode => 'S',
+            branchcode => 'NPL',
+            flags => 1, # editcatalogue
+        },
+    });
 
 my $session = C4::Auth::get_session('');
 $session->param('number', $librarian->{ borrowernumber });
@@ -60,31 +66,34 @@ $session->param('ip', '127.0.0.1');
 $session->param('lasttime', time());
 $session->flush;
 
+my ( $biblionumber, $itemnumber );
+
 subtest 'Create biblio' => sub {
-	plan tests => 5;
+    plan tests => 5;
 
-	my $tx = $t->ua->build_tx(POST => '/api/v1/biblios' => $record->as_xml());
-	$tx->req->env({REMOTE_ADDR => '127.0.0.1'});
-	$tx->req->cookies({name => 'CGISESSID', value => $session->id});
-	$t->request_ok($tx)
-	  ->status_is(201);
-	$biblionumber = $tx->res->json->{biblionumber};
-	$itemnumber   = $tx->res->json->{items};
+    my $tx = $t->ua->build_tx(POST => '/api/v1/biblios' => $record->as_xml());
+    $tx->req->env({REMOTE_ADDR => '127.0.0.1'});
+    $tx->req->cookies({name => 'CGISESSID', value => $session->id});
+    $t->request_ok($tx)
+    ->status_is(201);
+    $biblionumber = $tx->res->json->{biblionumber};
+    $itemnumber   = $tx->res->json->{items};
 
-	$t->json_is('/biblionumber' => $biblionumber)
-	  ->json_is('/items'      => $itemnumber)
-	  ->header_like(Location => qr/$biblionumber/, 'Location header contains biblionumber');
+    $t->json_is('/biblionumber' => $biblionumber)
+    ->json_is('/items'      => $itemnumber)
+    ->header_like(Location => qr/$biblionumber/, 'Location header contains biblionumber');
+
 };
 
 subtest 'Delete biblio' => sub {
-	plan tests => 2;
+    plan tests => 2;
 
-	my $tx = $t->ua->build_tx(DELETE => "/api/v1/biblios/$biblionumber");
-	$tx->req->env({REMOTE_ADDR => '127.0.0.1'});
-	$tx->req->cookies({name => 'CGISESSID', value => $session->id});
-	$t->request_ok($tx)
-	  ->status_is(200);
+    my $tx = $t->ua->build_tx(DELETE => "/api/v1/biblios/$biblionumber");
+    $tx->req->env({REMOTE_ADDR => '127.0.0.1'});
+    $tx->req->cookies({name => 'CGISESSID', value => $session->id});
+    $t->request_ok($tx)
+    ->status_is(200);
+
 };
-
 
 $schema->storage->txn_rollback;
