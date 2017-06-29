@@ -32,6 +32,7 @@ use Koha::Acquisition::Order;
 use Koha::Acquisition::Bookseller;
 use Koha::Number::Price;
 use Koha::Libraries;
+use Koha::CsvProfiles;
 
 use C4::Koha;
 
@@ -286,11 +287,11 @@ sub GetBasketAsCSV {
     my $template = C4::Templates::gettemplate("acqui/csv/basket.tt", "intranet", $cgi);
     my @rows;
     if ($csv_profile_id) {
-        my $csv_profile = C4::Csv::GetCsvProfile( $csv_profile_id );
+        my $csv_profile = Koha::CsvProfiles->find( $csv_profile_id );
         die "There is no valid csv profile given" unless $csv_profile;
 
-        my $csv = Text::CSV_XS->new({'quote_char'=>'"','escape_char'=>'"','sep_char'=>$csv_profile->{csv_separator},'binary'=>1});
-        my $csv_profile_content = $csv_profile->{content};
+        my $csv = Text::CSV_XS->new({'quote_char'=>'"','escape_char'=>'"','sep_char'=>$csv_profile->csv_separator,'binary'=>1});
+        my $csv_profile_content = $csv_profile->content;
         my ( @headers, @fields );
         while ( $csv_profile_content =~ /
             ([^=]+) # header
@@ -321,7 +322,7 @@ sub GetBasketAsCSV {
             }
             push @rows, \@row;
         }
-        my $content = join( $csv_profile->{csv_separator}, @headers ) . "\n";
+        my $content = join( $csv_profile->csv_separator, @headers ) . "\n";
         for my $row ( @rows ) {
             $csv->combine(@$row);
             my $string = $csv->string;
