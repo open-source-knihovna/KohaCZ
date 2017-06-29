@@ -870,7 +870,7 @@ msgstr "Odeslaný záznam"
 #: intranet-tmpl/prog/en/modules/members/boraccount.tt:207
 #, c-format
 msgid "Refund to card"
-msgstr "Vrátit platbu"
+msgstr "Vrátit platební kartou"
 
 #: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:77
 #, c-format
