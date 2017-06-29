@@ -12815,11 +12815,10 @@ if ( CheckVersion($DBversion) ) {
     });
     $dbh->do(q{
         ALTER TABLE `items`
-        ADD INDEX `booksellerid` (`booksellerid`(32)),
         ADD INDEX `withdrawn_permanent` (`withdrawn_permanent`);
     });
     $dbh->do(q{
-INSERT INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('PermanentWithdrawnNumberItemsColumns', '', NULL, 'Which columns of items table use to determinate the new withdraw number', 'Free');
+INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES ('PermanentWithdrawnNumberItemsColumns', '', NULL, 'Which columns of items table use to determinate the new withdraw number', 'Free');
     });
 
     $dbh->do(q{
@@ -14013,7 +14012,6 @@ if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Koha 16.11.08)\n";
     SetVersion($DBversion);
 }
-
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
