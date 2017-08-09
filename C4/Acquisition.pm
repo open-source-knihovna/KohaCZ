@@ -850,8 +850,8 @@ sub CanUserManageBasket {
 
         if ($AcqViewBaskets eq 'user'
         && $basket->{authorisedby} != $borrowernumber
-        && grep($borrowernumber, GetBasketUsers($basketno)) == 0) {
-            return 0;
+        && ! grep { $borrowernumber eq $_ } GetBasketUsers($basketno)) {
+             return 0;
         }
 
         if ($AcqViewBaskets eq 'branch' && defined $basket->{branch}
@@ -1701,17 +1701,22 @@ sub _cancel_items_receipt {
 @results = &SearchOrders({
     ordernumber => $ordernumber,
     search => $search,
-    biblionumber => $biblionumber,
     ean => $ean,
     booksellerid => $booksellerid,
     basketno => $basketno,
+    basketname => $basketname,
+    basketgroupname => $basketgroupname,
     owner => $owner,
     pending => $pending
     ordered => $ordered
+    biblionumber => $biblionumber,
+    budget_id => $budget_id
 });
 
-Searches for orders.
+Searches for orders filtered by criteria.
 
+C<$ordernumber> Finds matching orders or transferred orders by ordernumber.
+C<$search> Finds orders matching %$search% in title, author, or isbn.
 C<$owner> Finds order for the logged in user.
 C<$pending> Finds pending orders. Ignores completed and cancelled orders.
 C<$ordered> Finds orders to receive only (status 'ordered' or 'partial').
@@ -1746,6 +1751,8 @@ sub SearchOrders {
                biblio.*,
                biblioitems.isbn,
                biblioitems.biblioitemnumber,
+               biblioitems.publishercode,
+               biblioitems.publicationyear,
                aqbasket.authorisedby,
                aqbasket.booksellerid,
                aqbasket.closedate,
@@ -2656,6 +2663,7 @@ sub GetInvoiceDetails {
         SELECT aqorders.*,
                 biblio.*,
                 biblio.copyrightdate,
+                biblioitems.isbn,
                 biblioitems.publishercode,
                 biblioitems.publicationyear,
                 aqbasket.basketname,

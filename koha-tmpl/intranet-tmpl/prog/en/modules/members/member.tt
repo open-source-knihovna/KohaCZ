@@ -37,6 +37,7 @@ $(document).ready(function() {
         }
     });
 
+    $("#patron_list_dialog").hide();
     $("#add_to_patron_list_submit").on('click', function(e){
         if ( $('#add_to_patron_list').val() == 'new' ) {
             if ( $('#new_patron_list').val() ) {
@@ -130,9 +131,8 @@ $(document).ready(function() {
     [% END %]
 
     [% IF view != "show_results" %]
+        $("#searchresults").hide();
         search = 0;
-    [% ELSE %]
-        $("#searchresults").show();
     [% END %]
 
     // Build the aLengthMenu

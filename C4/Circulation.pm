@@ -45,6 +45,8 @@ use Koha::DateUtils;
 use Koha::Calendar;
 use Koha::IssuingRules;
 use Koha::Items;
+use Koha::Checkouts;
+use Koha::OldIssues;
 use Koha::Patrons;
 use Koha::Patron::Debarments;
 use Koha::Database;
@@ -1929,21 +1931,18 @@ sub AddReturn {
         }
 
         if ($borrowernumber) {
-            if ( ( C4::Context->preference('CalculateFinesOnReturn') && $issue->{'overdue'} ) || $return_date ) {
-                _CalculateAndUpdateFine( { issue => $issue, item => $item, borrower => $borrower, return_date => $return_date } );
-            }
-
             eval {
                 MarkIssueReturned( $borrowernumber, $item->{'itemnumber'},
                     $circControlBranch, $return_date, $borrower->{'privacy'} );
             };
-            if ( $@ ) {
-                $messages->{'Wrongbranch'} = {
-                    Wrongbranch => $branch,
-                    Rightbranch => $message
-                };
-                carp $@;
-                return ( 0, { WasReturned => 0 }, $issue, $borrower );
+            unless ( $@ ) {
+                if ( ( C4::Context->preference('CalculateFinesOnReturn') && $issue->{'overdue'} ) || $return_date ) {
+                    _CalculateAndUpdateFine( { issue => $issue, item => $item, borrower => $borrower, return_date => $return_date } );
+                }
+            } else {
+                carp "The checkin for the following issue failed, Please go to the about page, section 'data corrupted' to know how to fix this problem ($@)" . Dumper( $issue );
+
+                return ( 0, { WasReturned => 0, DataCorrupted => 1 }, $issue, $borrower );
             }
 
             # FIXME is the "= 1" right?  This could be the borrower hash.
@@ -2167,30 +2166,23 @@ sub MarkIssueReturned {
 
     # FIXME Improve the return value and handle it from callers
     $schema->txn_do(sub {
+
+        # Update the returndate
         $dbh->do( $query, undef, @bind );
 
-        my $id_already_exists = $dbh->selectrow_array(
-            q|SELECT COUNT(*) FROM old_issues WHERE issue_id = ?|,
-            undef, $issue_id
-        );
+        # Retrieve the issue
+        my $issue = Koha::Checkouts->find( $issue_id ); # FIXME should be fetched earlier
 
-        if ( $id_already_exists ) {
-            my $new_issue_id = $dbh->selectrow_array(q|SELECT MAX(issue_id)+1 FROM old_issues|);
-            $dbh->do(
-                q|UPDATE issues SET issue_id = ? WHERE issue_id = ?|,
-                undef, $new_issue_id, $issue_id
-            );
-            $issue_id = $new_issue_id;
-        }
-
-        $dbh->do(q|INSERT INTO old_issues SELECT * FROM issues WHERE issue_id = ?|, undef, $issue_id);
+        # Create the old_issues entry
+        my $old_checkout = Koha::OldIssue->new($issue->unblessed)->store;
 
         # anonymise patron checkout immediately if $privacy set to 2 and AnonymousPatron is set to a valid borrowernumber
         if ( $privacy == 2) {
             $dbh->do(q|UPDATE old_issues SET borrowernumber=? WHERE issue_id = ?|, undef, $anonymouspatron, $issue_id);
         }
 
-        $dbh->do(q|DELETE FROM issues WHERE issue_id = ?|, undef, $issue_id);
+        # And finally delete the issue
+        $issue->delete;
 
         ModItem( { 'onloan' => undef }, undef, $itemnumber );
 
@@ -3036,10 +3028,14 @@ sub AddRenewal {
         DelUniqueDebarment({ borrowernumber => $borrowernumber, type => 'OVERDUES' });
     }
 
-    # Log the renewal
+    unless ( C4::Context->interface eq 'opac' ) { #if from opac we are obeying OpacRenewalBranch as calculated in opac-renew.pl
+        $branch = C4::Context->userenv ? C4::Context->userenv->{branch} : $branch;
+    }
+
+    # Add the renewal to stats
     UpdateStats(
         {
-            branch => C4::Context->userenv ? C4::Context->userenv->{branch} : $branch,
+            branch         => $branch,
             type           => 'renew',
             amount         => $charge,
             itemnumber     => $itemnumber,

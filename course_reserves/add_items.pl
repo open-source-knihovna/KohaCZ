@@ -26,17 +26,20 @@ use C4::Auth;
 use C4::Output;
 use C4::Koha;
 use C4::Biblio;
+use Koha::Items;
 
 use C4::CourseReserves qw(GetCourse GetCourseItem GetCourseReserve ModCourseItem ModCourseReserve);
 
 my $cgi = new CGI;
 
-my $action    = $cgi->param('action')    || '';
-my $course_id = $cgi->param('course_id') || '';
-my $barcode   = $cgi->param('barcode')   || '';
-my $return    = $cgi->param('return')    || '';
+my $action       = $cgi->param('action')       || '';
+my $course_id    = $cgi->param('course_id')    || '';
+my $barcode      = $cgi->param('barcode')      || '';
+my $return       = $cgi->param('return')       || '';
+my $itemnumber   = ($cgi->param('itemnumber') && $action eq 'lookup') ? $cgi->param('itemnumber') : '';
 
-my $item = GetBiblioFromItemNumber( undef, $barcode );
+my $item = Koha::Items->find( { ( $itemnumber ? ( itemnumber => $itemnumber ) : ( barcode => $barcode ) ) } );
+my $title = ($item) ? $item->biblio->title : undef;
 
 my $step = ( $action eq 'lookup' && $item ) ? '2' : '1';
 
@@ -49,8 +52,9 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
         flagsrequired   => { coursereserves => 'add_reserves' },
     }
 );
-$template->param( ERROR_BARCODE_NOT_FOUND => $barcode )
-  unless ( $barcode && $item && $action eq 'lookup' );
+my $inumber = $itemnumber ? "(blank) (itemnumber:$itemnumber)" : "";
+$template->param( ERROR_BARCODE_NOT_FOUND => $barcode . $inumber )
+  unless ( $barcode && !$itemnumber && $item && $action eq 'lookup' );
 
 $template->param( course => GetCourse($course_id) );
 
@@ -66,6 +70,7 @@ if ( $action eq 'lookup' ) {
 
     $template->param(
         item           => $item,
+        title          => $title,
         course_item    => $course_item,
         course_reserve => $course_reserve,
 

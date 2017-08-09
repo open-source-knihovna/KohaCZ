@@ -203,11 +203,9 @@ sub getletter {
     my ( $module, $code, $branchcode, $message_transport_type ) = @_;
     $message_transport_type //= '%';
 
-    if ( C4::Context->preference('IndependentBranches')
-            and $branchcode
-            and C4::Context->userenv ) {
-
-        $branchcode = C4::Context->userenv->{'branch'};
+    my $only_my_library = C4::Context->only_my_library;
+    if ( $only_my_library and $branchcode ) {
+        $branchcode = C4::Context::mybranch();
     }
     $branchcode //= '';
 
@@ -1049,9 +1047,17 @@ sub SendQueuedMessages {
                 my $sms_provider = Koha::SMS::Providers->find( $member->{'sms_provider_id'} );
                 unless ( $sms_provider ) {
                     warn sprintf( "Patron %s has no sms provider id set!", $message->{'borrowernumber'} ) if $params->{'verbose'} or $debug;
+                    _set_message_status( { message_id => $message->{'message_id'}, status => 'failed' } );
+                    next MESSAGE;
+                }
+                $message->{to_address} ||= $member->{'smsalertnumber'};
+                unless ( $message->{to_address} && $member->{'smsalertnumber'} ) {
+                    _set_message_status( { message_id => $message->{'message_id'}, status => 'failed' } );
+                    warn sprintf( "No smsalertnumber found for patron %s!", $message->{'borrowernumber'} ) if $params->{'verbose'} or $debug;
                     next MESSAGE;
                 }
                 $message->{to_address} .= '@' . $sms_provider->domain();
+                _update_message_to_address($message->{'message_id'},$message->{to_address});
                 _send_message_by_email( $message, $params->{'username'}, $params->{'password'}, $params->{'method'} );
             } else {
                 _send_message_by_sms( $message );
