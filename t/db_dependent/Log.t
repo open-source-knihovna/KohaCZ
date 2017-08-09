@@ -8,6 +8,7 @@ use Modern::Perl;
 use Test::More tests => 10;
 
 use C4::Context;
+use Koha::Database;
 use Koha::DateUtils;
 
 use t::lib::Mocks qw/mock_preference/; # to mock CronjobLog
@@ -19,9 +20,13 @@ BEGIN {
 }
 my $success;
 
+# Make sure we can rollback.
+my $schema  = Koha::Database->new->schema;
+$schema->storage->txn_begin;
+my $dbh = C4::Context->dbh;
+
 eval {
     # FIXME: are we sure there is an member number 1?
-    # FIXME: can we remove this log entry somehow?
     logaction("MEMBERS","MODIFY",1,"test operation");
     $success = 1;
 } or do {
@@ -56,11 +61,6 @@ eval {
     $success = 0;
 };
 ok($success, "GetLogs seemed to find ".$success." like our test record in a tighter search");
-
-# Make sure we can rollback.
-my $dbh = C4::Context->dbh;
-$dbh->{AutoCommit} = 0;
-$dbh->{RaiseError} = 1;
 
 # We want numbers to be the same between runs.
 $dbh->do("DELETE FROM action_logs;");
@@ -122,8 +122,6 @@ subtest 'logaction(): interface is correctly logged' => sub {
     logaction( "MEMBERS", "MODIFY", 1, 'test info', 'sip');
     $logs = GetLogs();
     is( @{$logs}[0]->{ interface }, 'sip', 'Passed interface is respected (sip)');
-
-    $dbh->rollback;
 };
 
 subtest 'GetLogs() respects interface filters' => sub {
@@ -151,8 +149,6 @@ subtest 'GetLogs() respects interface filters' => sub {
 
     $logs = GetLogs(undef,undef,undef,undef,undef,undef,undef,['commandline']);
     is( @{$logs}[0]->{ interface }, 'commandline', 'Interface correctly filtered (commandline)');
-
-    $dbh->rollback;
 };
 
-$dbh->rollback;
+$schema->storage->txn_rollback;

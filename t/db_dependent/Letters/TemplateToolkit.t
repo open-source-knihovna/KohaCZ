@@ -286,11 +286,11 @@ $prepared_letter = GetPreparedLetter(
 is( $prepared_letter->{content}, $modification->id(), 'Patron modification object used correctly' );
 
 subtest 'regression tests' => sub {
-    plan tests => 3;
+    plan tests => 5;
 
     my $library = $builder->build( { source => 'Branch' } );
     my $patron  = $builder->build( { source => 'Borrower' } );
-    my $biblio1 = Koha::Biblio->new({title => 'Test Biblio 1'})->store->unblessed;
+    my $biblio1 = Koha::Biblio->new({title => 'Test Biblio 1', author => 'An author', })->store->unblessed;
     my $biblioitem1 = Koha::Biblioitem->new({biblionumber => $biblio1->{biblionumber}})->store()->unblessed;
     my $item1 = Koha::Item->new(
         {
@@ -300,6 +300,7 @@ subtest 'regression tests' => sub {
             homebranch       => $library->{branchcode},
             holdingbranch    => $library->{branchcode},
             itype            => 'BK',
+            itemcallnumber   => 'itemcallnumber1',
         }
     )->store->unblessed;
     my $biblio2 = Koha::Biblio->new({title => 'Test Biblio 2'})->store->unblessed;
@@ -312,6 +313,7 @@ subtest 'regression tests' => sub {
             homebranch       => $library->{branchcode},
             holdingbranch    => $library->{branchcode},
             itype            => 'BK',
+            itemcallnumber   => 'itemcallnumber2',
         }
     )->store->unblessed;
 
@@ -471,6 +473,114 @@ Thank you for visiting [% branch.branchname %].
         is( $first_checkin_tt_letter->content, $first_checkin_letter->content, 'Verify first checkin letter'  );
         is( $second_checkin_tt_letter->content, $second_checkin_letter->content, 'Verify second checkin letter' );
 
+    };
+
+    subtest 'DUEDGST|count' => sub {
+        plan tests => 1;
+
+        my $code = 'DUEDGST';
+
+        my $dbh = C4::Context->dbh;
+        # Enable notification for DUEDGST - Things are hardcoded here but should work with default data
+        $dbh->do(q|INSERT INTO borrower_message_preferences( borrowernumber, message_attribute_id ) VALUES ( ?, ? )|, undef, $patron->{borrowernumber}, 1 );
+        my $borrower_message_preference_id = $dbh->last_insert_id(undef, undef, "borrower_message_preferences", undef);
+        $dbh->do(q|INSERT INTO borrower_message_transport_preferences( borrower_message_preference_id, message_transport_type) VALUES ( ?, ? )|, undef, $borrower_message_preference_id, 'email' );
+
+        my $params = {
+            code => $code,
+            substitute => { count => 42 },
+        };
+
+        my $template = q|
+You have <<count>> items due
+        |;
+        my $letter = process_letter( { template => $template, %$params });
+
+        my $tt_template = q|
+You have [% count %] items due
+        |;
+        my $tt_letter = process_letter( { template => $tt_template, %$params });
+        is( $tt_letter->{content}, $letter->{content}, );
+    };
+
+    subtest 'HOLD_SLIP|dates|today' => sub {
+        plan tests => 2;
+
+        my $code = 'HOLD_SLIP';
+
+        C4::Reserves::AddReserve( $library->{branchcode}, $patron->{borrowernumber}, $biblio1->{biblionumber}, undef, undef, undef, undef, "a note", undef, $item1->{itemnumber}, 'W' );
+        C4::Reserves::AddReserve( $library->{branchcode}, $patron->{borrowernumber}, $biblio2->{biblionumber}, undef, undef, undef, undef, "another note", undef, $item2->{itemnumber} );
+
+        my $template = <<EOF;
+<h5>Date: <<today>></h5>
+
+<h3> Transfer to/Hold in <<branches.branchname>></h3>
+
+<h3><<borrowers.surname>>, <<borrowers.firstname>></h3>
+
+<ul>
+    <li><<borrowers.cardnumber>></li>
+    <li><<borrowers.phone>></li>
+    <li> <<borrowers.address>><br />
+         <<borrowers.address2>><br />
+         <<borrowers.city>>  <<borrowers.zipcode>>
+    </li>
+    <li><<borrowers.email>></li>
+</ul>
+<br />
+<h3>ITEM ON HOLD</h3>
+<h4><<biblio.title>></h4>
+<h5><<biblio.author>></h5>
+<ul>
+   <li><<items.barcode>></li>
+   <li><<items.itemcallnumber>></li>
+   <li><<reserves.waitingdate>></li>
+</ul>
+<p>Notes:
+<pre><<reserves.reservenotes>></pre>
+</p>
+EOF
+
+        reset_template( { template => $template, code => $code, module => 'circulation' } );
+        my $letter_for_item1 = C4::Reserves::ReserveSlip( $library->{branchcode}, $patron->{borrowernumber}, $biblio1->{biblionumber} );
+        my $letter_for_item2 = C4::Reserves::ReserveSlip( $library->{branchcode}, $patron->{borrowernumber}, $biblio2->{biblionumber} );
+
+        my $tt_template = <<EOF;
+<h5>Date: [% today | \$KohaDates with_hours => 1 %]</h5>
+
+<h3> Transfer to/Hold in [% branch.branchname %]</h3>
+
+<h3>[% borrower.surname %], [% borrower.firstname %]</h3>
+
+<ul>
+    <li>[% borrower.cardnumber %]</li>
+    <li>[% borrower.phone %]</li>
+    <li> [% borrower.address %]<br />
+         [% borrower.address2 %]<br />
+         [% borrower.city %]  [% borrower.zipcode %]
+    </li>
+    <li>[% borrower.email %]</li>
+</ul>
+<br />
+<h3>ITEM ON HOLD</h3>
+<h4>[% biblio.title %]</h4>
+<h5>[% biblio.author %]</h5>
+<ul>
+   <li>[% item.barcode %]</li>
+   <li>[% item.itemcallnumber %]</li>
+   <li>[% hold.waitingdate | \$KohaDates %]</li>
+</ul>
+<p>Notes:
+<pre>[% hold.reservenotes %]</pre>
+</p>
+EOF
+
+        reset_template( { template => $tt_template, code => $code, module => 'circulation' } );
+        my $tt_letter_for_item1 = C4::Reserves::ReserveSlip( $library->{branchcode}, $patron->{borrowernumber}, $biblio1->{biblionumber} );
+        my $tt_letter_for_item2 = C4::Reserves::ReserveSlip( $library->{branchcode}, $patron->{borrowernumber}, $biblio2->{biblionumber} );
+
+        is( $tt_letter_for_item1->{content}, $letter_for_item1->{content}, );
+        is( $tt_letter_for_item2->{content}, $letter_for_item2->{content}, );
     };
 };
 

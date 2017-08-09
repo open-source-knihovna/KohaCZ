@@ -36,9 +36,11 @@ use Date::Calc qw(
 use C4::Koha;
 use C4::Reserves;
 use Koha::Items;
+use Koha::ItemTypes;
 use Koha::Libraries;
 use Koha::DateUtils;
 use Koha::BiblioFrameworks;
+use Koha::Patrons;
 
 my $input = new CGI;
 my $itemnumber = $input->param('itemnumber');
@@ -88,28 +90,38 @@ while ( my $library = $libraries->next ) {
                 $getransf{'messcompa'} = 1;
 				$getransf{'diff'} = $diff;
             }
-            my $gettitle     = GetBiblioFromItemNumber( $num->{'itemnumber'} );
-            my $itemtypeinfo = getitemtypeinfo( (C4::Context->preference('item-level_itypes')) ? $gettitle->{'itype'} : $gettitle->{'itemtype'} );
+
+            my $item = Koha::Items->find( $num->{itemnumber} );
+            my $biblio = $item->biblio;
+            my $itemtype = Koha::ItemTypes->find( $item->effective_itemtype );
 
             $getransf{'datetransfer'} = $num->{'datesent'};
-            $getransf{'itemtype'} = $itemtypeinfo ->{'description'};
-			foreach (qw(title author biblionumber itemnumber barcode homebranch holdingbranch itemcallnumber)) {
-            	$getransf{$_} = $gettitle->{$_};
-			}
+            $getransf{'itemtype'} = $itemtype->description; # FIXME Should not it be translated_description?
+            %getransf = (
+                %getransf,
+                title          => $biblio->title,
+                author         => $biblio->author,
+                biblionumber   => $biblio->biblionumber,
+                itemnumber     => $item->itemnumber,
+                barcode        => $item->barcode,
+                homebranch     => $item->homebranch,
+                holdingbranch  => $item->holdingbranch,
+                itemcallnumber => $item->itemcallnumber,
+            );
 
-            my $record = GetMarcBiblio($gettitle->{'biblionumber'});
-            $getransf{'subtitle'} = GetRecordValue('subtitle', $record, GetFrameworkCode($gettitle->{'biblionumber'}));
+            my $record = GetMarcBiblio($biblio->biblionumber);
+            $getransf{'subtitle'} = GetRecordValue('subtitle', $record, $biblio->frameworkcode);
 
             # we check if we have a reserv for this transfer
-            my $item = Koha::Items->find( $num->{itemnumber} );
             my $holds = $item->current_holds;
             if ( my $first_hold = $holds->next ) {
-                my $getborrower = C4::Members::GetMember( borrowernumber => $first_hold->borrowernumber );
-                $getransf{'borrowernum'}       = $getborrower->{'borrowernumber'};
-                $getransf{'borrowername'}      = $getborrower->{'surname'};
-                $getransf{'borrowerfirstname'} = $getborrower->{'firstname'};
-                $getransf{'borrowermail'}      = $getborrower->{'email'} if $getborrower->{'email'};
-                $getransf{'borrowerphone'}     = $getborrower->{'phone'};
+                my $patron = Koha::Patrons->find( $first_hold->borrowernumber );
+                # FIXME The full patron object should be passed to the template
+                $getransf{'borrowernum'}       = $patron->borrowernumber;
+                $getransf{'borrowername'}      = $patron->surname;
+                $getransf{'borrowerfirstname'} = $patron->firstname;
+                $getransf{'borrowermail'}      = $patron->email if $patron->email;
+                $getransf{'borrowerphone'}     = $patron->phone;
             }
             push( @transferloop, \%getransf );
         }

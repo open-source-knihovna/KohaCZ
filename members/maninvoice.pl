@@ -32,6 +32,7 @@ use C4::Accounts;
 use C4::Items;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
 
+use Koha::Patrons;
 use Koha::Patron::Images;
 use Koha::Patron::Categories;
 use Koha::Account::DebitTypes;
@@ -42,8 +43,7 @@ my $flagsrequired = { borrowers => 1, updatecharges => 'remaining_permissions' }
 
 my $borrowernumber=$input->param('borrowernumber');
 
-# get borrower details
-my $data=GetMember('borrowernumber'=>$borrowernumber);
+my $patron = Koha::Patrons->find( $borrowernumber );
 my $add=$input->param('add');
 if ($add){
     if ( checkauth( $input, 0, $flagsrequired, 'intranet' ) ) {
@@ -57,15 +57,34 @@ if ($add){
         my $amount=$input->param('amount');
         my $type=$input->param('type');
         my $error   = manualinvoice( $borrowernumber, $itemnum, $desc, $type, $amount );
-
-        #TODO - we need a correct error handling - better do this through REST API
-        #if ($error) {
-        #     if ( $error =~ /FOREIGN KEY/ && $error =~ /itemnumber/ ) {
-        #        $template->param( 'ITEMNUMBER' => 1 );
-        #    }
-        #    $template->param( 'ERROR' => $error );
-        #}
     }
+
+    if ( $patron->category->category_type eq 'C') {
+        my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
+        $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
+        $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
+    }
+
+    $template->param( adultborrower => 1 ) if ( $patron->category->category_type =~ /^(A|I)$/ );
+    $template->param( picture => 1 ) if $patron->image;
+
+    if (C4::Context->preference('ExtendedPatronAttributes')) {
+        my $attributes = GetBorrowerAttributes($borrowernumber);
+        $template->param(
+            ExtendedPatronAttributes => 1,
+            extendedattributes => $attributes
+        );
+    }
+
+    $template->param(%{ $patron->unblessed });
+    $template->param(
+        finesview      => 1,
+        borrowernumber => $borrowernumber,
+        categoryname   => $patron->category->description,
+        is_child       => ($patron->category->category_type eq 'C'),
+        RoutingSerials => C4::Context->preference('RoutingSerials'),
+    );
+    output_html_with_http_headers $input, $cookie, $template->output;
 }
 print $input->redirect("/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber");
 exit;

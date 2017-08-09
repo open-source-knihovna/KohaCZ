@@ -48,11 +48,14 @@ use C4::Images;
 use Koha::DateUtils;
 use C4::HTML5Media;
 use C4::CourseReserves qw(GetItemCourseReservesInfo);
+
+use Koha::Biblios;
 use Koha::RecordProcessor;
 use Koha::AuthorisedValues;
 use Koha::Biblios;
 use Koha::ItemTypes;
 use Koha::Virtualshelves;
+use Koha::Patrons;
 use Koha::Ratings;
 use Koha::Reviews;
 
@@ -433,22 +436,22 @@ if ($session->param('busc')) {
     $numberBiblioPaging = $paging{'previous'}->{biblionumber};
     if ($numberBiblioPaging) {
         $template->param( 'previousBiblionumber' => $numberBiblioPaging );
-        $dataBiblioPaging = GetBiblioData($numberBiblioPaging);
-        $template->param('previousTitle' => $dataBiblioPaging->{'title'}) if ($dataBiblioPaging);
+        $dataBiblioPaging = Koha::Biblios->find( $numberBiblioPaging );
+        $template->param('previousTitle' => $dataBiblioPaging->title) if $dataBiblioPaging;
     }
     # Next biblio
     $numberBiblioPaging = $paging{'next'}->{biblionumber};
     if ($numberBiblioPaging) {
         $template->param( 'nextBiblionumber' => $numberBiblioPaging );
-        $dataBiblioPaging = GetBiblioData($numberBiblioPaging);
-        $template->param('nextTitle' => $dataBiblioPaging->{'title'}) if ($dataBiblioPaging);
+        $dataBiblioPaging = Koha::Biblios->find( $numberBiblioPaging );
+        $template->param('nextTitle' => $dataBiblioPaging->title) if $dataBiblioPaging;
     }
     # Partial list of biblio results
     my @listResults;
     for (my $j = 0; $j < @arrBiblios; $j++) {
         next unless ($arrBiblios[$j]);
-        $dataBiblioPaging = GetBiblioData($arrBiblios[$j]) if ($arrBiblios[$j] != $biblionumber);
-        push @listResults, {index => $j + 1 + $offset, biblionumber => $arrBiblios[$j], title => ($arrBiblios[$j] == $biblionumber)?'':$dataBiblioPaging->{title}, author => ($arrBiblios[$j] != $biblionumber && $dataBiblioPaging->{author})?$dataBiblioPaging->{author}:'', url => ($arrBiblios[$j] == $biblionumber)?'':'opac-detail.pl?biblionumber=' . $arrBiblios[$j]};
+        $dataBiblioPaging = Koha::Biblios->find( $arrBiblios[$j] ) if ($arrBiblios[$j] != $biblionumber);
+        push @listResults, {index => $j + 1 + $offset, biblionumber => $arrBiblios[$j], title => ($arrBiblios[$j] == $biblionumber)?'':$dataBiblioPaging->title, author => ($arrBiblios[$j] != $biblionumber && $dataBiblioPaging->author)?$dataBiblioPaging->author:'', url => ($arrBiblios[$j] == $biblionumber)?'':'opac-detail.pl?biblionumber=' . $arrBiblios[$j]};
     }
     $template->param('listResults' => \@listResults) if (@listResults);
     $template->param('indexPag' => 1 + $offset, 'totalPag' => $arrParamsBusc{'total'}, 'indexPagEnd' => scalar(@arrBiblios) + $offset);
@@ -655,7 +658,7 @@ if ( not $viewallitems and @items > $max_items_to_display ) {
     );
 } else {
   my $allow_onshelf_holds;
-  my $borrower = GetMember( 'borrowernumber' => $borrowernumber );
+  my $patron = Koha::Patrons->find( $borrowernumber );
   for my $itm (@items) {
     $itm->{holds_count} = $item_reserves{ $itm->{itemnumber} };
     $itm->{priority} = $priority{ $itm->{itemnumber} };
@@ -667,7 +670,7 @@ if ( not $viewallitems and @items > $max_items_to_display ) {
         && !$itemtypes->{$itm->{'itype'}}->{notforloan}
         && $itm->{'itemnumber'};
 
-    $allow_onshelf_holds = C4::Reserves::OnShelfHoldsAllowed( $itm, $borrower )
+    $allow_onshelf_holds = C4::Reserves::OnShelfHoldsAllowed( $itm, ( $patron ? $patron->unblessed : {} ) )
       unless $allow_onshelf_holds;
 
     # get collection code description, too
@@ -839,19 +842,19 @@ if ( C4::Context->preference('reviewson') ) {
         }
     }
     for my $review (@$reviews) {
-        my $borrowerData = GetMember( 'borrowernumber' => $review->{borrowernumber} );
+        my $patron = Koha::Patrons->find( $review->{borrowernumber} );
 
         # setting some borrower info into this hash
-        $review->{title}     = $borrowerData->{'title'};
-        $review->{surname}   = $borrowerData->{'surname'};
-        $review->{firstname} = $borrowerData->{'firstname'};
-        if ( $libravatar_enabled and $borrowerData->{'email'} ) {
-            $review->{avatarurl} = libravatar_url( email => $borrowerData->{'email'}, https => $ENV{HTTPS} );
+        $review->{title}     = $patron->title;
+        $review->{surname}   = $patron->surname;
+        $review->{firstname} = $patron->firstname;
+        if ( $libravatar_enabled and $patron->email ) {
+            $review->{avatarurl} = libravatar_url( email => $patron->email, https => $ENV{HTTPS} );
         }
-        $review->{userid}     = $borrowerData->{'userid'};
-        $review->{cardnumber} = $borrowerData->{'cardnumber'};
+        $review->{userid}     = $patron->userid;
+        $review->{cardnumber} = $patron->cardnumber;
 
-        if ( $borrowerData->{'borrowernumber'} eq $borrowernumber ) {
+        if ( $patron->borrowernumber eq $borrowernumber ) {
             $review->{your_comment} = 1;
             $loggedincommenter = 1;
         }

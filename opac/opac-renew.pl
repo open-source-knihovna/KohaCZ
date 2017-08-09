@@ -70,8 +70,7 @@ else {
                 $branchcode = $item->{'homebranch'};
             }
             elsif ( $renewalbranch eq 'patronhomebranch' ) {
-                my $borrower = GetMember( borrowernumber => $borrowernumber );
-                $branchcode = $borrower->{'branchcode'};
+                $branchcode = Koha::Patrons->find( $borrowernumber )->branchcode;
             }
             elsif ( $renewalbranch eq 'checkoutbranch' ) {
                 my $issue = GetOpenIssue($itemnumber);
@@ -83,7 +82,7 @@ else {
             else {
                 $branchcode = 'OPACRenew';
             }
-            AddRenewal( $borrowernumber, $itemnumber, $branchcode );
+            AddRenewal( $borrowernumber, $itemnumber, $branchcode, undef, undef );
             push( @renewed, $itemnumber );
         }
         else {

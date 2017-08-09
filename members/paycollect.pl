@@ -29,6 +29,7 @@ use C4::Members::Attributes qw(GetBorrowerAttributes);
 use C4::Accounts;
 use C4::Koha;
 use Koha::Patron::Images;
+use Koha::Patrons;
 use Koha::Account;
 
 use Koha::Patron::Categories;
@@ -56,7 +57,11 @@ $template->param( credit_types => \@credit_types );
 
 # get borrower details
 my $borrowernumber = $input->param('borrowernumber');
-my $borrower       = GetMember( borrowernumber => $borrowernumber );
+my $patron         = Koha::Patrons->find( $borrowernumber );
+my $borrower       = $patron->unblessed;
+my $category       = $patron->category;
+$borrower->{description} = $category->description;
+$borrower->{category_type} = $category->category_type;
 my $user           = $input->remote_user;
 
 my $branch         = C4::Context->userenv->{'branch'};

@@ -29,6 +29,7 @@ use C4::Circulation;
 use C4::Members;
 use C4::Biblio;
 use Koha::DateUtils;
+use Koha::Patrons;
 
 use List::Util qw(shuffle);
 use List::MoreUtils qw(any);
@@ -100,7 +101,7 @@ sub UpdateTransportCostMatrix {
 
     my $sth = $dbh->prepare("INSERT INTO transport_cost (frombranch, tobranch, cost, disable_transfer) VALUES (?, ?, ?, ?)");
 
-    $dbh->do("TRUNCATE TABLE transport_cost");
+    $dbh->do("DELETE FROM transport_cost");
     foreach (@$records) {
         my $cost = $_->{cost};
         my $from = $_->{frombranch};
@@ -109,7 +110,7 @@ sub UpdateTransportCostMatrix {
             $cost ||= 0;
         }
         elsif ( !defined ($cost) || ($cost !~ m/(0|[1-9][0-9]*)(\.[0-9]*)?/o) ) {
-            warn  "Invalid $from -> $to cost $cost - must be a number >= 0, disablig";
+            warn  "Invalid $from -> $to cost $cost - must be a number >= 0, disabling";
             $cost = 0;
             $_->{disable_transfer} = 1;
         }
@@ -677,14 +678,14 @@ sub CreatePicklistFromItemMap {
         my $barcode = $item->{barcode};
         my $itemcallnumber = $item->{itemcallnumber};
 
-        my $borrower = GetMember('borrowernumber'=>$borrowernumber);
-        my $cardnumber = $borrower->{'cardnumber'};
-        my $surname = $borrower->{'surname'};
-        my $firstname = $borrower->{'firstname'};
-        my $phone = $borrower->{'phone'};
+        my $patron = Koha::Patrons->find( $borrowernumber );
+        my $cardnumber = $patron->cardnumber;
+        my $surname = $patron->surname;
+        my $firstname = $patron->firstname;
+        my $phone = $patron->phone;
 
-        my $bib = GetBiblioData($biblionumber);
-        my $title = $bib->{title};
+        my $biblio = Koha::Biblios->find( $biblionumber );
+        my $title = $biblio->title;
 
         $sth_load->execute($biblionumber, $itemnumber, $barcode, $surname, $firstname, $phone, $borrowernumber,
                            $cardnumber, $reservedate, $title, $itemcallnumber,

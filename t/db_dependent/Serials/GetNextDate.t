@@ -1,15 +1,16 @@
 #!/usr/bin/perl
 
-use C4::Context;
-use Test::More tests => 96;
 use Modern::Perl;
+use Test::More tests => 102;
 
-my $dbh = C4::Context->dbh;
-$dbh->{RaiseError} = 1;
-$dbh->{AutoCommit} = 0;
-
-use C4::Serials::Frequency;
+use Koha::Database;
 use C4::Serials;
+use C4::Serials::Frequency;
+
+my $schema  = Koha::Database->new->schema;
+$schema->storage->txn_begin;
+my $dbh = C4::Context->dbh;
+
 
 # TEST CASE - 1 issue per day, no irregularities
 my $frequency = {
@@ -211,13 +212,11 @@ $subscription = {
 };
 $publisheddate = $subscription->{firstacquidate};
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-01-03');
-# when more than 1 issue per week, date is automatically set to the same day of
-# week as firstacquidate
+is($publisheddate, '1970-01-04');
 $publisheddate = GetNextDate($subscription, $publisheddate);
 is($publisheddate, '1970-01-08');
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-01-10');
+is($publisheddate, '1970-01-11');
 $publisheddate = GetNextDate($subscription, $publisheddate);
 is($publisheddate, '1970-01-15');
 
@@ -230,13 +229,13 @@ $subscription = {
 };
 $publisheddate = $subscription->{firstacquidate};
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-01-03');
+is($publisheddate, '1970-01-04');
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-01-10');
+is($publisheddate, '1970-01-11');
 $publisheddate = GetNextDate($subscription, $publisheddate);
 is($publisheddate, '1970-01-22');
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-01-24');
+is($publisheddate, '1970-01-25');
 $publisheddate = GetNextDate($subscription, $publisheddate);
 is($publisheddate, '1970-01-29');
 
@@ -371,13 +370,13 @@ $subscription = {
 };
 $publisheddate = $subscription->{firstacquidate};
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-01-16', 'January has 31 days');
+is($publisheddate, '1970-01-16', 'Jan 16');
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-02-01');
+is($publisheddate, '1970-02-01', 'Feb 1');
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-02-15', 'February has only 28 days');
+is($publisheddate, '1970-02-16', 'Feb 16');
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-03-01');
+is($publisheddate, '1970-03-01', 'Mar 1' );
 
 # TEST CASE - 2 issues per month, irregularities
 $subscription = {
@@ -388,15 +387,15 @@ $subscription = {
 };
 $publisheddate = $subscription->{firstacquidate};
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-01-16', 'January has 31 days');
+is($publisheddate, '1970-01-16', 'Jan 16' );
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-02-15', 'February has only 28 days');
+is($publisheddate, '1970-02-16', 'Feb 16 (skipping Feb 1)' );
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-04-01');
+is($publisheddate, '1970-04-01', 'Apr 1 (skipping Mar 1 and 16)' );
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-04-16', 'April has 30 days');
+is($publisheddate, '1970-04-16', 'Apr 16' );
 $publisheddate = GetNextDate($subscription, $publisheddate);
-is($publisheddate, '1970-05-01');
+is($publisheddate, '1970-05-01', 'May 1' );
 
 # TEST CASE - 1 issue per year, no irregularity
 $id = AddSubscriptionFrequency({
@@ -469,10 +468,14 @@ $publisheddate = GetNextDate($subscription, $publisheddate);
 is($publisheddate, '1978-01-01');
 $publisheddate = GetNextDate($subscription, $publisheddate);
 is($publisheddate, '1980-01-01');
+# Move publisheddate to Feb 29 (leap year 1980)
+$publisheddate = '1980-02-29';
+$publisheddate = GetNextDate( $subscription, $publisheddate );
+is( $publisheddate, '1982-02-28', 'Test +2 year from Feb 29' );
 
 # TEST CASE - 2 issues per year, no irregularity
 $id = AddSubscriptionFrequency({
-    description => "1 issue every 2 years",
+    description => "2 issues per year",
     unit => 'year',
     issuesperunit => 2,
     unitsperissue => 1,
@@ -512,6 +515,32 @@ is($publisheddate, '1973-07-02');
 $publisheddate = GetNextDate($subscription, $publisheddate);
 is($publisheddate, '1974-01-01');
 
+# TEST CASE - 9 issues per year, dates spread throughout month
+$id = AddSubscriptionFrequency({
+    description => "9 issues per year",
+    unit => 'year',
+    issuesperunit => 9,
+    unitsperissue => 1,
+});
+$subscription = {
+    periodicity => $id,
+    firstacquidate => '1970-08-10',
+    irregularity => '',
+    countissuesperunit => 1,
+};
+my @dates = ( $subscription->{firstacquidate} );
+foreach(1..27) {
+    push @dates, GetNextDate( $subscription, $dates[-1] );
+}
+is( $dates[9],  '1971-08-10', 'Freq 9/yr, 1 year passed' );
+is( $dates[18], '1972-08-10', 'Freq 9/yr, 2 years passed (leap year)' );
+is( $dates[27], '1973-08-10', 'Freq 9/yr, 3 years passed' );
+# Keep (first) position in cycle, but shift back 9 days
+is( GetNextDate( $subscription, '1973-08-01' ), '1973-09-10', 'Back 9 days, without annual correction' );
+# Set position to last in cycle, and shift back 9 days; annual correction
+$subscription->{countissuesperunit} = 9;
+is( GetNextDate( $subscription, '1973-08-01' ), '1973-09-15', 'Last in cycle, back 9 days, expect annual correction' );
+
 # TEST CASE - Irregular
 $id = AddSubscriptionFrequency({
     description => "Irregular",
@@ -538,4 +567,4 @@ is($publisheddate, undef);
 $publisheddate = GetNextDate(undef, undef);
 is($publisheddate, undef);
 
-$dbh->rollback;
+$schema->storage->txn_rollback;

@@ -29,8 +29,12 @@ use C4::XSLT;
 
 use Koha::Biblios;
 use Koha::Biblioitems;
+use Koha::ItemTypes;
 use Koha::CsvProfiles;
+use Koha::Patrons;
 use Koha::Virtualshelves;
+
+use constant ANYONE => 2;
 
 my $query = new CGI;
 
@@ -49,14 +53,15 @@ my $category = $query->param('category') || 1;
 my ( $shelf, $shelfnumber, @messages );
 
 if ( $op eq 'add_form' ) {
-    # Nothing to do
+    # Only pass default
+    $shelf = { allow_change_from_owner => 1 };
 } elsif ( $op eq 'edit_form' ) {
     $shelfnumber = $query->param('shelfnumber');
     $shelf       = Koha::Virtualshelves->find($shelfnumber);
 
     if ( $shelf ) {
         $category = $shelf->category;
-        my $patron = GetMember( 'borrowernumber' => $shelf->owner );
+        my $patron = Koha::Patrons->find( $shelf->owner )->unblessed;
         $template->param( owner => $patron, );
         unless ( $shelf->can_be_managed( $loggedinuser ) ) {
             push @messages, { type => 'alert', code => 'unauthorized_on_update' };
@@ -66,14 +71,14 @@ if ( $op eq 'add_form' ) {
         push @messages, { type => 'alert', code => 'does_not_exist' };
     }
 } elsif ( $op eq 'add' ) {
+    my $allow_changes_from = $query->param('allow_changes_from');
     eval {
         $shelf = Koha::Virtualshelf->new(
             {   shelfname          => scalar $query->param('shelfname'),
                 sortfield          => scalar $query->param('sortfield'),
                 category           => scalar $query->param('category'),
-                allow_add          => scalar $query->param('allow_add'),
-                allow_delete_own   => scalar $query->param('allow_delete_own'),
-                allow_delete_other => scalar $query->param('allow_delete_other'),
+                allow_change_from_owner => $allow_changes_from > 0,
+                allow_change_from_others => $allow_changes_from == ANYONE,
                 owner              => scalar $query->param('owner'),
             }
         );
@@ -100,9 +105,9 @@ if ( $op eq 'add_form' ) {
         if ( $shelf->can_be_managed( $loggedinuser ) ) {
             $shelf->shelfname( scalar $query->param('shelfname') );
             $shelf->sortfield( $sortfield );
-            $shelf->allow_add( scalar $query->param('allow_add') );
-            $shelf->allow_delete_own( scalar $query->param('allow_delete_own') );
-            $shelf->allow_delete_other( scalar $query->param('allow_delete_other') );
+            my $allow_changes_from = $query->param('allow_changes_from');
+            $shelf->allow_change_from_owner( $allow_changes_from > 0 );
+            $shelf->allow_change_from_others( $allow_changes_from == ANYONE );
             $shelf->category( scalar $query->param('category') );
             eval { $shelf->store };
 
@@ -148,8 +153,7 @@ if ( $op eq 'add_form' ) {
                     next if $barcode eq '';
                     my $item = GetItem( 0, $barcode);
                     if (defined $item && $item->{itemnumber}) {
-                        my $biblio = GetBiblioFromItemNumber( $item->{itemnumber} );
-                        my $added = eval { $shelf->add_biblio( $biblio->{biblionumber}, $loggedinuser ); };
+                        my $added = eval { $shelf->add_biblio( $item->{biblionumber}, $loggedinuser ); };
                         if ($@) {
                             push @messages, { item_barcode => $barcode, type => 'alert', code => ref($@), msg => $@ };
                         } elsif ( $added ) {
@@ -225,8 +229,6 @@ if ( $op eq 'view' ) {
                 }
             );
 
-            my $borrower = GetMember( borrowernumber => $loggedinuser );
-
             my $xslfile = C4::Context->preference('XSLTListsDisplay');
             my $lang   = $xslfile ? C4::Languages::getlanguage()  : undef;
             my $sysxml = $xslfile ? C4::XSLT::get_xslt_sysprefs() : undef;
@@ -244,14 +246,14 @@ if ( $op eq 'view' ) {
 
                 my $marcflavour = C4::Context->preference("marcflavour");
                 my $itemtype = Koha::Biblioitems->search({ biblionumber => $content->biblionumber })->next->itemtype;
-                my $itemtypeinfo = getitemtypeinfo( $itemtype, 'intranet' );
+                $itemtype = Koha::ItemTypes->find( $itemtype );
                 my $biblio = Koha::Biblios->find( $content->biblionumber );
                 $this_item->{title}             = $biblio->title;
                 $this_item->{author}            = $biblio->author;
                 $this_item->{dateadded}         = $content->dateadded;
-                $this_item->{imageurl}          = $itemtypeinfo->{imageurl};
-                $this_item->{description}       = $itemtypeinfo->{description};
-                $this_item->{notforloan}        = $itemtypeinfo->{notforloan};
+                $this_item->{imageurl}          = $itemtype ? C4::Koha::getitemtypeimagelocation( 'intranet', $itemtype->imageurl ) : q{};
+                $this_item->{description}       = $itemtype ? $itemtype->description : q{}; #FIXME Should this be translated_description ?
+                $this_item->{notforloan}        = $itemtype->notforloan if $itemtype;
                 $this_item->{'coins'}           = GetCOinSBiblio($record);
                 $this_item->{'subtitle'}        = GetRecordValue( 'subtitle', $record, GetFrameworkCode( $biblionumber ) );
                 $this_item->{'normalized_upc'}  = GetNormalizedUPC( $record, $marcflavour );

@@ -149,6 +149,7 @@ sub search_compat {
     ) = @_;
     my %options;
     $options{offset} = $offset;
+    $offset = 0 if $offset < 0;
     $options{expanded_facet} = $expanded_facet;
     my $results = $self->search($query, undef, $results_per_page, %options);
 
@@ -326,7 +327,8 @@ sub simple_search_compat {
     return ('No query entered', undef, undef) unless $query;
 
     my %options;
-    $options{offset} = $offset // 0;
+    $offset = 0 if not defined $offset or $offset < 0;
+    $options{offset} = $offset;
     $max_results //= 100;
 
     unless (ref $query) {

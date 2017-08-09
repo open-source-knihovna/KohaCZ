@@ -29,6 +29,9 @@ use C4::Context;
 use C4::Circulation;
 use C4::Members;
 use C4::Biblio;
+use Koha::Patrons;
+
+use Koha::Items;
 
 my $query = CGI->new;
 
@@ -43,13 +46,14 @@ my ($template, $loggedinuser, $cookie) = get_template_and_user({
 my $operations = GetOfflineOperations;
 
 for (@$operations) {
-    my $biblio             = GetBiblioFromItemNumber(undef, $_->{'barcode'});
-    $_->{'bibliotitle'}    = $biblio->{'title'};
-    $_->{'biblionumber'}   = $biblio->{'biblionumber'};
-    my $borrower           = C4::Members::GetMember( cardnumber => $_->{'cardnumber'} );
-    if ($borrower) {
-        $_->{'borrowernumber'} = $borrower->{'borrowernumber'};
-        $_->{'borrower'}       = ($borrower->{'firstname'}?$borrower->{'firstname'}:'').' '.$borrower->{'surname'};
+    my $item = Koha::Items->find({ barcode => $_->{barcode} });
+    my $biblio = $item->biblio;
+    $_->{'bibliotitle'}    = $biblio->title;
+    $_->{'biblionumber'}   = $biblio->biblionumber;
+    my $patron             = $_->{cardnumber} ? Koha::Patrons->find( { cardnumber => $_->{cardnumber} } ) : undef;
+    if ($patron) {
+        $_->{'borrowernumber'} = $patron->borrowernumber;
+        $_->{'borrower'}       = ($patron->firstname ? $patron->firstname:'').' '.$patron->surname;
     }
     $_->{'actionissue'}    = $_->{'action'} eq 'issue';
     $_->{'actionreturn'}   = $_->{'action'} eq 'return';

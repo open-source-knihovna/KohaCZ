@@ -54,15 +54,12 @@ my $mockILS = Test::MockObject->new;
 $mockILS->mock( 'check_inst_id', sub {} );
 $mockILS->mock( 'institution_id', sub { $branchcode; } );
 $mockILS->mock( 'find_patron', sub { $findpatron; } );
-$branch = $builder->build({
-    source => 'Branch',
-});
-$branchcode = $branch->{branchcode};
 
 # START testing
 subtest 'Testing Patron Status Request V2' => sub {
     $schema->storage->txn_begin;
     plan tests => 13;
+    $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
     $C4::SIP::Sip::protocol_version = 2;
     test_request_patron_status_v2();
     $schema->storage->txn_rollback;
@@ -70,7 +67,8 @@ subtest 'Testing Patron Status Request V2' => sub {
 
 subtest 'Testing Patron Info Request V2' => sub {
     $schema->storage->txn_begin;
-    plan tests => 16;
+    plan tests => 18;
+    $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
     $C4::SIP::Sip::protocol_version = 2;
     test_request_patron_info_v2();
     $schema->storage->txn_rollback;
@@ -186,6 +184,15 @@ sub test_request_patron_info_v2 {
     # No check for custom fields here (unofficial PB, PC and PI)
     check_field( $respcode, $response, FID_SCREEN_MSG, '.+', 'We have a screen msg', 'regex' );
 
+    # Test customized patron name in AE with same sip request
+    # This implicitly tests C4::SIP::ILS::Patron->name
+    $server->{account}->{ae_field_template} = "X[% patron.surname %]Y";
+    $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
+    undef $response;
+    $msg->handle_patron_info( $server );
+    $respcode = substr( $response, 0, 2 );
+    check_field( $respcode, $response, FID_PERSONAL_NAME, 'X' . $patron2->{surname} . 'Y', 'Check customized patron name' );
+
     # Check empty password and verify CQ again
     $siprequest = PATRON_INFO. 'engYYYYMMDDZZZZHHMMSS'.'Y         '.
         FID_INST_ID. $branchcode. '|'.
@@ -196,6 +203,13 @@ sub test_request_patron_info_v2 {
     $msg->handle_patron_info( $server );
     $respcode = substr( $response, 0, 2 );
     check_field( $respcode, $response, FID_VALID_PATRON_PWD, 'N', 'code CQ should be N for empty AD' );
+    # Test empty password is OK if account configured to allow
+    $server->{account}->{allow_empty_passwords} = 1;
+    $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
+    undef $response;
+    $msg->handle_patron_info( $server );
+    $respcode = substr( $response, 0, 2 );
+    check_field( $respcode, $response, FID_VALID_PATRON_PWD, 'Y', 'code CQ should be Y if empty AD allowed' );
 
     # Finally, we send a wrong card number
     $schema->resultset('Borrower')->search({ cardnumber => $card })->delete;

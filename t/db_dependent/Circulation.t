@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 95;
+use Test::More tests => 96;
 
 use DateTime;
 
@@ -34,6 +34,8 @@ use C4::Overdues qw(UpdateFine CalcFine);
 use Koha::DateUtils;
 use Koha::Database;
 use Koha::IssuingRules;
+use Koha::Checkouts;
+use Koha::Patrons;
 use Koha::Subscriptions;
 
 my $schema = Koha::Database->schema;
@@ -73,6 +75,7 @@ my $borrower = {
 };
 
 # No userenv, PickupLibrary
+t::lib::Mocks::mock_preference('IndependentBranches', '0');
 t::lib::Mocks::mock_preference('CircControl', 'PickupLibrary');
 is(
     C4::Context->preference('CircControl'),
@@ -292,8 +295,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my $hold_waiting_borrowernumber = AddMember(%hold_waiting_borrower_data);
     my $restricted_borrowernumber = AddMember(%restricted_borrower_data);
 
-    my $renewing_borrower = GetMember( borrowernumber => $renewing_borrowernumber );
-    my $restricted_borrower = GetMember( borrowernumber => $restricted_borrowernumber );
+    my $renewing_borrower = Koha::Patrons->find( $renewing_borrowernumber )->unblessed;
+    my $restricted_borrower = Koha::Patrons->find( $restricted_borrowernumber )->unblessed;
 
     my $bibitems       = '';
     my $priority       = '1';
@@ -312,7 +315,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     is (defined $issue2, 1, "Item 2 checked out, due date: " . $issue2->date_due());
 
 
-    my $borrowing_borrowernumber = GetItemIssue($itemnumber)->{borrowernumber};
+    my $borrowing_borrowernumber = Koha::Checkouts->find( { itemnumber => $itemnumber } )->borrowernumber;
     is ($borrowing_borrowernumber, $renewing_borrowernumber, "Item checked out to $renewing_borrower->{firstname} $renewing_borrower->{surname}");
 
     my ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber, 1);
@@ -375,7 +378,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     is( $error, 'on_reserve', '(Bug 10663) Cannot renew, reserved (returned error is on_reserve)');
 
     my $reserveid = C4::Reserves::GetReserveId({ biblionumber => $biblionumber, borrowernumber => $reserving_borrowernumber});
-    my $reserving_borrower = GetMember( borrowernumber => $reserving_borrowernumber );
+    my $reserving_borrower = Koha::Patrons->find( $reserving_borrowernumber )->unblessed;
     AddIssue($reserving_borrower, $barcode3);
     my $reserve = $dbh->selectrow_hashref(
         'SELECT * FROM old_reserves WHERE reserve_id = ?',
@@ -839,7 +842,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     );
 
     my $a_borrower_borrowernumber = AddMember(%a_borrower_data);
-    my $a_borrower = GetMember( borrowernumber => $a_borrower_borrowernumber );
+    my $a_borrower = Koha::Patrons->find( $a_borrower_borrowernumber )->unblessed;
 
     my $yesterday = DateTime->today(time_zone => C4::Context->tz())->add( days => -1 );
     my $two_days_ahead = DateTime->today(time_zone => C4::Context->tz())->add( days => 2 );
@@ -920,7 +923,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 
     my $borrowernumber = AddMember(%a_borrower_data);
 
-    my $issue = AddIssue( GetMember( borrowernumber => $borrowernumber ), $barcode );
+    my $borrower = Koha::Patrons->find( $borrowernumber )->unblessed;
+    my $issue = AddIssue( $borrower, $barcode );
     UpdateFine(
         {
             issue_id       => $issue->id(),
@@ -990,8 +994,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         branchcode   => $library2->{branchcode},
     );
 
-    my $borrower1 = GetMember( borrowernumber => $borrowernumber1 );
-    my $borrower2 = GetMember( borrowernumber => $borrowernumber2 );
+    my $borrower1 = Koha::Patrons->find( $borrowernumber1 )->unblessed;
+    my $borrower2 = Koha::Patrons->find( $borrowernumber2 )->unblessed;
 
     my $issue = AddIssue( $borrower1, $barcode1 );
 
@@ -1061,7 +1065,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         branchcode => $branch,
     );
 
-    my $borrower = GetMember( borrowernumber => $borrowernumber );
+    my $borrower = Koha::Patrons->find( $borrowernumber )->unblessed;
+
     my $issue = AddIssue( $borrower, $barcode, undef, undef, undef, undef, { onsite_checkout => 1 } );
     my ( $renewed, $error ) = CanBookBeRenewed( $borrowernumber, $itemnumber );
     is( $renewed, 0, 'CanBookBeRenewed should not allow to renew on-site checkout' );
@@ -1087,7 +1092,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 
     my $patron = $builder->build({ source => 'Borrower', value => { branchcode => $library->{branchcode} } } );
 
-    my $issue = AddIssue( GetMember( borrowernumber => $patron->{borrowernumber} ), $barcode );
+    my $issue = AddIssue( $patron, $barcode );
     UpdateFine(
         {
             issue_id       => $issue->id(),
@@ -1110,7 +1115,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 }
 
 subtest 'CanBookBeIssued & AllowReturnToBranch' => sub {
-    plan tests => 23;
+    plan tests => 26;
 
     my $homebranch    = $builder->build( { source => 'Branch' } );
     my $holdingbranch = $builder->build( { source => 'Branch' } );
@@ -1127,6 +1132,7 @@ subtest 'CanBookBeIssued & AllowReturnToBranch' => sub {
                 notforloan    => 0,
                 itemlost      => 0,
                 withdrawn     => 0,
+                restricted    => 0,
                 biblionumber  => $biblioitem->{biblionumber}
             }
         }
@@ -1144,16 +1150,19 @@ subtest 'CanBookBeIssued & AllowReturnToBranch' => sub {
     ## Can be issued from homebranch
     set_userenv($homebranch);
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron_2, $item->{barcode} );
-    is( keys(%$error) + keys(%$alerts),        0 );
+    is( keys(%$error), 0, 'There should not be any errors (impossible)' );
+    is( keys(%$alerts), 0, 'There should not be any alerts' );
     is( exists $question->{ISSUED_TO_ANOTHER}, 1 );
     ## Can be issued from holdingbranch
     set_userenv($holdingbranch);
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron_2, $item->{barcode} );
-    is( keys(%$error) + keys(%$alerts),        0 );
+    is( keys(%$error), 0, 'There should not be any errors (impossible)' );
+    is( keys(%$alerts), 0, 'There should not be any alerts' );
     is( exists $question->{ISSUED_TO_ANOTHER}, 1 );
     ## Can be issued from another branch
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron_2, $item->{barcode} );
-    is( keys(%$error) + keys(%$alerts),        0 );
+    is( keys(%$error), 0, 'There should not be any errors (impossible)' );
+    is( keys(%$alerts), 0, 'There should not be any alerts' );
     is( exists $question->{ISSUED_TO_ANOTHER}, 1 );
 
     # AllowReturnToBranch == holdingbranch
@@ -1387,11 +1396,11 @@ subtest 'MultipleReserves' => sub {
         branchcode => $branch,
     );
     my $renewing_borrowernumber = AddMember(%renewing_borrower_data);
-    my $renewing_borrower = GetMember( borrowernumber => $renewing_borrowernumber );
+    my $renewing_borrower = Koha::Patrons->find( $renewing_borrowernumber )->unblessed;
     my $issue = AddIssue( $renewing_borrower, $barcode1);
     my $datedue = dt_from_string( $issue->date_due() );
     is (defined $issue->date_due(), 1, "item 1 checked out");
-    my $borrowing_borrowernumber = GetItemIssue($itemnumber1)->{borrowernumber};
+    my $borrowing_borrowernumber = Koha::Checkouts->find({ itemnumber => $itemnumber1 })->borrowernumber;
 
     my %reserving_borrower_data1 = (
         firstname =>  'Katrin',
@@ -1624,6 +1633,83 @@ subtest 'AddReturn + CumulativeRestrictionPeriods' => sub {
         }
     );
     is( $debarments->[0]->{expiration}, $expected_expiration );
+};
+
+subtest 'AddReturn | is_overdue' => sub {
+    plan tests => 5;
+
+    t::lib::Mocks::mock_preference('CalculateFinesOnReturn', 1);
+    t::lib::Mocks::mock_preference('finesMode', 'production');
+    t::lib::Mocks::mock_preference('MaxFine', '100');
+
+    my $library = $builder->build( { source => 'Branch' } );
+    my $patron  = $builder->build( { source => 'Borrower' } );
+
+    my $biblioitem = $builder->build( { source => 'Biblioitem' } );
+    my $item = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                homebranch    => $library->{branchcode},
+                holdingbranch => $library->{branchcode},
+                notforloan    => 0,
+                itemlost      => 0,
+                withdrawn     => 0,
+                biblionumber  => $biblioitem->{biblionumber},
+            }
+        }
+    );
+
+    Koha::IssuingRules->search->delete;
+    my $rule = Koha::IssuingRule->new(
+        {
+            categorycode => '*',
+            itemtype     => '*',
+            branchcode   => '*',
+            maxissueqty  => 99,
+            issuelength  => 6,
+            lengthunit   => 'days',
+            fine         => 1, # Charge 1 every day of overdue
+            chargeperiod => 1,
+        }
+    );
+    $rule->store();
+
+    my $one_day_ago   = dt_from_string->subtract( days => 1 );
+    my $five_days_ago = dt_from_string->subtract( days => 5 );
+    my $ten_days_ago  = dt_from_string->subtract( days => 10 );
+    $patron = Koha::Patrons->find( $patron->{borrowernumber} );
+
+    # No date specify, today will be used
+    AddIssue( $patron->unblessed, $item->{barcode}, $ten_days_ago ); # date due was 10d ago
+    AddReturn( $item->{barcode}, $library->{branchcode} );
+    is( int($patron->account->balance()), 10, 'Patron should have a charge of 10 (10 days x 1)' );
+    Koha::Account::Lines->search({ borrowernumber => $patron->borrowernumber })->delete;
+
+    # specify return date 5 days before => no overdue
+    AddIssue( $patron->unblessed, $item->{barcode}, $five_days_ago ); # date due was 5d ago
+    AddReturn( $item->{barcode}, $library->{branchcode}, undef, undef, $ten_days_ago );
+    is( int($patron->account->balance()), 0, 'AddReturn: pass return_date => no overdue' );
+    Koha::Account::Lines->search({ borrowernumber => $patron->borrowernumber })->delete;
+
+    # specify return date 5 days later => overdue
+    AddIssue( $patron->unblessed, $item->{barcode}, $ten_days_ago ); # date due was 10d ago
+    AddReturn( $item->{barcode}, $library->{branchcode}, undef, undef, $five_days_ago );
+    is( int($patron->account->balance()), 5, 'AddReturn: pass return_date => overdue' );
+    Koha::Account::Lines->search({ borrowernumber => $patron->borrowernumber })->delete;
+
+    # specify dropbox date 5 days before => no overdue
+    AddIssue( $patron->unblessed, $item->{barcode}, $five_days_ago ); # date due was 5d ago
+    AddReturn( $item->{barcode}, $library->{branchcode}, undef, 1, undef, $ten_days_ago );
+    is( int($patron->account->balance()), 0, 'AddReturn: pass return_date => no overdue' );
+    Koha::Account::Lines->search({ borrowernumber => $patron->borrowernumber })->delete;
+
+    # specify dropbox date 5 days later => overdue, or... not
+    AddIssue( $patron->unblessed, $item->{barcode}, $ten_days_ago ); # date due was 10d ago
+    AddReturn( $item->{barcode}, $library->{branchcode}, undef, 1, undef, $five_days_ago );
+    is( int($patron->account->balance()), 0, 'AddReturn: pass return_date => no overdue in dropbox mode' ); # FIXME? This is weird, the FU fine is created ( _CalculateAndUpdateFine > C4::Overdues::UpdateFine ) then remove later (in _FixOverduesOnReturn). Looks like it is a feature
+    Koha::Account::Lines->search({ borrowernumber => $patron->borrowernumber })->delete;
+
 };
 
 sub set_userenv {

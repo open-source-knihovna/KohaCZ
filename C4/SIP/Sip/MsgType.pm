@@ -420,7 +420,7 @@ sub build_patron_status {
 
         $resp .= patron_status_string($patron);
         $resp .= $lang . timestamp();
-        $resp .= add_field( FID_PERSONAL_NAME, $patron->name );
+        $resp .= add_field( FID_PERSONAL_NAME, $patron->name( $server->{account}->{ae_field_template} ) );
 
         # while the patron ID we got from the SC is valid, let's
         # use the one returned from the ILS, just in case...
@@ -671,7 +671,7 @@ sub handle_checkin {
             $resp .= maybe_add( FID_CALL_NUMBER,          $item->call_number );
             $resp .= maybe_add( FID_DESTINATION_LOCATION, $item->destination_loc );
             $resp .= maybe_add( FID_HOLD_PATRON_ID,       $item->hold_patron_bcode );
-            $resp .= maybe_add( FID_HOLD_PATRON_NAME,     $item->hold_patron_name );
+            $resp .= maybe_add( FID_HOLD_PATRON_NAME,     $item->hold_patron_name( $server->{account}->{da_field_template} ) );
             if ( $status->hold and $status->hold->{branchcode} ne $item->destination_loc ) {
                 warn 'SIP hold mismatch: $status->hold->{branchcode}=' . $status->hold->{branchcode} . '; $item->destination_loc=' . $item->destination_loc;
 
@@ -948,7 +948,7 @@ sub handle_patron_info {
         # while the patron ID we got from the SC is valid, let's
         # use the one returned from the ILS, just in case...
         $resp .= add_field( FID_PATRON_ID,     $patron->id );
-        $resp .= add_field( FID_PERSONAL_NAME, $patron->name );
+        $resp .= add_field( FID_PERSONAL_NAME, $patron->name( $server->{account}->{ae_field_template} ) );
 
         # TODO: add code for the fields
         #   hold items limit
@@ -961,6 +961,9 @@ sub handle_patron_info {
 
             # If patron password was provided, report whether it was right or not.
             $password_rc = $patron->check_password($patron_pwd);
+            if ( $patron_pwd eq q{} && $server->{account}->{allow_empty_passwords} ) {
+                $password_rc = 1;
+            }
             $resp .= add_field( FID_VALID_PATRON_PWD, sipbool( $password_rc ) );
         }
 
@@ -1243,7 +1246,7 @@ sub handle_patron_enable {
         $resp .= $patron->language . timestamp();
 
         $resp .= add_field( FID_PATRON_ID,     $patron->id );
-        $resp .= add_field( FID_PERSONAL_NAME, $patron->name );
+        $resp .= add_field( FID_PERSONAL_NAME, $patron->name( $server->{account}->{ae_field_template} ) );
         if ( defined($patron_pwd) ) {
             $resp .= add_field( FID_VALID_PATRON_PWD, sipbool( $patron->check_password($patron_pwd) ) );
         }

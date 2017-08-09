@@ -30,6 +30,7 @@ use C4::Search;
 use C4::Acquisition qw(GetOrdersByBiblionumber);
 
 use Koha::Biblios;
+use Koha::Patrons;
 
 my $query = new CGI;
 my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
@@ -44,10 +45,8 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
 
 my $biblionumber = $query->param('biblionumber') || $query->param('bib');
 my $imagenumber = $query->param('imagenumber');
-my $biblio = GetBiblio($biblionumber);
-my $biblio_object = Koha::Biblios->find( $biblionumber ); # This should replace $biblio
-my $itemcount = $biblio_object->items->count;;
-
+my $biblio = Koha::Biblios->find( $biblionumber );
+my $itemcount = $biblio ? $biblio->items->count : 0;
 my @items = GetItemsInfo($biblionumber);
 
 my $norequests = 1;
@@ -60,13 +59,12 @@ foreach my $item (@items) {
 }
 
 if ( $query->cookie("holdfor") ) {
-    my $holdfor_patron =
-      GetMember( 'borrowernumber' => $query->cookie("holdfor") );
+    my $holdfor_patron = Koha::Patrons->find( $query->cookie("holdfor") );
     $template->param(
         holdfor            => $query->cookie("holdfor"),
-        holdfor_surname    => $holdfor_patron->{'surname'},
-        holdfor_firstname  => $holdfor_patron->{'firstname'},
-        holdfor_cardnumber => $holdfor_patron->{'cardnumber'},
+        holdfor_surname    => $holdfor_patron->surname,
+        holdfor_firstname  => $holdfor_patron->firstname,
+        holdfor_cardnumber => $holdfor_patron->cardnumber,
     );
 }
 
@@ -110,8 +108,7 @@ $template->param (countorders => $count_orders_using_biblio);
 my $count_deletedorders_using_biblio = scalar @deletedorders_using_biblio ;
 $template->param (countdeletedorders => $count_deletedorders_using_biblio);
 
-$biblio = Koha::Biblios->find( $biblionumber );
-my $holds = $biblio->holds;
-$template->param( holdcount => $holds->count );
+my $hold_count = $biblio ? $biblio->holds->count : 0;
+$template->param( holdcount => $hold_count );
 
 output_html_with_http_headers $query, $cookie, $template->output;

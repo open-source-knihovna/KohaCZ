@@ -31,8 +31,8 @@ use C4::Members;
 use List::MoreUtils qw/any uniq/;
 use Koha::DateUtils;
 use C4::Members::Attributes qw(GetBorrowerAttributes);
-use Koha::Patron::Images;
 
+use Koha::Patrons;
 use Koha::Patron::Categories;
 use Koha::Account::DebitTypes;
 use Koha::Account::CreditTypes;
@@ -59,14 +59,17 @@ my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually =>
 $template->param( credit_types => \@credit_types );
 
 my $op = $input->param('op') || '';
+my $patron;
 if ($input->param('cardnumber')) {
     $cardnumber = $input->param('cardnumber');
-    $data = GetMember(cardnumber => $cardnumber);
+    $patron = Koha::Patrons->find( { cardnumber => $cardnumber } );
+    $data = $patron->unblessed;
     $borrowernumber = $data->{'borrowernumber'}; # we must define this as it is used to retrieve other data about the patron
 }
 if ($input->param('borrowernumber')) {
     $borrowernumber = $input->param('borrowernumber');
-    $data = GetMember(borrowernumber => $borrowernumber);
+    $patron = Koha::Patrons->find( $borrowernumber );
+    $data = $patron->unblessed;
 }
 
 my $order = 'date_due desc';
@@ -87,8 +90,7 @@ if ( $op eq 'export_barcodes' ) {
         my $today = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
         my @barcodes =
           map { $_->{barcode} } grep { $_->{returndate} =~ m/^$today/o } @{$issues};
-        my $borrowercardnumber =
-          GetMember( borrowernumber => $borrowernumber )->{'cardnumber'};
+        my $borrowercardnumber = $data->{cardnumber};
         my $delimiter = "\n";
         binmode( STDOUT, ":encoding(UTF-8)" );
         print $input->header(
@@ -114,8 +116,7 @@ if (! $limit){
 	$limit = 'full';
 }
 
-my $patron_image = Koha::Patron::Images->find($data->{borrowernumber});
-$template->param( picture => 1 ) if $patron_image;
+$template->param( picture => 1 ) if $patron->image;
 
 if (C4::Context->preference('ExtendedPatronAttributes')) {
     my $attributes = GetBorrowerAttributes($borrowernumber);

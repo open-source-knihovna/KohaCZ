@@ -63,6 +63,7 @@ use C4::Biblio;
 use C4::Output;
 use C4::Auth;
 
+use Koha::Biblios;
 use Koha::Virtualshelves;
 
 my $query           = new CGI;
@@ -152,25 +153,26 @@ if ($newvirtualshelf) {
     my $private_shelves = Koha::Virtualshelves->search(
         {   category => 1,
             owner    => $loggedinuser,
+            allow_change_from_owner => 1,
         },
         { order_by => 'shelfname' }
     );
     my $shelves_shared_with_me = Koha::Virtualshelves->search(
         {   category                            => 1,
             'virtualshelfshares.borrowernumber' => $loggedinuser,
-            -or                                 => {
-                allow_add => 1,
-                owner     => $loggedinuser,
-            }
+            allow_change_from_others            => 1,
         },
         { join => 'virtualshelfshares', }
     );
     my $public_shelves = Koha::Virtualshelves->search(
         {   category => 2,
-            -or      => {
-                allow_add => 1,
-                owner     => $loggedinuser,
-            }
+            -or      => [
+                -and => {
+                    allow_change_from_owner => 1,
+                    owner     => $loggedinuser,
+                },
+                allow_change_from_others => 1,
+            ],
         },
         { order_by => 'shelfname' }
     );
@@ -184,12 +186,12 @@ if ($newvirtualshelf) {
 
 my @biblios;
 for my $biblionumber (@biblionumbers) {
-    my $data = GetBiblioData($biblionumber);
+    my $biblio = Koha::Biblios->find( $biblionumber );
     push(
         @biblios,
         {   biblionumber => $biblionumber,
-            title        => $data->{'title'},
-            author       => $data->{'author'},
+            title        => $biblio->title,
+            author       => $biblio->author,
         }
     );
 }

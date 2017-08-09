@@ -37,6 +37,7 @@ use C4::Stats;
 use C4::BackgroundJob;
 use Koha::UploadedFiles;
 use Koha::Account;
+use Koha::Checkouts;
 use Koha::Patrons;
 
 use Date::Calc qw( Add_Delta_Days Date_to_Days );
@@ -248,20 +249,22 @@ sub kocIssueItem {
 
     $circ->{ 'barcode' } = barcodedecode($circ->{'barcode'}) if( $circ->{'barcode'} && C4::Context->preference('itemBarcodeInputFilter'));
     my $branchcode = C4::Context->userenv->{branch};
-    my $borrower = GetMember( 'cardnumber'=>$circ->{ 'cardnumber' } );
-    my $item = GetBiblioFromItemNumber( undef, $circ->{ 'barcode' } );
-    my $issue = GetItemIssue( $item->{'itemnumber'} );
+    my $patron = Koha::Patrons->find( { cardnumber => $circ->{cardnumber} } );
+    my $borrower = $patron->unblessed;
+    my $item = Koha::Items->find({ barcode => $circ->{barcode} });
+    my $issue = Koha::Checkouts->find( { itemnumber => $item->itemnumber } );
+    my $biblio = $item->biblio;
 
-    if ( $issue->{ 'date_due' } ) { ## Item is currently checked out to another person.
+    if ( $issue ) { ## Item is currently checked out to another person.
         #warn "Item Currently Issued.";
-        my $issue = GetOpenIssue( $item->{'itemnumber'} );
+        my $issue = GetOpenIssue( $item->itemnumber ); # FIXME Hum? That does not make sense, if it's in the issue table, the issue is open (i.e. returndate is null)
 
         if ( $issue->{'borrowernumber'} eq $borrower->{'borrowernumber'} ) { ## Issued to this person already, renew it.
             #warn "Item issued to this member already, renewing.";
 
             C4::Circulation::AddRenewal(
                 $issue->{'borrowernumber'},    # borrowernumber
-                $item->{'itemnumber'},         # itemnumber
+                $item->itemnumber,             # itemnumber
                 undef,                         # branch
                 undef,                         # datedue - let AddRenewal calculate it automatically
                 $circ->{'date'},               # issuedate
@@ -269,9 +272,9 @@ sub kocIssueItem {
 
             push @output, {
                 renew => 1,
-                title => $item->{ 'title' },
-                biblionumber => $item->{'biblionumber'},
-                barcode => $item->{ 'barcode' },
+                title => $biblio->title,
+                biblionumber => $biblio->biblionumber,
+                barcode => $item->barcode,
                 firstname => $borrower->{ 'firstname' },
                 surname => $borrower->{ 'surname' },
                 borrowernumber => $borrower->{'borrowernumber'},
@@ -290,9 +293,9 @@ sub kocIssueItem {
                 C4::Circulation::AddIssue( $borrower, $circ->{'barcode'}, undef, undef, $circ->{'date'} ) unless ( DEBUG );
                 push @output, {
                     issue => 1,
-                    title => $item->{ 'title' },
-                    biblionumber => $item->{'biblionumber'},
-                    barcode => $item->{ 'barcode' },
+                    title => $biblio->title,
+                    biblionumber => $biblio->biblionumber,
+                    barcode => $item->barcode,
                     firstname => $borrower->{ 'firstname' },
                     surname => $borrower->{ 'surname' },
                     borrowernumber => $borrower->{'borrowernumber'},
@@ -310,9 +313,9 @@ sub kocIssueItem {
         C4::Circulation::AddIssue( $borrower, $circ->{'barcode'}, undef, undef, $circ->{'date'} ) unless ( DEBUG );
         push @output, {
             issue => 1,
-            title => $item->{ 'title' },
-            biblionumber => $item->{'biblionumber'},
-            barcode => $item->{ 'barcode' },
+            title => $biblio->title,
+            biblionumber => $biblio->biblionumber,
+            barcode => $item->barcode,
             firstname => $borrower->{ 'firstname' },
             surname => $borrower->{ 'surname' },
             borrowernumber => $borrower->{'borrowernumber'},
@@ -325,33 +328,34 @@ sub kocIssueItem {
 sub kocReturnItem {
     my ( $circ ) = @_;
     $circ->{'barcode'} = barcodedecode($circ->{'barcode'}) if( $circ->{'barcode'} && C4::Context->preference('itemBarcodeInputFilter'));
-    my $item = GetBiblioFromItemNumber( undef, $circ->{ 'barcode' } );
-    #warn( Data::Dumper->Dump( [ $circ, $item ], [ qw( circ item ) ] ) );
+    my $item = Koha::Items->find({ barcode => $circ->{barcode} });
+    my $biblio = $item->biblio;
     my $borrowernumber = _get_borrowernumber_from_barcode( $circ->{'barcode'} );
     if ( $borrowernumber ) {
-        my $borrower = GetMember( 'borrowernumber' => $borrowernumber );
+        my $patron = Koha::Patrons->find( $borrowernumber );
         C4::Circulation::MarkIssueReturned(
             $borrowernumber,
-            $item->{'itemnumber'},
+            $item->itemnumber,
             undef,
             $circ->{'date'},
-            $borrower->{'privacy'}
+            $patron->privacy
         );
 
-        ModItem({ onloan => undef }, $item->{'biblionumber'}, $item->{'itemnumber'});
-        ModDateLastSeen( $item->{'itemnumber'} );
+        ModItem({ onloan => undef }, $biblio->biblionumber, $item->itemnumber);
+        ModDateLastSeen( $item->itemnumber );
 
-        push @output, {
-            return => 1,
-            title => $item->{ 'title' },
-            biblionumber => $item->{'biblionumber'},
-            barcode => $item->{ 'barcode' },
-            borrowernumber => $borrower->{'borrowernumber'},
-            firstname => $borrower->{'firstname'},
-            surname => $borrower->{'surname'},
-            cardnumber => $borrower->{'cardnumber'},
-            datetime => $circ->{ 'datetime' }
-        };
+        push @output,
+          {
+            return         => 1,
+            title          => $biblio->title,
+            biblionumber   => $biblio->biblionumber,
+            barcode        => $item->barcode,
+            borrowernumber => $patron->borrowernumber,
+            firstname      => $patron->firstname,
+            surname        => $patron->surname,
+            cardnumber     => $patron->cardnumber,
+            datetime       => $circ->{'datetime'}
+          };
     } else {
         push @output, {
             ERROR_no_borrower_from_item => 1,
@@ -395,10 +399,10 @@ sub _get_borrowernumber_from_barcode {
 
     return unless $barcode;
 
-    my $item = GetBiblioFromItemNumber( undef, $barcode );
-    return unless $item->{'itemnumber'};
+    my $item = Koha::Items->find({ barcode => $barcode });
+    return unless $item;
 
-    my $issue = C4::Circulation::GetItemIssue( $item->{'itemnumber'} );
-    return unless $issue->{'borrowernumber'};
-    return $issue->{'borrowernumber'};
+    my $issue = Koha::Checkouts->find( { itemnumber => $item->itemnumber } );
+    return unless $issue;
+    return $issue->borrowernumber;
 }

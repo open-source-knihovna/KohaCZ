@@ -30,7 +30,6 @@ use C4::Output qw(output_html_with_http_headers);
 use C4::Context;
 use C4::Search qw(SimpleSearch);
 use C4::Biblio qw(TransformMarcToKoha);
-use C4::Items qw(GetItemInfosOf);
 use C4::Creators::Lib qw(html_table);
 use C4::Debug;
 
@@ -129,7 +128,6 @@ if ($show_results) {
     my @items =();
     # This code needs to be refactored using these subs...
     #my @items = &GetItemsInfo( $biblio->{biblionumber}, 'intra' );
-    #my $dat = &GetBiblioData( $biblio->{biblionumber} );
     for ( my $i = 0 ; $i < $hits ; $i++ ) {
         my @row_data= ();
         #DEBUG Notes: Decode the MARC record from each resulting MARC record...

@@ -30,6 +30,8 @@ script to execute returns of books
 use strict;
 use warnings;
 
+# FIXME There are weird things going on with $patron and $borrowernumber in this script
+
 use Carp 'verbose';
 $SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
 
@@ -50,8 +52,10 @@ use C4::RotatingCollections;
 use Koha::AuthorisedValues;
 use Koha::DateUtils;
 use Koha::Calendar;
-use Koha::Checkouts;
 use Koha::BiblioFrameworks;
+use Koha::Checkouts;
+use Koha::Items;
+use Koha::Patrons;
 
 my $query = new CGI;
 
@@ -145,14 +149,14 @@ if ($query->param('WT-itemNumber')){
 }
 
 if ( $query->param('reserve_id') ) {
-    my $item           = $query->param('itemnumber');
+    my $itemnumber     = $query->param('itemnumber');
     my $borrowernumber = $query->param('borrowernumber');
     my $reserve_id     = $query->param('reserve_id');
     my $diffBranchReturned = $query->param('diffBranch');
-    my $iteminfo   = GetBiblioFromItemNumber($item);
     my $cancel_reserve = $query->param('cancel_reserve');
     # fix up item type for display
-    $iteminfo->{'itemtype'} = C4::Context->preference('item-level_itypes') ? $iteminfo->{'itype'} : $iteminfo->{'itemtype'};
+    my $item = Koha::Items->find( $itemnumber );
+    my $biblio = $item->biblio;
 
     if ( $cancel_reserve ) {
         CancelReserve({ reserve_id => $reserve_id, charge_cancel_fee => !$forgivemanualholdsexpire });
@@ -160,25 +164,25 @@ if ( $query->param('reserve_id') ) {
         my $diffBranchSend = ($userenv_branch ne $diffBranchReturned) ? $diffBranchReturned : undef;
         # diffBranchSend tells ModReserveAffect whether document is expected in this library or not,
         # i.e., whether to apply waiting status
-        ModReserveAffect( $item, $borrowernumber, $diffBranchSend, $reserve_id );
+        ModReserveAffect( $itemnumber, $borrowernumber, $diffBranchSend, $reserve_id );
     }
 #   check if we have other reserves for this document, if we have a return send the message of transfer
-    my ( $messages, $nextreservinfo ) = GetOtherReserves($item);
+    my ( $messages, $nextreservinfo ) = GetOtherReserves($itemnumber);
 
-    my $borr = GetMember( borrowernumber => $nextreservinfo );
-    my $name   = $borr->{'surname'} . ", " . $borr->{'title'} . " " . $borr->{'firstname'};
+    my $patron = Koha::Patrons->find( $nextreservinfo );
+    my $name   = $patron->surname . ", " . $patron->title . " " . $patron->firstname;
     if ( $messages->{'transfert'} ) {
         $template->param(
-            itemtitle      => $iteminfo->{'title'},
-            itemnumber     => $iteminfo->{'itemnumber'},
-            itembiblionumber => $iteminfo->{'biblionumber'},
-            iteminfo       => $iteminfo->{'author'},
+            itemtitle      => $biblio->title,
+            itemnumber     => $item->itemnumber,
+            itembiblionumber => $biblio->biblionumber,
+            iteminfo       => $biblio->author,
             name           => $name,
             borrowernumber => $borrowernumber,
-            borcnum        => $borr->{'cardnumber'},
-            borfirstname   => $borr->{'firstname'},
-            borsurname     => $borr->{'surname'},
-            borcategory    => $borr->{'description'},
+            borcnum        => $patron->cardnumber,
+            borfirstname   => $patron->firstname,
+            borsurname     => $patron->surname,
+            borcategory    => $patron->category->description,
             diffbranch     => 1,
         );
     }
@@ -187,7 +191,7 @@ if ( $query->param('reserve_id') ) {
 my $borrower;
 my $returned = 0;
 my $messages;
-my $issueinformation;
+my $issue;
 my $itemnumber;
 my $barcode     = $query->param('barcode');
 my $exemptfine  = $query->param('exemptfine');
@@ -255,52 +259,46 @@ my $returnbranch;
 if ($barcode) {
     $barcode =~ s/^\s*|\s*$//g; # remove leading/trailing whitespace
     $barcode = barcodedecode($barcode) if C4::Context->preference('itemBarcodeInputFilter');
-    $itemnumber = GetItemnumberFromBarcode($barcode);
+    my $item = Koha::Items->find({ barcode => $barcode });
 
-#
-# save the return
-#
+    if ( $item ) {
+        # Check if we should display a checkin message, based on the the item
+        # type of the checked in item
+        my $itemtype = Koha::ItemTypes->find( $item->effective_itemtype );
+        if ( $itemtype && $itemtype->checkinmsg ) {
+            $template->param(
+                checkinmsg     => $itemtype->checkinmsg,
+                checkinmsgtype => $itemtype->checkinmsgtype,
+            );
+        }
 
-    # get biblio description
-    my $biblio = GetBiblioFromItemNumber($itemnumber);
-    # fix up item type for display
-    $biblio->{'itemtype'} = C4::Context->preference('item-level_itypes') ? $biblio->{'itype'} : $biblio->{'itemtype'};
+        # make sure return branch respects home branch circulation rules, default to homebranch
+        my $hbr = GetBranchItemRule($item->homebranch, $itemtype ? $itemtype->itemtype : undef )->{'returnbranch'} || "homebranch";
+        $returnbranch = $item->$hbr;
 
-    # Check if we should display a checkin message, based on the the item
-    # type of the checked in item
-    my $itemtype = Koha::ItemTypes->find( $biblio->{'itemtype'} );
-    if ( $itemtype && $itemtype->checkinmsg ) {
+        my $materials = $item->materials;
+        my $descriptions = Koha::AuthorisedValues->get_description_by_koha_field({frameworkcode => '', kohafield =>'items.materials', authorised_value => $materials });
+        $materials = $descriptions->{lib} // $materials;
+
+        my $issue = Koha::Checkouts->find( { itemnumber => $itemnumber } );
+
+        my $biblio = $item->biblio;
         $template->param(
-            checkinmsg     => $itemtype->checkinmsg,
-            checkinmsgtype => $itemtype->checkinmsgtype,
+            title            => $biblio->title,
+            homebranch       => $item->homebranch,
+            holdingbranch    => $item->holdingbranch,
+            returnbranch     => $returnbranch,
+            author           => $biblio->author,
+            itembarcode      => $item->barcode,
+            itemtype         => $item->effective_itemtype,
+            ccode            => $item->ccode,
+            itembiblionumber => $biblio->biblionumber,
+            biblionumber     => $biblio->biblionumber,
+            borrower         => $borrower,
+            additional_materials => $materials,
+            issue            => $issue,
         );
-    }
-
-    # make sure return branch respects home branch circulation rules, default to homebranch
-    my $hbr = GetBranchItemRule($biblio->{'homebranch'}, $itemtype ? $itemtype->itemtype : undef )->{'returnbranch'} || "homebranch";
-    $returnbranch = $biblio->{$hbr};
-
-    my $materials = $biblio->{'materials'};
-    my $descriptions = Koha::AuthorisedValues->get_description_by_koha_field({frameworkcode => '', kohafield =>'items.materials', authorised_value => $materials });
-    $materials = $descriptions->{lib} // $materials;
-
-    my $issue = Koha::Checkouts->find( { itemnumber => $itemnumber } );
-
-    $template->param(
-        title            => $biblio->{'title'},
-        homebranch       => $biblio->{'homebranch'},
-        holdingbranch    => $biblio->{'holdingbranch'},
-        returnbranch     => $returnbranch,
-        author           => $biblio->{'author'},
-        itembarcode      => $biblio->{'barcode'},
-        itemtype         => $biblio->{'itemtype'},
-        ccode            => $biblio->{'ccode'},
-        itembiblionumber => $biblio->{'biblionumber'},
-        biblionumber     => $biblio->{'biblionumber'},
-        borrower         => $borrower,
-        additional_materials => $materials,
-        issue            => $issue,
-    );
+    } # FIXME else we should not call AddReturn but set BadBarcode directly instead
 
     my %input = (
         counter => 0,
@@ -308,22 +306,24 @@ if ($barcode) {
         barcode => $barcode,
     );
 
+
     # do the return
-    ( $returned, $messages, $issueinformation, $borrower ) =
+    ( $returned, $messages, $issue, $borrower ) =
       AddReturn( $barcode, $userenv_branch, $exemptfine, $dropboxmode, $return_date_override, $dropboxdate );
 
     if ($returned) {
         my $time_now = DateTime->now( time_zone => C4::Context->tz )->truncate( to => 'minute');
-        my $duedate = $issueinformation->{date_due}->strftime('%Y-%m-%d %H:%M');
+        my $date_due_dt = dt_from_string( $issue->date_due, 'sql' );
+        my $duedate = $date_due_dt->strftime('%Y-%m-%d %H:%M');
         $returneditems{0}      = $barcode;
         $riborrowernumber{0}   = $borrower->{'borrowernumber'};
         $riduedate{0}          = $duedate;
         $input{borrowernumber} = $borrower->{'borrowernumber'};
         $input{duedate}        = $duedate;
         unless ( $dropboxmode ) {
-            $input{return_overdue} = 1 if (DateTime->compare($issueinformation->{date_due}, DateTime->now()) == -1);
+            $input{return_overdue} = 1 if (DateTime->compare($date_due_dt, DateTime->now()) == -1);
         } else {
-            $input{return_overdue} = 1 if (DateTime->compare($issueinformation->{date_due}, $dropboxdate) == -1);
+            $input{return_overdue} = 1 if (DateTime->compare($date_due_dt, $dropboxdate) == -1);
         }
         push( @inputloop, \%input );
 
@@ -339,13 +339,8 @@ if ($barcode) {
 
         if (C4::Context->preference("WaitingNotifyAtCheckin") ) {
             #Check for waiting holds
-            my @reserves = GetReservesFromBorrowernumber($borrower->{'borrowernumber'});
-            my $waiting_holds = 0;
-            foreach my $num_res (@reserves) {
-                if ( $num_res->{'found'} eq 'W' && $num_res->{'branchcode'} eq $userenv_branch) {
-                    $waiting_holds++;
-                }
-            }
+            my $patron = Koha::Patrons->find( $borrower->{borrowernumber} );
+            my $waiting_holds = $patron->holds->search({ found => 'W', branchcode => $userenv_branch })->count;
             if ($waiting_holds > 0) {
                 $template->param(
                     waiting_holds       => $waiting_holds,
@@ -406,27 +401,31 @@ if ( $messages->{'WrongTransfer'} and not $messages->{'WasTransfered'}) {
     );
 
     my $reserve    = $messages->{'ResFound'};
-    my $borr = C4::Members::GetMember( borrowernumber => $reserve->{'borrowernumber'} );
-    my $name = $borr->{'surname'} . ", " . $borr->{'title'} . " " . $borr->{'firstname'};
+    if ( $reserve ) {
+        my $patron = Koha::Patrons->find( $reserve->{'borrowernumber'} );
+        my $name = $patron->surname . ", " . $patron->title . " " . $patron->firstname;
+        $template->param(
+            # FIXME The full patron object should be passed to the template
+                wname           => $name,
+                wborfirstname   => $patron->firstname,
+                wborsurname     => $patron->surname,
+                wborcategory    => $patron->category->description,
+                wbortitle       => $patron->title,
+                wborphone       => $patron->phone,
+                wboremail       => $patron->email,
+                streetnumber    => $patron->streetnumber,
+                address         => $patron->address,
+                address2        => $patron->address2,
+                city            => $patron->city,
+                zipcode         => $patron->zipcode,
+                state           => $patron->state,
+                country         => $patron->country,
+                wborrowernumber => $reserve->{'borrowernumber'},
+                wborcnum        => $patron->cardnumber,
+        );
+    }
     $template->param(
-            wname           => $name,
-            wborfirstname   => $borr->{'firstname'},
-            wborsurname     => $borr->{'surname'},
-            wborcategory    => $borr->{'description'},
-            wbortitle       => $borr->{'title'},
-            wborphone       => $borr->{'phone'},
-            wboremail       => $borr->{'email'},
-            streetnumber    => $borr->{streetnumber},
-            streettype      => $borr->{streettype},
-            address         => $borr->{'address'},
-            address2        => $borr->{'address2'},
-            city            => $borr->{'city'},
-            zipcode         => $borr->{'zipcode'},
-            state           => $borr->{'state'},
-            country         => $borr->{'country'},
-            wborrowernumber => $reserve->{'borrowernumber'},
-            wborcnum        => $borr->{'cardnumber'},
-            wtransfertFrom  => $userenv_branch,
+        wtransfertFrom  => $userenv_branch,
     );
 }
 
@@ -435,7 +434,7 @@ if ( $messages->{'WrongTransfer'} and not $messages->{'WasTransfered'}) {
 #
 if ( $messages->{'ResFound'}) {
     my $reserve    = $messages->{'ResFound'};
-    my $borr = C4::Members::GetMember( borrowernumber => $reserve->{'borrowernumber'} );
+    my $patron = Koha::Patrons->find( $reserve->{borrowernumber} );
     my $holdmsgpreferences =  C4::Members::Messaging::GetMessagingPreferences( { borrowernumber => $reserve->{'borrowernumber'}, message_name   => 'Hold_Filled' } );
     if ( $reserve->{'ResFound'} eq "Waiting" or $reserve->{'ResFound'} eq "Reserved" ) {
         if ( $reserve->{'ResFound'} eq "Waiting" ) {
@@ -453,25 +452,25 @@ if ( $messages->{'ResFound'}) {
 
         # same params for Waiting or Reserved
         $template->param(
+            # FIXME The full patron object should be passed to the template
             found          => 1,
-            name           => $borr->{'surname'} . ", " . $borr->{'title'} . " " . $borr->{'firstname'},
-            borfirstname   => $borr->{'firstname'},
-            borsurname     => $borr->{'surname'},
-            borcategory    => $borr->{'description'},
-            bortitle       => $borr->{'title'},
-            borphone       => $borr->{'phone'},
-            boremail       => $borr->{'email'},
-            streetnumber   => $borr->{streetnumber},
-            streettype     => $borr->{streettype},
-            address        => $borr->{'address'},
-            address2       => $borr->{'address2'},
-            city           => $borr->{'city'},
-            zipcode        => $borr->{'zipcode'},
-            state          => $borr->{'state'},
-            country        => $borr->{'country'},
-            borcnum        => $borr->{'cardnumber'},
-            debarred       => $borr->{'debarred'},
-            gonenoaddress  => $borr->{'gonenoaddress'},
+            name           => $patron->surname . ", " . $patron->title . " " . $patron->firstname,
+            borfirstname   => $patron->firstname,
+            borsurname     => $patron->surname,
+            borcategory    => $patron->category->description,
+            bortitle       => $patron->title,
+            borphone       => $patron->phone,
+            boremail       => $patron->email,
+            boraddress     => $patron->address,
+            boraddress2    => $patron->address2,
+            streetnumber   => $patron->streetnumber,
+            city           => $patron->city,
+            zipcode        => $patron->zipcode,
+            state          => $patron->state,
+            country        => $patron->country,
+            borcnum        => $patron->cardnumber,
+            debarred       => $patron->debarred,
+            gonenoaddress  => $patron->gonenoaddress,
             barcode        => $barcode,
             destbranch     => $reserve->{'branchcode'},
             borrowernumber => $reserve->{'borrowernumber'},
@@ -550,6 +549,9 @@ foreach my $code ( keys %$messages ) {
     elsif ( $code eq 'NotForLoanStatusUpdated' ) {
         $err{NotForLoanStatusUpdated} = $messages->{NotForLoanStatusUpdated};
     }
+    elsif ( $code eq 'DataCorrupted' ) {
+        $err{data_corrupted} = 1;
+    }
     else {
         die "Unknown error code $code";    # note we need all the (empty) elsif's above, or we die.
         # This forces the issue of staying in sync w/ Circulation.pm
@@ -579,44 +581,42 @@ foreach ( sort { $a <=> $b } keys %returneditems ) {
             $ri{hour}   = $duedate->hour();
             $ri{minute}   = $duedate->minute();
             $ri{duedate} = output_pref($duedate);
-            my $b      = C4::Members::GetMember( borrowernumber => $riborrowernumber{$_} );
+            my $patron = Koha::Patrons->find( $riborrowernumber{$_} );
             unless ( $dropboxmode ) {
                 $ri{return_overdue} = 1 if (DateTime->compare($duedate, DateTime->now()) == -1);
             } else {
                 $ri{return_overdue} = 1 if (DateTime->compare($duedate, $dropboxdate) == -1);
             }
-            $ri{borrowernumber} = $b->{'borrowernumber'};
-            $ri{borcnum}        = $b->{'cardnumber'};
-            $ri{borfirstname}   = $b->{'firstname'};
-            $ri{borsurname}     = $b->{'surname'};
-            $ri{bortitle}       = $b->{'title'};
-            $ri{bornote}        = $b->{'borrowernotes'};
-            $ri{borcategorycode}= $b->{'categorycode'};
+            $ri{borrowernumber} = $patron->borrowernumber;
+            $ri{borcnum}        = $patron->cardnumber;
+            $ri{borfirstname}   = $patron->firstname;
+            $ri{borsurname}     = $patron->surname;
+            $ri{bortitle}       = $patron->title;
+            $ri{bornote}        = $patron->borrowernotes;
+            $ri{borcategorycode}= $patron->categorycode;
             $ri{borissuescount} = Koha::Checkouts->count( { borrowernumber => $b->{'borrowernumber'} } );
         }
         else {
             $ri{borrowernumber} = $riborrowernumber{$_};
         }
 
-        #        my %ri;
-        my $biblio = GetBiblioFromItemNumber(GetItemnumberFromBarcode($bar_code));
-        my $item   = GetItem( GetItemnumberFromBarcode($bar_code) );
-        # fix up item type for display
-        $biblio->{'itemtype'} = C4::Context->preference('item-level_itypes') ? $biblio->{'itype'} : $biblio->{'itemtype'};
-        $ri{itembiblionumber}    = $biblio->{'biblionumber'};
-        $ri{itemtitle}           = $biblio->{'title'};
-        $ri{itemauthor}          = $biblio->{'author'};
-        $ri{itemcallnumber}      = $biblio->{'itemcallnumber'};
-        $ri{dateaccessioned}     = $item->{dateaccessioned};
-        $ri{itemtype}            = $biblio->{'itemtype'};
-        $ri{itemnote}            = $biblio->{'itemnotes'};
-        $ri{itemnotes_nonpublic} = $item->{'itemnotes_nonpublic'};
-        $ri{ccode}               = $biblio->{'ccode'};
-        $ri{enumchron}           = $biblio->{'enumchron'};
-        $ri{itemnumber}          = $biblio->{'itemnumber'};
+        my $item = Koha::Items->find({ barcode => $bar_code });
+        my $biblio = $item->biblio;
+        # FIXME pass $item to the template and we are done here...
+        $ri{itembiblionumber}    = $biblio->biblionumber;
+        $ri{itemtitle}           = $biblio->title;
+        $ri{itemauthor}          = $biblio->author;
+        $ri{itemcallnumber}      = $item->itemcallnumber;
+        $ri{dateaccessioned}     = $item->dateaccessioned;
+        $ri{itemtype}            = $item->effective_itemtype;
+        $ri{itemnote}            = $item->itemnotes;
+        $ri{itemnotes_nonpublic} = $item->itemnotes_nonpublic;
+        $ri{ccode}               = $item->ccode;
+        $ri{enumchron}           = $item->enumchron;
+        $ri{itemnumber}          = $item->itemnumber;
         $ri{barcode}             = $bar_code;
-        $ri{homebranch}          = $item->{'homebranch'};
-        $ri{holdingbranch}       = $item->{'holdingbranch'};
+        $ri{homebranch}          = $item->homebranch;
+        $ri{holdingbranch}       = $item->holdingbranch;
 
         $ri{location}         = $biblio->{'location'};
         my $shelfcode = $ri{'location'};

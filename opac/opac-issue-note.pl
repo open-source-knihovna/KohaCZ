@@ -23,13 +23,13 @@ use CGI qw ( -utf8 );
 use C4::Koha;
 use C4::Context;
 use C4::Scrubber;
-use C4::Members;
 use C4::Output;
 use C4::Auth;
 use C4::Biblio;
 use C4::Letters;
 use Koha::Checkouts;
 use Koha::DateUtils;
+use Koha::Patrons;
 
 my $query = new CGI;
 
@@ -43,21 +43,21 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
     }
 );
 
-my $member = C4::Members::GetMember( borrowernumber => $borrowernumber );
+my $patron = Koha::Patrons->find( $borrowernumber );
 $template->param(
-    firstname      => $member->{'firstname'},
-    surname        => $member->{'surname'},
+    firstname      => $patron->firstname,
+    surname        => $patron->surname,
     borrowernumber => $borrowernumber,
 );
 
 my $issue_id = $query->param('issue_id');
 my $issue = Koha::Checkouts->find( $issue_id );
 my $itemnumber = $issue->itemnumber;
-my $biblio = GetBiblioFromItemNumber($itemnumber);
+my $biblio = $issue->item->biblio;
 $template->param(
     issue_id   => $issue_id,
-    title      => $biblio->{'title'},
-    author     => $biblio->{'author'},
+    title      => $biblio->title,
+    author     => $biblio->author,
     note       => $issue->note,
     itemnumber => $issue->itemnumber,
 );
@@ -75,11 +75,11 @@ if ( $action eq 'issuenote' && C4::Context->preference('AllowCheckoutNotes') ) {
                 letter_code => 'PATRON_NOTE',
                 branchcode => $branch,
                 tables => {
-                    'biblio' => $biblio->{biblionumber},
-                    'borrowers' => $member->{borrowernumber},
+                    'biblio' => $biblio->biblionumber,
+                    'borrowers' => $borrowernumber,
                 },
             );
-            C4::Message->enqueue($letter, $member, 'email');
+            C4::Message->enqueue($letter, $patron->unblessed, 'email');
         }
     }
     print $query->redirect("/cgi-bin/koha/opac-user.pl");

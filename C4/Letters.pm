@@ -37,6 +37,7 @@ use Koha::SMS::Providers;
 
 use Koha::Email;
 use Koha::DateUtils qw( format_sqldatetime dt_from_string );
+use Koha::Patrons;
 
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
@@ -203,11 +204,9 @@ sub getletter {
     $lang = 'default' unless( $lang && C4::Context->preference('TranslateNotices') );
 
 
-    if ( C4::Context->preference('IndependentBranches')
-            and $branchcode
-            and C4::Context->userenv ) {
-
-        $branchcode = C4::Context->userenv->{'branch'};
+    my $only_my_library = C4::Context->only_my_library;
+    if ( $only_my_library and $branchcode ) {
+        $branchcode = C4::Context::mybranch();
     }
     $branchcode //= '';
 
@@ -416,8 +415,9 @@ sub SendAlerts {
         # find the list of borrowers to alert
         my $alerts = getalert( '', 'issue', $subscriptionid );
         foreach (@$alerts) {
-            my $borinfo = C4::Members::GetMember('borrowernumber' => $_->{'borrowernumber'});
-            my $email = $borinfo->{email} or next;
+            my $patron = Koha::Patrons->find( $_->{borrowernumber} );
+            next unless $patron; # Just in case
+            my $email = $patron->email or next;
 
 #                    warn "sending issues...";
             my $userenv = C4::Context->userenv;
@@ -430,7 +430,7 @@ sub SendAlerts {
                     'branches'    => $_->{branchcode},
                     'biblio'      => $biblionumber,
                     'biblioitems' => $biblionumber,
-                    'borrowers'   => $borinfo,
+                    'borrowers'   => $patron->unblessed,
                     'subscription' => $subscriptionid,
                     'serial' => $externalid,
                 },
@@ -782,6 +782,7 @@ sub GetPreparedLetter {
             content => $letter->{content},
             tables  => $tables,
             loops  => $loops,
+            substitute => $substitute,
         }
     );
 
@@ -1047,15 +1048,15 @@ sub SendQueuedMessages {
         }
         elsif ( lc( $message->{'message_transport_type'} ) eq 'sms' ) {
             if ( C4::Context->preference('SMSSendDriver') eq 'Email' ) {
-                my $member = C4::Members::GetMember( 'borrowernumber' => $message->{'borrowernumber'} );
-                my $sms_provider = Koha::SMS::Providers->find( $member->{'sms_provider_id'} );
+                my $patron = Koha::Patrons->find( $message->{borrowernumber} );
+                my $sms_provider = Koha::SMS::Providers->find( $patron->sms_provider_id );
                 unless ( $sms_provider ) {
                     warn sprintf( "Patron %s has no sms provider id set!", $message->{'borrowernumber'} ) if $params->{'verbose'} or $debug;
                     _set_message_status( { message_id => $message->{'message_id'}, status => 'failed' } );
                     next MESSAGE;
                 }
-                $message->{to_address} ||= $member->{'smsalertnumber'};
-                unless ( $message->{to_address} && $member->{'smsalertnumber'} ) {
+                $message->{to_address} ||= $patron->smsalertnumber;
+                unless ( $message->{to_address} && $patron->smsalertnumber ) {
                     _set_message_status( { message_id => $message->{'message_id'}, status => 'failed' } );
                     warn sprintf( "No smsalertnumber found for patron %s!", $message->{'borrowernumber'} ) if $params->{'verbose'} or $debug;
                     next MESSAGE;
@@ -1301,10 +1302,10 @@ sub _send_message_by_email {
     my $message = shift or return;
     my ($username, $password, $method) = @_;
 
-    my $member = C4::Members::GetMember( 'borrowernumber' => $message->{'borrowernumber'} );
+    my $patron = Koha::Patrons->find( $message->{borrowernumber} );
     my $to_address = $message->{'to_address'};
     unless ($to_address) {
-        unless ($member) {
+        unless ($patron) {
             warn "FAIL: No 'to_address' and INVALID borrowernumber ($message->{borrowernumber})";
             _set_message_status( { message_id => $message->{'message_id'},
                                    status     => 'failed' } );
@@ -1329,8 +1330,8 @@ sub _send_message_by_email {
     my $branch_email = undef;
     my $branch_replyto = undef;
     my $branch_returnpath = undef;
-    if ($member) {
-        my $library = Koha::Libraries->find( $member->{branchcode} );
+    if ($patron) {
+        my $library = $patron->library;
         $branch_email      = $library->branchemail;
         $branch_replyto    = $library->branchreplyto;
         $branch_returnpath = $library->branchreturnpath;
@@ -1406,9 +1407,9 @@ sub _is_duplicate {
 
 sub _send_message_by_sms {
     my $message = shift or return;
-    my $member = C4::Members::GetMember( 'borrowernumber' => $message->{'borrowernumber'} );
+    my $patron = Koha::Patrons->find( $message->{borrowernumber} );
 
-    unless ( $member->{smsalertnumber} ) {
+    unless ( $patron and $patron->smsalertnumber ) {
         _set_message_status( { message_id => $message->{'message_id'},
                                status     => 'failed' } );
         return;
@@ -1420,7 +1421,7 @@ sub _send_message_by_sms {
         return;
     }
 
-    my $success = C4::SMS->send_sms( { destination => $member->{'smsalertnumber'},
+    my $success = C4::SMS->send_sms( { destination => $patron->smsalertnumber,
                                        message     => $message->{'content'},
                                      } );
     _set_message_status( { message_id => $message->{'message_id'},
@@ -1455,6 +1456,7 @@ sub _process_tt {
     my $content = $params->{content};
     my $tables = $params->{tables};
     my $loops = $params->{loops};
+    my $substitute = $params->{substitute} || {};
 
     my $use_template_cache = C4::Context->config('template_cache_dir') && defined $ENV{GATEWAY_INTERFACE};
     my $template           = Template->new(
@@ -1469,7 +1471,7 @@ sub _process_tt {
         }
     ) or die Template->error();
 
-    my $tt_params = { %{ _get_tt_params( $tables ) }, %{ _get_tt_params( $loops, 'is_a_loop' ) } };
+    my $tt_params = { %{ _get_tt_params( $tables ) }, %{ _get_tt_params( $loops, 'is_a_loop' ) }, %$substitute };
 
     $content = qq|[% USE KohaDates %]$content|;
 
@@ -1625,7 +1627,7 @@ sub _get_tt_params {
         }
     }
 
-    $params->{today} = dt_from_string();
+    $params->{today} = output_pref({ dt => dt_from_string, dateformat => 'iso' });
 
     return $params;
 }

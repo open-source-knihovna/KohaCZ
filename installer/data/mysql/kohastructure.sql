@@ -633,7 +633,7 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
   `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron if this item has previously been checked out to this patron if 'yes', not if 'no', defer to category setting if 'inherit'.
   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
-  `lastseen` datetime default NULL, -- last time a patron has been seed (connected at the OPAC or staff interface)
+  `lastseen` datetime default NULL, -- last time a patron has been seen (connected at the OPAC or staff interface)
   `lang` varchar(25) NOT NULL default 'default', -- lang to use to send notices to this patron
   `login_attempts` int(4) default 0, -- number of failed login attemps
   `overdrive_auth_token` text default NULL, -- persist OverDrive auth token
@@ -1676,7 +1676,7 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `privacy_guarantor_checkouts` tinyint(1) NOT NULL DEFAULT '0', -- controls if relatives can see this patron's checkouts
   `checkprevcheckout` varchar(7) NOT NULL default 'inherit', -- produce a warning for this patron if this item has previously been checked out to this patron if 'yes', not if 'no', defer to category setting if 'inherit'.
   `updated_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- time of last change could be useful for synchronization with external systems (among others)
-  `lastseen` datetime default NULL, -- last time a patron has been seed (connected at the OPAC or staff interface)
+  `lastseen` datetime default NULL, -- last time a patron has been seen (connected at the OPAC or staff interface)
   `lang` varchar(25) NOT NULL default 'default', -- lang to use to send notices to this patron
   `login_attempts` int(4) default 0, -- number of failed login attemps
   `overdrive_auth_token` text default NULL, -- persist OverDrive auth token
@@ -2274,9 +2274,8 @@ CREATE TABLE `virtualshelves` ( -- information about lists (or virtual shelves)
   `sortfield` varchar(16) default 'title', -- the field this list is sorted on
   `lastmodified` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- date and time the list was last modified
   `created_on` datetime NOT NULL, -- creation time
-  `allow_add` tinyint(1) default 0, -- permission for adding entries to list
-  `allow_delete_own` tinyint(1) default 1, -- permission for deleting entries frm list that you added yourself
-  `allow_delete_other` tinyint(1) default 0, -- permission for deleting entries from list that another person added
+  `allow_change_from_owner` tinyint(1) default 1, -- can owner change contents?
+  `allow_change_from_others` tinyint(1) default 0, -- can others change contents?
   PRIMARY KEY  (`shelfnumber`),
   CONSTRAINT `virtualshelves_ibfk_1` FOREIGN KEY (`owner`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE SET NULL -- no cascaded delete, please see HandleDelBorrower in Members.pm
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

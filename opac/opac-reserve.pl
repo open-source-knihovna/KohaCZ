@@ -32,10 +32,13 @@ use C4::Context;
 use C4::Members;
 use C4::Overdues;
 use C4::Debug;
+
 use Koha::AuthorisedValues;
+use Koha::Biblios;
 use Koha::DateUtils;
 use Koha::Items;
 use Koha::ItemTypes;
+use Koha::Checkouts;
 use Koha::Libraries;
 use Koha::Patrons;
 use Date::Calc qw/Today Date_to_Days/;
@@ -72,15 +75,14 @@ sub get_out {
 	exit;
 }
 
-# get borrower information ....
-my ( $borr ) = GetMember( borrowernumber => $borrowernumber );
 my $patron = Koha::Patrons->find( $borrowernumber );
 
 my $can_place_hold_if_available_at_pickup = C4::Context->preference('OPACHoldsIfAvailableAtPickup');
 unless ( $can_place_hold_if_available_at_pickup ) {
     my @patron_categories = split '\|', C4::Context->preference('OPACHoldsIfAvailableAtPickupExceptions');
     if ( @patron_categories ) {
-        $can_place_hold_if_available_at_pickup = grep /$borr->{categorycode}/, @patron_categories;
+        my $categorycode = $patron->categorycode;
+        $can_place_hold_if_available_at_pickup = grep /^$categorycode$/, @patron_categories;
     }
 }
 
@@ -134,7 +136,7 @@ if (($#biblionumbers < 0) && (! $query->param('place_reserve'))) {
 
 
 # pass the pickup branch along....
-my $branch = $query->param('branch') || $borr->{'branchcode'} || C4::Context->userenv->{branch} || '' ;
+my $branch = $query->param('branch') || $patron->branchcode || C4::Context->userenv->{branch} || '' ;
 $template->param( branch => $branch );
 
 # Is the person allowed to choose their branch
@@ -199,7 +201,7 @@ foreach my $biblioNumber (@biblionumbers) {
 if ( $query->param('place_reserve') ) {
     my $reserve_cnt = 0;
     if ($maxreserves) {
-        $reserve_cnt = GetReservesFromBorrowernumber( $borrowernumber );
+        $reserve_cnt = $patron->holds->count;
     }
 
     # List is composed of alternating biblio/item/branch
@@ -239,12 +241,13 @@ if ( $query->param('place_reserve') ) {
         my $singleBranchMode = Koha::Libraries->search->count == 1;
         if ( $singleBranchMode || !$OPACChooseBranch )
         {    # single branch mode or disabled user choosing
-            $branch = $borr->{'branchcode'};
+            $branch = $patron->branchcode;
         }
 
 #item may belong to a host biblio, if yes change biblioNum to hosts bilbionumber
         if ( $itemNum ne '' ) {
-            my $hostbiblioNum = GetBiblionumberFromItemnumber($itemNum);
+            my $item = Koha::Items->find( $itemNum );
+            my $hostbiblioNum = $item->biblio->biblionumber;
             if ( $hostbiblioNum ne $biblioNum ) {
                 $biblioNum = $hostbiblioNum;
             }
@@ -334,7 +337,7 @@ if ( $amountoutstanding && ($amountoutstanding > $maxoutstanding) ) {
     $template->param( too_much_oweing => $amount );
 }
 
-if ( $borr->{gonenoaddress} && ($borr->{gonenoaddress} == 1) ) {
+if ( $patron->gonenoaddress && ($patron->gonenoaddress == 1) ) {
     $noreserves = 1;
     $template->param(
         message => 1,
@@ -342,7 +345,7 @@ if ( $borr->{gonenoaddress} && ($borr->{gonenoaddress} == 1) ) {
     );
 }
 
-if ( $borr->{lost} && ($borr->{lost} == 1) ) {
+if ( $patron->lost && ($patron->lost == 1) ) {
     $noreserves = 1;
     $template->param(
         message => 1,
@@ -350,23 +353,23 @@ if ( $borr->{lost} && ($borr->{lost} == 1) ) {
     );
 }
 
-if ( Koha::Patrons->find( $borrowernumber )->is_debarred ) {
+if ( $patron->is_debarred ) {
     $noreserves = 1;
     $template->param(
         message          => 1,
         debarred         => 1,
-        debarred_comment => $borr->{debarredcomment},
-        debarred_date    => $borr->{debarred},
+        debarred_comment => $patron->debarredcomment,
+        debarred_date    => $patron->debarred,
     );
 }
 
-my @reserves = GetReservesFromBorrowernumber( $borrowernumber );
-my $reserves_count = scalar(@reserves);
-$template->param( RESERVES => \@reserves );
+my $holds = $patron->holds;
+my $reserves_count = $holds->count;
+$template->param( RESERVES => $holds->unblessed );
 if ( $maxreserves && ( $reserves_count >= $maxreserves ) ) {
     $template->param( message => 1 );
     $noreserves = 1;
-    $template->param( too_many_reserves => scalar(@reserves));
+    $template->param( too_many_reserves => $holds->count );
 }
 
 unless ( $noreserves ) {
@@ -465,9 +468,9 @@ foreach my $biblioNum (@biblionumbers) {
 
         # If the item is currently on loan, we display its return date and
         # change the background color.
-        my $issues= GetItemIssue($itemNum);
-        if ( $issues->{'date_due'} ) {
-            $itemLoopIter->{dateDue} = output_pref({ dt => dt_from_string($issues->{date_due}, 'sql'), as_due_date => 1 });
+        my $issue = Koha::Checkouts->find( { itemnumber => $itemNum } );
+        if ( $issue ) {
+            $itemLoopIter->{dateDue} = output_pref({ dt => dt_from_string($issue->date_due, 'sql'), as_due_date => 1 });
             $itemLoopIter->{backgroundcolor} = 'onloan';
         }
 
@@ -476,12 +479,12 @@ foreach my $biblioNum (@biblionumbers) {
         my $holds = $item->current_holds;
 
         if ( my $first_hold = $holds->next ) {
-            my $ItemBorrowerReserveInfo = GetMember( borrowernumber => $first_hold->borrowernumber );
+            my $patron = Koha::Patrons->find( $first_hold->borrowernumber );
             $itemLoopIter->{backgroundcolor} = 'reserved';
             $itemLoopIter->{reservedate}     = output_pref({ dt => dt_from_string($first_hold->reservedate), dateonly => 1 }); # FIXME Should be formatted in the template
             $itemLoopIter->{ReservedForBorrowernumber} = $first_hold->borrowernumber;
-            $itemLoopIter->{ReservedForSurname}        = $ItemBorrowerReserveInfo->{'surname'};
-            $itemLoopIter->{ReservedForFirstname}      = $ItemBorrowerReserveInfo->{'firstname'};
+            $itemLoopIter->{ReservedForSurname}        = $patron->surname;
+            $itemLoopIter->{ReservedForFirstname}      = $patron->firstname;
             $itemLoopIter->{ExpectedAtLibrary}         = $first_hold->branchcode;
             $itemLoopIter->{waitingdate} = $first_hold->waitingdate;
         }
@@ -521,21 +524,22 @@ foreach my $biblioNum (@biblionumbers) {
         if ( $itemInfo->{biblionumber} ne $biblioNum ) {
             $biblioLoopIter{hostitemsflag}    = 1;
             $itemLoopIter->{hostbiblionumber} = $itemInfo->{biblionumber};
-            $itemLoopIter->{hosttitle}        = GetBiblioData( $itemInfo->{biblionumber} )->{title};
+            $itemLoopIter->{hosttitle}        = Koha::Biblios->find( $itemInfo->{biblionumber} )->title;
         }
 
         # If there is no loan, return and transfer, we show a checkbox.
         $itemLoopIter->{notforloan} = $itemLoopIter->{notforloan} || 0;
 
-        my $branch = GetReservesControlBranch( $itemInfo, $borr );
+        my $patron_unblessed = $patron->unblessed;
+        my $branch = GetReservesControlBranch( $itemInfo, $patron_unblessed );
 
         my $policy_holdallowed = !$itemLoopIter->{already_reserved};
         $policy_holdallowed &&=
-            IsAvailableForItemLevelRequest($itemInfo,$borr) &&
+            IsAvailableForItemLevelRequest($itemInfo,$patron_unblessed) &&
             CanItemBeReserved($borrowernumber,$itemNum) eq 'OK';
 
         if ($policy_holdallowed) {
-            if ( my $hold_allowed = OPACItemHoldsAllowed( $itemInfo, $borr ) ) {
+            if ( my $hold_allowed = OPACItemHoldsAllowed( $itemInfo, $patron_unblessed ) ) {
                 $itemLoopIter->{available} = 1;
                 $numCopiesOPACAvailable++;
                 $biblioLoopIter{force_hold} = 1 if $hold_allowed eq 'F';

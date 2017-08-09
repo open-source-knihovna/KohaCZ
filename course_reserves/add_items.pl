@@ -30,6 +30,7 @@ use Koha::Items;
 
 use C4::CourseReserves qw(GetCourse GetCourseItem GetCourseReserve ModCourseItem ModCourseReserve);
 
+use Koha::Items;
 use Koha::ItemTypes;
 
 my $cgi = new CGI;
@@ -54,14 +55,16 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
         flagsrequired   => { coursereserves => 'add_reserves' },
     }
 );
-my $inumber = $itemnumber ? "(blank) (itemnumber:$itemnumber)" : "";
-$template->param( ERROR_BARCODE_NOT_FOUND => $barcode . $inumber )
-  unless ( $barcode && !$itemnumber && $item && $action eq 'lookup' );
+
+if ( !$item && $action eq 'lookup' ){
+    $template->param( ERROR_ITEM_NOT_FOUND => 1 );
+    $template->param( UNKNOWN_BARCODE => $barcode ) if $barcode;
+}
 
 $template->param( course => GetCourse($course_id) );
 
-if ( $action eq 'lookup' ) {
-    my $course_item = GetCourseItem( itemnumber => $item->{'itemnumber'} );
+if ( $action eq 'lookup' and $item ) {
+    my $course_item = GetCourseItem( itemnumber => $item->itemnumber );
     my $course_reserve =
       ($course_item)
       ? GetCourseReserve(
@@ -73,7 +76,7 @@ if ( $action eq 'lookup' ) {
     my $itemtypes = Koha::ItemTypes->search;
     $template->param(
         item           => $item,
-        title          => $title,
+        biblio         => $item->biblio,
         course_item    => $course_item,
         course_reserve => $course_reserve,
 

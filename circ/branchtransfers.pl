@@ -33,6 +33,8 @@ use C4::Koha;
 use C4::Members;
 use Koha::BiblioFrameworks;
 use Koha::AuthorisedValues;
+use Koha::Items;
+use Koha::Patrons;
 
 ###############################################
 #  Getting state
@@ -112,32 +114,28 @@ defined $barcode and $barcode =~ s/^\s*|\s*$//g;  # FIXME: barcodeInputFilter
 # warn "barcode : $barcode";
 if ($barcode) {
 
-    my $iteminformation;
-    ( $transfered, $messages, $iteminformation ) =
+    ( $transfered, $messages ) =
       transferbook( $tobranchcd, $barcode, $ignoreRs );
-#       use Data::Dumper;
-#       warn "Transfered : $transfered / ".Dumper($messages);
+    my $item = Koha::Items->find({ barcode => $barcode });
     $found = $messages->{'ResFound'};
     if ($transfered) {
         my %item;
+        my $biblio = $item->biblio;
         my $frbranchcd =  C4::Context->userenv->{'branch'};
-#         if ( not($found) ) {
-        $item{'biblionumber'}          = $iteminformation->{'biblionumber'};
-        $item{'itemnumber'}            = $iteminformation->{'itemnumber'};
-        $item{'title'}                 = $iteminformation->{'title'};
-        $item{'author'}                = $iteminformation->{'author'};
-        $item{'itemtype'}              = $iteminformation->{'itemtype'};
-        $item{'ccode'}                 = $iteminformation->{'ccode'};
-        $item{'itemcallnumber'}        = $iteminformation->{'itemcallnumber'};
-        my $av = Koha::AuthorisedValues->search({ category => 'LOC', authorised_value => $iteminformation->{location} });
+        $item{'biblionumber'}          = $item->biblionumber;
+        $item{'itemnumber'}            = $item->itemnumber;
+        $item{'title'}                 = $biblio->title;
+        $item{'author'}                = $biblio->author;
+        $item{'itemtype'}              = $biblio->biblioitem->itemtype;
+        $item{'ccode'}                 = $item->ccode;
+        $item{'itemcallnumber'}        = $item->itemcallnumber;
+        my $av = Koha::AuthorisedValues->search({ category => 'LOC', authorised_value => $item->location });
         $item{'location'}              = $av->count ? $av->next->lib : '';
-#         }
         $item{counter}  = 0;
         $item{barcode}  = $barcode;
         $item{frombrcd} = $frbranchcd;
         $item{tobrcd}   = $tobranchcd;
         push( @trsfitemloop, \%item );
-#         warn Dumper(@trsfitemloop);
     }
 }
 
@@ -153,15 +151,16 @@ foreach ( $query->param ) {
     $item{barcode}  = $bc;
     $item{frombrcd} = $frbcd;
     $item{tobrcd}   = $tobcd;
-    my ($iteminformation) = GetBiblioFromItemNumber( GetItemnumberFromBarcode($bc) );
-    $item{'biblionumber'}          = $iteminformation->{'biblionumber'};
-    $item{'itemnumber'}            = $iteminformation->{'itemnumber'};
-    $item{'title'}                 = $iteminformation->{'title'};
-    $item{'author'}                = $iteminformation->{'author'};
-    $item{'itemtype'}              = $iteminformation->{'itemtype'};
-    $item{'ccode'}                 = $iteminformation->{'ccode'};
-    $item{'itemcallnumber'}        = $iteminformation->{'itemcallnumber'};
-    my $av = Koha::AuthorisedValues->search({ category => 'LOC', authorised_value => $iteminformation->{location} });
+    my $item = Koha::Items->find({ barcode => $bc });
+    my $biblio = $item->biblio;
+    $item{'biblionumber'}          = $item->biblionumber;
+    $item{'itemnumber'}            = $item->itemnumber;
+    $item{'title'}                 = $biblio->title;
+    $item{'author'}                = $biblio->author;
+    $item{'itemtype'}              = $biblio->biblioitem->itemtype;
+    $item{'ccode'}                 = $item->ccode;
+    $item{'itemcallnumber'}        = $item->itemcallnumber;
+    my $av = Koha::AuthorisedValues->search({ category => 'LOC', authorised_value => $item->location });
     $item{'location'}              = $av->count ? $av->next->lib : '';
     push( @trsfitemloop, \%item );
 }
@@ -207,11 +206,13 @@ foreach my $code ( keys %$messages ) {
         elsif ( $code eq 'WasReturned' ) {
             $err{errwasreturned} = 1;
             $err{borrowernumber} = $messages->{'WasReturned'};
-            my $borrower = GetMember('borrowernumber'=>$messages->{'WasReturned'});
-            $err{title}      = $borrower->{'title'};
-            $err{firstname}  = $borrower->{'firstname'};
-            $err{surname}    = $borrower->{'surname'};
-            $err{cardnumber} = $borrower->{'cardnumber'};
+            my $patron = Koha::Patrons->find( $messages->{'WasReturned'} );
+            if ( $patron ) { # Just in case...
+                $err{title}      = $patron->title;
+                $err{firstname}  = $patron->firstname;
+                $err{surname}    = $patron->surname;
+                $err{cardnumber} = $patron->cardnumber;
+            }
         }
         $err{errdesteqholding} = ( $code eq 'DestinationEqualsHolding' );
         push( @errmsgloop, \%err );

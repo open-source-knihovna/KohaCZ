@@ -21,6 +21,7 @@ use strict;
 #use warnings; FIXME - Bug 2505
 use C4::Context;
 use Koha::Database;
+use Koha::Patrons;
 use C4::Debug;
 use vars qw(@ISA @EXPORT);
 
@@ -915,7 +916,9 @@ sub CanUserUseBudget {
     my ($borrower, $budget, $userflags) = @_;
 
     if (not ref $borrower) {
-        $borrower = C4::Members::GetMember(borrowernumber => $borrower);
+        $borrower = Koha::Patrons->find( $borrower );
+        return 0 unless $borrower;
+        $borrower = $borrower->unblessed;
     }
     if (not ref $budget) {
         $budget = GetBudget($budget);
@@ -998,7 +1001,9 @@ sub CanUserModifyBudget {
     my ($borrower, $budget, $userflags) = @_;
 
     if (not ref $borrower) {
-        $borrower = C4::Members::GetMember(borrowernumber => $borrower);
+        $borrower = Koha::Patrons->find( $borrower );
+        return 0 unless $borrower;
+        $borrower = $borrower->unblessed;
     }
     if (not ref $budget) {
         $budget = GetBudget($budget);

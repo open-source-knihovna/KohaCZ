@@ -44,6 +44,7 @@ use Koha::Acquisition::Currencies;
 use Koha::Biblio::Metadata;
 use Koha::Biblio::Metadatas;
 use Koha::Holds;
+use Koha::ItemTypes;
 use Koha::SearchEngine;
 use Koha::Libraries;
 
@@ -63,14 +64,11 @@ BEGIN {
 
     # to get something
     push @EXPORT, qw(
-      GetBiblio
       GetBiblioData
       GetMarcBiblio
       GetBiblioItemData
       GetBiblioItemInfosOf
       GetBiblioItemByBiblioNumber
-      GetBiblioFromItemNumber
-      GetBiblionumberFromItemnumber
 
       &GetRecordValue
 
@@ -103,7 +101,6 @@ BEGIN {
 
       &CountItemsIssued
       &CountBiblioInOrders
-      &GetSubscriptionsId
     );
 
     # To modify something
@@ -772,60 +769,6 @@ sub GetBiblioItemByBiblioNumber {
     return @results;
 }
 
-=head2 GetBiblionumberFromItemnumber
-
-
-=cut
-
-sub GetBiblionumberFromItemnumber {
-    my ($itemnumber) = @_;
-    my $dbh            = C4::Context->dbh;
-    my $sth            = $dbh->prepare("Select biblionumber FROM items WHERE itemnumber = ?");
-
-    $sth->execute($itemnumber);
-    my ($result) = $sth->fetchrow;
-    return ($result);
-}
-
-=head2 GetBiblioFromItemNumber
-
-  $item = &GetBiblioFromItemNumber($itemnumber,$barcode);
-
-Looks up the item with the given itemnumber. if undef, try the barcode.
-
-C<&itemnodata> returns a reference-to-hash whose keys are the fields
-from the C<biblio>, C<biblioitems>, and C<items> tables in the Koha
-database.
-
-=cut
-
-#'
-sub GetBiblioFromItemNumber {
-    my ( $itemnumber, $barcode ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth;
-    if ($itemnumber) {
-        $sth = $dbh->prepare(
-            "SELECT * FROM items 
-            LEFT JOIN biblio ON biblio.biblionumber = items.biblionumber
-            LEFT JOIN biblioitems ON biblioitems.biblioitemnumber = items.biblioitemnumber
-             WHERE items.itemnumber = ?"
-        );
-        $sth->execute($itemnumber);
-    } else {
-        $sth = $dbh->prepare(
-            "SELECT * FROM items 
-            LEFT JOIN biblio ON biblio.biblionumber = items.biblionumber
-            LEFT JOIN biblioitems ON biblioitems.biblioitemnumber = items.biblioitemnumber
-             WHERE items.barcode = ?"
-        );
-        $sth->execute($barcode);
-    }
-    my $data = $sth->fetchrow_hashref;
-    $sth->finish;
-    return ($data);
-}
-
 =head2 GetISBDView 
 
   $isbd = &GetISBDView({
@@ -961,25 +904,6 @@ sub GetISBDView {
 
     return $res;
 }
-
-=head2 GetBiblio
-
-  my $biblio = &GetBiblio($biblionumber);
-
-=cut
-
-sub GetBiblio {
-    my ($biblionumber) = @_;
-    my $dbh            = C4::Context->dbh;
-    my $sth            = $dbh->prepare("SELECT * FROM biblio WHERE biblionumber = ?");
-    my $count          = 0;
-    my @results;
-    $sth->execute($biblionumber);
-    if ( my $data = $sth->fetchrow_hashref ) {
-        return $data;
-    }
-    return;
-}    # sub GetBiblio
 
 =head2 GetBiblioItemInfosOf
 
@@ -1497,6 +1421,7 @@ sub GetMarcPrice {
 =head2 MungeMarcPrice
 
 Return the best guess at what the actual price is from a price field.
+
 =cut
 
 sub MungeMarcPrice {
@@ -1629,7 +1554,8 @@ sub GetAuthorisedValueDesc {
 
         #---- itemtypes
         if ( $tagslib->{$tag}->{$subfield}->{'authorised_value'} eq "itemtypes" ) {
-            return getitemtypeinfo($value)->{translated_description};
+            my $itemtype = Koha::ItemTypes->find( $value );
+            return $itemtype ? $itemtype->translated_description : q||;
         }
 
         #---- "true" authorized value
@@ -3507,26 +3433,6 @@ sub CountBiblioInOrders {
     return ($count);
 }
 
-=head2 GetSubscriptionsId
-
-    $subscriptions = &GetSubscriptionsId($biblionumber);
-
-This function return an array of subscriptionid with $biblionumber
-
-=cut
-
-sub GetSubscriptionsId {
- my ($biblionumber) = @_;
-    my $dbh            = C4::Context->dbh;
-    my $query          = "SELECT subscriptionid
-          FROM  subscription
-          WHERE biblionumber=?";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($biblionumber);
-    my @subscriptions = $sth->fetchrow_array;
-    return (@subscriptions);
-}
-
 =head2 prepare_host_field
 
 $marcfield = prepare_host_field( $hostbiblioitem, $marcflavour );
@@ -3680,12 +3586,13 @@ sub UpdateTotalIssues {
         carp "UpdateTotalIssues could not get biblio record";
         return;
     }
-    my $data = GetBiblioData($biblionumber);
-    unless ($data) {
+    my $biblio = Koha::Biblios->find( $biblionumber );
+    unless ($biblio) {
         carp "UpdateTotalIssues could not get datas of biblio";
         return;
     }
-    my ($totalissuestag, $totalissuessubfield) = GetMarcFromKohaField('biblioitems.totalissues', $data->{'frameworkcode'});
+    my $biblioitem = $biblio->biblioitem;
+    my ($totalissuestag, $totalissuessubfield) = GetMarcFromKohaField('biblioitems.totalissues', $biblio->frameworkcode);
     unless ($totalissuestag) {
         return 1; # There is nothing to do
     }
@@ -3693,7 +3600,7 @@ sub UpdateTotalIssues {
     if (defined $value) {
         $totalissues = $value;
     } else {
-        $totalissues = $data->{'totalissues'} + $increase;
+        $totalissues = $biblioitem->totalissues + $increase;
     }
 
      my $field = $record->field($totalissuestag);
@@ -3705,7 +3612,7 @@ sub UpdateTotalIssues {
          $record->insert_grouped_field($field);
      }
 
-     return ModBiblio($record, $biblionumber, $data->{'frameworkcode'});
+     return ModBiblio($record, $biblionumber, $biblio->frameworkcode);
 }
 
 =head2 RemoveAllNsb

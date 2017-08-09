@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 33;
+use Test::More tests => 31;
 use DateTime::Duration;
 
 use t::lib::Mocks;
@@ -32,6 +32,7 @@ use C4::Reserves;
 use Koha::Database;
 use Koha::DateUtils;
 use Koha::Library;
+use Koha::Patrons;
 
 BEGIN {
     require_ok('C4::Circulation');
@@ -45,7 +46,6 @@ can_ok(
       AddReturn
       GetBiblioIssues
       GetIssuingCharges
-      GetItemIssue
       GetOpenIssue
       GetRenewCount
       GetUpcomingDueIssues
@@ -148,14 +148,14 @@ my $borrower_id1 = C4::Members::AddMember(
     categorycode => $categorycode,
     branchcode   => $branchcode_1
 );
-my $borrower_1 = C4::Members::GetMember(borrowernumber => $borrower_id1);
+my $borrower_1 = Koha::Patrons->find( $borrower_id1 )->unblessed;
 my $borrower_id2 = C4::Members::AddMember(
     firstname    => 'firstname2',
     surname      => 'surname2 ',
     categorycode => $categorycode,
     branchcode   => $branchcode_2,
 );
-my $borrower_2 = C4::Members::GetMember(borrowernumber => $borrower_id2);
+my $borrower_2 = Koha::Patrons->find( $borrower_id2 )->unblessed;
 
 my @USERENV = (
     $borrower_id1, 'test', 'MASTERTEST', 'firstname', $branchcode_1,
@@ -216,6 +216,9 @@ is ($countaccount,1,"1 accountline has been added");
 
 # Test AddRenewal
 
+my $se = Test::MockModule->new( 'C4::Context' );
+$se->mock( 'interface', sub {return 'intranet'});
+
 # Let's renew this one at a different library for statistical purposes to test Bug 17781
 C4::Context->set_userenv(@USERENV_DIFFERENT_LIBRARY);
 my $datedue3 = AddRenewal( $borrower_id1, $item_id1, $branchcode_1, $datedue1, $daysago10 );
@@ -230,14 +233,28 @@ like(
 my $stat = $dbh->selectrow_hashref("SELECT * FROM statistics WHERE type = 'renew' AND borrowernumber = ? AND itemnumber = ? AND branch = ?", undef, $borrower_id1, $item_id1, $branchcode_3 );
 ok( $stat, "Bug 17781 - 'Improper branchcode set during renewal' still fixed" );
 
+$se->mock( 'interface', sub {return 'opac'});
+
+#Let's do an opac renewal - whatever branchcode we send should be used
+my $opac_renew_issue = $builder->build({
+    source=>"Issue",
+    value=>{
+        date_due => '2017-01-01',
+        branch => $branchcode_1,
+        itype => $itemtype,
+        borrowernumber => $borrower_id1
+    }
+});
+
+my $datedue4 = AddRenewal( $opac_renew_issue->{borrowernumber}, $opac_renew_issue->{itemnumber}, "Stavromula", $datedue1, $daysago10 );
+
+$stat = $dbh->selectrow_hashref("SELECT * FROM statistics WHERE type = 'renew' AND borrowernumber = ? AND itemnumber = ? AND branch = ?", undef,  $opac_renew_issue->{borrowernumber},  $opac_renew_issue->{itemnumber}, "Stavromula" );
+ok( $stat, "Bug 18572 - 'Bug 18572 - OpacRenewalBranch is now respected" );
+
+
 
 #Test GetBiblioIssues
 is( GetBiblioIssues(), undef, "GetBiblio Issues without parameters" );
-
-#Test GetItemIssue
-#FIXME : As the issues are not correctly added in the database, these tests don't work correctly
-is(GetItemIssue,undef,"Without parameter GetItemIssue returns undef");
-#is(GetItemIssue($item_id1),{},"Item1's issues");
 
 #Test GetOpenIssue
 is( GetOpenIssue(), undef, "Without parameter GetOpenIssue returns undef" );
@@ -252,19 +269,19 @@ my $issue3 = C4::Circulation::AddIssue( $borrower_1, $barcode_1 );
 @renewcount = C4::Circulation::GetRenewCount();
 is_deeply(
     \@renewcount,
-    [ 0, undef, 0 ], # FIXME Need to be fixed, see FIXME in GetRenewCount
+    [ 0, 0, 0 ], # FIXME Need to be fixed, see FIXME in GetRenewCount
     "Without issuing rules and without parameter, GetRenewCount returns renewcount = 0, renewsallowed = undef, renewsleft = 0"
 );
 @renewcount = C4::Circulation::GetRenewCount(-1);
 is_deeply(
     \@renewcount,
-    [ 0, undef, 0 ], # FIXME Need to be fixed
+    [ 0, 0, 0 ], # FIXME Need to be fixed
     "Without issuing rules and without wrong parameter, GetRenewCount returns renewcount = 0, renewsallowed = undef, renewsleft = 0"
 );
 @renewcount = C4::Circulation::GetRenewCount($borrower_id1, $item_id1);
 is_deeply(
     \@renewcount,
-    [ 2, undef, 0 ],
+    [ 2, 0, 0 ],
     "Without issuing rules and with a valid parameter, renewcount = 2, renewsallowed = undef, renewsleft = 0"
 );
 
@@ -297,18 +314,6 @@ is_deeply(
 $dbh->do(q|
     UPDATE issuingrules SET renewalsallowed = 3
 |);
-@renewcount = C4::Circulation::GetRenewCount();
-is_deeply(
-    \@renewcount,
-    [ 0, 3, 3 ],
-    "With issuing rules (renewal allowed) and without parameter, GetRenewCount returns renewcount = 0, renewsallowed = 3, renewsleft = 3"
-);
-@renewcount = C4::Circulation::GetRenewCount(-1);
-is_deeply(
-    \@renewcount,
-    [ 0, 3, 3 ],
-    "With issuing rules (renewal allowed) and without wrong parameter, GetRenewCount returns renewcount = 0, renewsallowed = 3, renewsleft = 3"
-);
 @renewcount = C4::Circulation::GetRenewCount($borrower_id1, $item_id1);
 is_deeply(
     \@renewcount,

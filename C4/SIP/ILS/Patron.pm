@@ -24,6 +24,7 @@ use C4::Items qw( GetBarcodeFromItemnumber GetItemnumbersForBiblio);
 use C4::Auth qw(checkpw);
 
 use Koha::Libraries;
+use Koha::Patrons;
 
 our $kp;    # koha patron
 
@@ -31,14 +32,14 @@ sub new {
     my ($class, $patron_id) = @_;
     my $type = ref($class) || $class;
     my $self;
-    $kp = GetMember(cardnumber=>$patron_id) || GetMember(userid=>$patron_id);
-    $debug and warn "new Patron (GetMember): " . Dumper($kp);
-    unless (defined $kp) {
+    $kp = Koha::Patrons->find( { cardnumber => $patron_id } )
+      or Koha::Patrons->find( { userid => $patron_id } );
+    $debug and warn "new Patron: " . Dumper($kp->unblessed) if $kp;
+    unless ($kp) {
         syslog("LOG_DEBUG", "new ILS::Patron(%s): no such patron", $patron_id);
         return;
     }
-    $kp = GetMember( borrowernumber => $kp->{borrowernumber});
-    $debug and warn "new Patron (GetMember): " . Dumper($kp);
+    $kp = $kp->unblessed;
     my $pw        = $kp->{password};
     my $flags     = C4::Members::patronflags( $kp );
     my $debarred  = defined($flags->{DBARRED});
@@ -187,6 +188,26 @@ sub AUTOLOAD {
         return $self->{$name} = shift;
     } else {
         return $self->{$name};
+    }
+}
+
+sub name {
+    my ( $self, $template ) = @_;
+
+    if ($template) {
+        require Template;
+        require Koha::Patrons;
+
+        my $tt = Template->new();
+
+        my $patron = Koha::Patrons->find( $self->{borrowernumber} );
+
+        my $output;
+        $tt->process( \$template, { patron => $patron }, \$output );
+        return $output;
+    }
+    else {
+        return $self->{name};
     }
 }
 
@@ -431,20 +452,25 @@ sub _get_address {
 
 sub _get_outstanding_holds {
     my $borrowernumber = shift;
-    my @hold_array = grep { !defined $_->{found} || $_->{found} ne 'W'} GetReservesFromBorrowernumber($borrowernumber);
-    foreach my $h (@hold_array) {
+
+    my $patron = Koha::Patrons->find( $borrowernumber );
+    my $holds = $patron->holds->search( { -or => [ { found => undef }, { found => { '!=' => 'W' } } ] } );
+    my @holds;
+    while ( my $hold = $holds->next ) {
         my $item;
-        if ($h->{itemnumber}) {
-            $item = $h->{itemnumber};
+        if ($hold->itemnumber) {
+            $item = $hold->itemnumber;
         }
         else {
             # We need to return a barcode for the biblio so the client
             # can request the biblio info
-            $item = ( GetItemnumbersForBiblio($h->{biblionumber}) )->[0];
+            $item = ( GetItemnumbersForBiblio($hold->biblionumber) )->[0];
         }
-        $h->{barcode} = GetBarcodeFromItemnumber($item);
+        my $unblessed_hold = $hold->unblessed;
+        $unblessed_hold->{barcode} = GetBarcodeFromItemnumber($item);
+        push @holds, $unblessed_hold;
     }
-    return \@hold_array;
+    return \@holds;
 }
 
 1;

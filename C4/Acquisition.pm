@@ -31,9 +31,11 @@ use Koha::DateUtils qw( dt_from_string output_pref );
 use Koha::Acquisition::Order;
 use Koha::Acquisition::Booksellers;
 use Koha::Biblios;
+use Koha::Items;
 use Koha::Number::Price;
 use Koha::Libraries;
 use Koha::CsvProfiles;
+use Koha::Patrons;
 
 use C4::Koha;
 
@@ -312,20 +314,13 @@ sub GetBasketAsCSV {
         }
         for my $order (@orders) {
             my @row;
-            my $bd = GetBiblioData( $order->{'biblionumber'} );
-            my @biblioitems = GetBiblioItemByBiblioNumber( $order->{'biblionumber'});
-            for my $biblioitem (@biblioitems) {
-                if (    $biblioitem->{isbn}
-                    and $order->{isbn}
-                    and $biblioitem->{isbn} eq $order->{isbn} )
-                {
-                    $order = { %$order, %$biblioitem };
-                }
-            }
+            my $biblio = Koha::Biblios->find( $order->{biblionumber} );
+            my $biblioitem = $biblio->biblioitem;
+            $order = { %$order, %{ $biblioitem->unblessed } };
             if ($contract) {
                 $order = {%$order, %$contract};
             }
-            $order = {%$order, %$basket, %$bd};
+            $order = {%$order, %$basket, %{ $biblio->unblessed }};
             for my $field (@fields) {
                 push @row, $order->{$field};
             }
@@ -341,17 +336,18 @@ sub GetBasketAsCSV {
     }
     else {
         foreach my $order (@orders) {
-            my $bd = GetBiblioData( $order->{'biblionumber'} );
+            my $biblio = Koha::Biblios->find( $order->{biblionumber} );
+            my $biblioitem = $biblio->biblioitem;
             my $row = {
                 contractname => $contract->{'contractname'},
                 ordernumber => $order->{'ordernumber'},
                 entrydate => $order->{'entrydate'},
                 isbn => $order->{'isbn'},
-                author => $bd->{'author'},
-                title => $bd->{'title'},
-                publicationyear => $bd->{'publicationyear'},
-                publishercode => $bd->{'publishercode'},
-                collectiontitle => $bd->{'collectiontitle'},
+                author => $biblio->author,
+                title => $biblio->title,
+                publicationyear => $biblioitem->publicationyear,
+                publishercode => $biblioitem->publishercode,
+                collectiontitle => $biblioitem->collectiontitle,
                 notes => $order->{'order_vendornote'},
                 quantity => $order->{'quantity'},
                 rrp => $order->{'rrp'},
@@ -410,16 +406,17 @@ sub GetBasketGroupAsCSV {
         my $basketgroup = GetBasketgroup( $$basket{basketgroupid} );
 
         foreach my $order (@orders) {
-            my $bd = GetBiblioData( $order->{'biblionumber'} );
+            my $biblio = Koha::Biblios->find( $order->{biblionumber} );
+            my $biblioitem = $biblio->biblioitem;
             my $row = {
                 clientnumber => $bookseller->accountnumber,
                 basketname => $basket->{basketname},
                 ordernumber => $order->{ordernumber},
-                author => $bd->{author},
-                title => $bd->{title},
-                publishercode => $bd->{publishercode},
-                publicationyear => $bd->{publicationyear},
-                collectiontitle => $bd->{collectiontitle},
+                author => $biblio->author,
+                title => $biblio->title,
+                publishercode => $biblioitem->publishercode,
+                publicationyear => $biblioitem->publicationyear,
+                collectiontitle => $biblioitem->collectiontitle,
                 isbn => $order->{isbn},
                 quantity => $order->{quantity},
                 rrp_tax_included => $order->{rrp_tax_included},
@@ -804,7 +801,7 @@ AcqViewBaskets, user permissions and basket properties (creator, users list,
 branch).
 
 First parameter can be either a borrowernumber or a hashref as returned by
-C4::Members::GetMember.
+Koha::Patron->unblessed
 
 Second parameter can be either a basketno or a hashref as returned by
 C4::Acquisition::GetBasket.
@@ -821,7 +818,10 @@ sub CanUserManageBasket {
     my ($borrower, $basket, $userflags) = @_;
 
     if (!ref $borrower) {
-        $borrower = C4::Members::GetMember(borrowernumber => $borrower);
+        # FIXME This needs to be replaced
+        # We should not accept both scalar and array
+        # Tests need to be updated
+        $borrower = Koha::Patrons->find( $borrower )->unblessed;
     }
     if (!ref $basket) {
         $basket = GetBasket($basket);
@@ -859,8 +859,8 @@ sub CanUserManageBasket {
 
         if ($AcqViewBaskets eq 'user'
         && $basket->{authorisedby} != $borrowernumber
-        && grep($borrowernumber, GetBasketUsers($basketno)) == 0) {
-            return 0;
+        && ! grep { $borrowernumber eq $_ } GetBasketUsers($basketno)) {
+             return 0;
         }
 
         if ($AcqViewBaskets eq 'branch' && defined $basket->{branch}
@@ -1660,17 +1660,17 @@ sub CancelReceipt {
         my @affects = split q{\|}, C4::Context->preference("AcqItemSetSubfieldsWhenReceiptIsCancelled");
         if ( @affects ) {
             for my $in ( @itemnumbers ) {
-                my $biblionumber = C4::Biblio::GetBiblionumberFromItemnumber( $in );
-                my $frameworkcode = GetFrameworkCode($biblionumber);
-                my ( $itemfield ) = GetMarcFromKohaField( 'items.itemnumber', $frameworkcode );
-                my $item = C4::Items::GetMarcItem( $biblionumber, $in );
+                my $item = Koha::Items->find( $in );
+                my $biblio = $item->biblio;
+                my ( $itemfield ) = GetMarcFromKohaField( 'items.itemnumber', $biblio->frameworkcode );
+                my $item_marc = C4::Items::GetMarcItem( $biblio->biblionumber, $in );
                 for my $affect ( @affects ) {
                     my ( $sf, $v ) = split q{=}, $affect, 2;
-                    foreach ( $item->field($itemfield) ) {
+                    foreach ( $item_marc->field($itemfield) ) {
                         $_->update( $sf => $v );
                     }
                 }
-                C4::Items::ModItemFromMarc( $item, $biblionumber, $in );
+                C4::Items::ModItemFromMarc( $item_marc, $biblio->biblionumber, $in );
             }
         }
     }
@@ -3081,17 +3081,17 @@ sub NotifyOrderUsers {
 
     my $order = GetOrder( $ordernumber );
     for my $borrowernumber (@borrowernumbers) {
-        my $borrower = C4::Members::GetMember( borrowernumber => $borrowernumber );
-        my $library = Koha::Libraries->find( $borrower->{branchcode} )->unblessed;
-        my $biblio = C4::Biblio::GetBiblio( $order->{biblionumber} );
+        my $patron = Koha::Patrons->find( $borrowernumber );
+        my $library = $patron->library->unblessed;
+        my $biblio = Koha::Biblios->find( $order->{biblionumber} )->unblessed;
         my $letter = C4::Letters::GetPreparedLetter(
             module      => 'acquisition',
             letter_code => 'ACQ_NOTIF_ON_RECEIV',
             branchcode  => $library->{branchcode},
-            lang        => $borrower->{lang},
+            lang        => $patron->lang,
             tables      => {
                 'branches'    => $library,
-                'borrowers'   => $borrower,
+                'borrowers'   => $patron->unblessed,
                 'biblio'      => $biblio,
                 'aqorders'    => $order,
             },

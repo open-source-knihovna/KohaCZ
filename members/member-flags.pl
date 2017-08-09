@@ -16,6 +16,7 @@ use C4::Members::Attributes qw(GetBorrowerAttributes);
 #use C4::Acquisitions;
 
 use Koha::Patron::Categories;
+use Koha::Patrons;
 
 use C4::Output;
 use Koha::Patron::Images;
@@ -27,9 +28,11 @@ my $input = new CGI;
 
 my $flagsrequired = { permissions => 1 };
 my $member=$input->param('member');
-my $bor = GetMember( borrowernumber => $member );
-if( $bor->{'category_type'} eq 'S' )  {
-	$flagsrequired->{'staffaccess'} = 1;
+my $patron = Koha::Patrons->find( $member );
+my $category_type = $patron->category->category_type;
+my $bor = $patron->unblessed;
+if( $category_type eq 'S' )  {
+    $flagsrequired->{'staffaccess'} = 1;
 }
 my ($template, $loggedinuser, $cookie) = get_template_and_user({
         template_name   => "members/member-flags.tt",
@@ -121,14 +124,14 @@ if ($input->param('newflags')) {
     my @loop;
 
     while (my ($bit, $flag) = $sth->fetchrow) {
-	    my $checked='';
-	    if ($accessflags->{$flag}) {
-	        $checked= 1;
-	    }
+        my $checked='';
+        if ($accessflags->{$flag}) {
+            $checked= 1;
+        }
 
-	    my %row = ( bit => $bit,
-		    flag => $flag,
-		    checked => $checked,
+        my %row = ( bit => $bit,
+            flag => $flag,
+            checked => $checked,
         );
 
         my @sub_perm_loop = ();
@@ -174,18 +177,17 @@ if ($input->param('newflags')) {
         if ($#sub_perm_loop > -1) {
             $row{sub_perm_loop} = \@sub_perm_loop;
         }
-	    push @loop, \%row;
+        push @loop, \%row;
     }
 
-    if ( $bor->{'category_type'} eq 'C') {
+    if ( $category_type eq 'C') {
         my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
         $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
         $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
     }
-	
-$template->param( adultborrower => 1 ) if ( $bor->{'category_type'} eq 'A' || $bor->{'category_type'} eq 'I' );
-    my $patron_image = Koha::Patron::Images->find($bor->{borrowernumber});
-    $template->param( picture => 1 ) if $patron_image;
+
+$template->param( adultborrower => 1 ) if ( $category_type =~ /^(A|I)$/ );
+    $template->param( picture => 1 ) if $patron->image;
 
 if (C4::Context->preference('ExtendedPatronAttributes')) {
     my $attributes = GetBorrowerAttributes($bor->{'borrowernumber'});
@@ -196,32 +198,33 @@ if (C4::Context->preference('ExtendedPatronAttributes')) {
 }
 
 $template->param(
-		borrowernumber => $bor->{'borrowernumber'},
-    cardnumber => $bor->{'cardnumber'},
-		surname => $bor->{'surname'},
-		firstname => $bor->{'firstname'},
-        othernames => $bor->{'othernames'},
-		categorycode => $bor->{'categorycode'},
-		category_type => $bor->{'category_type'},
-		categoryname => $bor->{'description'},
-        address => $bor->{address},
-		address2 => $bor->{'address2'},
-        streettype => $bor->{streettype},
-		city => $bor->{'city'},
-        state => $bor->{'state'},
-		zipcode => $bor->{'zipcode'},
-		country => $bor->{'country'},
-		phone => $bor->{'phone'},
-        phonepro => $bor->{'phonepro'},
-        mobile => $bor->{'mobile'},
-		email => $bor->{'email'},
-        emailpro => $bor->{'emailpro'},
-		branchcode => $bor->{'branchcode'},
-		loop => \@loop,
-		is_child        => ($bor->{'category_type'} eq 'C'),
-        RoutingSerials => C4::Context->preference('RoutingSerials'),
-        csrf_token => Koha::Token->new->generate_csrf( { session_id => scalar $input->cookie('CGISESSID'), } ),
-		);
+    borrowernumber => $bor->{'borrowernumber'},
+    cardnumber     => $bor->{'cardnumber'},
+    surname        => $bor->{'surname'},
+    firstname      => $bor->{'firstname'},
+    othernames     => $bor->{'othernames'},
+    categorycode   => $bor->{'categorycode'},
+    category_type  => $category_type,
+    categoryname   => $bor->{'description'},
+    address        => $bor->{address},
+    address2       => $bor->{'address2'},
+    streettype     => $bor->{streettype},
+    city           => $bor->{'city'},
+    state          => $bor->{'state'},
+    zipcode        => $bor->{'zipcode'},
+    country        => $bor->{'country'},
+    phone          => $bor->{'phone'},
+    phonepro       => $bor->{'phonepro'},
+    mobile         => $bor->{'mobile'},
+    email          => $bor->{'email'},
+    emailpro       => $bor->{'emailpro'},
+    branchcode     => $bor->{'branchcode'},
+    loop           => \@loop,
+    is_child       => ( $category_type eq 'C' ),
+    RoutingSerials => C4::Context->preference('RoutingSerials'),
+    csrf_token =>
+        Koha::Token->new->generate_csrf( { session_id => scalar $input->cookie('CGISESSID'), } ),
+);
 
     output_html_with_http_headers $input, $cookie, $template->output;
 

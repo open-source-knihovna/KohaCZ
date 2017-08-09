@@ -31,8 +31,10 @@ use C4::Circulation;
 use C4::Koha;
 use C4::ClassSource;
 use Koha::DateUtils;
+use Koha::Items;
 use Koha::ItemTypes;
 use Koha::Libraries;
+use Koha::Patrons;
 use List::MoreUtils qw/any/;
 use C4::Search;
 use Storable qw(thaw freeze);
@@ -401,7 +403,7 @@ my ($template, $loggedinuser, $cookie)
 
 
 # Does the user have a restricted item editing permission?
-my $uid = $loggedinuser ? GetMember( borrowernumber => $loggedinuser )->{userid} : undef;
+my $uid = Koha::Patrons->find( $loggedinuser )->userid;
 my $restrictededition = $uid ? haspermission($uid,  {'editcatalogue' => 'edit_items_restricted'}) : undef;
 # In case user is a superlibrarian, editing is not restricted
 $restrictededition = 0 if ($restrictededition != 0 &&  C4::Context->IsSuperLibrarian());
@@ -644,41 +646,28 @@ if ($op eq "additem") {
 #-------------------------------------------------------------------------------
 } elsif ($op eq "delallitems") {
 #-------------------------------------------------------------------------------
-    my @biblioitems = &GetBiblioItemByBiblioNumber($biblionumber);
-    my $errortest=0;
-    my $itemfail;
-    foreach my $biblioitem (@biblioitems) {
-        my $items = &GetItemsByBiblioitemnumber( $biblioitem->{biblioitemnumber} );
-
-        foreach my $item (@$items) {
-            $error =&DelItemCheck( $biblionumber, $item->{itemnumber} );
-            $itemfail =$item;
-        if($error == 1){
-            next
-            }
-        else {
-            push @errors,$error;
-            $errortest++
-            }
+    my $itemnumbers = C4::Items::GetItemnumbersForBiblio( $biblionumber );
+    foreach my $itemnumber ( @$itemnumbers ) {
+        $error = C4::Items::DelItemCheck( $biblionumber, $itemnumber );
+        next if $error == 1; # Means ok
+        push @errors,$error;
+    }
+    if ( @errors ) {
+        $nextop="additem";
+    } else {
+        my $defaultview = C4::Context->preference('IntranetBiblioDefaultView');
+        my $views = { C4::Search::enabled_staff_search_views };
+        if ($defaultview eq 'isbd' && $views->{can_view_ISBD}) {
+            print $input->redirect("/cgi-bin/koha/catalogue/ISBDdetail.pl?biblionumber=$biblionumber&searchid=$searchid");
+        } elsif  ($defaultview eq 'marc' && $views->{can_view_MARC}) {
+            print $input->redirect("/cgi-bin/koha/catalogue/MARCdetail.pl?biblionumber=$biblionumber&searchid=$searchid");
+        } elsif  ($defaultview eq 'labeled_marc' && $views->{can_view_labeledMARC}) {
+            print $input->redirect("/cgi-bin/koha/catalogue/labeledMARCdetail.pl?biblionumber=$biblionumber&searchid=$searchid");
+        } else {
+            print $input->redirect("/cgi-bin/koha/catalogue/detail.pl?biblionumber=$biblionumber&searchid=$searchid");
         }
-        if($errortest > 0){
-            $nextop="additem";
-        } 
-        else {
-            my $defaultview = C4::Context->preference('IntranetBiblioDefaultView');
-            my $views = { C4::Search::enabled_staff_search_views };
-            if ($defaultview eq 'isbd' && $views->{can_view_ISBD}) {
-                print $input->redirect("/cgi-bin/koha/catalogue/ISBDdetail.pl?biblionumber=$biblionumber&searchid=$searchid");
-            } elsif  ($defaultview eq 'marc' && $views->{can_view_MARC}) {
-                print $input->redirect("/cgi-bin/koha/catalogue/MARCdetail.pl?biblionumber=$biblionumber&searchid=$searchid");
-            } elsif  ($defaultview eq 'labeled_marc' && $views->{can_view_labeledMARC}) {
-                print $input->redirect("/cgi-bin/koha/catalogue/labeledMARCdetail.pl?biblionumber=$biblionumber&searchid=$searchid");
-            } else {
-                print $input->redirect("/cgi-bin/koha/catalogue/detail.pl?biblionumber=$biblionumber&searchid=$searchid");
-            }
-            exit;
-        }
-	}
+        exit;
+    }
 #-------------------------------------------------------------------------------
 } elsif ($op eq "saveitem") {
 #-------------------------------------------------------------------------------
@@ -807,9 +796,10 @@ foreach my $field (@fields) {
 
 	if ( C4::Context->preference('EasyAnalyticalRecords') ) {
 	    foreach my $hostitemnumber (@hostitemnumbers){
+            my $item = Koha::Items->find( $hostitemnumber );
 		if ($this_row{itemnumber} eq $hostitemnumber){
 			$this_row{hostitemflag} = 1;
-			$this_row{hostbiblionumber}= GetBiblionumberFromItemnumber($hostitemnumber);
+            $this_row{hostbiblionumber}= $item->biblio->biblionumber;
 			last;
 		}
 	    }

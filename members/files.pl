@@ -29,8 +29,8 @@ use C4::Members::Attributes qw(GetBorrowerAttributes);
 use C4::Debug;
 
 use Koha::DateUtils;
+use Koha::Patrons;
 use Koha::Patron::Files;
-use Koha::Patron::Images;
 use Koha::Account::DebitTypes;
 use Koha::Account::CreditTypes;
 
@@ -71,8 +71,9 @@ if ( $op eq 'download' ) {
     print $file->{'file_content'};
 }
 else {
-    my $data = GetMember( borrowernumber => $borrowernumber );
-    $template->param(%$data);
+    my $patron = Koha::Patrons->find( $borrowernumber );
+    my $patron_category = $patron->category;
+    $template->param(%{ $patron->unblessed});
 
     my %errors;
 
@@ -110,7 +111,7 @@ else {
     }
 
     $template->param(
-        categoryname    => $data->{'description'},
+        categoryname    => $patron_category->description,
         RoutingSerials => C4::Context->preference('RoutingSerials'),
     );
 
@@ -122,10 +123,11 @@ else {
         );
     }
 
-    my $patron_image = Koha::Patron::Images->find($data->{borrowernumber});
-    $template->param( picture => 1 ) if $patron_image;
+    $template->param( picture => 1 ) if $patron->image;
 
-    $template->param( adultborrower => 1 ) if ( $data->{category_type} eq 'A' || $data->{category_type} eq 'I' );
+    $template->param( adultborrower => 1 )
+        if ( $patron_category->category_type eq 'A' || $patron_category->category_type eq 'I' );
+
     $template->param(
         files => Koha::Patron::Files->new( borrowernumber => $borrowernumber )
           ->GetFilesInfo(),

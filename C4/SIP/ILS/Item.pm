@@ -11,6 +11,7 @@ use warnings;
 
 use Sys::Syslog qw(syslog);
 use Carp;
+use Template;
 
 use C4::SIP::ILS::Transaction;
 
@@ -23,7 +24,10 @@ use C4::Members;
 use C4::Reserves;
 use Koha::Database;
 use Koha::Biblios;
-
+use Koha::Checkouts;
+use Koha::DateUtils;
+use Koha::Patrons;
+use Koha::Items;
 
 =encoding UTF-8
 
@@ -64,42 +68,40 @@ use Koha::Biblios;
         hold_queue => [],
     },
 );
+
 =cut
 
 sub new {
 	my ($class, $item_id) = @_;
 	my $type = ref($class) || $class;
-	my $self;
-    my $itemnumber = GetItemnumberFromBarcode($item_id);
-	my $item = GetBiblioFromItemNumber($itemnumber);    # actually biblio.*, biblioitems.* AND items.*  (overkill)
-	if (! $item) {
+    my $item = Koha::Items->find( { barcode => $item_id } );
+    unless ( $item ) {
 		syslog("LOG_DEBUG", "new ILS::Item('%s'): not found", $item_id);
 		warn "new ILS::Item($item_id) : No item '$item_id'.";
         return;
 	}
-    $item->{  'itemnumber'   } = $itemnumber;
-    $item->{      'id'       } = $item->{barcode};     # to SIP, the barcode IS the id.
-    $item->{permanent_location}= $item->{homebranch};
-    $item->{'collection_code'} = $item->{ccode};
-    $item->{  'call_number'  } = $item->{itemcallnumber};
+    my $self = $item->unblessed;
+    $self->{      'id'       } = $item->barcode;     # to SIP, the barcode IS the id.
+    $self->{permanent_location}= $item->homebranch;
+    $self->{'collection_code'} = $item->ccode;
+    $self->{  'call_number'  } = $item->itemcallnumber;
 
-    my $it = C4::Context->preference('item-level_itypes') ? $item->{itype} : $item->{itemtype};
+    my $it = $item->effective_itemtype;
     my $itemtype = Koha::Database->new()->schema()->resultset('Itemtype')->find( $it );
-    $item->{sip_media_type} = $itemtype->sip_media_type() if $itemtype;
+    $self->{sip_media_type} = $itemtype->sip_media_type() if $itemtype;
 
 	# check if its on issue and if so get the borrower
-	my $issue = GetItemIssue($item->{'itemnumber'});
+    my $issue = Koha::Checkouts->find( { itemnumber => $item->itemnumber } );
     if ($issue) {
-        $item->{due_date} = $issue->{date_due};
+        $self->{due_date} = dt_from_string( $issue->date_due, 'sql' )->truncate( to => 'minute' );
+        my $patron = Koha::Patrons->find( $issue->borrowernumber );
+        $self->{patron} = $patron->cardnumber;
     }
-	my $borrower = GetMember(borrowernumber=>$issue->{'borrowernumber'});
-	$item->{patron} = $borrower->{'cardnumber'};
-    my $biblio = Koha::Biblios->find( $item->{biblionumber } );
+    my $biblio = Koha::Biblios->find( $self->{biblionumber} );
     my $holds = $biblio->current_holds->unblessed;
-    $item->{hold_queue} = $holds;
-	$item->{hold_shelf}    = [( grep {   defined $_->{found}  and $_->{found} eq 'W' } @{$item->{hold_queue}} )];
-	$item->{pending_queue} = [( grep {(! defined $_->{found}) or  $_->{found} ne 'W' } @{$item->{hold_queue}} )];
-	$self = $item;
+    $self->{hold_queue} = $holds;
+    $self->{hold_shelf}    = [( grep {   defined $_->{found}  and $_->{found} eq 'W' } @{$self->{hold_queue}} )];
+    $self->{pending_queue} = [( grep {(! defined $_->{found}) or  $_->{found} ne 'W' } @{$self->{hold_queue}} )];
 	bless $self, $type;
 
     syslog("LOG_DEBUG", "new ILS::Item('%s'): found with title '%s'",
@@ -161,31 +163,40 @@ sub hold_patron_id {
 
 }
 sub hold_patron_name {
-    my $self = shift;
-    my $borrowernumber = (@_ ? shift: $self->hold_patron_id()) or return;
-    my $holder = GetMember(borrowernumber=>$borrowernumber);
+    my ( $self, $template ) = @_;
+    my $borrowernumber = $self->hold_patron_id() or return;
+
+    if ($template) {
+        my $tt = Template->new();
+
+        my $patron = Koha::Patrons->find($borrowernumber);
+
+        my $output;
+        $tt->process( \$template, { patron => $patron }, \$output );
+        return $output;
+    }
+
+    my $holder = Koha::Patrons->find( $borrowernumber );
     unless ($holder) {
-        syslog("LOG_ERR", "While checking hold, GetMember failed for borrowernumber '$borrowernumber'");
+        syslog("LOG_ERR", "While checking hold, failed to retrieve the patron with borrowernumber '$borrowernumber'");
         return;
     }
-    my $email = $holder->{email} || '';
-    my $phone = $holder->{phone} || '';
+    my $email = $holder->email || '';
+    my $phone = $holder->phone || '';
     my $extra = ($email and $phone) ? " ($email, $phone)" :  # both populated, employ comma
                 ($email or  $phone) ? " ($email$phone)"   :  # only 1 populated, we don't care which: no comma
                 "" ;                                         # neither populated, empty string
-    my $name = $holder->{firstname} ? $holder->{firstname} . ' ' : '';
-    $name .= $holder->{surname} . $extra;
+    my $name = $holder->firstname ? $holder->firstname . ' ' : '';
+    $name .= $holder->surname . $extra;
     return $name;
 }
 
 sub hold_patron_bcode {
     my $self = shift;
     my $borrowernumber = (@_ ? shift: $self->hold_patron_id()) or return;
-    my $holder = GetMember(borrowernumber => $borrowernumber);
-    if ($holder) {
-        if ($holder->{cardnumber}) {
-            return $holder->{cardnumber};
-        }
+    my $holder = Koha::Patrons->find( $borrowernumber );
+    if ($holder and $holder->cardnumber ) {
+        return $holder->cardnumber;
     }
     return;
 }
@@ -347,8 +358,8 @@ sub available {
 sub _barcode_to_borrowernumber {
     my $known = shift;
     return unless defined $known;
-    my $member = GetMember(cardnumber=>$known) or return;
-    return $member->{borrowernumber};
+    my $patron = Koha::Patrons->find( { cardnumber => $known } ) or return;
+    return $patron->borrowernumber
 }
 sub barcode_is_borrowernumber {    # because hold_queue only has borrowernumber...
     my $self = shift;

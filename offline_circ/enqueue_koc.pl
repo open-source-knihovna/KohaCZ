@@ -32,7 +32,9 @@ use C4::Circulation;
 use C4::Items;
 use C4::Members;
 use C4::Stats;
+use Koha::Checkouts;
 use Koha::UploadedFiles;
+use Koha::Items;
 
 use Date::Calc qw( Add_Delta_Days Date_to_Days );
 
@@ -189,10 +191,10 @@ sub _get_borrowernumber_from_barcode {
 
     return unless $barcode;
 
-    my $item = GetBiblioFromItemNumber( undef, $barcode );
-    return unless $item->{'itemnumber'};
+    my $item = Koha::Items->find({ barcode => $barcode });
+    return unless $item;
 
-    my $issue = C4::Circulation::GetItemIssue( $item->{'itemnumber'} );
-    return unless $issue->{'borrowernumber'};
-    return $issue->{'borrowernumber'};
+    my $issue = Koha::Checkouts->find( { itemnumber => $item->itemnumber } );
+    return unless $issue;
+    return $issue->borrowernumber;
 }

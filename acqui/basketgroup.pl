@@ -52,11 +52,12 @@ use C4::Output;
 use CGI qw ( -utf8 );
 
 use C4::Acquisition qw/CloseBasketgroup ReOpenBasketgroup GetOrders GetBasketsByBasketgroup GetBasketsByBookseller ModBasketgroup NewBasketgroup DelBasketgroup GetBasketgroups ModBasket GetBasketgroup GetBasket GetBasketGroupAsCSV/;
-use C4::Members qw/GetMember/;
 use Koha::EDI qw/create_edi_order get_edifact_ean/;
 
+use Koha::Biblioitems;
 use Koha::Acquisition::Booksellers;
 use Koha::ItemTypes;
+use Koha::Patrons;
 
 our $input=new CGI;
 
@@ -174,7 +175,7 @@ sub printbasketgrouppdf{
             $ord->{total_tax_included} = $ord->{ecost_tax_included} * $ord->{quantity};
             $ord->{total_tax_excluded} = $ord->{ecost_tax_excluded} * $ord->{quantity};
 
-            my $bib = GetBiblioData($ord->{biblionumber});
+            my $biblioitem = Koha::Biblioitems->search({ biblionumber => $ord->{biblionumber} })->next;
 
             #FIXME DELETE ME
             # 0      1        2        3         4            5         6       7      8        9
@@ -195,7 +196,7 @@ sub printbasketgrouppdf{
                 }
             }
 
-            $ord->{itemtype} = ( $ord->{itemtype} and $bib->{itemtype} ) ? Koha::ItemTypes->find( $bib->{itemtype} )->description : undef;
+            $ord->{itemtype} = ( $ord->{itemtype} and $biblioitem->itemtype ) ? Koha::ItemTypes->find( $biblioitem->itemtype )->description : undef;
             $ord->{en} = $en ? $en : undef;
             $ord->{edition} = $edition ? $edition : undef;
 
@@ -273,9 +274,9 @@ if ( $op eq "add" ) {
         $template->param( closedbg => 0);
     }
     # determine default billing and delivery places depending on librarian homebranch and existing basketgroup data
-    my $borrower = GetMember( ( 'borrowernumber' => $loggedinuser ) );
-    $billingplace  = $billingplace  || $borrower->{'branchcode'};
-    $deliveryplace = $deliveryplace || $borrower->{'branchcode'};
+    my $patron = Koha::Patrons->find( $loggedinuser ); # FIXME Not needed if billingplace and deliveryplace are set
+    $billingplace  = $billingplace  || $patron->branchcode;
+    $deliveryplace = $deliveryplace || $patron->branchcode;
 
     $template->param( billingplace => $billingplace );
     $template->param( deliveryplace => $deliveryplace );

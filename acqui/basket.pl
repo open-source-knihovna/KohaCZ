@@ -30,7 +30,6 @@ use C4::Budgets;
 use C4::Contract;
 use C4::Debug;
 use C4::Biblio;
-use C4::Members qw/GetMember/;  #needed for permissions checking for changing basketgroup of a basket
 use C4::Items;
 use C4::Suggestions;
 use Koha::Biblios;
@@ -41,6 +40,7 @@ use Date::Calc qw/Add_Delta_Days/;
 use Koha::Database;
 use Koha::EDI qw( create_edi_order get_edifact_ean );
 use Koha::CsvProfiles;
+use Koha::Patrons;
 
 =head1 NAME
 
@@ -134,10 +134,10 @@ if ( $op eq 'delete_confirm' ) {
             my $biblio = Koha::Biblios->find( $biblionumber );
             my $countbiblio = CountBiblioInOrders($biblionumber);
             my $ordernumber = $myorder->{'ordernumber'};
-            my $subscriptions = scalar GetSubscriptionsId ($biblionumber);
+            my $cnt_subscriptions = $biblio->subscriptions->count;
             my $itemcount = $biblio->items->count;
             my $error;
-            if ($countbiblio == 0 && $itemcount == 0 && $subscriptions == 0) {
+            if ($countbiblio == 0 && $itemcount == 0 && not $cnt_subscriptions ) {
                 $error = DelBiblio($myorder->{biblionumber}) }
             else {
                 push @cannotdelbiblios, {biblionumber=> ($myorder->{biblionumber}),
@@ -145,7 +145,7 @@ if ( $op eq 'delete_confirm' ) {
                                          author=> $myorder->{'author'},
                                          countbiblio=> $countbiblio,
                                          itemcount=>$itemcount,
-                                         subscriptions=>$subscriptions};
+                                         subscriptions => $cnt_subscriptions};
             }
             if ($error) {
                 push @cannotdelbiblios, {biblionumber=> ($myorder->{biblionumber}),
@@ -291,8 +291,8 @@ if ( $op eq 'list' ) {
 
 #if the basket is closed,and the user has the permission to edit basketgroups, display a list of basketgroups
     my ($basketgroup, $basketgroups);
-    my $staffuser = GetMember(borrowernumber => $loggedinuser);
-    if ($basket->{closedate} && haspermission($staffuser->{userid}, { acquisition => 'group_manage'} )) {
+    my $patron = Koha::Patrons->find($loggedinuser);
+    if ($basket->{closedate} && haspermission($patron->userid, { acquisition => 'group_manage'} )) {
         $basketgroups = GetBasketgroups($basket->{booksellerid});
         for my $bg ( @{$basketgroups} ) {
             if ($basket->{basketgroupid} && $basket->{basketgroupid} == $bg->{id}){
@@ -321,8 +321,9 @@ if ( $op eq 'list' ) {
     my @basketusers_ids = GetBasketUsers($basketno);
     my @basketusers;
     foreach my $basketuser_id (@basketusers_ids) {
-        my $basketuser = GetMember(borrowernumber => $basketuser_id);
-        push @basketusers, $basketuser if $basketuser;
+        # FIXME Could be improved with a search -in
+        my $basket_patron = Koha::Patrons->find( $basketuser_id );
+        push @basketusers, $basket_patron if $basket_patron;
     }
 
     my $active_currency = Koha::Acquisition::Currencies->get_active;
@@ -375,7 +376,6 @@ if ( $op eq 'list' ) {
     if ($basket->{basketgroupid}){
         $basketgroup = GetBasketgroup($basket->{basketgroupid});
     }
-    my $borrower= GetMember('borrowernumber' => $loggedinuser);
     my $budgets = GetBudgetHierarchy;
     my $has_budgets = 0;
     foreach my $r (@{$budgets}) {
@@ -474,20 +474,20 @@ sub get_order_infos {
         my $biblio = Koha::Biblios->find( $biblionumber );
         my $countbiblio = CountBiblioInOrders($biblionumber);
         my $ordernumber = $order->{'ordernumber'};
-        my @subscriptions = GetSubscriptionsId ($biblionumber);
+        my $cnt_subscriptions = $biblio->subscriptions->count;
         my $itemcount   = $biblio->items->count;
         my $holds_count = $biblio->holds->count;
         my @items = GetItemnumbersFromOrder( $ordernumber );
         my $itemholds  = $biblio->holds->search({ itemnumber => { -in => \@items } })->count;
 
         # if the biblio is not in other orders and if there is no items elsewhere and no subscriptions and no holds we can then show the link "Delete order and Biblio" see bug 5680
-        $line{can_del_bib}          = 1 if $countbiblio <= 1 && $itemcount == scalar @items && !(@subscriptions) && !($holds_count);
+        $line{can_del_bib}          = 1 if $countbiblio <= 1 && $itemcount == scalar @items && !($cnt_subscriptions) && !($holds_count);
         $line{items}                = ($itemcount) - (scalar @items);
         $line{left_item}            = 1 if $line{items} >= 1;
         $line{left_biblio}          = 1 if $countbiblio > 1;
         $line{biblios}              = $countbiblio - 1;
-        $line{left_subscription}    = 1 if scalar @subscriptions >= 1;
-        $line{subscriptions}        = scalar @subscriptions;
+        $line{left_subscription}    = 1 if $cnt_subscriptions;
+        $line{subscriptions}        = $cnt_subscriptions;
         ($holds_count >= 1) ? $line{left_holds} = 1 : $line{left_holds} = 0;
         $line{left_holds_on_order}  = 1 if $line{left_holds}==1 && ($line{items} == 0 || $itemholds );
         $line{holds}                = $holds_count;

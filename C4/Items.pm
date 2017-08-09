@@ -69,7 +69,6 @@ BEGIN {
         CheckItemPreSave
     
         GetItemsForInventory
-        GetItemInfosOf
         GetItemsByBiblioitemnumber
         GetItemsInfo
 	GetItemsLocationInfo
@@ -666,7 +665,8 @@ sub DelItem {
     my $biblionumber = $params->{biblionumber};
 
     unless ($biblionumber) {
-        $biblionumber = C4::Biblio::GetBiblionumberFromItemnumber($itemnumber);
+        my $item = Koha::Items->find( $itemnumber );
+        $biblionumber = $item ? $item->biblio->biblionumber : undef;
     }
 
     # If there is no biblionumber for the given itemnumber, there is nothing to delete
@@ -921,26 +921,6 @@ sub GetItemsForInventory {
     }
 
     return (\@results, $iTotalRecords);
-}
-
-=head2 GetItemInfosOf
-
-  GetItemInfosOf(@itemnumbers);
-
-=cut
-
-sub GetItemInfosOf {
-    my @itemnumbers = @_;
-
-    my $itemnumber_values = @itemnumbers ? join( ',', @itemnumbers ) : "''";
-
-    my $dbh = C4::Context->dbh;
-    my $query = "
-        SELECT *
-        FROM items
-        WHERE itemnumber IN ($itemnumber_values)
-    ";
-    return $dbh->selectall_hashref($query, 'itemnumber');
 }
 
 =head2 GetItemsByBiblioitemnumber

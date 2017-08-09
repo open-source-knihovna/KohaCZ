@@ -211,7 +211,6 @@ sub get_template_and_user {
 
     my $borrowernumber;
     if ($user) {
-        require C4::Members;
 
         # It's possible for $user to be the borrowernumber if they don't have a
         # userid defined (and are logging in through some other method, such
@@ -219,8 +218,9 @@ sub get_template_and_user {
         my $borrower;
         $borrowernumber = getborrowernumber($user) if defined($user);
         if ( !defined($borrowernumber) && defined($user) ) {
-            $borrower = C4::Members::GetMember( borrowernumber => $user );
+            $borrower = Koha::Patrons->find( $user );
             if ($borrower) {
+                $borrower = $borrower->unblessed;
                 $borrowernumber = $user;
 
                 # A bit of a hack, but I don't know there's a nicer way
@@ -228,7 +228,8 @@ sub get_template_and_user {
                 $user = $borrower->{firstname} . ' ' . $borrower->{surname};
             }
         } else {
-            $borrower = C4::Members::GetMember( borrowernumber => $borrowernumber );
+            $borrower = Koha::Patrons->find( $borrowernumber );
+            $borrower->unblessed if $borrower; # FIXME Otherwise, what to do?
         }
 
         # user info
@@ -965,12 +966,12 @@ sub checkauth {
                     # doesn't have a userid. So if there is none, we pass along the
                     # borrower number, and the bits of code that need to know the user
                     # ID will have to be smart enough to handle that.
-                    require C4::Members;
-                    my @users_info = C4::Members::GetBorrowersWithEmail($value);
-                    if (@users_info) {
+                    my $patrons = Koha::Patrons->search({ email => $value });
+                    if ($patrons->count) {
 
                         # First the userid, then the borrowernum
-                        $value = $users_info[0][1] || $users_info[0][0];
+                        my $patron = $patrons->next;
+                        $value = $patron->userid || $patron->borrowernumber;
                     } else {
                         undef $value;
                     }
@@ -995,12 +996,12 @@ sub checkauth {
                         # doesn't have a userid. So if there is none, we pass along the
                         # borrower number, and the bits of code that need to know the user
                         # ID will have to be smart enough to handle that.
-                        require C4::Members;
-                        my @users_info = C4::Members::GetBorrowersWithEmail($value);
-                        if (@users_info) {
+                        my $patrons = Koha::Patrons->search({ email => $value });
+                        if ($patrons->count) {
 
                             # First the userid, then the borrowernum
-                            $value = $users_info[0][1] || $users_info[0][0];
+                            my $patron = $patrons->next;
+                            $value = $patron->userid || $patron->borrowernumber;
                         } else {
                             undef $value;
                         }
@@ -1762,17 +1763,24 @@ sub checkpw {
 
     my @return;
     my $patron = Koha::Patrons->find({ userid => $userid });
+    my $check_internal_as_fallback = 0;
+    my $passwd_ok = 0;
+    # Note: checkpw_* routines returns:
+    # 1 if auth is ok
+    # 0 if auth is nok
+    # -1 if user bind failed (LDAP only)
+    # 2 if DB user is used (internal only)
 
     if ( $patron and $patron->account_locked ) {
-        @return = (0);
+        # Nothing to check, account is locked
     } elsif ($ldap) {
         $debug and print STDERR "## checkpw - checking LDAP\n";
         my ( $retval, $retcard, $retuserid ) = checkpw_ldap(@_);    # EXTERNAL AUTH
-        if ( $retval ) {
+        if ( $retval == 1 ) {
             @return = ( $retval, $retcard, $retuserid );
-        } else {
-            @return = (0);
+            $passwd_ok = 1;
         }
+        $check_internal_as_fallback = 1 if $retval == 0;
 
     } elsif ( $cas && $query && $query->param('ticket') ) {
         $debug and print STDERR "## checkpw - checking CAS\n";
@@ -1783,9 +1791,8 @@ sub checkpw {
         my ( $retval, $retcard, $retuserid ) = checkpw_cas( $dbh, $ticket, $query, $type );    # EXTERNAL AUTH
         if ( $retval ) {
             @return = ( $retval, $retcard, $retuserid );
-        } else {
-            @return = (0);
         }
+        $passwd_ok = $retval;
     }
 
     # If we are in a shibboleth session (shibboleth is enabled, and a shibboleth match attribute is present)
@@ -1804,22 +1811,24 @@ sub checkpw {
             my ( $retval, $retcard, $retuserid ) = C4::Auth_with_shibboleth::checkpw_shib($shib_login);    # EXTERNAL AUTH
             if ( $retval ) {
                 @return = ( $retval, $retcard, $retuserid );
-            } else {
-                @return = (0);
             }
+            $passwd_ok = $retval;
         }
+    } else {
+        $check_internal_as_fallback = 1;
     }
 
     # INTERNAL AUTH
-    @return = checkpw_internal( $dbh, $userid, $password, $no_set_userenv) unless @return;
+    if ( $check_internal_as_fallback ) {
+        @return = checkpw_internal( $dbh, $userid, $password, $no_set_userenv);
+        $passwd_ok = 1 if $return[0] > 0; # 1 or 2
+    }
 
-    if ( $return[0] == 0 ) {
-        $patron->update({ login_attempts => $patron->login_attempts + 1 }) if $patron;
-    } elsif ( $return[0] == 1 ) {
-        if ( $patron ) {
-            # FIXME Koha::Object->update should return a Koha::Object to allow chaining
+    if( $patron ) {
+        if ( $passwd_ok ) {
             $patron->update({ login_attempts => 0 });
-            $patron->store;
+        } else {
+            $patron->update({ login_attempts => $patron->login_attempts + 1 });
         }
     }
     return @return;

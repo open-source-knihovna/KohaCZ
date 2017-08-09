@@ -37,7 +37,9 @@ use List::MoreUtils qw/uniq/;
 
 use Koha::Biblios;
 use Koha::DateUtils;
+use Koha::Items;
 use Koha::ItemTypes;
+use Koha::Patrons;
 
 my $input = new CGI;
 my $dbh = C4::Context->dbh;
@@ -78,7 +80,7 @@ my ($template, $loggedinuser, $cookie)
                  });
 
 # Does the user have a restricted item edition permission?
-my $uid = $loggedinuser ? GetMember( borrowernumber => $loggedinuser )->{userid} : undef;
+my $uid = $loggedinuser ? Koha::Patrons->find( $loggedinuser )->userid : undef;
 my $restrictededition = $uid ? haspermission($uid,  {'tools' => 'items_batchmod_restricted'}) : undef;
 # In case user is a superlibrarian, edition is not restricted
 $restrictededition = 0 if ($restrictededition != 0 && C4::Context->IsSuperLibrarian());
@@ -129,7 +131,15 @@ if ($op eq "action") {
 	    $items_display_hashref=BuildItemsData(@itemnumbers);
 	} else {
 	    # Else, we only display the barcode
-	    my @simple_items_display = map {{ itemnumber => $_, barcode => (GetBarcodeFromItemnumber($_) or ""), biblionumber => (GetBiblionumberFromItemnumber($_) or "") }} @itemnumbers;
+        my @simple_items_display = map {
+            my $itemnumber = $_;
+            my $item = Koha::Items->find($itemnumber);
+            {
+                itemnumber   => $itemnumber,
+                barcode      => $item ? ( $item->barcode // q{} ) : q{},
+                biblionumber => $item ? $item->biblio->biblionumber : q{},
+            };
+        } @itemnumbers;
 	    $template->param("simple_items_display" => \@simple_items_display);
 	}
 
@@ -606,11 +616,11 @@ sub BuildItemsData{
 
             # grab title, author, and ISBN to identify bib that the item
             # belongs to in the display
-			 my $biblio=GetBiblioData($$itemdata{biblionumber});
-            $this_row{title} = $biblio->{title};
-            $this_row{author} = $biblio->{author};
-            $this_row{isbn} = $biblio->{isbn};
-            $this_row{biblionumber} = $biblio->{biblionumber};
+            my $biblio = Koha::Biblios->find( $itemdata->{biblionumber} );
+            $this_row{title}        = $biblio->title;
+            $this_row{author}       = $biblio->author;
+            $this_row{isbn}         = $biblio->biblioitem->isbn;
+            $this_row{biblionumber} = $biblio->biblionumber;
 
 			if (%this_row) {
 				push(@big_array, \%this_row);
