@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2017-05-11 13:59-0300\n"
-"PO-Revision-Date: 2017-02-09 14:41+0000\n"
+"POT-Creation-Date: 2017-07-16 11:25-0300\n"
+"PO-Revision-Date: 2017-06-14 10:10+0000\n"
 "Last-Translator: m23 <black23@gmail.com>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
 ">\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1486651268.000000\n"
+"X-POOTLE-MTIME: 1497435036.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -861,7 +861,7 @@ msgstr "(! znamená 'neviditelný' nebo v případě zhrouceno 'nezhrouceno')"
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
@@ -2503,6 +2503,11 @@ msgstr ""
 msgid "All three of these options will open up the issue receive form:"
 msgstr "Všechny tyto tři možnosti otevřou formulář přijetí čísla:"
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#, fuzzy, c-format
+msgid "All uploaded images will be listed on the right hand side of this page."
+msgstr "Obrázek se objeví spolu s ostatními obrázky v seznamu napravo."
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:117
 #, c-format
 msgid "Allow access to the reports module"
@@ -2655,13 +2660,6 @@ msgstr ""
 "Synchronizujte vaše data na každém počítači, který používáte pro půjčování a "
 "vracení. To provedete kliknutím na odkaz \"Synchronizovat\" na pravé straně "
 "stránky."
-
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
-#, c-format
-msgid ""
-"And the image will be listed with all of your others on the right hand side "
-"of the page."
-msgstr "Obrázek se objeví spolu s ostatními obrázky v seznamu napravo."
 
 #: intranet-tmpl/prog/en/modules/help/suggestion/suggestion.tt:23
 #, c-format
@@ -3392,12 +3390,12 @@ msgid ""
 "the libraries are placed in the StaticHoldsQueueWeight system preference."
 msgstr ""
 "Ve výchozím nastavení je fronta rezervací generována tak, že systém nejprve "
-"zkusí splnit požadavek jednotkami, které jsou k dispozici v knihovně, ve "
+"pokusí vykrýt požadavek jednotkami, které jsou k dispozici v knihovně, ve "
 "které má být rezervace vyzvednuta. Pokud zde žádné volné jednotky nejsou, "
-"potom skript build_holds_queue.pl vyzkouší knihovny podle seznamu "
-"definovaného v nastavení StaticHoldsQueueWeight. Pokud je nastavení "
-"RandomizeHoldsQueueWeight zakázáno (což je výchozí nastavení), skript "
-"použije knihovny v tom pořadí v jakém jsou vypsány v StaticHoldsQueueWeight."
+"potom skript build_holds_queue.pl vyzkouší najít volné jednotky v knihovnách "
+"uvedených na seznamu v nastavení StaticHoldsQueueWeight. Můžete rozhodnout "
+"jestli se využije pořadí knihoven, jak je zapsáno nebo se knihovna vybere "
+"náhodně."
 
 #: intranet-tmpl/prog/en/modules/help/admin/authorised_values.tt:11
 #, c-format
@@ -6579,9 +6577,10 @@ msgid ""
 "larger libraries before smaller libraries, you would want "
 "StaticHoldsQueueWeight to look something like \"LRG,MED,SML\"."
 msgstr ""
-"Například, pokud máte v systému tři knihovny rozdílných velikostí (malou, "
-"střední a velkou) a chcete, aby velké knihovny plnily rezervace přednostně, "
-"natavte předvolbu StaticHoldsQueueWeight zhruba takto: \"VEL,STR,MAL\"."
+"Například, pokud máte v systému tři knihovny/pobočky rozdílných velikostí "
+"(malou, střední a velkou) a chcete, aby velká knihovna plnila rezervace "
+"přednostně. Pak nastavte předvolbu StaticHoldsQueueWeight zhruba takto: "
+"\"VEL,STR,MAL\"."
 
 #: intranet-tmpl/prog/en/modules/help/tools/csv-profiles.tt:61
 #, c-format
@@ -9751,12 +9750,12 @@ msgstr ""
 "Ignorování rezervace ponechá rezervaci na výtisku, ale ponechá jeho status "
 "\"Dostupný\" (což ale neruší rezervaci)"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
 #, c-format
 msgid "Images must be under 500k in size."
 msgstr "Obrázky musejí být menší než 500kB."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
 #, c-format
 msgid ""
 "Images uploaded using this tool will appear on the menu when creating patron "
@@ -10632,7 +10631,7 @@ msgid ""
 "In the amount field, do not enter currency symbols, only numbers and decimals"
 msgstr "Do pole s částkou nepište symbol měny, pouze čísla."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
 #, c-format
 msgid ""
 "In the center of the screen is a simple upload form, simply browse for the "
@@ -10872,8 +10871,8 @@ msgid ""
 "Item being checked out meets the decreaseLoanHighHolds system preference "
 "criteria"
 msgstr ""
-"Půjčovaná jednotka splňuje kritéria decreaseLoanHighHolds - výpůjční lhůta "
-"bude zkrácena."
+"Půjčovaná jednotka splňuje kritéria pro zkrácení výpůjční doby na základě "
+"počtu čekajících rezervací (decreaseLoanHighHolds)"
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:110
 #, c-format
@@ -11373,10 +11372,10 @@ msgid ""
 "RandomizeHoldsQueueWeight, causing the script to request hold fulfillment "
 "not randomly, but by alphabetical order."
 msgstr ""
-"Ponechání prázdného parametru StaticHoldsQueueWeight v tomto okamžiku je "
+"Ponechání parametru StaticHoldsQueueWeight nevyplněného je v tomto okamžiku "
 "nežádoucí. Mohlo by dojít k tomu, že skript build_holds_queue bude ignorovat "
-"RandomizeHoldsQueueWeight, což by vedlo k tomu, že skript nebude přiřazovat "
-"rezervace náhodně, ale podle abecedy."
+"RandomizeHoldsQueueWeight, což by vedlo k tomu, že rezervace nebudou "
+"přiřazeny náhodně, ale podle abecedy."
 
 #: intranet-tmpl/prog/en/modules/help/admin/matching-rules.tt:44
 #, c-format
@@ -12689,7 +12688,7 @@ msgstr ""
 "Pokud je aktuální citace nahrána do editační tabulky, můžete upravovat zdroj "
 "citace a text."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
 #, c-format
 msgid ""
 "Once the file is uploaded you will be presented with a confirmation message."
@@ -13746,7 +13745,7 @@ msgstr "Philadelphia, PA 19107"
 msgid "Phone number: "
 msgstr "Telefonní číslo: "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
 #, c-format
 msgid ""
 "Pictures uploaded with this tool should be at least 300dpi which is the "
@@ -14699,7 +14698,7 @@ msgstr "Viz úplná dokumentace pro šablony MARC v "
 msgid "See the full documentation for MARC Modification Templates in the "
 msgstr "Viz úplnou dokumentaci pro MARC šablony v "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #, c-format
 msgid "See the full documentation for Managing Images in the "
 msgstr "Viz úplnou dokumentaci pro správu obrázků v "
@@ -17323,7 +17322,7 @@ msgid ""
 "The rules are applied from most specific to less specific, using the first "
 "found in this order:"
 msgstr ""
-"Pravidla se aplikují z nejvíce specifických po méně konkrétní, s použitím "
+"Pravidla se aplikují od nejvíce specifických po méně konkrétní, s použitím "
 "prvního nalezeného v tomto pořadí:"
 
 #: intranet-tmpl/prog/en/modules/help/admin/matching-rules.tt:7
@@ -19096,7 +19095,7 @@ msgid ""
 "want to delete those alerts. %s "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
 #, c-format
 msgid ""
 "To delete one or multiple of these images, click the checkbox to the right "
@@ -19553,6 +19552,13 @@ msgstr ""
 "Abyste prodloužili jednotku z této stránky, oskenujte čárové kódy dokumentů, "
 "které chcete prodloužit."
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:21
+#, c-format
+msgid ""
+"To replace an image, delete it, upload a new file and give it the same image "
+"name."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:91
 #, c-format
 msgid ""
@@ -19897,6 +19903,13 @@ msgstr "Aktualizovat záznam o čtenáři"
 #, c-format
 msgid "Upload Koha plugin"
 msgstr "Načíst zásuvný modul Koha"
+
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#, c-format
+msgid ""
+"Upload additional images to use as logo, decoration or background on a "
+"patron card layout."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/tools/upload-cover-image.tt:3
 #, c-format
@@ -20923,12 +20936,12 @@ msgid ""
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:59
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"Without periodicy: some very specific (usually high level science journals) "
-"don't have a true periodicity. When you subscribe to the title, you "
-"subscribe for 6 issues, which can arrive in 1 year... or 2... There is no "
-"regularity or known schedule."
+"Without periodicity: some very specific (usually high level science "
+"journals) don't have a true periodicity. When you subscribe to the title, "
+"you subscribe for 6 issues, which can arrive in 1 year... or 2... There is "
+"no regularity or known schedule."
 msgstr ""
 "Bez periodicy: některé velmi specifické (většinou vědecké časopisy vysoké "
 "úrovně ) nemají skutečnou periodicitu. Když si předplácíte titul, se "
@@ -22855,7 +22868,7 @@ msgstr "management (správa) "
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19

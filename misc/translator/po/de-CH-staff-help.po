@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German Koha Translation\n"
-"POT-Creation-Date: 2017-05-11 14:04-0300\n"
-"PO-Revision-Date: 2017-04-16 16:19+0000\n"
+"POT-Creation-Date: 2017-07-16 11:30-0300\n"
+"PO-Revision-Date: 2017-07-19 05:21+0000\n"
 "Last-Translator: Marc <veron@veron.ch>\n"
 "Language-Team: \n"
 "Language: de_CH\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
 "X-Poedit-SourceCharset: utf-8\n"
-"X-POOTLE-MTIME: 1492359540.000000\n"
+"X-POOTLE-MTIME: 1500441705.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -885,7 +885,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
@@ -2574,6 +2574,12 @@ msgstr ""
 "Alle drei Optionen öffnen das Formular für den Zugang von "
 "Zeitschriftenheften:"
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#, c-format
+msgid "All uploaded images will be listed on the right hand side of this page."
+msgstr ""
+"Alle hochgeladenen Bilder werden im rechten Bereich der Seite aufgelistet."
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:117
 #, c-format
 msgid "Allow access to the reports module"
@@ -2734,14 +2740,6 @@ msgstr ""
 "Nun können sie die Daten an jeder Ausleihstation mit der entsprechenden "
 "Schaltfläche im rechten Bereich synchronisieren."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
-#, c-format
-msgid ""
-"And the image will be listed with all of your others on the right hand side "
-"of the page."
-msgstr ""
-"Das Image wird zusammen mit den anderen rechts auf der Seite aufgelistet."
-
 #: intranet-tmpl/prog/en/modules/help/suggestion/suggestion.tt:23
 #, c-format
 msgid ""
@@ -2824,15 +2822,15 @@ msgid ""
 "more detailed information on each section of the Label Creator by clicking "
 "the online help link at the upper left-hand corner of every page."
 msgstr ""
-"Am oberen Seitenrand jedes Bildschirms innerhalb des Etiketten-Moduls finden "
-"Sie eine Toolbar, mit der Sie schnellen Zugriff auf die wichtigen Funktionen "
-"haben. Das Navigationsmenü über der linken Seite ermögicht den schnellen "
-"Zugriff auf die verschiedenen Bereiche des Moduls. Der Pfad im oberen "
-"Bereich des Bilschirms zeigt Ihnen, wo Sie sich innerhalb des Moduls "
+"Am oberen Rand jeder Seite innerhalb des Moduls für den Benutzerausweisdruck "
+"finden Sie eine Toolbar, mit der Sie schnellen Zugriff auf die wichtigen "
+"Funktionen haben. Das Navigationsmenü über der linken Seite ermöglicht den "
+"schnellen Zugriff auf die verschiedenen Bereiche des Moduls. Der Pfad im "
+"oberen Bereich des Bildschirms zeigt Ihnen, wo Sie sich innerhalb des Moduls "
 "befinden und erlaubt eine schnelle Navigation zu früheren Abschnitten. In "
 "der Online-Hilfe finden Sie ausserdem weitere Hilfestellung zu jedem "
-"Abschnitt, in dem Sie auf das Fragezeichen in der rechten oberen Ecke jeder "
-"Seite klicken."
+"Abschnitt, in dem Sie auf den Link \"Hilfe\" in der rechten oberen Ecke "
+"jeder Seite klicken."
 
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:16
 #, c-format
@@ -2849,13 +2847,13 @@ msgid ""
 msgstr ""
 "Am oberen Rand jeder Seite innerhalb des Moduls für den Benutzerausweisdruck "
 "finden Sie eine Toolbar, mit der Sie schnellen Zugriff auf die wichtigen "
-"Funktionen haben. Das Navigationsmenü über der linken Seite ermögicht den "
+"Funktionen haben. Das Navigationsmenü über der linken Seite ermöglicht den "
 "schnellen Zugriff auf die verschiedenen Bereiche des Moduls. Der Pfad im "
-"oberen Bereich des Bilschirms zeigt Ihnen, wo Sie sich innerhalb des Moduls "
+"oberen Bereich des Bildschirms zeigt Ihnen, wo Sie sich innerhalb des Moduls "
 "befinden und erlaubt eine schnelle Navigation zu früheren Abschnitten. In "
 "der Online-Hilfe finden Sie ausserdem weitere Hilfestellung zu jedem "
-"Abschnitt, in dem Sie auf das Fragezeichen in der rechten oberen Ecke jeder "
-"Seite klicken."
+"Abschnitt, in dem Sie auf den Link \"Hilfe\" in der rechten oberen Ecke "
+"jeder Seite klicken."
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:9
 #, c-format
@@ -3535,7 +3533,7 @@ msgid ""
 "to be imported in to a variety of applications"
 msgstr ""
 "CSV - Exportieren Sie den Etikettenstapel, nachdem das gewählte Layout "
-"angewendet wurde, um Sie in verschiedene andere Anwendungen zu importieren"
+"angewendet wurde, um ihn in verschiedene andere Anwendungen zu importieren"
 
 #: intranet-tmpl/prog/en/modules/help/tools/quotes-upload.tt:10
 #, c-format
@@ -6374,7 +6372,7 @@ msgstr "Einen oder mehrere Stapel exportieren"
 #: intranet-tmpl/prog/en/modules/help/labels/label-home.tt:12
 #, c-format
 msgid "Export single or multiple labels from within a batch"
-msgstr "Exportieren Sie eines oder mehrere Etiketten aus einem Stapel"
+msgstr "Exportieren Sie eine oder mehrere Etiketten aus einem Stapel"
 
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:12
 #, c-format
@@ -6551,6 +6549,7 @@ msgstr ""
 "passender Datensatz in der Datenbank gefunden wird. "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:86
+#, c-format
 #, fuzzy, c-format
 msgid ""
 "Finally, if you charge a rental fee for the item type and want to give a "
@@ -9352,15 +9351,15 @@ msgstr ""
 "wurden."
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:35
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "If you have set your ExportCircHistory preference, you will also see the "
 "option to export the patron's current checkout information using a CSV "
 "Profile or ISO2709 (MARC21) format."
 msgstr ""
-"Wenn ein Eintrag im Systemparameter 'ExportWithCsvProfile' existiert, wird "
-"zudem eine Option zum Export der Ausleihinformationen mit einem CSV-Profil "
-"oder im Format ISO2709 angezeigt."
+"Wenn der Systemparameter 'ExportCircHistory' aktiviert ist, wird zudem eine "
+"Option zum Export der Ausleihinformationen mit einem CSV-Profil oder im "
+"Format ISO2709 (MARC21) angezeigt."
 
 #: intranet-tmpl/prog/en/modules/help/circ/circulation.tt:65
 #, c-format
@@ -10104,12 +10103,12 @@ msgstr ""
 "Wenn Sie die Vormerkung ignorieren bleibt die Vormerkung bestehen, aber das "
 "Exemplar behält den Status verfügbar (die Vormerkung wird nicht storniert)"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
 #, c-format
 msgid "Images must be under 500k in size."
 msgstr "Die Dateigrösse der Bilder muss unter 500k liegen."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
 #, c-format
 msgid ""
 "Images uploaded using this tool will appear on the menu when creating patron "
@@ -11017,7 +11016,7 @@ msgstr ""
 "Verwenden Sie im Feld Summe keine Währungssymbole, sondern nur Zahlen und "
 "Dezimalpunkte"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
 #, c-format
 msgid ""
 "In the center of the screen is a simple upload form, simply browse for the "
@@ -13162,7 +13161,7 @@ msgstr ""
 "Nachdem der Zitatpool in die Bearbeitungstabelle geladen wurde, können Sie "
 "dort Quelle und Text bearbeiten."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
 #, c-format
 msgid ""
 "Once the file is uploaded you will be presented with a confirmation message."
@@ -14250,7 +14249,7 @@ msgstr "Philadelphia, PA 19107"
 msgid "Phone number: "
 msgstr "Telefonnummer: "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
 #, c-format
 msgid ""
 "Pictures uploaded with this tool should be at least 300dpi which is the "
@@ -15239,7 +15238,7 @@ msgstr "Die vollständige Hilfe zu den MARC-Frameworks finden Sie im "
 msgid "See the full documentation for MARC Modification Templates in the "
 msgstr "Die vollständige Hilfe zu Etikettentemplates finden Sie im "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #, c-format
 msgid "See the full documentation for Managing Images in the "
 msgstr "Die vollständige Hilfe zur Verwaltung von Benutzerfotos finden Sie im "
@@ -19864,7 +19863,7 @@ msgstr ""
 "Um ein oder mehrere Signale zu löschen markieren Sie diese und betätigen Sie "
 "dann die entsprechende Schaltfläche und bestätigen Sie die Löschung. %s "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
 #, c-format
 msgid ""
 "To delete one or multiple of these images, click the checkbox to the right "
@@ -20343,6 +20342,15 @@ msgstr ""
 "Scannen oder tippen Sie den Barcode des Exemplars, dass Sie verlängern "
 "möchten."
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:21
+#, c-format
+msgid ""
+"To replace an image, delete it, upload a new file and give it the same image "
+"name."
+msgstr ""
+"Um ein Bild zu ersetzen löschen Sie es und laden Sie eine neue Bilddatei mit "
+"dem gleichen Bildnamen hoch."
+
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:91
 #, c-format
 msgid ""
@@ -20698,6 +20706,15 @@ msgstr "Benutzer aktualisieren"
 #, c-format
 msgid "Upload Koha plugin"
 msgstr "Koha-Plugin hochladen"
+
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#, c-format
+msgid ""
+"Upload additional images to use as logo, decoration or background on a "
+"patron card layout."
+msgstr ""
+"Hochladen von zusätzlichen Bildern die als Logo, Deko-Bild oder Hintergrund "
+"in einem Benutzerkarten-Layout verwendet werden können."
 
 #: intranet-tmpl/prog/en/modules/help/tools/upload-cover-image.tt:3
 #, c-format
@@ -21353,7 +21370,7 @@ msgid ""
 "message' to the right of the check out box."
 msgstr ""
 "Im Benutzerdatensatz sehen Sie unter dem Reiter 'Ausleihen'  im rechten "
-"Seitenbereich einen Link 'Neue Notiz'."
+"Seitenbereich einen Link 'Neue Mitteilung'."
 
 #: intranet-tmpl/prog/en/modules/help/serials/routing.tt:7
 #, c-format
@@ -21556,9 +21573,9 @@ msgid ""
 "message is for the librarians or the patron and the message you would like "
 "to leave."
 msgstr ""
-"Wenn Sie auf 'Neue Benachrichtigung hinzufügen' klicken, können Sie "
-"auswählen, ob die Benachrichtigung für andere Bibliotheksmitarbeiter oder "
-"den Benutzer gedacht ist und welchen Text Sie haben soll."
+"Wenn Sie auf 'Neue Mitteilung' klicken, können Sie auswählen, ob die "
+"Mitteilung für andere Bibliotheksmitarbeiter oder den Benutzer gedacht ist "
+"und welchen Text Sie haben soll."
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:182
 #, c-format
@@ -21575,7 +21592,7 @@ msgid ""
 "When you click the 'Patrons requesting modifications' link you will be "
 "brought to a list of patrons with requested changes."
 msgstr ""
-"Wenn Sie den Link 'Benutzer mit Änderungswünschen\" anlkicken, gelangen Sie "
+"Wenn Sie den Link 'Benutzer mit Änderungswünschen\" anklicken, gelangen Sie "
 "zu einer Liste mit Benutzern, die Änderungen Ihrer persönlichen Daten "
 "angefordert haben."
 
@@ -21759,10 +21776,10 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:59
 #, c-format
 msgid ""
-"Without periodicy: some very specific (usually high level science journals) "
-"don't have a true periodicity. When you subscribe to the title, you "
-"subscribe for 6 issues, which can arrive in 1 year... or 2... There is no "
-"regularity or known schedule."
+"Without periodicity: some very specific (usually high level science "
+"journals) don't have a true periodicity. When you subscribe to the title, "
+"you subscribe for 6 issues, which can arrive in 1 year... or 2... There is "
+"no regularity or known schedule."
 msgstr ""
 "Ohne Erscheinungsweise: einige sehr spezielle (normalerweise "
 "hochwissenschaftliche Zeitschriften) haben keine feste Erscheinungsweise. "
@@ -23738,7 +23755,7 @@ msgstr "Verwaltung "
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19

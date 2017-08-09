@@ -73,6 +73,7 @@ my $borrower = {
 };
 
 # No userenv, PickupLibrary
+t::lib::Mocks::mock_preference('IndependentBranches', '0');
 t::lib::Mocks::mock_preference('CircControl', 'PickupLibrary');
 is(
     C4::Context->preference('CircControl'),
@@ -1110,7 +1111,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 }
 
 subtest 'CanBookBeIssued & AllowReturnToBranch' => sub {
-    plan tests => 23;
+    plan tests => 26;
 
     my $homebranch    = $builder->build( { source => 'Branch' } );
     my $holdingbranch = $builder->build( { source => 'Branch' } );
@@ -1127,6 +1128,7 @@ subtest 'CanBookBeIssued & AllowReturnToBranch' => sub {
                 notforloan    => 0,
                 itemlost      => 0,
                 withdrawn     => 0,
+                restricted    => 0,
                 biblionumber  => $biblioitem->{biblionumber}
             }
         }
@@ -1144,16 +1146,19 @@ subtest 'CanBookBeIssued & AllowReturnToBranch' => sub {
     ## Can be issued from homebranch
     set_userenv($homebranch);
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron_2, $item->{barcode} );
-    is( keys(%$error) + keys(%$alerts),        0 );
+    is( keys(%$error), 0, 'There should not be any errors (impossible)' );
+    is( keys(%$alerts), 0, 'There should not be any alerts' );
     is( exists $question->{ISSUED_TO_ANOTHER}, 1 );
     ## Can be issued from holdingbranch
     set_userenv($holdingbranch);
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron_2, $item->{barcode} );
-    is( keys(%$error) + keys(%$alerts),        0 );
+    is( keys(%$error), 0, 'There should not be any errors (impossible)' );
+    is( keys(%$alerts), 0, 'There should not be any alerts' );
     is( exists $question->{ISSUED_TO_ANOTHER}, 1 );
     ## Can be issued from another branch
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron_2, $item->{barcode} );
-    is( keys(%$error) + keys(%$alerts),        0 );
+    is( keys(%$error), 0, 'There should not be any errors (impossible)' );
+    is( keys(%$alerts), 0, 'There should not be any alerts' );
     is( exists $question->{ISSUED_TO_ANOTHER}, 1 );
 
     # AllowReturnToBranch == holdingbranch

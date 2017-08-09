@@ -850,8 +850,8 @@ sub CanUserManageBasket {
 
         if ($AcqViewBaskets eq 'user'
         && $basket->{authorisedby} != $borrowernumber
-        && grep($borrowernumber, GetBasketUsers($basketno)) == 0) {
-            return 0;
+        && ! grep { $borrowernumber eq $_ } GetBasketUsers($basketno)) {
+             return 0;
         }
 
         if ($AcqViewBaskets eq 'branch' && defined $basket->{branch}
@@ -1751,6 +1751,8 @@ sub SearchOrders {
                biblio.*,
                biblioitems.isbn,
                biblioitems.biblioitemnumber,
+               biblioitems.publishercode,
+               biblioitems.publicationyear,
                aqbasket.authorisedby,
                aqbasket.booksellerid,
                aqbasket.closedate,
@@ -2662,6 +2664,7 @@ sub GetInvoiceDetails {
         SELECT aqorders.*,
                 biblio.*,
                 biblio.copyrightdate,
+                biblioitems.isbn,
                 biblioitems.publishercode,
                 biblioitems.publicationyear,
                 aqbasket.basketname,

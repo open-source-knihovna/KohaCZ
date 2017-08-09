@@ -326,9 +326,9 @@ sub get_fixer_rules {
             # The split makes everything into nested arrays, but that's not
             # really a big deal, ES doesn't mind.
             $options = '-split => 1' unless $marc_field =~ m|_/| || $type eq 'sum';
-            push @rules, "marc_map('$marc_field','${name}', $options)";
+            push @rules, "marc_map('$marc_field','${name}.\$append', $options)";
             if ($facet) {
-                push @rules, "marc_map('$marc_field','${name}__facet', $options)";
+                push @rules, "marc_map('$marc_field','${name}__facet.\$append', $options)";
             }
             if ($suggestible) {
                 push @rules,
@@ -351,7 +351,7 @@ sub get_fixer_rules {
             # to do the default thing, which is make it sortable.
             if ($self->sort_fields()->{$name}) {
                 if ($sort || !defined $sort) {
-                    push @rules, "marc_map('$marc_field','${name}__sort', $options)";
+                    push @rules, "marc_map('$marc_field','${name}__sort.\$append', $options)";
                 }
             }
         }
