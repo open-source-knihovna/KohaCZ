@@ -17,6 +17,7 @@ a.btn:link, a.btn:visited {
 
 table .btn-group {
     white-space: nowrap;
+    display: flex;
 }
 
 table .btn-group .btn {
