@@ -274,9 +274,11 @@ function searchToHold(){
 </div>
 
 <!-- Modal for manual invoice -->
-<div id="add_fine_form" class="modal hide" tabindes="-1" role="dialog" aria-labelledby="createfine" aria-hidden="true">
-    <form method="post" action="/cgi-bin/koha/members/maninvoice.pl">
-    <input type="hidden" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" />
+<div id="add_fine_form" class="modal" tabindes="-1" role="dialog" aria-labelledby="createfine" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <form method="post" action="/cgi-bin/koha/members/maninvoice.pl">
+        <input type="hidde" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" />
     <div class="modal-header">
         <h3>Create manual invoice</h3>
     </div>
@@ -305,6 +307,8 @@ function searchToHold(){
     <div class="modal-footer">
         <button class="btn approve" type="submit" name="add" value="Save"><i class="fa fa-check"></i> Save</button>
         <button class="btn deny" href="#" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times"></i> Cancel</button>
+    </div>
+    </div>
     </div>
     </form>
 </div>
