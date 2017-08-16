@@ -280,7 +280,7 @@ function searchToHold(){
     <div class="modal-dialog">
         <div class="modal-content">
         <form method="post" action="/cgi-bin/koha/members/maninvoice.pl">
-        <input type="hidde" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" />
+        <input type="hidden" name="borrowernumber" id="borrowernumber" value="[% borrowernumber %]" />
     <div class="modal-header">
         <h3>Create manual invoice</h3>
     </div>
@@ -307,8 +307,8 @@ function searchToHold(){
         </div>
     </div>
     <div class="modal-footer">
-        <button class="btn approve" type="submit" name="add" value="Save"><i class="fa fa-check"></i> Save</button>
-        <button class="btn deny" href="#" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times"></i> Cancel</button>
+        <button class="btn btn-default approve" type="submit" name="add" value="Save"><i class="fa fa-check"></i> Save</button>
+        <button class="btn btn-default deny" href="#" data-dismiss="modal" aria-hidden="true"><i class="fa fa-times"></i> Cancel</button>
     </div>
     </div>
     </div>
