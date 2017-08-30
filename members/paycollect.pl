@@ -164,7 +164,7 @@ if ( $total_paid and $total_paid ne '0.00' ) {
                     { order_by => 'date' }
                 );
 
-                return Koha::Account->new(
+                Koha::Account->new(
                     {
                         patron_id => $borrowernumber,
                     }
