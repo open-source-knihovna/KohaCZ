@@ -255,13 +255,15 @@ my $overdues_exist = 0;
 my $totalprice = 0;
 
 # Calculate and display patron's age
+my $age;
 if ( $data->{dateofbirth} ) {
-    $template->param( age => Koha::Patron->new({ dateofbirth => $data->{dateofbirth} })->get_age );
+    $age = Koha::Patron->new({ dateofbirth => $data->{dateofbirth} })->get_age;
+    $template->param( age => $age );
 }
 
 # Check patron's category against age
-my $borrowercategory = Koha::Patron::Categories->find($data->{ 'categorycode' });
-my ($low,$high) = ($borrowercategory->dateofbirthrequired, $borrowercategory->upperagelimit);
+my $patroncategory = Koha::Patron::Categories->find($data->{ 'categorycode' });
+my ($low,$high) = ($patroncategory->dateofbirthrequired, $patroncategory->upperagelimit);
 if (($high && ($age > $high)) or ($age < $low)) {
     $template->param( age_limitations => 1 );
     $template->param( age_low => $low );
