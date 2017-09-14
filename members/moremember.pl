@@ -36,6 +36,7 @@
 use strict;
 #use warnings; FIXME - Bug 2505
 use CGI qw ( -utf8 );
+use HTML::Entities;
 use C4::Context;
 use C4::Auth;
 use C4::Output;
@@ -125,6 +126,7 @@ my @credit_types = Koha::Account::CreditTypes->search({ can_be_added_manually =>
 $template->param( credit_types => \@credit_types );
 
 my $borrowernumber = $input->param('borrowernumber');
+$borrowernumber = HTML::Entities::encode($borrowernumber);
 my $error = $input->param('error');
 $template->param( error => $error ) if ( $error );
 

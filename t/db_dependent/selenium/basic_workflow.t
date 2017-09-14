@@ -23,9 +23,6 @@
 # Xvfb :1 -screen 0 1024x768x24 2>&1 >/dev/null &
 # DISPLAY=:1 java -jar $SELENIUM_PATH
 #
-# Remove the rentalcharge:
-# % UPDATE itemtypes SET rentalcharge = 0;
-#
 # Then you can execute the test file.
 #
 # If you get:
@@ -48,12 +45,13 @@ use MARC::Field;
 my $dbh = C4::Context->dbh;
 my $login = 'koha';
 my $password = 'koha';
-my $base_url= 'http://'.C4::Context->preference("staffClientBaseURL")."/cgi-bin/koha/";
+my $base_url= ( $ENV{KOHA_INTRANET_URL} || 'http://'.C4::Context->preference("staffClientBaseURL") ) . "/cgi-bin/koha/";
+
 
 my $number_of_biblios_to_insert = 3;
 our $sample_data = {
     category => {
-        categorycode    => 'test_cat',
+        categorycode    => 'TEST_CAT',
         description     => 'test cat description',
         enrolmentperiod => '12',
         category_type   => 'A'
@@ -65,6 +63,21 @@ our $sample_data = {
         password   => 'password',
         password2  => 'password'
     },
+    itemtype => {
+        itemtype     => 'IT4TEST',
+        description  => 'Just an itemtype for tests',
+        rentalcharge => 0,
+        notforloan   => 0,
+    },
+    issuingrule => {
+        categorycode  => 'test_cat',
+        itemtype      => 'IT4test',
+        branchcode    => '*',
+        maxissueqty   => '5',
+        issuelength   => '5',
+        lengthunit    => 'days',
+        renewalperiod => '5',
+      },
 };
 our ( $borrowernumber, $start, $prev_time, $cleanup_needed );
 
@@ -128,8 +141,11 @@ SKIP: {
 
     time_diff("add biblio");
 
-    my $itemtype = $dbh->selectcol_arrayref(q|SELECT itemtype FROM itemtypes|);
-    $itemtype = $itemtype->[0];
+    my $itemtype = $sample_data->{itemtype};
+    $dbh->do(q|INSERT INTO itemtypes (itemtype, description, rentalcharge, notforloan) VALUES (?, ?, ?, ?)|, undef, $itemtype->{itemtype}, $itemtype->{description}, $itemtype->{rentalcharge}, $itemtype->{notforloan});
+
+    my $issuing_rules = $sample_data->{issuingrule};
+    $dbh->do(q|INSERT INTO issuingrules (categorycode, itemtype, branchcode, maxissueqty, issuelength, lengthunit, renewalperiod) VALUES (?, ?, ?, ?, ?, ?, ?)|, undef, $issuing_rules->{categorycode}, $issuing_rules->{itemtype}, $issuing_rules->{branchcode}, $issuing_rules->{maxissueqty}, $issuing_rules->{issuelength}, $issuing_rules->{lengthunit}, $issuing_rules->{renewalperiod});
 
     for my $biblionumber ( @biblionumbers ) {
         $driver->get($base_url."/cataloguing/additem.pl?biblionumber=$biblionumber");
@@ -149,8 +165,8 @@ SKIP: {
         like( $driver->get_title(), qr($biblionumber.*Items) );
 
         $dbh->do(q|UPDATE items SET notforloan=0 WHERE biblionumber=?|, {}, $biblionumber );
-        $dbh->do(q|UPDATE biblioitems SET itemtype=? WHERE biblionumber=?|, {}, $itemtype, $biblionumber);
-        $dbh->do(q|UPDATE items SET itype=? WHERE biblionumber=?|, {}, $itemtype, $biblionumber);
+        $dbh->do(q|UPDATE biblioitems SET itemtype=? WHERE biblionumber=?|, {}, $itemtype->{itemtype}, $biblionumber);
+        $dbh->do(q|UPDATE items SET itype=? WHERE biblionumber=?|, {}, $itemtype->{itemtype}, $biblionumber);
     }
 
     time_diff("add items");
@@ -206,17 +222,18 @@ sub fill_form {
 
 sub cleanup {
     my $dbh = C4::Context->dbh;
-    $dbh->do(q|DELETE FROM categories WHERE categorycode = ?|, {}, $sample_data->{category}{categorycode});
-    $dbh->do(q|DELETE FROM borrowers WHERE userid = ?|, {}, $sample_data->{patron}{userid});
-    for my $i ( 1 .. $number_of_biblios_to_insert ) {
-        $dbh->do(qq|DELETE FROM biblio WHERE title = "test biblio $i"|);
-    };
-
     $dbh->do(q|DELETE FROM issues where borrowernumber=?|, {}, $borrowernumber);
     $dbh->do(q|DELETE FROM old_issues where borrowernumber=?|, {}, $borrowernumber);
     for my $i ( 1 .. $number_of_biblios_to_insert ) {
         $dbh->do(qq|DELETE items, biblio FROM biblio INNER JOIN items ON biblio.biblionumber = items.biblionumber WHERE biblio.title = "test biblio$i"|);
     };
+    $dbh->do(q|DELETE FROM borrowers WHERE userid = ?|, {}, $sample_data->{patron}{userid});
+    $dbh->do(q|DELETE FROM categories WHERE categorycode = ?|, {}, $sample_data->{category}{categorycode});
+    for my $i ( 1 .. $number_of_biblios_to_insert ) {
+        $dbh->do(qq|DELETE FROM biblio WHERE title = "test biblio $i"|);
+    };
+    $dbh->do(q|DELETE FROM itemtypes WHERE itemtype=?|, undef, $sample_data->{itemtype}{itemtype});
+    $dbh->do(q|DELETE FROM issuingrules WHERE categorycode=? AND itemtype=? AND branchcode=?|, undef, $sample_data->{issuingrule}{categorycode}, $sample_data->{issuingrule}{itemtype}, $sample_data->{issuingrule}{branchcode});
 }
 
 sub time_diff {
