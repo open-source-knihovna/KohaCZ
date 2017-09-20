@@ -44,6 +44,11 @@ my $flagsrequired = { borrowers => 1, updatecharges => 'remaining_permissions' }
 my $borrowernumber=$input->param('borrowernumber');
 
 my $patron = Koha::Patrons->find( $borrowernumber );
+unless ( $patron ) {
+    print $input->redirect("/cgi-bin/koha/circ/circulation.pl?borrowernumber=$borrowernumber");
+    exit;
+}
+
 my $add=$input->param('add');
 if ($add){
     if ( checkauth( $input, 0, $flagsrequired, 'intranet' ) ) {

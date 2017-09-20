@@ -83,6 +83,10 @@ my $issues = GetPendingIssues($member);     # FIXME: wasteful call when really, 
 my $countissues = scalar(@$issues);
 
 my $patron = Koha::Patrons->find( $member );
+unless ( $patron ) {
+    print $input->redirect("/cgi-bin/koha/circ/circulation.pl?borrowernumber=$member");
+    exit;
+}
 my $flags = C4::Members::patronflags( $patron->unblessed );
 my $userenv = C4::Context->userenv;
 

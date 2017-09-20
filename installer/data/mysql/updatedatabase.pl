@@ -14775,6 +14775,72 @@ if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Bug 18801 - Update incorrect Default auth type codes)\n";
 }
 
+$DBversion = '17.06.00.004';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('GoogleOpenIDConnectAutoRegister',   '0',NULL,' Google OpenID Connect logins to auto-register patrons.','YesNo'),
+        ('GoogleOpenIDConnectDefaultCategory','','','This category code will be used to create Google OpenID Connect patrons.','Textarea'),
+        ('GoogleOpenIDConnectDefaultBranch',  '','','This branch code will be used to create Google OpenID Connect patrons.','Textarea');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 16892: Add automatic patron registration via OAuth2 login)\n";
+}
+
+$DBversion = '17.06.00.005';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (`variable`, `value`, `options`, `explanation`, `type`) VALUES  ('StaffLangSelectorMode','footer','top|both|footer','Select the location to display the language selector in staff client','Choice')
+        });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18718 - Language selector in staff header menu similar to OPAC )\n";
+}
+
+$DBversion = '17.06.00.006';
+if( CheckVersion( $DBversion ) ) {
+    print q{WARNING: Bug 18811 fixed an inconsistency in the visibility settings for authority frameworks. It is recommended that you run script misc/maintenance/auth_show_hidden_data.pl to check if you have data in hidden fields and adjust your frameworks accordingly to prevent data loss when editing such records.};
+    print "\n";
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18811 - Visibility settings inconsistent between framework and authority editor)\n";
+}
+
+$DBversion = '17.06.00.007';
+if( CheckVersion( $DBversion ) ) {
+    if( !column_exists( 'branches', 'marcorgcode' ) ) {
+        $dbh->do( "ALTER TABLE branches ADD COLUMN marcorgcode VARCHAR(16) default NULL AFTER geolocation" );
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 10132 - MARCOrgCode on branch level (branches.marcorgcode))\n";
+}
+
+$DBversion = '17.06.00.008';
+if( CheckVersion( $DBversion ) ) {
+    unless ( column_exists( 'borrowers', 'date_renewed' ) ) {
+        $dbh->do(q{
+            ALTER TABLE borrowers ADD COLUMN date_renewed DATE NULL DEFAULT NULL AFTER dateexpiry;
+        });
+    }
+
+    unless ( column_exists( 'deletedborrowers', 'date_renewed' ) ) {
+        $dbh->do(q{
+            ALTER TABLE deletedborrowers ADD COLUMN date_renewed DATE NULL DEFAULT NULL AFTER dateexpiry;
+        });
+    }
+
+    unless ( column_exists( 'borrower_modifications', 'date_renewed' ) ) {
+        $dbh->do(q{
+            ALTER TABLE borrower_modifications ADD COLUMN date_renewed DATE NULL DEFAULT NULL AFTER dateexpiry;
+        });
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 6758 - Capture membership renewal date for reporting purposes (borrowers.date_renewed))\n";
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.

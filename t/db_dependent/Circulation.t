@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 96;
+use Test::More tests => 100;
 
 use DateTime;
 
@@ -377,7 +377,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     is( $renewokay, 0, '(Bug 10663) Cannot renew, reserved');
     is( $error, 'on_reserve', '(Bug 10663) Cannot renew, reserved (returned error is on_reserve)');
 
-    my $reserveid = C4::Reserves::GetReserveId({ biblionumber => $biblionumber, borrowernumber => $reserving_borrowernumber});
+    my $reserveid = Koha::Holds->search({ biblionumber => $biblionumber, borrowernumber => $reserving_borrowernumber })->next->reserve_id;
     my $reserving_borrower = Koha::Patrons->find( $reserving_borrowernumber )->unblessed;
     AddIssue($reserving_borrower, $barcode3);
     my $reserve = $dbh->selectrow_hashref(
@@ -455,11 +455,12 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         $biblionumber
     );
     my $datedue6 = AddIssue( $renewing_borrower, $barcode6);
-    is (defined $datedue6, 1, "Item 2 checked out, due date: $datedue6");
+    is (defined $datedue6, 1, "Item 2 checked out, due date: ".$datedue6->date_due);
 
     my $now = dt_from_string();
     my $five_weeks = DateTime::Duration->new(weeks => 5);
     my $five_weeks_ago = $now - $five_weeks;
+    t::lib::Mocks::mock_preference('finesMode', 'production');
 
     my $passeddatedue1 = AddIssue($renewing_borrower, $barcode7, $five_weeks_ago);
     is (defined $passeddatedue1, 1, "Item with passed date due checked out, due date: " . $passeddatedue1->date_due);
@@ -475,6 +476,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             due            => Koha::DateUtils::output_pref($five_weeks_ago)
         }
     );
+
     t::lib::Mocks::mock_preference('RenewalLog', 0);
     my $date = output_pref( { dt => dt_from_string(), datenonly => 1, dateformat => 'iso' } );
     my $old_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
@@ -489,10 +491,23 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     $new_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
     is ($new_log_size, $old_log_size + 1, 'renew log successfully added');
 
+    my $fines = Koha::Account::Lines->search( { borrowernumber => $renewing_borrower->{borrowernumber}, itemnumber => $itemnumber7 } );
+    is( $fines->count, 2 );
+    is( $fines->next->accounttype, 'F', 'Fine on renewed item is closed out properly' );
+    is( $fines->next->accounttype, 'F', 'Fine on renewed item is closed out properly' );
+    $fines->delete();
 
-    $fine = $schema->resultset('Accountline')->single( { borrowernumber => $renewing_borrower->{borrowernumber}, itemnumber => $itemnumber7 } );
-    is( $fine->accounttype, 'F', 'Fine on renewed item is closed out properly' );
-    $fine->delete();
+
+    my $old_issue_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["ISSUE"]) } );
+    my $old_renew_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
+    AddIssue( $renewing_borrower,$barcode7,Koha::DateUtils::output_pref({str=>$datedue6->date_due, dateformat =>'iso'}),0,$date, 0, undef );
+    $new_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
+    is ($new_log_size, $old_renew_log_size + 1, 'renew log successfully added when renewed via issuing');
+    $new_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["ISSUE"]) } );
+    is ($new_log_size, $old_issue_log_size, 'renew not logged as issue when renewed via issuing');
+
+    $fines = Koha::Account::Lines->search( { borrowernumber => $renewing_borrower->{borrowernumber}, itemnumber => $itemnumber7 } );
+    $fines->delete();
 
     t::lib::Mocks::mock_preference('OverduesBlockRenewing','blockitem');
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber6);
@@ -501,8 +516,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     is( $renewokay, 0, '(Bug 8236), Cannot renew, this item is overdue');
 
 
-    $reserveid = C4::Reserves::GetReserveId({ biblionumber => $biblionumber, itemnumber => $itemnumber, borrowernumber => $reserving_borrowernumber});
-    CancelReserve({ reserve_id => $reserveid });
+    $hold = Koha::Holds->search({ biblionumber => $biblionumber, borrowernumber => $reserving_borrowernumber })->next;
+    $hold->cancel;
 
     # Bug 14101
     # Test automatic renewal before value for "norenewalbefore" in policy is set
@@ -1285,7 +1300,7 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
     plan tests => 8;
 
     my $library = $builder->build( { source => 'Branch' } );
-    my $patron  = $builder->build( { source => 'Borrower' } );
+    my $patron  = $builder->build( { source => 'Borrower', value => { gonenoaddress => undef, lost => undef, debarred => undef, borrowernotes => "" } } );
 
     my $biblioitem_1 = $builder->build( { source => 'Biblioitem' } );
     my $item_1 = $builder->build(
@@ -1296,6 +1311,7 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
                 notforloan    => 0,
                 itemlost      => 0,
                 withdrawn     => 0,
+                restricted    => 0,
                 biblionumber  => $biblioitem_1->{biblionumber}
             }
         }
@@ -1309,6 +1325,7 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
                 notforloan    => 0,
                 itemlost      => 0,
                 withdrawn     => 0,
+                restricted    => 0,
                 biblionumber  => $biblioitem_2->{biblionumber}
             }
         }
@@ -1322,25 +1339,25 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
 
     t::lib::Mocks::mock_preference( 'OverduesBlockCirc', 'confirmation' );
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron, $item_2->{barcode} );
-    is( keys(%$error) + keys(%$alerts),  0 );
-    is( $question->{USERBLOCKEDOVERDUE}, 1 );
+    is( keys(%$error) + keys(%$alerts),  0, 'No key for error and alert ' . keys(%$error) . ' ' . keys(%$alerts) );
+    is( $question->{USERBLOCKEDOVERDUE}, 1, 'OverduesBlockCirc=confirmation, USERBLOCKEDOVERDUE should be set for question' );
 
     t::lib::Mocks::mock_preference( 'OverduesBlockCirc', 'block' );
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron, $item_2->{barcode} );
-    is( keys(%$question) + keys(%$alerts), 0 );
-    is( $error->{USERBLOCKEDOVERDUE},      1 );
+    is( keys(%$question) + keys(%$alerts),  0, 'No key for question and alert ' . keys(%$question) . ' ' . keys(%$alerts) );
+    is( $error->{USERBLOCKEDOVERDUE},      1, 'OverduesBlockCirc=block, USERBLOCKEDOVERDUE should be set for error' );
 
     # Patron cannot issue item_1, they are debarred
     my $tomorrow = DateTime->today( time_zone => C4::Context->tz() )->add( days => 1 );
     Koha::Patron::Debarments::AddDebarment( { borrowernumber => $patron->{borrowernumber}, expiration => $tomorrow } );
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron, $item_2->{barcode} );
-    is( keys(%$question) + keys(%$alerts), 0 );
-    is( $error->{USERBLOCKEDWITHENDDATE}, output_pref( { dt => $tomorrow, dateformat => 'sql', dateonly => 1 } ) );
+    is( keys(%$question) + keys(%$alerts),  0, 'No key for question and alert ' . keys(%$question) . ' ' . keys(%$alerts) );
+    is( $error->{USERBLOCKEDWITHENDDATE}, output_pref( { dt => $tomorrow, dateformat => 'sql', dateonly => 1 } ), 'USERBLOCKEDWITHENDDATE should be tomorrow' );
 
     Koha::Patron::Debarments::AddDebarment( { borrowernumber => $patron->{borrowernumber} } );
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron, $item_2->{barcode} );
-    is( keys(%$question) + keys(%$alerts), 0 );
-    is( $error->{USERBLOCKEDNOENDDATE},    '9999-12-31' );
+    is( keys(%$question) + keys(%$alerts),  0, 'No key for question and alert ' . keys(%$question) . ' ' . keys(%$alerts) );
+    is( $error->{USERBLOCKEDNOENDDATE},    '9999-12-31', 'USERBLOCKEDNOENDDATE should be 9999-12-31 for unlimited debarments' );
 };
 
 subtest 'MultipleReserves' => sub {
@@ -1716,5 +1733,3 @@ sub set_userenv {
     my ( $library ) = @_;
     C4::Context->set_userenv(0,0,0,'firstname','surname', $library->{branchcode}, $library->{branchname}, '', '', '');
 }
-
-1;

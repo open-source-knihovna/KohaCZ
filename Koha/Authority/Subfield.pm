@@ -1,4 +1,4 @@
-package Koha::Tmp::Order;
+package Koha::Authority::Subfield;
 
 # This file is part of Koha.
 #
@@ -17,15 +17,11 @@ package Koha::Tmp::Order;
 
 use Modern::Perl;
 
-use Carp;
-
-use Koha::Database;
-
 use base qw(Koha::Object);
 
 =head1 NAME
 
-Koha::Tmp::Order - This is a temporary class to make notices working with orders
+Koha::Authority::Subfield - Koha Authority Subfield Object class
 
 =head1 API
 
@@ -38,7 +34,7 @@ Koha::Tmp::Order - This is a temporary class to make notices working with orders
 =cut
 
 sub _type {
-    return 'Aqorder';
+    return 'AuthSubfieldStructure';
 }
 
 1;

@@ -32,15 +32,18 @@
                         <input type="hidden" name="modify" value="yes" />
 
                             <table class="table table-bordered table-condensed table-striped">
-                                <tr>
-                                    <th>&nbsp;</th>
-                                    <th>Days in advance</th>
-                                    [% IF ( SMSSendDriver ) %]<th>SMS</th>[% END %]
-                                    [% IF ( TalkingTechItivaPhone ) %]<th>Phone</th>[% END %]
-                                    <th>Email</th>
-                                    <th>Digests only <i id="info_digests" data-toggle="tooltip" title="You can ask for a digest to reduce the number of messages. Messages will be saved and sent as a single message." data-placement="right" class="icon icon-info-sign"></i></th>
-                                    <!-- <th>RSS</th> --><th>Do not notify</th>
-                                </tr>
+                                <thead>
+                                    <tr>
+                                        <th>&nbsp;</th>
+                                        <th>Days in advance</th>
+                                        [% IF ( SMSSendDriver ) %]<th>SMS</th>[% END %]
+                                        [% IF ( TalkingTechItivaPhone ) %]<th>Phone</th>[% END %]
+                                        <th>Email</th>
+                                        <th>Digests only <i id="info_digests" data-toggle="tooltip" title="You can ask for a digest to reduce the number of messages. Messages will be saved and sent as a single message." data-placement="right" class="icon icon-info-sign"></i></th>
+                                        <!-- <th>RSS</th> --><th>Do not notify</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                 [% FOREACH messaging_preference IN messaging_preferences %]
                                     <tr>
                                         <td>[% IF ( messaging_preference.Item_Due ) %]Item due
@@ -63,8 +66,8 @@
                                         [% ELSE %]
                                             <td>-</td>
                                         [% END %]
-                                        [% IF ( messaging_preference.transport_sms ) %]
-                                            [% IF ( SMSSendDriver ) %]
+                                        [% IF ( SMSSendDriver ) %]
+                                            [% IF ( messaging_preference.transport_sms ) %]
                                                 <td>
                                                     [% IF ( messaging_preference.transports_sms ) %]
                                                       <input type="checkbox" id="sms[% messaging_preference.message_attribute_id %]" name="[% messaging_preference.message_attribute_id %]" value="sms" checked="checked" onclick = "document.opacmessaging.none[% messaging_preference.message_attribute_id %].checked=false;" />
@@ -72,9 +75,12 @@
                                                         <input type="checkbox" id="sms[% messaging_preference.message_attribute_id %]" name="[% messaging_preference.message_attribute_id %]" value="sms" onclick = "document.opacmessaging.none[% messaging_preference.message_attribute_id %].checked=false;" />
                                                     [% END %]
                                                 </td>
+                                            [% ELSE %]
+                                                <td>-</td>
                                             [% END %]
                                         [% END %]
                                         [% IF ( TalkingTechItivaPhone ) %]
+                                            [% IF ( messaging_preference.transport_phone ) %]
                                             <td>
                                               [% IF ( messaging_preference.transports_phone ) %]
                                               <input type="checkbox"
@@ -88,6 +94,9 @@
                                                          value="phone" onclick = "document.opacmessaging.none[% messaging_preference.message_attribute_id %].checked=false;" />
                                               [% END %]
                                             </td>
+                                            [% ELSE %]
+                                                <td>-</td>
+                                            [% END %]
                                         [% END %]
 
                                         [% IF ( messaging_preference.transport_email ) %]
@@ -117,6 +126,7 @@
                                         <td><input type="checkbox" class="none" id="none[% messaging_preference.message_attribute_id %]" /></td>
                                     </tr>
                                 [% END # / FOREACH messaging_preferences%]
+                            </tbody>
                         </table>
 
                         <fieldset class="rows">

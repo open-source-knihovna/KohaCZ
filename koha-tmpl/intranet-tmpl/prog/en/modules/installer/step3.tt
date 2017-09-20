@@ -32,7 +32,10 @@
      [% END %]
 </title>
 
-[% IF ( finish ) %]<meta http-equiv="refresh" content="10; url=/cgi-bin/koha/installer/onboarding.pl">[% END %]
+[% IF ( finish ) %]
+    [%- metacontent= '10; url=/cgi-bin/koha/installer/onboarding.pl' -%]
+    <meta http-equiv="refresh" content="[% metacontent %]">
+[% END %]
 [% INCLUDE 'installer-doc-head-close.inc' %]
 </head>
 
@@ -44,9 +47,7 @@
                 [% IF ( finish ) %]
                     <h2>Web installer &rsaquo; Installation complete</h2>
                     <h3>Congratulations, installation complete</h3>
-                    <p>
-                        If this page does not redirect in 10 seconds, <a href="/cgi-bin/koha/installer/onboarding.pl">start onboarding process</a>.
-                    </p>
+                    <p>This page will redirect in 10 seconds. <a href="/cgi-bin/koha/installer/onboarding.pl">If not, click here to start onboarding process.</a></p>
                 [% END %]
 
                 [% IF ( choosemarc ) %]
@@ -156,7 +157,15 @@
                 [% IF ( addframeworks ) %]
                     <h2>Web installer &rsaquo; Default data loaded</h2>
                     [% FOREACH lis IN list %]
-                        <h3>[% lis.level FILTER ucfirst %] data added</h3>
+                        [% IF lis.level == 'mandatory' %]
+                            <h3>Mandatory data added</h3>
+                        [% ELSIF lis.level == 'optional' %]
+                            <h3>Optional data added</h3>
+                        [% ELSIF lis.level == 'mysql' %]
+                            <h3>MySQL data added</h3>
+                        [% ELSE %]
+                            <h3>[% lis.level FILTER ucfirst %] data added</h3>
+                        [% END %]
                         <ul>
                             [% FOREACH fwklis IN lis.fwklist %]
                             <li>
@@ -221,7 +230,7 @@
                     [% ELSE %]
                         <h2>Web installer &rsaquo; Install basic configuration settings</h2>
                         <p>We are ready to do some basic configuration.</p>
-                        <p> <a href="install.pl?step=3&amp;op=choosemarc" class="btn btn-primary">Continue to the next step</a> </p>
+                        <p><a href="install.pl?step=3&amp;op=choosemarc" class="btn btn-primary">Continue to the next step</a></p>
                     [% END %]
                 [% END # / IF default %]
 

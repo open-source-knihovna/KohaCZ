@@ -74,12 +74,6 @@ subtest 'update' => sub {
     is( Koha::Cities->search( { city_country => 'UK' } )->count, 0, 'Koha::Objects->update should have updated the 3 rows' );
 };
 
-subtest 'pager' => sub {
-    plan tests => 1;
-    my $pager = Koha::Patrons->search( {}, { page => 1, rows => 2 } )->pager;
-    is( ref($pager), 'DBIx::Class::ResultSet::Pager', 'Koha::Objects->pager returns a valid DBIx::Class object' );
-};
-
 subtest 'reset' => sub {
     plan tests => 3;
 
@@ -214,4 +208,33 @@ subtest 'Exceptions' => sub {
 };
 
 $schema->storage->txn_rollback;
-1;
+
+subtest '->is_paged and ->pager tests' => sub {
+
+    plan tests => 5;
+
+    $schema->storage->txn_begin;
+
+    # Delete existing patrons
+    Koha::Checkouts->delete;
+    Koha::Patrons->delete;
+    # Create 10 patrons
+    foreach (1..10) {
+        $builder->build_object({ class => 'Koha::Patrons' });
+    }
+
+    # Non-paginated search
+    my $patrons = Koha::Patrons->search();
+    is( $patrons->count, 10, 'Search returns all patrons' );
+    ok( !$patrons->is_paged, 'Search is not paged' );
+
+    # Paginated search
+    $patrons = Koha::Patrons->search( undef, { 'page' => 1, 'rows' => 3 } );
+    is( $patrons->count, 3, 'Search returns only one page, 3 patrons' );
+    ok( $patrons->is_paged, 'Search is paged' );
+    my $pager = $patrons->pager;
+    is( ref($patrons->pager), 'DBIx::Class::ResultSet::Pager',
+       'Koha::Objects->pager returns a valid DBIx::Class object' );
+
+    $schema->storage->txn_rollback;
+}

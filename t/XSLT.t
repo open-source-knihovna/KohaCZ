@@ -36,6 +36,8 @@ BEGIN {
 };
 
 use Test::DBIx::Class;
+my $db = Test::MockModule->new('Koha::Database');
+$db->mock( _new_schema => sub { return Schema(); } );
 
 my $dir = File::Temp->newdir();
 my @themes = ('prog', 'test');
@@ -75,4 +77,3 @@ my $matching_string = q{<syspref name="singleBranchMode">0</syspref>};
 my $sysprefs_xml = C4::XSLT::get_xslt_sysprefs();
 ok( $sysprefs_xml =~ m/$matching_string/, 'singleBranchMode has a value of 0');
 
-1;

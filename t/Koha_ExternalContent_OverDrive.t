@@ -1,15 +1,35 @@
+#!/usr/bin/env perl
+
 use Modern::Perl;
 
 use t::lib::Mocks;
-use Test::More tests => 5;                      # last test to print
+use Test::More;
+use Test::MockModule;
 
-use Module::Load::Conditional qw( can_load );
+use Module::Load::Conditional qw( can_load check_install );
+
+use Koha::Schema;
+
+BEGIN {
+    if ( check_install( module => 'Test::DBIx::Class' ) ) {
+        plan tests => 5;
+    } else {
+        plan skip_all => "Need Test::DBIx::Class"
+    }
+}
+
+use Test::DBIx::Class;
+
+my $db = Test::MockModule->new('Koha::Database');
+$db->mock( _new_schema => sub { return Schema(); } );
 
 SKIP: {
     skip "cannot find WebService::ILS::OverDrive::Patron", 5
       unless can_load( modules => { 'WebService::ILS::OverDrive::Patron' => undef } );
 
     use_ok('Koha::ExternalContent::OverDrive');
+
+    t::lib::Mocks::mock_preference('SessionStorage','tmp');
 
     t::lib::Mocks::mock_preference('OverDriveClientKey', 'DUMMY');
     t::lib::Mocks::mock_preference('OverDriveClientSecret', 'DUMMY');

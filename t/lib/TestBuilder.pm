@@ -86,8 +86,15 @@ sub build {
 # build returns a hash of column values for a created record, or undef
 # build does NOT update a record, or pass back values of an existing record
     my ($self, $params) = @_;
-    my $source  = $params->{source} || return;
+    my $source  = $params->{source};
+    if( !$source ) {
+        carp "Source parameter not specified!";
+        return;
+    }
     my $value   = $params->{value};
+
+    my @unknowns = grep( !/^(source|value)$/, keys %{ $params });
+    carp "Unknown parameter(s): ", join( ', ', @unknowns ) if scalar @unknowns;
 
     my $col_values = $self->_buildColumnValues({
         source  => $source,
@@ -451,6 +458,9 @@ sub _gen_blob {
 sub _gen_default_values {
     my ($self) = @_;
     return {
+        Borrower => {
+            login_attempts => 0,
+        },
         Item => {
             more_subfields_xml => undef,
         },

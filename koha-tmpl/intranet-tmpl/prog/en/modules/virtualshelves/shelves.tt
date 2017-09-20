@@ -9,6 +9,26 @@
 [% INCLUDE 'datatables.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.dataTables.columnFilter.js"></script>
 
+[% BLOCK list_permissions %]
+    <li>
+        <label for="allow_changes_from">Allow changes to contents from: </label>
+        <select name="allow_changes_from" id="allow_changes_from" onchange="AdjustRemark()">
+
+            [% IF shelf.allow_change_from_owner %]<option value="0">Nobody</option>[% ELSE %]<option value="0" selected="selected">Nobody</option>[% END %]
+
+            [% IF shelf.allow_change_from_owner && (( !shelf.is_public && !shelf.is_shared ) || !shelf.allow_change_from_others ) %]
+                <option value="1" selected="selected">Owner only</option>
+            [% ELSE %]
+                <option value="1">Owner only</option>
+            [% END %]
+
+            [% IF shelf.allow_change_from_others %]<option value="2" selected="selected">Anyone seeing this list</option>[% ELSE %]<option value="2">Anyone seeing this list</option>[% END %]
+
+        </select>
+        &emsp; <span id="anyone_remark" style="display:none;color:red;">The Anyone permission has no actual effect while this list is strictly private.</span>
+    </li>
+[% END %]
+
 [% IF print %]
 <script type="text/javascript">
     $( document ).ready(function() {
@@ -72,6 +92,7 @@ $(document).ready(function(){
             { 'mDataProp': 'dt_type' },
             { 'mDataProp': 'dt_shelfname' },
             { 'mDataProp': 'dt_count' },
+            { 'mDataProp': 'dt_is_shared' },
             { 'mDataProp': 'dt_owner' },
             { 'mDataProp': 'dt_sortby' },
             { 'mDataProp': 'dt_created_on' },
@@ -197,6 +218,12 @@ $(document).ready(function(){
 });
 [% END %]
 
+[% IF shelf AND op == 'edit_form' %]
+$(document).ready(function(){
+    AdjustRemark();
+});
+[% END %]
+
     /**
      * This function checks if the adequate number of records are checked for merging
      */
@@ -285,6 +312,25 @@ function placeHold () {
             return false;
         }
     }
+
+function AdjustRemark() {
+    var category = $("#category").val();
+    var perms = $("#allow_changes_from").val();
+
+    if( perms < 2 ) {
+        $("#anyone_remark").hide();
+    } else if( category==1 ) {
+        // If we move to Private (without shares), show Anyone remark
+        // Note: the number of shares is not tested real-time
+        [% IF !shelf.is_shared %]
+            $("#anyone_remark").show();
+        [% ELSE %]
+            $("#anyone_remark").hide();
+        [% END %]
+    } else { // category==2
+        $("#anyone_remark").hide();
+    }
+}
 //]]>
 </script>
 </head>
@@ -536,7 +582,7 @@ function placeHold () {
             [% IF shelf.sortfield == "itemcallnumber" %]<option value="itemcallnumber" selected="selected">Call number</option>[% ELSE %]<option value="itemcallnumber">Call number</option>[% END %]
             </select></li>
             <li><label for="category">Category: </label>
-                <select id="category" name="category">
+                <select id="category" name="category" onchange="AdjustRemark()">
                 [% IF shelf.is_private %]
                     <option value="1" selected="selected">Private</option>
                 [% ELSE %]
@@ -549,14 +595,7 @@ function placeHold () {
                 [% END %]
                            </select></li>
 
-            <li>
-                <label for="allow_changes_from">Allow changes to contents from: </label>
-                <select name="allow_changes_from" id="allow_changes_from">
-                    [% IF !shelf.allow_change_from_owner %]<option value="0">Nobody</option>[% ELSE %]<option value="0" selected="selected">Nobody</option>[% END %]
-                    [% IF shelf.allow_change_from_owner && !shelf.allow_change_from_others %]<option value="1" selected="selected">Owner only</option>[% ELSE %]<option value="1">Owner only</option>[% END %]
-                    [% IF shelf.allow_change_from_owner && shelf.allow_change_from_others %]<option value="2" selected="selected">Anyone seeing this list</option>[% ELSE %]<option value="2">Anyone seeing this list</option>[% END %]
-                </select>
-            </li>
+            [% INCLUDE list_permissions %]
 
         </ol>
     </fieldset>
@@ -600,6 +639,7 @@ function placeHold () {
                         <th class="NoVisible">Type</th>
                         <th>List name</th>
                         <th>Contents</th>
+                        <th>Type</th>
                         <th>Owner</th>
                         <th>Sort by</th>
                         <th>Creation date</th>
@@ -609,6 +649,7 @@ function placeHold () {
                     <tr class="filters_row">
                         <th></th>
                         <th><input class="filter text_filter" id="searchshelfname_filter" placeholder="List name"></th>
+                        <th></th>
                         <th></th>
                         <th><input class="filter text_filter" id="searchowner_filter" placeholder="Owner"></th>
                         <th>

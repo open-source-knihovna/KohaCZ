@@ -269,8 +269,8 @@ if ($findborrower) {
 }
 
 # get the borrower information.....
-if ($borrowernumber) {
-    $patron = Koha::Patrons->find( $borrowernumber );
+$patron ||= Koha::Patrons->find( $borrowernumber ) if $borrowernumber;
+if ($patron) {
     my $overdues = $patron->get_overdues;
     my $issues = $patron->checkouts;
     my $balance = $patron->account->balance;
@@ -405,6 +405,7 @@ if (@$barcodes) {
                 $template_params->{getBarcodeMessageIteminfo} = $item->barcode;
                 $template_params->{NEEDSCONFIRMATION} = 1;
                 $template_params->{onsite_checkout} = $onsite_checkout;
+                $template_params->{auto_renew} = $session->param('auto_renew');
                 $confirm_required = 1;
             }
         }
@@ -450,8 +451,8 @@ if (@$barcodes) {
 ##################################################################################
 # BUILD HTML
 # show all reserves of this borrower, and the position of the reservation ....
-if ($borrowernumber) {
-    my $holds = Koha::Holds->search( { borrowernumber => $borrowernumber } );
+if ($patron) {
+    my $holds = Koha::Holds->search( { borrowernumber => $borrowernumber } ); # FIXME must be Koha::Patron->holds
     my $waiting_holds = $holds->waiting;
     $template->param(
         holds_count  => $holds->count(),
@@ -644,8 +645,6 @@ $template->param(
     AudioAlerts           => C4::Context->preference("AudioAlerts"),
     fast_cataloging   => $fast_cataloging,
     CircAutoPrintQuickSlip   => C4::Context->preference("CircAutoPrintQuickSlip"),
-    SuspendHoldsIntranet => C4::Context->preference('SuspendHoldsIntranet'),
-    AutoResumeSuspendedHolds => C4::Context->preference('AutoResumeSuspendedHolds'),
     RoutingSerials => C4::Context->preference('RoutingSerials'),
     relatives_issues_count => $relatives_issues_count,
     relatives_borrowernumbers => \@relatives,

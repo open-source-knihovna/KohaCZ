@@ -41,6 +41,7 @@ use Algorithm::CheckDigits;
 use Data::Dumper;
 use Koha::Account;
 use Koha::AuthorisedValues;
+use Koha::Biblioitems;
 use Koha::DateUtils;
 use Koha::Calendar;
 use Koha::Checkouts;
@@ -564,12 +565,16 @@ sub TooMany {
 
 =head2 CanBookBeIssued
 
-  ( $issuingimpossible, $needsconfirmation ) =  CanBookBeIssued( $borrower, 
+  ( $issuingimpossible, $needsconfirmation, [ $alerts ] ) =  CanBookBeIssued( $borrower,
                       $barcode, $duedate, $inprocess, $ignore_reserves, $params );
 
 Check if a book can be issued.
 
-C<$issuingimpossible> and C<$needsconfirmation> are some hashref.
+C<$issuingimpossible> and C<$needsconfirmation> are hashrefs.
+
+IMPORTANT: The assumption by users of this routine is that causes blocking
+the issue are keyed by uppercase labels and other returned
+data is keyed in lower case!
 
 =over 4
 
@@ -1451,13 +1456,12 @@ sub AddIssue {
                     }
                 );
             }
+            logaction(
+                "CIRCULATION", "ISSUE",
+                $borrower->{'borrowernumber'},
+                $item->{'itemnumber'}
+            ) if C4::Context->preference("IssueLog");
         }
-
-        logaction(
-            "CIRCULATION", "ISSUE",
-            $borrower->{'borrowernumber'},
-            $item->{'itemnumber'}
-        ) if C4::Context->preference("IssueLog");
     }
     return $issue;
 }
@@ -1820,10 +1824,7 @@ sub AddReturn {
     }
 
     my $itemnumber = $item->{ itemnumber };
-
-    my $item_level_itypes = C4::Context->preference("item-level_itypes");
-    my $biblio   = $item_level_itypes ? undef : Koha::Biblios->find( $item->{ biblionumber } ); # don't get bib data unless we need it
-    my $itemtype = $item_level_itypes ? $item->{itype} : $biblio->biblioitem->itemtype;
+    my $itemtype = $item->{itype}; # GetItem called effective_itemtype
 
     my $issue  = Koha::Checkouts->find( { itemnumber => $itemnumber } );
     if ( $issue ) {
@@ -3512,6 +3513,13 @@ sub CalcDateDue {
             if ( DateTime->compare( $d1, $expiry_dt ) == 1 ) {
                 $datedue = $expiry_dt->clone->set_time_zone( C4::Context->tz );
             }
+        }
+        if ( C4::Context->preference('useDaysMode') ne 'Days' ) {
+          my $calendar = Koha::Calendar->new( branchcode => $branch );
+          if ( $calendar->is_holiday($datedue) ) {
+              # Don't return on a closed day
+              $datedue = $calendar->prev_open_day( $datedue );
+          }
         }
     }
 

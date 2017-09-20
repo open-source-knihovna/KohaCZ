@@ -91,7 +91,8 @@ if ( $action eq 'move' ) {
   AlterPriority( $where, $reserve_id );
 } elsif ( $action eq 'cancel' ) {
   my $reserve_id = $input->param('reserve_id');
-  CancelReserve({ reserve_id => $reserve_id });
+  my $hold = Koha::Holds->find( $reserve_id );
+  $hold->cancel if $hold;
 } elsif ( $action eq 'setLowestPriority' ) {
   my $reserve_id = $input->param('reserve_id');
   ToggleLowestPriority( $reserve_id );
@@ -142,8 +143,7 @@ if ($borrowernumber_hold && !$action) {
     # we check the reserves of the user, and if they can reserve a document
     # FIXME At this time we have a simple count of reservs, but, later, we could improve the infos "title" ...
 
-    my $reserves_count =
-      GetReserveCount( $patron->borrowernumber );
+    my $reserves_count = $patron->holds->count;
 
     my $new_reserves_count = scalar( @biblionumbers );
 

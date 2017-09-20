@@ -104,13 +104,7 @@ BEGIN {
     @EXPORT = qw(
         &AddReserve
 
-        &GetReserve
         &GetReservesForBranch
-        &GetReservesToBranch
-        &GetReserveCount
-        &GetReserveCountFromItemnumber
-        &GetReserveFee
-        &GetReserveInfo
         &GetReserveStatus
 
         &GetOtherReserves
@@ -127,7 +121,6 @@ BEGIN {
         &CanBookBeReserved
         &CanItemBeReserved
         &CanReserveBeCanceledFromOpac
-        &CancelReserve
         &CancelExpiredReserves
 
         &AutoUnsuspendReserves
@@ -260,25 +253,6 @@ sub AddReserve {
     }
 
     return $reserve_id;
-}
-
-=head2 GetReserve
-
-    $res = GetReserve( $reserve_id );
-
-    Return the current reserve.
-
-=cut
-
-sub GetReserve {
-    my ($reserve_id) = @_;
-
-    my $dbh = C4::Context->dbh;
-
-    my $query = "SELECT * FROM reserves WHERE reserve_id = ?";
-    my $sth = $dbh->prepare( $query );
-    $sth->execute( $reserve_id );
-    return $sth->fetchrow_hashref();
 }
 
 =head2 CanBookBeReserved
@@ -470,61 +444,13 @@ sub CanReserveBeCanceledFromOpac {
     my ($reserve_id, $borrowernumber) = @_;
 
     return unless $reserve_id and $borrowernumber;
-    my $reserve = GetReserve($reserve_id);
+    my $reserve = Koha::Holds->find($reserve_id);
 
-    return 0 unless $reserve->{borrowernumber} == $borrowernumber;
-    return 0 if ( $reserve->{found} eq 'W' ) or ( $reserve->{found} eq 'T' );
+    return 0 unless $reserve->borrowernumber == $borrowernumber;
+    return 0 if ( $reserve->found eq 'W' ) or ( $reserve->found eq 'T' );
 
     return 1;
 
-}
-
-=head2 GetReserveCount
-
-  $number = &GetReserveCount($borrowernumber);
-
-this function returns the number of reservation for a borrower given on input arg.
-
-=cut
-
-sub GetReserveCount {
-    my ($borrowernumber) = @_;
-
-    my $dbh = C4::Context->dbh;
-
-    my $query = "
-        SELECT COUNT(*) AS counter
-        FROM reserves
-        WHERE borrowernumber = ?
-    ";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($borrowernumber);
-    my $row = $sth->fetchrow_hashref;
-    return $row->{counter};
-}
-
-=head2 GetReserveCountFromItemnumber
-
-  $number = &GetReserveCountFromItemnumber($itemnumber);
-
-this function returns the number of reservation for an itemnumber given on input arg.
-
-=cut
-
-
-sub GetReserveCountFromItemnumber {
-    my ($itemnumber) = @_;
-
-    my $dbh = C4::Context->dbh;
-
-    my $sth = $dbh->prepare("
-        SELECT COUNT(*) AS counter
-        FROM reserves
-        WHERE itemnumber = ?");
-
-    $sth->execute($itemnumber);
-
-    return $sth->fetchrow_hashref->{counter};
 }
 
 =head2 GetOtherReserves
@@ -634,56 +560,6 @@ SELECT COUNT(*) FROM reserves WHERE biblionumber=? AND borrowernumber<>?
         }
     }
     return $fee;
-}
-
-=head2 GetReservesToBranch
-
-  @transreserv = GetReservesToBranch( $frombranch );
-
-Get reserve list for a given branch
-
-=cut
-
-sub GetReservesToBranch {
-    my ( $frombranch ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(
-        "SELECT reserve_id,borrowernumber,reservedate,itemnumber,timestamp
-         FROM reserves
-         WHERE priority='0'
-           AND branchcode=?"
-    );
-    $sth->execute( $frombranch );
-    my @transreserv;
-    my $i = 0;
-    while ( my $data = $sth->fetchrow_hashref ) {
-        $transreserv[$i] = $data;
-        $i++;
-    }
-    return (@transreserv);
-}
-
-=head2 GetReserveFromBorrowernumberAndItemnumber
-
-    $reserve = GetReserveFromBorrowernumberAndItemnumber($borrowernumber, $itemnumber);
-
-Returns matching reserve of borrower on an item specified.
-
-=cut
-
-sub GetReserveFromBorrowernumberAndItemnumber {
-    my ($borrowernumber, $itemnumber) = @_;
-    my $dbh    = C4::Context->dbh;
-    my $sth;
-    $sth = $dbh->prepare("
-                SELECT *
-                FROM reserves
-                WHERE borrowernumber=?
-                AND itemnumber =?
-                ");
-    $sth->execute($borrowernumber, $itemnumber);
-
-    return $sth->fetchrow_hashref();
 }
 
 =head2 GetReservesForBranch
@@ -921,23 +797,26 @@ sub CancelExpiredReserves {
     my $cancel_on_holidays = C4::Context->preference('ExpireReservesOnHolidays');
 
     my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare( "
-        SELECT * FROM reserves WHERE DATE(expirationdate) < DATE( CURDATE() )
-        AND expirationdate IS NOT NULL
-    " );
-    $sth->execute();
 
-    while ( my $res = $sth->fetchrow_hashref() ) {
-        my $calendar = Koha::Calendar->new( branchcode => $res->{'branchcode'} );
-        my $cancel_params = { reserve_id => $res->{'reserve_id'} };
+    my $dtf = Koha::Database->new->schema->storage->datetime_parser;
+    # FIXME To move to Koha::Holds->search_expired (?)
+    my $holds = Koha::Holds->search(
+        {
+            expirationdate => { '<', $dtf->format_date($today) }
+        }
+    );
+
+    while ( my $hold = $holds->next ) {
+        my $calendar = Koha::Calendar->new( branchcode => $hold->branchcode );
 
         next if !$cancel_on_holidays && $calendar->is_holiday( $today );
 
-        if ( $res->{found} eq 'W' ) {
+        my $cancel_params = {};
+        if ( $hold->found eq 'W' ) {
             $cancel_params->{charge_cancel_fee} = 1;
         }
+        $hold->cancel( $cancel_params );
 
-        CancelReserve($cancel_params);
     }
 }
 
@@ -955,70 +834,6 @@ sub AutoUnsuspendReserves {
     my @holds = Koha::Holds->search( { suspend_until => { '<' => $today->ymd() } } );
 
     map { $_->suspend(0)->suspend_until(undef)->store() } @holds;
-}
-
-=head2 CancelReserve
-
-  CancelReserve({ reserve_id => $reserve_id, [ biblionumber => $biblionumber, borrowernumber => $borrrowernumber, itemnumber => $itemnumber, ] [ charge_cancel_fee => 1 ] });
-
-Cancels a reserve. If C<charge_cancel_fee> is passed and the C<ExpireReservesMaxPickUpDelayCharge> syspref is set, charge that fee to the patron's account.
-
-=cut
-
-sub CancelReserve {
-    my ( $params ) = @_;
-
-    my $reserve_id = $params->{'reserve_id'};
-    # Filter out only the desired keys; this will insert undefined values for elements missing in
-    # \%params, but GetReserveId filters them out anyway.
-    $reserve_id = GetReserveId( { biblionumber => $params->{'biblionumber'}, borrowernumber => $params->{'borrowernumber'}, itemnumber => $params->{'itemnumber'} } ) unless ( $reserve_id );
-
-    return unless ( $reserve_id );
-
-    my $dbh = C4::Context->dbh;
-
-    my $reserve = GetReserve( $reserve_id );
-    if ($reserve) {
-
-        my $hold = Koha::Holds->find( $reserve_id );
-        logaction( 'HOLDS', 'CANCEL', $hold->reserve_id, Dumper($hold->unblessed) )
-            if C4::Context->preference('HoldsLog');
-
-        my $query = "
-            UPDATE reserves
-            SET    cancellationdate = now(),
-                   priority         = 0
-            WHERE  reserve_id = ?
-        ";
-        my $sth = $dbh->prepare($query);
-        $sth->execute( $reserve_id );
-
-        $query = "
-            INSERT INTO old_reserves
-            SELECT * FROM reserves
-            WHERE  reserve_id = ?
-        ";
-        $sth = $dbh->prepare($query);
-        $sth->execute( $reserve_id );
-
-        $query = "
-            DELETE FROM reserves
-            WHERE  reserve_id = ?
-        ";
-        $sth = $dbh->prepare($query);
-        $sth->execute( $reserve_id );
-
-        # now fix the priority on the others....
-        _FixPriority({ biblionumber => $reserve->{biblionumber} });
-
-        # and, if desired, charge a cancel fee
-        my $charge = C4::Context->preference("ExpireReservesMaxPickUpDelayCharge");
-        if ( $charge && $params->{'charge_cancel_fee'} ) {
-            manualinvoice($reserve->{'borrowernumber'}, $reserve->{'itemnumber'}, '', 'HE', $charge);
-        }
-    }
-
-    return $reserve;
 }
 
 =head2 ModReserve
@@ -1072,13 +887,20 @@ sub ModReserve {
     return if $rank eq "n";
 
     return unless ( $reserve_id || ( $borrowernumber && ( $biblionumber || $itemnumber ) ) );
-    $reserve_id = GetReserveId({ biblionumber => $biblionumber, borrowernumber => $borrowernumber, itemnumber => $itemnumber }) unless ( $reserve_id );
+
+    my $hold;
+    unless ( $reserve_id ) {
+        $hold = Koha::Holds->search({ biblionumber => $biblionumber, borrowernumber => $borrowernumber, itemnumber => $itemnumber });
+        return unless $hold; # FIXME Should raise an exception
+        $reserve_id = $hold->reserve_id;
+    }
+
+    $hold ||= Koha::Holds->find($reserve_id);
 
     if ( $rank eq "del" ) {
-        CancelReserve({ reserve_id => $reserve_id });
+        $hold->cancel;
     }
     elsif ($rank =~ /^\d+/ and $rank > 0) {
-        my $hold = Koha::Holds->find($reserve_id);
         logaction( 'HOLDS', 'MODIFY', $hold->reserve_id, Dumper($hold->unblessed) )
             if C4::Context->preference('HoldsLog');
 
@@ -1136,6 +958,7 @@ sub ModReserveFill {
         }
     );
 
+    # FIXME Must call Koha::Hold->cancel ? => No, should call ->filled and add the correct log
     Koha::Old::Hold->new( $hold->unblessed() )->store();
 
     $hold->delete();
@@ -1248,7 +1071,9 @@ sub ModReserveCancelAll {
     my ( $itemnumber, $borrowernumber ) = @_;
 
     #step 1 : cancel the reservation
-    my $CancelReserve = CancelReserve({ itemnumber => $itemnumber, borrowernumber => $borrowernumber });
+    my $holds = Koha::Holds->search({ itemnumber => $itemnumber, borrowernumber => $borrowernumber });
+    return unless $holds->count;
+    $holds->next->cancel;
 
     #step 2 launch the subroutine of the others reserves
     ( $messages, $nextreservinfo ) = GetOtherReserves($itemnumber);
@@ -1278,59 +1103,6 @@ sub ModReserveMinusPriority {
     $sth_upd->execute( $itemnumber, $reserve_id );
     # second step update all others reserves
     _FixPriority({ reserve_id => $reserve_id, rank => '0' });
-}
-
-=head2 GetReserveInfo
-
-  &GetReserveInfo($reserve_id);
-
-Get item and borrower details for a current hold.
-Current implementation this query should have a single result.
-
-=cut
-
-sub GetReserveInfo {
-    my ( $reserve_id ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $strsth="SELECT
-                   reserve_id,
-                   reservedate,
-                   reservenotes,
-                   reserves.borrowernumber,
-                   reserves.biblionumber,
-                   reserves.branchcode,
-                   reserves.waitingdate,
-                   notificationdate,
-                   reminderdate,
-                   priority,
-                   found,
-                   firstname,
-                   surname,
-                   phone,
-                   email,
-                   address,
-                   address2,
-                   cardnumber,
-                   city,
-                   zipcode,
-                   biblio.title,
-                   biblio.author,
-                   items.holdingbranch,
-                   items.itemcallnumber,
-                   items.itemnumber,
-                   items.location,
-                   barcode,
-                   notes
-                FROM reserves
-                LEFT JOIN items USING(itemnumber)
-                LEFT JOIN borrowers USING(borrowernumber)
-                LEFT JOIN biblio ON  (reserves.biblionumber=biblio.biblionumber)
-                WHERE reserves.reserve_id = ?";
-    my $sth = $dbh->prepare($strsth);
-    $sth->execute($reserve_id);
-
-    my $data = $sth->fetchrow_hashref;
-    return $data;
 }
 
 =head2 IsAvailableForItemLevelRequest
@@ -1467,16 +1239,17 @@ Input: $where is 'up', 'down', 'top' or 'bottom'. Biblionumber, Date reserve was
 sub AlterPriority {
     my ( $where, $reserve_id ) = @_;
 
-    my $reserve = GetReserve( $reserve_id );
+    my $hold = Koha::Holds->find( $reserve_id );
+    return unless $hold;
 
-    if ( $reserve->{cancellationdate} ) {
-        warn "I cannot alter the priority for reserve_id $reserve_id, the reserve has been cancelled (".$reserve->{cancellationdate}.')';
+    if ( $hold->cancellationdate ) {
+        warn "I cannot alter the priority for reserve_id $reserve_id, the reserve has been cancelled (" . $hold->cancellationdate . ')';
         return;
     }
 
     if ( $where eq 'up' || $where eq 'down' ) {
 
-      my $priority = $reserve->{'priority'};
+      my $priority = $hold->priority;
       $priority = $where eq 'up' ? $priority - 1 : $priority + 1;
       _FixPriority({ reserve_id => $reserve_id, rank => $priority })
 
@@ -1489,6 +1262,7 @@ sub AlterPriority {
       _FixPriority({ reserve_id => $reserve_id, rank => '999999' });
 
     }
+    # FIXME Should return the new priority
 }
 
 =head2 ToggleLowestPriority
@@ -1623,13 +1397,18 @@ sub _FixPriority {
 
     my $dbh = C4::Context->dbh;
 
-    unless ( $biblionumber ) {
-        my $res = GetReserve( $reserve_id );
-        $biblionumber = $res->{biblionumber};
+    my $hold;
+    if ( $reserve_id ) {
+        $hold = Koha::Holds->find( $reserve_id );
+        return unless $hold;
     }
 
-    if ( $rank eq "del" ) {
-         CancelReserve({ reserve_id => $reserve_id });
+    unless ( $biblionumber ) { # FIXME This is a very weird API
+        $biblionumber = $hold->biblionumber;
+    }
+
+    if ( $rank eq "del" ) { # FIXME will crash if called without $hold
+        $hold->cancel;
     }
     elsif ( $rank eq "W" || $rank eq "0" ) {
 
@@ -2065,7 +1844,8 @@ sub MoveReserve {
             RevertWaitingStatus({ itemnumber => $itemnumber });
         }
         elsif ( $cancelreserve eq 'cancel' || $cancelreserve ) { # cancel reserves on this item
-            CancelReserve( { reserve_id => $res->{'reserve_id'} } );
+            my $hold = Koha::Holds->find( $res->{reserve_id} );
+            $hold->cancel;
         }
     }
 }
@@ -2175,30 +1955,6 @@ sub RevertWaitingStatus {
     _FixPriority( { biblionumber => $reserve->{biblionumber} } );
 }
 
-=head2 GetReserveId
-
-  $reserve_id = GetReserveId({ biblionumber => $biblionumber, borrowernumber => $borrowernumber [, itemnumber => $itemnumber ] });
-
-  Returnes the first reserve id that matches the given criteria
-
-=cut
-
-sub GetReserveId {
-    my ( $params ) = @_;
-
-    return unless ( ( $params->{'biblionumber'} || $params->{'itemnumber'} ) && $params->{'borrowernumber'} );
-
-    foreach my $key ( keys %$params ) {
-        delete $params->{$key} unless defined( $params->{$key} );
-    }
-
-    my $hold = Koha::Holds->search( $params )->next();
-
-    return unless $hold;
-
-    return $hold->id();
-}
-
 =head2 ReserveSlip
 
   ReserveSlip($branchcode, $borrowernumber, $biblionumber)
@@ -2223,11 +1979,9 @@ sub ReserveSlip {
 #   return unless ( C4::Context->boolean_preference('printreserveslips') );
     my $patron = Koha::Patrons->find( $borrowernumber );
 
-    my $reserve_id = GetReserveId({
-        biblionumber => $biblionumber,
-        borrowernumber => $borrowernumber
-    }) or return;
-    my $reserve = GetReserveInfo($reserve_id) or return;
+    my $hold = Koha::Holds->search({biblionumber => $biblionumber, borrowernumber => $borrowernumber })->next;
+    return unless $hold;
+    my $reserve = $hold->unblessed;
 
     return  C4::Letters::GetPreparedLetter (
         module => 'circulation',

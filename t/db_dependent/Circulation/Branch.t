@@ -46,6 +46,7 @@ my $dbh = C4::Context->dbh;
 $dbh->do(q|DELETE FROM issues|);
 $dbh->do(q|DELETE FROM items|);
 $dbh->do(q|DELETE FROM borrowers|);
+$dbh->do(q|DELETE FROM clubs|);
 $dbh->do(q|DELETE FROM branches|);
 $dbh->do(q|DELETE FROM categories|);
 $dbh->do(q|DELETE FROM accountlines|);
@@ -64,21 +65,21 @@ my $samplebranch2 = $builder->build({ source => 'Branch' });
 # Add itemtypes
 my $no_circ_itemtype = $builder->build({
     source => 'Itemtype',
-    values => {
+    value => {
         rentalcharge => '0',
         notforloan   => 0
     }
 });
 my $sampleitemtype1 = $builder->build({
     source => 'Itemtype',
-    values => {
+    value => {
         rentalcharge => '10.0',
         notforloan   => 1
     }
 });
 my $sampleitemtype2 = $builder->build({
     source => 'Itemtype',
-    values => {
+    value => {
         rentalcharge => '5.0',
         notforloan   => 0
     }
@@ -86,7 +87,7 @@ my $sampleitemtype2 = $builder->build({
 # Add Category
 my $samplecat     = $builder->build({
     source => 'Category',
-    values => {
+    value => {
         hidelostitems => 0
     }
 });
@@ -270,10 +271,11 @@ is( $messages->{NeedsTransfer}, $samplebranch1->{branchcode}, "AddReturn respect
 $query =
 "INSERT INTO issues (borrowernumber,itemnumber,branchcode) VALUES( ?,?,? )";
 $dbh->do( $query, {}, $borrower_id1, $item_id3, $samplebranch1->{branchcode} );
+t::lib::Mocks::mock_preference( 'item-level_itypes', 1 );
 ($doreturn, $messages, $iteminformation, $borrower) = AddReturn('barcode_3',
     $samplebranch1->{branchcode});
 is($messages->{NeedsTransfer},undef,"AddReturn respects branch item return policy - noreturn");
+t::lib::Mocks::mock_preference( 'item-level_itypes', 0 );
 
 $schema->storage->txn_rollback;
 
-1;

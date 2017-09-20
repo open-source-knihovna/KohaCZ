@@ -18,7 +18,7 @@ use C4::Budgets;
 use C4::Biblio;
 
 use Koha::Acquisition::Booksellers;
-use Koha::Acquisition::Order;
+use Koha::Acquisition::Orders;
 use Koha::Database;
 
 BEGIN {
@@ -129,7 +129,7 @@ for my $bookseller ( @booksellers ) {
 
 $sample_supplier1->{id} = $id_supplier1;
 is( scalar(@booksellers), $count + 2, "Get  Supplier1 and Supplier2" );
-my @tab = ( $sample_supplier1, $sample_supplier2 );
+my @tab = ( $sample_supplier2, $sample_supplier1 );
 is_deeply( \@booksellers, \@tab,
     "Returns right fields of Supplier1 and Supplier2" );
 
@@ -365,8 +365,8 @@ my $order1 = Koha::Acquisition::Order->new(
         ecost            => 10,
         datereceived     => '01-06-2013'
     }
-)->insert;
-my $ordernumber1 = $order1->{ordernumber};
+)->store;
+my $ordernumber1 = $order1->ordernumber;
 
 my $order2 = Koha::Acquisition::Order->new(
     {
@@ -383,8 +383,8 @@ my $order2 = Koha::Acquisition::Order->new(
         rrp            => 10,
         ecost          => 10,
     }
-)->insert;
-my $ordernumber2 = $order2->{ordernumber};
+)->store;
+my $ordernumber2 = $order2->ordernumber;
 
 my $order3 = Koha::Acquisition::Order->new(
     {
@@ -401,8 +401,8 @@ my $order3 = Koha::Acquisition::Order->new(
         rrp            => 11,
         ecost          => 11,
     }
-)->insert;
-my $ordernumber3 = $order3->{ordernumber};
+)->store;
+my $ordernumber3 = $order3->ordernumber;
 
 my $order4 = Koha::Acquisition::Order->new(
     {
@@ -420,8 +420,8 @@ my $order4 = Koha::Acquisition::Order->new(
         ecost            => 11,
         quantityreceived => 20
     }
-)->insert;
-my $ordernumber4 = $order4->{ordernumber};
+)->store;
+my $ordernumber4 = $order4->ordernumber;
 
 #Test cases:
 # Sample datas :

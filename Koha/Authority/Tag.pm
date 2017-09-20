@@ -1,4 +1,4 @@
-package Koha::Tmp::Orders;
+package Koha::Authority::Tag;
 
 # This file is part of Koha.
 #
@@ -17,17 +17,11 @@ package Koha::Tmp::Orders;
 
 use Modern::Perl;
 
-use Carp;
-
-use Koha::Database;
-
-use Koha::Tmp::Order;
-
-use base qw(Koha::Objects);
+use base qw(Koha::Object);
 
 =head1 NAME
 
-Koha::Tmp::Orders - This is a temporary class to make notices working with orders
+Koha::Authority::Tag - Koha Authority Tag Object class
 
 =head1 API
 
@@ -40,11 +34,7 @@ Koha::Tmp::Orders - This is a temporary class to make notices working with order
 =cut
 
 sub _type {
-    return 'Aqorder';
-}
-
-sub object_class {
-    return 'Koha::Tmp::Order';
+    return 'AuthTagStructure';
 }
 
 1;

@@ -153,6 +153,7 @@ foreach my $item (@{$items}) {
         );
 
         $patron_card->draw_guide_box($pdf) if $print_layout_xml->{'guide_box'};
+        $patron_card->draw_guide_grid($pdf) if $print_layout_xml->{'guide_grid'};
         $patron_card->draw_barcode($pdf) if $print_layout_xml->{'barcode'};
 
 #       Do image foo and place binary image data into layout hash

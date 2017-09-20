@@ -28,8 +28,8 @@ use C4::Contract;
 use C4::Debug;
 use C4::Templates qw(gettemplate);
 use Koha::DateUtils qw( dt_from_string output_pref );
-use Koha::Acquisition::Order;
 use Koha::Acquisition::Booksellers;
+use Koha::Acquisition::Orders;
 use Koha::Biblios;
 use Koha::Items;
 use Koha::Number::Price;
@@ -240,8 +240,10 @@ sub CloseBasket {
     my $dbh        = C4::Context->dbh;
     $dbh->do('UPDATE aqbasket SET closedate=now() WHERE basketno=?', {}, $basketno );
 
-    $dbh->do( q{UPDATE aqorders SET orderstatus = 'ordered' WHERE basketno = ? AND orderstatus != 'complete'},
-        {}, $basketno);
+    $dbh->do(
+q{UPDATE aqorders SET orderstatus = 'ordered' WHERE basketno = ? AND orderstatus NOT IN ( 'complete', 'cancelled')},
+        {}, $basketno
+    );
     return;
 }
 
@@ -1483,7 +1485,7 @@ sub ModReceiveOrder {
         $order->{datereceived} = $datereceived;
         $order->{invoiceid} = $invoice->{invoiceid};
         $order->{orderstatus} = 'complete';
-        $new_ordernumber = Koha::Acquisition::Order->new($order)->insert->{ordernumber};
+        $new_ordernumber = Koha::Acquisition::Order->new($order)->store->ordernumber; # TODO What if the store fails?
 
         if ($received_items) {
             foreach my $itemnumber (@$received_items) {
@@ -1949,8 +1951,11 @@ sub TransferOrder {
 
     return unless ($ordernumber and $basketno);
 
-    my $order = GetOrder( $ordernumber );
-    return if $order->{datereceived};
+    my $order = Koha::Acquisition::Orders->find( $ordernumber ) or return;
+    return if $order->datereceived;
+
+    $order = $order->unblessed;
+
     my $basket = GetBasket($basketno);
     return unless $basket;
 
@@ -1969,7 +1974,7 @@ sub TransferOrder {
     delete $order->{parent_ordernumber};
     $order->{'basketno'} = $basketno;
 
-    my $newordernumber = Koha::Acquisition::Order->new($order)->insert->{ordernumber};
+    my $newordernumber = Koha::Acquisition::Order->new($order)->store->ordernumber;
 
     $query = q{
         UPDATE aqorders_items

@@ -31,6 +31,7 @@ use C4::Members;
 use C4::Reserves;
 use Koha::Database;
 use Koha::DateUtils;
+use Koha::Holds;
 use Koha::Library;
 use Koha::Patrons;
 
@@ -62,7 +63,6 @@ my $builder = t::lib::TestBuilder->new();
 $dbh->do(q|DELETE FROM issues|);
 $dbh->do(q|DELETE FROM items|);
 $dbh->do(q|DELETE FROM borrowers|);
-$dbh->do(q|DELETE FROM branches|);
 $dbh->do(q|DELETE FROM categories|);
 $dbh->do(q|DELETE FROM accountlines|);
 $dbh->do(q|DELETE FROM issuingrules|);
@@ -373,8 +373,8 @@ my $reserve_id = AddReserve($branchcode_1, $borrower_id1, $biblionumber,
     undef,  1, undef, undef, "a note", "a title", undef, '');
 ok( $reserve_id, 'The reserve should have been inserted' );
 AddIssue( $borrower_2, $barcode_1, dt_from_string, 'cancel' );
-my $reserve = GetReserve( $reserve_id );
-is( $reserve, undef, 'The reserve should have been correctly cancelled' );
+my $hold = Koha::Holds->find( $reserve_id );
+is( $hold, undef, 'The reserve should have been correctly cancelled' );
 
 #End transaction
 $schema->storage->txn_rollback;

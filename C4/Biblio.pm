@@ -293,7 +293,7 @@ sub ModBiblio {
     }
 
     if ( C4::Context->preference("CataloguingLog") ) {
-        my $newrecord = GetMarcBiblio($biblionumber);
+        my $newrecord = GetMarcBiblio({ biblionumber => $biblionumber });
         logaction( "CATALOGUING", "MODIFY", $biblionumber, "biblio BEFORE=>" . $newrecord->as_formatted );
     }
 
@@ -406,9 +406,8 @@ sub DelBiblio {
     # We delete any existing holds
     my $biblio = Koha::Biblios->find( $biblionumber );
     my $holds = $biblio->holds;
-    require C4::Reserves;
     while ( my $hold = $holds->next ) {
-        C4::Reserves::CancelReserve({ reserve_id => $hold->reserve_id }); # TODO Replace with $hold->cancel
+        $hold->cancel;
     }
 
     # Delete in Zebra. Be careful NOT to move this line after _koha_delete_biblio
@@ -569,6 +568,11 @@ sub LinkBibHeadingsToAuthorities {
 # of change to a core API just before the 3.0 release.
 
                     if ( C4::Context->preference('marcflavour') eq 'MARC21' ) {
+                        my $userenv = C4::Context->userenv;
+                        my $library;
+                        if ( $userenv && $userenv->{'branch'} ) {
+                            $library = Koha::Libraries->find( $userenv->{'branch'} );
+                        }
                         $marcrecordauth->insert_fields_ordered(
                             MARC::Field->new(
                                 '667', '', '',
@@ -583,7 +587,7 @@ sub LinkBibHeadingsToAuthorities {
                         $cite =~ s/[\s\,]*$//;
                         $cite =
                             "Work cat.: ("
-                          . C4::Context->preference('MARCOrgCode') . ")"
+                          . ( $library ? $library->get_effective_marcorgcode : C4::Context->preference('MARCOrgCode') ) . ")"
                           . $bib->subfield( '999', 'c' ) . ": "
                           . $cite;
                         $marcrecordauth->insert_fields_ordered(
@@ -1136,10 +1140,17 @@ sub GetMarcSubfieldStructureFromKohaField {
 
 =head2 GetMarcBiblio
 
-  my $record = GetMarcBiblio($biblionumber, [$embeditems], [$opac]);
+  my $record = GetMarcBiblio({
+      biblionumber => $biblionumber,
+      embed_items  => $embeditems,
+      opac         => $opac });
 
 Returns MARC::Record representing a biblio record, or C<undef> if the
 biblionumber doesn't exist.
+
+Both embed_items and opac are optional.
+If embed_items is passed and is 1, items are embedded.
+If opac is passed and is 1, the record is filtered as needed.
 
 =over 4
 
@@ -1161,9 +1172,16 @@ OpacHiddenItems to be applied.
 =cut
 
 sub GetMarcBiblio {
-    my $biblionumber = shift;
-    my $embeditems   = shift || 0;
-    my $opac         = shift || 0;
+    my ($params) = @_;
+
+    if (not defined $params) {
+        carp 'GetMarcBiblio called without parameters';
+        return;
+    }
+
+    my $biblionumber = $params->{biblionumber};
+    my $embeditems   = $params->{embed_items} || 0;
+    my $opac         = $params->{opac} || 0;
 
     if (not defined $biblionumber) {
         carp 'GetMarcBiblio called with undefined biblionumber';
@@ -2181,7 +2199,7 @@ sub PrepHostMarcField {
     $marcflavour ||="MARC21";
     
     require C4::Items;
-    my $hostrecord = GetMarcBiblio($hostbiblionumber);
+    my $hostrecord = GetMarcBiblio({ biblionumber => $hostbiblionumber });
 	my $item = C4::Items::GetItem($hostitemnumber);
 	
 	my $hostmarcfield;
@@ -2830,7 +2848,9 @@ sub ModZebra {
         );
         if ( $op eq 'specialUpdate' ) {
             unless ($record) {
-                $record = GetMarcBiblio($biblionumber, 1);
+                $record = GetMarcBiblio({
+                    biblionumber => $biblionumber,
+                    embed_items  => 1 });
             }
             my $records = [$record];
             $indexer->update_index_background( [$biblionumber], [$record] );
@@ -3443,7 +3463,7 @@ Generate the host item entry for an analytic child entry
 sub prepare_host_field {
     my ( $hostbiblio, $marcflavour ) = @_;
     $marcflavour ||= C4::Context->preference('marcflavour');
-    my $host = GetMarcBiblio($hostbiblio);
+    my $host = GetMarcBiblio({ biblionumber => $hostbiblio });
     # unfortunately as_string does not 'do the right thing'
     # if field returns undef
     my %sfd;
@@ -3581,7 +3601,7 @@ sub UpdateTotalIssues {
     my ($biblionumber, $increase, $value) = @_;
     my $totalissues;
 
-    my $record = GetMarcBiblio($biblionumber);
+    my $record = GetMarcBiblio({ biblionumber => $biblionumber });
     unless ($record) {
         carp "UpdateTotalIssues could not get biblio record";
         return;

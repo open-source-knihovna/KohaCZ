@@ -36,6 +36,7 @@ use Koha::Authorities;
 use Koha::Authority::MergeRequest;
 use Koha::Authority::Types;
 use Koha::Authority;
+use Koha::Libraries;
 use Koha::SearchEngine;
 use Koha::SearchEngine::Search;
 
@@ -55,8 +56,6 @@ BEGIN {
     	&GetAuthority
     	&GetAuthorityXML
 
-    	&CountUsage
-    	&CountUsageChildren
     	&SearchAuthorities
     
         &BuildSummary
@@ -333,7 +332,7 @@ sub SearchAuthorities {
         ###
         if (! $skipmetadata) {
             for (my $z=0; $z<@finalresult; $z++){
-                my  $count=CountUsage($finalresult[$z]{authid});
+                my $count = Koha::Authorities->get_usage_count({ authid => $finalresult[$z]{authid} });
                 $finalresult[$z]{used}=$count;
             }# all $z's
         }
@@ -344,43 +343,6 @@ sub SearchAuthorities {
     # $oAuth[0]->destroy();
 
     return (\@finalresult, $nbresults);
-}
-
-=head2 CountUsage 
-
-  $count= &CountUsage($authid)
-
-counts Usage of Authid in bibliorecords. 
-
-=cut
-
-sub CountUsage {
-    my ($authid) = @_;
-        ### ZOOM search here
-        my $query;
-        $query= "an:".$authid;
-        # Should really be replaced with a real count call, this is a
-        # bad way.
-        my $searcher = Koha::SearchEngine::Search->new({index => $Koha::SearchEngine::BIBLIOS_INDEX});
-        my ($err,$res,$result) = $searcher->simple_search_compat($query,0,1);
-        if ($err) {
-            warn "Error: $err from search $query";
-            $result = 0;
-        }
-
-        return $result;
-}
-
-=head2 CountUsageChildren 
-
-  $count= &CountUsageChildren($authid)
-
-counts Usage of narrower terms of Authid in bibliorecords.
-
-=cut
-
-sub CountUsageChildren {
-  my ($authid) = @_;
 }
 
 =head2 GuessAuthTypeCode
@@ -611,12 +573,19 @@ sub AddAuthority {
 
     SetUTF8Flag($record);
 	if ($format eq "MARC21") {
+        my $userenv = C4::Context->userenv;
+        my $library;
+        my $marcorgcode = C4::Context->preference('MARCOrgCode');
+        if ( $userenv && $userenv->{'branch'} ) {
+            $library = Koha::Libraries->find( $userenv->{'branch'} );
+            $marcorgcode = $library->get_effective_marcorgcode;
+        }
 		if (!$record->leader) {
 			$record->leader($leader);
 		}
 		if (!$record->field('003')) {
 			$record->insert_fields_ordered(
-				MARC::Field->new('003',C4::Context->preference('MARCOrgCode'))
+                MARC::Field->new('003', $marcorgcode),
 			);
 		}
 		my $date=POSIX::strftime("%y%m%d",localtime);
@@ -635,8 +604,8 @@ sub AddAuthority {
 		if (!$record->field('040')) {
 		 $record->insert_fields_ordered(
         MARC::Field->new('040','','',
-				'a' => C4::Context->preference('MARCOrgCode'),
-				'c' => C4::Context->preference('MARCOrgCode')
+            'a' => $marcorgcode,
+            'c' => $marcorgcode,
 				) 
 			);
     }
@@ -1449,6 +1418,14 @@ sub merge {
 
     my @record_to;
     @record_to = $MARCto->field($auth_tag_to_report_to)->subfields() if $auth_tag_to_report_to && $MARCto && $MARCto->field($auth_tag_to_report_to);
+    # Exceptional: If MARCto and authtypeto exist but $auth_tag_to_report_to
+    # is empty, make sure that $9 and $a remain (instead of clearing the
+    # reference) in order to allow for data recovery.
+    # Note: We need $a too, since a single $9 does not pass ModBiblio.
+    if( $MARCto && $authtypeto && !@record_to  ) {
+        push @record_to, [ 'a', ' ' ]; # do not remove the space
+    }
+
     my @record_from;
     if( !$authfrom && $MARCfrom && $MARCfrom->field('1..','2..') ) {
     # postponed merge, authfrom was deleted and MARCfrom only contains the old reporting tag (and possibly a 100 for UNIMARC)
@@ -1463,7 +1440,7 @@ sub merge {
     # For a deleted authority record, we scan all auth controlled fields
     my $dbh = C4::Context->dbh;
     my $sql = "SELECT DISTINCT tagfield FROM marc_subfield_structure WHERE authtypecode=?";
-    my $tags_using_authtype = $authtypefrom ? $dbh->selectcol_arrayref( $sql, undef, ( $authtypefrom->authtypecode )) : $dbh->selectcol_arrayref( "SELECT DISTINCT tagfield FROM marc_subfield_structure WHERE authtypecode IS NOT NULL AND authtypecode<>''" );
+    my $tags_using_authtype = $authtypefrom && $authtypefrom->authtypecode ? $dbh->selectcol_arrayref( $sql, undef, ( $authtypefrom->authtypecode )) : $dbh->selectcol_arrayref( "SELECT DISTINCT tagfield FROM marc_subfield_structure WHERE authtypecode IS NOT NULL AND authtypecode<>''" );
     my $tags_new;
     if( $authtypeto && ( !$authtypefrom || $authtypeto->authtypecode ne $authtypefrom->authtypecode )) {
         $tags_new = $dbh->selectcol_arrayref( $sql, undef, ( $authtypeto->authtypecode ));
@@ -1481,7 +1458,7 @@ sub merge {
 
     my $counteditedbiblio = 0;
     foreach my $biblionumber ( @biblionumbers ) {
-        my $marcrecord = GetMarcBiblio( $biblionumber );
+        my $marcrecord = GetMarcBiblio({ biblionumber => $biblionumber });
         next if !$marcrecord;
         my $update = 0;
         foreach my $tagfield (@$tags_using_authtype) {
@@ -1499,7 +1476,7 @@ sub merge {
                     $update = 1;
                     next;
                 }
-                my $newtag = $tags_new
+                my $newtag = $tags_new && @$tags_new
                   ? _merge_newtag( $tag, $tags_new )
                   : $tag;
                 my $field_to = MARC::Field->new(
@@ -1518,7 +1495,7 @@ sub merge {
                         $field_to->add_subfields( $subfield->[0], $subfield->[1] );
                     }
                 }
-                if ($tags_new) {
+                if ($tags_new && @$tags_new) {
                     $marcrecord->delete_field($field);
                     append_fields_ordered( $marcrecord, $field_to );
                 } else {

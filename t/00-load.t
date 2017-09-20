@@ -23,15 +23,12 @@ use Test::More;
 use File::Spec;
 use File::Find;
 use English qw( -no_match_vars );
-use t::lib::Mocks;
 
 =head1 DESCRIPTION
 
 00-load.t: This script is called by the pre-commit git hook to test modules compile
 
 =cut
-
-use Test::DBIx::Class;
 
 # Loop through the C4:: modules
 my $lib = File::Spec->rel2abs('C4');
@@ -109,4 +106,3 @@ sub is_testable {
 
 done_testing();
 
-1;

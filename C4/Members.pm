@@ -1129,46 +1129,58 @@ sub IssueSlip {
         }
     }
 
-    # Sort on timestamp then on issuedate (useful for tests and could be if modified in a batch
+    # Sort on timestamp then on issuedate then on issue_id
+    # useful for tests and could be if modified in a batch
     @issues = sort {
-        my $s = $b->{timestamp} <=> $a->{timestamp};
-        $s == 0 ?
-             $b->{issuedate} <=> $a->{issuedate} : $s;
+            $b->{timestamp} <=> $a->{timestamp}
+         or $b->{issuedate} <=> $a->{issuedate}
+         or $b->{issue_id}  <=> $a->{issue_id}
     } @issues;
 
-    my ($letter_code, %repeat);
+    my ($letter_code, %repeat, %loops);
     if ( $quickslip ) {
         $letter_code = 'ISSUEQSLIP';
-        %repeat =  (
-            'checkedout' => [ map {
+        my @checkouts = map {
                 'biblio'       => $_,
                 'items'        => $_,
                 'biblioitems'  => $_,
                 'issues'       => $_,
-            }, grep { $_->{'now'} } @issues ],
+            }, grep { $_->{'now'} } @issues;
+        %repeat =  (
+            checkedout => \@checkouts, # History syntax
+        );
+        %loops = (
+            issues => [ map { $_->{issues}{itemnumber} } @checkouts ], # TT syntax
         );
     }
     else {
+        my @checkouts = map {
+            'biblio'        => $_,
+              'items'       => $_,
+              'biblioitems' => $_,
+              'issues'      => $_,
+        }, grep { !$_->{'overdue'} } @issues;
+        my @overdues = map {
+            'biblio'        => $_,
+              'items'       => $_,
+              'biblioitems' => $_,
+              'issues'      => $_,
+        }, grep { $_->{'overdue'} } @issues;
+        my $news = GetNewsToDisplay( "slip", $branch );
+        my @news = map {
+            $_->{'timestamp'} = $_->{'newdate'};
+            { opac_news => $_ }
+        } @$news;
         $letter_code = 'ISSUESLIP';
-        %repeat =  (
-            'checkedout' => [ map {
-                'biblio'       => $_,
-                'items'        => $_,
-                'biblioitems'  => $_,
-                'issues'       => $_,
-            }, grep { !$_->{'overdue'} } @issues ],
-
-            'overdue' => [ map {
-                'biblio'       => $_,
-                'items'        => $_,
-                'biblioitems'  => $_,
-                'issues'       => $_,
-            }, grep { $_->{'overdue'} } @issues ],
-
-            'news' => [ map {
-                $_->{'timestamp'} = $_->{'newdate'};
-                { opac_news => $_ }
-            } @{ GetNewsToDisplay("slip",$branch) } ],
+        %repeat      = (
+            checkedout => \@checkouts,
+            overdue    => \@overdues,
+            news       => \@news,
+        );
+        %loops = (
+            issues => [ map { $_->{issues}{itemnumber} } @checkouts ],
+            overdues   => [ map { $_->{issues}{itemnumber} } @overdues ],
+            opac_news => [ map { $_->{opac_news}{idnew} } @news ],
         );
     }
 
@@ -1182,6 +1194,7 @@ sub IssueSlip {
             'borrowers'   => $borrowernumber,
         },
         repeat => \%repeat,
+        loops => \%loops,
     );
 }
 

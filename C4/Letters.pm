@@ -1525,7 +1525,7 @@ sub _get_tt_params {
             pk       => 'idnew',
         },
         aqorders => {
-            module   => 'Koha::Tmp::Orders', # Should Koha::Acquisition::Orders when will be based on Koha::Objects
+            module   => 'Koha::Acquisition::Orders',
             singular => 'order',
             plural   => 'orders',
             pk       => 'ordernumber',
@@ -1566,6 +1566,12 @@ sub _get_tt_params {
             plural   => 'old_checkouts',
             fk       => 'itemnumber',
         },
+        overdues => {
+            module   => 'Koha::Checkouts',
+            singular => 'overdue',
+            plural   => 'overdues',
+            fk       => 'itemnumber',
+        },
         borrower_modifications => {
             module   => 'Koha::Patron::Modifications',
             singular => 'patron_modification',
@@ -1590,7 +1596,18 @@ sub _get_tt_params {
                     croak "ERROR processing table $table. Wrong API call.";
                 }
                 my $key = $pk ? $pk : $fk;
-                my $objects = $module->search( { $key => { -in => $values } } );
+                # $key does not come from user input
+                my $objects = $module->search(
+                    { $key => $values },
+                    {
+                            # We want to retrieve the data in the same order
+                            # FIXME MySQLism
+                            # field is a MySQLism, but they are no other way to do it
+                            # To be generic we could do it in perl, but we will need to fetch
+                            # all the data then order them
+                        @$values ? ( order_by => \[ "field($key, " . join( ', ', @$values ) . ")" ] ) : ()
+                    }
+                );
                 $params->{ $config->{$table}->{plural} } = $objects;
             }
             elsif ( $ref eq q{} || $ref eq 'HASH' ) {
@@ -1632,6 +1649,39 @@ sub _get_tt_params {
     return $params;
 }
 
+=head2 get_item_content
+
+    my $item = Koha::Items->find(...)->unblessed;
+    my @item_content_fields = qw( date_due title barcode author itemnumber );
+    my $item_content = C4::Letters::get_item_content({
+                             item => $item,
+                             item_content_fields => \@item_content_fields
+                       });
+
+This function generates a tab-separated list of values for the passed item. Dates
+are formatted following the current setup.
+
+=cut
+
+sub get_item_content {
+    my ( $params ) = @_;
+    my $item = $params->{item};
+    my $dateonly = $params->{dateonly} || 0;
+    my $item_content_fields = $params->{item_content_fields} || [];
+
+    return unless $item;
+
+    my @item_info = map {
+        $_ =~ /^date|date$/
+          ? eval {
+            output_pref(
+                { dt => dt_from_string( $item->{$_} ), dateonly => $dateonly } );
+          }
+          : $item->{$_}
+          || ''
+    } @$item_content_fields;
+    return join( "\t", @item_info ) . "\n";
+}
 
 1;
 __END__

@@ -21,6 +21,7 @@ use Modern::Perl;
 
 use Test::More tests => 22;
 use Test::Warn;
+use Time::Fake;
 use DateTime;
 
 use C4::Biblio;
@@ -31,6 +32,7 @@ use C4::Circulation;
 use Koha::Holds;
 use Koha::Patron;
 use Koha::Patrons;
+use Koha::Patron::Categories;
 use Koha::Database;
 use Koha::DateUtils;
 use Koha::Virtualshelves;
@@ -242,80 +244,91 @@ subtest 'is_going_to_expire' => sub {
 
 
 subtest 'renew_account' => sub {
-    plan tests => 10;
-    my $a_month_ago                = dt_from_string->add( months => -1 )->truncate( to => 'day' );
-    my $a_year_later               = dt_from_string->add( months => 12 )->truncate( to => 'day' );
-    my $a_year_later_minus_a_month = dt_from_string->add( months => 11 )->truncate( to => 'day' );
-    my $a_month_later              = dt_from_string->add( months => 1  )->truncate( to => 'day' );
-    my $a_year_later_plus_a_month  = dt_from_string->add( months => 13 )->truncate( to => 'day' );
-    my $patron_category = $builder->build(
-        {   source => 'Category',
-            value  => {
-                enrolmentperiod     => 12,
-                enrolmentperioddate => undef,
+    plan tests => 36;
+
+    for my $date ( '2016-03-31', '2016-11-30', dt_from_string() ) {
+        my $dt = dt_from_string( $date, 'iso' );
+        Time::Fake->offset( $dt->epoch );
+        my $a_month_ago                = $dt->clone->subtract( months => 1, end_of_month => 'limit' )->truncate( to => 'day' );
+        my $a_year_later               = $dt->clone->add( months => 12, end_of_month => 'limit' )->truncate( to => 'day' );
+        my $a_year_later_minus_a_month = $dt->clone->add( months => 11, end_of_month => 'limit' )->truncate( to => 'day' );
+        my $a_month_later              = $dt->clone->add( months => 1 , end_of_month => 'limit' )->truncate( to => 'day' );
+        my $a_year_later_plus_a_month  = $dt->clone->add( months => 13, end_of_month => 'limit' )->truncate( to => 'day' );
+        my $patron_category = $builder->build(
+            {   source => 'Category',
+                value  => {
+                    enrolmentperiod     => 12,
+                    enrolmentperioddate => undef,
+                }
             }
-        }
-    );
-    my $patron = $builder->build(
-        {   source => 'Borrower',
-            value  => {
-                dateexpiry   => $a_month_ago,
-                categorycode => $patron_category->{categorycode},
+        );
+        my $patron = $builder->build(
+            {   source => 'Borrower',
+                value  => {
+                    dateexpiry   => $a_month_ago,
+                    categorycode => $patron_category->{categorycode},
+                    date_renewed => undef, # Force builder to not populate the column for new patron
+                }
             }
-        }
-    );
-    my $patron_2 = $builder->build(
-        {  source => 'Borrower',
-           value  => {
-               dateexpiry => $a_month_ago,
-               categorycode => $patron_category->{categorycode},
+        );
+        my $patron_2 = $builder->build(
+            {  source => 'Borrower',
+               value  => {
+                   dateexpiry => $a_month_ago,
+                   categorycode => $patron_category->{categorycode},
+                }
             }
-        }
-    );
-    my $patron_3 = $builder->build(
-        {  source => 'Borrower',
-           value  => {
-               dateexpiry => $a_month_later,
-               categorycode => $patron_category->{categorycode},
-           }
-        }
-    );
-    my $retrieved_patron = Koha::Patrons->find( $patron->{borrowernumber} );
-    my $retrieved_patron_2 = Koha::Patrons->find( $patron_2->{borrowernumber} );
-    my $retrieved_patron_3 = Koha::Patrons->find( $patron_3->{borrowernumber} );
+        );
+        my $patron_3 = $builder->build(
+            {  source => 'Borrower',
+               value  => {
+                   dateexpiry => $a_month_later,
+                   categorycode => $patron_category->{categorycode},
+               }
+            }
+        );
+        my $retrieved_patron = Koha::Patrons->find( $patron->{borrowernumber} );
+        my $retrieved_patron_2 = Koha::Patrons->find( $patron_2->{borrowernumber} );
+        my $retrieved_patron_3 = Koha::Patrons->find( $patron_3->{borrowernumber} );
 
-    t::lib::Mocks::mock_preference( 'BorrowerRenewalPeriodBase', 'dateexpiry' );
-    t::lib::Mocks::mock_preference( 'BorrowersLog',              1 );
-    my $expiry_date = $retrieved_patron->renew_account;
-    is( $expiry_date, $a_year_later_minus_a_month, );
-    my $retrieved_expiry_date = Koha::Patrons->find( $patron->{borrowernumber} )->dateexpiry;
-    is( dt_from_string($retrieved_expiry_date), $a_year_later_minus_a_month );
-    my $number_of_logs = $schema->resultset('ActionLog')->search( { module => 'MEMBERS', action => 'RENEW', object => $retrieved_patron->borrowernumber } )->count;
-    is( $number_of_logs, 1, 'With BorrowerLogs, Koha::Patron->renew_account should have logged' );
+        is( $retrieved_patron->date_renewed, undef, "Date renewed is not set for patrons that have never been renewed" );
 
-    t::lib::Mocks::mock_preference( 'BorrowerRenewalPeriodBase', 'now' );
-    t::lib::Mocks::mock_preference( 'BorrowersLog',              0 );
-    $expiry_date = $retrieved_patron->renew_account;
-    is( $expiry_date, $a_year_later, );
-    $retrieved_expiry_date = Koha::Patrons->find( $patron->{borrowernumber} )->dateexpiry;
-    is( dt_from_string($retrieved_expiry_date), $a_year_later );
-    $number_of_logs = $schema->resultset('ActionLog')->search( { module => 'MEMBERS', action => 'RENEW', object => $retrieved_patron->borrowernumber } )->count;
-    is( $number_of_logs, 1, 'Without BorrowerLogs, Koha::Patron->renew_account should not have logged' );
+        t::lib::Mocks::mock_preference( 'BorrowerRenewalPeriodBase', 'dateexpiry' );
+        t::lib::Mocks::mock_preference( 'BorrowersLog',              1 );
+        my $expiry_date = $retrieved_patron->renew_account;
+        is( $expiry_date, $a_year_later_minus_a_month, "$a_month_ago + 12 months must be $a_year_later_minus_a_month" );
+        my $retrieved_expiry_date = Koha::Patrons->find( $patron->{borrowernumber} )->dateexpiry;
+        is( dt_from_string($retrieved_expiry_date), $a_year_later_minus_a_month, "$a_month_ago + 12 months must be $a_year_later_minus_a_month" );
+        my $number_of_logs = $schema->resultset('ActionLog')->search( { module => 'MEMBERS', action => 'RENEW', object => $retrieved_patron->borrowernumber } )->count;
+        is( $number_of_logs, 1, 'With BorrowerLogs, Koha::Patron->renew_account should have logged' );
 
-    t::lib::Mocks::mock_preference( 'BorrowerRenewalPeriodBase', 'combination' );
-    $expiry_date = $retrieved_patron_2->renew_account;
-    is( $expiry_date, $a_year_later );
-    $retrieved_expiry_date = Koha::Patrons->find( $patron_2->{borrowernumber} )->dateexpiry;
-    is( dt_from_string($retrieved_expiry_date), $a_year_later );
+        t::lib::Mocks::mock_preference( 'BorrowerRenewalPeriodBase', 'now' );
+        t::lib::Mocks::mock_preference( 'BorrowersLog',              0 );
+        $expiry_date = $retrieved_patron->renew_account;
+        is( $expiry_date, $a_year_later, "today + 12 months must be $a_year_later" );
+        $retrieved_patron = Koha::Patrons->find( $patron->{borrowernumber} );
+        is( $retrieved_patron->date_renewed, output_pref({ dt => $dt, dateformat => 'iso', dateonly => 1 }), "Date renewed is set when calling renew_account" );
+        $retrieved_expiry_date = $retrieved_patron->dateexpiry;
+        is( dt_from_string($retrieved_expiry_date), $a_year_later, "today + 12 months must be $a_year_later" );
+        $number_of_logs = $schema->resultset('ActionLog')->search( { module => 'MEMBERS', action => 'RENEW', object => $retrieved_patron->borrowernumber } )->count;
+        is( $number_of_logs, 1, 'Without BorrowerLogs, Koha::Patron->renew_account should not have logged' );
 
-    $expiry_date = $retrieved_patron_3->renew_account;
-    is( $expiry_date, $a_year_later_plus_a_month );
-    $retrieved_expiry_date = Koha::Patrons->find( $patron_3->{borrowernumber} )->dateexpiry;
-    is( dt_from_string($retrieved_expiry_date), $a_year_later_plus_a_month );
+        t::lib::Mocks::mock_preference( 'BorrowerRenewalPeriodBase', 'combination' );
+        $expiry_date = $retrieved_patron_2->renew_account;
+        is( $expiry_date, $a_year_later, "today + 12 months must be $a_year_later" );
+        $retrieved_expiry_date = Koha::Patrons->find( $patron_2->{borrowernumber} )->dateexpiry;
+        is( dt_from_string($retrieved_expiry_date), $a_year_later, "today + 12 months must be $a_year_later" );
 
-    $retrieved_patron->delete;
-    $retrieved_patron_2->delete;
-    $retrieved_patron_3->delete;
+        $expiry_date = $retrieved_patron_3->renew_account;
+        is( $expiry_date, $a_year_later_plus_a_month, "$a_month_later + 12 months must be $a_year_later_plus_a_month" );
+        $retrieved_expiry_date = Koha::Patrons->find( $patron_3->{borrowernumber} )->dateexpiry;
+        is( dt_from_string($retrieved_expiry_date), $a_year_later_plus_a_month, "$a_month_later + 12 months must be $a_year_later_plus_a_month" );
+
+        $retrieved_patron->delete;
+        $retrieved_patron_2->delete;
+        $retrieved_patron_3->delete;
+    }
+    Time::Fake->reset;
 };
 
 subtest "move_to_deleted" => sub {
@@ -368,14 +381,13 @@ subtest "delete" => sub {
 subtest 'add_enrolment_fee_if_needed' => sub {
     plan tests => 4;
 
-    my $enrolmentfee_K  = 5;
-    my $enrolmentfee_J  = 10;
-    my $enrolmentfee_YA = 20;
-
-    my $dbh = C4::Context->dbh;
-    $dbh->do(q|UPDATE categories set enrolmentfee=? where categorycode=?|, undef, $enrolmentfee_K, 'K');
-    $dbh->do(q|UPDATE categories set enrolmentfee=? where categorycode=?|, undef, $enrolmentfee_J, 'J');
-    $dbh->do(q|UPDATE categories set enrolmentfee=? where categorycode=?|, undef, $enrolmentfee_YA, 'YA');
+    my $enrolmentfees = { K  => 5, J => 10, YA => 20 };
+    foreach( keys %{$enrolmentfees} ) {
+        ( Koha::Patron::Categories->find( $_ ) // $builder->build_object({ class => 'Koha::Patron::Categories', value => { categorycode => $_ } }) )->enrolmentfee( $enrolmentfees->{$_} )->store;
+    }
+    my $enrolmentfee_K  = $enrolmentfees->{K};
+    my $enrolmentfee_J  = $enrolmentfees->{J};
+    my $enrolmentfee_YA = $enrolmentfees->{YA};
 
     my %borrower_data = (
         firstname    => 'my firstname',
@@ -906,4 +918,3 @@ is( Koha::Patrons->search->count, $nb_of_patrons + 1, 'Delete should have delete
 
 $schema->storage->txn_rollback;
 
-1;

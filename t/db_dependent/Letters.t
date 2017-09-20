@@ -18,7 +18,7 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Test::More tests => 75;
+use Test::More tests => 76;
 use Test::MockModule;
 use Test::Warn;
 
@@ -43,9 +43,9 @@ use t::lib::Mocks;
 use t::lib::TestBuilder;
 use Koha::Database;
 use Koha::DateUtils qw( dt_from_string output_pref );
-use Koha::Acquisition::Order;
 use Koha::Acquisition::Booksellers;
 use Koha::Acquisition::Bookseller::Contacts;
+use Koha::Acquisition::Orders;
 use Koha::Libraries;
 use Koha::Notice::Templates;
 my $schema = Koha::Database->schema;
@@ -184,6 +184,7 @@ is( $letters->[0]->{name}, 'my name', 'GetLetters gets the name correctly' );
 # getletter
 subtest 'getletter' => sub {
     plan tests => 16;
+    t::lib::Mocks::mock_preference('IndependentBranches', 0);
     my $letter = C4::Letters::getletter('my module', 'my code', $library->{branchcode}, 'email');
     is( $letter->{branchcode}, $library->{branchcode}, 'GetLetters gets the branch code correctly' );
     is( $letter->{module}, 'my module', 'GetLetters gets the module correctly' );
@@ -196,7 +197,9 @@ subtest 'getletter' => sub {
 
     my $context = Test::MockModule->new('C4::Context');
     $context->mock( 'userenv', sub {
-        return { branch => "anotherlib" }
+        return {
+            flags  => 1,
+            branch => "anotherlib" }
     });
 
     t::lib::Mocks::mock_preference('IndependentBranches', 1);
@@ -432,8 +435,8 @@ my $order = Koha::Acquisition::Order->new(
         biblionumber => $biblionumber,
         budget_id => $budgetid,
     }
-)->insert;
-my $ordernumber = $order->{ordernumber};
+)->store;
+my $ordernumber = $order->ordernumber;
 
 C4::Acquisition::CloseBasket( $basketno );
 my $err;
@@ -649,5 +652,39 @@ subtest 'SendQueuedMessages' => sub {
         status => 'sent'
     })->next()->to_address();
     is( $sms_message_address, '5555555555@kidclamp.rocks', 'SendQueuedMessages populates the to address correctly for SMS by email' );
+};
 
+subtest 'get_item_content' => sub {
+    plan tests => 2;
+
+    t::lib::Mocks::mock_preference('dateformat', 'metric');
+    t::lib::Mocks::mock_preference('timeformat', '24hr');
+    my @items = (
+        {date_due => '2041-01-01 12:34', title => 'a first title', barcode => 'a_first_barcode', author => 'a_first_author', itemnumber => 1 },
+        {date_due => '2042-01-02 23:45', title => 'a second title', barcode => 'a_second_barcode', author => 'a_second_author', itemnumber => 2 },
+    );
+    my @item_content_fields = qw( date_due title barcode author itemnumber );
+
+    my $items_content;
+    for my $item ( @items ) {
+        $items_content .= C4::Letters::get_item_content( { item => $item, item_content_fields => \@item_content_fields } );
+    }
+
+    my $expected_items_content = <<EOF;
+01/01/2041 12:34\ta first title\ta_first_barcode\ta_first_author\t1
+02/01/2042 23:45\ta second title\ta_second_barcode\ta_second_author\t2
+EOF
+    is( $items_content, $expected_items_content, 'get_item_content should return correct items info with time (default)' );
+
+
+    $items_content = q||;
+    for my $item ( @items ) {
+        $items_content .= C4::Letters::get_item_content( { item => $item, item_content_fields => \@item_content_fields, dateonly => 1, } );
+    }
+
+    $expected_items_content = <<EOF;
+01/01/2041\ta first title\ta_first_barcode\ta_first_author\t1
+02/01/2042\ta second title\ta_second_barcode\ta_second_author\t2
+EOF
+    is( $items_content, $expected_items_content, 'get_item_content should return correct items info without time (if dateonly => 1)' );
 };

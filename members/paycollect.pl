@@ -58,6 +58,10 @@ $template->param( credit_types => \@credit_types );
 # get borrower details
 my $borrowernumber = $input->param('borrowernumber');
 my $patron         = Koha::Patrons->find( $borrowernumber );
+unless ( $patron ) {
+    print $input->redirect("/cgi-bin/koha/circ/circulation.pl?borrowernumber=$borrowernumber");
+    exit;
+}
 my $borrower       = $patron->unblessed;
 my $category       = $patron->category;
 $borrower->{description} = $category->description;
@@ -74,8 +78,7 @@ my $writeoff     = $input->param('writeoff_individual');
 my $writeoffoutstanding = $input->param('writeOffOutstanding');
 my $select_lines = $input->param('selected');
 my $select       = $input->param('selected_accts');
-my $payment_note = uri_unescape $input->param('payment_note');
-my $accountno;
+my $payment_note = uri_unescape scalar $input->param('payment_note');
 my $accountlines_id;
 my $itemnumber;
 my $accounttype;
@@ -90,7 +93,6 @@ if ( $individual || $writeoff ) {
     $accountlines_id       = $input->param('accountlines_id');
     my $amount            = $input->param('amount');
     my $amountoutstanding = $input->param('amountoutstanding');
-    $accountno = $input->param('accountno');
     $itemnumber  = $input->param('itemnumber');
     my $description  = $input->param('description');
     my $title        = $input->param('title');
@@ -100,7 +102,6 @@ if ( $individual || $writeoff ) {
     $template->param(
         accounttype       => $accounttype,
         accountlines_id    => $accountlines_id,
-        accountno         => $accountno,
         amount            => $amount,
         amountoutstanding => $amountoutstanding,
         title             => $title,
@@ -164,12 +165,12 @@ if ( $total_paid and $total_paid ne '0.00' ) {
                     {
                         borrowernumber    => $borrowernumber,
                         amountoutstanding => { '<>' => 0 },
-                        accountno         => { 'IN' => \@acc },
+                        accountlines_id   => { 'IN' => \@acc },
                     },
                     { order_by => 'date' }
                 );
 
-                return Koha::Account->new(
+                Koha::Account->new(
                     {
                         patron_id => $borrowernumber,
                     }

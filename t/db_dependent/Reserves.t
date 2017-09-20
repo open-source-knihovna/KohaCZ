@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 72;
+use Test::More tests => 58;
 use Test::MockModule;
 use Test::Warn;
 
@@ -93,8 +93,7 @@ else {
         MARC::Field->new('245', '', '', a => $title),
     );
 }
-my ($bibnum, $bibitemnum);
-($bibnum, $title, $bibitemnum) = AddBiblio($bib, $frameworkcode);
+my ( $bibnum ) = AddBiblio($bib, $frameworkcode);
 
 # Create a helper item instance for testing
 my ( $item_bibnum, $item_bibitemnum, $itemnumber ) = AddItem(
@@ -235,7 +234,7 @@ $bib2->append_fields(
 );
 
 # create one item belonging to FPL and one belonging to CPL
-my ($bibnum2, $bibitemnum2) = AddBiblio($bib, $frameworkcode);
+my ( $bibnum2 ) = AddBiblio($bib, $frameworkcode);
 my ($itemnum_cpl, $itemnum_fpl);
 ( undef, undef, $itemnum_cpl ) = AddItem(
     {   homebranch    => $branch_1,
@@ -320,21 +319,6 @@ $biblio = Koha::Biblios->find( $biblionumber );
 $holds = $biblio->holds;
 is($holds->count, 1, "Only one reserves for this biblio");
 my $reserve_id = $holds->next->reserve_id;
-
-$reserve = GetReserve($reserve_id);
-isa_ok($reserve, 'HASH', "GetReserve return");
-is($reserve->{biblionumber}, $biblionumber);
-
-$reserve = CancelReserve({reserve_id => $reserve_id});
-isa_ok($reserve, 'HASH', "CancelReserve return");
-is($reserve->{biblionumber}, $biblionumber);
-
-$reserve = GetReserve($reserve_id);
-is($reserve, undef, "GetReserve returns undef after deletion");
-
-$reserve = CancelReserve({reserve_id => $reserve_id});
-is($reserve, undef, "CancelReserve return undef if reserve does not exist");
-
 
 # Tests for bug 9761 (ConfirmFutureHolds): new CheckReserves lookahead parameter, and corresponding change in AddReturn
 # Note that CheckReserve uses its lookahead parameter and does not check ConfirmFutureHolds pref (it should be passed if needed like AddReturn does)
@@ -530,7 +514,7 @@ t::lib::Mocks::mock_preference( 'AgeRestrictionMarker', 'FSK|PEGI|Age|K' );
 #Reserving an not-agerestricted Biblio by a Borrower with no dateofbirth is tested previously.
 
 #Set the ageRestriction for the Biblio
-my $record = GetMarcBiblio( $bibnum );
+my $record = GetMarcBiblio({ biblionumber =>  $bibnum });
 my ( $ageres_tagid, $ageres_subfieldid ) = GetMarcFromKohaField( "biblioitems.agerestriction" );
 $record->append_fields(  MARC::Field->new($ageres_tagid, '', '', $ageres_subfieldid => 'PEGI 16')  );
 C4::Biblio::ModBiblio( $record, $bibnum, $frameworkcode );
@@ -579,86 +563,6 @@ $dbh->do(
     $issuing_rule->categorycode, $issuing_rule->itemtype, $issuing_rule->branchcode
 );
 ok( !C4::Reserves::OnShelfHoldsAllowed($item, $borrower), "OnShelfHoldsAllowed() disallowed" );
-
-# Tests for bug 14464
-
-$dbh->do("DELETE FROM reserves WHERE biblionumber=?",undef,($bibnum));
-my $patron = Koha::Patrons->find( $borrowernumber );
-my $bz14464_fines = $patron->account->balance;
-is( !$bz14464_fines || $bz14464_fines==0, 1, 'Bug 14464 - No fines at beginning' );
-
-# First, test cancelling a reserve when there's no charge configured.
-t::lib::Mocks::mock_preference('ExpireReservesMaxPickUpDelayCharge', 0);
-
-my $bz14464_reserve = AddReserve(
-    $branch_1,
-    $borrowernumber,
-    $bibnum,
-    undef,
-    '1',
-    undef,
-    undef,
-    '',
-    $title,
-    $itemnumber,
-    'W'
-);
-
-ok( $bz14464_reserve, 'Bug 14464 - 1st reserve correctly created' );
-
-CancelReserve({ reserve_id => $bz14464_reserve, charge_cancel_fee => 1 });
-
-my $old_reserve = Koha::Database->new()->schema()->resultset('OldReserve')->find( $bz14464_reserve );
-is($old_reserve->get_column('found'), 'W', 'Bug 14968 - Keep found column from reserve');
-
-$bz14464_fines = $patron->account->balance;
-is( !$bz14464_fines || $bz14464_fines==0, 1, 'Bug 14464 - No fines after cancelling reserve with no charge configured' );
-
-# Then, test cancelling a reserve when there's no charge desired.
-t::lib::Mocks::mock_preference('ExpireReservesMaxPickUpDelayCharge', 42);
-
-$bz14464_reserve = AddReserve(
-    $branch_1,
-    $borrowernumber,
-    $bibnum,
-    undef,
-    '1',
-    undef,
-    undef,
-    '',
-    $title,
-    $itemnumber,
-    'W'
-);
-
-ok( $bz14464_reserve, 'Bug 14464 - 2nd reserve correctly created' );
-
-CancelReserve({ reserve_id => $bz14464_reserve });
-
-$bz14464_fines = $patron->account->balance;
-is( !$bz14464_fines || $bz14464_fines==0, 1, 'Bug 14464 - No fines after cancelling reserve with no charge desired' );
-
-# Finally, test cancelling a reserve when there's a charge desired and configured.
-$bz14464_reserve = AddReserve(
-    $branch_1,
-    $borrowernumber,
-    $bibnum,
-    undef,
-    '1',
-    undef,
-    undef,
-    '',
-    $title,
-    $itemnumber,
-    'W'
-);
-
-ok( $bz14464_reserve, 'Bug 14464 - 1st reserve correctly created' );
-
-CancelReserve({ reserve_id => $bz14464_reserve, charge_cancel_fee => 1 });
-
-$bz14464_fines = $patron->account->balance;
-is( int( $bz14464_fines ), 42, 'Bug 14464 - Fine applied after cancelling reserve with charge desired and configured' );
 
 # tests for MoveReserve in relation to ConfirmFutureHolds (BZ 14526)
 #   hold from A pos 1, today, no fut holds: MoveReserve should fill it

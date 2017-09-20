@@ -28,6 +28,7 @@ use C4::Output;
 use C4::AuthoritiesMarc;
 use C4::Biblio;
 
+use Koha::Authorities;
 use Koha::Biblios;
 
 my $input = new CGI;
@@ -80,7 +81,7 @@ if ( $op eq 'form' ) {
             }
             my $holds_count = $biblio->holds->count;
             $biblio = $biblio->unblessed;
-            my $record = &GetMarcBiblio( $record_id );
+            my $record = &GetMarcBiblio({ biblionumber => $record_id });
             $biblio->{subtitle} = GetRecordValue( 'subtitle', $record, GetFrameworkCode( $record_id ) );
             $biblio->{itemnumbers} = C4::Items::GetItemnumbersForBiblio( $record_id );
             $biblio->{holds_count} = $holds_count;
@@ -101,7 +102,7 @@ if ( $op eq 'form' ) {
             $authority = {
                 authid => $record_id,
                 summary => C4::AuthoritiesMarc::BuildSummary( $authority, $record_id ),
-                count_usage => C4::AuthoritiesMarc::CountUsage( $record_id ),
+                count_usage => Koha::Authorities->get_usage_count({ authid => $record_id }),
             };
             push @records, $authority;
         }
@@ -147,7 +148,7 @@ if ( $op eq 'form' ) {
             my $holds = $biblio->holds;
             while ( my $hold = $holds->next ) {
                 eval{
-                    C4::Reserves::CancelReserve( { reserve_id => $hold->reserve_id } );
+                    $hold->cancel;
                 };
                 if ( $@ ) {
                     push @messages, {

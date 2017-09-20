@@ -286,7 +286,7 @@ $prepared_letter = GetPreparedLetter(
 is( $prepared_letter->{content}, $modification->id(), 'Patron modification object used correctly' );
 
 subtest 'regression tests' => sub {
-    plan tests => 5;
+    plan tests => 7;
 
     my $library = $builder->build( { source => 'Branch' } );
     my $patron  = $builder->build( { source => 'Borrower' } );
@@ -314,6 +314,19 @@ subtest 'regression tests' => sub {
             holdingbranch    => $library->{branchcode},
             itype            => 'BK',
             itemcallnumber   => 'itemcallnumber2',
+        }
+    )->store->unblessed;
+    my $biblio3 = Koha::Biblio->new({title => 'Test Biblio 3'})->store->unblessed;
+    my $biblioitem3 = Koha::Biblioitem->new({biblionumber => $biblio3->{biblionumber}})->store()->unblessed;
+    my $item3 = Koha::Item->new(
+        {
+            biblionumber     => $biblio3->{biblionumber},
+            biblioitemnumber => $biblioitem3->{biblioitemnumber},
+            barcode          => 'another_t_barcode_3',
+            homebranch       => $library->{branchcode},
+            holdingbranch    => $library->{branchcode},
+            itype            => 'BK',
+            itemcallnumber   => 'itemcallnumber3',
         }
     )->store->unblessed;
 
@@ -582,6 +595,271 @@ EOF
         is( $tt_letter_for_item1->{content}, $letter_for_item1->{content}, );
         is( $tt_letter_for_item2->{content}, $letter_for_item2->{content}, );
     };
+
+    subtest 'ISSUESLIP|checkedout|repeat' => sub {
+        plan tests => 2;
+
+        my $code = 'ISSUESLIP';
+        my $now = dt_from_string;
+        my $one_minute_ago = dt_from_string->subtract( minutes => 1 );
+
+        my $branchcode = $library->{branchcode};
+
+        Koha::News->delete;
+        my $news_item = Koha::NewsItem->new({ branchcode => $branchcode, title => "A wonderful news", content => "This is the wonderful news." })->store;
+
+        # historic syntax
+        my $template = <<EOF;
+<h3><<branches.branchname>></h3>
+Checked out to <<borrowers.title>> <<borrowers.firstname>> <<borrowers.initials>> <<borrowers.surname>> <br />
+(<<borrowers.cardnumber>>) <br />
+
+<<today>><br />
+
+<h4>Checked Out</h4>
+<checkedout>
+<p>
+<<biblio.title>> <br />
+Barcode: <<items.barcode>><br />
+Date due: <<issues.date_due | dateonly>><br />
+</p>
+</checkedout>
+
+<h4>Overdues</h4>
+<overdue>
+<p>
+<<biblio.title>> <br />
+Barcode: <<items.barcode>><br />
+Date due: <<issues.date_due | dateonly>><br />
+</p>
+</overdue>
+
+<hr>
+
+<h4 style="text-align: center; font-style:italic;">News</h4>
+<news>
+<div class="newsitem">
+<h5 style="margin-bottom: 1px; margin-top: 1px"><b><<opac_news.title>></b></h5>
+<p style="margin-bottom: 1px; margin-top: 1px"><<opac_news.content>></p>
+<p class="newsfooter" style="font-size: 8pt; font-style:italic; margin-bottom: 1px; margin-top: 1px">Posted on <<opac_news.timestamp>></p>
+<hr />
+</div>
+</news>
+EOF
+
+        reset_template( { template => $template, code => $code, module => 'circulation' } );
+
+        my $checkout = C4::Circulation::AddIssue( $patron, $item1->{barcode} ); # Add a first checkout
+        $checkout->set_columns( { timestamp => $now, issuedate => $one_minute_ago } )->update; # FIXME $checkout is a Koha::Schema::Result::Issues, must be a Koha::Checkout
+        my $first_slip = C4::Members::IssueSlip( $branchcode, $patron->{borrowernumber} );
+
+        $checkout = C4::Circulation::AddIssue( $patron, $item2->{barcode} ); # Add a second checkout
+        $checkout->set_columns( { timestamp => $now, issuedate => $now } )->update;
+        my $yesterday = dt_from_string->subtract( days => 1 );
+        C4::Circulation::AddIssue( $patron, $item3->{barcode}, $yesterday ); # Add an overdue
+        my $second_slip = C4::Members::IssueSlip( $branchcode, $patron->{borrowernumber} );
+
+        # Cleanup
+        AddReturn( $item1->{barcode} );
+        AddReturn( $item2->{barcode} );
+        AddReturn( $item3->{barcode} );
+
+        # TT syntax
+        my $tt_template = <<EOF;
+<h3>[% branch.branchname %]</h3>
+Checked out to [% borrower.title %] [% borrower.firstname %] [% borrower.initials %] [% borrower.surname %] <br />
+([% borrower.cardnumber %]) <br />
+
+[% today | \$KohaDates with_hours => 1 %]<br />
+
+<h4>Checked Out</h4>
+[% FOREACH checkout IN checkouts %]
+[%~ SET item = checkout.item %]
+[%~ SET biblio = checkout.item.biblio %]
+<p>
+[% biblio.title %] <br />
+Barcode: [% item.barcode %]<br />
+Date due: [% checkout.date_due | \$KohaDates %]<br />
+</p>
+[% END %]
+
+<h4>Overdues</h4>
+[% FOREACH overdue IN overdues %]
+[%~ SET item = overdue.item %]
+[%~ SET biblio = overdue.item.biblio %]
+<p>
+[% biblio.title %] <br />
+Barcode: [% item.barcode %]<br />
+Date due: [% overdue.date_due | \$KohaDates %]<br />
+</p>
+[% END %]
+
+<hr>
+
+<h4 style="text-align: center; font-style:italic;">News</h4>
+[% FOREACH n IN news %]
+<div class="newsitem">
+<h5 style="margin-bottom: 1px; margin-top: 1px"><b>[% n.title %]</b></h5>
+<p style="margin-bottom: 1px; margin-top: 1px">[% n.content %]</p>
+<p class="newsfooter" style="font-size: 8pt; font-style:italic; margin-bottom: 1px; margin-top: 1px">Posted on [% n.timestamp | \$KohaDates %]</p>
+<hr />
+</div>
+[% END %]
+EOF
+
+        reset_template( { template => $tt_template, code => $code, module => 'circulation' } );
+
+        $checkout = C4::Circulation::AddIssue( $patron, $item1->{barcode} ); # Add a first checkout
+        $checkout->set_columns( { timestamp => $now, issuedate => $one_minute_ago } )->update;
+        my $first_tt_slip = C4::Members::IssueSlip( $branchcode, $patron->{borrowernumber} );
+
+        $checkout = C4::Circulation::AddIssue( $patron, $item2->{barcode} ); # Add a second checkout
+        $checkout->set_columns( { timestamp => $now, issuedate => $now } )->update;
+        C4::Circulation::AddIssue( $patron, $item3->{barcode}, $yesterday ); # Add an overdue
+        my $second_tt_slip = C4::Members::IssueSlip( $branchcode, $patron->{borrowernumber} );
+
+        # There is too many line breaks generated by the historic syntax
+        $second_slip->{content} =~ s|</p>\n\n\n<p>|</p>\n\n<p>|s;
+
+        is( $first_tt_slip->{content}, $first_slip->{content}, );
+        is( $second_tt_slip->{content}, $second_slip->{content}, );
+
+        # Cleanup
+        AddReturn( $item1->{barcode} );
+        AddReturn( $item2->{barcode} );
+        AddReturn( $item3->{barcode} );
+    };
+
+    subtest 'ODUE|items.content|item' => sub {
+        plan tests => 1;
+
+        my $code = 'ODUE';
+
+        my $branchcode = $library->{branchcode};
+
+        # historic syntax
+        # FIXME items.fine does not work with TT notices
+        # See bug 17976
+        # <item> should contain Fine: <<items.fine>></item>
+        my $template = <<EOF;
+Dear <<borrowers.firstname>> <<borrowers.surname>>,
+
+According to our current records, you have items that are overdue.Your library does not charge late fines, but please return or renew them at the branch below as soon as possible.
+
+<<branches.branchname>>
+<<branches.branchaddress1>>
+<<branches.branchaddress2>> <<branches.branchaddress3>>
+Phone: <<branches.branchphone>>
+Fax: <<branches.branchfax>>
+Email: <<branches.branchemail>>
+
+If you have registered a password with the library, and you have a renewal available, you may renew online. If an item becomes more than 30 days overdue, you will be unable to use your library card until the item is returned.
+
+The following item(s) is/are currently overdue:
+
+<item>"<<biblio.title>>" by <<biblio.author>>, <<items.itemcallnumber>>, Barcode: <<items.barcode>></item>
+
+<<items.content>>
+
+Thank-you for your prompt attention to this matter.
+
+<<branches.branchname>> Staff
+EOF
+
+        reset_template( { template => $template, code => $code, module => 'circulation' } );
+
+        my $yesterday = dt_from_string->subtract( days => 1 );
+        my $two_days_ago = dt_from_string->subtract( days => 2 );
+        my $issue1 = C4::Circulation::AddIssue( $patron, $item1->{barcode} ); # Add a first checkout
+        my $issue2 = C4::Circulation::AddIssue( $patron, $item2->{barcode}, $yesterday ); # Add an first overdue
+        my $issue3 = C4::Circulation::AddIssue( $patron, $item3->{barcode}, $two_days_ago ); # Add an second overdue
+        $issue1 = Koha::Checkout->_new_from_dbic( $issue1 )->unblessed; # ->unblessed should be enough but AddIssue does not return a Koha::Checkout object
+        $issue2 = Koha::Checkout->_new_from_dbic( $issue2 )->unblessed;
+        $issue3 = Koha::Checkout->_new_from_dbic( $issue3 )->unblessed;
+
+        # For items.content
+        my @item_fields = qw( date_due title barcode author itemnumber );
+        my $items_content = C4::Letters::get_item_content( { item => { %$item1, %$biblio1, %$issue1 }, item_content_fields => \@item_fields, dateonly => 1 } );
+          $items_content .= C4::Letters::get_item_content( { item => { %$item2, %$biblio2, %$issue2 }, item_content_fields => \@item_fields, dateonly => 1 } );
+          $items_content .= C4::Letters::get_item_content( { item => { %$item3, %$biblio3, %$issue3 }, item_content_fields => \@item_fields, dateonly => 1 } );
+
+        my @items = ( $item1, $item2, $item3 );
+        my $letter = C4::Overdues::parse_overdues_letter(
+            {
+                letter_code => $code,
+                borrowernumber => $patron->{borrowernumber},
+                branchcode  => $library->{branchcode},
+                items       => \@items,
+                substitute  => {
+                    bib                    => $library->{branchname},
+                    'items.content'        => $items_content,
+                    count                  => scalar( @items ),
+                    message_transport_type => 'email',
+                }
+            }
+        );
+
+        # Cleanup
+        AddReturn( $item1->{barcode} );
+        AddReturn( $item2->{barcode} );
+        AddReturn( $item3->{barcode} );
+
+
+        # historic syntax
+        my $tt_template = <<EOF;
+Dear [% borrower.firstname %] [% borrower.surname %],
+
+According to our current records, you have items that are overdue.Your library does not charge late fines, but please return or renew them at the branch below as soon as possible.
+
+[% branch.branchname %]
+[% branch.branchaddress1 %]
+[% branch.branchaddress2 %] [% branch.branchaddress3 %]
+Phone: [% branch.branchphone %]
+Fax: [% branch.branchfax %]
+Email: [% branch.branchemail %]
+
+If you have registered a password with the library, and you have a renewal available, you may renew online. If an item becomes more than 30 days overdue, you will be unable to use your library card until the item is returned.
+
+The following item(s) is/are currently overdue:
+
+[% FOREACH overdue IN overdues %]
+[%~ SET item = overdue.item ~%]
+"[% item.biblio.title %]" by [% item.biblio.author %], [% item.itemcallnumber %], Barcode: [% item.barcode %]
+[% END %]
+[% FOREACH overdue IN overdues %]
+[%~ SET item = overdue.item ~%]
+[% overdue.date_due | \$KohaDates %]\t[% item.biblio.title %]\t[% item.barcode %]\t[% item.biblio.author %]\t[% item.itemnumber %]
+[% END %]
+
+Thank-you for your prompt attention to this matter.
+
+[% branch.branchname %] Staff
+EOF
+
+        reset_template( { template => $tt_template, code => $code, module => 'circulation' } );
+
+        C4::Circulation::AddIssue( $patron, $item1->{barcode} ); # Add a first checkout
+        C4::Circulation::AddIssue( $patron, $item2->{barcode}, $yesterday ); # Add an first overdue
+        C4::Circulation::AddIssue( $patron, $item3->{barcode}, $two_days_ago ); # Add an second overdue
+
+        my $tt_letter = C4::Overdues::parse_overdues_letter(
+            {
+                letter_code => $code,
+                borrowernumber => $patron->{borrowernumber},
+                branchcode  => $library->{branchcode},
+                items       => \@items,
+                substitute  => {
+                    bib                    => $library->{branchname},
+                    'items.content'        => $items_content,
+                    count                  => scalar( @items ),
+                    message_transport_type => 'email',
+                }
+            }
+        );
+
+        is( $tt_letter->{content}, $letter->{content}, );
+    };
+
 };
 
 subtest 'loops' => sub {

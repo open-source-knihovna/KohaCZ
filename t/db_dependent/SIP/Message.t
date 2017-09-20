@@ -21,14 +21,23 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Test::More tests => 2;
+use Test::More tests => 3;
 use Test::MockObject;
 use Test::MockModule;
+use Test::Warn;
+
+use t::lib::Mocks;
+use t::lib::TestBuilder;
 
 use Koha::Database;
-use t::lib::TestBuilder;
 use Koha::AuthUtils qw(hash_password);
+use Koha::DateUtils;
+use Koha::Items;
+use Koha::Checkouts;
+use Koha::Old::Checkouts;
+use Koha::Patrons;
 
+use C4::SIP::ILS;
 use C4::SIP::ILS::Patron;
 use C4::SIP::Sip qw(write_msg);
 use C4::SIP::Sip::Constants qw(:all);
@@ -36,41 +45,31 @@ use C4::SIP::Sip::MsgType;
 
 use constant PATRON_PW => 'do_not_ever_use_this_one';
 
-my $fixed_length = { #length of fixed fields including response code
-    ( PATRON_STATUS_RESP ) => 37,
-    ( PATRON_INFO_RESP )   => 61,
-};
-
-my $schema = Koha::Database->new->schema;
-my $builder = t::lib::TestBuilder->new();
-
-# COMMON: Some common stuff for all/most subtests
-my ( $response, $findpatron, $branch, $branchcode );
-# mock write_msg (imported from Sip.pm into Message.pm)
-my $mockMsg = Test::MockModule->new( 'C4::SIP::Sip::MsgType' );
-$mockMsg->mock( 'write_msg', sub { $response = $_[1]; } ); # save response
-# mock ils object
-my $mockILS = Test::MockObject->new;
-$mockILS->mock( 'check_inst_id', sub {} );
-$mockILS->mock( 'institution_id', sub { $branchcode; } );
-$mockILS->mock( 'find_patron', sub { $findpatron; } );
-
 # START testing
 subtest 'Testing Patron Status Request V2' => sub {
+    my $schema = Koha::Database->new->schema;
     $schema->storage->txn_begin;
     plan tests => 13;
-    $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
     $C4::SIP::Sip::protocol_version = 2;
     test_request_patron_status_v2();
     $schema->storage->txn_rollback;
 };
 
 subtest 'Testing Patron Info Request V2' => sub {
+    my $schema = Koha::Database->new->schema;
     $schema->storage->txn_begin;
     plan tests => 18;
-    $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
     $C4::SIP::Sip::protocol_version = 2;
     test_request_patron_info_v2();
+    $schema->storage->txn_rollback;
+};
+
+subtest 'Checkin V2' => sub {
+    my $schema = Koha::Database->new->schema;
+    $schema->storage->txn_begin;
+    plan tests => 21;
+    $C4::SIP::Sip::protocol_version = 2;
+    test_checkin_v2();
     $schema->storage->txn_rollback;
 };
 
@@ -79,6 +78,11 @@ subtest 'Testing Patron Info Request V2' => sub {
 # END of main code
 
 sub test_request_patron_status_v2 {
+    my $builder = t::lib::TestBuilder->new();
+    my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
+    my ( $response, $findpatron );
+    my $mocks = create_mocks( \$response, \$findpatron, \$branchcode );
+
     my $patron1 = $builder->build({
         source => 'Borrower',
         value  => {
@@ -95,7 +99,7 @@ sub test_request_patron_status_v2 {
         FID_PATRON_PWD. PATRON_PW. '|';
     my $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
 
-    my $server = { ils => $mockILS };
+    my $server = { ils => $mocks->{ils} };
     undef $response;
     $msg->handle_patron_status( $server );
 
@@ -134,7 +138,7 @@ sub test_request_patron_status_v2 {
 
     # Finally, we send a wrong card number and check AE, BL
     # This is done by removing the new patron first
-    $schema->resultset('Borrower')->search({ cardnumber => $card1 })->delete;
+    Koha::Patrons->search({ cardnumber => $card1 })->delete;
     undef $findpatron;
     $siprequest = PATRON_STATUS_REQ. 'engYYYYMMDDZZZZHHMMSS'.
         FID_INST_ID. $branchcode. '|'.
@@ -150,6 +154,11 @@ sub test_request_patron_status_v2 {
 }
 
 sub test_request_patron_info_v2 {
+    my $builder = t::lib::TestBuilder->new();
+    my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
+    my ( $response, $findpatron );
+    my $mocks = create_mocks( \$response, \$findpatron, \$branchcode );
+
     my $patron2 = $builder->build({
         source => 'Borrower',
         value  => {
@@ -165,7 +174,7 @@ sub test_request_patron_info_v2 {
         FID_PATRON_PWD. PATRON_PW. '|';
     my $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
 
-    my $server = { ils => $mockILS };
+    my $server = { ils => $mocks->{ils} };
     undef $response;
     $msg->handle_patron_info( $server );
     isnt( $response, undef, 'At least we got a response.' );
@@ -212,7 +221,7 @@ sub test_request_patron_info_v2 {
     check_field( $respcode, $response, FID_VALID_PATRON_PWD, 'Y', 'code CQ should be Y if empty AD allowed' );
 
     # Finally, we send a wrong card number
-    $schema->resultset('Borrower')->search({ cardnumber => $card })->delete;
+    Koha::Patrons->search({ cardnumber => $card })->delete;
     undef $findpatron;
     $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
     undef $response;
@@ -223,17 +232,143 @@ sub test_request_patron_info_v2 {
     check_field( $respcode, $response, FID_SCREEN_MSG, '.+', 'But we have a screen msg', 'regex' );
 }
 
+sub test_checkin_v2 {
+    my $builder = t::lib::TestBuilder->new();
+    my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
+    my ( $response, $findpatron );
+    my $mocks = create_mocks( \$response, \$findpatron, \$branchcode );
+
+    # create some data
+    my $patron1 = $builder->build({
+        source => 'Borrower',
+        value  => {
+            password => hash_password( PATRON_PW ),
+        },
+    });
+    my $card1 = $patron1->{cardnumber};
+    my $sip_patron1 = C4::SIP::ILS::Patron->new( $card1 );
+    $findpatron = $sip_patron1;
+    my $item = $builder->build({
+        source => 'Item',
+        value => { damaged => 0, withdrawn => 0, itemlost => 0, restricted => 0, homebranch => $branchcode, holdingbranch => $branchcode },
+    });
+
+    my $mockILS = $mocks->{ils};
+    my $server = { ils => $mockILS, account => {} };
+    $mockILS->mock( 'institution', sub { $branchcode; } );
+    $mockILS->mock( 'supports', sub { return; } );
+    $mockILS->mock( 'checkin', sub {
+        shift;
+        return C4::SIP::ILS->checkin(@_);
+    });
+    my $today = dt_from_string;
+
+    # Checkin invalid barcode
+    Koha::Items->search({ barcode => 'not_to_be_found' })->delete;
+    my $siprequest = CHECKIN . 'N' . 'YYYYMMDDZZZZHHMMSS' .
+        siprequestdate( $today->clone->add( days => 1) ) .
+        FID_INST_ID . $branchcode . '|'.
+        FID_ITEM_ID . 'not_to_be_found' . '|' .
+        FID_TERMINAL_PWD . 'ignored' . '|';
+    undef $response;
+    my $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
+    warnings_like { $msg->handle_checkin( $server ); }
+        [ qr/No item 'not_to_be_found'/, qr/no item found in object to resensitize/ ],
+        'Checkin of invalid item with two warnings';
+    my $respcode = substr( $response, 0, 2 );
+    is( $respcode, CHECKIN_RESP, 'Response code fine' );
+    is( substr($response,2,1), '0', 'OK flag is false' );
+    is( substr($response,5,1), 'Y', 'Alert flag is set' );
+    check_field( $respcode, $response, FID_SCREEN_MSG, 'Invalid Item', 'Check screen msg', 'regex' );
+
+    # Not checked out, toggle option checked_in_ok
+    $siprequest = CHECKIN . 'N' . 'YYYYMMDDZZZZHHMMSS' .
+        siprequestdate( $today->clone->add( days => 1) ) .
+        FID_INST_ID . $branchcode . '|'.
+        FID_ITEM_ID . $item->{barcode} . '|' .
+        FID_TERMINAL_PWD . 'ignored' . '|';
+    undef $response;
+    $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
+    $msg->handle_checkin( $server );
+    $respcode = substr( $response, 0, 2 );
+    is( substr($response,2,1), '0', 'OK flag is false when checking in an item that was not checked out' );
+    is( substr($response,5,1), 'Y', 'Alert flag is set' );
+    check_field( $respcode, $response, FID_SCREEN_MSG, 'not checked out', 'Check screen msg', 'regex' );
+    # Toggle option
+    $server->{account}->{checked_in_ok} = 1;
+    undef $response;
+    $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
+    $msg->handle_checkin( $server );
+    is( substr($response,2,1), '1', 'OK flag is true now with checked_in_ok flag set when checking in an item that was not checked out' );
+    is( substr($response,5,1), 'Y', 'Alert flag is set' );
+    check_field( $respcode, $response, FID_SCREEN_MSG, undef, 'No screen msg' );
+    $server->{account}->{checked_in_ok} = 0;
+
+    # Checkin at wrong branch: issue item and switch branch, and checkin
+    my $issue = Koha::Checkout->new({ branchcode => $branchcode, borrowernumber => $patron1->{borrowernumber}, itemnumber => $item->{itemnumber} })->store;
+    $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
+    t::lib::Mocks::mock_preference( 'AllowReturnToBranch', 'homebranch' );
+    undef $response;
+    $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
+    $msg->handle_checkin( $server );
+    is( substr($response,2,1), '0', 'OK flag is false when we check in at the wrong branch and we do not allow it' );
+    is( substr($response,5,1), 'Y', 'Alert flag is set' );
+    check_field( $respcode, $response, FID_SCREEN_MSG, 'Checkin failed', 'Check screen msg' );
+    $branchcode = $item->{homebranch};  # switch back
+    t::lib::Mocks::mock_preference( 'AllowReturnToBranch', 'anywhere' );
+
+    # Data corrupted: add same issue_id to old_issues
+    Koha::Old::Checkout->new({ issue_id => $issue->issue_id })->store;
+    undef $response;
+    $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
+    warnings_like { $msg->handle_checkin( $server ); }
+        [ qr/Duplicate entry/, qr/data corrupted/ ],
+        'DBIx error on duplicate issue_id';
+    is( substr($response,2,1), '0', 'OK flag is false when we encounter data corruption in old_issues' );
+    is( substr($response,5,1), 'Y', 'Alert flag is set' );
+    check_field( $respcode, $response, FID_SCREEN_MSG, 'Checkin failed: data problem', 'Check screen msg' );
+
+    # Finally checkin without problems (remove duplicate id)
+    Koha::Old::Checkouts->search({ issue_id => $issue->issue_id })->delete;
+    undef $response;
+    $msg = C4::SIP::Sip::MsgType->new( $siprequest, 0 );
+    $msg->handle_checkin( $server );
+    is( substr($response,2,1), '1', 'OK flag is true when we checkin after removing the duplicate' );
+    is( substr($response,5,1), 'N', 'Alert flag is not set' );
+    is( Koha::Checkouts->find( $issue->issue_id ), undef,
+        'Issue record is gone now' );
+}
+
 # Helper routines
+
+sub create_mocks {
+    my ( $response, $findpatron, $branchcode ) = @_; # referenced variables !
+
+    # mock write_msg (imported from Sip.pm into Message.pm)
+    my $mockMsg = Test::MockModule->new( 'C4::SIP::Sip::MsgType' );
+    $mockMsg->mock( 'write_msg', sub { $$response = $_[1]; } ); # save response
+
+    # mock ils object
+    my $mockILS = Test::MockObject->new;
+    $mockILS->mock( 'check_inst_id', sub {} );
+    $mockILS->mock( 'institution_id', sub { $$branchcode; } );
+    $mockILS->mock( 'find_patron', sub { $$findpatron; } );
+
+    return { ils => $mockILS, message => $mockMsg };
+}
 
 sub check_field {
     my ( $code, $resp, $fld, $expr, $msg, $mode ) = @_;
     # mode: contains || equals || regex (by default: equals)
 
     # strip fixed part; prefix to simplify next regex
-    $resp = '|'. substr( $resp, $fixed_length->{$code} );
+    $resp = '|'. substr( $resp, fixed_length( $code ) );
     my $fldval;
     if( $resp =~ /\|$fld([^\|]*)\|/ ) {
         $fldval = $1;
+    } elsif( !defined($expr) ) { # field should not be found
+        ok( 1, $msg );
+        return;
     } else { # test fails
         is( 0, 1, "Code $fld not found in '$resp'?" );
         return;
@@ -246,4 +381,17 @@ sub check_field {
     } else { # contains
         is( index( $fldval, $expr ) > -1, 1, $msg );
     }
+}
+
+sub siprequestdate {
+    my ( $dt ) = @_;
+    return $dt->ymd('').(' 'x4).$dt->hms('');
+}
+
+sub fixed_length { #length of fixed fields including response code
+    return {
+      ( PATRON_STATUS_RESP )  => 37,
+      ( PATRON_INFO_RESP )    => 61,
+      ( CHECKIN_RESP )        => 24,
+    }->{$_[0]};
 }

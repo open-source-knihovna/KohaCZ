@@ -52,6 +52,7 @@ use Koha::DateUtils;
 use Koha::Token;
 use Koha::Libraries;
 use Koha::Patron::Categories;
+use Koha::List::Patron;
 
 use Text::CSV;
 # Text::CSV::Unicode, even in binary mode, fails to parse lines with these diacriticals:
@@ -105,6 +106,12 @@ if ($matchpoint) {
 }
 my $overwrite_cardnumber = $input->param('overwrite_cardnumber');
 
+#create a patronlist
+my $createpatronlist = $input->param('createpatronlist') || 0;
+my $dt = dt_from_string();
+my $timestamp = $dt->ymd('-').' '.$dt->hms(':');
+my $patronlistname = $uploadborrowers . ' (' . $timestamp .')';
+
 $template->param( SCRIPT_NAME => '/cgi-bin/koha/tools/import_borrowers.pl' );
 
 if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
@@ -120,7 +127,9 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
     foreach (keys %$uploadinfo) {
         push @feedback, {feedback=>1, name=>$_, value=>$uploadinfo->{$_}, $_=>$uploadinfo->{$_}};
     }
+
     my $imported    = 0;
+    my @imported_borrowers;
     my $alreadyindb = 0;
     my $overwritten = 0;
     my $invalid     = 0;
@@ -229,7 +238,7 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
         if ( ($matchpoint eq 'cardnumber') && ($borrower{'cardnumber'}) ) {
             $member = Koha::Patrons->find( { cardnumber => $borrower{'cardnumber'} } );
         } elsif ( ($matchpoint eq 'userid') && ($borrower{'userid'}) ) {
-            $member = Koha::Patrons->find( { userid => $borrower{'userid'} } )->unblessed;
+            $member = Koha::Patrons->find( { userid => $borrower{'userid'} } );
         } elsif ($extended) {
             if (defined($matchpoint_attr_type)) {
                 foreach my $attr (@$patron_attributes) {
@@ -356,6 +365,7 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
 
                 $imported++;
                 $template->param('lastimported'=>$borrower{'surname'}.' / '.$borrowernumber);
+                push @imported_borrowers, $borrowernumber; #for patronlist
             } else {
                 $invalid++;
                 push @errors, {unknown_error => 1};
@@ -363,6 +373,13 @@ if ( $uploadborrowers && length($uploadborrowers) > 0 ) {
             }
         }
     }
+
+    if ( $imported && $createpatronlist ) {
+        my $patronlist = AddPatronList({ name => $patronlistname });
+        AddPatronsToList({ list => $patronlist, borrowernumbers => \@imported_borrowers });
+        $template->param('patronlistname' => $patronlistname);
+    }
+
     (@errors  ) and $template->param(  ERRORS=>\@errors  );
     (@feedback) and $template->param(FEEDBACK=>\@feedback);
     $template->param(
