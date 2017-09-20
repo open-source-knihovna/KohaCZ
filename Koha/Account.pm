@@ -89,6 +89,8 @@ sub pay {
     my $balance_remaining = $amount; # Set it now so we can adjust the amount if necessary
     $balance_remaining ||= 0;
 
+    my $branch = $userenv ? $userenv->{'branch'} : undef;
+
     # We were passed a specific line to pay
     foreach my $fine ( @$lines ) {
         my $amount_to_pay =
@@ -126,6 +128,17 @@ sub pay {
             );
             push( @fines_paid, $fine->id );
         }
+
+        UpdateStats(
+            {
+                branch         => $branch,
+                type           => $type,
+                amount         => $amount_to_pay,
+                borrowernumber => $self->{patron_id},
+                accountno      => $accountno,
+                other          => $fine->id,
+            }
+        );
     }
 
     # Were not passed a specific line to pay, or the payment was for more
@@ -139,7 +152,6 @@ sub pay {
         }
     ) if $balance_remaining > 0;
 
-    my $branch = $userenv ? $userenv->{'branch'} : undef;
     foreach my $fine (@outstanding_fines) {
         my $amount_to_pay =
             $fine->amountoutstanding > $balance_remaining
