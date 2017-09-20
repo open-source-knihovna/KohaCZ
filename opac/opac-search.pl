@@ -289,7 +289,7 @@ foreach my $advanced_srch_type (@advanced_search_types) {
 				ccl => $advanced_srch_type,
                 code => $thisitemtype->{authorised_value},
                 description => $thisitemtype->{'lib_opac'} || $thisitemtype->{'lib'},
-                searchcategory => $itemtypes->{$thisitemtype}->{'searchcategory'},
+                searchcategory => $thisitemtype->{'searchcategory'},
                 imageurl => getitemtypeimagelocation( 'opac', $thisitemtype->{'imageurl'} ),
                 );
 		push @authvalueloop, \%row;
@@ -521,6 +521,7 @@ my $count = C4::Context->preference('OPACnumSearchResults') || 20;
 my $countRSS         = C4::Context->preference('numSearchRSSResults') || 50;
 my $results_per_page = $params->{'count'} || $count;
 my $offset = $params->{'offset'} || 0;
+$offset = 0 if $offset < 0;
 my $page = $cgi->param('page') || 1;
 $offset = ($page-1)*$results_per_page if $page>1;
 my $hits;

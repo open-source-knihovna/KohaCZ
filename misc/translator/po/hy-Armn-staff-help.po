@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2017-02-15 15:24-0300\n"
+"POT-Creation-Date: 2017-08-17 04:30-0300\n"
 "PO-Revision-Date: 2016-06-16 12:30+0000\n"
 "Last-Translator: tigran <tigran@flib.sci.am>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
@@ -880,7 +880,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
@@ -1031,7 +1031,7 @@ msgstr "-8 =&gt; Դրոշակ"
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Ապագա օգտագործում"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
@@ -2035,7 +2035,7 @@ msgstr "Բյուջեի ավելացում"
 msgid "Adding a group"
 msgstr "Ավելացնել խումբ"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, c-format
 msgid "Adding a new alert"
 msgstr "Նոր ահազանգի ավելացում"
@@ -2553,6 +2553,11 @@ msgstr ""
 msgid "All three of these options will open up the issue receive form:"
 msgstr "Այս ընտրանքներից բոլոր երեքն էլ կբացեն նյութի ստացման ձևը։"
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#, fuzzy, c-format
+msgid "All uploaded images will be listed on the right hand side of this page."
+msgstr "ԵՎ էջի աջ մասում մնացյալ ամեն ինչի հետ միասնին կցուցադրվի պատկերը։"
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:117
 #, c-format
 msgid "Allow access to the reports module"
@@ -2707,13 +2712,6 @@ msgid ""
 msgstr ""
 "Եվ համաժամանակացրու քո տվյալները տացքի ամեն համակարգչի վրա կտտացնելով "
 "պաստառի աջ մասի 'Համաժամանակացնել' կապի վրա։"
-
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
-#, c-format
-msgid ""
-"And the image will be listed with all of your others on the right hand side "
-"of the page."
-msgstr "ԵՎ էջի աջ մասում մնացյալ ամեն ինչի հետ միասնին կցուցադրվի պատկերը։"
 
 #: intranet-tmpl/prog/en/modules/help/suggestion/suggestion.tt:23
 #, c-format
@@ -2895,7 +2893,7 @@ msgstr ""
 "Ամենավերջում, եթե նախատեսում ես նյութի տարածում, հետևյալ դաշտերը պետք է "
 "մուտքագրվեն նոր նյութի համար։"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -3414,11 +3412,11 @@ msgid "Build sets"
 msgstr "Կառուցիր բազմություններ"
 
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:19
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "By default all item types and all patrons are notified of check ins and "
-"check outs. To change this, click on the item/patron type combination that "
-"you would like to stop notices for."
+"check outs. To change this, click on the item type/patron category "
+"combination that you would like to stop notices for."
 msgstr ""
 "Որպես լռակյաց նյութի բոլոր տեսակները և ընթերցողների բոլոր տեսակները "
 "զգուշացվում են հետ ընդունումների և դուրս տրումենրի մասին։ Սա փոխելու համար, "
@@ -4384,7 +4382,7 @@ msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr ""
 "Սեղմիր 'Վճարիր' որը հաջորդում է տուգանքին եթե ցանկանում ես ամբողջովին վճարել"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr "Սեղմիր \"Հիշիր ահազանգը\", և կատարել ես։"
@@ -5342,7 +5340,7 @@ msgstr "Ջնջել հանրային ցուցակները"
 msgid "Deleting Item Types"
 msgstr "Նյութի տեսակների ջնջում"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, c-format
 msgid "Deleting alerts"
 msgstr "Ահազանգերի ջնջում"
@@ -5843,7 +5841,7 @@ msgstr "Մուտք արա ցուցակի անունը և հիշիր ցուցակ
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "'Նկարագրություն' դաշտում մուտք արա դասի ազատ տեքստային տարբերակը։"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
@@ -5852,7 +5850,7 @@ msgstr ""
 "Մուտք արա ընտրիչը \"Ընտրիչ\" մուտքում, և կտեսնես jQuery ընտրիչների "
 "վերաբերյալ փաստաթղթերը "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -6426,11 +6424,11 @@ msgstr ""
 "կրկնվողներ։ "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:86
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Finally, if you charge a rental fee for the item type and want to give a "
-"specific patron type a discount on that fee, enter the percentage discount "
-"(without the %% symbol) in the 'Rental Discount' field"
+"specific patron category a discount on that fee, enter the percentage "
+"discount (without the %% symbol) in the 'Rental Discount' field"
 msgstr ""
 "Եվ վերջում, եթե դու գանձում ես վարձի գումարը նյութի տեսակի համար և եթե "
 "ցանկանում ես ընթերցողի որոշակի դասի տալ զեղչ այդ գումարի չափով, մուտք արա "
@@ -7629,10 +7627,10 @@ msgstr ""
 "պատկանի բազմությանը հարկ է որ ունենա մեկ համընկնող վիճակ։"
 
 #: intranet-tmpl/prog/en/modules/help/members/boraccount.tt:13
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"Hold fees will be charged based on the rules you set in the Patron Types "
-"&amp; Categories administration area"
+"Hold fees will be charged based on the rules you set for the patron category "
+"in administration"
 msgstr ""
 "Պահման գումարները կգանձվեն հիմնված այն օրենքների վրա որ սահմանել ես "
 "Ընթերցողի Տեսակների &amp; Դասերի կառավարման տարածքում"
@@ -9894,12 +9892,12 @@ msgstr ""
 "Անտեսելով պահումը կթողնի նյութը պահման մեջ, բայց կթողնի նաև կարգավիճակը "
 "որպես Հասանելի (այն չեղյալ չի անի պահումը)"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
 #, c-format
 msgid "Images must be under 500k in size."
 msgstr "Պատկերները չափով պետք է լինեն մինչև 500k։"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
 #, c-format
 msgid ""
 "Images uploaded using this tool will appear on the menu when creating patron "
@@ -9992,16 +9990,16 @@ msgstr ""
 "մուտք ես արել TransfersMaxDaysWarning համակարգային նախապատվություններում։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:31
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Important: At the very least you will need to set a default circulation "
 "rule. This rule should be set for all item types, all libraries and all "
 "patron categories. That will catch all instances that do not match a "
 "specific rule. When checking out if you do not have a rule for all "
-"libraries, all item types and all patron types then you may see patrons "
+"libraries, all item types and all patron categories then you may see patrons "
 "getting blocked from placing holds. You will also want a rule for your "
-"specific library set for all item types and all patron types to avoid this "
-"holds issue. Koha needs to know what rule to fall back on."
+"specific library set for all item types and all patron categories to avoid "
+"this holds issue. Koha needs to know what rule to fall back on."
 msgstr ""
 "Կարևոր է։ Որպես վերջին հնարավորություն քեզ հարկ է կարգաբերել տացքի լռակյաց "
 "օրենքները։ Այս օրենքները պետք է կարգաբերվեն նյութի բոլոր տեսակների, բոլոր "
@@ -10795,7 +10793,7 @@ msgid ""
 msgstr ""
 "Գումարի դաշտում մուտք մի արա արտարժույթի նիշեր, միայն թվեր և տասնորդականներ"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
 #, c-format
 msgid ""
 "In the center of the screen is a simple upload form, simply browse for the "
@@ -11730,7 +11728,7 @@ msgstr "Տեղային օգտագործման համակարգային նախա�
 msgid "Local Use:"
 msgstr "Տեղային օգտագործում։"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "Locate the \"Add new alert\" form."
 msgstr "Որոշիր \"Ավելացրու նոր ահազանգ\" ձևի տեղը։"
@@ -12133,8 +12131,9 @@ msgid "Most circulated items"
 msgstr "Ամենաշատ սպասարկվող նյութերը"
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:12
-#, c-format
-msgid "Most common patron type, usually used for a general 'Patron' category."
+#, fuzzy, c-format
+msgid ""
+"Most common patron category, usually used for a general 'Patron' category."
 msgstr ""
 "Ամենահաճախ հանդիպող ընթերցողի տեսակ, սովորաբար օգտագործվում է 'Ընթերցող' "
 "ընդհանուր դասի համար։"
@@ -12547,6 +12546,11 @@ msgstr "Նշում։ Նկատի առ, որ edit_items թույլտվությու
 msgid "Note: Please note that items_batchmod permission is still required"
 msgstr "Նշում։ Նկատի առ, որ items_batchmod թույլտվությունը դեռ պահանջվում է։"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
 #, c-format
 msgid "Note: if you list prices and/or invoice prices, include tax."
@@ -12890,7 +12894,7 @@ msgstr ""
 "Երբ ընթացիկ մեջբերման փաթեթեը կբեռնավորվի խմբագրման աղյուսակ, դու կարող ես "
 "խմբագրել մեջբերման աղբյուրը և տեքստը։"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
 #, c-format
 msgid ""
 "Once the file is uploaded you will be presented with a confirmation message."
@@ -13673,10 +13677,10 @@ msgstr ""
 "ExtendedPatronAttributes համակարգային նախապատվությունը։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:5
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Patron categories allow you to organize your patrons into different roles, "
-"age groups, and patron types."
+"age groups, and patron categories."
 msgstr ""
 "Հաճախորդի դասերը թույլ են տալիս կազմակերպել քո ընթերցողների համար տարբեր "
 "դերեր, տարիքային խմբեր, և ընթերցողական տեսակներ։"
@@ -13967,7 +13971,7 @@ msgstr "Ֆիլադելֆիա, PA 19107"
 msgid "Phone number: "
 msgstr "Հեռախոսահամար։ "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
 #, c-format
 msgid ""
 "Pictures uploaded with this tool should be at least 300dpi which is the "
@@ -14940,7 +14944,7 @@ msgstr "Տես լրիվ փաստաթղթերը ՄԵԸՔ կառուցվածքի �
 msgid "See the full documentation for MARC Modification Templates in the "
 msgstr "Տես լրիվ փաստաթղթերը ՄԵԸՔ ձևափոխումների ձևերի համար "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #, c-format
 msgid "See the full documentation for Managing Images in the "
 msgstr "Տես լրիվ փաստաթղթերը Պատկերների կառավարման համար "
@@ -15697,12 +15701,12 @@ msgstr "Sort field 1 "
 msgid "Sort field 2 "
 msgstr "Sort field 2 "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr "Ձայնի նախապատվություններ"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -17911,8 +17915,8 @@ msgstr ""
 "Լավագույնն է կարգաբերել հիմնական պարամետրերը մինչ այս բաժինը այցելելը։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:7
-#, c-format
-msgid "These preferences are set based on patron types and item types."
+#, fuzzy, c-format
+msgid "These preferences are set based on patron categories and item types."
 msgstr ""
 "Այս նախապատվությունները կարգաբերված են հիմնված ընթերցողների տեսակների և "
 "նյութի տեսակների վրա։"
@@ -18334,10 +18338,10 @@ msgstr ""
 "մի քանի պահված ձևանմուշներ։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:37
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"This patron type is used strictly for statistical purposes, such as in house "
-"use of items."
+"This patron category is used strictly for statistical purposes, such as in "
+"house use of items."
 msgstr ""
 "Հաճախորդի այս տեսակը խստորեն օգտագործվում է վիճակագրական նպատակներով, ասենք "
 "նյութերի ներքին օգտագործում։"
@@ -19103,7 +19107,7 @@ msgstr ""
 "Նոր Ընթերցողական Բնութագրիչի Տեսակի ավելացման համար էջի վերին մասում սեղմիր "
 "'Նոր Ընթերցողական Բնութագրիչի Տեսակ'-ի վրա"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, c-format
 msgid "To add a new alert:"
 msgstr "Նոր ահազանգ ավելացնելու համար."
@@ -19330,7 +19334,7 @@ msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr ""
 "Որպեսզի կարողանաս պատվիրել Մատակարարից, դու պետք է դրանք սարքես 'Ակտիվ'։"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
@@ -19458,7 +19462,7 @@ msgstr ""
 "համառոտագրության կապի վրա սեղմելուց։"
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -19469,7 +19473,7 @@ msgstr ""
 "որոնց ցանկանում ես ջնջել, ապա սեղմիր \"Ջնջիր ընտրված ահազանգերը\" կոճակը և և "
 "հաստատիր որ ցանկանում ես ջնջել այդ ահազանգերը։ %s "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
 #, c-format
 msgid ""
 "To delete one or multiple of these images, click the checkbox to the right "
@@ -19937,6 +19941,13 @@ msgstr ""
 "Այս էջից նյութը երկարացնելու համար դու կարող ես սքան անել այն նյութերի շտրիխ "
 "կոդերը որոնք ենթակա են երկարացման"
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:21
+#, c-format
+msgid ""
+"To replace an image, delete it, upload a new file and give it the same image "
+"name."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:91
 #, c-format
 msgid ""
@@ -20288,6 +20299,13 @@ msgstr "Թարմացնել ընթերցողի գրառումները"
 #, c-format
 msgid "Upload Koha plugin"
 msgstr "Բեռնավորիր Կոհայի պլագինը"
+
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#, c-format
+msgid ""
+"Upload additional images to use as logo, decoration or background on a "
+"patron card layout."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/tools/upload-cover-image.tt:3
 #, c-format
@@ -20887,11 +20905,11 @@ msgstr ""
 "հիշես նոր մեջբերումը։"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:89
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "When finished, click 'Add' to save your changes. To modify a rule, create a "
-"new one with the same patron type and item type. If you would like to delete "
-"your rule, simply click the 'Delete' link to the right of the rule."
+"new one with the same patron category and item type. If you would like to "
+"delete your rule, simply click the 'Delete' link to the right of the rule."
 msgstr ""
 "Երբ ավարտել ես քո փոփոխություները հիշելու համար սեղմիր 'Ավելացնել'։ Օրենքը "
 "ձևափոխելու համար, ստեղծիր նորը նյութի և ընթերցողի նույն տեսակներով։ Եթե "
@@ -21338,12 +21356,12 @@ msgid ""
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:59
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"Without periodicy: some very specific (usually high level science journals) "
-"don't have a true periodicity. When you subscribe to the title, you "
-"subscribe for 6 issues, which can arrive in 1 year... or 2... There is no "
-"regularity or known schedule."
+"Without periodicity: some very specific (usually high level science "
+"journals) don't have a true periodicity. When you subscribe to the title, "
+"you subscribe for 6 issues, which can arrive in 1 year... or 2... There is "
+"no regularity or known schedule."
 msgstr ""
 "Առանց հաճախականության։ որոշ շատ յուրահատուկ (սովորաբար բարձր վարկանիշով "
 "գիտական ամսագրեր) չունեն ճիշտ հաճախականություն։ Երբ բաժանորդագրվում ես դրան "
@@ -22398,23 +22416,23 @@ msgid "acquisition "
 msgstr "համալրում "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:17
-#, c-format
-msgid "all libraries, all patron types, all item types"
+#, fuzzy, c-format
+msgid "all libraries, all patron categories, all item types"
 msgstr "բոլոր գրադարաններ, ընթերցողի բոլոր տեսակները, նյութի բոլոր տեսակները"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:16
-#, c-format
-msgid "all libraries, all patron types, same item type"
+#, fuzzy, c-format
+msgid "all libraries, all patron categories, same item type"
 msgstr "բոլոր գրադարաններ, ընթերցողի բոլոր դասերը, նյութի նույն տեսակը"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:15
-#, c-format
-msgid "all libraries, same patron type, all item types"
+#, fuzzy, c-format
+msgid "all libraries, same patron category, all item types"
 msgstr "բոլոր գրադարաններ, ընթերցողի նույն դասը, նյութի բոլոր տեսակները"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:14
-#, c-format
-msgid "all libraries, same patron type, same item type"
+#, fuzzy, c-format
+msgid "all libraries, same patron category, same item type"
 msgstr "բոլոր գրադարաններ, ընթերցողի նույն դասը, նյութի նույն տեսակը"
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:120
@@ -22910,7 +22928,7 @@ msgstr ""
 msgid "group_manage "
 msgstr "խմբի_կառավարում "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr "այստեղ"
@@ -23303,7 +23321,7 @@ msgstr "Կառավարում "
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
@@ -23594,23 +23612,23 @@ msgid "routing "
 msgstr "Շրջաբերական Ցուցակ "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:13
-#, c-format
-msgid "same library, all patron types, all item types"
+#, fuzzy, c-format
+msgid "same library, all patron categories, all item types"
 msgstr "նույն գրադարանը, ընթերցողի բոլոր տեսակները, նյութի բոլոր տեսակները"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:12
-#, c-format
-msgid "same library, all patron types, same item type"
+#, fuzzy, c-format
+msgid "same library, all patron categories, same item type"
 msgstr "նույն գրադարանը, ընթերցողի բոլոր տեսակները, նյութի նույն տեսակը"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:11
-#, c-format
-msgid "same library, same patron type, all item type"
+#, fuzzy, c-format
+msgid "same library, same patron category, all item type"
 msgstr "նույն գրադարանը, ընթերցողի նույն տեսակը, նյութի բոլոր տեսակները"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:10
-#, c-format
-msgid "same library, same patron type, same item type"
+#, fuzzy, c-format
+msgid "same library, same patron category, same item type"
 msgstr "նույն գրադարանը, ընթերցողի նույն տեսակը, նյութի նույն տեսակը"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:471

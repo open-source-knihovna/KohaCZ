@@ -162,13 +162,13 @@ tinyMCE.init({
                 <ol>
                     [% FOREACH category IN categories %]
                         <li>
-                            <label for="[% category.categorycode %]">[% category.categoryname %]: </label>
+                            <label for="[% category.categorycode %]">[% category.categoryname |html %]: </label>
                             [% IF category and selected_categorycodes.grep(category.categorycode).size %]
                                 <input type="checkbox" id="[% category.categorycode %]" name="selected_categorycode_[% category.categorycode %]" checked="checked" />
                             [% ELSE %]
                                 <input type="checkbox" id="[% category.categorycode %]" name="selected_categorycode_[% category.categorycode %]" />
                             [% END %]
-                            <span class="hint">[% category.codedescription %]</span>
+                            <span class="hint">[% category.codedescription |html %]</span>
                         </li>
                     [% END %]
                 </ol>
@@ -186,8 +186,8 @@ tinyMCE.init({
                 <li><label for="branchphone">Phone: </label><input type="text" name="branchphone" id="branchphone" size="60" value="[% library.branchphone |html %]" /></li>
                 <li><label for="branchfax">Fax: </label><input type="text" name="branchfax" id="branchfax" size="60" value="[% library.branchfax |html %]" /></li>
                 <li><label for="branchemail">Email: </label><input type="text" name="branchemail" id="branchemail" class="email"  size="80" value="[% library.branchemail |html %]" /></li>
-                <li><label for="branchreplyto">Reply-To (if different to Email): </label> <input type="text" name="branchreplyto" id="branchreplyto" class="email"  size="80" value="[% library.branchreplyto |html %]" /></li>
-                <li><label for="branchreturnpath">Return-Path (if different to Email): </label> <input type="text" name="branchreturnpath" id="branchreturnpath" class="email"  size="80" value="[% library.branchreturnpath |html %]" /></li>
+                <li><label for="branchreplyto">Reply-To: </label> <input type="text" name="branchreplyto" id="branchreplyto" class="email"  size="80" value="[% library.branchreplyto |html %]" /><br /><span class="hint">Default: ReplyToDefault system preference</span></li>
+                <li><label for="branchreturnpath">Return-Path: </label> <input type="text" name="branchreturnpath" id="branchreturnpath" class="email"  size="80" value="[% library.branchreturnpath |html %]" /><br /><span class="hint">Default: ReturnpathDefault system preference</span></li>
                 <li><label for="branchurl">URL: </label><input type="text" name="branchurl" id="branchurl"  size="80" value="[% library.branchurl |html %]" class="url" /></li>
                 <li><label for="opac_info">OPAC info: </label><textarea name="opac_info" id="opac_info">[% library.opac_info |html %]</textarea></li>
                 <li><label for="branchip">IP: </label><input type="text" name="branchip" id="branchip"  size="15" maxlength="15" value="[% library.branchip |html %]" /> <span class="hint">Can be entered as a single IP, or a subnet such as 192.168.1.*</span></li>
@@ -204,7 +204,7 @@ tinyMCE.init({
 [% IF op == 'delete_confirm' and not ( items_count or patrons_count )%]
     <div class="dialog alert">
         <form action="/cgi-bin/koha/admin/branches.pl" method="post">
-            <h3>Are you sure you want to delete [% library.branchname %] ([% library.branchcode %])?</h3>
+            <h3>Are you sure you want to delete [% library.branchname |html %] ([% library.branchcode %])?</h3>
             <input type="hidden" name="op" value="delete_confirmed" />
             <input type="hidden" name="branchcode" value="[% library.branchcode |html %]" />
             <input type="hidden" name="branchname" value="[% library.branchname |html %]">
@@ -264,7 +264,7 @@ tinyMCE.init({
                         </td>
                         <td>
                             [% FOREACH category IN library.get_categories %]
-                                [% category.categoryname %]<br />
+                                [% category.categoryname |html %]<br />
                             [% END %]
                         </td>
                         <td>[% library.branchip %]</td>
@@ -296,9 +296,9 @@ tinyMCE.init({
                     <tbody>
                         [% FOREACH category IN group_type.categories %]
                             <tr>
-                                <td>[% category.categoryname %]</td>
+                                <td>[% category.categoryname |html %]</td>
                                 <td>[% category.categorycode %]</td>
-                                <td>[% category.codedescription %]</td>
+                                <td>[% category.codedescription |html %]</td>
                                 <td class="actions">
                                   <a class="btn btn-mini" href="/cgi-bin/koha/admin/branches.pl?categorycode=[% category.categorycode %]&amp;op=add_form_category"><i class="fa fa-pencil"></i> Edit</a>
                                   <a class="btn btn-mini" href="/cgi-bin/koha/admin/branches.pl?categorycode=[% category.categorycode %]&amp;op=delete_confirm_category"><i class="fa fa-trash"></i> Delete</a>
@@ -382,7 +382,7 @@ tinyMCE.init({
 
 [% IF op == 'delete_confirm_category' %]
     <div class="dialog alert">
-    <h3>Are you sure you want to delete the group '[% category.codedescription %]' ([% category.categorycode %])?</h3>
+    <h3>Are you sure you want to delete the group '[% category.codedescription |html %]' ([% category.categorycode %])?</h3>
     <form action="/cgi-bin/koha/admin/branches.pl" method="post">
         <input type="hidden" name="op" value="delete_confirmed_category" />
         <input type="hidden" name="categorycode" value="[% category.categorycode |html %]" />

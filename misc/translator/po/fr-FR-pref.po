@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Koha\n"
 "POT-Creation-Date: 2013-05-07 08:52+0200\n"
-"PO-Revision-Date: 2017-01-19 15:58+0000\n"
-"Last-Translator: simone <pascale.nalon@mines-paristech.fr>\n"
+"PO-Revision-Date: 2017-06-28 13:09+0000\n"
+"Last-Translator: abernaud <anne-claire.bernaudin@univ-rennes1.fr>\n"
 "Language-Team: French (France) (http://www.transifex.com/projects/p/koha/language/fr_FR/)\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1484841528.000000\n"
+"X-POOTLE-MTIME: 1498655341.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -54,8 +54,8 @@ msgid "acquisitions.pref#AcqEnableFiles# enable the ability to upload and attach
 msgstr "à envoyer des fichiers sur le serveur et à les attacher à des factures."
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#AcqItemSetSubfieldsWhenReceiptIsCancelled# Upon cancelling a receipt, update the item's subfields if they were created when placing an order (e.g. o=5|a=\"bar foo\"\")."
-msgstr "À l'annulation d'un reçu, mettre à jour les champs des exemplaires créés à la commande, par exemple: o=5|a=\"Une note\"."
+msgid "acquisitions.pref#AcqItemSetSubfieldsWhenReceiptIsCancelled# Upon cancelling a receipt, update the item's subfields if they were created when placing an order (e.g. o=5|a=\"bar foo\")."
+msgstr ""
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqItemSetSubfieldsWhenReceived# Upon receiving items, update their subfields if they were created when placing an order (e.g. o=5|a=\"foo bar\")."
@@ -167,7 +167,7 @@ msgstr "(séparez les champs par un espace)"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#UniqueItemFields# The following <a href='http://schema.koha-community.org/16_05/tables/items.html' target='blank'>database columns</a> should be unique in an item:"
-msgstr ""
+msgstr "acquisitions.pref#UniqueItemFields# Les champs suivants <a href='http://schema.koha-community.org/16_05/tables/items.html' target='blank'>database columns</a> doivent être unique dans exemplaire :"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#gist# . Enter in numeric form, 0.12 for 12%. The first item in the list will be selected by default. For more than one value, separate with | (pipe)."
@@ -1258,6 +1258,30 @@ msgid "admin.pref#UsageStatsCountry# Zimbabwe"
 msgstr "admin.pref#UsageStatsCountry# Zimbabwe"
 
 # Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsGeolocation# Geolocation of the main library: "
+msgstr "admin.pref#UsageStatsGeolocation# Géolocalisation du site principal&nbsp;: "
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsGeolocation# Note that this value has no effect if the UsageStats system preference is set to \"Don't share\""
+msgstr "admin.pref#UsageStatsGeolocation# Notez que cette valeur n'a pas d'effet si la préférence système UsageStats est paramétrée à \"ne pas partager\""
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# Do not Share"
+msgstr "admin.pref#UsageStatsLibrariesInfo# Ne pas partager"
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# Note that this value has no effect if the UsageStats system preference is set to \"Don't share\""
+msgstr "admin.pref#UsageStatsLibrariesInfo# Notez que cette valeur n'a pas d'effet si la préférence système UsageStats est paramétrée à Ne pas partager"
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# Share"
+msgstr "admin.pref#UsageStatsLibrariesInfo# Partager"
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# libraries information (name, url, country)"
+msgstr "admin.pref#UsageStatsLibrariesInfo# Information sur les bibliothèques (nom, URL, pays)"
+
+# Administration > Share anonymous usage statistics
 msgid "admin.pref#UsageStatsLibraryName# If this field is empty data will be sent anonymously."
 msgstr "Si ce champ est vide, les données seront envoyées anonymement."
 
@@ -1456,6 +1480,22 @@ msgstr "Ne pas afficher"
 # Authorities > General
 msgid "authorities.pref#AuthDisplayHierarchy# broader term/narrower term hierarchies when viewing authorities."
 msgstr "les hiérarchies entre termes génériques et spécifiques lors de l'affichage des autorités."
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# When updating biblio records from an attached authority record (\"merging\"), handle subfields of relevant biblio record fields in"
+msgstr "authorities.pref#AuthorityMergeMode# Lors de la mise à jour des notices biblio depuis une notice autorité liée (\"fusion\"), modifier les sous-champs des champs de la notice biblio correspondant"
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# loose"
+msgstr "authorities.pref#AuthorityMergeMode# souple"
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# mode. In strict mode subfields that are not found in the authority record, are deleted. Loose mode will keep them. Loose mode is the historical behavior and still the default."
+msgstr "authorities.pref#AuthorityMergeMode# mode. En mode strict les sous-champs qui ne sont pas trouvé dans la notice autorité, sont supprimés. Le mode souple les conservera. Le mode souple est le mode historique et encore celui par défaut."
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# strict"
+msgstr "authorities.pref#AuthorityMergeMode# strict"
 
 # Authorities > General
 msgid "authorities.pref#AutoCreateAuthorities# When editing records,"
@@ -2647,7 +2687,7 @@ msgstr "Ne pas permettre"
 
 # Circulation > Holds Policy
 msgid "circulation.pref#ExpireReservesMaxPickUpDelay# holds to expire automatically if they have not been picked by within the time period specified in ReservesMaxPickUpDelay"
-msgstr "que les réservations expirent automatiquement si elles n'ont pas été mises de côté durant l'intervalle de temps spécifié dans ReservesMaxPickUpDelay"
+msgstr "que les réservations expirent automatiquement si elles n'ont pas été récupérées durant l'intervalle de temps spécifié dans ReservesMaxPickUpDelay"
 
 # Circulation > Holds Policy
 msgid "circulation.pref#ExpireReservesMaxPickUpDelayCharge# If using ExpireReservesMaxPickUpDelay, charge a borrower who allows his or her waiting hold to expire a fee of"
@@ -5668,7 +5708,7 @@ msgstr "opac.pref#PatronSelfModificationBorrowerUnwantedField# (colonnes sépar�
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-modification screen:"
-msgstr ""
+msgstr "opac.pref#PatronSelfModificationBorrowerUnwantedField# Les champs suivants <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> ne s'afficheront pas sur la page d'auto-modification de l'adhérent :"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistration# Allow"
@@ -5692,7 +5732,7 @@ msgstr "(séparer les champs avec |)"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationBorrowerMandatoryField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> must be filled in on the patron entry screen:"
-msgstr ""
+msgstr "opac.pref#PatronSelfRegistrationBorrowerMandatoryField# Les champs suivants <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> doivent être remplis sur la page d'inscription de l'adhérent:"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# (separate columns with |)"
@@ -5700,7 +5740,7 @@ msgstr "(séparer les champs par |)"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-registration screen:"
-msgstr ""
+msgstr "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# Les champs suivants <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> ne s'afficheront pas sur la page d'auto-inscription de l'adhérent :"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationDefaultCategory# Use the patron category code"
@@ -6096,7 +6136,7 @@ msgstr "(liste de champs séparés par |)."
 
 # Patrons > General
 msgid "patrons.pref#BorrowerMandatoryField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> must be filled in on the patron entry screen:"
-msgstr ""
+msgstr "patrons.pref#BorrowerMandatoryField# Les champs suivants <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> doivent être remplis sur la page d'inscription de l'adhérent :"
 
 # Patrons > General
 msgid "patrons.pref#BorrowerRenewalPeriodBase# When renewing borrowers, base the new expiry date on"
@@ -6116,7 +6156,7 @@ msgstr "(séparer les champs par |)"
 
 # Patrons > General
 msgid "patrons.pref#BorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron entry screen:"
-msgstr ""
+msgstr "patrons.pref#BorrowerUnwantedField# Les champs suivants <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> ne s'afficheront pas sur la page d'inscrition de l'adhérent :"
 
 # Patrons > General
 msgid "patrons.pref#BorrowersTitles# (separate multiple choices with |)"

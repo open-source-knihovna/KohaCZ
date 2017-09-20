@@ -329,6 +329,7 @@ sub getRecords {
 
     my @servers = @$servers_ref;
     my @sort_by = @$sort_by_ref;
+    $offset = 0 if $offset < 0;
 
     # Initialize variables for the ZOOM connection and results object
     my $zconn;
@@ -2083,7 +2084,7 @@ sub searchResults {
             {
                 $onloan_count++;
                 my $key = $prefix . $item->{onloan} . $item->{barcode};
-                $onloan_items->{$key}->{due_date} = output_pref( { str => $item->{onloan}, dateonly => 1 } );
+                $onloan_items->{$key}->{due_date} = $item->{onloan};
                 $onloan_items->{$key}->{count}++ if $item->{$hbranch};
                 $onloan_items->{$key}->{branchname}     = $item->{branchname};
                 $onloan_items->{$key}->{location}       = $shelflocations->{ $item->{location} };

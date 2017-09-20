@@ -103,7 +103,7 @@ if ( $data->{'category_type'} eq 'C') {
     $template->param( 'catcode' =>    $catcodes->[0])  if $cnt == 1;
 }
 
-$template->param( adultborrower => 1 ) if ( $data->{'category_type'} eq 'A' );
+$template->param( adultborrower => 1 ) if ( $data->{'category_type'} eq 'A' || $data->{'category_type'} eq 'I' );
 if (! $limit){
 	$limit = 'full';
 }
@@ -130,8 +130,6 @@ $template->param(
     is_child          => ( $data->{category_type} eq 'C' ),
     branchname        => $branches->{ $data->{branchcode} }->{branchname},
     loop_reading      => $issues,
-    activeBorrowerRelationship =>
-      ( C4::Context->preference('borrowerRelationship') ne '' ),
     RoutingSerials => C4::Context->preference('RoutingSerials'),
 );
 output_html_with_http_headers $input, $cookie, $template->output;

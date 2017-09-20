@@ -7,11 +7,17 @@ use Test::Warn;
 use URI::Escape;
 use List::Util qw( shuffle );
 
+use t::lib::Mocks;
+
 use C4::Context;
 use Koha::DateUtils;
 my $dbh = C4::Context->dbh;
 $dbh->{AutoCommit} = 0;
 $dbh->{RaiseError} = 1;
+
+# FIXME: SessionStorage defaults to mysql, but it seems to break transaction
+# handling
+t::lib::Mocks::mock_preference( 'SessionStorage', 'tmp' );
 
 use_ok('Koha::DateUtils');
 use_ok('C4::Search::History');

@@ -25,6 +25,7 @@ use File::Temp;
 use File::Copy;
 use CGI qw ( -utf8 );
 use GD;
+use Digest::MD5 qw(md5_base64);
 use C4::Context;
 use C4::Auth;
 use C4::Output;
@@ -34,6 +35,7 @@ use C4::Debug;
 use Koha::Patrons;
 use Koha::Patron::Image;
 use Koha::Patron::Images;
+use Koha::Token;
 
 my $input = new CGI;
 
@@ -82,6 +84,13 @@ our %errors = ();
 
 # Case is important in these operational values as the template must use case to be visually pleasing!
 if ( ( $op eq 'Upload' ) && $uploadfile ) {
+
+    die "Wrong CSRF token"
+        unless Koha::Token->new->check_csrf({
+            session_id => scalar $input->cookie('CGISESSID'),
+            token  => scalar $input->param('csrf_token'),
+        });
+
     my $dirname = File::Temp::tempdir( CLEANUP => 1 );
     $debug and warn "dirname = $dirname";
     my $filesuffix;
@@ -163,6 +172,12 @@ elsif ( ( $op eq 'Upload' ) && !$uploadfile ) {
     $template->param( filetype   => $filetype );
 }
 elsif ( $op eq 'Delete' ) {
+    die "Wrong CSRF token"
+        unless Koha::Token->new->check_csrf({
+            session_id => scalar $input->cookie('CGISESSID'),
+            token  => scalar $input->param('csrf_token'),
+        });
+
     my $deleted = eval {
         Koha::Patron::Images->find( $borrowernumber )->delete;
     };
@@ -175,6 +190,11 @@ if ( $borrowernumber && !%errors && !$template->param('ERRORS') ) {
         "/cgi-bin/koha/members/moremember.pl?borrowernumber=$borrowernumber");
 }
 else {
+    $template->param(
+        csrf_token => Koha::Token->new->generate_csrf({
+            session_id => scalar $input->cookie('CGISESSID'),
+        }),
+    );
     output_html_with_http_headers $input, $cookie, $template->output;
 }
 

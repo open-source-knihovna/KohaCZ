@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Koha\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-15 16:27-0300\n"
+"POT-Creation-Date: 2017-08-17 04:51-0300\n"
 "PO-Revision-Date: 2016-10-31 12:24-0300\n"
 "Last-Translator: KristerAndreason <krister.andreason@molndal.se>\n"
 "Language-Team: \n"
@@ -861,7 +861,7 @@ msgstr "(! betyder 'inte synlig' eller vid minimering 'inte minimerad')"
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
@@ -1012,7 +1012,7 @@ msgstr "-8 =&gt; Flagga"
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Framtida användning"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
@@ -2004,7 +2004,7 @@ msgstr "Lägga till en budget"
 msgid "Adding a group"
 msgstr "Lägga till en grupp"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, c-format
 msgid "Adding a new alert"
 msgstr "Lägga till en ny notifiering"
@@ -2501,6 +2501,12 @@ msgid "All three of these options will open up the issue receive form:"
 msgstr ""
 "Samtliga tre alternativ öppna formuläret för mottagning av nytt nummer:"
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#, fuzzy, c-format
+msgid "All uploaded images will be listed on the right hand side of this page."
+msgstr ""
+"Bilden kommer att listas tillsammans med alla andra till höger på sidan."
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:117
 #, c-format
 msgid "Allow access to the reports module"
@@ -2649,14 +2655,6 @@ msgid ""
 msgstr ""
 "Synkronisera data på alla utlåningsdatorer genom att klicka på länken "
 "'Synkronisera' på skärmens högra sida."
-
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
-#, c-format
-msgid ""
-"And the image will be listed with all of your others on the right hand side "
-"of the page."
-msgstr ""
-"Bilden kommer att listas tillsammans med alla andra till höger på sidan."
 
 #: intranet-tmpl/prog/en/modules/help/suggestion/suggestion.tt:23
 #, c-format
@@ -2834,7 +2832,7 @@ msgid ""
 msgstr ""
 "Som ett minimum ska följande fält fyllas i om ett nytt objekt ska lånas ut:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -3341,11 +3339,11 @@ msgid "Build sets"
 msgstr "Skapa uppsättningar"
 
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:19
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "By default all item types and all patrons are notified of check ins and "
-"check outs. To change this, click on the item/patron type combination that "
-"you would like to stop notices for."
+"check outs. To change this, click on the item type/patron category "
+"combination that you would like to stop notices for."
 msgstr ""
 "Som standard meddelas alla objekttyper och låntagare om utlån och "
 "återlämning. För att ändra detta klickar du på den kombination av objekt/"
@@ -4297,7 +4295,7 @@ msgstr "Klicka på \"Betala\" bredvid den bot du vill delbetala"
 msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr "Klicka på \"Betala\" bredvid den bot du vill betala i sin helhet"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr "När du klickat på \"Spara notifiering\" är du klar!"
@@ -5254,7 +5252,7 @@ msgstr "Radera allmänna listor"
 msgid "Deleting Item Types"
 msgstr "Radera objekttyper"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, c-format
 msgid "Deleting alerts"
 msgstr "Radera notifikationer"
@@ -5753,7 +5751,7 @@ msgstr "Ange ett namn på listan och spara den."
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "Ange en beskrivande version av kategorinamnet i fältet 'Beskrivning'."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
@@ -5761,7 +5759,7 @@ msgid ""
 msgstr ""
 "Ange ett val i fältet för \"val\", du kan visa information om jQuery-val"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -6334,11 +6332,11 @@ msgstr ""
 "dubbletter. "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:86
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Finally, if you charge a rental fee for the item type and want to give a "
-"specific patron type a discount on that fee, enter the percentage discount "
-"(without the %% symbol) in the 'Rental Discount' field"
+"specific patron category a discount on that fee, enter the percentage "
+"discount (without the %% symbol) in the 'Rental Discount' field"
 msgstr ""
 "Avslutningsvis kan du om du tar ut en uthyrningsavgift för objekttypen och "
 "vill ge en särskild låntagartyp rabatt på avgiften, anger du rabatten i "
@@ -7533,10 +7531,10 @@ msgstr ""
 "för att tillhöra uppsättningen."
 
 #: intranet-tmpl/prog/en/modules/help/members/boraccount.tt:13
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"Hold fees will be charged based on the rules you set in the Patron Types "
-"&amp; Categories administration area"
+"Hold fees will be charged based on the rules you set for the patron category "
+"in administration"
 msgstr ""
 "Reservationsavgifter tas ut baserat på de regler du ställer in i "
 "administrationsområdet Låntagartyper &amp; kategorier"
@@ -9776,12 +9774,12 @@ msgstr ""
 "Om reservationen ignoreras är objektet fortfarande reserverat, men med "
 "statusen Tillgänglig (reservationen annulleras inte)"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
 #, c-format
 msgid "Images must be under 500k in size."
 msgstr "Bilder måste vara mindre än 500 k."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
 #, c-format
 msgid ""
 "Images uploaded using this tool will appear on the menu when creating patron "
@@ -9873,16 +9871,16 @@ msgstr ""
 "i systeminställningen för TransfersMaxDaysWarning."
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:31
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Important: At the very least you will need to set a default circulation "
 "rule. This rule should be set for all item types, all libraries and all "
 "patron categories. That will catch all instances that do not match a "
 "specific rule. When checking out if you do not have a rule for all "
-"libraries, all item types and all patron types then you may see patrons "
+"libraries, all item types and all patron categories then you may see patrons "
 "getting blocked from placing holds. You will also want a rule for your "
-"specific library set for all item types and all patron types to avoid this "
-"holds issue. Koha needs to know what rule to fall back on."
+"specific library set for all item types and all patron categories to avoid "
+"this holds issue. Koha needs to know what rule to fall back on."
 msgstr ""
 "Viktigt: du måste som minimum ange en standardregel för utlåning. Denna "
 "regel ska vara inställd för alla objekttyper, alla bibliotek och alla "
@@ -10663,7 +10661,7 @@ msgid ""
 "In the amount field, do not enter currency symbols, only numbers and decimals"
 msgstr "Använd inga valutasymboler i fältet belopp, bara siffror och decimaler"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
 #, c-format
 msgid ""
 "In the center of the screen is a simple upload form, simply browse for the "
@@ -11591,7 +11589,7 @@ msgstr "Lokala systeminställningar"
 msgid "Local Use:"
 msgstr "Lokal användning:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "Locate the \"Add new alert\" form."
 msgstr "Leta upp formuläret \"Lägg till ny notifiering\"."
@@ -11989,8 +11987,9 @@ msgid "Most circulated items"
 msgstr "Mest utlånade objekt"
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:12
-#, c-format
-msgid "Most common patron type, usually used for a general 'Patron' category."
+#, fuzzy, c-format
+msgid ""
+"Most common patron category, usually used for a general 'Patron' category."
 msgstr ""
 "Den vanligaste låntagartypen, används vanligen för en allmän 'Låntagare'-"
 "kategori."
@@ -12394,6 +12393,11 @@ msgstr "Obs! rättigheten edit_items krävs fortfarande"
 msgid "Note: Please note that items_batchmod permission is still required"
 msgstr "Obs! rättigheten items_batchmod krävs fortfarande"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
 #, c-format
 msgid "Note: if you list prices and/or invoice prices, include tax."
@@ -12728,7 +12732,7 @@ msgstr ""
 "När den aktuella gruppen citat laddats i redigeringstabellen kan du redigera "
 "källa och text för citaten."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
 #, c-format
 msgid ""
 "Once the file is uploaded you will be presented with a confirmation message."
@@ -13500,10 +13504,10 @@ msgstr ""
 "systeminställningen ExtendedPatronAttributes."
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:5
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "Patron categories allow you to organize your patrons into different roles, "
-"age groups, and patron types."
+"age groups, and patron categories."
 msgstr ""
 "Med låntagarkategorier kan du organisera dina låntagare i olika roller, "
 "grupper, åldersgrupper och låntagartyper."
@@ -13791,7 +13795,7 @@ msgstr "Philadelphia, PA 19107"
 msgid "Phone number: "
 msgstr "Telefonnummer: "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
 #, c-format
 msgid ""
 "Pictures uploaded with this tool should be at least 300dpi which is the "
@@ -14754,7 +14758,7 @@ msgstr "Se den fullständiga dokumentationen för MARC-ramverk i "
 msgid "See the full documentation for MARC Modification Templates in the "
 msgstr "Se den fullständiga dokumentationen för Mallar för MARC-modifiering i"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #, c-format
 msgid "See the full documentation for Managing Images in the "
 msgstr "Se den fullständiga dokumentationen för Hantering av bilder i "
@@ -15523,12 +15527,12 @@ msgstr "Sorteringsfält 1"
 msgid "Sort field 2 "
 msgstr "Sorteringsfält 2"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr "Spelningsordning för ljud"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -17695,8 +17699,8 @@ msgstr ""
 "in grundparametrarna innan denna sektion öppnas."
 
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:7
-#, c-format
-msgid "These preferences are set based on patron types and item types."
+#, fuzzy, c-format
+msgid "These preferences are set based on patron categories and item types."
 msgstr "Dessa inställningar görs baserat på låntagartyper och objekttyper."
 
 #: intranet-tmpl/prog/en/modules/help/reports/reserves_stats.tt:5
@@ -18099,10 +18103,10 @@ msgstr ""
 "inbyggda mönster."
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:37
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"This patron type is used strictly for statistical purposes, such as in house "
-"use of items."
+"This patron category is used strictly for statistical purposes, such as in "
+"house use of items."
 msgstr ""
 "Denna låntagartyp används bara för statistiska ändamål, som för intern "
 "användning av objekt."
@@ -18854,7 +18858,7 @@ msgstr ""
 "För att lägga till en ny attributtyp för låntagare klickar du på knappen 'Ny "
 "attributtyp för låntagare' längst upp i sidan"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, c-format
 msgid "To add a new alert:"
 msgstr "För att lägga till en ny notifiering:"
@@ -19076,7 +19080,7 @@ msgstr ""
 msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr "För att kunna beställa från en leverantör, måste du göra dem 'Aktiva'."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
@@ -19200,7 +19204,7 @@ msgstr ""
 "för auktoritetsposten."
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -19211,7 +19215,7 @@ msgstr ""
 "notifieringar du vill radera och klicka sedan på knappen \"Ta bort valda "
 "notifieringar\" och bekräfta att du vill ta bort dessa notifieringar. %s "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
 #, c-format
 msgid ""
 "To delete one or multiple of these images, click the checkbox to the right "
@@ -19677,6 +19681,13 @@ msgstr ""
 "För att låna om ett objekt från denna sida skannar du streckkoderna för "
 "objekten du vill låna om."
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:21
+#, c-format
+msgid ""
+"To replace an image, delete it, upload a new file and give it the same image "
+"name."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:91
 #, c-format
 msgid ""
@@ -20026,6 +20037,13 @@ msgstr "Uppdatera låntagarposter"
 #, c-format
 msgid "Upload Koha plugin"
 msgstr "Ladda upp insticksprogram för Koha"
+
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#, c-format
+msgid ""
+"Upload additional images to use as logo, decoration or background on a "
+"patron card layout."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/tools/upload-cover-image.tt:3
 #, c-format
@@ -20619,11 +20637,11 @@ msgstr ""
 "spara det nya citatet."
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:89
-#, c-format
+#, fuzzy, c-format
 msgid ""
 "When finished, click 'Add' to save your changes. To modify a rule, create a "
-"new one with the same patron type and item type. If you would like to delete "
-"your rule, simply click the 'Delete' link to the right of the rule."
+"new one with the same patron category and item type. If you would like to "
+"delete your rule, simply click the 'Delete' link to the right of the rule."
 msgstr ""
 "När du är klar klickar du på 'Lägg till' för att spara ändringarna. För att "
 "modifiera en regel skapar du en ny med samma låntagartyp och objekttyp. Om "
@@ -21065,12 +21083,12 @@ msgid ""
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:59
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"Without periodicy: some very specific (usually high level science journals) "
-"don't have a true periodicity. When you subscribe to the title, you "
-"subscribe for 6 issues, which can arrive in 1 year... or 2... There is no "
-"regularity or known schedule."
+"Without periodicity: some very specific (usually high level science "
+"journals) don't have a true periodicity. When you subscribe to the title, "
+"you subscribe for 6 issues, which can arrive in 1 year... or 2... There is "
+"no regularity or known schedule."
 msgstr ""
 "Utan periodicitet: en del mycket specifika periodika (vanligen avancerade "
 "vetenskapliga tidskrifter) har inte någon definierbar periodicitet. När du "
@@ -22104,23 +22122,23 @@ msgid "acquisition "
 msgstr "acquisition "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:17
-#, c-format
-msgid "all libraries, all patron types, all item types"
+#, fuzzy, c-format
+msgid "all libraries, all patron categories, all item types"
 msgstr "alla bibliotek, alla låntagartyper, alla objekttyper"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:16
-#, c-format
-msgid "all libraries, all patron types, same item type"
+#, fuzzy, c-format
+msgid "all libraries, all patron categories, same item type"
 msgstr "alla bibliotek, alla låntagartyper, samma objekttyp"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:15
-#, c-format
-msgid "all libraries, same patron type, all item types"
+#, fuzzy, c-format
+msgid "all libraries, same patron category, all item types"
 msgstr "alla bibliotek, samma låntagartyp, alla objekttyper"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:14
-#, c-format
-msgid "all libraries, same patron type, same item type"
+#, fuzzy, c-format
+msgid "all libraries, same patron category, same item type"
 msgstr "alla bibliotek, samma låntagartyp, samma objekttyp"
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:120
@@ -22614,7 +22632,7 @@ msgstr ""
 msgid "group_manage "
 msgstr "group_manage "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr "here"
@@ -23001,7 +23019,7 @@ msgstr "hantering "
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
@@ -23292,23 +23310,23 @@ msgid "routing "
 msgstr "mottagarlista "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:13
-#, c-format
-msgid "same library, all patron types, all item types"
+#, fuzzy, c-format
+msgid "same library, all patron categories, all item types"
 msgstr "samma bibliotek, alla låntagartyper, alla objekttyper"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:12
-#, c-format
-msgid "same library, all patron types, same item type"
+#, fuzzy, c-format
+msgid "same library, all patron categories, same item type"
 msgstr "samma bibliotek, alla låntagartyper, samma objekttyp"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:11
-#, c-format
-msgid "same library, same patron type, all item type"
+#, fuzzy, c-format
+msgid "same library, same patron category, all item type"
 msgstr "samma bibliotek, samma låntagartyp, alla objekttyper"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:10
-#, c-format
-msgid "same library, same patron type, same item type"
+#, fuzzy, c-format
+msgid "same library, same patron category, same item type"
 msgstr "samma bibliotek, samma låntagartyp, samma objekttyp"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:471

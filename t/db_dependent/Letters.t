@@ -18,7 +18,7 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
-use Test::More tests => 74;
+use Test::More tests => 75;
 use Test::MockModule;
 use Test::Warn;
 
@@ -61,11 +61,12 @@ $dbh->do(q|DELETE FROM message_transport_types|);
 my $library = $builder->build({
     source => 'Branch',
 });
+my $patron_category = $builder->build({ source => 'Category' })->{categorycode};
 my $date = dt_from_string;
 my $borrowernumber = AddMember(
     firstname    => 'Jane',
     surname      => 'Smith',
-    categorycode => 'PT',
+    categorycode => $patron_category,
     branchcode   => $library->{branchcode},
     dateofbirth  => $date,
 );
@@ -90,7 +91,7 @@ is( C4::Letters::EnqueueLetter(), undef, 'EnqueueLetter without argument returns
 my $my_message = {
     borrowernumber         => $borrowernumber,
     message_transport_type => 'sms',
-    to_address             => 'to@example.com',
+    to_address             => undef,
     from_address           => 'from@example.com',
 };
 my $message_id = C4::Letters::EnqueueLetter($my_message);
@@ -471,3 +472,28 @@ is($err2, 1, "Successfully sent serial notification");
 is($mail{'To'}, 'john.smith@test.de', "mailto correct in sent serial notification");
 is($mail{'Message'}, 'Silence in the library,'.$subscriptionid.',No. 0', 'Serial notification text constructed successfully');
 }
+
+subtest 'SendQueuedMessages' => sub {
+
+    plan tests => 2;
+    t::lib::Mocks::mock_preference( 'SMSSendDriver', 'Email' );
+    my $patron = Koha::Patrons->find($borrowernumber);
+    $dbh->do(q|
+        INSERT INTO message_queue(borrowernumber, subject, content, message_transport_type, status, letter_code)
+        VALUES (?, 'subject', 'content', 'sms', 'pending', 'just_a_code')
+        |, undef, $borrowernumber
+    );
+    eval { C4::Letters::SendQueuedMessages(); };
+    is( $@, '', 'SendQueuedMessages should not explode if the patron does not have a sms provider set' );
+
+    my $sms_pro = $builder->build({ source => 'SmsProvider', value => { domain => 'kidclamp.rocks' } });
+    ModMember( borrowernumber => $borrowernumber, smsalertnumber => '5555555555', sms_provider_id => $sms_pro->{id} );
+    $message_id = C4::Letters::EnqueueLetter($my_message); #using datas set around line 95 and forward
+    C4::Letters::SendQueuedMessages();
+    my $sms_message_address = $schema->resultset('MessageQueue')->search({
+        borrowernumber => $borrowernumber,
+        status => 'sent'
+    })->next()->to_address();
+    is( $sms_message_address, '5555555555@kidclamp.rocks', 'SendQueuedMessages populates the to address correctly for SMS by email' );
+
+};

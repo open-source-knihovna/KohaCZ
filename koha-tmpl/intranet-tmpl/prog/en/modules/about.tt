@@ -104,11 +104,51 @@
 
         <div id="sysinfo">
     [% IF warnPrefBiblioAddsAuthorities || warnPrefEasyAnalyticalRecords || warnPrefAnonymousPatron || warnPrefAnonymousPatron_PatronDoesNotExist ||
-          warnNoActiveCurrency || QueryParserError || warnIsRootUser || xml_config_warnings.size || AutoSelfCheckPatronDoesNotHaveSelfCheckPerm || AutoSelfCheckPatronHasTooManyPerm || warnStatisticsFieldsError || warnNoTemplateCaching %]
+          warnNoActiveCurrency || QueryParserError || warnIsRootUser || xml_config_warnings.size || AutoSelfCheckPatronDoesNotHaveSelfCheckPerm || AutoSelfCheckPatronHasTooManyPerm || warnStatisticsFieldsError || warnNoTemplateCaching || has_ai_issues %]
         [% IF (warnIsRootUser) %]
             <h2>Warning regarding current user</h2>
             <p>You are logged in as the database administrative user. This is not recommended because some parts of Koha will not function as expected when using this account.</p>
             <p>Please log in instead with a regular staff account. To create a staff account, create a library, a patron category 'Staff' and add a new patron. Then give this patron permissions from 'More' in the toolbar.</p>
+        [% END %]
+
+        [% IF has_ai_issues %]
+            <h2>Data problems</h2>
+            <p>
+            Some of your tables have problems with their auto_increment values which may lead to data loss. <strong>You should not ignore this warning</strong>.
+            The problem is that InnoDB does not keep auto_increment across SQL server restarts (it is only set in memory).
+            So on server startup the auto_increment values are set to max(table.id)+1.
+            </p>
+            <p>
+            See the <a href="https://wiki.koha-community.org/wiki/DBMS_auto_increment_fix">related wiki page</a> to know how to avoid this problem.
+            </p>
+
+            <h3>Problems found</h3>
+            [% IF ai_patrons %]
+                <h4>Patrons</h4>
+                <p>The following ids exist in both <strong>borrowers</strong> and <strong>deletedborrowers</strong> tables:
+                [% FOR p IN ai_patrons %][% p.borrowernumber %][% UNLESS loop.last %], [% END %][% END %]</p>
+            [% END %]
+            [% IF ai_biblios %]
+                <h4>Biblios</h4>
+                <p>The following ids exist in both <strong>biblio</strong> and <strong>deletedbiblio</strong> tables:
+                [% FOR b IN ai_biblios %][% b.biblionumber %][% UNLESS loop.last %], [% END %][% END %]</p>
+            [% END %]
+            [% IF ai_items %]
+                <h4>Items</h4>
+                <p>The following ids exist in both <strong>items</strong> and <strong>deleteditems</strong> tables:
+                [% FOR i IN ai_items %][% i.itemnumber %][% UNLESS loop.last %], [% END %][% END %]</p>
+            [% END %]
+            [% IF ai_checkouts %]
+                <h4>Checkouts</h4>
+                <p>The following ids exist in both <strong>issues</strong> and <strong>old_issues</strong> tables:
+                [% FOR c IN ai_checkouts %][% c.issue_id %][% UNLESS loop.last %], [% END %][% END %]</p>
+            [% END %]
+            [% IF ai_holds %]
+                <h4>Holds</h4>
+                <p>The following ids exist in both <strong>holds</strong> and <strong>old_reserves</strong> table:
+                [% FOR h IN ai_holds %][% h.reserve_id %][% UNLESS loop.last %], [% END %][% END %]</p>
+            [% END %]
+            <br/>
         [% END %]
 
         [% IF warnPrefBiblioAddsAuthorities || warnPrefEasyAnalyticalRecords || warnPrefAnonymousPatron || warnPrefAnonymousPatron_PatronDoesNotExist ||
@@ -584,6 +624,7 @@
                 <li>Eivin Giske Skaaren</li>
                 <li>Brice Sanchez</li>
                 <li>Sam Sanders</li>
+                <li>Rodrigo Santellan</li>
                 <li>Viktor Sarge</li>
                 <li>A. Sassmannshausen</li>
                 <li>Adrien Saurat</li>
@@ -782,6 +823,14 @@
             <h2>OAI xslt stylesheet</h2>
             <p>The included OAI.xslt file by the <a href="http://dspace.org/">DSpace project</a> is licensed under a <a href="http://www.dspace.org/license/">BSD License</a>.</p>
 
+            <h2>Select2</h2>
+            <p>The <a href="http://select2.github.io/select2/">Select2</a> library is licensed under <a href="https://github.com/select2/select2/blob/stable/3.5/LICENSE">the Apache License, Version 2.0 (the "Apache License") or the GNU General Public License version 2 (the "GPL License")</a>.</p>
+
+            <h2>jquery.tablednd.js</h2>
+            <p>The <a href="https://github.com/isocra/TableDnD">TableDnD plug-in for jQuery</a> by Denis Howlett is licensed under the <a href="http://opensource.org/licenses/mit-license.php">MIT License</a>.</p>
+
+            <h2>Leaflet</h2>
+            <p>The <a href="http://leafletjs.com">Leaflet</a> JavaScript library by Vladimir Agafonkinis licensed under the <a href="https://github.com/Leaflet/Leaflet/blob/master/LICENSE">BSD License</a>.</p>
         </div>
 
         <div id="translations">

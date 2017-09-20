@@ -267,6 +267,7 @@ CREATE TABLE `branches` ( -- information about your libraries or branches are st
   `branchprinter` varchar(100) default NULL, -- unused in Koha
   `branchnotes` mediumtext, -- notes related to your library or branch
   opac_info text, -- HTML that displays in OPAC
+  `geolocation` VARCHAR(255) default NULL, -- geolocation of your library
   PRIMARY KEY (`branchcode`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -590,14 +591,14 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `dateexpiry` date default NULL, -- date the patron/borrower's card is set to expire (YYYY-MM-DD)
   `gonenoaddress` tinyint(1) default NULL, -- set to 1 for yes and 0 for no, flag to note that library marked this patron/borrower as having an unconfirmed address
   `lost` tinyint(1) default NULL, -- set to 1 for yes and 0 for no, flag to note that library marked this patron/borrower as having lost their card
-  `debarred` date default NULL, -- until this date the patron can only check-in (no loans, no holds, etc.), is a fine based on days instead of money (YYY-MM-DD)
+  `debarred` date default NULL, -- until this date the patron can only check-in (no loans, no holds, etc.), is a fine based on days instead of money (YYYY-MM-DD)
   `debarredcomment` VARCHAR(255) DEFAULT NULL, -- comment on the stop of patron
-  `contactname` mediumtext, -- used for children and profesionals to include surname or last name of guarentor or organization name
-  `contactfirstname` text, -- used for children to include first name of guarentor
-  `contacttitle` text, -- used for children to include title (Mr., Mrs., etc) of guarentor
-  `guarantorid` int(11) default NULL, -- borrowernumber used for children or professionals to link them to guarentors or organizations
+  `contactname` mediumtext, -- used for children and profesionals to include surname or last name of guarantor or organization name
+  `contactfirstname` text, -- used for children to include first name of guarantor
+  `contacttitle` text, -- used for children to include title (Mr., Mrs., etc) of guarantor
+  `guarantorid` int(11) default NULL, -- borrowernumber used for children or professionals to link them to guarantors or organizations
   `borrowernotes` mediumtext, -- a note on the patron/borrower's account that is only visible in the staff client
-  `relationship` varchar(100) default NULL, -- used for children to include the relationship to their guarentor
+  `relationship` varchar(100) default NULL, -- used for children to include the relationship to their guarantor
   `sex` varchar(1) default NULL, -- patron/borrower's gender
   `password` varchar(60) default NULL, -- patron/borrower's encrypted password
   `flags` int(11) default NULL, -- will include a number associated with the staff member's permissions
@@ -615,7 +616,7 @@ CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrower
   `altcontactzipcode` varchar(50) default NULL, -- the zipcode for the alternate contact for the patron/borrower
   `altcontactcountry` text default NULL, -- the country for the alternate contact for the patron/borrower
   `altcontactphone` varchar(50) default NULL, -- the phone number for the alternate contact for the patron/borrower
-  `smsalertnumber` varchar(50) default NULL, -- the mobile phone number where the patron/borrower would like to receive notices (if SNS turned on)
+  `smsalertnumber` varchar(50) default NULL, -- the mobile phone number where the patron/borrower would like to receive notices (if SMS turned on)
   `sms_provider_id` int(11) DEFAULT NULL, -- the provider of the mobile phone number defined in smsalertnumber
   `privacy` integer(11) DEFAULT '1' NOT NULL, -- patron/borrower's privacy settings related to their reading history  KEY `borrowernumber` (`borrowernumber`),
   `checkprevissue` varchar(7) NOT NULL default 'inherit', -- produce a warning for this borrower if this item has previously been issued to this borrower if 'yes', not if 'no', defer to category setting if 'inherit'.
@@ -666,7 +667,7 @@ CREATE TABLE `deleteditems` (
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- date and time this item was last altered
   `location` varchar(80) default NULL, -- authorized value for the shelving location for this item (MARC21 952$c)
   `permanent_location` varchar(80) default NULL, -- linked to the CART and PROC temporary locations feature, stores the permanent shelving location
-  `onloan` date default NULL, -- defines if item is checked out (NULL for not checked out, and checkout date for checked out)
+  `onloan` date default NULL, -- defines if item is checked out (NULL for not checked out, and due date for checked out)
   `cn_source` varchar(10) default NULL, -- classification source used on this item (MARC21 952$2)
   `cn_sort` varchar(255) default NULL, -- normalized form of the call number (MARC21 952$o) used for sorting
   `ccode` varchar(10) default NULL, -- authorized value for the collection code associated with this item (MARC21 952$8)
@@ -911,7 +912,7 @@ CREATE TABLE `items` ( -- holdings/item information
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- date and time this item was last altered
   `location` varchar(80) default NULL, -- authorized value for the shelving location for this item (MARC21 952$c)
   `permanent_location` varchar(80) default NULL, -- linked to the CART and PROC temporary locations feature, stores the permanent shelving location
-  `onloan` date default NULL, -- defines if item is checked out (NULL for not checked out, and checkout date for checked out)
+  `onloan` date default NULL, -- defines if item is checked out (NULL for not checked out, and due date for checked out)
   `cn_source` varchar(10) default NULL, -- classification source used on this item (MARC21 952$2)
   `cn_sort` varchar(255) default NULL,  -- normalized form of the call number (MARC21 952$o) used for sorting
   `ccode` varchar(10) default NULL, -- authorized value for the collection code associated with this item (MARC21 952$8)
@@ -1456,7 +1457,7 @@ CREATE TABLE `search_field` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL COMMENT 'the name of the field as it will be stored in the search engine',
   `label` varchar(255) NOT NULL COMMENT 'the human readable name of the field, for display',
-  `type` ENUM('string', 'date', 'number', 'boolean', 'sum') NOT NULL COMMENT 'what type of data this holds, relevant when storing it in the search engine',
+  `type` ENUM('', 'string', 'date', 'number', 'boolean', 'sum') NOT NULL COMMENT 'what type of data this holds, relevant when storing it in the search engine',
   PRIMARY KEY (`id`),
   UNIQUE KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1603,16 +1604,16 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `dateexpiry` date default NULL, -- date the patron/borrower's card is set to expire (YYYY-MM-DD)
   `gonenoaddress` tinyint(1) default NULL, -- set to 1 for yes and 0 for no, flag to note that library marked this patron/borrower as having an unconfirmed address
   `lost` tinyint(1) default NULL, -- set to 1 for yes and 0 for no, flag to note that library marked this patron/borrower as having lost their card
-  `debarred` date default NULL, -- until this date the patron can only check-in (no loans, no holds, etc.), is a fine based on days instead of money (YYY-MM-DD)
+  `debarred` date default NULL, -- until this date the patron can only check-in (no loans, no holds, etc.), is a fine based on days instead of money (YYYY-MM-DD)
   `debarredcomment` VARCHAR(255) DEFAULT NULL, -- comment on the stop of the patron
-  `contactname` mediumtext, -- used for children and profesionals to include surname or last name of guarentor or organization name
-  `contactfirstname` text, -- used for children to include first name of guarentor
-  `contacttitle` text, -- used for children to include title (Mr., Mrs., etc) of guarentor
-  `guarantorid` int(11) default NULL, -- borrowernumber used for children or professionals to link them to guarentors or organizations
+  `contactname` mediumtext, -- used for children and profesionals to include surname or last name of guarantor or organization name
+  `contactfirstname` text, -- used for children to include first name of guarantor
+  `contacttitle` text, -- used for children to include title (Mr., Mrs., etc) of guarantor
+  `guarantorid` int(11) default NULL, -- borrowernumber used for children or professionals to link them to guarantors or organizations
   `borrowernotes` mediumtext, -- a note on the patron/borrower's account that is only visible in the staff client
-  `relationship` varchar(100) default NULL, -- used for children to include the relationship to their guarentor
+  `relationship` varchar(100) default NULL, -- used for children to include the relationship to their guarantor
   `sex` varchar(1) default NULL, -- patron/borrower's gender
-  `password` varchar(60) default NULL, -- patron/borrower's encrypted password
+  `password` varchar(60) default NULL, -- patron/borrower's Bcrypt encrypted password
   `flags` int(11) default NULL, -- will include a number associated with the staff member's permissions
   `userid` varchar(75) default NULL, -- patron/borrower's opac and/or staff client log in
   `opacnote` mediumtext, -- a note on the patron/borrower's account that is visible in the OPAC and staff client
@@ -1628,7 +1629,7 @@ CREATE TABLE `borrowers` ( -- this table includes information about your patrons
   `altcontactzipcode` varchar(50) default NULL, -- the zipcode for the alternate contact for the patron/borrower
   `altcontactcountry` text default NULL, -- the country for the alternate contact for the patron/borrower
   `altcontactphone` varchar(50) default NULL, -- the phone number for the alternate contact for the patron/borrower
-  `smsalertnumber` varchar(50) default NULL, -- the mobile phone number where the patron/borrower would like to receive notices (if SNS turned on)
+  `smsalertnumber` varchar(50) default NULL, -- the mobile phone number where the patron/borrower would like to receive notices (if SMS turned on)
   `sms_provider_id` int(11) DEFAULT NULL, -- the provider of the mobile phone number defined in smsalertnumber
   `privacy` integer(11) DEFAULT '1' NOT NULL, -- patron/borrower's privacy settings related to their reading history
   `checkprevissue` varchar(7) NOT NULL default 'inherit', -- produce a warning for this borrower if this item has previously been issued to this borrower if 'yes', not if 'no', defer to category setting if 'inherit'.

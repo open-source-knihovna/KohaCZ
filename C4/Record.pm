@@ -29,7 +29,6 @@ use MARC::File::XML; # marc2marcxml, marcxml2marc, changeEncoding
 use Biblio::EndnoteStyle;
 use Unicode::Normalize; # _entity_encode
 use C4::Biblio; #marc2bibtex
-use C4::Csv; #marc2csv
 use C4::Koha; #marc2csv
 use C4::XSLT ();
 use YAML; #marcrecords2csv
@@ -37,6 +36,7 @@ use Template;
 use Text::CSV::Encoded; #marc2csv
 use Koha::SimpleMARC qw(read_field);
 use Koha::XSLT_Handler;
+use Koha::CsvProfiles;
 use Carp;
 
 use vars qw(@ISA @EXPORT);
@@ -401,7 +401,7 @@ Returns a CSV scalar
 
 C<$biblio> - a list of biblionumbers
 
-C<$csvprofileid> - the id of the CSV profile to use for the export (see export_format.export_format_id and the GetCsvProfiles function in C4::Csv)
+C<$csvprofileid> - the id of the CSV profile to use for the export (see export_format.export_format_id)
 
 C<$itemnumbers> - a list of itemnumbers to export
 
@@ -451,7 +451,7 @@ Returns a CSV scalar
 
 C<$biblio> - a biblionumber
 
-C<$csvprofileid> - the id of the CSV profile to use for the export (see export_format.export_format_id and the GetCsvProfiles function in C4::Csv)
+C<$csvprofileid> - the id of the CSV profile to use for the export (see export_format.export_format_id)
 
 C<$header> - true if the headers are to be printed (typically at first pass)
 
@@ -475,14 +475,14 @@ sub marcrecord2csv {
     my $frameworkcode = GetFrameworkCode($biblio);
 
     # Getting information about the csv profile
-    my $profile = GetCsvProfile($id);
+    my $profile = Koha::CsvProfiles->find($id);
 
     # Getting output encoding
-    my $encoding          = $profile->{encoding} || 'utf8';
+    my $encoding          = $profile->encoding || 'utf8';
     # Getting separators
-    my $csvseparator      = $profile->{csv_separator}      || ',';
-    my $fieldseparator    = $profile->{field_separator}    || '#';
-    my $subfieldseparator = $profile->{subfield_separator} || '|';
+    my $csvseparator      = $profile->csv_separator      || ',';
+    my $fieldseparator    = $profile->field_separator    || '#';
+    my $subfieldseparator = $profile->subfield_separator || '|';
 
     # TODO: Be more generic (in case we have to handle other protected chars or more separators)
     if ($csvseparator eq '\t') { $csvseparator = "\t" }
@@ -496,7 +496,7 @@ sub marcrecord2csv {
     $csv->sep_char($csvseparator);
 
     # Getting the marcfields
-    my $marcfieldslist = $profile->{content};
+    my $marcfieldslist = $profile->content;
 
     # Getting the marcfields as an array
     my @marcfieldsarray = split('\|', $marcfieldslist);

@@ -46,6 +46,15 @@ $(document).ready(function() {
 	<div id="yui-main">
 	<div class="yui-b">
 
+[% FOR m IN messages %]
+    <div class="dialog [% m.type %]">
+        [% SWITCH m.code %]
+        [% CASE 'invalid_mimetype' %]The file used does not have a valid format. Only csv and txt are allowed.
+        [% CASE %][% m.code %]
+        [% END %]
+    </div>
+[% END %]
+
 <div id="exporttype" class="toptabs">
 <ul>
 <li><a href="#bibs">Export bibliographic records</a></li>
@@ -130,7 +139,7 @@ $(document).ready(function() {
         Use a file
     </legend>
         <ol>
-        <li>File containing a list of biblio numbers with one biblio number per line. This list works as a filter: it is compatible with other parameters.</li>
+        <li>File containing a list of biblio numbers with one biblio number per line. This list works as a filter: it is compatible with other parameters. (File types accepted: .csv and .txt)</li>
         <li><label for="id_list_file">File: </label> <input type="file" id="id_list_file" name="id_list_file" /></li>
         </ol>
     </fieldset>
@@ -159,7 +168,11 @@ $(document).ready(function() {
             <select id="output_format" name="output_format">
                 <option value="iso2709">marc</option>
                 <option value="xml">xml</option>
-                <option value="csv">csv</option>
+                [% IF csv_profiles %]
+                    <option value="csv">csv</option>
+                [% ELSE %]
+                    <option value="csv" disabled data-toggle="tooltip" data-placement="left" title="You must create a CSV profile for MARC exports to use this option.">csv</option>
+                [% END %]
             </select>
         </li>
         <li class="csv_profiles">
@@ -209,7 +222,7 @@ $(document).ready(function() {
         Use a file
     </legend>
         <ol>
-        <li>File containing a list of authids with one authid per line. This list works as a filter: it is compatible with other parameters.</li>
+        <li>File containing a list of authids with one authid per line. This list works as a filter: it is compatible with other parameters. (File types accepted: .csv and .txt)</li>
         <li><label for="id_list_file">File:</label> <input type="file" id="id_list_file" name="id_list_file" /></li>
         </ol>
     </fieldset>

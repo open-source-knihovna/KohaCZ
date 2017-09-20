@@ -649,14 +649,6 @@ sub handle_checkin {
         $resp .= 'U';
     }
 
-    # apparently we can't trust the returns from Checkin yet (because C4::Circulation::AddReturn is faulty)
-    # So we reproduce the alert logic here.
-    if ( not $status->alert ) {
-        if ( $item->destination_loc and $item->destination_loc ne $my_branch ) {
-            $status->alert(1);
-            $status->alert_type('04');    # no hold, just send it
-        }
-    }
     $resp .= $status->alert ? 'Y' : 'N';
     $resp .= timestamp;
     $resp .= add_field( FID_INST_ID, $inst_id );
@@ -969,6 +961,9 @@ sub handle_patron_info {
 
             # If patron password was provided, report whether it was right or not.
             $password_rc = $patron->check_password($patron_pwd);
+            if ( $patron_pwd eq q{} && $server->{account}->{allow_empty_passwords} ) {
+                $password_rc = 1;
+            }
             $resp .= add_field( FID_VALID_PATRON_PWD, sipbool( $password_rc ) );
         }
 

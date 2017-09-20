@@ -27,7 +27,7 @@
         } );
     });
     // This is here because of its dependence on template variables, everything else should go in js/pages/preferences.js - jpw
-    var to_highlight = "[% searchfield |replace("'", "\'") |replace('"', '\"') |replace('\n', '\\n') |replace('\r', '\\r') %]";
+    var to_highlight = "[% searchfield |replace("'", "\'") |replace('"', '\"') |replace('\n', '\\n') |replace('\r', '\\r') |html %]";
     var search_jumped = [% IF ( search_jumped ) %]true[% ELSE %]false[% END %];
     var MSG_NOTHING_TO_SAVE = _("Nothing to save");
     var MSG_SAVING = _("Saving...");
@@ -118,7 +118,7 @@
                     [% IF ( CHUNK.type_text ) %]
                     [% CHUNK.contents %]
                     [% ELSIF ( CHUNK.type_input ) %]
-                    <input type="[%IF CHUNK.input_type %][% CHUNK.input_type %][% ELSE %]text[% END %]" name="pref_[% CHUNK.name %]" id="pref_[% CHUNK.name %]" class="preference preference-[% CHUNK.class or "short" %]" value="[% CHUNK.value %]" autocomplete="off" /> [% IF ( CHUNK.dateinput ) %]<span class="hint">[% INCLUDE 'date-format.inc' %]</span>[% END %]
+                    <input type="[%IF CHUNK.input_type %][% CHUNK.input_type %][% ELSE %]text[% END %]" name="pref_[% CHUNK.name %]" id="pref_[% CHUNK.name %]" class="preference preference-[% CHUNK.class or "short" %]" value="[% CHUNK.value| html %]" autocomplete="off" /> [% IF ( CHUNK.dateinput ) %]<span class="hint">[% INCLUDE 'date-format.inc' %]</span>[% END %]
                     [% ELSIF ( CHUNK.type_select ) %]
                     <select name="pref_[% CHUNK.name %]" id="pref_[% CHUNK.name %]" class="preference preference-[% CHUNK.class or "choice" %]">
                         [% FOREACH CHOICE IN CHUNK.CHOICES.sort('value') %]

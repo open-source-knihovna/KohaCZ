@@ -22,13 +22,12 @@ $(document).ready(function(){
   $("input[name='disable_input']").click(function() {
       var row = $(this).attr("id");
       row = row.replace("row","hint");
-      var subfield = $(this).next();
-      if ($(this).is(":checked")){
-          $(this).val($(this).siblings("[name='subfield']").val());
-          $(subfield).prop('disabled', true);
+      var editor = $(this).parent().find("[name='field_value']");
+      if ($(this).is(":checked")) {
+          $(editor).prop('disabled', true);
           $("#"+row).html(_("This subfield will be deleted"));
       } else {
-          $(subfield).prop('disabled', false);
+          $(editor).prop('disabled', false);
           $("#"+row).html("");
       }
   });
@@ -91,7 +90,7 @@ $(document).ready(function(){
     </thead>
     <tbody>
         [% FOREACH notfoundbarcode IN notfoundbarcodes %]
-      <tr><td>[% notfoundbarcode.barcode %]</td></td>
+      <tr><td>[% notfoundbarcode.barcode |html %]</td></td>
         [% END %]
     </tbody>
       </table>

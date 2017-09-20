@@ -101,7 +101,7 @@ sub UpdateTransportCostMatrix {
 
     my $sth = $dbh->prepare("INSERT INTO transport_cost (frombranch, tobranch, cost, disable_transfer) VALUES (?, ?, ?, ?)");
 
-    $dbh->do("TRUNCATE TABLE transport_cost");
+    $dbh->do("DELETE FROM transport_cost");
     foreach (@$records) {
         my $cost = $_->{cost};
         my $from = $_->{frombranch};
@@ -110,7 +110,7 @@ sub UpdateTransportCostMatrix {
             $cost ||= 0;
         }
         elsif ( !defined ($cost) || ($cost !~ m/(0|[1-9][0-9]*)(\.[0-9]*)?/o) ) {
-            warn  "Invalid $from -> $to cost $cost - must be a number >= 0, disablig";
+            warn  "Invalid $from -> $to cost $cost - must be a number >= 0, disabling";
             $cost = 0;
             $_->{disable_transfer} = 1;
         }
@@ -398,6 +398,7 @@ sub MapItemsToHoldRequests {
           C4::Context->preference('LocalHoldsPriorityItemControl');
 
         foreach my $request (@$hold_requests) {
+            next if (defined($request->{itemnumber})); #skip item level holds in local priority checking
             last if $num_items_remaining == 0;
 
             my $local_hold_match;
@@ -423,7 +424,8 @@ sub MapItemsToHoldRequests {
 
                 if ($local_hold_match) {
                     if ( exists $items_by_itemnumber{ $item->{itemnumber} }
-                        and not exists $allocated_items{ $item->{itemnumber} } )
+                        and not exists $allocated_items{ $item->{itemnumber} }
+                        and not $request->{allocated})
                     {
                         $item_map{ $item->{itemnumber} } = {
                             borrowernumber => $request->{borrowernumber},
@@ -436,6 +438,7 @@ sub MapItemsToHoldRequests {
                             reservenotes => $request->{reservenotes},
                         };
                         $allocated_items{ $item->{itemnumber} }++;
+                        $request->{allocated} = 1;
                         $num_items_remaining--;
                     }
                 }
@@ -445,6 +448,7 @@ sub MapItemsToHoldRequests {
 
     foreach my $request (@$hold_requests) {
         last if $num_items_remaining == 0;
+        next if $request->{allocated};
 
         # is this an item-level request?
         if (defined($request->{itemnumber})) {
@@ -495,6 +499,7 @@ sub MapItemsToHoldRequests {
     my $pull_branches;
     foreach my $request (@$hold_requests) {
         last if $num_items_remaining == 0;
+        next if $request->{allocated};
         next if defined($request->{itemnumber}); # already handled these
 
         # look for local match first

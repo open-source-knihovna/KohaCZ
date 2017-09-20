@@ -159,7 +159,6 @@ $template->param(
     borrower      => $borrower,
     categoryname  => $borrower->{description},
     total         => $total_due,
-    activeBorrowerRelationship => (C4::Context->preference('borrowerRelationship') ne ''),
     RoutingSerials => C4::Context->preference('RoutingSerials'),
     ExtendedPatronAttributes => C4::Context->preference('ExtendedPatronAttributes'),
 );
@@ -182,7 +181,7 @@ sub borrower_add_additional_fields {
                 $b_ref->{catcode} = $catcodes->[0];
             }
         }
-    } elsif ( $b_ref->{category_type} eq 'A' ) {
+    } elsif ( $b_ref->{category_type} eq 'A' || $b_ref->{category_type} eq 'I' ) {
         $b_ref->{adultborrower} = 1;
     }
 

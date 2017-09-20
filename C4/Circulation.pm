@@ -54,6 +54,8 @@ use Koha::Patron::CheckPrevIssue qw( WantsCheckPrevIssue CheckPrevIssue );
 use Koha::Database;
 use Koha::Libraries;
 use Koha::Holds;
+use Koha::Issues;
+use Koha::OldIssues;
 use Carp;
 use List::MoreUtils qw( uniq );
 use Scalar::Util qw( looks_like_number );
@@ -928,7 +930,6 @@ sub CanBookBeIssued {
     if ( $rentalConfirmation ){
         my ($rentalCharge) = GetIssuingCharges( $item->{'itemnumber'}, $borrower->{'borrowernumber'} );
         if ( $rentalCharge > 0 ){
-            $rentalCharge = sprintf("%.02f", $rentalCharge);
             $needsconfirmation{RENTALCHARGE} = $rentalCharge;
         }
     }
@@ -1940,21 +1941,18 @@ sub AddReturn {
         }
 
         if ($borrowernumber) {
-            if ( ( C4::Context->preference('CalculateFinesOnReturn') && $issue->{'overdue'} ) || $return_date ) {
-                _CalculateAndUpdateFine( { issue => $issue, item => $item, borrower => $borrower, return_date => $return_date } );
-            }
-
             eval {
                 MarkIssueReturned( $borrowernumber, $item->{'itemnumber'},
                     $circControlBranch, $return_date, $borrower->{'privacy'} );
             };
-            if ( $@ ) {
-                $messages->{'Wrongbranch'} = {
-                    Wrongbranch => $branch,
-                    Rightbranch => $message
-                };
-                carp $@;
-                return ( 0, { WasReturned => 0 }, $issue, $borrower );
+            unless ( $@ ) {
+                if ( ( C4::Context->preference('CalculateFinesOnReturn') && $issue->{'overdue'} ) || $return_date ) {
+                    _CalculateAndUpdateFine( { issue => $issue, item => $item, borrower => $borrower, return_date => $return_date } );
+                }
+            } else {
+                carp "The checkin for the following issue failed, Please go to the about page, section 'data corrupted' to know how to fix this problem ($@)" . Dumper( $issue );
+
+                return ( 0, { WasReturned => 0, DataCorrupted => 1 }, $issue, $borrower );
             }
 
             # FIXME is the "= 1" right?  This could be the borrower hash.
@@ -2140,7 +2138,15 @@ sub MarkIssueReturned {
         die "Fatal error: the patron ($borrowernumber) has requested their circulation history be anonymized on check-in, but the AnonymousPatron system preference is empty or not set correctly."
             unless C4::Members::GetMember( borrowernumber => $anonymouspatron );
     }
+    my $database = Koha::Database->new();
+    my $schema   = $database->schema;
     my $dbh   = C4::Context->dbh;
+
+    my $issue_id = $dbh->selectrow_array(
+        q|SELECT issue_id FROM issues WHERE itemnumber = ?|,
+        undef, $itemnumber
+    );
+
     my $query = 'UPDATE issues SET returndate=';
     my @bind;
     if ($dropbox_branch) {
@@ -2154,34 +2160,37 @@ sub MarkIssueReturned {
     } else {
         $query .= ' now() ';
     }
-    $query .= ' WHERE  borrowernumber = ?  AND itemnumber = ?';
-    push @bind, $borrowernumber, $itemnumber;
-    # FIXME transaction
-    my $sth_upd  = $dbh->prepare($query);
-    $sth_upd->execute(@bind);
-    my $sth_copy = $dbh->prepare('INSERT INTO old_issues SELECT * FROM issues
-                                  WHERE borrowernumber = ?
-                                  AND itemnumber = ?');
-    $sth_copy->execute($borrowernumber, $itemnumber);
-    # anonymise patron checkout immediately if $privacy set to 2 and AnonymousPatron is set to a valid borrowernumber
-    if ( $privacy == 2) {
-        my $sth_ano = $dbh->prepare("UPDATE old_issues SET borrowernumber=?
-                                  WHERE borrowernumber = ?
-                                  AND itemnumber = ?");
-       $sth_ano->execute($anonymouspatron, $borrowernumber, $itemnumber);
-    }
-    my $sth_del  = $dbh->prepare("DELETE FROM issues
-                                  WHERE borrowernumber = ?
-                                  AND itemnumber = ?");
-    $sth_del->execute($borrowernumber, $itemnumber);
+    $query .= ' WHERE issue_id = ?';
+    push @bind, $issue_id;
 
-    ModItem( { 'onloan' => undef }, undef, $itemnumber );
+    # FIXME Improve the return value and handle it from callers
+    $schema->txn_do(sub {
 
-    if ( C4::Context->preference('StoreLastBorrower') ) {
-        my $item = Koha::Items->find( $itemnumber );
-        my $patron = Koha::Patrons->find( $borrowernumber );
-        $item->last_returned_by( $patron );
-    }
+        # Update the returndate
+        $dbh->do( $query, undef, @bind );
+
+        # Retrieve the issue
+        my $issue = Koha::Issues->find( $issue_id ); # FIXME should be fetched earlier
+
+        # Create the old_issues entry
+        my $old_checkout = Koha::OldIssue->new($issue->unblessed)->store;
+
+        # anonymise patron checkout immediately if $privacy set to 2 and AnonymousPatron is set to a valid borrowernumber
+        if ( $privacy == 2) {
+            $dbh->do(q|UPDATE old_issues SET borrowernumber=? WHERE issue_id = ?|, undef, $anonymouspatron, $issue_id);
+        }
+
+        # And finally delete the issue
+        $issue->delete;
+
+        ModItem( { 'onloan' => undef }, undef, $itemnumber );
+
+        if ( C4::Context->preference('StoreLastBorrower') ) {
+            my $item = Koha::Items->find( $itemnumber );
+            my $patron = Koha::Patrons->find( $borrowernumber );
+            $item->last_returned_by( $patron );
+        }
+    });
 }
 
 =head2 _debar_user_on_return
@@ -2925,7 +2934,7 @@ sub AddRenewal {
         $datedue = (C4::Context->preference('RenewalPeriodBase') eq 'date_due') ?
                                         dt_from_string( $issuedata->{date_due} ) :
                                         DateTime->now( time_zone => C4::Context->tz());
-        $datedue =  CalcDateDue($datedue, $itemtype, $issuedata->{'branchcode'}, $borrower, 'is a renewal');
+        $datedue =  CalcDateDue($datedue, $itemtype, _GetCircControlBranch($item, $borrower), $borrower, 'is a renewal');
     }
 
     # Update the issues record to have the new due date, and a new count
@@ -2992,10 +3001,14 @@ sub AddRenewal {
         DelUniqueDebarment({ borrowernumber => $borrowernumber, type => 'OVERDUES' });
     }
 
-    # Log the renewal
+    unless ( C4::Context->interface eq 'opac' ) { #if from opac we are obeying OpacRenewalBranch as calculated in opac-renew.pl
+        $branch = C4::Context->userenv ? C4::Context->userenv->{branch} : $branch;
+    }
+
+    # Add the renewal to stats
     UpdateStats(
         {
-            branch => C4::Context->userenv ? C4::Context->userenv->{branch} : $branch,
+            branch         => $branch,
             type           => 'renew',
             amount         => $charge,
             itemnumber     => $itemnumber,
@@ -3151,6 +3164,9 @@ sub GetIssuingCharges {
             # We may have multiple rules so get the most specific
             my $discount = _get_discount_from_rule($discount_rules, $branch, $item_type);
             $charge = ( $charge * ( 100 - $discount ) ) / 100;
+        }
+        if ($charge) {
+            $charge = sprintf '%.2f', $charge; # ensure no fractions of a penny returned
         }
     }
 
@@ -3376,7 +3392,7 @@ sub SendCirculationAlert {
     my %message_name = (
         CHECKIN  => 'Item_Check_in',
         CHECKOUT => 'Item_Checkout',
-	RENEWAL  => 'Item_Checkout',
+        RENEWAL  => 'Item_Checkout',
     );
     my $borrower_preferences = C4::Members::Messaging::GetMessagingPreferences({
         borrowernumber => $borrower->{borrowernumber},
@@ -3384,47 +3400,44 @@ sub SendCirculationAlert {
     });
     my $issues_table = ( $type eq 'CHECKOUT' || $type eq 'RENEWAL' ) ? 'issues' : 'old_issues';
 
+    my $schema = Koha::Database->new->schema;
     my @transports = keys %{ $borrower_preferences->{transports} };
-    # warn "no transports" unless @transports;
-    for (@transports) {
-        # warn "transport: $_";
-        my $message = C4::Message->find_last_message($borrower, $type, $_);
-        if (!$message) {
-            #warn "create new message";
-            my $letter =  C4::Letters::GetPreparedLetter (
-                module => 'circulation',
-                letter_code => $type,
-                branchcode => $branch,
-                message_transport_type => $_,
-                tables => {
-                    $issues_table => $item->{itemnumber},
-                    'items'       => $item->{itemnumber},
-                    'biblio'      => $item->{biblionumber},
-                    'biblioitems' => $item->{biblionumber},
-                    'borrowers'   => $borrower,
-                    'branches'    => $branch,
-                }
-            ) or next;
-            C4::Message->enqueue($letter, $borrower, $_);
+
+    # From the MySQL doc:
+    # LOCK TABLES is not transaction-safe and implicitly commits any active transaction before attempting to lock the tables.
+    # If the LOCK/UNLOCK statements are executed from tests, the current transaction will be committed.
+    # To avoid that we need to guess if this code is execute from tests or not (yes it is a bit hacky)
+    my $do_not_lock = ( exists $ENV{_} && $ENV{_} =~ m|prove| ) || $ENV{KOHA_NO_TABLE_LOCKS};
+
+    for my $mtt (@transports) {
+        my $letter =  C4::Letters::GetPreparedLetter (
+            module => 'circulation',
+            letter_code => $type,
+            branchcode => $branch,
+            message_transport_type => $mtt,
+            tables => {
+                $issues_table => $item->{itemnumber},
+                'items'       => $item->{itemnumber},
+                'biblio'      => $item->{biblionumber},
+                'biblioitems' => $item->{biblionumber},
+                'borrowers'   => $borrower,
+                'branches'    => $branch,
+            }
+        ) or next;
+
+        $schema->storage->txn_begin;
+        C4::Context->dbh->do(q|LOCK TABLE message_queue READ|) unless $do_not_lock;
+        C4::Context->dbh->do(q|LOCK TABLE message_queue WRITE|) unless $do_not_lock;
+        my $message = C4::Message->find_last_message($borrower, $type, $mtt);
+        unless ( $message ) {
+            C4::Context->dbh->do(q|UNLOCK TABLES|) unless $do_not_lock;
+            C4::Message->enqueue($letter, $borrower, $mtt);
         } else {
-            #warn "append to old message";
-            my $letter =  C4::Letters::GetPreparedLetter (
-                module => 'circulation',
-                letter_code => $type,
-                branchcode => $branch,
-                message_transport_type => $_,
-                tables => {
-                    $issues_table => $item->{itemnumber},
-                    'items'       => $item->{itemnumber},
-                    'biblio'      => $item->{biblionumber},
-                    'biblioitems' => $item->{biblionumber},
-                    'borrowers'   => $borrower,
-                    'branches'    => $branch,
-                }
-            ) or next;
             $message->append($letter);
             $message->update;
         }
+        C4::Context->dbh->do(q|UNLOCK TABLES|) unless $do_not_lock;
+        $schema->storage->txn_commit;
     }
 
     return;

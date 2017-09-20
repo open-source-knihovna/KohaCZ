@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2017-02-15 15:21-0300\n"
+"POT-Creation-Date: 2017-08-17 04:29-0300\n"
 "PO-Revision-Date: 2015-08-24 18:27+0000\n"
 "Last-Translator: Marijana <mglavica@ffzg.hr>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -728,7 +728,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
@@ -876,7 +876,7 @@ msgstr ""
 msgid "-9 =&gt; Future use"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
@@ -1784,7 +1784,7 @@ msgstr "Dodaj budžet"
 msgid "Adding a group"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, fuzzy, c-format
 msgid "Adding a new alert"
 msgstr "Dodaj budžet"
@@ -2211,6 +2211,11 @@ msgstr ""
 msgid "All three of these options will open up the issue receive form:"
 msgstr ""
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#, c-format
+msgid "All uploaded images will be listed on the right hand side of this page."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:117
 #, c-format
 msgid "Allow access to the reports module"
@@ -2334,13 +2339,6 @@ msgstr ""
 msgid ""
 "And synchronize your data on every circulation computer by clicking the "
 "'Synchronize' link on the right of the screen."
-msgstr ""
-
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
-#, c-format
-msgid ""
-"And the image will be listed with all of your others on the right hand side "
-"of the page."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/suggestion/suggestion.tt:23
@@ -2480,7 +2478,7 @@ msgid ""
 "should be entered for new items:"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -2932,8 +2930,8 @@ msgstr ""
 #, fuzzy, c-format
 msgid ""
 "By default all item types and all patrons are notified of check ins and "
-"check outs. To change this, click on the item/patron type combination that "
-"you would like to stop notices for."
+"check outs. To change this, click on the item type/patron category "
+"combination that you would like to stop notices for."
 msgstr ""
 "Standardno je postavljeno da korisnik dobiva obavijesti o zaduženjima i "
 "razduženjima za sve vrste građe i sve vrste korisnika. Kako biste to "
@@ -3758,7 +3756,7 @@ msgstr ""
 msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr ""
@@ -4600,7 +4598,7 @@ msgstr "Obriši skup"
 msgid "Deleting Item Types"
 msgstr "Brisanje vrsta građe"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, fuzzy, c-format
 msgid "Deleting alerts"
 msgstr "Brisanje primjeraka"
@@ -5056,14 +5054,14 @@ msgstr ""
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
 "jQuery selectors "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -5572,8 +5570,8 @@ msgstr ""
 #, c-format
 msgid ""
 "Finally, if you charge a rental fee for the item type and want to give a "
-"specific patron type a discount on that fee, enter the percentage discount "
-"(without the %% symbol) in the 'Rental Discount' field"
+"specific patron category a discount on that fee, enter the percentage "
+"discount (without the %% symbol) in the 'Rental Discount' field"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/memberentry.tt:72
@@ -6566,8 +6564,8 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/members/boraccount.tt:13
 #, c-format
 msgid ""
-"Hold fees will be charged based on the rules you set in the Patron Types "
-"&amp; Categories administration area"
+"Hold fees will be charged based on the rules you set for the patron category "
+"in administration"
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/circ/reserveratios.tt:3
@@ -8341,12 +8339,12 @@ msgid ""
 "Available (it will not cancel the hold)"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
 #, c-format
 msgid "Images must be under 500k in size."
 msgstr "Slike moraju biti manje od 500k."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
 #, c-format
 msgid ""
 "Images uploaded using this tool will appear on the menu when creating patron "
@@ -8433,10 +8431,10 @@ msgid ""
 "rule. This rule should be set for all item types, all libraries and all "
 "patron categories. That will catch all instances that do not match a "
 "specific rule. When checking out if you do not have a rule for all "
-"libraries, all item types and all patron types then you may see patrons "
+"libraries, all item types and all patron categories then you may see patrons "
 "getting blocked from placing holds. You will also want a rule for your "
-"specific library set for all item types and all patron types to avoid this "
-"holds issue. Koha needs to know what rule to fall back on."
+"specific library set for all item types and all patron categories to avoid "
+"this holds issue. Koha needs to know what rule to fall back on."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/koha2marclinks.tt:13
@@ -9058,7 +9056,7 @@ msgid ""
 "In the amount field, do not enter currency symbols, only numbers and decimals"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
 #, c-format
 msgid ""
 "In the center of the screen is a simple upload form, simply browse for the "
@@ -9850,7 +9848,7 @@ msgstr "Globalne sistemske postavke"
 msgid "Local Use:"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "Locate the \"Add new alert\" form."
 msgstr ""
@@ -10236,7 +10234,8 @@ msgstr "Najviše cirkulirani primjerci"
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:12
 #, c-format
-msgid "Most common patron type, usually used for a general 'Patron' category."
+msgid ""
+"Most common patron category, usually used for a general 'Patron' category."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/boraccount.tt:9
@@ -10576,6 +10575,11 @@ msgstr ""
 msgid "Note: Please note that items_batchmod permission is still required"
 msgstr ""
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
 #, c-format
 msgid "Note: if you list prices and/or invoice prices, include tax."
@@ -10865,7 +10869,7 @@ msgid ""
 "edit the quote source and text."
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
 #, c-format
 msgid ""
 "Once the file is uploaded you will be presented with a confirmation message."
@@ -11514,7 +11518,7 @@ msgstr ""
 #, c-format
 msgid ""
 "Patron categories allow you to organize your patrons into different roles, "
-"age groups, and patron types."
+"age groups, and patron categories."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/memberentry.tt:5
@@ -11784,7 +11788,7 @@ msgstr ""
 msgid "Phone number: "
 msgstr "Broj telefona: "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
 #, c-format
 msgid ""
 "Pictures uploaded with this tool should be at least 300dpi which is the "
@@ -12701,7 +12705,7 @@ msgstr "Pogledajte potpunu dokumentaciju za Katalogizaciju u "
 msgid "See the full documentation for MARC Modification Templates in the "
 msgstr "Pogledajte potpunu dokumentaciju za Katalogizaciju u "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #, c-format
 msgid "See the full documentation for Managing Images in the "
 msgstr ""
@@ -13422,12 +13426,12 @@ msgstr ""
 msgid "Sort field 2 "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -15247,7 +15251,7 @@ msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:7
 #, c-format
-msgid "These preferences are set based on patron types and item types."
+msgid "These preferences are set based on patron categories and item types."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/reports/reserves_stats.tt:5
@@ -15572,8 +15576,8 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:37
 #, c-format
 msgid ""
-"This patron type is used strictly for statistical purposes, such as in house "
-"use of items."
+"This patron category is used strictly for statistical purposes, such as in "
+"house use of items."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:331
@@ -16181,7 +16185,7 @@ msgid ""
 "button at the top of the page"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, fuzzy, c-format
 msgid "To add a new alert:"
 msgstr "Upiši novog korisnika"
@@ -16362,7 +16366,7 @@ msgstr ""
 msgid "To be able to order from a vendor, you must make them 'Active.'"
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
@@ -16461,7 +16465,7 @@ msgid ""
 msgstr ""
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -16469,7 +16473,7 @@ msgid ""
 "want to delete those alerts. %s "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
 #, c-format
 msgid ""
 "To delete one or multiple of these images, click the checkbox to the right "
@@ -16843,6 +16847,13 @@ msgid ""
 "like to renew."
 msgstr ""
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:21
+#, c-format
+msgid ""
+"To replace an image, delete it, upload a new file and give it the same image "
+"name."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:91
 #, c-format
 msgid ""
@@ -17126,6 +17137,13 @@ msgstr "Ažuriranje zapisa o korisniku"
 #, fuzzy, c-format
 msgid "Upload Koha plugin"
 msgstr "Unesi datoteku"
+
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#, c-format
+msgid ""
+"Upload additional images to use as logo, decoration or background on a "
+"patron card layout."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/tools/upload-cover-image.tt:3
 #, fuzzy, c-format
@@ -17634,8 +17652,8 @@ msgstr ""
 #, c-format
 msgid ""
 "When finished, click 'Add' to save your changes. To modify a rule, create a "
-"new one with the same patron type and item type. If you would like to delete "
-"your rule, simply click the 'Delete' link to the right of the rule."
+"new one with the same patron category and item type. If you would like to "
+"delete your rule, simply click the 'Delete' link to the right of the rule."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/itemtypes.tt:40
@@ -17985,10 +18003,10 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:59
 #, c-format
 msgid ""
-"Without periodicy: some very specific (usually high level science journals) "
-"don't have a true periodicity. When you subscribe to the title, you "
-"subscribe for 6 issues, which can arrive in 1 year... or 2... There is no "
-"regularity or known schedule."
+"Without periodicity: some very specific (usually high level science "
+"journals) don't have a true periodicity. When you subscribe to the title, "
+"you subscribe for 6 issues, which can arrive in 1 year... or 2... There is "
+"no regularity or known schedule."
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:383
@@ -18828,23 +18846,23 @@ msgid "acquisition "
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:17
-#, c-format
-msgid "all libraries, all patron types, all item types"
+#, fuzzy, c-format
+msgid "all libraries, all patron categories, all item types"
 msgstr "sve knjižnice, sve vrste korisnika, sve vrste građe"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:16
-#, c-format
-msgid "all libraries, all patron types, same item type"
+#, fuzzy, c-format
+msgid "all libraries, all patron categories, same item type"
 msgstr "sve knjižnice, sve vrste korisnika, ista vrsta građe"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:15
-#, c-format
-msgid "all libraries, same patron type, all item types"
+#, fuzzy, c-format
+msgid "all libraries, same patron category, all item types"
 msgstr "sve knjižnice, ista vrsta korisnika, sve vrste građe"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:14
-#, c-format
-msgid "all libraries, same patron type, same item type"
+#, fuzzy, c-format
+msgid "all libraries, same patron category, same item type"
 msgstr "sve knjižnice, ista vrsta korisnika, ista vrsta građe"
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:120
@@ -19312,7 +19330,7 @@ msgstr ""
 msgid "group_manage "
 msgstr ""
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr ""
@@ -19681,7 +19699,7 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
@@ -19962,24 +19980,24 @@ msgid "routing "
 msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:13
-#, c-format
-msgid "same library, all patron types, all item types"
-msgstr ""
+#, fuzzy, c-format
+msgid "same library, all patron categories, all item types"
+msgstr "sve knjižnice, sve vrste korisnika, sve vrste građe"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:12
-#, c-format
-msgid "same library, all patron types, same item type"
-msgstr ""
+#, fuzzy, c-format
+msgid "same library, all patron categories, same item type"
+msgstr "sve knjižnice, sve vrste korisnika, ista vrsta građe"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:11
-#, c-format
-msgid "same library, same patron type, all item type"
-msgstr ""
+#, fuzzy, c-format
+msgid "same library, same patron category, all item type"
+msgstr "sve knjižnice, ista vrsta korisnika, sve vrste građe"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:10
-#, c-format
-msgid "same library, same patron type, same item type"
-msgstr ""
+#, fuzzy, c-format
+msgid "same library, same patron category, same item type"
+msgstr "sve knjižnice, ista vrsta korisnika, ista vrsta građe"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:471
 #, c-format

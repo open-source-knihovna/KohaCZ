@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2017-02-15 15:42-0300\n"
+"POT-Creation-Date: 2017-08-17 04:36-0300\n"
 "PO-Revision-Date: 2015-10-08 08:45+0000\n"
 "Last-Translator: Vinea-SP_Hwang <snowfox8629@gmail.com>\n"
 "Language-Team: Koha Translation Team <koha-translate@nongnu.org>\n"
@@ -28,8 +28,8 @@ msgid "\" %s Restriction added by overdues process %s %s %s %s "
 msgstr ""
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:300
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:302
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:305
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:307
 msgid "$[% SUBFIELD.code %] [% SUBFIELD.value %]"
 msgstr "$[% SUBFIELD.code %] [% SUBFIELD.value %]"
 
@@ -43,7 +43,7 @@ msgstr "$[% SUBFIELD.code %] [% SUBFIELD.value %]"
 #. %8$s:  ITEM_RESULT.priority 
 #. %9$s:  END 
 #. %10$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1294
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1306
 #, c-format
 msgid "%s %s %s %s %s (priority %s) %s %s %s %s "
 msgstr "%s %s %s %s %s (우선순위 %s) %s %s %s %s "
@@ -107,7 +107,7 @@ msgstr ""
 #. %6$s:  acquisition_details.total_quantity 
 #. %7$s:  END 
 #. %8$s:  ELSE 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:668
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:680
 #, c-format
 msgid "%s %s %s %s 1 item is on order. %s %s items are on order. %s %s "
 msgstr ""
@@ -122,7 +122,7 @@ msgstr ""
 #. %7$s:  END 
 #. %8$s:  END 
 #. %9$s:  IF holds_count.defined || priority 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:641
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:653
 #, c-format
 msgid "%s %s %s %s 1 item is on order. %s %s items are on order. %s %s %s "
 msgstr ""
@@ -132,7 +132,7 @@ msgstr ""
 #. %2$s:  ELSE 
 #. %3$s:  IF ( RESERVE.is_in_transit ) 
 #. %4$s:  SET transfer = RESERVE.item.get_transfer 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:631
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:639
 #, fuzzy, c-format
 msgid "%s %s %s %s Item in transit from "
 msgstr "%s %s %s 자료가 배송중입니다"
@@ -169,7 +169,7 @@ msgstr ""
 #. %1$s:  IF ( RESERVE.is_waiting ) 
 #. %2$s:  IF ( RESERVE.is_at_destination ) 
 #. %3$s:  IF ( RESERVE.found ) 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:615
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:623
 #, c-format
 msgid "%s %s %s Item waiting at "
 msgstr "%s %s %s 자료 예약 대기중"
@@ -200,7 +200,7 @@ msgstr "%s%s%sKoha 온라인%s 도서목록 &rsaquo; 항목 %s"
 #. %3$s:  ELSE 
 #. %4$s:  END 
 #. %5$s:  INCLUDE shelfbrowser tab='otherholdings' 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:688
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:700
 #, c-format
 msgid "%s %s %s No other items. %s %s "
 msgstr "%s %s %s 다른 자료는 없습니다. %s %s "
@@ -231,7 +231,7 @@ msgstr "%s %s %s%s%s제목 없음%s %s %s%s "
 #. %1$s:  ELSE 
 #. %2$s:  MY_TAG.term |html 
 #. %3$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:126
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:133
 #, c-format
 msgid "%s %s (not approved) %s "
 msgstr ""
@@ -240,7 +240,7 @@ msgstr ""
 #. %1$s:  END 
 #. %2$s:  IF debarred_date && debarred_date != '9999-12-31' 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:50
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:115
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:121
 #, c-format
 msgid "%s %s End date: "
 msgstr ""
@@ -257,7 +257,7 @@ msgstr ""
 
 #. %1$s:  END 
 #. %2$s:  ELSE 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:628
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:636
 #, c-format
 msgid "%s %s Item in transit to "
 msgstr "%s %s 자료가 배송중입니다"
@@ -371,7 +371,7 @@ msgstr "%s %s 리뷰어 %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s%s"
 
 #. %1$s:  firstname 
 #. %2$s:  surname 
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:12
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:13
 #, c-format
 msgid "%s %s sent you a cart from our online catalog."
 msgstr "%s %s 님이 온라인 도서목록에서 책바구니를 보냈습니다."
@@ -389,7 +389,7 @@ msgstr ""
 #. %2$s:  IF ( added_count ==1 ) 
 #. %3$s:  ELSE 
 #. %4$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:108
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:115
 #, c-format
 msgid "%s %s tag%stags%s successfully added."
 msgstr "%s %s 태그%s태그들%s 성공적으로 추가되었습니다."
@@ -424,7 +424,7 @@ msgstr ""
 #. %5$s:  IF ( collectionvolume ) 
 #. %6$s:  collectionvolume 
 #. %7$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:238
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:243
 #, c-format
 msgid "%s %s, ISSN %s %s %s; %s %s "
 msgstr "%s %s, ISSN %s %s %s; %s %s "
@@ -499,7 +499,7 @@ msgstr ""
 #. %4$s:  END 
 #. %5$s:  ELSE 
 #. %6$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:671
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:673
 #, fuzzy, c-format
 msgid "%s %sShared%sPrivate%s %s Public %s "
 msgstr "%s%s개인 전용%s공유됨%s%s "
@@ -532,7 +532,7 @@ msgstr "%s (관련 검색 결과: %s %s %s ). %s "
 #. %1$s:  IF ( OVERDUE.debarred ) 
 #. %2$s:  ELSIF ( OVERDUE.status ) 
 #. %3$s:  IF ( canrenew ) 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:502
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:510
 #, c-format
 msgid "%s Account frozen %s %s "
 msgstr "%s 휴면계정 %s %s "
@@ -573,7 +573,7 @@ msgstr ""
 "시기 바랍니다. %s "
 
 #. %1$s:  ELSIF ( ISSUE.auto_renew || ISSUE.auto_too_soon ) 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:272
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:278
 #, fuzzy, c-format
 msgid "%s Automatic renewal "
 msgstr "%s 연장할 수 없습니다 %s 자동 연장"
@@ -724,13 +724,13 @@ msgid "%s Internet user critics"
 msgstr "%s 인터넷 이용자 의견"
 
 #. %1$s:  ELSE 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:626
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:634
 #, c-format
 msgid "%s Item waiting to be pulled from "
 msgstr "%s 자료 가져오기 대기중"
 
 #. %1$s:  issues_count 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:158
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:164
 #, c-format
 msgid "%s Item(s) checked out"
 msgstr "%s 자료(들) 대출됨"
@@ -742,14 +742,14 @@ msgid "%s Library card number: "
 msgstr "귀하의 도서관 카드 번호를 입력하세요:"
 
 #. %1$s:  END 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:114
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:119
 #, c-format
 msgid "%s Log out"
 msgstr "%s 로그아웃"
 
 #. %1$s:  ELSIF ( ISSUE.too_soon ) 
 #. %2$s:  ISSUE.soonestrenewdate 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:275
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:281
 #, c-format
 msgid "%s No renewal before %s "
 msgstr "%s 이전에 연장한 내역이 없습니다 %s "
@@ -769,20 +769,20 @@ msgid "%s No results, try to change filters. %s "
 msgstr "%s %s 결과를 찾을 수 없습니다. %s "
 
 #. %1$s:  ELSIF ( OVERDUE.norenew_overdue ) 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:509
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:517
 #, fuzzy, c-format
 msgid "%s Not allowed"
 msgstr "허용하지 않음"
 
 #. %1$s:  ELSIF ( ISSUE.on_reserve ) 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:266
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:272
 #, fuzzy, c-format
 msgid "%s Not renewable "
 msgstr "%s 연장할 수 없습니다 %s 자동 연장"
 
 #. %1$s:  ELSIF ( ISSUE.too_many ) 
 #. %2$s:  ELSIF ( ISSUE.norenew_overdue ) 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:268
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:274
 #, fuzzy, c-format
 msgid "%s Not renewable %s Not allowed "
 msgstr "연장할 수 없습니다"
@@ -790,7 +790,7 @@ msgstr "연장할 수 없습니다"
 #. %1$s:  ELSIF ( OVERDUE.onreserve ) 
 #. %2$s:  ELSE 
 #. %3$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:511
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:519
 #, fuzzy, c-format
 msgid "%s On hold %s No renewals left %s "
 msgstr "%s 예약중 % 연장할 자료가 없습니다 %s "
@@ -822,7 +822,7 @@ msgid ""
 "%s Passwords do not match. Please re-type your new password. %s %s Your new "
 "password must be at least %s characters long. %s %s Your current password "
 "was entered incorrectly. If this problem persists, please ask a librarian to "
-"re-set your password for you. %s %s Your password contains leading and/or "
+"reset your password for you. %s %s Your password contains leading and/or "
 "trailing spaces. %s "
 msgstr ""
 "%s 비밀번호가 맞지 않습니다. 비밀번호를 다시 입력해 주세요. %s %s 새 비밀번호"
@@ -843,12 +843,6 @@ msgstr "%s 전화번호:"
 #, c-format
 msgid "%s Please correct this and resubmit. "
 msgstr ""
-
-#. %1$s:  END # / IF circ_error_UNKNOWN_BARCODE 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:73
-#, c-format
-msgid "%s Please see a member of the library staff. "
-msgstr "%s 도서관 직원에게 문의하시기 바랍니다. "
 
 #. %1$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:514
@@ -969,6 +963,37 @@ msgstr "%s 다른 이용자들의 태그 보기 %s 태그 보기 %s: "
 msgid "%s The passwords do not match. %s Your chosen password is too short. "
 msgstr ""
 
+#. %1$s:  IF ( circ_error_UNKNOWN_BARCODE ) 
+#. %2$s:  ELSIF ( circ_error_max_loans_allowed ) 
+#. %3$s:  ELSIF ( circ_error_ISSUED_TO_ANOTHER ) 
+#. %4$s:  ELSIF ( circ_error_NO_MORE_RENEWALS ) 
+#. %5$s:  ELSIF ( circ_error_NOT_FOR_LOAN ) 
+#. %6$s:  ELSIF ( circ_error_DEBT ) 
+#. %7$s:  amount 
+#. %8$s:  ELSIF ( circ_error_WTHDRAWN ) 
+#. %9$s:  ELSIF ( circ_error_RESTRICTED ) 
+#. %10$s:  ELSIF ( circ_error_RESERVED ) 
+#. %11$s:  ELSIF ( circ_error_ITEMNOTSAMEBRANCH ) 
+#. %12$s:  ELSIF ( circ_error_EXPIRED ) 
+#. %13$s:  ELSIF ( circ_error_DEBARRED ) 
+#. %14$s:  ELSIF ( circ_error_CARD_LOST ) 
+#. %15$s:  ELSIF ( circ_error_GNA ) 
+#. %16$s:  ELSIF ( circ_error_INVALID_DATE ) 
+#. %17$s:  END 
+#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:43
+#, c-format
+msgid ""
+"%s The system does not recognize this barcode. %s You have checked out too "
+"many items and can't check out any more. %s This item is checked out to "
+"someone else. %s You cannot renew this item again. %s This item is not for "
+"loan. %s You owe the library %s and cannot check out. %s This item has been "
+"withdrawn from the collection. %s This item is restricted. %s This item is "
+"on hold for another patron. %s This item belongs to another branch. %s Your "
+"account has expired. %s Your account has been suspended. %s This card has "
+"been declared lost. %s Your contact information seems to be incomplete. %s "
+"Due date is not valid. %s Please see a member of the library staff. "
+msgstr ""
+
 #. %1$s:  IF error 
 #. %2$s:  ELSE 
 #. %3$s:  FOREACH role IN content 
@@ -994,7 +1019,7 @@ msgstr "%s 레코드에 항목이 없습니다. %s "
 #. %8$s:  priority 
 #. %9$s:  END 
 #. %10$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:652
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:664
 #, c-format
 msgid ""
 "%s Total holds: %s %s %s %s (priority %s) %s Overall queue priority: %s %s "
@@ -1039,15 +1064,22 @@ msgstr ""
 "%s 대기중 %s 예약중 %s 이용자에게 %s 에서 %s 예상되는 %s %s 대기일 %s %s %s "
 "%s %s %s %s. "
 
-#. For the first occurrence,
-#. %1$s:  IF ( ISSUE.charges ) 
+#. %1$s:  IF ( OVERDUE.charges ) 
 #. %2$s:  ELSE 
 #. %3$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:284
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:521
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:529
 #, c-format
 msgid "%s Yes %s No %s "
 msgstr "%s 네 %s 아니오 %s "
+
+#. %1$s:  IF ( ISSUE.charges ) 
+#. %2$s:  ELSIF ( ISSUE.rentalfines ) 
+#. %3$s:  ELSE 
+#. %4$s:  END 
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:290
+#, c-format
+msgid "%s Yes (Item overdue or lost) %s Yes (Rental fees) %s No %s "
+msgstr ""
 
 #. %1$s:  ELSE 
 #. %2$s:  END 
@@ -1058,7 +1090,7 @@ msgstr "%s 검색조건을 지정하지 않았습니다. %s "
 
 #. %1$s:  IF READING_RECORD.size == 0 
 #. %2$s:  ELSE 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:29
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:35
 #, c-format
 msgid "%s You have never borrowed anything from this library. %s "
 msgstr "%s 이 도서관에서의 대출 기록이 없습니다. %s "
@@ -1087,7 +1119,7 @@ msgstr ""
 "%%] "
 
 #. %1$s:  END # / IF Babeltheque 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1039
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1051
 #, c-format
 msgid ""
 "%s [%% INCLUDE \"openlibrary-readapi.inc\" bib = { normalized_isbn => "
@@ -1185,19 +1217,6 @@ msgstr ""
 "'seefrom' or 'seealso', controls the label for the entry type: authid: if it "
 "is a linked authority, its authid %%] %s %s %s %s %s "
 
-#. %1$s:  USE AuthorisedValues 
-#. %2$s:  SET avs = AuthorisedValues.GetAuthValueDropbox( category, default ) 
-#. %3$s:  IF avs 
-#: opac-tmpl/bootstrap/en/includes/av-build-dropbox.inc:1
-#, c-format
-msgid ""
-"%s [%%# Parameters: name: the name of the select element category: the "
-"authorised value category default: the default authorised value to select "
-"class: the CSS class of the select element size: the size to use for the "
-"input (generated if the authorised value category does not exist). %%] %s "
-"[%% DEFAULT class = '' size = 20 %%] %s "
-msgstr ""
-
 # 아 'ascending' 의 약자인 것 같습니다.
 #. For the first occurrence,
 #. %1$s:  ind.label 
@@ -1227,7 +1246,7 @@ msgstr "%s 의 리뷰"
 #. %2$s:  MY_TAG.author 
 #. %3$s:  END 
 #. %4$s:  END # /IF MY_TAG.XSLTBloc 
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:144
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:151
 #, c-format
 msgid "%s by %s %s %s "
 msgstr "%s 저자 %s %s %s "
@@ -1239,7 +1258,7 @@ msgstr "%s 저자 %s %s %s "
 #. %5$s:  XISBN.copyrightdate 
 #. %6$s:  END 
 #. %7$s:  IF ( XISBN.publishercode ) 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:971
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:983
 #, c-format
 msgid "%s by %s%s %s &copy;%s%s %s "
 msgstr "%s 저자 %s%s %s &copy;%s%s %s "
@@ -1259,7 +1278,7 @@ msgstr "%s 내림차순"
 #. %4$s:  RESERVE.waiting_expires_on | $KohaDates 
 #. %5$s:  END 
 #. %6$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:619
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:627
 #, fuzzy, c-format
 msgid "%s since %s %s until %s %s %s "
 msgstr "%s %s %s %s %s 제목없음 %s %s %s %s "
@@ -1321,7 +1340,7 @@ msgstr ""
 #. %5$s:  END 
 #. %6$s:  ELSE 
 #. %7$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:670
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:672
 #, c-format
 msgid "%s%s %sitem%sitems%s%sEmpty%s"
 msgstr "%s%s %s자료%s자료들%s%s비어있음%s"
@@ -1344,7 +1363,7 @@ msgstr ""
 #. %5$s:  UNLESS too_many_items 
 #. %6$s:  itemloop.size || 0 
 #. %7$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:537
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:549
 #, c-format
 msgid "%s%s holdings%sHoldings%s %s ( %s )%s"
 msgstr "%s%s 예약%s예약%s %s ( %s )%s"
@@ -1353,7 +1372,7 @@ msgstr "%s%s 예약%s예약%s %s ( %s )%s"
 #. %2$s:  IF ( deleted_count ==1 ) 
 #. %3$s:  ELSE 
 #. %4$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:111
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:118
 #, c-format
 msgid "%s%s tag%stags%s successfully deleted."
 msgstr "%s%s 태그%s태그들%s 삭제 성공."
@@ -1689,7 +1708,7 @@ msgstr "%s%s%sKoha 온라인%s 도서목록 &rsaquo; 강좌"
 #. %8$s:  END 
 #. %9$s:  subtitl.subfield |html 
 #. %10$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:27
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:32
 #, fuzzy, c-format
 msgid "%s%s%sKoha online%s catalog &rsaquo; Details for: %s%s%s,%s %s%s"
 msgstr "%s%s%sKoha 온라인%s 도서목록 &rsaquo; 상세보기: %s%s, %s%s"
@@ -2142,7 +2161,7 @@ msgstr ""
 #. %22$s:  END 
 #. %23$s:  IF (latestserial.status8 ) 
 #. %24$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:834
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:846
 #, fuzzy, c-format
 msgid ""
 "%sExpected%s %sArrived%s %sLate%s %sMissing%s %sMissing (never received)%s "
@@ -2230,7 +2249,7 @@ msgstr "%s이 레코드에 항목이 없습니다.%s "
 #. %2$s:  ELSE 
 #. %3$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:29
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:122
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:128
 #, c-format
 msgid "%sUpdate your contact information%sGo to your contact information%s"
 msgstr ""
@@ -2251,7 +2270,7 @@ msgid "%sa list:%s"
 msgstr "%s목록:%s"
 
 #: opac-tmpl/bootstrap/en/includes/page-numbers.inc:5
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1065
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1077
 #, c-format
 msgid "&laquo; Previous"
 msgstr "&laquo; 이전"
@@ -2878,18 +2897,18 @@ msgstr "(%s 표제)"
 #. For the first occurrence,
 #. %1$s:  ISSUE.renewsleft 
 #. %2$s:  ISSUE.renewsallowed 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:266
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:275
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:278
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:509
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:272
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:281
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:284
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:517
 #, c-format
 msgid "(%s of %s renewals remaining)"
 msgstr "(%s of %s 남은 연장 횟수)"
 
 #. For the first occurrence,
 #. %1$s:  overdues_count 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:415
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:540
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:423
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:548
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:214
 #, c-format
 msgid "(%s total)"
@@ -2906,7 +2925,7 @@ msgstr ""
 msgid "(All)"
 msgstr "(전체)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:149
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:155
 #, c-format
 msgid "(Checked out)"
 msgstr "(대출됨)"
@@ -2954,7 +2973,7 @@ msgid "(Optional, default 1)"
 msgstr "(선택사항, 기본값 1)"
 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:30
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:123
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:129
 #, fuzzy, c-format
 msgid ""
 "(Please note: there may be a delay in restoring your account if you submit "
@@ -3008,7 +3027,7 @@ msgid "(Use SRU instead)"
 msgstr "(대신 SRU 사용)"
 
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:454
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:409
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:414
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:172
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:506
 #, c-format
@@ -3028,13 +3047,13 @@ msgstr "(_MAX_ 전체 기입에서 선별되었음)"
 msgid "(modified on %s)"
 msgstr "(수정했음: %s)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:268
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:274
 #, fuzzy, c-format
 msgid "(on hold)"
 msgstr "(예약중)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:272
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:511
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:278
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:519
 #, fuzzy, c-format
 msgid "(overdue)"
 msgstr "연체 (%s)"
@@ -3081,7 +3100,7 @@ msgid "- You must enter a Title"
 msgstr "- 제목을 입력해야 합니다"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 msgid "- You must enter a list name"
 msgstr "- 목록명을 입력하셔야 합니다"
 
@@ -3106,7 +3125,7 @@ msgstr "-- 없음 -- "
 msgid ". Once you've confirmed the deletion, no one can retrieve the list!"
 msgstr ". 한번 삭제하면 목록에서 검색할 수 없습니다!"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:74
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:80
 #, c-format
 msgid ". Please contact the library for more information."
 msgstr ". 더 많은 정보를 원하시면 도서관에 문의하시기 바랍니다."
@@ -3114,7 +3133,7 @@ msgstr ". 더 많은 정보를 원하시면 도서관에 문의하시기 바랍�
 #. %1$s:  ELSE 
 #. %2$s:  END 
 #. %3$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:130
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:136
 #, fuzzy, c-format
 msgid ".%sYou have fines.%s %s "
 msgstr "귀하의 연체료나 수수료는 없습니다"
@@ -3213,7 +3232,7 @@ msgstr ""
 #. %3$s:  HTML5MediaSet.srcblock 
 #. %4$s:  HTML5MediaSet.typeblock 
 #. %5$s:  HTML5MediaParent 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:991
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1003
 #, fuzzy, c-format
 msgid ""
 "<%s controls preload=none> <%s src=\"%s\"%s /> [%s tag not supported by your "
@@ -3239,7 +3258,7 @@ msgstr ""
 msgid "A specific item"
 msgstr "특수 자료"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:567
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:579
 #, c-format
 msgid "About the author"
 msgstr "저자 정보"
@@ -3256,7 +3275,7 @@ msgid "Access denied"
 msgstr "접근이 거부되었습니다"
 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:27
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:121
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:127
 #, fuzzy, c-format
 msgid ""
 "According to our records, we don't have up-to-date contact information. "
@@ -3284,7 +3303,7 @@ msgstr "입수일: 오래된 순서대로 정렬"
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:273
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:453
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:57
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:408
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:413
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:171
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:505
 msgid "Add"
@@ -3309,7 +3328,7 @@ msgstr "다른 필드 추가"
 msgid "Add tag"
 msgstr "태그 추가"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:414
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:419
 #, c-format
 msgid "Add tag(s)"
 msgstr "태그(들) 추가"
@@ -3359,7 +3378,7 @@ msgstr "추가하기..."
 msgid "Added %s %s by "
 msgstr "추기됨 %s %s 의해 "
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:130
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:135
 #, c-format
 msgid "Additional authors:"
 msgstr "추가된 저자들:"
@@ -3384,15 +3403,15 @@ msgstr "청소년"
 msgid "Adult"
 msgstr "성인"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:272
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:277
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:13
 #, c-format
 msgid "Advanced search"
 msgstr "고급 검색"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:59
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:139
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:268
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:65
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:144
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:273
 #, c-format
 msgid "All"
 msgstr "전체"
@@ -3413,7 +3432,7 @@ msgid "All item types"
 msgstr "모든 자료 유형"
 
 #: opac-tmpl/bootstrap/en/includes/opac-topissues.inc:20
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:229
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:234
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:216
 #, c-format
 msgid "All libraries"
@@ -3432,7 +3451,7 @@ msgstr "허용함"
 msgid "Allow your guarantor to view your current checkouts?"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:75
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:81
 #, c-format
 msgid ""
 "Also note that you must return all checked out items before your card "
@@ -3455,9 +3474,9 @@ msgstr "다른 주소"
 msgid "Alternate contact"
 msgstr "다른 연락처"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:327
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:341
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:355
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:335
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:349
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:363
 #, c-format
 msgid "Amount"
 msgstr "총계"
@@ -3470,12 +3489,6 @@ msgstr "미입수 총계"
 #: opac-tmpl/bootstrap/en/modules/opac-account.tt:161
 #, c-format
 msgid "Amount to pay: "
-msgstr ""
-
-#. %1$s:  email 
-#: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:109
-#, c-format
-msgid "An email has been sent to \"%s\". "
 msgstr ""
 
 #. %1$s:  shelfname 
@@ -3569,7 +3582,7 @@ msgid "April"
 msgstr "4월"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:744
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:752
 msgid "Are you sure you want to cancel this hold?"
 msgstr "정말 이 예약을 취소하시겠습니까?"
 
@@ -3579,7 +3592,7 @@ msgid "Are you sure you want to delete selected search history entries?"
 msgstr "정말 선택한 검색 이력 항목들을 삭제하겠습니까?"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 msgid "Are you sure you want to delete this list?"
 msgstr "정말 이 목록을 삭제하시겠습니까?"
 
@@ -3599,27 +3612,27 @@ msgid "Are you sure you want to remove the selected items?"
 msgstr "정말 선택된 항목들을 삭제하시겠습니까?"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 msgid "Are you sure you want to remove these items from the list?"
 msgstr "정말 이 목록에서 이 자료들을 삭제하시겠습니까?"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 msgid "Are you sure you want to remove this item from the list?"
 msgstr "정말 이 자료들을 리스트에서 삭제하시겠습니까?"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 msgid "Are you sure you want to remove this share?"
 msgstr "정말 이 공유 폴더를 삭제하시겠습니까?"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:744
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:752
 msgid "Are you sure you want to resume all suspended holds?"
 msgstr "정말 일시 중지된 모든 예약을 재개하시겠습니까?"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:744
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:752
 msgid "Are you sure you want to suspend all holds?"
 msgstr "정말 모든 예약을 일시적으로 중단하겠습니까?"
 
@@ -3642,8 +3655,8 @@ msgstr "회원탈퇴 문의"
 
 #. For the first occurrence,
 #. %1$s:  subscription.branchname 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:798
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:801
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:810
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:813
 #, c-format
 msgid "At library: %s"
 msgstr "등록한 분관명: %s"
@@ -3653,7 +3666,7 @@ msgstr "등록한 분관명: %s"
 msgid "Audience"
 msgstr "독자"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:435
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:447
 #, c-format
 msgid "Audiovisual profile:"
 msgstr "시청각 프로필:"
@@ -3684,8 +3697,8 @@ msgstr "이용자의 로그인 권한을 인증하고, 이용자 식별기호를
 
 #. OPTGROUP
 #: opac-tmpl/bootstrap/en/includes/resort_form.inc:14
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:178
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:180
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:183
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:185
 #: opac-tmpl/bootstrap/en/modules/opac-results-grouped.tt:78
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:53
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:216
@@ -3710,7 +3723,7 @@ msgstr "저자 (A-Z 정렬)"
 msgid "Author (Z-A)"
 msgstr "저자 (Z-A 정렬)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:775
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:787
 #, c-format
 msgid "Author notes provided by Syndetics"
 msgstr "저자 주기는 Syndetics을 통해 제공됩니다"
@@ -3737,7 +3750,7 @@ msgstr "저자(들)："
 #. %14$s:  END 
 #. %15$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:43
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:38
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:39
 #, c-format
 msgid "Author(s): %s%s%s %s %s; %s %s %s %s%s %s %s;%s %s %s "
 msgstr "저자(들): %s%s%s %s %s; %s %s %s %s%s %s %s;%s %s %s "
@@ -3752,7 +3765,7 @@ msgstr "저자:"
 msgid "Authority"
 msgstr "전거"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:275
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:280
 #: opac-tmpl/bootstrap/en/modules/opac-authoritiessearchresultlist.tt:15
 #: opac-tmpl/bootstrap/en/modules/opac-authorities-home.tt:13
 #: opac-tmpl/bootstrap/en/modules/opac-authorities-home.tt:33
@@ -3806,7 +3819,7 @@ msgstr "사용가능함 %s"
 msgid "Available issues"
 msgstr "사용가능한 간행물"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:457
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:469
 #, c-format
 msgid "Awards:"
 msgstr "어워즈:"
@@ -3827,28 +3840,28 @@ msgstr ""
 msgid "Back to lists"
 msgstr "목록으로 돌아가기"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1071
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1083
 #, c-format
 msgid "Back to results"
 msgstr "결과로 돌아가기"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1071
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1083
 msgid "Back to the results search list"
 msgstr "검색결과 목록으로 돌아갑니다"
 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:317
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:91
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:168
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:373
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:422
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1174
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:174
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:381
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:430
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1186
 #, c-format
 msgid "Barcode"
 msgstr "바코드"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:251
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:487
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:257
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:495
 #, c-format
 msgid "Barcode:"
 msgstr "바코드:"
@@ -3892,7 +3905,7 @@ msgstr "거부됨"
 msgid "Blocked record"
 msgstr "거부된 레코드"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:611
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:623
 #, c-format
 msgid "Book reviews by critics ( XXX )"
 msgstr "책 리뷰는 다음 평론가에 의해 작성되었습니다 (XXX)"
@@ -3918,7 +3931,7 @@ msgstr "간략 간행이력"
 msgid "Broader Term"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:274
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:279
 #, c-format
 msgid "Browse by hierarchy"
 msgstr "계층구조로 보기"
@@ -3928,14 +3941,14 @@ msgstr "계층구조로 보기"
 msgid "Browse our catalog"
 msgstr "도서목록 찾아보기"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1057
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1059
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1069
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1071
 #, c-format
 msgid "Browse results"
 msgstr "찾아보기 결과"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1258
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1260
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1270
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1272
 #, c-format
 msgid "Browse shelf"
 msgstr "책장 보기"
@@ -3974,25 +3987,25 @@ msgstr "CSV - %s"
 msgid "Call Number"
 msgstr "청구기호"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:72
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:170
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:374
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:423
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:78
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:176
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:382
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:431
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:220
 #, c-format
 msgid "Call no."
 msgstr "청구기호"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:256
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:492
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:262
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:500
 #, fuzzy, c-format
 msgid "Call no.:"
 msgstr "청구기호"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:199
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:201
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:205
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:207
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:204
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:206
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:210
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:212
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:322
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:57
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:228
@@ -4001,7 +4014,7 @@ msgstr "청구기호"
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:581
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:57
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:59
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1167
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1179
 #, c-format
 msgid "Call number"
 msgstr "청구기호"
@@ -4018,35 +4031,35 @@ msgstr "청구기호 (0-9, A-Z로 정렬)"
 msgid "Call number (Z-A to 9-0)"
 msgstr "청구기호( Z-A, 9-0으로 정렬)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:141
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:147
 #, c-format
 msgid "Call number:"
 msgstr "청구기호: "
 
 #. For the first occurrence,
 #. %1$s:  subscription.callnumber 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:807
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:819
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:831
 #, c-format
 msgid "Call number: %s"
 msgstr "청구기호: %s"
 
 #: opac-tmpl/bootstrap/en/includes/opac-detail-sidebar.inc:104
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:336
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:341
 #: opac-tmpl/bootstrap/en/modules/opac-messaging.tt:150
 #: opac-tmpl/bootstrap/en/modules/opac-downloadcart.tt:27
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasketform.tt:40
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasketform.tt:41
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:274
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:615
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:617
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:619
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:88
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:58
 #: opac-tmpl/bootstrap/en/modules/opac-passwd.tt:57
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:681
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:700
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:689
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:708
 #: opac-tmpl/bootstrap/en/modules/opac-shareshelf.tt:62
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:165
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:290
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:170
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:295
 #: opac-tmpl/bootstrap/en/modules/opac-downloadshelf.tt:69
 #: opac-tmpl/bootstrap/en/modules/opac-review.tt:50
 #: opac-tmpl/bootstrap/en/modules/opac-addbybiblionumber.tt:54
@@ -4151,20 +4164,20 @@ msgstr "대출"
 msgid "Check out%s, return%s or renew an item: "
 msgstr "대출%s, 반납%s 혹은 자료 대출기간 연장: "
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:146
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:152
 #, c-format
 msgid "Check-in date:"
 msgstr "반납일:"
 
 # 그냥 '대출'로 통일해서 번역하는게 나을 것 같습니다.
 #: opac-tmpl/bootstrap/en/includes/item-status.inc:33
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:149
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:155
 #, c-format
 msgid "Checked out"
 msgstr "대출됨"
 
 #. %1$s:  issues_count 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:141
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:147
 #, c-format
 msgid "Checked out (%s)"
 msgstr "대출됨 (%s)"
@@ -4185,13 +4198,13 @@ msgid "Checked out to %s %s %s(%s)%s"
 msgstr "다음 사용자가 대출중입니다: %s %s %s(%s)%s"
 
 # 매뉴얼을 보니 '대출/반출'의 의미로 혼용되고 있네요...
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:29
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:35
 #, c-format
 msgid "Checkout history"
 msgstr "대출 이력"
 
 # 그냥 '대출'로 통일해서 번역하겠습니다
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:60
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:66
 #: opac-tmpl/bootstrap/en/modules/opac-topissues.tt:54
 #, c-format
 msgid "Checkouts"
@@ -4222,7 +4235,7 @@ msgstr "분류"
 #. For the first occurrence,
 #. %1$s:  BIBLIO_RESULT.classification 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:124
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:116
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:117
 #, c-format
 msgid "Classification: %s "
 msgstr "분류: %s "
@@ -4234,7 +4247,7 @@ msgstr "삭제"
 
 #. For the first occurrence,
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:263
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:36
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:49
@@ -4254,15 +4267,15 @@ msgstr "모두 삭제"
 msgid "Clear date"
 msgstr "날짜 삭제"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:676
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:717
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:684
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:725
 #, c-format
 msgid "Clear date to suspend indefinitely"
 msgstr "날짜를 지우고 무기한 연기"
 
 #. %1$s:  BORROWER_INFO.title 
 #. %2$s:  INCLUDE 'patron-title.inc' category_type = BORROWER_INFO.category_type firstname = BORROWER_INFO.firstname surname = BORROWER_INFO.surname othernames = BORROWER_INFO.othernames cardnumber = BORROWER_INFO.cardnumber 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:61
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:67
 #, c-format
 msgid "Click here if you're not %s %s"
 msgstr "%s %s 님이 아닌 경우에는 이곳을 클릭해 주세요"
@@ -4272,12 +4285,12 @@ msgstr "%s %s 님이 아닌 경우에는 이곳을 클릭해 주세요"
 msgid "Click here to login."
 msgstr "여기를 눌러 로그인하세요"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:641
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:653
 #, c-format
 msgid "Click here to view them all."
 msgstr "모두 보기를 원하시면 여기를 클릭하세요."
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1003
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1015
 #, c-format
 msgid "Click on an image to view it in the image viewer"
 msgstr "이미지 뷰어로 보려면 이미지를 클릭하세요"
@@ -4293,34 +4306,34 @@ msgid "Click to expand this role"
 msgstr "클릭하여 기능을 확장하세요"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "Click to forward the list to"
 msgstr "클릭하여 목록을 앞으로 가져오세요"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:427
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:429
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:437
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:439
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:448
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:450
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:459
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:461
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:441
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:449
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:451
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:460
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:462
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:471
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:473
 #, c-format
 msgid "Click to open in new window"
 msgstr "새 창에서 열려면 클릭하세요"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "Click to rewind the list to"
 msgstr "목록을 되돌리려면 클릭하세요"
 
 #. DIV
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:197
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:448
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:203
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:456
 msgid "Click to view in Google Books"
 msgstr "구글 북스에서 보려면 클릭하세요"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1083
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1095
 #, c-format
 msgid "Close"
 msgstr "닫기"
@@ -4352,7 +4365,7 @@ msgstr "관심있는 자료들를 수집하세요"
 
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:56
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:127
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1166
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1178
 #: opac-tmpl/bootstrap/en/modules/opac-topissues.tt:74
 #, c-format
 msgid "Collection"
@@ -4363,7 +4376,7 @@ msgstr "장서"
 msgid "Collection title:"
 msgstr "장서 제목"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:238
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:243
 #, c-format
 msgid "Collection: "
 msgstr "장서"
@@ -4371,23 +4384,23 @@ msgstr "장서"
 #. For the first occurrence,
 #. %1$s:  BIBLIO_RESULT.seriestitle 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:82
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:74
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:75
 #, c-format
 msgid "Collection: %s "
 msgstr "시리즈: %s "
 
 #. For the first occurrence,
 #. %1$s:  review.firstname 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:908
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:910
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:914
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:920
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:922
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:926
 #, c-format
 msgid "Comment by %s"
 msgstr "%s 님의 의견"
 
 #. %1$s:  review.firstname 
 #. %2$s:  review.surname|truncate(2,'.') 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:912
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:924
 #, c-format
 msgid "Comment by %s %s"
 msgstr "%s %s 님의 의견"
@@ -4395,7 +4408,7 @@ msgstr "%s %s 님의 의견"
 #. %1$s:  review.title 
 #. %2$s:  review.firstname 
 #. %3$s:  review.surname 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:906
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:918
 #, c-format
 msgid "Comment by %s %s %s"
 msgstr "%s %s %s 님의 의견"
@@ -4407,7 +4420,7 @@ msgid "Comment:"
 msgstr "의견:"
 
 #. %1$s:  reviews.size || 0 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:583
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:595
 #, c-format
 msgid "Comments ( %s )"
 msgstr "의견 ( %s )"
@@ -4458,12 +4471,12 @@ msgstr "연락처 정보"
 msgid "Content"
 msgstr "내용"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:506
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:518
 #, c-format
 msgid "Content Cafe"
 msgstr "Content Cafe"
 
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:660
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:662
 #, c-format
 msgid "Contents"
 msgstr "목차"
@@ -4475,7 +4488,7 @@ msgstr "%s의 내용"
 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:313
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:58
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1170
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1182
 #, c-format
 msgid "Copy number"
 msgstr "복본 번호"
@@ -4499,7 +4512,7 @@ msgstr "판권일:"
 #. For the first occurrence,
 #. %1$s:  BIBLIO_RESULT.copyrightdate 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:94
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:86
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:87
 #, c-format
 msgid "Copyright year: %s "
 msgstr "판권 연도: %s "
@@ -4527,9 +4540,9 @@ msgstr "강좌 #"
 msgid "Course number:"
 msgstr "강좌 번호:"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:273
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:278
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:20
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1180
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1192
 #: opac-tmpl/bootstrap/en/modules/opac-course-reserves.tt:18
 #, c-format
 msgid "Course reserves"
@@ -4547,7 +4560,7 @@ msgid "Courses"
 msgstr "강좌"
 
 #. IMG
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:61
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:66
 msgid "Cover image"
 msgstr "책 표지 그림"
 
@@ -4578,18 +4591,18 @@ msgstr ""
 "이용자를 위해 코하 서지레코드의 특정 아이템에 대해 제목 수준의 예약 요청을 생"
 "성하십시오."
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:353
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:361
 #, c-format
 msgid "Credits"
 msgstr "만든 사람"
 
 #. %1$s:  BORROWER_INFO.amountoutstanding | $Price 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:147
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:153
 #, c-format
 msgid "Credits (%s)"
 msgstr "잔액 (%s)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1159
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1171
 #, c-format
 msgid "Current location"
 msgstr "현재 위치"
@@ -4630,10 +4643,10 @@ msgstr "커리큘럼"
 msgid "DVD video / Videodisc"
 msgstr "DVD 비디오 / 비디오디스크"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:73
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:79
 #: opac-tmpl/bootstrap/en/modules/opac-full-serial-issues.tt:75
 #: opac-tmpl/bootstrap/en/modules/opac-account.tt:73
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:826
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:838
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:61
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:101
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:146
@@ -4642,25 +4655,25 @@ msgstr "DVD 비디오 / 비디오디스크"
 msgid "Date"
 msgstr "날짜"
 
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:119
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:126
 #, c-format
 msgid "Date added"
 msgstr "추가된 날짜"
 
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:152
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:159
 #, c-format
 msgid "Date added:"
 msgstr "추가된 날짜:"
 
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:60
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1173
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1185
 #, c-format
 msgid "Date due"
 msgstr "만료일"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:229
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:236
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:497
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:235
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:242
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:505
 #, c-format
 msgid "Date due:"
 msgstr "만료일:"
@@ -4731,14 +4744,14 @@ msgid ""
 msgstr "기록이 반환된 메타데이터 스키마를 정의하십시오, 가능한 값: "
 
 #. INPUT type=submit
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:694
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:696
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:263
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:53
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:92
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:138
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:175
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:119
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:156
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:126
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:163
 #, c-format
 msgid "Delete"
 msgstr "삭제"
@@ -4760,12 +4773,12 @@ msgid "Delete this list"
 msgstr "이 목록 삭제"
 
 #. A
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:105
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:110
 msgid "Delete your search history"
 msgstr "내 검색 이력 지우기"
 
 # 소셜 북마크 서비스 'Delicious' 말하는 것 같습니다...
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1115
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1127
 #, c-format
 msgid "Delicious"
 msgstr "Delicious"
@@ -4812,7 +4825,7 @@ msgstr "%s의 상세 정보"
 #. %4$s:  END 
 #. %5$s:  subtitl.subfield |html 
 #. %6$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:43
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:48
 #, fuzzy, c-format
 msgid "Details for: %s%s%s,%s %s%s"
 msgstr "상세 정보 : %s%s, %s%s"
@@ -4825,7 +4838,7 @@ msgstr "듀이분류법"
 #. For the first occurrence,
 #. %1$s:  BIBLIO_RESULT.dewey 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:118
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:110
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:111
 #, c-format
 msgid "Dewey: %s "
 msgstr "듀이분류법: %s "
@@ -4890,7 +4903,7 @@ msgstr "도서관 카드가 없습니까?"
 msgid "Don't have a password yet?"
 msgstr "아직 비밀번호가 없습니까?"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:331
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:336
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:86
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:75
 #, c-format
@@ -4907,7 +4920,7 @@ msgstr "완료"
 msgid "Download"
 msgstr "다운로드"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:314
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:322
 #, fuzzy, c-format
 msgid "Download as iCal/.ics file"
 msgstr "다운로드 목록"
@@ -4933,9 +4946,9 @@ msgstr "다운로드 목록"
 msgid "Dublin Core"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:163
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:372
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:424
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:169
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:380
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:432
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:221
 #, c-format
 msgid "Due"
@@ -4964,8 +4977,8 @@ msgid "ERROR: No record id specified. "
 msgstr "오류: 자료 등록번호가 없습니다."
 
 #. INPUT type=submit
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:685
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:895
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:687
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:907
 #: opac-tmpl/bootstrap/en/modules/opac-review.tt:61
 #, c-format
 msgid "Edit"
@@ -4987,19 +5000,19 @@ msgstr "목록 편집"
 msgid "Editing "
 msgstr "편집 중"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:211
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:216
 #, c-format
 msgid "Edition statement:"
 msgstr "출판 사항:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:593
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:605
 #, c-format
 msgid "Editions"
 msgstr "판"
 
 #: opac-tmpl/bootstrap/en/modules/opac-messaging.tt:40
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:189
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1116
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1128
 #, c-format
 msgid "Email"
 msgstr "이메일"
@@ -5026,12 +5039,12 @@ msgstr "비우고 닫기"
 msgid "Encyclopedias "
 msgstr "백과사전"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:505
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:517
 #, c-format
 msgid "Enhanced content: "
 msgstr "확장된 내용:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:703
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:715
 #, c-format
 msgid "Enhanced descriptions from Syndetics:"
 msgstr "관련항목에서 가져온 상세 설명: "
@@ -5185,12 +5198,12 @@ msgstr "예제 불러오기"
 msgid "Example response"
 msgstr "예시 응답"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:550
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:562
 #, c-format
 msgid "Excerpt"
 msgstr "발췌"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:746
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:758
 #, c-format
 msgid "Excerpt provided by Syndetics"
 msgstr "Syndetics에 의해 제공된 인용"
@@ -5205,13 +5218,13 @@ msgstr "특수자료 선택 예정"
 msgid "Expiration date:"
 msgstr "만료 날짜:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:593
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:597
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:601
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:605
 #, c-format
 msgid "Expiration:"
 msgstr "만료"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:546
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:554
 #, c-format
 msgid "Expires on"
 msgstr "만료됨"
@@ -5236,7 +5249,7 @@ msgstr ""
 msgid "Extends the due date for a patron's existing loan."
 msgstr "이용자 대출 기간을 연장합니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1113
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1125
 #, c-format
 msgid "Facebook"
 msgstr "페이스북"
@@ -5256,7 +5269,7 @@ msgstr "2월"
 msgid "Female:"
 msgstr "여성:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:386
+#: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:387
 #, c-format
 msgid "Fewer options"
 msgstr "옵션 덜 보기"
@@ -5266,7 +5279,7 @@ msgstr "옵션 덜 보기"
 msgid "Fiction"
 msgstr "소설"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:446
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:458
 #, c-format
 msgid "Fiction notes:"
 msgstr "소설 주석:"
@@ -5281,8 +5294,8 @@ msgstr "작품목록"
 msgid "Fine amount"
 msgstr "총 연체료"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:175
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:429
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:181
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:437
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:224
 #, c-format
 msgid "Fines"
@@ -5290,21 +5303,21 @@ msgstr "연체료"
 
 #. For the first occurrence,
 #. %1$s:  BORROWER_INFO.amountoutstanding | $Price 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:145
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:146
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:151
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:152
 #, c-format
 msgid "Fines (%s)"
 msgstr "연체료 (%s)"
 
 #: opac-tmpl/bootstrap/en/modules/opac-account.tt:65
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:325
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:339
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:333
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:347
 #, c-format
 msgid "Fines and charges"
 msgstr "연체료 및 수수료"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:284
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:521
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:290
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:529
 #, c-format
 msgid "Fines:"
 msgstr "연체료:"
@@ -5356,7 +5369,7 @@ msgstr ""
 "계속 보존함: 내 독서 이력을 기간제한 없이 보존합니다. 이것은 독서 기록을 계"
 "속 보존하고 싶어하는 유저를 위한 옵션 기능입니다"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:323
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:328
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:167
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:90
 #, fuzzy, c-format
@@ -5371,7 +5384,7 @@ msgstr ""
 
 #. For the first occurrence,
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:263
 msgid "Form not submitted because of the following problem(s)"
 msgstr "다음 문제(들) 때문에 양식이 제출되지 않았습니다"
@@ -5436,7 +5449,7 @@ msgstr "일반"
 msgid "Get new password recovery link"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:111
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:117
 #: opac-tmpl/bootstrap/en/modules/opac-discharge.tt:38
 #, c-format
 msgid "Get your discharge"
@@ -5520,9 +5533,9 @@ msgstr ""
 "주어진 서지정보나 자료 식별기호 설정에서, 식별자와 관련된 자료들의 유효성 목"
 "록을 반환합니다"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:222
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:248
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:42
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:227
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:253
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:48
 #: opac-tmpl/bootstrap/en/modules/opac-downloadcart.tt:26
 #: opac-tmpl/bootstrap/en/modules/opac-results-grouped.tt:138
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:138
@@ -5534,12 +5547,12 @@ msgstr "이동"
 
 #. For the first occurrence,
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "Go to detail"
 msgstr "상세정보 보기"
 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:54
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:117
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:123
 #, fuzzy, c-format
 msgid "Go to your account page"
 msgstr "내 계정 페이지"
@@ -5555,7 +5568,7 @@ msgid "Google login"
 msgstr "지역 도서관 로그인"
 
 #. OPTGROUP
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:237
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:242
 msgid "Groups"
 msgstr "그룹"
 
@@ -5600,7 +5613,7 @@ msgid "Heading descendant"
 msgstr "제목 내림차순"
 
 #. %1$s:  INCLUDE 'patron-title.inc' category_type = BORROWER_INFO.category_type firstname = BORROWER_INFO.firstname surname = BORROWER_INFO.surname othernames = BORROWER_INFO.othernames cardnumber = BORROWER_INFO.cardnumber 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:58
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:64
 #, c-format
 msgid "Hello, %s "
 msgstr "안녕하세요, %s 님 "
@@ -5611,7 +5624,7 @@ msgid "Help"
 msgstr "도움말"
 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:9
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:10
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:11
 #, c-format
 msgid "Hi,"
 msgstr "안녕하세요,"
@@ -5633,7 +5646,7 @@ msgstr "창 숨기기"
 msgid "Highlight"
 msgstr "하이라이트"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:585
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:593
 #, c-format
 msgid "Hold date:"
 msgstr "예약일:"
@@ -5678,23 +5691,23 @@ msgid "Holdings"
 msgstr "예약"
 
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:402
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:668
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:680
 #, c-format
 msgid "Holdings:"
 msgstr "예약:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:540
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:548
 #, c-format
 msgid "Holds "
 msgstr "예약"
 
 #. %1$s:  RESERVES.count 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:149
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:155
 #, c-format
 msgid "Holds (%s)"
 msgstr "예약 (%s)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:15
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:21
 #: opac-tmpl/bootstrap/en/modules/opac-messaging.tt:12
 #: opac-tmpl/bootstrap/en/modules/opac-serial-issues.tt:12
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:17
@@ -5726,11 +5739,11 @@ msgstr "예약 (%s)"
 #: opac-tmpl/bootstrap/en/modules/opac-overdrive-search.tt:19
 #: opac-tmpl/bootstrap/en/modules/opac-authorities-home.tt:12
 #: opac-tmpl/bootstrap/en/modules/opac-passwd.tt:12
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:17
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:23
 #: opac-tmpl/bootstrap/en/modules/ilsdi.tt:39
 #: opac-tmpl/bootstrap/en/modules/opac-shareshelf.tt:12
 #: opac-tmpl/bootstrap/en/modules/opac-discharge.tt:12
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:42
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:47
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:12
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:13
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:21
@@ -5752,7 +5765,7 @@ msgid "Home libraries"
 msgstr "도서관 본관"
 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:319
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1163
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1175
 #, c-format
 msgid "Home library"
 msgstr "도서관 본관"
@@ -5794,13 +5807,13 @@ msgstr "ISBD"
 #: opac-tmpl/bootstrap/en/modules/opac-ISBDdetail.tt:12
 #: opac-tmpl/bootstrap/en/modules/opac-ISBDdetail.tt:22
 #: opac-tmpl/bootstrap/en/modules/opac-MARCdetail.tt:25
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:109
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:114
 #, c-format
 msgid "ISBD view"
 msgstr "ISBD 보기"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:188
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:190
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:193
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:195
 #: opac-tmpl/bootstrap/en/modules/opac-results-grouped.tt:85
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:89
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:85
@@ -5814,18 +5827,18 @@ msgstr "ISBN"
 msgid "ISBN %s"
 msgstr "ISBN %s"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:226
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:231
 #, c-format
 msgid "ISBN:"
 msgstr "ISBN:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:229
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:234
 #, c-format
 msgid "ISBN: "
 msgstr "ISBN: "
 
 #. %1$s:  BIBLIO_RESULT.ISBN 
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:53
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:54
 #, c-format
 msgid "ISBN: %s "
 msgstr "ISBN: %s "
@@ -5845,13 +5858,13 @@ msgstr "ISBN: %s %s %s; %s %s "
 msgid "ISSN"
 msgstr "ISSN"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:234
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:239
 #, c-format
 msgid "ISSN:"
 msgstr "ISSN:"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:187
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:192
 #, c-format
 msgid "IdRef"
 msgstr "IdRef"
@@ -5861,7 +5874,7 @@ msgstr "IdRef"
 msgid "Identity"
 msgstr "개인정보"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:127
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:133
 #, fuzzy, c-format
 msgid "If this is an error, please contact the library."
 msgstr "귀하의 계정을 쉽게 확인하려면, 도서관에 연락하시기 바랍니다."
@@ -5966,7 +5979,7 @@ msgstr "만약 예전 계정을 가지고 계시다면, 다음과 같이 해주�
 msgid "If you have a CAS account, you may use that below."
 msgstr "만약 예전 계정을 가지고 계시다면, 다음과 같이 해주세요:"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:313
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:318
 #, c-format
 msgid "If you have a Shibboleth account, please "
 msgstr "만약 예전 계정을 가지고 계시다면, 다음과 같이 해주세요:"
@@ -5989,7 +6002,7 @@ msgid "If you want to, you can try to "
 msgstr ""
 
 #: opac-tmpl/bootstrap/en/modules/opac-imageviewer.tt:52
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:603
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:615
 #, c-format
 msgid "Images"
 msgstr "이미지"
@@ -6010,7 +6023,7 @@ msgstr "즉시 삭제"
 #. %1$s:  OPACBaseURL 
 #. %2$s:  BIBLIO_RESULT.biblionumber 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:142
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:134
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:136
 #, c-format
 msgid "In online catalog: %s/cgi-bin/koha/opac-detail.pl?biblionumber=%s "
 msgstr "온라인 도서목록에서: %s/cgi-bin/koha/opac-detail.pl?biblionumber=%s "
@@ -6063,7 +6076,7 @@ msgstr "강사:"
 msgid "Invalid shelf number."
 msgstr "잘못된 책장 번호입니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:825
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:837
 #, c-format
 msgid "Issue #"
 msgstr "발행호 #"
@@ -6079,12 +6092,17 @@ msgstr "구독중인 정기간행물"
 msgid "Issues summary"
 msgstr "정기간행물 요약"
 
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:102
+#, c-format
+msgid "It is too soon after the checkout date for this item to be renewed."
+msgstr ""
+
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:85
 #, fuzzy, c-format
 msgid "Item URI"
 msgstr "자료명:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:622
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:634
 #, c-format
 msgid "Item call number"
 msgstr "자료 청구기호"
@@ -6099,12 +6117,12 @@ msgstr "대출 불가능한 자료입니다."
 msgid "Item damaged"
 msgstr "파손자료"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1178
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1190
 #, c-format
 msgid "Item hold queue priority"
 msgstr "우선 예약 대기중인 자료"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1176
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1188
 #, c-format
 msgid "Item holds"
 msgstr "자료 예약"
@@ -6114,26 +6132,26 @@ msgstr "자료 예약"
 msgid "Item lost"
 msgstr "자료 분실"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:71
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:77
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:315
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:54
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:165
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:421
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1157
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:171
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:429
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1169
 #: opac-tmpl/bootstrap/en/modules/opac-topissues.tt:77
 #, c-format
 msgid "Item type"
 msgstr "자료 유형"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:138
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:144
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:46
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:243
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:249
 #, c-format
 msgid "Item type:"
 msgstr "자료 유형:"
 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:189
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:323
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:328
 #, c-format
 msgid "Item type: "
 msgstr "자료 유형:"
@@ -6167,7 +6185,7 @@ msgid "Items in your cart: "
 msgstr "내 책바구니의 자료"
 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:147
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:139
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:141
 #, c-format
 msgid "Items: "
 msgstr "자료명:"
@@ -6249,7 +6267,7 @@ msgstr "LCCN:"
 #. For the first occurrence,
 #. %1$s:  BIBLIO_RESULT.lccn 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:130
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:122
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:123
 #, c-format
 msgid "LCCN: %s "
 msgstr "LCCN: %s "
@@ -6330,19 +6348,19 @@ msgid "Level 4: Robust/domain specific discovery platforms"
 msgstr "Level 4: Robust/domain specific discovery platforms"
 
 #. OPTGROUP
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:230
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:235
 msgid "Libraries"
 msgstr "도서관"
 
 #: opac-tmpl/bootstrap/en/modules/opac-full-serial-issues.tt:76
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:620
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:632
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:122
 #, c-format
 msgid "Library"
 msgstr "도서관"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:168
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:170
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:173
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:175
 #, c-format
 msgid "Library catalog"
 msgstr "도서관 도서목록"
@@ -6383,19 +6401,19 @@ msgstr "다음으로 제한:"
 msgid "Link"
 msgstr "바로가기"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1273
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1275
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1285
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1287
 #, c-format
 msgid "Link to resource "
 msgstr "자료 연결"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1114
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1126
 #, c-format
 msgid "LinkedIn"
 msgstr "LinkedIn"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:75
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:178
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:81
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:184
 #, c-format
 msgid "Links"
 msgstr "바로가기"
@@ -6410,7 +6428,7 @@ msgstr "목록명"
 msgid "List deleted."
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:659
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:661
 #, c-format
 msgid "List name"
 msgstr "목록명"
@@ -6431,7 +6449,7 @@ msgstr "목록명:"
 msgid "List updated."
 msgstr "설정 업데이트됨"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:381
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:386
 #, c-format
 msgid "List(s) this item appears in: "
 msgstr "이 자료가 포함된 목록(들):"
@@ -6439,7 +6457,7 @@ msgstr "이 자료가 포함된 목록(들):"
 #: opac-tmpl/bootstrap/en/includes/masthead.inc:38
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:49
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:51
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:624
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:626
 #, c-format
 msgid "Lists"
 msgstr "목록"
@@ -6449,7 +6467,7 @@ msgstr "목록"
 msgid "Loading"
 msgstr "읽어들이는 중"
 
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:739
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:741
 #, c-format
 msgid "Loading "
 msgstr "불러오는 중"
@@ -6461,7 +6479,7 @@ msgstr "불러오는 중"
 msgid "Loading..."
 msgstr "불러오는 중..."
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:314
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:319
 #, c-format
 msgid "Local Login"
 msgstr "지역 도서관 로그인"
@@ -6498,11 +6516,11 @@ msgid "Locations"
 msgstr "위치"
 
 #. INPUT type=submit
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:335
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:340
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:18
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:164
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:651
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:726
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:653
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:728
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:84
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:73
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:294
@@ -6511,28 +6529,31 @@ msgid "Log in"
 msgstr "로그인"
 
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:460
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:416
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:424
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:426
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:512
 #, c-format
 msgid "Log in to add tags."
 msgstr "태그를 추가하기 위해서는 로그인하세요"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:73
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:75
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:77
 #, c-format
 msgid "Log in to create your own lists"
 msgstr "내 목록을 만들기 위해서는 로그인하세요"
 
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:90
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:93
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:95
 #, c-format
 msgid "Log in to see your own saved tags."
 msgstr "내 태그를 저장하기 위해서는 로그인하세요."
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:92
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:94
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:96
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:301
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:97
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:99
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:101
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:306
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:40
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:939
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:951
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:288
 #, c-format
 msgid "Log in to your account"
@@ -6549,7 +6570,7 @@ msgstr "귀하의 계정으로 로그인하세요"
 msgid "Log in with Google"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:38
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:44
 #, fuzzy, c-format
 msgid "Log out"
 msgstr "%s 로그아웃"
@@ -6574,7 +6595,7 @@ msgstr "로그인"
 msgid "Login page"
 msgstr "도서목록 메인 페이지"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:319
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:324
 #: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:82
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:81
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:70
@@ -6618,7 +6639,7 @@ msgstr "MARC 보기"
 #: opac-tmpl/bootstrap/en/modules/opac-ISBDdetail.tt:22
 #: opac-tmpl/bootstrap/en/modules/opac-MARCdetail.tt:24
 #: opac-tmpl/bootstrap/en/modules/opac-showmarc.tt:2
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:108
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:113
 #: opac-tmpl/bootstrap/en/modules/opac-auth-detail.tt:36
 #: opac-tmpl/bootstrap/en/modules/opac-auth-MARCdetail.tt:36
 #, c-format
@@ -6636,81 +6657,6 @@ msgstr "MARC 보기: %s"
 #, c-format
 msgid "MARCXML"
 msgstr "MARCXML"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:63
-#, c-format
-msgid "MESSAGE 10:"
-msgstr "메시지 10:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:65
-#, c-format
-msgid "MESSAGE 11:"
-msgstr "메시지 11:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:67
-#, c-format
-msgid "MESSAGE 12:"
-msgstr "메시지 12:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:69
-#, c-format
-msgid "MESSAGE 13:"
-msgstr "메시지 13:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:71
-#, c-format
-msgid "MESSAGE 14:"
-msgstr "메시지 14:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:73
-#, c-format
-msgid "MESSAGE 15:"
-msgstr "메시지 15:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:45
-#, c-format
-msgid "MESSAGE 1:"
-msgstr "메시지 1:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:47
-#, c-format
-msgid "MESSAGE 2:"
-msgstr "메시지 2:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:49
-#, c-format
-msgid "MESSAGE 3:"
-msgstr "메시지 3:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:51
-#, c-format
-msgid "MESSAGE 4:"
-msgstr "메시지 4:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:53
-#, c-format
-msgid "MESSAGE 5:"
-msgstr "메시지 5:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:55
-#, c-format
-msgid "MESSAGE 6:"
-msgstr "메시지 6:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:57
-#, c-format
-msgid "MESSAGE 7:"
-msgstr "메시지 7:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:59
-#, c-format
-msgid "MESSAGE 8:"
-msgstr "메시지 8:"
-
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:61
-#, c-format
-msgid "MESSAGE 9:"
-msgstr "메시지 9:"
 
 #: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:354
 #, c-format
@@ -6778,13 +6724,13 @@ msgstr "나"
 msgid "Message sent"
 msgstr "메시지를 보냈습니다"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:45
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:51
 #, c-format
 msgid "Messages for you"
 msgstr "나에게 온 메시지"
 
 #. %1$s:  subscription.missinglist 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:813
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:825
 #, c-format
 msgid "Missing issues: %s "
 msgstr "누락된 간행물: %s"
@@ -6794,7 +6740,7 @@ msgstr "누락된 간행물: %s"
 msgid "Mo"
 msgstr "월요일"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:555
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:563
 #, c-format
 msgid "Modify"
 msgstr "수정"
@@ -6809,13 +6755,13 @@ msgstr "월요일"
 msgid "Monday"
 msgstr "월요일"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1015
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1027
 #, c-format
 msgid "More book reviews at iDreamBooks.com"
 msgstr "iDreamBooks.com 에서 리뷰 더 찾아보기"
 
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:23
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:854
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:866
 #, c-format
 msgid "More details"
 msgstr "더 자세히"
@@ -6825,7 +6771,7 @@ msgstr "더 자세히"
 msgid "More lists"
 msgstr "더 많은 목록"
 
-#: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:388
+#: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:389
 #, c-format
 msgid "More options"
 msgstr "더 많은 옵션"
@@ -6835,7 +6781,7 @@ msgstr "더 많은 옵션"
 msgid "More searches "
 msgstr "상세검색"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:279
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:284
 #, c-format
 msgid "Most popular"
 msgstr "가장 인기있는"
@@ -6874,7 +6820,7 @@ msgstr "사용안함"
 #. %1$s:  END 
 #. %2$s:  ELSE 
 #. %3$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:597
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:605
 #, fuzzy, c-format
 msgid "Never expires %s %s - %s "
 msgstr "만료되지 않음 %s "
@@ -6900,7 +6846,7 @@ msgstr "%s의 새 의견 등록"
 #: opac-tmpl/bootstrap/en/includes/masthead.inc:70
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:167
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:497
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:648
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:650
 #, c-format
 msgid "New list"
 msgstr "새 목록"
@@ -6917,14 +6863,14 @@ msgstr "새 비밀번호:"
 msgid "New purchase suggestion"
 msgstr "새 구입희망자료 신청"
 
-#: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:392
+#: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:393
 #, c-format
 msgid "New search"
 msgstr "새 검색"
 
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:271
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:451
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:406
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:411
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:503
 #, c-format
 msgid "New tag(s), separated by a comma:"
@@ -6949,7 +6895,7 @@ msgstr "%s%s%s도서관%s 뉴스"
 #: opac-tmpl/bootstrap/en/includes/datatables.inc:2
 #: opac-tmpl/bootstrap/en/includes/calendar.inc:2
 #: opac-tmpl/bootstrap/en/modules/opac-overdrive-search.tt:62
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1076
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1088
 #, c-format
 msgid "Next"
 msgstr "다음"
@@ -6961,7 +6907,7 @@ msgid "Next &gt;&gt;"
 msgstr "다음 &gt;&gt;"
 
 #: opac-tmpl/bootstrap/en/includes/page-numbers.inc:15
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1074
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1086
 #, c-format
 msgid "Next &raquo;"
 msgstr "다음 &raquo;"
@@ -7000,9 +6946,9 @@ msgstr ""
 #: opac-tmpl/bootstrap/en/includes/opac-bottom.inc:200
 #: opac-tmpl/bootstrap/en/includes/opac-bottom.inc:210
 #: opac-tmpl/bootstrap/en/includes/opac-bottom.inc:219
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:93
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:101
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:110
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:99
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:107
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:116
 #: opac-tmpl/bootstrap/en/modules/opac-showreviews.tt:120
 #: opac-tmpl/bootstrap/en/modules/opac-showreviews.tt:136
 #: opac-tmpl/bootstrap/en/modules/opac-showreviews.tt:145
@@ -7010,14 +6956,14 @@ msgstr ""
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:329
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:337
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:347
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:191
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:199
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:208
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:442
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:197
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:205
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:214
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:450
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:459
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:73
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:963
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:458
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:467
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:78
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:975
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:234
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:246
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:254
@@ -7077,7 +7023,7 @@ msgstr "일치하는 레코드를 찾을 수 없습니다"
 msgid "No operation parameter has been passed."
 msgstr "통과된 작업 매개변수가 없습니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:678
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:690
 #, c-format
 msgid "No physical items for this record"
 msgstr "이 레코드에 물리적인 항목이 없습니다"
@@ -7087,7 +7033,7 @@ msgstr "이 레코드에 물리적인 항목이 없습니다"
 msgid "No private lists"
 msgstr "개인 목록이 없습니다"
 
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:719
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:721
 #, c-format
 msgid "No private lists."
 msgstr "개인 목록이 없습니다."
@@ -7097,7 +7043,7 @@ msgstr "개인 목록이 없습니다."
 msgid "No public lists"
 msgstr "공개 목록이 없습니다"
 
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:717
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:719
 #, c-format
 msgid "No public lists."
 msgstr "공개 목록이 없습니다."
@@ -7137,7 +7083,7 @@ msgstr "선택된 구입희망신청이 없습니다"
 msgid "No tag was specified."
 msgstr "지정된 태그가 없습니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:401
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:406
 #, c-format
 msgid "No tags from this library for this title."
 msgstr "이 도서관에서 이 서명에 붙은 태그가 없습니다."
@@ -7166,7 +7112,7 @@ msgstr "지정된 태그가 없습니다."
 #: opac-tmpl/bootstrap/en/modules/opac-ISBDdetail.tt:22
 #: opac-tmpl/bootstrap/en/modules/opac-full-serial-issues.tt:51
 #: opac-tmpl/bootstrap/en/modules/opac-MARCdetail.tt:23
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:107
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:112
 #: opac-tmpl/bootstrap/en/modules/opac-auth-detail.tt:33
 #: opac-tmpl/bootstrap/en/modules/opac-auth-MARCdetail.tt:33
 #, c-format
@@ -7206,7 +7152,7 @@ msgid "Not what you expected? Check for "
 msgstr "원하시는 결과가 아니신가요? 다음을 확인해 주세요"
 
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:166
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:828
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:840
 #, c-format
 msgid "Note"
 msgstr "참고"
@@ -7278,7 +7224,7 @@ msgstr ""
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:61
 #: opac-tmpl/bootstrap/en/modules/opac-full-serial-issues.tt:77
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:151
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1172
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1184
 #: opac-tmpl/bootstrap/en/modules/opac-auth-detail.tt:112
 #: opac-tmpl/bootstrap/en/modules/opac-course-reserves.tt:36
 #, c-format
@@ -7288,7 +7234,7 @@ msgstr "참고"
 #. For the first occurrence,
 #. %1$s:  BIBLIO_RESULT.notes 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:100
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:92
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:93
 #, c-format
 msgid "Notes : %s "
 msgstr "알림：%s"
@@ -7310,13 +7256,13 @@ msgid "Nothing"
 msgstr "없음"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:744
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:752
 msgid ""
 "Nothing has been selected. Check the box for each item you want to renew"
 msgstr "선택된 항목이 없습니다. 연장할 항목들을 체크해 주세요."
 
 #: opac-tmpl/bootstrap/en/modules/opac-messaging.tt:124
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:67
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:73
 #, c-format
 msgid "Notice:"
 msgstr ""
@@ -7326,14 +7272,14 @@ msgstr ""
 msgid "Nov"
 msgstr "11월"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:588
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1022
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1098
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:600
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1034
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1110
 #, c-format
 msgid "Novelist Select"
 msgstr "소설가 선택"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:513
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:525
 #, c-format
 msgid "Novelist Select: "
 msgstr "소설가 선택:"
@@ -7397,17 +7343,17 @@ msgstr "예약중"
 msgid "On order"
 msgstr "주문중"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:61
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:67
 #, fuzzy, c-format
 msgid "On-site checkouts"
 msgstr "On-site checkouts"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:68
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:74
 #, c-format
 msgid "One or more holds were not placed due to existing holds."
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:333
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:338
 #, c-format
 msgid "Online resources:"
 msgstr "온라인 자료:"
@@ -7432,12 +7378,12 @@ msgstr ""
 msgid "Open Library: "
 msgstr "도서관:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:39
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:45
 #, c-format
 msgid "Order by date"
 msgstr "날짜로 정렬"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:40
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:46
 #, c-format
 msgid "Order by title"
 msgstr "제목으로 정렬"
@@ -7447,7 +7393,7 @@ msgstr "제목으로 정렬"
 msgid "Order by: "
 msgstr "다음 기준으로 정렬:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:946
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:958
 #, c-format
 msgid "Other editions of this work"
 msgstr "이 작품의 다른 에디션"
@@ -7458,7 +7404,7 @@ msgid "Other forms:"
 msgstr "다른 양식:"
 
 #. %1$s:  otheritemloop.size || 0 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:540
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:552
 #, fuzzy, c-format
 msgid "Other holdings ( %s )"
 msgstr "다른 예약들 ( %s )"
@@ -7482,12 +7428,12 @@ msgid "OverDrive search for '%s'"
 msgstr "OverDrive에서 검색: '%s'"
 
 #. %1$s:  overdues_count 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:143
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:149
 #, c-format
 msgid "Overdue (%s)"
 msgstr "연체 (%s)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:415
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:423
 #, c-format
 msgid "Overdues "
 msgstr "연체"
@@ -7531,7 +7477,7 @@ msgstr ""
 msgid "Password updated"
 msgstr "비밀번호 업데이트"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:320
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:325
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:82
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:42
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:71
@@ -7551,7 +7497,7 @@ msgid "Patent document"
 msgstr "특허 문서"
 
 #. %1$s:  review.datereviewed | $KohaDates 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:918
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:930
 #, c-format
 msgid "Patron comment on %s"
 msgstr "이용자 의견 등록 %s"
@@ -7586,18 +7532,18 @@ msgstr "허가: "
 msgid "Phone"
 msgstr "전화번호:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:222
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:227
 #, c-format
 msgid "Physical details:"
 msgstr "형태 정보:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:547
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:555
 #, c-format
 msgid "Pick up location"
 msgstr "픽업 장소"
 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:214
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:605
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:613
 #, c-format
 msgid "Pick up location:"
 msgstr "픽업 장소"
@@ -7621,7 +7567,7 @@ msgstr "예약하기:"
 #: opac-tmpl/bootstrap/en/modules/opac-results-grouped.tt:231
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:437
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:440
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:46
 #: opac-tmpl/bootstrap/en/modules/opac-overdrive-search.tt:62
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:494
@@ -7631,7 +7577,7 @@ msgstr "예약하기:"
 msgid "Place hold"
 msgstr "예약"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:545
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:553
 #, c-format
 msgid "Placed on"
 msgstr "지정하기"
@@ -7646,7 +7592,7 @@ msgstr "Places"
 msgid "Placing a hold"
 msgstr "예약하기"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:607
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:619
 #, c-format
 msgid "Play media"
 msgstr "미디어 재생"
@@ -7783,7 +7729,7 @@ msgid ""
 msgstr ""
 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:14
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:14
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:15
 #, fuzzy, c-format
 msgid ""
 "Please note that the attached file is a MARC bibliographic records file "
@@ -7801,18 +7747,18 @@ msgid ""
 "of items returned damaged."
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:74
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:87
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:111
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:114
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:121
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:80
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:93
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:117
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:120
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:127
 #, c-format
 msgid "Please note:"
 msgstr "다음을 참고하십시요："
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:81
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:127
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:130
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:87
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:133
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:136
 #, c-format
 msgid "Please note: "
 msgstr "다음을 참고하십시요:"
@@ -7861,7 +7807,7 @@ msgstr "인기도(낮은 순으로)"
 msgid "Popularity (most to least)"
 msgstr "인기도 (높은 순으로)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:934
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:946
 #, c-format
 msgid "Post or edit your comments on this item. "
 msgstr "이 도서에 대한 나의 의견을 등록하거나 편집합니다."
@@ -7900,7 +7846,7 @@ msgstr "미리보기"
 #: opac-tmpl/bootstrap/en/includes/shelfbrowser.inc:16
 #: opac-tmpl/bootstrap/en/includes/datatables.inc:2
 #: opac-tmpl/bootstrap/en/modules/opac-overdrive-search.tt:62
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1067
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1079
 #, c-format
 msgid "Previous"
 msgstr "이전"
@@ -7927,12 +7873,12 @@ msgstr "인쇄"
 msgid "Print list"
 msgstr "목록 출력"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:549
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:557
 #, c-format
 msgid "Priority"
 msgstr "우선순위"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:610
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:618
 #, c-format
 msgid "Priority:"
 msgstr "우선순위:"
@@ -7980,8 +7926,8 @@ msgstr "공개"
 #: opac-tmpl/bootstrap/en/includes/masthead.inc:41
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:62
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:64
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:635
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:637
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:639
 #: opac-tmpl/bootstrap/en/modules/opac-downloadshelf.tt:19
 #: opac-tmpl/bootstrap/en/modules/opac-addbybiblionumber.tt:41
 #, c-format
@@ -8022,7 +7968,7 @@ msgstr "출판/판권일: 오래된 자료 순으로"
 msgid "Publication:"
 msgstr "출판:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:214
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:219
 #, c-format
 msgid "Published by :"
 msgstr "출판사:"
@@ -8039,7 +7985,7 @@ msgstr "출판사:"
 #. %9$s:  BIBLIO_RESULT.item('size') 
 #. %10$s:  END 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:67
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:59
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:60
 #, c-format
 msgid "Published by: %s %s in %s %s %s , %s %s %s , %s %s "
 msgstr "출판사: %s %s in %s %s %s , %s %s %s , %s %s "
@@ -8061,8 +8007,8 @@ msgstr "출판사 위치"
 msgid "Publisher:"
 msgstr "출판사:"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:282
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:284
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:287
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:289
 #, c-format
 msgid "Purchase suggestions"
 msgstr "구입희망자료 신청"
@@ -8097,14 +8043,14 @@ msgid "RT"
 msgstr ""
 
 #. INPUT type=submit name=rate_button
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:490
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:502
 #, fuzzy
 msgid "Rate me"
 msgstr "날짜"
 
 #. For the first occurrence,
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:577
 msgid "Rating based on reviews of "
 msgstr "리뷰 순위"
@@ -8124,7 +8070,7 @@ msgstr "구입희망신청 사유:"
 msgid "RecallItem "
 msgstr "회수할 자료"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:276
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:281
 #: opac-tmpl/bootstrap/en/modules/opac-showreviews.tt:16
 #, c-format
 msgid "Recent comments"
@@ -8160,7 +8106,7 @@ msgstr "검색 개선"
 msgid "Register a new account"
 msgstr "새 계정 등록하기"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:331
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:336
 #: opac-tmpl/bootstrap/en/modules/opac-main.tt:86
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:75
 #, c-format
@@ -8192,12 +8138,12 @@ msgstr "일반 인쇄물"
 msgid "Related Term"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:375
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:383
 #, c-format
 msgid "Relative"
 msgstr ""
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:142
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:148
 #, fuzzy, c-format
 msgid "Relatives' checkouts"
 msgstr "On-site checkouts"
@@ -8235,7 +8181,7 @@ msgid "Remove field"
 msgstr "필드 지우기"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 msgid "Remove from list"
 msgstr "목록에서 지우기"
 
@@ -8259,23 +8205,23 @@ msgstr "선택한 검색 결과 지우기"
 
 #. INPUT type=submit
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:202
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:706
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:708
 msgid "Remove share"
 msgstr "공유 지우기"
 
 # '구독기간 연장' 이라는 뜻도 됩니다...
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:172
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:264
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:426
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:507
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:178
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:270
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:434
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:515
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:222
 #, c-format
 msgid "Renew"
 msgstr "연장"
 
 #. INPUT type=submit
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:311
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:744
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:319
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:752
 msgid "Renew all"
 msgstr "모두 연장하기"
 
@@ -8288,8 +8234,8 @@ msgid "Renew item"
 msgstr "자료 대출기간 연장하기"
 
 #. INPUT type=submit
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:300
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:744
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:308
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:752
 msgid "Renew selected"
 msgstr "선택한 항목 연장하기"
 
@@ -8300,7 +8246,7 @@ msgstr "선택한 항목 연장하기"
 msgid "RenewLoan"
 msgstr "대출기간 연장"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:261
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:267
 #, c-format
 msgid "Renewed!"
 msgstr "연장되었습니다!"
@@ -8395,17 +8341,17 @@ msgstr "%3$s의 %1$s에 대한 %2$s결과"
 msgid "Results of search %sfor '%s'%s%s&nbsp;with limit(s):&nbsp;'%s'%s"
 msgstr "Results of search %sfor '%s'%s%s&nbsp;with limit(s):&nbsp;'%s'%s"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:655
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:663
 #, c-format
 msgid "Resume"
 msgstr "다시 시작"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:724
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:732
 #, c-format
 msgid "Resume all suspended holds"
 msgstr "일시 중지된 모든 예약 재개"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:666
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:674
 #, c-format
 msgid "Resume your hold on "
 msgstr "내 예약신청 재개"
@@ -8482,27 +8428,27 @@ msgstr ""
 "fine information, hold request information, loan information, and messages."
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "Review date: "
 msgstr "리뷰 날짜:"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "Review result: "
 msgstr "리뷰 결과:"
 
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:337
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:553
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:565
 #, c-format
 msgid "Reviews"
 msgstr "리뷰"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:374
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:379
 #, c-format
 msgid "Reviews from LibraryThing.com:"
 msgstr "LibraryThing.com의 리뷰 보기:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:755
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:767
 #, fuzzy, c-format
 msgid "Reviews provided by Syndetics"
 msgstr "Syndetics에서 제공하는 리뷰"
@@ -8543,7 +8489,7 @@ msgid "Saturday"
 msgstr "토요일"
 
 #: opac-tmpl/bootstrap/en/modules/opac-privacy.tt:90
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:613
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:615
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:577
 #: opac-tmpl/bootstrap/en/modules/opac-addbybiblionumber.tt:53
 #: opac-tmpl/bootstrap/en/modules/opac-addbybiblionumber.tt:67
@@ -8604,9 +8550,9 @@ msgid "Scan index:"
 msgstr "색인 스캔:"
 
 #. INPUT type=submit name=do
-#: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:382
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:164
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:289
+#: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:383
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:169
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:294
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:62
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:102
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:147
@@ -8622,10 +8568,10 @@ msgstr "검색"
 
 #. %1$s:  UNLESS ( Koha.Preference( 'OpacAddMastheadLibraryPulldown' ) == 1 ) 
 #. %2$s:  IF ( mylibraryfirst ) 
-#. %3$s:  mylibraryfirst 
+#. %3$s:  Branches.GetName( mylibraryfirst ) 
 #. %4$s:  END 
 #. %5$s:  END 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:158
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:163
 #, c-format
 msgid "Search %s %s (in %s only) %s %s "
 msgstr "검색 %s %s (%s 소장자료만 검색) %s %s "
@@ -8649,7 +8595,7 @@ msgstr "이 저자의 작품 목록 검색"
 msgid "Search for:"
 msgstr "검색 대상:"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:105
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:110
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:17
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:34
 #, c-format
@@ -8708,14 +8654,14 @@ msgstr "영역:"
 
 #. IMG
 #: opac-tmpl/bootstrap/en/includes/shelfbrowser.inc:63
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:108
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:114
 #: opac-tmpl/bootstrap/en/modules/opac-showreviews.tt:143
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:345
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:206
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:457
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:91
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:93
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:212
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:465
 #: opac-tmpl/bootstrap/en/modules/opac-detail.tt:96
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:98
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:101
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:278
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:289
 msgid "See Baker & Taylor"
@@ -8727,13 +8673,13 @@ msgid "See also:"
 msgstr "같이 보기:"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 #, fuzzy
 msgid "See biblio"
 msgstr "See biblio"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1074
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1086
 msgid ""
 "See: [% IF ( nextTitle ) %][% nextTitle |html %][% ELSE %]next biblio[% END "
 "%]"
@@ -8742,7 +8688,7 @@ msgstr ""
 "%]"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1065
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1077
 msgid ""
 "See: [% IF ( previousTitle ) %][% previousTitle |html %][% ELSE %]previous "
 "biblio[% END %]"
@@ -8762,7 +8708,7 @@ msgstr "특수자료 선택:"
 
 #. For the first occurrence,
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:263
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:35
 #: opac-tmpl/bootstrap/en/modules/opac-search-history.tt:48
@@ -8789,18 +8735,18 @@ msgstr "Select searches to: "
 msgid "Select suggestions to: "
 msgstr "Select suggestions to: "
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:136
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:141
 #, c-format
 msgid "Select the item(s) to search"
 msgstr "검색할 자료를 선택하세요"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:263
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:268
 #, c-format
 msgid "Select the term(s) to search"
 msgstr "검색할 단어를 선택하세요"
 
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:262
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:39
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:325
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:577
@@ -8814,7 +8760,7 @@ msgid "Self checkout help"
 msgstr "무인 대출 안내"
 
 #. INPUT type=submit
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasketform.tt:39
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasketform.tt:40
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:26
 #: opac-tmpl/bootstrap/en/modules/opac-shareshelf.tt:61
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelfform.tt:44
@@ -8857,8 +8803,8 @@ msgstr "9월"
 msgid "Serial"
 msgstr "연속간행물"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:598
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:621
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:610
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:633
 #, c-format
 msgid "Serial collection"
 msgstr "연속간행물 장서"
@@ -8866,14 +8812,14 @@ msgstr "연속간행물 장서"
 #. For the first occurrence,
 #. %1$s:  BIBLIO_RESULT.serial 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:112
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:104
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:105
 #, fuzzy, c-format
 msgid "Serial: %s "
 msgstr "연속간행물"
 
 #: opac-tmpl/bootstrap/en/includes/opac-facets.inc:25
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:193
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:195
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:198
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:200
 #: opac-tmpl/bootstrap/en/modules/opac-results-grouped.tt:81
 #, fuzzy, c-format
 msgid "Series"
@@ -8884,7 +8830,7 @@ msgstr "총서명"
 msgid "Series Title"
 msgstr "총서명:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:425
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:437
 #, c-format
 msgid "Series information:"
 msgstr "시리즈 정보:"
@@ -8894,7 +8840,7 @@ msgstr "시리즈 정보:"
 msgid "Series title"
 msgstr "총서명"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:195
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:200
 #, c-format
 msgid "Series:"
 msgstr "시리즈:"
@@ -8909,8 +8855,8 @@ msgstr "세션 종료됨"
 msgid "Settings updated"
 msgstr "설정 업데이트됨"
 
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:698
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1112
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:700
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1124
 #, c-format
 msgid "Share"
 msgstr "공유"
@@ -8926,7 +8872,7 @@ msgid "Share a list with another patron"
 msgstr "다른 이용자와 목록 공유"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1116
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1128
 msgid "Share by email"
 msgstr "이메일로 공유하기"
 
@@ -8936,17 +8882,17 @@ msgid "Share list"
 msgstr "목록 공유하기"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1115
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1127
 msgid "Share on Delicious"
 msgstr "Delicious에서 공유"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1113
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1125
 msgid "Share on Facebook"
 msgstr "Facebook에서 공유"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1114
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1126
 msgid "Share on LinkedIn"
 msgstr "LinkedIn에서 공유"
 
@@ -8955,7 +8901,7 @@ msgstr "LinkedIn에서 공유"
 msgid "Shelving location"
 msgstr "배가 위치"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:312
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:317
 #: opac-tmpl/bootstrap/en/modules/opac-auth.tt:80
 #, c-format
 msgid "Shibboleth Login"
@@ -8972,12 +8918,12 @@ msgid "Show _MENU_ entries"
 msgstr "메뉴목록 보기"
 
 #: opac-tmpl/bootstrap/en/includes/opac-facets.inc:9
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:48
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:54
 #, c-format
 msgid "Show all items"
 msgstr "모든 자료 표시"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:52
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:58
 #, c-format
 msgid "Show last 50 items"
 msgstr "마지막 50개 자료 표시"
@@ -8999,7 +8945,7 @@ msgid "Show more options"
 msgstr "옵션 더 보기"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1057
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1069
 msgid ""
 "Show pagination list ([% indexPag %]-[% indexPagEnd %] / [% totalPag %])"
 msgstr ""
@@ -9028,12 +8974,12 @@ msgstr "Showing %s of about %s results"
 msgid "Showing _START_ to _END_ of _TOTAL_"
 msgstr "전체 보기"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:51
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:57
 #, c-format
 msgid "Showing all items. "
 msgstr "모든 항목를 보여줍니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:47
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:53
 #, c-format
 msgid "Showing last 50 items. "
 msgstr "마지막 50개 항목을 보여줍니다."
@@ -9054,7 +9000,7 @@ msgstr "이메일로 가입하기"
 msgid "Sign in with your email"
 msgstr "이메일로 가입하기"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:572
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:584
 #, c-format
 msgid "Similar items"
 msgstr "유사한 자료들"
@@ -9185,7 +9131,7 @@ msgstr ""
 "죄송합니다, 귀하의 예전 계정이 현재 유효한 도서관 계정과 다릅니다. 만약 지역 "
 "도서관 계정으로 로그인을 하신다면 서비스 이용이 가능할 것 같습니다. "
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:309
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:314
 #, c-format
 msgid ""
 "Sorry, your Shibboleth identity does not match a valid library identity. If "
@@ -9244,15 +9190,15 @@ msgstr "통계"
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:59
 #: opac-tmpl/bootstrap/en/modules/opac-full-serial-issues.tt:80
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:169
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:551
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:827
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1171
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:559
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:839
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1183
 #, c-format
 msgid "Status"
 msgstr "상태"
 
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:220
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:615
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:623
 #, c-format
 msgid "Status:"
 msgstr "상태:"
@@ -9279,15 +9225,15 @@ msgstr "두번째 단계: 각 자료의 바코드를 한번에 하나씩 스캔�
 msgid "Su"
 msgstr "일요일"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:183
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:185
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:188
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:190
 #: opac-tmpl/bootstrap/en/modules/opac-results-grouped.tt:79
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:45
 #, c-format
 msgid "Subject"
 msgstr "주제"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:278
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:283
 #: opac-tmpl/bootstrap/en/modules/opac-tags_subject.tt:13
 #: opac-tmpl/bootstrap/en/modules/opac-tags_subject.tt:32
 #, c-format
@@ -9304,8 +9250,8 @@ msgstr "주제명 구절"
 msgid "Subject(s)"
 msgstr "주제(들)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:256
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:312
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:261
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:317
 #, c-format
 msgid "Subject(s):"
 msgstr "주제"
@@ -9313,7 +9259,7 @@ msgstr "주제"
 #. For the first occurrence,
 #. %1$s:  BIBLIO_RESULT.subject 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:88
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:80
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:81
 #, fuzzy, c-format
 msgid "Subject: %s "
 msgstr "주제: %S"
@@ -9323,7 +9269,7 @@ msgstr "주제: %S"
 #: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:87
 #: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:103
 #: opac-tmpl/bootstrap/en/modules/opac-authorities-home.tt:80
-#: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:913
+#: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:914
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:186
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:300
 #, c-format
@@ -9342,7 +9288,7 @@ msgid "Submit changes"
 msgstr "변경사항 제출"
 
 #. INPUT type=submit
-#: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:907
+#: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:908
 msgid "Submit update request"
 msgstr "업데이트 요청 제출"
 
@@ -9394,7 +9340,7 @@ msgstr "구독"
 #. %3$s:  subscription.histenddate | $KohaDates 
 #. %4$s:  ELSE 
 #. %5$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:811
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:823
 #, fuzzy, c-format
 msgid "Subscription from: %s to:%s %s %s now (current)%s"
 msgstr "Subscription from: %s to:%s %s %s now (current)%s"
@@ -9411,7 +9357,7 @@ msgstr "%s의 구독정보"
 msgid "Subscription: "
 msgstr "구독:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:578
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:590
 #, c-format
 msgid "Subscriptions"
 msgstr "구독"
@@ -9467,26 +9413,26 @@ msgstr "일요일"
 msgid "Surveys"
 msgstr "조사 보고서"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:553
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:659
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:677
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:680
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:561
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:667
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:685
 #: opac-tmpl/bootstrap/en/modules/opac-user.tt:688
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:696
 #, c-format
 msgid "Suspend"
 msgstr "일시 중지"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:711
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:719
 #, c-format
 msgid "Suspend all holds"
 msgstr "모든 예약 일시 중지"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:673
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:681
 #, c-format
 msgid "Suspend until:"
 msgstr "다음 시기까지 일시 중지:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:668
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:676
 #, c-format
 msgid "Suspend your hold on "
 msgstr "귀하의 예약을 일시 중지합니다"
@@ -9501,12 +9447,12 @@ msgstr ""
 msgid "System Maintenance"
 msgstr "시스템 관리"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:546
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:558
 #, c-format
 msgid "TOC"
 msgstr "TOC"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:733
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:745
 #, fuzzy, c-format
 msgid "Table of contents provided by Syndetics"
 msgstr "Table of contents provided by Syndetics"
@@ -9518,12 +9464,12 @@ msgstr "Table of contents provided by Syndetics"
 msgid "Tag"
 msgstr "태그"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:573
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:585
 #, c-format
 msgid "Tag browser"
 msgstr "태그 탐색기"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:277
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:282
 #, c-format
 msgid "Tag cloud"
 msgstr "태그 클라우드"
@@ -9534,14 +9480,14 @@ msgid "Tag status here."
 msgstr "태그 상태입니다."
 
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:456
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:411
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:416
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:174
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:508
 #, c-format
 msgid "Tag status here. "
 msgstr "태그 상태입니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:124
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:131
 #, fuzzy, c-format
 msgid "Tag:"
 msgstr "태그: %s"
@@ -9557,8 +9503,8 @@ msgstr "태그"
 msgid "Tags added: "
 msgstr "태그를 추가합니다:"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:392
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:401
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:397
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:406
 #, c-format
 msgid "Tags from this library:"
 msgstr "이 도서관의 태그:"
@@ -9576,7 +9522,7 @@ msgstr "기술 보고서"
 
 #. A
 #: opac-tmpl/bootstrap/en/includes/opac-authorities.inc:14
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:119
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:126
 #: opac-tmpl/bootstrap/en/modules/opac-course-reserves.tt:34
 #, c-format
 msgid "Term"
@@ -9607,13 +9553,13 @@ msgstr "목요일"
 msgid "Thank you"
 msgstr "감사합니다"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:63
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:69
 #, c-format
 msgid "Thank you!"
 msgstr "감사합니다!"
 
 #. %1$s:  subscription.opacdisplaycount 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:822
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:834
 #, fuzzy, c-format
 msgid "The %s latest issues for this subscription:"
 msgstr "이 예약과 관련된 세 가지 최근 이슈"
@@ -9881,12 +9827,6 @@ msgstr "내 책바구니에서 삭제된 도서"
 msgid "The subscription expired on %s"
 msgstr "%s일에 구독이 만료되었습니다"
 
-#. %1$s:  ELSIF ( circ_error_max_loans_allowed ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:45
-#, c-format
-msgid "The system does not recognize this barcode. %s "
-msgstr "시스템에서 이 바코드를 인식하지 못합니다. %s"
-
 #. %1$s:  ERROR.scrubbed 
 #. %2$s:  ELSIF ( ERROR.scrubbed_all_bad ) 
 #: opac-tmpl/bootstrap/en/modules/opac-tags.tt:64
@@ -9910,12 +9850,12 @@ msgid "The userid "
 msgstr "이용자 ID"
 
 #. %1$s:  subscriptionsnumber 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:795
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:807
 #, fuzzy, c-format
 msgid "There are %s subscription(s) associated with this title."
 msgstr "이 표제와 연관된 %s예약이 있습니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:929
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:941
 #, c-format
 msgid "There are no comments for this item."
 msgstr "이 자료에 달린 의견이 없습니다."
@@ -9986,12 +9926,6 @@ msgstr ""
 "&quot;cloud&quot; 우리의 도서목록에서 가장 많이 사용된 주제를 보여줍니다. 아"
 "무 주제나 클릭하면 소장자료를 볼 수 있습니다."
 
-#. %1$s:  ELSIF ( circ_error_GNA ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:69
-#, c-format
-msgid "This card has been declared lost. %s "
-msgstr "이 회원카드는 분실신고 되었습니다. %s"
-
 #: opac-tmpl/bootstrap/en/modules/opac-discharge.tt:45
 #, fuzzy, c-format
 msgid ""
@@ -10005,7 +9939,7 @@ msgstr ""
 "discharge is sent by us to your school. You will also find it available on "
 "your reader account."
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:794
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:806
 #, fuzzy, c-format
 msgid "This is a serial"
 msgstr "정기간행물판"
@@ -10015,34 +9949,15 @@ msgstr "정기간행물판"
 msgid "This item does not exist."
 msgstr "책바구니로 보내기 "
 
-#. %1$s:  ELSIF ( circ_error_RESTRICTED ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:57
-#, c-format
-msgid "This item has been withdrawn from the collection. %s "
-msgstr "이 자료가 장서에서 등록취소 되었습니다. %s"
-
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:99
 #, c-format
 msgid "This item is already checked out to you."
 msgstr "이 자료는 이미 대출하셨습니다."
 
-#. %1$s:  ELSIF ( circ_error_NO_MORE_RENEWALS ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:49
-#, c-format
-msgid "This item is checked out to someone else. %s "
-msgstr "이 자료는 다른 이용자에게 대출되었습니다. %s"
-
-#. %1$s:  ELSIF ( circ_error_DEBT ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:53
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:104
 #, fuzzy, c-format
-msgid "This item is not for loan. %s "
-msgstr "책바구니로 보내기 "
-
-#. %1$s:  ELSIF ( circ_error_ITEMNOTSAMEBRANCH ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:61
-#, fuzzy, c-format
-msgid "This item is on hold for another patron. %s "
-msgstr "책바구니로 보내기 "
+msgid "This item is on hold for another patron."
+msgstr "다른 이용자와 목록 공유"
 
 #: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:112
 #, c-format
@@ -10066,10 +9981,10 @@ msgstr "이 목록은 비어있습니다. %s 모든 결과들을 목록에 추�
 msgid "This message can have the following reason(s):"
 msgstr "이 메시지는 다음 질문들을 포함할 수 있습니다"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:558
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:561
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1128
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1132
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:570
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:573
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1140
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1144
 #, c-format
 msgid ""
 "This page contains enriched content visible when JavaScript is enabled or by "
@@ -10079,12 +9994,12 @@ msgstr ""
 "니다"
 
 #. %1$s:  items_count 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:641
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:653
 #, fuzzy, c-format
 msgid "This record has many physical items (%s). "
 msgstr "%3$s의 %1$s에 대한 %2$s결과 "
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:805
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:817
 #, fuzzy, c-format
 msgid "This subscription is closed."
 msgstr "기술"
@@ -10132,9 +10047,9 @@ msgstr ""
 
 #. OPTGROUP
 #: opac-tmpl/bootstrap/en/includes/resort_form.inc:60
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:173
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:175
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:70
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:178
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:180
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:76
 #: opac-tmpl/bootstrap/en/modules/opac-results-grouped.tt:76
 #: opac-tmpl/bootstrap/en/modules/opac-course-details.tt:52
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:222
@@ -10143,13 +10058,13 @@ msgstr ""
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:566
 #: opac-tmpl/bootstrap/en/modules/opac-advsearch.tt:52
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:251
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:162
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:371
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:420
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:544
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:168
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:379
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:428
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:552
 #: opac-tmpl/bootstrap/en/modules/opac-topissues.tt:52
 #: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:219
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:119
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:126
 #, c-format
 msgid "Title"
 msgstr "제목"
@@ -10166,7 +10081,7 @@ msgstr "제목 (A-Z)"
 msgid "Title (Z-A)"
 msgstr "제목 (Z-A)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:543
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:555
 #, c-format
 msgid "Title notes"
 msgstr "표제 주기사항"
@@ -10177,7 +10092,7 @@ msgid "Title phrase"
 msgstr "제목 구절"
 
 #: opac-tmpl/bootstrap/en/modules/opac-suggestions.tt:39
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:136
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:143
 #, c-format
 msgid "Title:"
 msgstr "제목:"
@@ -10252,13 +10167,13 @@ msgstr "화요일"
 msgid "Tuesday"
 msgstr "화요일"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1118
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1130
 #, c-format
 msgid "Tweet"
 msgstr "트윗"
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:68
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:661
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:74
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:663
 #, c-format
 msgid "Type"
 msgstr "종류"
@@ -10269,8 +10184,8 @@ msgid "Type of heading"
 msgstr "제목 유형"
 
 #. INPUT type=text name=q
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:216
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:218
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:221
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:223
 msgid "Type search term"
 msgstr "검색용어 형식"
 
@@ -10284,15 +10199,20 @@ msgstr "형식:"
 msgid "UF"
 msgstr ""
 
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1181
+#, fuzzy, c-format
+msgid "URL"
+msgstr "URL(s)"
+
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:203
 #, c-format
 msgid "URL(s)"
 msgstr "URL(s)"
 
 #. For the first occurrence,
-#. %1$s:  BIBLIO_RESULT.url |url 
+#. %1$s:  BIBLIO_RESULT.url 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:135
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:127
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:128
 #, c-format
 msgid "URL: %s "
 msgstr "URL: %s "
@@ -10309,7 +10229,7 @@ msgid "Unable to connect to PayPal."
 msgstr "하나 이상의 태그를 추가할 수 없습니다."
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:928
+#: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:929
 #, fuzzy
 msgid "Unable to update your setting!"
 msgstr "하나 이상의 태그를 추가할 수 없습니다."
@@ -10345,12 +10265,12 @@ msgstr "통합 제목"
 #. For the first occurrence,
 #. %1$s:  BIBLIO_RESULT.unititle 
 #: opac-tmpl/bootstrap/en/modules/opac-sendshelf.tt:106
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:98
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:99
 #, c-format
 msgid "Unified title: %s "
 msgstr "통합 제목: %s"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:247
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:252
 #, c-format
 msgid "Uniform titles:"
 msgstr "통합 표제:"
@@ -10395,7 +10315,7 @@ msgstr "Used for/see from:"
 msgid "Username:"
 msgstr "사용자。"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:35
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:41
 #, c-format
 msgid ""
 "Using this account is not recommended because some parts of Koha will not "
@@ -10412,7 +10332,7 @@ msgstr ""
 "금 액이 있기때문입니다. 만약<a1>당신의 온라인 계정 페이지</a>가 아무런 문제 "
 "가 없 게 보여진다면, 사서에게 문의해 주시기 바랍니다. "
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:117
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:123
 #, fuzzy, c-format
 msgid ""
 "Usually the reason for freezing an account is old overdues or damage fees. "
@@ -10461,20 +10381,20 @@ msgid "View details for this title"
 msgstr "이 자료의 상세정보 보기"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:189
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:440
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:195
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:448
 #, fuzzy
 msgid "View on Amazon.com"
 msgstr "(Amazon.com 에의한) 평정척도:"
 
 #. A
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:105
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:110
 #, fuzzy
 msgid "View your search history"
 msgstr "검색중"
 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:324
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1168
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1180
 #, c-format
 msgid "Vol info"
 msgstr "권 정보"
@@ -10484,7 +10404,7 @@ msgstr "권 정보"
 msgid "Warning"
 msgstr "주의"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:35
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:41
 #, fuzzy, c-format
 msgid "Warning:"
 msgstr "주의"
@@ -10524,7 +10444,7 @@ msgstr "수요일"
 msgid "Wednesday"
 msgstr "수요일"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:100
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:105
 #, c-format
 msgid "Welcome, "
 msgstr "환영합니다,"
@@ -10567,7 +10487,7 @@ msgstr "구입 제안 "
 
 #. For the first occurrence,
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:752
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:754
 #: opac-tmpl/bootstrap/en/modules/opac-basket.tt:325
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:577
 msgid "With selected titles: "
@@ -10586,7 +10506,7 @@ msgstr "영수증을 인쇄하시겠습니까?"
 # 이 정도는 번역하지 않아도 될 것 같습니다
 #. %1$s:  message.message_date | $KohaDates 
 #. %2$s:  Branches.GetName(message.branchcode) 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:50
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:56
 #, c-format
 msgid "Written on %s by %s"
 msgstr "Written on %s by %s"
@@ -10598,7 +10518,7 @@ msgstr "Written on %s by %s"
 msgid "Year"
 msgstr "년"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:316
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:321
 #, fuzzy, c-format
 msgid "Year: "
 msgstr "년 "
@@ -10705,14 +10625,8 @@ msgstr ""
 "You cannot be discharged, you have issues. Please return items before asking "
 "for a discharge."
 
-#. %1$s:  ELSIF ( circ_error_NOT_FOR_LOAN ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:51
-#, c-format
-msgid "You cannot renew this item again. %s "
-msgstr "이 자료의 대출기한을 다시 연장할 수 없습니다. %s"
-
 #. %1$s:  IF ( renewal_blocked_fines ) > 0  
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:130
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:136
 #, fuzzy, c-format
 msgid "You cannot renew your books online. Reason: %sYour fines exceed "
 msgstr ""
@@ -10729,8 +10643,8 @@ msgstr "공개 목록은 공유할 수 없습니다."
 msgid "You currently have nothing checked out."
 msgstr "현재 대출하신 자료가 없습니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:330
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:344
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:338
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:352
 #, c-format
 msgid "You currently owe fines and charges amounting to:"
 msgstr "귀하의 현재 연체료와 수수료는 다음과 같습니다:"
@@ -10796,7 +10710,7 @@ msgstr ""
 "검색엔진이나 북마크 등에서 너무 오래되어 연결이 끊긴 링크를 타고 들어오셨습니"
 "다 "
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:358
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:366
 #, c-format
 msgid "You have a credit of:"
 msgstr "귀하는 크레디트를 가지고 있습니다:"
@@ -10805,12 +10719,6 @@ msgstr "귀하는 크레디트를 가지고 있습니다:"
 #, c-format
 msgid "You have already requested this title."
 msgstr "이 자료는 이미 예약 신청하셨습니다."
-
-#. %1$s:  ELSIF ( circ_error_ISSUED_TO_ANOTHER ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:47
-#, c-format
-msgid "You have checked out too many items and can't check out any more. %s "
-msgstr "도서대출 한도를 초과하여 더이상 대출할 수 없습니다. %s "
 
 #: opac-tmpl/bootstrap/en/modules/opac-account.tt:169
 #, c-format
@@ -10826,10 +10734,15 @@ msgstr ""
 "필수 항목을 모두 채우지 않으셨습니다. 누락된 항목을 모두 채워서 다시 제출해 "
 "주세요."
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:317
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:325
 #, c-format
 msgid "You have nothing checked out"
 msgstr "대출중인 자료가 없습니다"
+
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:100
+#, c-format
+msgid "You have renewed this item the maximum number of times allowed."
+msgstr ""
 
 #: opac-tmpl/bootstrap/en/modules/opac-registration-confirmation.tt:35
 #, c-format
@@ -10889,15 +10802,6 @@ msgstr "픽업할 도서관을 선택하셔야 합니다."
 msgid "You must select at least one item. "
 msgstr "적어도 한 개 이상의 자료를 선택해야 합니다. "
 
-#. %1$s:  amount 
-#. %2$s:  ELSIF ( circ_error_WTHDRAWN ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:55
-#, c-format
-msgid "You owe the library %s and cannot check out. %s "
-msgstr ""
-"도서관에 납부하셔야 할 비용이 다음과 같습니다: %s 그러므로 대출이 불가능합니"
-"다. %s"
-
 #: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:59
 #, c-format
 msgid "You should have received an email with a link to reset your password. "
@@ -10924,8 +10828,13 @@ msgstr ""
 "2주 내에 귀하의 공유 신청을 승인한 사람이 있으면 이메일로 알림을 받으시게 됩"
 "니다."
 
+#: opac-tmpl/bootstrap/en/modules/opac-password-recovery.tt:109
+#, c-format
+msgid "You will receive an email shortly. "
+msgstr ""
+
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid ""
 "Your CGI session cookie is not current. Please refresh the page and try "
 "again."
@@ -10936,19 +10845,13 @@ msgstr ""
 #. For the first occurrence,
 #. %1$s:  IF debarred_comment 
 #: opac-tmpl/bootstrap/en/modules/opac-reserve.tt:42
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:114
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:120
 #, fuzzy, c-format
 msgid "Your account has been frozen. %s Comment: "
 msgstr "귀하의 계정이 정지되었습니다%s until"
 
-#. %1$s:  ELSIF ( circ_error_CARD_LOST ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:67
-#, c-format
-msgid "Your account has been suspended. %s "
-msgstr "귀하의 계정이 일시 중지되었습니다. %s"
-
 #. %1$s:  BORROWER_INFO.warnexpired | $KohaDates 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:81
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:87
 #, c-format
 msgid ""
 "Your account has expired as of %s. Please contact the library if you wish to "
@@ -10957,13 +10860,13 @@ msgstr ""
 "귀하의 계정이 만료되었습니다: %s. 계정을 갱신하시려면 도서관에 문의하시기 바"
 "랍니다."
 
-#. %1$s:  ELSIF ( circ_error_DEBARRED ) 
-#: opac-tmpl/bootstrap/en/modules/sco/sco-main.tt:65
-#, c-format
-msgid "Your account has expired. %s "
-msgstr "귀하의 계정이 만료되었습니다. %s"
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:98
+#, fuzzy, c-format
+msgid ""
+"Your account has expired. Please contact the library for more information."
+msgstr ". 더 많은 정보를 원하시면 도서관에 문의하시기 바랍니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:111
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:117
 #, c-format
 msgid "Your account is frozen because it has been discharged. "
 msgstr ""
@@ -10985,7 +10888,7 @@ msgstr "확인 메일의 링크를 누를 때까지 귀하의 계정은 활성�
 msgid "Your authority search history is empty."
 msgstr "내 전거 검색 기록이 비어 있습니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:74
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:80
 #, c-format
 msgid "Your card will expire on "
 msgstr "귀하의 회원카드가 만료되었습니다"
@@ -10995,7 +10898,7 @@ msgstr "귀하의 회원카드가 만료되었습니다"
 msgid "Your cart"
 msgstr "내 책바구니"
 
-#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:1
+#: opac-tmpl/bootstrap/en/modules/opac-sendbasket.tt:4
 #, c-format
 msgid "Your cart "
 msgstr "내 책바구니 "
@@ -11016,12 +10919,12 @@ msgstr "내 책바구니가 비어있습니다."
 msgid "Your catalog search history is empty."
 msgstr "귀하의 도서목록 검색 기록이 비어있습니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:17
+#: opac-tmpl/bootstrap/en/modules/opac-readingrecord.tt:23
 #, c-format
 msgid "Your checkout history"
 msgstr "내 대출 이력"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:889
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:901
 #, c-format
 msgid "Your comment"
 msgstr "내 의견"
@@ -11031,7 +10934,7 @@ msgstr "내 의견"
 msgid "Your comment (preview, pending approval)"
 msgstr "귀하의 의견 (미리보기, 승인 대기중)"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:63
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:69
 #, c-format
 msgid ""
 "Your corrections have been submitted to the library, and a staff member will "
@@ -11080,7 +10983,7 @@ msgstr ""
 ",귀하의 도서관 카드가 분실 혹은 도난된 카드로 표시되어 있어 자료를 예약할 수 "
 "없습니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:127
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:133
 #, fuzzy, c-format
 msgid "Your library card has been marked as lost or stolen. "
 msgstr ""
@@ -11103,8 +11006,8 @@ msgstr "내 목록: %s"
 #: opac-tmpl/bootstrap/en/includes/masthead.inc:56
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:56
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:58
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:629
 #: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:631
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:633
 #: opac-tmpl/bootstrap/en/modules/opac-downloadshelf.tt:17
 #, c-format
 msgid "Your lists"
@@ -11115,26 +11018,10 @@ msgstr "내 목록"
 msgid "Your lists:"
 msgstr "내 목록:"
 
-#. %1$s:  FOREACH error IN RENEW_ERROR.split('\|') 
-#. %2$s:  IF error == 'card_expired' 
-#. %3$s:  ELSIF error == 'too_many' 
-#. %4$s:  ELSIF error == 'too_soon' 
-#. %5$s:  ELSIF error == 'on_reserve' 
-#. %6$s:  END 
-#. %7$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:88
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:93
 #, fuzzy, c-format
-msgid ""
-"Your loan renewal failed because of the following reason(s): %s %s Your "
-"account has expired. Please contact the library for more information. %s You "
-"have renewed this item the maximum number of times allowed. %s It is too "
-"soon after the checkout date for this item to be renewed. %s This item is on "
-"hold for another patron. %s %s "
-msgstr ""
-"귀하의 대출기간 연장이 다음과 같은 사유(들)로 실패했습니다: %s %s 귀하의 계정"
-"이 만료되었습니다. 더 많은 정보를 얻기 위해서는 도서관에 문의하시기 바랍니"
-"다. %s 이 자료의 대출기간 연장 가능 횟수를 초과하셨습니다. %s 이 자료는 다른 "
-"이용자가 예약중입니다. %s %s "
+msgid "Your loan renewal failed because of the following reason(s): "
+msgstr "다음 문제(들) 때문에 양식이 제출되지 않았습니다"
 
 #: opac-tmpl/bootstrap/en/modules/opac-messaging.tt:14
 #: opac-tmpl/bootstrap/en/modules/opac-messaging.tt:27
@@ -11222,17 +11109,17 @@ msgid "Your search returned %s results."
 msgstr "배달된 책 바구니"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:928
+#: opac-tmpl/bootstrap/en/modules/opac-memberentry.tt:929
 #, fuzzy
 msgid "Your setting has been updated!"
 msgstr "귀하의 암호가 변경되었습니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:19
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:25
 #, fuzzy, c-format
 msgid "Your summary"
 msgstr "요약"
 
-#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:117
+#: opac-tmpl/bootstrap/en/modules/opac-tags.tt:124
 #, fuzzy, c-format
 msgid "Your tags"
 msgstr "출판되지 않았습니다"
@@ -11399,13 +11286,13 @@ msgid "ask for a discharge"
 msgstr "탈퇴 문의"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "average rating: "
 msgstr "평균 순위:"
 
 #. %1$s:  rating_avg_int 
 #. %2$s:  rating_total 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:498
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:510
 #, c-format
 msgid "average rating: %s (%s votes)"
 msgstr "평균 순위: %s (%s 표)"
@@ -11435,12 +11322,12 @@ msgstr "대출자 번호"
 #. For the first occurrence,
 #. SCRIPT
 #: opac-tmpl/bootstrap/en/modules/opac-overdrive-search.tt:62
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "by"
 msgstr "by"
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:115
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:120
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 #: opac-tmpl/bootstrap/en/modules/opac-results.tt:577
 #, c-format
 msgid "by "
@@ -11456,7 +11343,7 @@ msgstr "카드 번호"
 msgid "change your password"
 msgstr "비밀번호를 변경하세요"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:313
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:318
 #, c-format
 msgid "click here to login"
 msgstr "여기를 눌러 로그인하세요"
@@ -11521,16 +11408,16 @@ msgstr "이메일 주소:"
 msgid "for more information on what it does and how to configure it."
 msgstr "기능 및 설정 방법에 대한 더 자세한 정보입니다."
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:558
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:561
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1129
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1134
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:570
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:573
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1141
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1146
 #, c-format
 msgid "here"
 msgstr "here"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "iDreamBooks.com rating"
 msgstr "iDreamBooks.com 순위"
 
@@ -11688,7 +11575,7 @@ msgid "koha opac %s"
 msgstr "Koha OPAC %s"
 
 #. ABBR
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:101
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:106
 #, fuzzy
 msgid "koha:biblionumber:[% biblionumber %]"
 msgstr "koha:biblionumber:[% biblionumber %]"
@@ -11784,7 +11671,7 @@ msgid "purchase suggestion"
 msgstr "구매희망자료 신청"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "rating based on reviews at iDreamBooks.com"
 msgstr "iDreamBooks.com 리뷰에 기반한 순위"
 
@@ -11884,7 +11771,7 @@ msgstr "대출자료 보기"
 #. %10$s:  END 
 #. %11$s:  END 
 #. %12$s:  END 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:636
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:644
 #, fuzzy, c-format
 msgid ""
 "since %s %s Suspended %s until %s %s %s %s Pending for next available item "
@@ -12001,13 +11888,13 @@ msgstr ""
 msgid "there was a problem processing your payment"
 msgstr "입력한 사항에 문제가 있었습니다"
 
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:651
-#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:726
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:653
+#: opac-tmpl/bootstrap/en/modules/opac-shelves.tt:728
 #, c-format
 msgid "to create new lists."
 msgstr "새 목록 생성하기."
 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:939
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:951
 #, c-format
 msgid "to post a comment."
 msgstr "의견 등록."
@@ -12017,7 +11904,7 @@ msgstr "의견 등록."
 msgid "unAPI"
 msgstr "unAPI"
 
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:715
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:723
 #, c-format
 msgid "until "
 msgstr "until "
@@ -12026,11 +11913,6 @@ msgstr "until "
 #, c-format
 msgid "up to "
 msgstr "up to "
-
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1169
-#, c-format
-msgid "url"
-msgstr "URL"
 
 #: opac-tmpl/bootstrap/en/includes/authorities-search-results.inc:93
 #, fuzzy, c-format
@@ -12064,7 +11946,7 @@ msgid "view plain"
 msgstr "일반화면 보기"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "votes"
 msgstr "투표"
 
@@ -12116,7 +11998,7 @@ msgid "will be sent shortly to %s."
 msgstr "%s (으)로 곧 전송될 예정입니다."
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "with biblionumber"
 msgstr "자료등록번호"
 
@@ -12177,12 +12059,12 @@ msgid "your purchase suggestions"
 msgstr "내 구매희망자료 신청"
 
 #. SCRIPT
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1343
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:1355
 msgid "your rating: "
 msgstr "내 순위:"
 
 #. %1$s:  rating_value 
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:493
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:505
 #, c-format
 msgid "your rating: %s, "
 msgstr "내 순위: %s,"
@@ -12207,17 +12089,17 @@ msgstr "나의 요약"
 msgid "your tags"
 msgstr "내 태그"
 
-#: opac-tmpl/bootstrap/en/includes/masthead.inc:300
-#: opac-tmpl/bootstrap/en/modules/opac-user.tt:664
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:135
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:262
+#: opac-tmpl/bootstrap/en/includes/masthead.inc:305
+#: opac-tmpl/bootstrap/en/modules/opac-user.tt:672
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:140
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:267
 #, c-format
 msgid "×"
 msgstr "×"
 
 #. A
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:175
-#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:179
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:180
+#: opac-tmpl/bootstrap/en/modules/opac-detail.tt:184
 msgid ""
 "‡[% MARCAUTHOR_SUBFIELDS_LOO.code %] [% MARCAUTHOR_SUBFIELDS_LOO.value %]"
 msgstr ""

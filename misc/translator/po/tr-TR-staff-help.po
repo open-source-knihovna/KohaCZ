@@ -3,9 +3,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Koha 3.0.2\n"
-"POT-Creation-Date: 2017-02-15 16:38-0300\n"
-"PO-Revision-Date: 2017-02-17 06:50+0000\n"
-"Last-Translator: Onur <onurerdem@sdu.edu.tr>\n"
+"POT-Creation-Date: 2017-08-17 04:55-0300\n"
+"PO-Revision-Date: 2017-06-01 07:53+0000\n"
+"Last-Translator: Ugur <ugurbulgan@sdu.edu.tr>\n"
 "Language-Team: Koha Translation Team\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1487314247.000000\n"
+"X-POOTLE-MTIME: 1496303584.000000\n"
 
 #: intranet-tmpl/prog/en/modules/help/tools/letter.tt:82
 #, c-format
@@ -876,7 +876,7 @@ msgstr "(! çökmüş durumda 'çökmedi' ya da 'görünmez' anlamına gelir)"
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
@@ -1027,7 +1027,7 @@ msgstr "-8 =&gt; Bayrak"
 msgid "-9 =&gt; Future use"
 msgstr "-9 =&gt; Gelecekte kullanım"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid ""
 ". For example, if you use the selector \"#circ_impossible\" your selected "
@@ -2029,7 +2029,7 @@ msgstr "Bütçe eklemek"
 msgid "Adding a group"
 msgstr "Grup ekleniyor"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
 #, c-format
 msgid "Adding a new alert"
 msgstr "Yeni bir uyarı eklemek"
@@ -2552,6 +2552,13 @@ msgstr ""
 msgid "All three of these options will open up the issue receive form:"
 msgstr "Bu üç seçeneğin tümü, sayı temin etme formunu açacaktır:"
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#, fuzzy, c-format
+msgid "All uploaded images will be listed on the right hand side of this page."
+msgstr ""
+"Ve görüntü, sizin diğer görüntülerinizle sayfanın sağ tarafında "
+"listelenecektir."
+
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:117
 #, c-format
 msgid "Allow access to the reports module"
@@ -2709,15 +2716,6 @@ msgid ""
 msgstr ""
 "Ve ekranın sağında bulunan 'Senkronize et' bağlantısını tıklayarak her "
 "dolaşım bilgisayarında verilerinizi eşitleyebilirsiniz."
-
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
-#, c-format
-msgid ""
-"And the image will be listed with all of your others on the right hand side "
-"of the page."
-msgstr ""
-"Ve görüntü, sizin diğer görüntülerinizle sayfanın sağ tarafında "
-"listelenecektir."
 
 #: intranet-tmpl/prog/en/modules/help/suggestion/suggestion.tt:23
 #, c-format
@@ -2906,7 +2904,7 @@ msgstr ""
 "Materyali dolaşıma koymak istiyorsanız, en azından aşağıdaki alanları "
 "doldurmanız gerekir:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:17
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:19
 #, c-format
 msgid ""
 "At this point, you can preview your sound by clicking the \"Play sound\" "
@@ -3422,12 +3420,12 @@ msgstr "Ayar oluştur"
 #, c-format
 msgid ""
 "By default all item types and all patrons are notified of check ins and "
-"check outs. To change this, click on the item/patron type combination that "
-"you would like to stop notices for."
+"check outs. To change this, click on the item type/patron category "
+"combination that you would like to stop notices for."
 msgstr ""
-"Varsayılan olarak tüm materyal türleri ve kullanıcılar, iade ve ödünç "
-"işlemleri açısından bilgilendirilir. Bunu değiştirmek için, bilgilendirmeyi "
-"istemediğiniz materyal/kullanıcı türü kutusunun üstüne tıklayınız."
+"Varsayılan olarak, tüm materyal türleri ve tüm kullanıcılara ödünç ve "
+"iadeler bildirilir. Bunu değiştirmek için, bildirimleri durdurmak "
+"istediğiniz materyal türü/kullanıcı kategorisi kombinasyonunu tıklayın."
 
 #: intranet-tmpl/prog/en/modules/help/tools/export.tt:26
 #, c-format
@@ -4396,7 +4394,7 @@ msgstr "Kısmen ödeme yapmak istediğiniz cezanın yanındaki \"Öde\"ye tıkla
 msgid "Click \"Pay\" next to the fine you want to pay in full"
 msgstr "Tamamını ödemek istediğiniz cezanın yanındaki \"Öde\"ye tıklayın."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:20
 #, c-format
 msgid "Click \"Save alert\" and your done!"
 msgstr "\"Uyarıları kaydet\" üzerine tıklayın ve bitirdiniz!"
@@ -5362,7 +5360,7 @@ msgstr "Genel listeleri sil"
 msgid "Deleting Item Types"
 msgstr "Materyal Türünü Sil"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
 #, c-format
 msgid "Deleting alerts"
 msgstr "Uyarıların silinmesi"
@@ -5867,7 +5865,7 @@ msgstr "Liste adı girin ve listeyi kaydedin."
 msgid "Enter a plain text version of the category in the 'Description' field."
 msgstr "'Tanım' alanındaki kategorinin düz metin sürümünü girin."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:13
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:15
 #, c-format
 msgid ""
 "Enter a selector in the \"selector\" input, you can see documentation on "
@@ -5876,7 +5874,7 @@ msgstr ""
 "\"seçici\" girişine bir seçici girin, jQuery seçicileri belgelerine "
 "bakabilirsiniz"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:18
 #, c-format
 msgid ""
 "Enter a sound to be played, you can either select a built-in Koha sound "
@@ -6462,12 +6460,12 @@ msgstr ""
 #, c-format
 msgid ""
 "Finally, if you charge a rental fee for the item type and want to give a "
-"specific patron type a discount on that fee, enter the percentage discount "
-"(without the %% symbol) in the 'Rental Discount' field"
+"specific patron category a discount on that fee, enter the percentage "
+"discount (without the %% symbol) in the 'Rental Discount' field"
 msgstr ""
-"Son olarak materyal türünden kira ücretlendirmesi yapıyorsanız ve özel bir "
-"kullanıcı türüne o ücrette indirim yapmak isterseniz, 'Kira indirimi' "
-"alanına indirim yüzdesini ( %% sembolü olmadan) girin"
+"Son olarak, materyal türü için bir kira ücreti talep ederseniz ve belirli "
+"bir kullanıcı kategorisine bu ücretten bir indirim vermek istiyorsanız, "
+"'Kiralama İndirimi' alanına yüzde indirim (%% simgesi olmadan) girin"
 
 #: intranet-tmpl/prog/en/modules/help/members/memberentry.tt:72
 #, c-format
@@ -7684,11 +7682,11 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/members/boraccount.tt:13
 #, c-format
 msgid ""
-"Hold fees will be charged based on the rules you set in the Patron Types "
-"&amp; Categories administration area"
+"Hold fees will be charged based on the rules you set for the patron category "
+"in administration"
 msgstr ""
-"Ayırma ücretleri Kullanıcı Türlerinde &amp;  yönetim alanı kategorilerinde "
-"ayarladığınız kurallara bağlı olarak ücretlendirilir."
+"Ayırtma ücretleri, yönetimdeki kullanıcı kategorisi için belirlediğiniz "
+"kurallara göre ücretlendirilecektir."
 
 #: intranet-tmpl/prog/en/modules/help/circ/reserveratios.tt:3
 #, c-format
@@ -9963,12 +9961,12 @@ msgstr ""
 "Bir ayırma işlemini yoksaymak, materyali ayrılmış olarak gösterecek ancak "
 "materyal durumu kullanılabilir olacaktır (ayırma işlemi iptal olmayacaktır)"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
 #, c-format
 msgid "Images must be under 500k in size."
 msgstr "Görüntü boyutu 500 kb altında olmalıdır."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:7
 #, c-format
 msgid ""
 "Images uploaded using this tool will appear on the menu when creating patron "
@@ -10066,20 +10064,20 @@ msgid ""
 "rule. This rule should be set for all item types, all libraries and all "
 "patron categories. That will catch all instances that do not match a "
 "specific rule. When checking out if you do not have a rule for all "
-"libraries, all item types and all patron types then you may see patrons "
+"libraries, all item types and all patron categories then you may see patrons "
 "getting blocked from placing holds. You will also want a rule for your "
-"specific library set for all item types and all patron types to avoid this "
-"holds issue. Koha needs to know what rule to fall back on."
+"specific library set for all item types and all patron categories to avoid "
+"this holds issue. Koha needs to know what rule to fall back on."
 msgstr ""
-"Önemli: En azından varsayılan bir dolaşım kuralı ayarlamak durumunda "
-"kalacaksınız. Bu kural tüm materyal türleri, kütüphaneler ve kullanıcı "
-"kategorileri için geçerlidir. Özel bir kuralla eşleşmeyen tüm örnekleri bu "
-"kural ortaya çıkaracaktır. Ödünç verirken, tüm kütüphanelere, materyal "
-"türlerine ve kullanıcı türlerine ait bir kuralınız yoksa kullanıcıların "
-"ayırma işleminin engellendiğini görebilirsiniz. Ayrıca, özel kütüphaneniz "
-"için bu yayın ayırma işlemini önlemek üzere tüm materyal ve kullanıcı "
-"türlerine ayarlanmış bir kural isteyebilirsiniz. Koha hangi kurala "
-"başvurulacağını bilmek durumundadır."
+"Önemli: En azından bir varsayılan dolaşım kuralı ayarlamanız gerekir. Bu "
+"kural tüm materyal türleri, kütüphaneler ve kullanıcı kategorileri için "
+"ayarlanmalıdır. Özel bir kuralla eşleşmeyen tüm durumları bu kural "
+"yakalayacaktır. Ödünç verirken, tüm kütüphanelere, materyal türlerine ve "
+"kullanıcı türlerine ait bir kuralınız yoksa kullanıcıların ayırtma işlemi "
+"yapmasının engellendiğini görebilirsiniz. Ayrıca, özel kütüphaneniz için bu "
+"ayırtılan yayının ödünç verilmesini önlemek üzere tüm materyal ve kullanıcı "
+"türleri için ayarlanmış bir kural olmasını isteyebilirsiniz. Koha'nın hangi "
+"kurala müracaat edeceğini bilmesi gerekir."
 
 #: intranet-tmpl/prog/en/modules/help/admin/koha2marclinks.tt:13
 #, c-format
@@ -10867,7 +10865,7 @@ msgid ""
 msgstr ""
 "Miktar alanında kur sembolü girmeyin, sadece rakamlar ve ondalıklar girin."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
 #, c-format
 msgid ""
 "In the center of the screen is a simple upload form, simply browse for the "
@@ -11810,7 +11808,7 @@ msgstr "Yerel kullanım sistem tercihleri"
 msgid "Local Use:"
 msgstr "Yerel Kullanım:"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:12
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
 #, c-format
 msgid "Locate the \"Add new alert\" form."
 msgstr "\"Yeni uyarı Ekle\" formunu bul."
@@ -12215,9 +12213,10 @@ msgstr "En çok dolaşımda olan materyaller"
 
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:12
 #, c-format
-msgid "Most common patron type, usually used for a general 'Patron' category."
+msgid ""
+"Most common patron category, usually used for a general 'Patron' category."
 msgstr ""
-"En yaygın kullanıcı tipi, sıklıkla genel ‘kullanıcı’ kategorisi için "
+"En yaygın kullanıcı kategorisi, sıklıkla genel ‘Kullanıcı’ kategorisi için "
 "kullanılır."
 
 #: intranet-tmpl/prog/en/modules/help/members/boraccount.tt:9
@@ -12629,6 +12628,13 @@ msgstr "Not: edit_items izninin halen gerekli olduğunu lütfen unutmayın"
 msgid "Note: Please note that items_batchmod permission is still required"
 msgstr "Not: items_batchmod izninin halen gerekli olduğunu lütfen unutmayın"
 
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:7
+#, c-format
+msgid "Note: Use system preference 'AudioAlerts' to enable/disable sounds."
+msgstr ""
+"Not: Sesleri etkinleştirmek/devre dışı bırakmak için 'AudioAlerts' sistem "
+"tercihini kullanın."
+
 #: intranet-tmpl/prog/en/modules/help/acqui/supplier.tt:33
 #, c-format
 msgid "Note: if you list prices and/or invoice prices, include tax."
@@ -12968,7 +12974,7 @@ msgstr ""
 "Mevcut bilgi havuzu düzeltme tablosuna yüklendiğinde, bilgi kaynağını ve "
 "metnini düzeltebilirsiniz."
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:13
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:15
 #, c-format
 msgid ""
 "Once the file is uploaded you will be presented with a confirmation message."
@@ -13762,10 +13768,10 @@ msgstr ""
 #, c-format
 msgid ""
 "Patron categories allow you to organize your patrons into different roles, "
-"age groups, and patron types."
+"age groups, and patron categories."
 msgstr ""
-"Kullanıcı kategorileri kullanıcılarınızı farklı görevlerde, yaş gruplarında "
-"ve kullanıcı türlerinde düzenlemenize imkan sunar."
+"Kullanıcı kategorileri, kullanıcılarınızı farklı rollere, yaş gruplarına ve "
+"kullanıcı kategorilerine göre düzenlemenizi sağlar."
 
 #: intranet-tmpl/prog/en/modules/help/members/memberentry.tt:5
 #, c-format
@@ -14058,7 +14064,7 @@ msgstr "Philadelphia, PA 19107"
 msgid "Phone number: "
 msgstr "Telefon numarası: "
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:9
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:11
 #, c-format
 msgid ""
 "Pictures uploaded with this tool should be at least 300dpi which is the "
@@ -15030,7 +15036,7 @@ msgstr "MARC çerçeveleri tam dokümantasyonuna bakınız"
 msgid "See the full documentation for MARC Modification Templates in the "
 msgstr "MARC Modifikasyon Şablonları tam dokümantasyonuna bakınız"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #, c-format
 msgid "See the full documentation for Managing Images in the "
 msgstr "Resimlerin Yönetimi tam dokümantasyonuna bakınız"
@@ -15779,12 +15785,12 @@ msgstr "Sıralama alanı 1"
 msgid "Sort field 2 "
 msgstr "Sıralama alanı 2"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:21
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
 #, c-format
 msgid "Sound precedence"
 msgstr "Ses önceliği"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:23
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
 #, c-format
 msgid ""
 "Sounds will be played in order from top to bottom. That is, the first select "
@@ -17977,9 +17983,10 @@ msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/admin/item_circulation_alerts.tt:7
 #, c-format
-msgid "These preferences are set based on patron types and item types."
+msgid "These preferences are set based on patron categories and item types."
 msgstr ""
-"Bu tercihler kullanıcı türleri ve materyal türleri temel alınarak ayarlanır"
+"Bu tercihler kullanıcı kategorileri ve materyal türleri esas alınarak "
+"ayarlanır."
 
 #: intranet-tmpl/prog/en/modules/help/reports/reserves_stats.tt:5
 #, c-format
@@ -18398,11 +18405,11 @@ msgstr ""
 #: intranet-tmpl/prog/en/modules/help/admin/categorie.tt:37
 #, c-format
 msgid ""
-"This patron type is used strictly for statistical purposes, such as in house "
-"use of items."
+"This patron category is used strictly for statistical purposes, such as in "
+"house use of items."
 msgstr ""
-"Bu kullanıcı türü yalnızca istatistiksel amaçlarla kullanılır, materyallerin "
-"bina içi kullanımı gibi."
+"Bu kullanıcı kategorisi yalnızca istatistiksel amaçlarla kullanılır, "
+"materyallerin bina içi kullanımı gibi."
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:331
 #, c-format
@@ -19091,9 +19098,8 @@ msgid ""
 "Tip: You have to put \"%%\" in a text box to 'leave it blank'. Otherwise, it "
 "literally looks for \"\" (empty string) as the value for the field."
 msgstr ""
-"İpucu:  'Boş bırakmak için' metin kutusuna \"%%\" yerleştirmeniz gerekir. "
-"Aksi takdirde, alanın değeri olarak tam  \"\" şeklinde (boş dizgi) olarak "
-"gözükecektir."
+"İpucu: 'Boş bırakmak için bir metin kutusuna \"%%\" koymanız gerekir. Aksi "
+"takdirde, alanın değeri olarak kelimenin tam anlamıyla \"\" (boş dize) arar."
 
 #: intranet-tmpl/prog/en/modules/help/admin/z3950servers.tt:66
 #, c-format
@@ -19161,7 +19167,7 @@ msgstr ""
 "Yeni kullanıcı nitelik türü eklemek için sayfanın üstündeki ‘Yeni kullanıcı "
 "nitelik türü’ne tıklayın."
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:9
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:11
 #, c-format
 msgid "To add a new alert:"
 msgstr "Yeni bir uyarı eklemek için:"
@@ -19387,7 +19393,7 @@ msgstr ""
 "Bir sağlayıcıdan sipariş verebilmeniz için, bu sağlayıcıları 'Aktif' duruma "
 "getirmelisiniz"
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:25
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:27
 #, c-format
 msgid ""
 "To change the precedence of a given alert, use the four arrows to move it "
@@ -19517,7 +19523,7 @@ msgstr ""
 "belirecektir."
 
 #. %1$s:  INCLUDE 'help-bottom.inc' 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:29
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:31
 #, c-format
 msgid ""
 "To delete one or more alerts, check the checkboxes for those alerts you wish "
@@ -19528,7 +19534,7 @@ msgstr ""
 "kutularını tıklayın, ardından \"Seçilen uyarıları sil\" düğmesine tıklayın "
 "ve o uyarıları silmek istediğinizi onaylayın. %s"
 
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:17
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
 #, c-format
 msgid ""
 "To delete one or multiple of these images, click the checkbox to the right "
@@ -20002,6 +20008,13 @@ msgstr ""
 "Bu sayfadan bir materyalin süresini uzatmak için, süresini uzatmak "
 "istediğiniz materyallerin barkodlarını barkod okuyucuya taratın."
 
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:21
+#, c-format
+msgid ""
+"To replace an image, delete it, upload a new file and give it the same image "
+"name."
+msgstr ""
+
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:91
 #, c-format
 msgid ""
@@ -20354,6 +20367,13 @@ msgstr "Kullanıcı kayıtlarını güncelle"
 #, c-format
 msgid "Upload Koha plugin"
 msgstr "Koha eklentisini karşıya yükleyin"
+
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:5
+#, c-format
+msgid ""
+"Upload additional images to use as logo, decoration or background on a "
+"patron card layout."
+msgstr ""
 
 #: intranet-tmpl/prog/en/modules/help/tools/upload-cover-image.tt:3
 #, c-format
@@ -20956,13 +20976,13 @@ msgstr ""
 #, c-format
 msgid ""
 "When finished, click 'Add' to save your changes. To modify a rule, create a "
-"new one with the same patron type and item type. If you would like to delete "
-"your rule, simply click the 'Delete' link to the right of the rule."
+"new one with the same patron category and item type. If you would like to "
+"delete your rule, simply click the 'Delete' link to the right of the rule."
 msgstr ""
-"Tamamlandığında, değişikliklerinizi kaydetmek için 'Ekle'ye tıklayınız. Bir "
-"kuralı değiştirmek için, o kuralı aynı kullanıcı ve materyal türüyle "
-"oluşturunuz. Kuralınızı silmek istiyorsanız, kuralın sağındaki 'Sil' "
-"bağlantısına tıklayınız."
+"İşiniz bittiğinde, değişikliklerinizi kaydetmek için 'Ekle'yi tıklayın. Bir "
+"kuralı değiştirmek için, aynı kullanıcı kategorisine ve materyal türüne "
+"sahip yeni bir kural oluşturun. Kuralınızı silmek isterseniz, kuralın "
+"sağındaki 'Sil' bağlantısını tıklamanız yeterlidir."
 
 #: intranet-tmpl/prog/en/modules/help/admin/itemtypes.tt:40
 #, c-format
@@ -21410,12 +21430,12 @@ msgstr ""
 "uygulayacaktır."
 
 #: intranet-tmpl/prog/en/modules/help/serials/subscription-add.tt:59
-#, c-format
+#, fuzzy, c-format
 msgid ""
-"Without periodicy: some very specific (usually high level science journals) "
-"don't have a true periodicity. When you subscribe to the title, you "
-"subscribe for 6 issues, which can arrive in 1 year... or 2... There is no "
-"regularity or known schedule."
+"Without periodicity: some very specific (usually high level science "
+"journals) don't have a true periodicity. When you subscribe to the title, "
+"you subscribe for 6 issues, which can arrive in 1 year... or 2... There is "
+"no regularity or known schedule."
 msgstr ""
 "Periyodik olmama: Bazı çok özel (genellikle yüksek dereceli bilim) "
 "dergilerin gerçek bir periyodu bulunmamaktadır. Başlığa abone olduğunuzda, "
@@ -22483,23 +22503,23 @@ msgstr "sağlama "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:17
 #, c-format
-msgid "all libraries, all patron types, all item types"
-msgstr "tüm kütüphaneler, tüm kullanıcı türleri, tüm materyal türleri"
+msgid "all libraries, all patron categories, all item types"
+msgstr "tüm kütüphaneler, tüm kullanıcı kategorileri, tüm materyal türleri"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:16
 #, c-format
-msgid "all libraries, all patron types, same item type"
-msgstr "tüm kütüphaneler, tüm kullanıcı türleri, aynı materyal türü"
+msgid "all libraries, all patron categories, same item type"
+msgstr "tüm kütüphaneler, tüm kullanıcı kategorileri, aynı materyal türü"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:15
 #, c-format
-msgid "all libraries, same patron type, all item types"
-msgstr "tüm kütüphaneler, aynı kullanıcı türü, tüm materyal türleri"
+msgid "all libraries, same patron category, all item types"
+msgstr "tüm kütüphaneler, aynı kullanıcı kategorisi, tüm materyal türleri"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:14
 #, c-format
-msgid "all libraries, same patron type, same item type"
-msgstr "tüm kütüphaneler, aynı kullanıcı türü, aynı materyal türü"
+msgid "all libraries, same patron category, same item type"
+msgstr "tüm kütüphaneler, aynı kullanıcı kategorisi, aynı materyal türü"
 
 #: intranet-tmpl/prog/en/modules/help/admin/biblio_framework.tt:120
 #: intranet-tmpl/prog/en/modules/help/admin/marc_subfields_structure.tt:66
@@ -22996,7 +23016,7 @@ msgstr "Bu yeni materyallerle ilgili bir RSS/Atom beslemesi alın."
 msgid "group_manage "
 msgstr "grup_yönet "
 
-#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:14
+#: intranet-tmpl/prog/en/modules/help/admin/audio_alerts.tt:16
 #, c-format
 msgid "here"
 msgstr "burada"
@@ -23386,7 +23406,7 @@ msgstr "yönetim "
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-batch.tt:11
 #: intranet-tmpl/prog/en/modules/help/patroncards/home.tt:20
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-profile.tt:31
-#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:19
+#: intranet-tmpl/prog/en/modules/help/patroncards/image-manage.tt:23
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-layout.tt:34
 #: intranet-tmpl/prog/en/modules/help/patroncards/edit-template.tt:28
 #: intranet-tmpl/prog/en/modules/help/patroncards/manage.tt:19
@@ -23679,23 +23699,23 @@ msgstr "yönlendirme "
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:13
 #, c-format
-msgid "same library, all patron types, all item types"
-msgstr "aynı kütüphane, tüm kullanıcı türleri, tüm materyal türleri"
+msgid "same library, all patron categories, all item types"
+msgstr "aynı kütüphane, tüm kullanıcı kategorileri, tüm materyal türleri"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:12
 #, c-format
-msgid "same library, all patron types, same item type"
-msgstr "aynı kütüphane, aynı kullanıcı türü, aynı materyal türü"
+msgid "same library, all patron categories, same item type"
+msgstr "aynı kütüphane, tüm kullanıcı kategorileri, aynı materyal türü"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:11
 #, c-format
-msgid "same library, same patron type, all item type"
-msgstr "aynı kütüphane, aynı kullanıcı türü, tüm materyal türü"
+msgid "same library, same patron category, all item type"
+msgstr "aynı kütüphane, aynı kullanıcı kategorisi, tüm materyal türleri"
 
 #: intranet-tmpl/prog/en/modules/help/admin/smart-rules.tt:10
 #, c-format
-msgid "same library, same patron type, same item type"
-msgstr "aynı kütüphane, aynı kullanıcı türü, aynı materyal türü"
+msgid "same library, same patron category, same item type"
+msgstr "aynı kütüphane, aynı kullanıcı kategorisi, aynı materyal türü"
 
 #: intranet-tmpl/prog/en/modules/help/members/member-flags.tt:471
 #, c-format

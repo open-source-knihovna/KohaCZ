@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: Koha 3.0.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-06-12 12:52+0000\n"
-"PO-Revision-Date: 2017-02-17 06:49+0000\n"
+"PO-Revision-Date: 2017-07-19 13:31+0000\n"
 "Last-Translator: Onur <onurerdem@sdu.edu.tr>\n"
 "Language-Team: Koha Translation Team\n"
 "Language: tr\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1487314162.000000\n"
+"X-POOTLE-MTIME: 1500471118.000000\n"
 
 # Acquisitions
 msgid "acquisitions.pref"
@@ -55,8 +55,8 @@ msgid "acquisitions.pref#AcqEnableFiles# enable the ability to upload and attach
 msgstr "faturalara isteğe bağlı dosyaları ekleme ve karşıya yükleme yetisini etkinleştir"
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#AcqItemSetSubfieldsWhenReceiptIsCancelled# Upon cancelling a receipt, update the item's subfields if they were created when placing an order (e.g. o=5|a=\"bar foo\"\")."
-msgstr "Bir makbuz iptalinden sonra, eğer bir sipariş yapılırken oluşturuldu ise materyalin alt alanlarını güncelleştirin (örn. o=5|a=\"bar foo\"\")"
+msgid "acquisitions.pref#AcqItemSetSubfieldsWhenReceiptIsCancelled# Upon cancelling a receipt, update the item's subfields if they were created when placing an order (e.g. o=5|a=\"bar foo\")."
+msgstr ""
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqItemSetSubfieldsWhenReceived# Upon receiving items, update their subfields if they were created when placing an order (e.g. o=5|a=\"foo bar\")."
@@ -168,9 +168,7 @@ msgstr "(bir boşlukla ayrılmış)"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#UniqueItemFields# The following <a href='http://schema.koha-community.org/16_05/tables/items.html' target='blank'>database columns</a> should be unique in an item:"
-msgstr ""
-"Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/items.html' "
-"target='blank'>veritabanı sütunları</a> bir materyalde benzersiz olmalıdır:"
+msgstr "Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/items.html' target='blank'>veritabanı sütunları</a> bir materyalde benzersiz olmalıdır:"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#gist# . Enter in numeric form, 0.12 for 12%. The first item in the list will be selected by default. For more than one value, separate with | (pipe)."
@@ -1261,6 +1259,30 @@ msgid "admin.pref#UsageStatsCountry# Zimbabwe"
 msgstr "Zimbabve"
 
 # Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsGeolocation# Geolocation of the main library: "
+msgstr "Ana kütüphanenin coğrafi konumu:"
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsGeolocation# Note that this value has no effect if the UsageStats system preference is set to \"Don't share\""
+msgstr "UsageStats sistem tercihi \"Paylaşma\" olarak ayarlandıysa, bu değerin hiçbir etkisi olmadığını unutmayın."
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# Do not Share"
+msgstr "Paylaşma"
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# Note that this value has no effect if the UsageStats system preference is set to \"Don't share\""
+msgstr "UsageStats sistem tercihi \"Paylaşma\" olarak ayarlandıysa, bu değerin hiçbir etkisi olmadığını unutmayın."
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# Share"
+msgstr "Paylaş"
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# libraries information (name, url, country)"
+msgstr "Kütüphaneler bilgisi (ad, url, ülke)"
+
+# Administration > Share anonymous usage statistics
 msgid "admin.pref#UsageStatsLibraryName# If this field is empty data will be sent anonymously."
 msgstr "Bu alan boşsa, veri anonim olarak gönderilecektir."
 
@@ -1459,6 +1481,22 @@ msgstr "Görüntüleme"
 # Authorities > General
 msgid "authorities.pref#AuthDisplayHierarchy# broader term/narrower term hierarchies when viewing authorities."
 msgstr "otoriteleri görüntülerken daha geniş terim/daha dar terim hiyerarşisi."
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# When updating biblio records from an attached authority record (\"merging\"), handle subfields of relevant biblio record fields in"
+msgstr "Ekli bir otoriteye ait biblio kayıtlarını güncellerken (\"birleştirme\"), ilgili bibliyo kayıt alanlarının alt alanlarını işleyin"
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# loose"
+msgstr "loose"
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# mode. In strict mode subfields that are not found in the authority record, are deleted. Loose mode will keep them. Loose mode is the historical behavior and still the default."
+msgstr "kip. Strict kipte, otorite kaydında bulunmayan alt alanlar silinir. Loose kip onları koruyacaktır. Loose mod tarihsel davranıştır ve yine de varsayılandır."
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# strict"
+msgstr "strict"
 
 # Authorities > General
 msgid "authorities.pref#AutoCreateAuthorities# When editing records,"
@@ -1700,7 +1738,7 @@ msgstr "varsayılan sınıflandırma kaynağı olarak."
 
 # Cataloging > Record Structure
 msgid "cataloguing.pref#DefaultLanguageField008#  Empty defaults to eng."
-msgstr "varsayılan boş Eng."
+msgstr "Boş varsayılan değer ing."
 
 # Cataloging > Record Structure
 msgid "cataloguing.pref#DefaultLanguageField008# Fill in the default language for field 008 Range 35-37 of MARC21 records (e.g. eng, nor, ger, see <a href=\"http://www.loc.gov/marc/languages/language_code.html\">MARC Code List for Languages</a>)"
@@ -1994,11 +2032,11 @@ msgstr "Materyalleri önceden doldururken (boşlukla ayrılmış) kullanılacak 
 
 # Cataloging > Record Structure
 msgid "cataloguing.pref#UNIMARCField100Language# Use the languague (ISO 690-2)"
-msgstr "(ISO 690-2) dili kullanın"
+msgstr "Dili kullanın (ISO 690-2) "
 
 # Cataloging > Record Structure
 msgid "cataloguing.pref#UNIMARCField100Language# as default language in the UNIMARC field 100 when creating a new record or in the field plugin."
-msgstr "yeni bir kayıt oluştururken veya alan eklentisi içerisinde 100 UNIMARC alanındaki varsayılan dil olarak."
+msgstr "Yeni bir kayıt oluştururken veya alan eklentisinde UNIMARC alanında 100 varsayılan dil olarak kullanılır."
 
 # Cataloging > Display
 msgid "cataloguing.pref#URLLinkText# Show"
@@ -2126,7 +2164,7 @@ msgstr "UNIMARC'tan yazarlar"
 
 # Cataloging > Record Structure
 msgid "cataloguing.pref#z3950NormalizeAuthor# tags (separated by commas) to the correct author tags when importing a record using Z39.50."
-msgstr "Z39.50. kullanarak bir kayıt aktarırken yazar etiketlerine kullanılan doğru etiketler (virgüllerle ayrılan)"
+msgstr "Z39.50'ı kullanarak bir kayıt içe aktarırken doğru yazar tag'lerine (virgülle ayrılmış) tag'ler gönderir."
 
 # Circulation
 msgid "circulation.pref"
@@ -2166,7 +2204,7 @@ msgstr "Otomatik ödünç verme sistemi"
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#AgeRestrictionMarker# E.g. enter target audience keyword(s) split by | (bar) FSK|PEGI|Age| (No white space near |). Be sure to map agerestriction in Koha to MARC mapping (e.g. 521$a). A MARC field value of FSK 12 or PEGI 12 would mean: Borrower must be 12 years old. Leave empty to not apply an age restriction."
-msgstr "Örneğin, | (bar) FSK|PEGI|Yaş| ile bölünmüş hedef kitle anahtar sözcüklerini  (Yakınındaki beyaz boşlukla değil |) giriniz. Koha’daki yaş eşleme sınırlamasının MARC eşlemesinde olduğundan emin olunuz örneğin, 521$a). FSK MARC alan değeri ya da PEGI 12 : Ödünç alanın 12 yaşında olması gerekir. Yaş sınırlaması uygulamamak için boş bırakınız, anlamına gelecektir."
+msgstr "Örneğin, | (bar) FSK|PEGI|Yaş| ile bölünmüş hedef kitle anahtar sözcüklerini (Yanında beyaz boşluk yok |) girin. Yaş sınırlandırmasını Koha to MARC mapping'de eşleştirmeyi unutmayın (ör. 521 $ a). Bir FSK 12 veya PEGI 12 MARC alanı değeri: ödünç alan kişinin 12 yaşında olması gerektiği anlamına gelir. Bir yaş kısıtlaması uygulamamak için boş bırakın."
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#AgeRestrictionMarker# Restrict patrons with the following target audience values from checking out inappropriate materials:"
@@ -3335,7 +3373,7 @@ msgstr "Gerçekleştirme"
 
 # Circulation > Interface
 msgid "circulation.pref#UpdateTotalIssuesOnCirc# update a bibliographic record's total issues count whenever an item is issued (WARNING! This increases server load significantly; if performance is a concern, use the update_totalissues.pl cron job to update the total issues count)."
-msgstr "bir materyal ödünç verildiğinde bibliyografik kaydın toplam yayının ödünç verilme sayısını güncelleyiniz (UYARI! Bu, sunucu yükünü önemli ölçüde yükseltecektir; performans söz konusuysa, toplam yayının ödünç verilme sayısını güncellemek için update_totalissues.pl cron job kullanınız)."
+msgstr "bir materyal ödünç verildiğinde bibliyografik kaydın toplam ödünç verilme sayısını güncelleyiniz (UYARI! Bu, sunucu yükünü önemli ölçüde yükseltecektir; performans söz konusuysa, toplam yayının ödünç verilme sayısını güncellemek için update_totalissues.pl cron job kullanınız)."
 
 # Circulation > Checkout Policy
 msgid "circulation.pref#UseBranchTransferLimits# ."
@@ -3879,19 +3917,19 @@ msgstr "arama sonuçlarında Google Kitaplarından kapak resimleri ve OPAC’tak
 
 # Enhanced Content > HTML5 Media
 msgid "enhanced_content.pref#HTML5MediaEnabled# Show a tab with a HTML5 media player for files catalogued in field 856"
-msgstr "HTML5 ortam yürütücüsü ile 856 alanında kataloglanmış dosyalar için sekme gösteriniz"
+msgstr "856 alanında kataloglanmış dosyalar için bir HTML5 medya oynatıcısına sahip bir sekme gösterin"
 
 # Enhanced Content > HTML5 Media
 msgid "enhanced_content.pref#HTML5MediaEnabled# in OPAC and staff client."
-msgstr "OPAC ve personel istemci içerisinde."
+msgstr "OPAC ve personel istemcide."
 
 # Enhanced Content > HTML5 Media
 msgid "enhanced_content.pref#HTML5MediaEnabled# in the OPAC."
-msgstr "OPAC içerisinde"
+msgstr "OPAC'da."
 
 # Enhanced Content > HTML5 Media
 msgid "enhanced_content.pref#HTML5MediaEnabled# in the staff client."
-msgstr "personel istemci içerisinde."
+msgstr "personel istemcide."
 
 # Enhanced Content > HTML5 Media
 msgid "enhanced_content.pref#HTML5MediaEnabled# not at all."
@@ -3903,7 +3941,7 @@ msgstr "( | ile ayrılmış)."
 
 # Enhanced Content > HTML5 Media
 msgid "enhanced_content.pref#HTML5MediaExtensions# Media file extensions"
-msgstr "Ortam dosya uzantıları"
+msgstr "Ortam dosyası uzantıları"
 
 # Enhanced Content > HTML5 Media
 msgid "enhanced_content.pref#HTML5MediaYouTube# Don't embed"
@@ -4399,7 +4437,7 @@ msgstr "I18N/L10N"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# Format postal addresses using"
-msgstr "Posta adreslerinin kullandığı format"
+msgstr "Posta adreslerinin kullandığı biçim"
 
 # I18N/L10N
 msgid "i18n_l10n.pref#AddressFormat# German style ([Address] [Street number] - [ZIP/Postal Code] [City] - [Country])"
@@ -4819,10 +4857,7 @@ msgstr "Engelleme"
 
 # OPAC > Policy
 msgid "opac.pref#BlockExpiredPatronOpacActions# expired patrons from OPAC actions such as placing a hold or renewing.  Note that the setting for a patron category takes priority over this system preference."
-msgstr ""
-"ayırtma veya süre uzatma gibi OPAC işlemleri için süreleri dolmuş olan "
-"kullanıcılar. Bir kullanıcı kategorisi ayarının bu sistem tercihi üzerinde "
-"öncelik taşıdığını unutmayın."
+msgstr "ayırtma veya süre uzatma gibi OPAC işlemleri için süreleri dolmuş olan kullanıcılar. Bir kullanıcı kategorisi ayarının bu sistem tercihi üzerinde öncelik taşıdığını unutmayın."
 
 # OPAC > Appearance
 msgid "opac.pref#COinSinOPACResults# COinS / OpenURL / Z39.88 in OPAC search results.  <br/>Warning: Enabling this feature will slow OPAC search response times."
@@ -5674,10 +5709,7 @@ msgstr "(sütunları | ile ayırın)"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-modification screen:"
-msgstr ""
-"Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/"
-"borrowers.html' target='blank'>veritabanı sütunları</a> kullanıcının self-"
-"modifikasyon ekranında görünmeyecektir:"
+msgstr "Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>veritabanı sütunları</a> kullanıcının self-modifikasyon ekranında görünmeyecektir:"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistration# Allow"
@@ -5701,10 +5733,7 @@ msgstr "(sütunları | ile ayırın)"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationBorrowerMandatoryField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> must be filled in on the patron entry screen:"
-msgstr ""
-"Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/"
-"borrowers.html' target='blank'>veritabanı sütunları</a>'nın kullanıcı giriş "
-"ekranında doldurulması gerekir:"
+msgstr "Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>veritabanı sütunları</a>'nın kullanıcı giriş ekranında doldurulması gerekir:"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# (separate columns with |)"
@@ -5712,10 +5741,7 @@ msgstr "(sütunları | ile ayırın)"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-registration screen:"
-msgstr ""
-"Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/"
-"borrowers.html' target='blank'>veritabaı sütunları</a> kullanıcının kendi "
-"kendine kayıt ekranında görünmeyecektir:"
+msgstr "Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>veritabaı sütunları</a> kullanıcının kendi kendine kayıt ekranında görünmeyecektir:"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationDefaultCategory# Use the patron category code"
@@ -6111,10 +6137,7 @@ msgstr "(kolonları | ile ayır)"
 
 # Patrons > General
 msgid "patrons.pref#BorrowerMandatoryField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> must be filled in on the patron entry screen:"
-msgstr ""
-"Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/"
-"borrowers.html' target='blank'>veritabanı sütunları</a>'nın kullanıcı giriş "
-"ekranında doldurulması gerekir:"
+msgstr "Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>veritabanı sütunları</a>'nın kullanıcı giriş ekranında doldurulması gerekir:"
 
 # Patrons > General
 msgid "patrons.pref#BorrowerRenewalPeriodBase# When renewing borrowers, base the new expiry date on"
@@ -6134,10 +6157,7 @@ msgstr "(sütunları | ile ayırınız)"
 
 # Patrons > General
 msgid "patrons.pref#BorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron entry screen:"
-msgstr ""
-"Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/"
-"borrowers.html' target='blank'>veritabanı sütunları</a> kullanıcının giriş "
-"ekranında görünmeyecektir:"
+msgstr "Aşağıdaki <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>veritabanı sütunları</a> kullanıcının giriş ekranında görünmeyecektir:"
 
 # Patrons > General
 msgid "patrons.pref#BorrowersTitles# (separate multiple choices with |)"
@@ -7410,3 +7430,4 @@ msgstr "Sadece geri dönen"
 # Web services > Reporting
 msgid "web_services.pref#SvcMaxReportRows# rows of a report requested via the reports web service."
 msgstr "raporlar web hizmeti yoluyla talep edilen bir raporun satırları"
+

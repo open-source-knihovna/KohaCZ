@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Koha Staff\n"
 "POT-Creation-Date: 2013-05-02 01:29-0300\n"
-"PO-Revision-Date: 2017-02-22 07:43+0000\n"
+"PO-Revision-Date: 2017-06-19 16:01+0200\n"
 "Last-Translator: Zeno <z.tajoli@cineca.it>\n"
 "Language-Team: CILEA <z.tajoli@cineca.it>\n"
 "Language: it\n"
@@ -10,9 +10,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Pootle 2.5.1.1\n"
+"X-Generator: Poedit 1.8.13\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-POOTLE-MTIME: 1487749423.000000\n"
+"X-POOTLE-MTIME: 1490031112.000000\n"
 "X-Poedit-Basepath: ../../../versioni/master/koha-tmpl\n"
 "X-Poedit-SearchPath-0: .\n"
 
@@ -57,8 +57,8 @@ msgid "acquisitions.pref#AcqEnableFiles# enable the ability to upload and attach
 msgstr "la possibilità di caricare e collegate dei files alle ricevute."
 
 # Acquisitions > Policy
-msgid "acquisitions.pref#AcqItemSetSubfieldsWhenReceiptIsCancelled# Upon cancelling a receipt, update the item's subfields if they were created when placing an order (e.g. o=5|a=\"bar foo\"\")."
-msgstr "Quando cancelli una ricevuta, aggiorna i sottocampi della copia se sono stati creati quando hai creato un ordine (ad es. 0=5|a=\"Biblio x\")"
+msgid "acquisitions.pref#AcqItemSetSubfieldsWhenReceiptIsCancelled# Upon cancelling a receipt, update the item's subfields if they were created when placing an order (e.g. o=5|a=\"bar foo\")."
+msgstr ""
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#AcqItemSetSubfieldsWhenReceived# Upon receiving items, update their subfields if they were created when placing an order (e.g. o=5|a=\"foo bar\")."
@@ -170,10 +170,7 @@ msgstr "(separati da spazio)"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#UniqueItemFields# The following <a href='http://schema.koha-community.org/16_05/tables/items.html' target='blank'>database columns</a> should be unique in an item:"
-msgstr ""
-"Le seguenti <a href='http://schema.koha-community.org/16_05/tables/"
-"items.html' target='blank'>colonne del DB</a> devono essere univoche in una "
-"copia:"
+msgstr "Le seguenti <a href='http://schema.koha-community.org/16_05/tables/items.html' target='blank'>colonne del DB</a> devono essere univoche in una copia:"
 
 # Acquisitions > Policy
 msgid "acquisitions.pref#gist# . Enter in numeric form, 0.12 for 12%. The first item in the list will be selected by default. For more than one value, separate with | (pipe)."
@@ -1264,6 +1261,30 @@ msgid "admin.pref#UsageStatsCountry# Zimbabwe"
 msgstr "Zimbabwe"
 
 # Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsGeolocation# Geolocation of the main library: "
+msgstr "Geolocalizzazione della biblioteca principale:"
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsGeolocation# Note that this value has no effect if the UsageStats system preference is set to \"Don't share\""
+msgstr "Nota che questo valore non ha effetto se la preferenza di sistema UsageStats è impostata su \"Non condividere\""
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# Do not Share"
+msgstr "Non condividere"
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# Note that this value has no effect if the UsageStats system preference is set to \"Don't share\""
+msgstr "Nota che questo valore non ha effetto se la preferenza di sistema UsageStats è impostata su \"Non condividere\""
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# Share"
+msgstr "Condividi"
+
+# Administration > Share anonymous usage statistics
+msgid "admin.pref#UsageStatsLibrariesInfo# libraries information (name, url, country)"
+msgstr "informazioni sulle biblioteche (nome, url, paese)"
+
+# Administration > Share anonymous usage statistics
 msgid "admin.pref#UsageStatsLibraryName# If this field is empty data will be sent anonymously."
 msgstr "Se questo campo è vuoto, i dati saranno mandati in forma anonima."
 
@@ -1462,6 +1483,22 @@ msgstr "Non mostrare"
 # Authorities > General
 msgid "authorities.pref#AuthDisplayHierarchy# broader term/narrower term hierarchies when viewing authorities."
 msgstr "le gerarchie tra termini BT/NT quando mostri gli authority."
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# When updating biblio records from an attached authority record (\"merging\"), handle subfields of relevant biblio record fields in"
+msgstr "Aggiornando record bibliografici a partire da un record di autorità ('merge'), gestisci i sottocampi di campi rilevanti in"
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# loose"
+msgstr "modalità lasca"
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# mode. In strict mode subfields that are not found in the authority record, are deleted. Loose mode will keep them. Loose mode is the historical behavior and still the default."
+msgstr "In modalità rigida, i sottocampi non trovati nel record di autorità vengono cancellati. In modalità lasca verranno mantenuti. La modalità lasca è quella storica, ed è ancora il default."
+
+# Authorities > General
+msgid "authorities.pref#AuthorityMergeMode# strict"
+msgstr "rigida"
 
 # Authorities > General
 msgid "authorities.pref#AutoCreateAuthorities# When editing records,"
@@ -3246,7 +3283,7 @@ msgstr "che possiede la copia"
 
 # Circulation > Holds Policy
 msgid "circulation.pref#StaticHoldsQueueWeight# (as branchcodes, separated by commas; if empty, uses all libraries)"
-msgstr "(come codici di sottobiblioteche, seprrati da virgola; se vuoto, usa tutte le biblioteche)"
+msgstr "(come codici di sottobiblioteche, separati da virgola; se vuoto, usa tutte le biblioteche)"
 
 # Circulation > Holds Policy
 msgid "circulation.pref#StaticHoldsQueueWeight# Satisfy holds using items from the libraries"
@@ -5666,10 +5703,7 @@ msgstr "Non permettere"
 
 # OPAC > Features
 msgid "opac.pref#OpacTopissue# patrons to access a list of the most checked out items on the OPAC. Note that this is somewhat experimental, and should be avoided if your collection has a large number of items."
-msgstr ""
-"agli utenti dell'Opac di vedere una lista delle opere più prestate. E' una "
-"funzionalità  sperimentale, da non attivare in caso di elevato numero di "
-"copie."
+msgstr "agli utenti dell'Opac di vedere una lista delle opere più prestate. E' una funzionalità  sperimentale, da non attivare in caso di elevato numero di copie."
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# (separate columns with |)"
@@ -5677,10 +5711,7 @@ msgstr "(separa le colonne con |)"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfModificationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-modification screen:"
-msgstr ""
-"Le seguenti <a href='http://schema.koha-community.org/16_05/tables/"
-"borrowers.html' target='blank'>colonne del DB</a> non appariranno nella "
-"pagina di modifica dei propri dati accessibile all'utente tramite l'Opac:"
+msgstr "Le seguenti <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>colonne del DB</a> non appariranno nella pagina di modifica dei propri dati accessibile all'utente tramite l'Opac:"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistration# Allow"
@@ -5704,10 +5735,7 @@ msgstr "(separa le colonne con |)"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationBorrowerMandatoryField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> must be filled in on the patron entry screen:"
-msgstr ""
-"Le seguenti <a href='http://schema.koha-community.org/16_05/tables/"
-"borrowers.html' target='blank'>colonne del DB</a> devono essere compilate "
-"nell'autoregistrazione utente accessibile tramite l'Opac:"
+msgstr "Le seguenti <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>colonne del DB</a> devono essere compilate nell'autoregistrazione utente accessibile tramite l'Opac:"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# (separate columns with |)"
@@ -5715,10 +5743,7 @@ msgstr "(separa le colonne con |)"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationBorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron self-registration screen:"
-msgstr ""
-"Le seguenti <a href='http://schema.koha-community.org/16_05/tables/"
-"borrowers.html' target='blank'>colonne del DB</a> non devono apparire "
-"nell'autoregistrazione utente accessibile tramite l'Opac:"
+msgstr "Le seguenti <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>colonne del DB</a> non devono apparire nell'autoregistrazione utente accessibile tramite l'Opac:"
 
 # OPAC > Self Registration
 msgid "opac.pref#PatronSelfRegistrationDefaultCategory# Use the patron category code"
@@ -6114,10 +6139,7 @@ msgstr "(separa le colonne co |)"
 
 # Patrons > General
 msgid "patrons.pref#BorrowerMandatoryField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> must be filled in on the patron entry screen:"
-msgstr ""
-"Le seguenti <a href='http://schema.koha-community.org/16_05/tables/"
-"borrowers.html' target='blank'>colonne del DB</a> devono essere compilate "
-"nella registrazione utente che avviente tramite l'interfaccia staff:"
+msgstr "Le seguenti <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>colonne del DB</a> devono essere compilate nella registrazione utente che avviente tramite l'interfaccia staff:"
 
 # Patrons > General
 msgid "patrons.pref#BorrowerRenewalPeriodBase# When renewing borrowers, base the new expiry date on"
@@ -6137,10 +6159,7 @@ msgstr "(I nomi delle colonne vanno separati con |)"
 
 # Patrons > General
 msgid "patrons.pref#BorrowerUnwantedField# The following <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>database columns</a> will not appear on the patron entry screen:"
-msgstr ""
-"Le seguenti <a href='http://schema.koha-community.org/16_05/tables/"
-"borrowers.html' target='blank'>colonne del DB</a> non appariranno  nella "
-"registrazione utente che avviente tramite l'interfaccia staff: "
+msgstr "Le seguenti <a href='http://schema.koha-community.org/16_05/tables/borrowers.html' target='blank'>colonne del DB</a> non appariranno  nella registrazione utente che avviente tramite l'interfaccia staff: "
 
 # Patrons > General
 msgid "patrons.pref#BorrowersTitles# (separate multiple choices with |)"
@@ -7413,3 +7432,4 @@ msgstr "Invia solamente"
 # Web services > Reporting
 msgid "web_services.pref#SvcMaxReportRows# rows of a report requested via the reports web service."
 msgstr "linee di un report se richiesto attraverso il web service per i reports."
+
