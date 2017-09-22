@@ -564,12 +564,16 @@ sub TooMany {
 
 =head2 CanBookBeIssued
 
-  ( $issuingimpossible, $needsconfirmation ) =  CanBookBeIssued( $borrower, 
+  ( $issuingimpossible, $needsconfirmation, [ $alerts ] ) =  CanBookBeIssued( $borrower,
                       $barcode, $duedate, $inprocess, $ignore_reserves, $params );
 
 Check if a book can be issued.
 
-C<$issuingimpossible> and C<$needsconfirmation> are some hashref.
+C<$issuingimpossible> and C<$needsconfirmation> are hashrefs.
+
+IMPORTANT: The assumption by users of this routine is that causes blocking
+the issue are keyed by uppercase labels and other returned
+data is keyed in lower case!
 
 =over 4
 
