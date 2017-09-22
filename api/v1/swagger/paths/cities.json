@@ -1,8 +1,8 @@
 {
   "/cities": {
     "get": {
-      "x-mojo-controller": "Koha::REST::V1::Cities",
-      "operationId": "list",
+      "x-mojo-to": "Cities#list",
+      "operationId": "listCities",
       "tags": ["cities"],
       "produces": [
         "application/json"
@@ -53,12 +53,18 @@
           "schema": {
             "$ref": "../definitions.json#/error"
           }
+        },
+        "503": {
+          "description": "Under maintenance",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
         }
       }
     },
     "post": {
-      "x-mojo-controller": "Koha::REST::V1::Cities",
-      "operationId": "add",
+      "x-mojo-to": "Cities#add",
+      "operationId": "addCity",
       "tags": ["cities"],
       "parameters": [{
         "name": "body",
@@ -79,6 +85,12 @@
             "$ref": "../definitions.json#/city"
           }
         },
+        "401": {
+          "description": "Authentication required",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        },
         "403": {
           "description": "Access forbidden",
           "schema": {
@@ -87,6 +99,12 @@
         },
         "500": {
           "description": "Internal error",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        },
+        "503": {
+          "description": "Under maintenance",
           "schema": {
             "$ref": "../definitions.json#/error"
           }
@@ -101,8 +119,8 @@
   },
   "/cities/{cityid}": {
     "get": {
-      "x-mojo-controller": "Koha::REST::V1::Cities",
-      "operationId": "get",
+      "x-mojo-to": "Cities#get",
+      "operationId": "getCity",
       "tags": ["cities"],
       "parameters": [{
         "$ref": "../parameters.json#/cityidPathParam"
@@ -117,12 +135,6 @@
             "$ref": "../definitions.json#/city"
           }
         },
-        "403": {
-          "description": "Access forbidden",
-          "schema": {
-            "$ref": "../definitions.json#/error"
-          }
-        },
         "404": {
           "description": "City not found",
           "schema": {
@@ -134,12 +146,18 @@
           "schema": {
             "$ref": "../definitions.json#/error"
           }
+        },
+        "503": {
+          "description": "Under maintenance",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
         }
       }
     },
     "put": {
-      "x-mojo-controller": "Koha::REST::V1::Cities",
-      "operationId": "update",
+      "x-mojo-to": "Cities#update",
+      "operationId": "updateCity",
       "tags": ["cities"],
       "parameters": [{
         "$ref": "../parameters.json#/cityidPathParam"
@@ -162,6 +180,12 @@
             "$ref": "../definitions.json#/city"
           }
         },
+        "401": {
+          "description": "Authentication required",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        },
         "403": {
           "description": "Access forbidden",
           "schema": {
@@ -179,6 +203,12 @@
           "schema": {
             "$ref": "../definitions.json#/error"
           }
+        },
+        "503": {
+          "description": "Under maintenance",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
         }
       },
       "x-koha-authorization": {
@@ -188,8 +218,8 @@
       }
     },
     "delete": {
-      "x-mojo-controller": "Koha::REST::V1::Cities",
-      "operationId": "delete",
+      "x-mojo-to": "Cities#delete",
+      "operationId": "deleteCity",
       "tags": ["cities"],
       "parameters": [{
         "$ref": "../parameters.json#/cityidPathParam"
@@ -204,6 +234,12 @@
             "type": "string"
           }
         },
+        "401": {
+          "description": "Authentication required",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        },
         "403": {
           "description": "Access forbidden",
           "schema": {
@@ -218,6 +254,12 @@
         },
         "500": {
           "description": "Internal error",
+          "schema": {
+            "$ref": "../definitions.json#/error"
+          }
+        },
+        "503": {
+          "description": "Under maintenance",
           "schema": {
             "$ref": "../definitions.json#/error"
           }
