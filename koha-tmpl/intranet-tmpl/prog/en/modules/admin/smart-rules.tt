@@ -201,6 +201,8 @@ $(document).ready(function() {
                 <th>Max. suspension duration (day)</th>
                 <th>Renewals allowed (count)</th>
                 <th>Renewal period</th>
+                <th>Renewals allowed for reserved items (count)</th>
+                <th>Renewal period for reserved items</th>
                 <th>No renewal before</th>
                 <th>Automatic renewal</th>
                 <th>No automatic renewal after</th>
@@ -283,6 +285,8 @@ $(document).ready(function() {
                             <td>[% rule.maxsuspensiondays %]</td>
 							<td>[% rule.renewalsallowed %]</td>
                             <td>[% rule.renewalperiod %]</td>
+                            <td>[% rule.reserved_renew_count %]</td>
+                            <td>[% rule.reserved_renew_period %]</td>
                             <td>[% rule.norenewalbefore %]</td>
                             <td>
                                 [% IF ( rule.auto_renew ) %]
@@ -379,6 +383,8 @@ $(document).ready(function() {
                     <td><input type="text" name="maxsuspensiondays" id="maxsuspensiondays" size="3" /> </td>
                     <td><input type="text" name="renewalsallowed" id="renewalsallowed" size="2" /></td>
                     <td><input type="text" name="renewalperiod" id="renewalperiod" size="3" /></td>
+                    <td><input type="text" name="reserved_renew_count" id="reserved_renew_count" size="2" /></td>
+                    <td><input type="text" name="reserved_renew_period" id="reserved_renew_period" size="3" /></td>
                     <td><input type="text" name="norenewalbefore" id="norenewalbefore" size="3" /></td>
                     <td>
                         <select name="auto_renew" id="auto_renew">
@@ -442,6 +448,8 @@ $(document).ready(function() {
                       <th>Max. suspension duration (day)</th>
                       <th>Renewals allowed (count)</th>
                       <th>Renewal period</th>
+                      <th>Renewals allowed for reserved items (count)</th>
+                      <th>Renewal period for reserved items</th>
                       <th>No renewal before</th>
                       <th>Automatic renewal</th>
                       <th>No automatic renewal after</th>

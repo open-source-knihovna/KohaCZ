@@ -133,6 +133,8 @@ elsif ($op eq 'add') {
     my $maxonsiteissueqty  = $input->param('maxonsiteissueqty');
     my $renewalsallowed  = $input->param('renewalsallowed');
     my $renewalperiod    = $input->param('renewalperiod');
+    my $reserved_renew_count = $input->param('reserved_renew_count');
+    my $reserved_renew_period = $input->param('reserved_renew_period');
     my $norenewalbefore  = $input->param('norenewalbefore');
     $norenewalbefore = undef if $norenewalbefore =~ /^\s*$/;
     my $auto_renew = $input->param('auto_renew') eq 'yes' ? 1 : 0;
@@ -178,6 +180,8 @@ elsif ($op eq 'add') {
         maxonsiteissueqty             => $maxonsiteissueqty,
         renewalsallowed               => $renewalsallowed,
         renewalperiod                 => $renewalperiod,
+        reserved_renew_count          => $reserved_renew_count,
+        reserved_renew_period         => $reserved_renew_period,
         norenewalbefore               => $norenewalbefore,
         auto_renew                    => $auto_renew,
         no_auto_renewal_after         => $no_auto_renewal_after,

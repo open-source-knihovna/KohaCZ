@@ -3254,3 +3254,17 @@ span.name {
     margin: auto;
     margin-bottom: 2px;
 }
+
+.reserved-label a, .reserved-label a:visited {
+    font-size: 120%;
+    font-weight: bold;
+    color: red;
+}
+
+tr.reserved-item td {
+    background-color: #c5e5f9;
+}
+
+:tr.reserved-item:nth-child(2n+1) td {
+    background-color: #badaee;
+}

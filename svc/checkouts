@@ -149,6 +149,8 @@ while ( my $c = $sth->fetchrow_hashref() ) {
     my ( $renewals_count, $renewals_allowed, $renewals_remaining, $periodleft ) =
       GetRenewCount( $c->{borrowernumber}, $c->{itemnumber} );
 
+    my ( $resfound, $resrec, undef ) = C4::Reserves::CheckReserves($c->{itemnumber});
+
     my $itemtype = Koha::ItemTypes->find( $item_level_itypes ? $c->{itype} : $c->{itemtype} );
     my $location;
     if ( $c->{location} ) {
@@ -222,6 +224,7 @@ while ( my $c = $sth->fetchrow_hashref() ) {
             cardnumber => $c->{cardnumber},
         },
         issued_today => !$c->{not_issued_today},
+        reserved     => $resfound,
     };
 
     if ( $c->{not_issued_today} ) {

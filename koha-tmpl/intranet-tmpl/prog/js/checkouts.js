@@ -286,6 +286,12 @@ $(document).ready(function() {
                               + "</a>"
                               + onsite_checkout
 
+                        if (oObj.reserved) {
+                            title += "<div><span class='reserved-label'><a href='/cgi-bin/koha/reserve/request.pl?biblionumber="
+                                  + oObj.biblionumber
+                                  + "'>"
+                                  + ON_HOLD + "</a></span></div>";
+                        }
                         return title;
                     },
                     "sType": "anti-the"
@@ -477,6 +483,7 @@ $(document).ready(function() {
 
                 $.getJSON( sSource, aoData, function (json) {
                     fnCallback(json)
+                    $(".reserved-label").parents("tr").addClass("reserved-item");
                 } );
             },
             "fnInitComplete": function(oSettings, json) {
