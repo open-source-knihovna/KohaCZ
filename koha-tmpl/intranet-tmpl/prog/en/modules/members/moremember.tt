@@ -192,7 +192,8 @@ function validate1(date) {
         [% IF age_limitations %]
             [% INCLUDE 'category-out-of-age-limit.inc' %]
         [% END %]
-    </ul>
+     </ul>
+    </div>
     [% END %]
 
     [% IF ( flagged ) %]
