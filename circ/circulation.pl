@@ -325,14 +325,10 @@ if ($patron) {
     }
 
     # Calculate and display patron's age
-    my $age = $patron->get_age;
-
-    my $patroncategory = $patron->category;
-    my ($low,$high) = ($patroncategory->dateofbirthrequired, $patroncategory->upperagelimit);
-    if (($high && ($age > $high)) or ($age < $low)) {
+    if ( !$patron->is_category_valid ) {
         $template->param( age_limitations => 1 );
-        $template->param( age_low => $low );
-        $template->param( age_high => $high );
+        $template->param( age_low => $patron->category->dateofbirthrequired );
+        $template->param( age_high => $patron->category->upperagelimit );
     }
 
 }
