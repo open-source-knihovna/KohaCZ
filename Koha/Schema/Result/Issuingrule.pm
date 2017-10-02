@@ -112,6 +112,11 @@ __PACKAGE__->table("issuingrules");
   data_type: 'integer'
   is_nullable: 1
 
+=head2 maxissuelength
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =head2 lengthunit
 
   data_type: 'varchar'
@@ -215,6 +220,22 @@ __PACKAGE__->table("issuingrules");
   extra: {list => ["no","yes","bib_only","item_only"]}
   is_nullable: 0
 
+=head2 renew_reserved
+
+  data_type: 'tinyint'
+  default_value: 0
+  is_nullable: 1
+
+=head2 reserved_renew_count
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 reserved_renew_period
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -249,6 +270,8 @@ __PACKAGE__->add_columns(
   "maxonsiteissueqty",
   { data_type => "integer", is_nullable => 1 },
   "issuelength",
+  { data_type => "integer", is_nullable => 1 },
+  "maxissuelength",
   { data_type => "integer", is_nullable => 1 },
   "lengthunit",
   {
@@ -294,6 +317,12 @@ __PACKAGE__->add_columns(
     extra => { list => ["no", "yes", "bib_only", "item_only"] },
     is_nullable => 0,
   },
+  "renew_reserved",
+  { data_type => "tinyint", default_value => 0, is_nullable => 1 },
+  "reserved_renew_count",
+  { data_type => "integer", is_nullable => 1 },
+  "reserved_renew_period",
+  { data_type => "integer", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -313,8 +342,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("branchcode", "categorycode", "itemtype");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-04-27 19:15:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:D1443VWPcoIXN3+lIkckIQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-10-02 10:32:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:PaUpUDLYAu/3V012MwjiNw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

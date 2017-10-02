@@ -1488,7 +1488,7 @@ sub GetLoanLength {
     my ( $borrowertype, $itemtype, $branchcode ) = @_;
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare(qq{
-        SELECT issuelength, lengthunit, renewalperiod
+        SELECT issuelength, lengthunit, renewalperiod, reserved_renew_period
         FROM issuingrules
         WHERE   categorycode=?
             AND itemtype=?
@@ -2725,9 +2725,6 @@ sub CanBookBeRenewed {
             }
         }
     }
-    return ( 0, "on_reserve" ) if $resfound;    # '' when no hold was found
-
-    return ( 1, undef ) if $override_limit;
 
     my $branchcode = _GetCircControlBranch( $item, $borrower );
     my $issuing_rule = Koha::IssuingRules->get_effective_issuing_rule(
@@ -2736,6 +2733,11 @@ sub CanBookBeRenewed {
             branchcode   => $branchcode
         }
     );
+
+    return ( 1, undef ) if $override_limit;
+
+    return ( 0, "on_reserve" )
+      if not $issuing_rule or ( $resfound && $issuing_rule->reserved_renew_count <= $itemissue->{renewals} );
 
     return ( 0, "too_many" )
       if not $issuing_rule or $issuing_rule->renewalsallowed <= $itemissue->{renewals};
@@ -2863,6 +2865,8 @@ sub AddRenewal {
 
     return unless ( $issuedata );
 
+    my ( $resfound, $resrec, undef ) = C4::Reserves::CheckReserves($itemnumber);
+
     $borrowernumber ||= $issuedata->{borrowernumber};
 
     if ( defined $datedue && ref $datedue ne 'DateTime' ) {
@@ -2887,7 +2891,7 @@ sub AddRenewal {
         $datedue = (C4::Context->preference('RenewalPeriodBase') eq 'date_due') ?
                                         dt_from_string( $issuedata->{date_due} ) :
                                         DateTime->now( time_zone => C4::Context->tz());
-        $datedue =  CalcDateDue($datedue, $itemtype, _GetCircControlBranch($item, $borrower), $borrower, 'is a renewal');
+        $datedue =  CalcDateDue($datedue, $itemtype, _GetCircControlBranch($item, $borrower), $borrower, 'is a renewal', $resfound);
     }
 
     # Update the issues record to have the new due date, and a new count
@@ -3009,7 +3013,12 @@ sub GetRenewCount {
         }
     );
 
+    my ( $resfound, $resrec, undef ) = C4::Reserves::CheckReserves($itemno);
+
     $renewsallowed = $issuing_rule ? $issuing_rule->renewalsallowed : undef; # FIXME Just replace undef with 0 to get what we expected. But what about the side-effects? TODO LATER
+
+    $renewsallowed = $issuing_rule ? $issuing_rule->reserved_renew_count : $renewsallowed if $resfound;
+
     $renewsleft    = $renewsallowed - $renewcount;
     if($renewsleft < 0){ $renewsleft = 0; }
     return ( $renewcount, $renewsallowed, $renewsleft );
@@ -3482,7 +3491,7 @@ C<$isrenewal> = Boolean: is true if we want to calculate the date due for a rene
 =cut
 
 sub CalcDateDue {
-    my ( $startdate, $itemtype, $branch, $borrower, $isrenewal ) = @_;
+    my ( $startdate, $itemtype, $branch, $borrower, $isrenewal, $isreserved ) = @_;
 
     $isrenewal ||= 0;
 
@@ -3490,9 +3499,15 @@ sub CalcDateDue {
     my $loanlength =
             GetLoanLength( $borrower->{'categorycode'}, $itemtype, $branch );
 
-    my $length_key = ( $isrenewal and defined $loanlength->{renewalperiod} )
-            ? qq{renewalperiod}
-            : qq{issuelength};
+    my $length_key;
+    if ( $isrenewal and $isreserved ) {
+        $length_key = defined $loanlength->{reserved_renew_period} ? qq{reserved_renew_period} : 
+            ( defined $loanlength->{renewalperiod} ? qq{renewalperiod} : qq{issuelength} );
+    } elsif ( $isrenewal ) {
+        $length_key =  defined $loanlength->{renewalperiod} ? qq{renewalperiod} : qq{issuelength};
+    } else {
+        $length_key =  qq{issuelength};
+    }
 
     my $datedue;
     if ( $startdate ) {

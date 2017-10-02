@@ -3008,3 +3008,13 @@ fieldset.rows + fieldset.action {
 #patron_search #filters {
     display: none;
 }
+
+.reserved-label a, .reserved-label a:visited {
+    font-size: 120%;
+    font-weight: bold;
+    color: red;
+}
+
+tr.reserved-item td {
+    background-color: #c5e5f9;
+}
