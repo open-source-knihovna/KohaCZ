@@ -24,11 +24,14 @@ use Koha::Patrons;
 sub list {
     my ($c, $args, $cb) = @_;
 
-    my $user = $c->stash('koha.user');
+    my $params = $c->req->query_params->to_hash;
+    my @valid_params = Koha::Patrons->_resultset->result_source->columns;
+    foreach my $key (keys %$params) {
+        delete $params->{$key} unless grep { $key eq $_ } @valid_params;
+    }
+    my $patrons = Koha::Patrons->search($params);
 
-    my $patrons = Koha::Patrons->search;
-
-    $c->$cb($patrons, 200);
+    return $c->$cb($patrons, 200);
 }
 
 sub get {
