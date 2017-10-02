@@ -199,6 +199,13 @@ if (
     # fines by manually tweaking form parameters
     undef $exemptfine;
 }
+
+if (C4::Context->preference("AutoSwitchPatronReturn") && $barcode) {
+    if (Koha::Patrons->search( { cardnumber => $barcode} )->count() > 0) {
+        print $query->redirect("/cgi-bin/koha/circ/circulation.pl?findborrower=$barcode&amp;autoswitched=1");
+    }
+}
+
 my $dropboxmode = $query->param('dropboxmode');
 my $dotransfer  = $query->param('dotransfer');
 my $canceltransfer = $query->param('canceltransfer');
