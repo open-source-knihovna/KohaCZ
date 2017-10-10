@@ -282,6 +282,42 @@ sub borrower {
     return $self->{_borrower};
 }
 
+=head3 borrowers_to_satisfy
+
+Returns Koha::Patron objects able to return item to satisfy this Hold
+
+=cut
+
+sub borrowers_to_satisfy {
+    my ($self) = @_;
+
+    my @items = ();
+    if ( my $item = $self->item() ) {
+        push ( @items, $item );
+    }
+    elsif ( my $biblio = $self->biblio() ) {
+        push ( @items, $biblio->items() );
+    }
+
+    my $library = C4::Context->preference("NotifyToReturnItemFromLibrary");
+    my @patrons = ();
+    foreach my $item ( @items ) {
+
+        next unless $item->checkout();
+
+        my $patron = $item->checkout()->patron();
+        if ( ( ($library eq 'RequestorLibrary') && ($patron->branchcode eq $self->borrower()->branchcode) )
+             || ( ($library eq 'ItemHomeLibrary') && ($item->homebranch eq $self->borrower()->branchcode) )
+             || ( $library eq 'AnyLibrary' ) ) {
+
+            push ( @patrons, $patron );
+        }
+    }
+
+    return @patrons;
+}
+
+
 =head3 is_suspended
 
 my $bool = $hold->is_suspended();

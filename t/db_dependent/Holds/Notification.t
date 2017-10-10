@@ -23,10 +23,8 @@ use Test::More tests => 5;
 use t::lib::TestBuilder;
 use t::lib::Mocks;
 
-use C4::Reserves qw( GetBorrowersToSatisfyHold );
 use Koha::Database;
 use Koha::Holds;
-use Data::Dumper;
 
 my $schema = Koha::Database->new->schema;
 $schema->storage->txn_begin;
@@ -149,18 +147,18 @@ my $hold = Koha::Hold->new(
 my @borrowers;
 
 t::lib::Mocks::mock_preference('NotifyToReturnItemFromLibrary', 'AnyLibrary'); # Assuming items from any library
-@borrowers = GetBorrowersToSatisfyHold($hold);
+@borrowers = $hold->borrowers_to_satisfy();
 is(scalar(grep {defined $_} @borrowers), 2, "2 borrowers with requested item found in any library");
 
 t::lib::Mocks::mock_preference('NotifyToReturnItemFromLibrary', 'RequestorLibrary'); # Assuming items from requestor library
-@borrowers = GetBorrowersToSatisfyHold($hold);
+@borrowers = $hold->borrowers_to_satisfy();
 is(scalar(grep {defined $_} @borrowers), 1, "1 item found in requestor library");
-is($borrowers[0]->{cardnumber}, "002", "   ...and it is in 002's hands");
+is($borrowers[0]->cardnumber, "002", "   ...and it is in 002's hands");
 
 t::lib::Mocks::mock_preference('NotifyToReturnItemFromLibrary', 'ItemHomeLibrary'); # Assuming items from the same library as requested item
-@borrowers = GetBorrowersToSatisfyHold($hold);
+@borrowers = $hold->borrowers_to_satisfy();
 is(scalar(grep {defined $_} @borrowers), 1, "1 item found in the same library as the requested item");
-is($borrowers[0]->{cardnumber}, "003", "   ...and it is in 003's hands");
+is($borrowers[0]->cardnumber, "003", "   ...and it is in 003's hands");
 
 $schema->storage->txn_rollback;
 
