@@ -1,6 +1,6 @@
-package Koha::Subscription;
+package Koha::Acquisition::Basket;
 
-# Copyright ByWater Solutions 2015
+# Copyright 2017 Aleisha Amohia <aleisha@catalyst.net.nz>
 #
 # This file is part of Koha.
 #
@@ -19,16 +19,13 @@ package Koha::Subscription;
 
 use Modern::Perl;
 
-use Carp;
-
 use Koha::Database;
-use Koha::Biblios;
 
-use base qw(Koha::Object);
+use base qw( Koha::Object );
 
 =head1 NAME
 
-Koha::Subscription - Koha Subscription Object class
+Koha::Acquisition::Basket - Koha Basket Object class
 
 =head1 API
 
@@ -36,29 +33,45 @@ Koha::Subscription - Koha Subscription Object class
 
 =cut
 
-=head3 biblio
+=head3 bookseller
 
-Returns the biblio linked to this subscription as a Koha::Biblio object
+Returns the vendor
 
 =cut
 
-sub biblio {
+sub bookseller {
     my ($self) = @_;
-
-    return scalar Koha::Biblios->find($self->biblionumber);
+    my $bookseller_rs = $self->_result->booksellerid;
+    return Koha::Acquisition::Bookseller->_new_from_dbic( $bookseller_rs );
 }
 
-=head3 type
+
+=head3 effective_create_items
+
+Returns C<create_items> for this basket, falling back to C<AcqCreateItem> if unset.
+
+=cut
+
+sub effective_create_items {
+    my ( $self ) = @_;
+
+    return $self->create_items || C4::Context->preference('AcqCreateItem');
+}
+
+=head2 Internal methods
+
+=head3 _type
 
 =cut
 
 sub _type {
-    return 'Subscription';
+    return 'Aqbasket';
 }
 
 =head1 AUTHOR
 
-Kyle M Hall <kyle@bywatersolutions.com>
+Aleisha Amohia <aleisha@catalyst.net.nz>
+Catalyst IT
 
 =cut
 

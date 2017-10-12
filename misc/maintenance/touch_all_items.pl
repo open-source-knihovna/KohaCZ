@@ -79,7 +79,8 @@ $sth_fetch->execute();
 # fetch info from the search
 while (my ($biblionumber, $itemnumber, $itemcallnumber) = $sth_fetch->fetchrow_array){
    
-  my $modok = ModItem({itemcallnumber => $itemcallnumber}, $biblionumber, $itemnumber);
+  eval { ModItem({itemcallnumber => $itemcallnumber}, $biblionumber, $itemnumber); };
+  my $modok = $@ ? 0 : 1;
 
   if ($modok) {
      $goodcount++;
@@ -98,7 +99,7 @@ my $endtime = time();
 my $time = $endtime-$startime;
 my $accuracy = ($goodcount / $totalcount) * 100; # this is a percentage
 my $averagetime = 0;
-unless ($time == 0) {$averagetime = $totalcount / $time;};
+$averagetime = $time / $totalcount if $totalcount;
 print "Good: $goodcount, Bad: $badcount (of $totalcount) in $time seconds\n";
 printf "Accuracy: %.2f%%\nAverage time per record: %.6f seconds\n", $accuracy, $averagetime if (defined $verbose);
 

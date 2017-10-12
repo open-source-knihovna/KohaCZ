@@ -1,6 +1,6 @@
-package Koha::Subscription;
+package Koha::Acquisition::Baskets;
 
-# Copyright ByWater Solutions 2015
+# Copyright 2017 Aleisha Amohia <aleisha@catalyst.net.nz>
 #
 # This file is part of Koha.
 #
@@ -19,46 +19,39 @@ package Koha::Subscription;
 
 use Modern::Perl;
 
-use Carp;
-
 use Koha::Database;
-use Koha::Biblios;
+use Koha::Acquisition::Basket;
 
-use base qw(Koha::Object);
+use base qw( Koha::Objects );
 
 =head1 NAME
 
-Koha::Subscription - Koha Subscription Object class
+Koha::Acquisition::Baskets - Koha Baskets object set class
 
 =head1 API
 
-=head2 Class Methods
+=head2 Internal methods
 
-=cut
-
-=head3 biblio
-
-Returns the biblio linked to this subscription as a Koha::Biblio object
-
-=cut
-
-sub biblio {
-    my ($self) = @_;
-
-    return scalar Koha::Biblios->find($self->biblionumber);
-}
-
-=head3 type
+=head3 _type
 
 =cut
 
 sub _type {
-    return 'Subscription';
+    return 'Aqbasket';
+}
+
+=head3 object_class
+
+=cut
+
+sub object_class {
+    return 'Koha::Acquisition::Basket';
 }
 
 =head1 AUTHOR
 
-Kyle M Hall <kyle@bywatersolutions.com>
+Aleisha Amohia <aleisha@catalyst.net.nz>
+Catalyst IT
 
 =cut
 

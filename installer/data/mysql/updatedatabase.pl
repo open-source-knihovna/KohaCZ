@@ -14866,6 +14866,70 @@ if ( CheckVersion($DBversion) ) {
     print "Upgrade to $DBversion done (Bug 13912 - System preference for default place of publication (country code) for field 008, range 15-17)\n";
 }
 
+$DBversion = '17.06.00.011';
+if ( CheckVersion($DBversion) ) {
+    # Drop index that might exist because of bug 5337
+    if( index_exists('biblioitems', 'ean')) {
+        $dbh->do(q{ ALTER TABLE biblioitems DROP INDEX ean });
+    }
+    if( index_exists('deletedbiblioitems', 'ean')) {
+        $dbh->do(q{ ALTER TABLE deletedbiblioitems DROP INDEX ean });
+    }
+
+    # Change data type of column
+    $dbh->do(q{ ALTER TABLE biblioitems MODIFY COLUMN ean MEDIUMTEXT default NULL });
+    $dbh->do(q{ ALTER TABLE deletedbiblioitems MODIFY COLUMN ean MEDIUMTEXT default NULL });
+
+    # Add indexes
+    $dbh->do(q{ ALTER TABLE biblioitems ADD INDEX ean ( ean(255) )});
+    $dbh->do(q{ ALTER TABLE deletedbiblioitems ADD INDEX ean ( ean(255 ) )});
+
+    SetVersion($DBversion);
+    print "Upgrade to $DBversion done (Bug 13766 - Make ean mediumtext and add ean indexes)\n";
+}
+
+$DBversion = '17.06.00.012';
+if( CheckVersion( $DBversion ) ) {
+    my $where = q|host='clio-db.cc.columbia.edu' AND port=7090|;
+    my $sql = "SELECT COUNT(*) FROM z3950servers WHERE $where";
+    my ( $cnt ) = $dbh->selectrow_array( $sql );
+    if( $cnt ) {
+        $dbh->do( "DELETE FROM z3950servers WHERE $where" );
+        print "Removed $cnt Z39.50 target(s) for Columbia University\n";
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 19043 - Z39.50 target for Columbia University is no longer publicly available.)\n";
+}
+
+$DBversion = '17.06.00.013';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do( "UPDATE systempreferences SET value = CONCAT('http://', value) WHERE variable = 'staffClientBaseURL' AND value <> '' AND value NOT LIKE 'http%'" );
+
+    my ( $staffClientBaseURL_used_in_notices ) = $dbh->selectrow_array(q|
+        SELECT COUNT(*) FROM letter where content like "%staffClientBaseURL%"
+    |);
+    if ( $staffClientBaseURL_used_in_notices ) {
+        warn "\tYou may need to update one or more notice templates if they contain 'staffClientBaseURL'\n";
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 16401 - fix potentialy bad set staffClientBaseURL preference)\n";
+}
+
+$DBversion = '17.06.00.014';
+if( CheckVersion( $DBversion ) ) {
+    unless( column_exists('aqbasket','create_items') ){
+        $dbh->do(q{
+            ALTER TABLE aqbasket
+                ADD COLUMN create_items ENUM('ordering', 'receiving', 'cataloguing') default NULL AFTER is_standing
+        });
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 15685 - Allow creation of items (AcqCreateItem) to be customizable per-basket)\n";
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.

@@ -74,6 +74,7 @@ use C4::Suggestions;
 use C4::Koha;
 
 use Koha::Acquisition::Booksellers;
+use Koha::Acquisition::Orders;
 use Koha::DateUtils qw( dt_from_string );
 use Koha::ItemTypes;
 use Koha::Patrons;
@@ -111,6 +112,7 @@ unless ( $results and @$results) {
 
 # prepare the form for receiving
 my $order = $results->[0];
+my $basket = Koha::Acquisition::Orders->find( $ordernumber )->basket;
 
 # Check if ACQ framework exists
 my $acq_fw = GetMarcStructure( 1, 'ACQ', { unsafe => 1 } );
@@ -118,7 +120,7 @@ unless($acq_fw) {
     $template->param('NoACQframework' => 1);
 }
 
-my $AcqCreateItem = C4::Context->preference('AcqCreateItem');
+my $AcqCreateItem = $basket->effective_create_items;
 if ($AcqCreateItem eq 'receiving') {
     $template->param(
         AcqCreateItemReceiving => 1,

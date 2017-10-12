@@ -19,6 +19,7 @@ use Modern::Perl;
 
 use Carp qw( croak );
 
+use Koha::Acquisition::Baskets;
 use Koha::Database;
 use Koha::DateUtils qw( dt_from_string output_pref );
 
@@ -30,7 +31,7 @@ Koha::Acquisition::Order Object class
 
 =head1 API
 
-=head2 Class Methods
+=head2 Class methods
 
 =head3 new
 
@@ -98,9 +99,23 @@ sub add_item {
     $rs->create({ ordernumber => $self->ordernumber, itemnumber => $itemnumber });
 }
 
+=head3 basket
+
+    my $basket = Koha::Acquisition::Orders->find( $id )->basket;
+
+Returns the basket associated to the order.
+
+=cut
+
+sub basket {
+    my ( $self )  = @_;
+    my $basket_rs = $self->_result->basketno;
+    return Koha::Acquisition::Basket->_new_from_dbic( $basket_rs );
+}
+
 =head2 Internal methods
 
-=head3 _type (internal)
+=head3 _type
 
 =cut
 

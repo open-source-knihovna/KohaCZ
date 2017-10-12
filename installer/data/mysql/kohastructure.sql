@@ -168,7 +168,7 @@ CREATE TABLE `biblioitems` ( -- information related to bibliographic records in 
   `itemtype` varchar(10) default NULL, -- biblio level item type (MARC21 942$c)
   `isbn` mediumtext, -- ISBN (MARC21 020$a)
   `issn` mediumtext, -- ISSN (MARC21 022$a)
-  `ean` varchar(13) default NULL,
+  `ean` mediumtext default NULL,
   `publicationyear` text,
   `publishercode` varchar(255) default NULL, -- publisher (MARC21 260$b)
   `volumedate` date default NULL,
@@ -199,6 +199,7 @@ CREATE TABLE `biblioitems` ( -- information related to bibliographic records in 
   KEY `itemtype_idx` (`itemtype`),
   KEY `isbn` (`isbn`(255)),
   KEY `issn` (`issn`(255)),
+  KEY `ean` (`ean`(255)),
   KEY `publishercode` (`publishercode`),
   KEY `timestamp` (`timestamp`),
   CONSTRAINT `biblioitems_ibfk_1` FOREIGN KEY (`biblionumber`) REFERENCES `biblio` (`biblionumber`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -525,7 +526,7 @@ CREATE TABLE `deletedbiblioitems` ( -- information about bibliographic records t
   `itemtype` varchar(10) default NULL, -- biblio level item type (MARC21 942$c)
   `isbn` mediumtext default NULL, -- ISBN (MARC21 020$a)
   `issn` mediumtext default NULL, -- ISSN (MARC21 022$a)
-  `ean` varchar(13) default NULL,
+  `ean` mediumtext default NULL,
   `publicationyear` text,
   `publishercode` varchar(255) default NULL, -- publisher (MARC21 260$b)
   `volumedate` date default NULL,
@@ -555,6 +556,7 @@ CREATE TABLE `deletedbiblioitems` ( -- information about bibliographic records t
   KEY `bibnoidx` (`biblionumber`),
   KEY `itemtype_idx` (`itemtype`),
   KEY `isbn` (`isbn`(255)),
+  KEY `ean` (`ean`(255)),
   KEY `publishercode` (`publishercode`),
   KEY `timestamp` (`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -3029,6 +3031,7 @@ CREATE TABLE `aqbasket` ( -- stores data about baskets in acquisitions
   `billingplace` varchar(10) default NULL, -- basket billing place
   branch varchar(10) default NULL, -- basket branch
   is_standing TINYINT(1) NOT NULL DEFAULT 0, -- orders in this basket are standing
+  create_items ENUM('ordering', 'receiving', 'cataloguing') default NULL, -- when items should be created for orders in this basket
   PRIMARY KEY  (`basketno`),
   KEY `booksellerid` (`booksellerid`),
   KEY `basketgroupid` (`basketgroupid`),
