@@ -195,7 +195,7 @@ foreach my $item (@items){
         }
     }
 
-    $item->{reservescount} = GetReserveCountFromItemnumber($item->{itemnumber});
+    $item->{reservescount} = C4::Reserves::GetReserveCountFromItemnumber($item->{itemnumber});
 }
 
 my $mss = Koha::MarcSubfieldStructures->search({ frameworkcode => $fw, kohafield => 'items.itemlost', authorised_value => { not => undef } });
