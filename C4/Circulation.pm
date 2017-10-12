@@ -720,7 +720,8 @@ sub CanBookBeIssued {
     #
     # BORROWER STATUS
     #
-    if ( $borrower->{'category_type'} eq 'X' && (  $item->{barcode}  )) { 
+    my $patron = Koha::Patrons->find( $borrower->{borrowernumber} );
+    if ( $patron->category->category_type eq 'X' && (  $item->{barcode}  )) {
     	# stats only borrower -- add entry to statistics table, and return issuingimpossible{STATS} = 1  .
         &UpdateStats({
                      branch => C4::Context->userenv->{'branch'},
@@ -814,7 +815,7 @@ sub CanBookBeIssued {
         $alerts{OTHER_CHARGES} = sprintf( "%.2f", $other_charges );
     }
 
-    my $patron = Koha::Patrons->find( $borrower->{borrowernumber} );
+    $patron = Koha::Patrons->find( $borrower->{borrowernumber} );
     if ( my $debarred_date = $patron->is_debarred ) {
          # patron has accrued fine days or has a restriction. $count is a date
         if ($debarred_date eq '9999-12-31') {
@@ -833,6 +834,56 @@ sub CanBookBeIssued {
         }
     }
 
+    #
+    # CHECK IF BOOK ALREADY ISSUED TO THIS BORROWER
+    #
+    if ( $issue && $issue->borrowernumber eq $borrower->{'borrowernumber'} ){
+
+        # Already issued to current borrower.
+        # If it is an on-site checkout if it can be switched to a normal checkout
+        # or ask whether the loan should be renewed
+
+        if ( $issue->onsite_checkout
+                and C4::Context->preference('SwitchOnSiteCheckouts') ) {
+            $messages{ONSITE_CHECKOUT_WILL_BE_SWITCHED} = 1;
+        } else {
+            my ($CanBookBeRenewed,$renewerror) = CanBookBeRenewed(
+                $borrower->{'borrowernumber'},
+                $item->{'itemnumber'},
+            );
+            if ( $CanBookBeRenewed == 0 ) {    # no more renewals allowed
+                if ( $renewerror eq 'onsite_checkout' ) {
+                    $issuingimpossible{NO_RENEWAL_FOR_ONSITE_CHECKOUTS} = 1;
+                }
+                else {
+                    $issuingimpossible{NO_MORE_RENEWALS} = 1;
+                }
+            }
+            else {
+                $needsconfirmation{RENEW_ISSUE} = 1;
+            }
+        }
+    }
+    elsif ( $issue ) {
+
+        # issued to someone else
+
+        my $patron = Koha::Patrons->find( $issue->borrowernumber );
+
+        my ( $can_be_returned, $message ) = CanBookBeReturned( $item, C4::Context->userenv->{branch} );
+
+        unless ( $can_be_returned ) {
+            $issuingimpossible{RETURN_IMPOSSIBLE} = 1;
+            $issuingimpossible{branch_to_return} = $message;
+        } else {
+            $needsconfirmation{ISSUED_TO_ANOTHER} = 1;
+            $needsconfirmation{issued_firstname} = $patron->firstname;
+            $needsconfirmation{issued_surname} = $patron->surname;
+            $needsconfirmation{issued_cardnumber} = $patron->cardnumber;
+            $needsconfirmation{issued_borrowernumber} = $patron->borrowernumber;
+        }
+    }
+
     # JB34 CHECKS IF BORROWERS DON'T HAVE ISSUE TOO MANY BOOKS
     #
     my $switch_onsite_checkout = (
@@ -842,7 +893,7 @@ sub CanBookBeIssued {
       and $issue->borrowernumber == $borrower->{'borrowernumber'} ? 1 : 0 );
     my $toomany = TooMany( $borrower, $item->{biblionumber}, $item, { onsite_checkout => $onsite_checkout, switch_onsite_checkout => $switch_onsite_checkout, } );
     # if TooMany max_allowed returns 0 the user doesn't have permission to check out this book
-    if ( $toomany ) {
+    if ( $toomany && not exists $needsconfirmation{RENEW_ISSUE} ) {
         if ( $toomany->{max_allowed} == 0 ) {
             $needsconfirmation{PATRON_CANT} = 1;
         }
@@ -940,56 +991,6 @@ sub CanBookBeIssued {
         my ($rentalCharge) = GetIssuingCharges( $item->{'itemnumber'}, $borrower->{'borrowernumber'} );
         if ( $rentalCharge > 0 ){
             $needsconfirmation{RENTALCHARGE} = $rentalCharge;
-        }
-    }
-
-    #
-    # CHECK IF BOOK ALREADY ISSUED TO THIS BORROWER
-    #
-    if ( $issue && $issue->borrowernumber eq $borrower->{'borrowernumber'} ){
-
-        # Already issued to current borrower.
-        # If it is an on-site checkout if it can be switched to a normal checkout
-        # or ask whether the loan should be renewed
-
-        if ( $issue->onsite_checkout
-                and C4::Context->preference('SwitchOnSiteCheckouts') ) {
-            $messages{ONSITE_CHECKOUT_WILL_BE_SWITCHED} = 1;
-        } else {
-            my ($CanBookBeRenewed,$renewerror) = CanBookBeRenewed(
-                $borrower->{'borrowernumber'},
-                $item->{'itemnumber'},
-            );
-            if ( $CanBookBeRenewed == 0 ) {    # no more renewals allowed
-                if ( $renewerror eq 'onsite_checkout' ) {
-                    $issuingimpossible{NO_RENEWAL_FOR_ONSITE_CHECKOUTS} = 1;
-                }
-                else {
-                    $issuingimpossible{NO_MORE_RENEWALS} = 1;
-                }
-            }
-            else {
-                $needsconfirmation{RENEW_ISSUE} = 1;
-            }
-        }
-    }
-    elsif ( $issue ) {
-
-        # issued to someone else
-
-        my $patron = Koha::Patrons->find( $issue->borrowernumber );
-
-        my ( $can_be_returned, $message ) = CanBookBeReturned( $item, C4::Context->userenv->{branch} );
-
-        unless ( $can_be_returned ) {
-            $issuingimpossible{RETURN_IMPOSSIBLE} = 1;
-            $issuingimpossible{branch_to_return} = $message;
-        } else {
-            $needsconfirmation{ISSUED_TO_ANOTHER} = 1;
-            $needsconfirmation{issued_firstname} = $patron->firstname;
-            $needsconfirmation{issued_surname} = $patron->surname;
-            $needsconfirmation{issued_cardnumber} = $patron->cardnumber;
-            $needsconfirmation{issued_borrowernumber} = $patron->borrowernumber;
         }
     }
 
@@ -2174,9 +2175,6 @@ sub MarkIssueReturned {
 
         # Create the old_issues entry
         my $old_checkout = Koha::Old::Checkout->new($issue->unblessed)->store;
-
-        # Update the fines
-        $dbh->do(q|UPDATE accountlines SET issue_id = ? WHERE issue_id = ?|, undef, $old_checkout->issue_id, $issue->issue_id);
 
         # anonymise patron checkout immediately if $privacy set to 2 and AnonymousPatron is set to a valid borrowernumber
         if ( $privacy == 2) {

@@ -732,7 +732,11 @@ sub CheckReserves {
         my $priority = 10000000;
         foreach my $res (@reserves) {
             if ( $res->{'itemnumber'} == $itemnumber && $res->{'priority'} == 0) {
-                return ( "Waiting", $res, \@reserves ); # Found it
+                if ($res->{'found'} eq 'W') {
+                    return ( "Waiting", $res, \@reserves ); # Found it, it is waiting
+                } else {
+                    return ( "Reserved", $res, \@reserves ); # Found determinated hold, e. g. the tranferred one
+                }
             } else {
                 my $patron;
                 my $iteminfo;
@@ -792,19 +796,16 @@ Cancels all reserves with an expiration date from before today.
 =cut
 
 sub CancelExpiredReserves {
-
     my $today = dt_from_string();
     my $cancel_on_holidays = C4::Context->preference('ExpireReservesOnHolidays');
-
-    my $dbh = C4::Context->dbh;
+    my $expireWaiting = C4::Context->preference('ExpireReservesMaxPickUpDelay');
 
     my $dtf = Koha::Database->new->schema->storage->datetime_parser;
+    my $params = { expirationdate => { '<', $dtf->format_date($today) } };
+    $params->{found} = undef unless $expireWaiting;
+
     # FIXME To move to Koha::Holds->search_expired (?)
-    my $holds = Koha::Holds->search(
-        {
-            expirationdate => { '<', $dtf->format_date($today) }
-        }
-    );
+    my $holds = Koha::Holds->search( $params );
 
     while ( my $hold = $holds->next ) {
         my $calendar = Koha::Calendar->new( branchcode => $hold->branchcode );
@@ -816,7 +817,6 @@ sub CancelExpiredReserves {
             $cancel_params->{charge_cancel_fee} = 1;
         }
         $hold->cancel( $cancel_params );
-
     }
 }
 

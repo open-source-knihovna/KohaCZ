@@ -89,12 +89,12 @@ $(document).ready(function() {
             <li>
                 <span class="label">Category</span>
                 <input type="hidden" name="op" value="add" />
-                <input type="hidden" name="category" value="[% category %]" /> [% category %]
+                <input type="hidden" name="category" value="[% category | html %]" /> [% category | html %]
             </li>
         <li>
             <label for="authorised_value">Authorized value: </label>
             [% IF ( action_modify ) %]<input type="hidden" id="id" name="id" value="[% id %]" />[% END %]
-            <input type="text" id="authorised_value" name="authorised_value" value="[% authorised_value %]" maxlength="80" class="focus" />
+            <input type="text" id="authorised_value" name="authorised_value" value="[% authorised_value | html %]" maxlength="80" class="focus" />
         </li>
         <li>
             <label for="lib">Description: </label>
@@ -109,9 +109,9 @@ $(document).ready(function() {
                 <option value="">All libraries</option>
                 [% FOREACH branch IN branches_loop %]
                   [% IF ( branch.selected ) %]
-                    <option selected="selected" value="[% branch.branchcode %]">[% branch.branchname %]</option>
+                    <option selected="selected" value="[% branch.branchcode %]">[% branch.branchname |html %]</option>
                   [% ELSE %]
-                    <option value="[% branch.branchcode %]">[% branch.branchname %]</option>
+                    <option value="[% branch.branchcode %]">[% branch.branchname |html %]</option>
                   [% END %]
                 [% END %]
             </select>
@@ -156,7 +156,7 @@ $(document).ready(function() {
         [% END %]
         </fieldset>
        <fieldset class="action"> <input type="hidden" name="id" value="[% id %]" />
-        <input type="submit" value="Save" /> <a class="cancel" href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=[% category %]">Cancel</a></fieldset>
+        <input type="submit" value="Save" /> <a class="cancel" href="/cgi-bin/koha/admin/authorised_values.pl?searchfield=[% category | url %]">Cancel</a></fieldset>
     </form>
 [% END %]
 
@@ -164,7 +164,7 @@ $(document).ready(function() {
 [% IF op == 'list' %]
 
 <div id="toolbar" class="btn-toolbar">
-    <a id="addauth" class="btn btn-default btn-sm" href= "/cgi-bin/koha/admin/authorised_values.pl?op=add_form&amp;category=[% category %]"><i class="fa fa-plus"> </i> New authorized value for [% category %]</a>
+    <a id="addauth" class="btn btn-default btn-sm" href= "/cgi-bin/koha/admin/authorised_values.pl?op=add_form&amp;category=[% category | url %]"><i class="fa fa-plus"> </i> New authorized value for [% category |html %]</a>
     <a id="addcat" class="btn btn-default btn-sm" href= "/cgi-bin/koha/admin/authorised_values.pl?op=add_form"><i class="fa fa-plus"> </i> New category</a>
 </div>
 
@@ -207,9 +207,9 @@ $(document).ready(function() {
   <select name="searchfield" id="searchfield" size="1">
   [% FOR c IN categories %]
     [% IF c == searchfield %]
-      <option value="[% c %]" selected="selected">[% c %]</option>
+      <option value="[% c %]" selected="selected">[% c |html %]</option>
     [% ELSE %]
-      <option value="[% c %]">[% c %]</option>
+      <option value="[% c %]">[% c |html %]</option>
     [% END %]
   [% END %]
   <input type="submit" value="Submit" />
@@ -250,7 +250,7 @@ $(document).ready(function() {
  [% IF ( category == 'NOT_LOAN' ) %]
     <p>Statuses to describe why an item is not for loan</p>
  [% END %]
-<h3>Authorized values for category [% category %]:</h3>
+<h3>Authorized values for category [% category |html %]:</h3>
 
 [% IF ( loop ) %]<div id="pagertable_authorized_values">
 </div>[% END %]
@@ -271,9 +271,9 @@ $(document).ready(function() {
 [% ELSE %]
 <tr>
 [% END %]
-	<td>[% loo.authorised_value %]</td>
-	<td>[% loo.lib %]</td>
-	<td>[% loo.lib_opac %]</td>
+	<td>[% loo.authorised_value | html %]</td>
+    <td>[% loo.lib |html %]</td>
+    <td>[% loo.lib_opac |html %]</td>
 	<td>[% IF ( loo.imageurl ) %]<img src="[% loo.imageurl %]" alt=""/>[% ELSE %]&nbsp;[% END %]</td>
     <td>
         [% IF loo.branches.size > 0 %]
@@ -292,16 +292,16 @@ $(document).ready(function() {
         [% END %]
     </td>
     <td class="actions"><a href="/cgi-bin/koha/admin/authorised_values.pl?op=add_form&amp;id=[% loo.id %]" class="btn btn-default btn-xs"><i class="fa fa-pencil"></i> Edit</a>
-    <a class="delete btn btn-default btn-xs" href="/cgi-bin/koha/admin/authorised_values.pl?op=delete&amp;searchfield=[% searchfield %]&amp;id=[% loo.id %]"><i class="fa fa-trash"></i> Delete</a></td>
+    <a class="delete btn btn-default btn-xs" href="/cgi-bin/koha/admin/authorised_values.pl?op=delete&amp;searchfield=[% searchfield | url %]&amp;id=[% loo.id %]"><i class="fa fa-trash"></i> Delete</a></td>
 </tr>
 [% END %]
 </tbody></table>[% ELSE %]
-<div class="dialog message">There are no authorized values defined for [% category %]</div>
+<div class="dialog message">There are no authorized values defined for [% category |html %]</div>
 [% END %]
 
 [% IF ( isprevpage ) %]
 <form class="inline" action="/cgi-bin/koha/admin/authorised_values.pl" method="post">
-<input type="hidden" name="searchfield" value="[% searchfield %]" />
+<input type="hidden" name="searchfield" value="[% searchfield | html %]" />
 	<input type="submit" value="&lt;&lt; Previous" /></form>
 [% END %] 
 

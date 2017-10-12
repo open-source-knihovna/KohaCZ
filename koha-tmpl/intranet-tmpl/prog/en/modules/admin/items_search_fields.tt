@@ -27,7 +27,7 @@
 
           [% IF field_added %]
             <div class="dialog message">
-              Field successfully added: [% field_added.label %]
+              Field successfully added: [% field_added.label |html %]
             </div>
           [% ELSIF field_not_added %]
             <div class="dialog alert">
@@ -71,14 +71,14 @@
                     <tbody>
                       [% FOREACH field IN fields %]
                         <tr>
-                          <td>[% field.name %]</td>
-                          <td>[% field.label %]</td>
+                          <td>[% field.name |html %]</td>
+                          <td>[% field.label |html %]</td>
                           <td>[% field.tagfield %]</td>
                           <td>[% field.tagsubfield %]</td>
                           <td>[% field.authorised_values_category %]</td>
                           <td>
-                            <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/items_search_field.pl?name=[% field.name %]" title="Edit [% field.name %] field"><i class="fa fa-pencil"></i> Edit</a>
-                            <a class="field-delete btn btn-default btn-xs" href="/cgi-bin/koha/admin/items_search_fields.pl?op=del&name=[% field.name %]"><i class="fa fa-trash"></i> Delete</a>
+                            <a class="btn btn-default btn-xs" href="/cgi-bin/koha/admin/items_search_field.pl?name=[% field.name |html %]" title="Edit [% field.name |html %] field"><i class="fa fa-pencil"></i> Edit</a>
+                            <a class="field-delete btn btn-default btn-xs" href="/cgi-bin/koha/admin/items_search_fields.pl?op=del&name=[% field.name |html %]"><i class="fa fa-trash"></i> Delete</a>
                           </td>
                         </tr>
                       [% END %]
