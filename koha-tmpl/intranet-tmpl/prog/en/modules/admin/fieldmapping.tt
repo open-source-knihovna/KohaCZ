@@ -24,18 +24,18 @@ $(document).ready(function() {
 	<div id="yui-main">
 		<div class="yui-b">
             <h2>Keyword to MARC mapping</h2>
-			[% UNLESS ( fields ) %]
-            <div class="dialog message"><p>There are no mappings for the [% IF framework.frameworktext %]<em>[% framework.frameworktext %]</em>[% ELSE %]default[% END %] framework. </p></div>
-			[% END %]
+            [% UNLESS ( fields.count ) %]
+                <div class="dialog message"><p>There are no mappings for the [% IF framework.frameworktext %]<em>[% framework.frameworktext |html %]</em>[% ELSE %]default[% END %] framework. </p></div>
+            [% END %]
 			<form method="get" action="/cgi-bin/koha/admin/fieldmapping.pl" id="selectframework">
 				<label for="framework">Framework:</label>
                 <select name="framework" id="framework" style="width:20em;">
                     <option value="">Default</option>
                 [% FOREACH f IN frameworks %]
                     [% IF f.frameworkcode == framework.frameworkcode %]
-                    <option selected="selected" value="[% f.frameworkcode %]">[% f.frameworktext %]</option>
+                    <option selected="selected" value="[% f.frameworkcode %]">[% f.frameworktext |html %]</option>
                     [% ELSE %]
-                    <option value="[% f.frameworkcode %]">[% f.frameworktext %]</option>
+                    <option value="[% f.frameworkcode %]">[% f.frameworktext |html %]</option>
                     [% END %]
                 [% END %]
                 </select>
@@ -68,7 +68,7 @@ $(document).ready(function() {
 									</tr>
 									[% FOREACH field IN fields %]
 									<tr>
-										<td>[% field.field %]</td>
+                                        <td>[% field.field |html %]</td>
 										<td>[% field.fieldcode %]</td>
 										<td>[% field.subfieldcode %]</td>
                                         <td><a class="btn btn-mini" href="?op=delete&amp;id=[% field.id %]&amp;framework=[% field.framework %]"><i class="fa fa-trash"></i> Delete</a></td>

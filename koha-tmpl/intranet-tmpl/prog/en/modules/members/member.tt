@@ -114,7 +114,7 @@ var dtMemberResults;
 var search = 1;
 $(document).ready(function() {
     [% IF searchmember %]
-        $("#searchmember_filter").val("[% searchmember %]");
+        $("#searchmember_filter").val("[% searchmember | html %]");
     [% END %]
     [% IF searchfieldstype %]
         $("searchfieldstype_filter").val("[% searchfieldstype %]");
@@ -356,7 +356,7 @@ function filterByFirstLetterSurname(letter) {
 
           <div id="searchresults" style="display:none">
             <div id="searchheader">
-              <h3>Patrons found for: <span id="searchpattern">[% IF searchmember %] for '[% searchmember %]'[% END %]</span></h3>
+              <h3>Patrons found for: <span id="searchpattern">[% IF searchmember %] for '[% searchmember | html %]'[% END %]</span></h3>
             </div>
             [% IF CAN_user_tools_manage_patron_lists %]
               <div id="searchheader">
@@ -372,7 +372,7 @@ function filterByFirstLetterSurname(letter) {
                               [% IF patron_lists %]
                                   <optgroup label="Patron lists:">
                                       [% FOREACH pl IN patron_lists %]
-                                          <option value="[% pl.patron_list_id %]">[% pl.name %]</option>
+                                          <option value="[% pl.patron_list_id %]">[% pl.name |html %]</option>
                                       [% END %]
                                   </optgroup>
                               [% END %]
@@ -496,9 +496,9 @@ function filterByFirstLetterSurname(letter) {
                 <option value="">Any</option>
                 [% FOREACH cat IN categories %]
                   [% IF cat.categorycode == categorycode_filter %]
-                    <option selected="selected" value="[% cat.categorycode %]">[% cat.description %]</option>
+                    <option selected="selected" value="[% cat.categorycode %]">[% cat.description |html %]</option>
                   [% ELSE %]
-                    <option value="[% cat.categorycode %]">[% cat.description %]</option>
+                    <option value="[% cat.categorycode %]">[% cat.description |html %]</option>
                   [% END %]
                 [% END %]
               </select>
