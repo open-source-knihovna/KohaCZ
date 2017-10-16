@@ -457,6 +457,10 @@
                             <span class="restricted">([% item.restricted %])</span>
                         [% END %]
 
+                        [% IF (item.IsInRotatingCollection) %]
+                            <br />Item is part of rotating collection <a href="/cgi-bin/koha/rotating_collections/addItems.pl?colId=[% item.rotating_collection.colId %]"><span class="rotating_collection">[% item.rotating_collection.colTitle %]</span></a>
+                        [% END %]
+
                     </td>
                     <td class="datelastseen">[% item.datelastseen | $KohaDates %]</td>
                     <td><a href="/cgi-bin/koha/catalogue/moredetail.pl?type=[% item.type %]&amp;itemnumber=[% item.itemnumber %]&amp;biblionumber=[% item.biblionumber %]&amp;bi=[% item.biblioitemnumber %]#item[% item.itemnumber %]">[% item.barcode %]</a></td>

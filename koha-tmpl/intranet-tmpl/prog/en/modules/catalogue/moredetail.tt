@@ -187,7 +187,7 @@
                 [% IF ITEM_DAT.withdrawn != "" && ITEM_DAT.withdrawn_on %]
                     <li><span class="label">Withdrawn on:</span>[% ITEM_DAT.withdrawn_on | $KohaDates %] &nbsp;</li>
                 [% END %]
- 
+
                         [% IF Koha.Preference('UsePermanentWithdrawal') %]<li><span class="label">Permanent withdrawal:</span>
                         <form action="updateitem.pl" method="post">
                             <input type="hidden" name="biblionumber" value="[% ITEM_DAT.biblionumber %]" />
@@ -208,6 +208,11 @@
             [% IF ITEM_DAT.withdrawn_categorycode %]<li><span class="label">Withdrawn description:</span>
                    [% ITEM_DAT.withdrawn_categorycode %]
             &nbsp;</li>[% END %]
+
+                [% IF ITEM_DAT.IsInRotatingCollection %]
+                    <li><span class="label">Rotating collection:</span><a href="/cgi-bin/koha/rotating_collections/addItems.pl?colId=[% ITEM_DAT.rotating_collection.colId %]">[% ITEM_DAT.rotating_collection.colTitle %]</a></li>
+                [% END %]
+            [% END %]
 
             </ol></div>
             <div class="listgroup"><h4>History</h4>

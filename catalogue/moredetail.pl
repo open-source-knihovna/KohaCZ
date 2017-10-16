@@ -136,6 +136,11 @@ foreach ( keys %{$data} ) {
 foreach my $item (@items){
     $item->{object} = Koha::Items->find( $item->{itemnumber} );
     $item->{'collection'}              = $ccodes->{ $item->{ccode} } if ($ccodes);
+    my $rotating_collection = $item->{object}->rotating_collection;
+    if ( $rotating_collection ) {
+        $item->{rotating_collection} = $rotating_collection;
+        $item->{IsInRotatingCollection} = 1;
+    }
     $item->{'itype'}                   = $itemtypes->{ $item->{'itype'} }->{'translated_description'};
     $item->{'replacementprice'}        = sprintf( "%.2f", $item->{'replacementprice'} );
     if ( defined $item->{'copynumber'} ) {

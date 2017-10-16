@@ -275,7 +275,14 @@ foreach my $item (@items) {
     }
 
 
-	# Check the transit status
+    # checking for rotating collection
+    my $rotating_collection = $item_object->rotating_collection;
+    if ( $rotating_collection ) {
+        $item->{rotating_collection} = $rotating_collection;
+        $item->{IsInRotatingCollection} = 1;
+    }
+
+    # Check the transit status
     my ( $transfertwhen, $transfertfrom, $transfertto ) = GetTransfers($item->{itemnumber});
     if ( defined( $transfertwhen ) && ( $transfertwhen ne '' ) ) {
         $item->{transfertwhen} = $transfertwhen;
