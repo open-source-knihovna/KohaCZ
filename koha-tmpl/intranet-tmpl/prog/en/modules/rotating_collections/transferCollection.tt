@@ -38,7 +38,11 @@
                                     <li>
                                         <label for="toBranch">Choose your library:</label>
                                         <select id="toBranch" name="toBranch">
-                                            [% PROCESS options_for_libraries libraries => Branches.all( unfiltered => 1 ) %]
+                                            [% IF ( collection.colBranchcode ) %]
+                                              [% PROCESS options_for_libraries libraries => Branches.all( selected => collection.colBranchcode, unfiltered => 1 ) %]
+                                            [% ELSE %]
+                                              [% PROCESS options_for_libraries libraries => Branches.all( unfiltered => 1 ) %]
+                                            [% END %]
                                         </select>
                                     </li>
                                 </ol>

@@ -1,3 +1,5 @@
+[% SET footerjs = 1 %]
+[% USE Branches %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Tools &rsaquo; Rotating collections &rsaquo;
     [%- IF ( action == "new" ) %]
@@ -92,6 +94,16 @@
                                         <input type="text" size="50" name="description" />
                                     [% END %]
                                 </li>
+                                <li>
+                                    <label for="branchcode">Library: </label>
+                                    <select id="branchcode" name="branchcode">
+                                        <option value="">No library, will select during transfer</option>
+                                        [% IF ( collection.colBranchcode ) %]
+                                          [% PROCESS options_for_libraries libraries => Branches.all( selected => collection.colBranchcode, unfiltered => 1, ) %]
+                                        [% ELSE %]
+                                          [% PROCESS options_for_libraries libraries => Branches.all( selected => '', unfiltered => 1, ) %]
+                                        [% END %]
+                                    </select>
                             </ol>
                         </fieldset>
                         <fieldset class="action">

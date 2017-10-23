@@ -46,11 +46,13 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 if ( $action eq 'create' ) {
     my $title       = $query->param('title');
     my $description = $query->param('description');
+    my $branchcode  = $query->param('branchcode') || undef;
     $template->param( createdTitle => $title );
 
     my $collection = Koha::RotatingCollection->new(
         {   colTitle => $title,
             colDesc  => $description,
+            colBranchcode => $branchcode,
         }
     );
 
@@ -85,6 +87,7 @@ if ( $action eq 'create' ) {
     my $colId       = $query->param('colId');
     my $title       = $query->param('title');
     my $description = $query->param('description');
+    my $branchcode  = $query->param('branchcode') || undef;
 
     $template->param( updatedTitle => $title );
 
@@ -92,6 +95,7 @@ if ( $action eq 'create' ) {
         my $collection = Koha::RotatingCollections->find($colId);
         $collection->colTitle($title);
         $collection->colDesc($description);
+        $collection->colBranchcode($branchcode);
 
         eval { $collection->store; };
 
