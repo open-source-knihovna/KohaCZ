@@ -40,6 +40,7 @@ use C4::Letters qw/SendAlerts/;
 use Date::Calc qw/Add_Delta_Days/;
 use Koha::Database;
 use Koha::EDI qw( create_edi_order get_edifact_ean );
+use Koha::CsvProfiles;
 
 =head1 NAME
 
@@ -430,7 +431,7 @@ if ( $op eq 'list' ) {
         unclosable           => @orders ? $basket->{is_standing} : 1,
         has_budgets          => $has_budgets,
         duplinbatch          => $duplinbatch,
-        csv_profiles         => C4::Csv::GetCsvProfiles( "sql" ),
+        csv_profiles         => Koha::CsvProfiles->search( { type => 'sql' } ),
     );
 }
 
