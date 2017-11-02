@@ -17,7 +17,8 @@
 
 use Modern::Perl;
 
-use Test::More tests => 6;
+use Module::Load::Conditional qw[can_load check_install requires];
+use Test::More;
 use Test::MockModule;
 use t::lib::Mocks;
 
@@ -26,6 +27,20 @@ use MARC::Record;
 use Koha::Database;
 
 my $schema = Koha::Database->schema();
+
+if ( ! can_load(
+    modules => { 'Koha::SearchEngine::Elasticsearch::Indexer' => undef, } )
+) {
+    my $missing_module;
+    if ( $Module::Load::Conditional::ERROR =~ /Can\'t locate (.*?) / ) {
+        $missing_module = $1;
+    }
+    my $es_dep_msg = "Required module $missing_module is not installed";
+    plan( skip_all => $es_dep_msg );
+}
+else {
+    plan tests => 6;
+}
 
 use_ok('Koha::SearchEngine::Elasticsearch::Indexer');
 
@@ -122,5 +137,3 @@ subtest '_convert_marc_to_json() tests' => sub {
 
     $schema->storage->txn_rollback;
 };
-
-1;

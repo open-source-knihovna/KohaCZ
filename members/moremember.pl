@@ -344,9 +344,6 @@ if ( C4::Context->preference("ExportCircHistory") ) {
     $template->param(csv_profiles => [ Koha::CsvProfiles->search({ type => 'marc' }) ]);
 }
 
-# in template <TMPL_IF name="I"> => institutional (A for Adult, C for children)
-$template->param( $data->{'categorycode'} => 1 );
-
 # Display the language description instead of the code
 # Note that this is certainly wrong
 my ( $subtag, $region ) = split '-', $patron->lang;
@@ -358,7 +355,7 @@ $template->param(
     detailview      => 1,
     borrowernumber  => $borrowernumber,
     othernames      => $data->{'othernames'},
-    categoryname    => $data->{'description'},
+    categoryname    => $patron->category->description,
     was_renewed     => scalar $input->param('was_renewed') ? 1 : 0,
     todaysdate      => output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }),
     totalprice      => sprintf("%.2f", $totalprice),
@@ -367,12 +364,11 @@ $template->param(
     overdues_exist  => $overdues_exist,
     StaffMember     => $category_type eq 'S',
     is_child        => $category_type eq 'C',
+    $category_type  => 1, # [% IF ( I ) %] = institutional/organisation
     samebranch      => $samebranch,
     quickslip       => $quickslip,
     housebound_role => scalar $patron->housebound_role,
     privacy_guarantor_checkouts => $data->{'privacy_guarantor_checkouts'},
-    AutoResumeSuspendedHolds => C4::Context->preference('AutoResumeSuspendedHolds'),
-    SuspendHoldsIntranet => C4::Context->preference('SuspendHoldsIntranet'),
     RoutingSerials => C4::Context->preference('RoutingSerials'),
     PatronsPerPage => C4::Context->preference("PatronsPerPage") || 20,
     relatives_issues_count => $relatives_issues_count,

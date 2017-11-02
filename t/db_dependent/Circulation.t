@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 95;
+use Test::More tests => 100;
 
 use DateTime;
 
@@ -453,11 +453,12 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         $biblionumber
     );
     my $datedue6 = AddIssue( $renewing_borrower, $barcode6);
-    is (defined $datedue6, 1, "Item 2 checked out, due date: $datedue6");
+    is (defined $datedue6, 1, "Item 2 checked out, due date: ".$datedue6->date_due);
 
     my $now = dt_from_string();
     my $five_weeks = DateTime::Duration->new(weeks => 5);
     my $five_weeks_ago = $now - $five_weeks;
+    t::lib::Mocks::mock_preference('finesMode', 'production');
 
     my $passeddatedue1 = AddIssue($renewing_borrower, $barcode7, $five_weeks_ago);
     is (defined $passeddatedue1, 1, "Item with passed date due checked out, due date: " . $passeddatedue1->date_due);
@@ -473,6 +474,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
             due            => Koha::DateUtils::output_pref($five_weeks_ago)
         }
     );
+
     t::lib::Mocks::mock_preference('RenewalLog', 0);
     my $date = output_pref( { dt => dt_from_string(), datenonly => 1, dateformat => 'iso' } );
     my $old_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
@@ -487,10 +489,23 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     $new_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
     is ($new_log_size, $old_log_size + 1, 'renew log successfully added');
 
+    my $fines = Koha::Account::Lines->search( { borrowernumber => $renewing_borrower->{borrowernumber}, itemnumber => $itemnumber7 } );
+    is( $fines->count, 2 );
+    is( $fines->next->accounttype, 'F', 'Fine on renewed item is closed out properly' );
+    is( $fines->next->accounttype, 'F', 'Fine on renewed item is closed out properly' );
+    $fines->delete();
 
-    $fine = $schema->resultset('Accountline')->single( { borrowernumber => $renewing_borrower->{borrowernumber}, itemnumber => $itemnumber7 } );
-    is( $fine->accounttype, 'F', 'Fine on renewed item is closed out properly' );
-    $fine->delete();
+
+    my $old_issue_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["ISSUE"]) } );
+    my $old_renew_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
+    AddIssue( $renewing_borrower,$barcode7,Koha::DateUtils::output_pref({str=>$datedue6->date_due, dateformat =>'iso'}),0,$date, 0, undef );
+    $new_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["RENEWAL"]) } );
+    is ($new_log_size, $old_renew_log_size + 1, 'renew log successfully added when renewed via issuing');
+    $new_log_size =  scalar(@{GetLogs( $date, $date, undef,["CIRCULATION"], ["ISSUE"]) } );
+    is ($new_log_size, $old_issue_log_size, 'renew not logged as issue when renewed via issuing');
+
+    $fines = Koha::Account::Lines->search( { borrowernumber => $renewing_borrower->{borrowernumber}, itemnumber => $itemnumber7 } );
+    $fines->delete();
 
     t::lib::Mocks::mock_preference('OverduesBlockRenewing','blockitem');
     ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber6);
@@ -1281,7 +1296,7 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
     plan tests => 8;
 
     my $library = $builder->build( { source => 'Branch' } );
-    my $patron  = $builder->build( { source => 'Borrower' } );
+    my $patron  = $builder->build( { source => 'Borrower', value => { gonenoaddress => undef, lost => undef, debarred => undef, borrowernotes => "" } } );
 
     my $biblioitem_1 = $builder->build( { source => 'Biblioitem' } );
     my $item_1 = $builder->build(
@@ -1292,6 +1307,7 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
                 notforloan    => 0,
                 itemlost      => 0,
                 withdrawn     => 0,
+                restricted    => 0,
                 biblionumber  => $biblioitem_1->{biblionumber}
             }
         }
@@ -1305,6 +1321,7 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
                 notforloan    => 0,
                 itemlost      => 0,
                 withdrawn     => 0,
+                restricted    => 0,
                 biblionumber  => $biblioitem_2->{biblionumber}
             }
         }
@@ -1318,25 +1335,25 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
 
     t::lib::Mocks::mock_preference( 'OverduesBlockCirc', 'confirmation' );
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron, $item_2->{barcode} );
-    is( keys(%$error) + keys(%$alerts),  0 );
-    is( $question->{USERBLOCKEDOVERDUE}, 1 );
+    is( keys(%$error) + keys(%$alerts),  0, 'No key for error and alert ' . keys(%$error) . ' ' . keys(%$alerts) );
+    is( $question->{USERBLOCKEDOVERDUE}, 1, 'OverduesBlockCirc=confirmation, USERBLOCKEDOVERDUE should be set for question' );
 
     t::lib::Mocks::mock_preference( 'OverduesBlockCirc', 'block' );
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron, $item_2->{barcode} );
-    is( keys(%$question) + keys(%$alerts), 0 );
-    is( $error->{USERBLOCKEDOVERDUE},      1 );
+    is( keys(%$question) + keys(%$alerts),  0, 'No key for question and alert ' . keys(%$question) . ' ' . keys(%$alerts) );
+    is( $error->{USERBLOCKEDOVERDUE},      1, 'OverduesBlockCirc=block, USERBLOCKEDOVERDUE should be set for error' );
 
     # Patron cannot issue item_1, they are debarred
     my $tomorrow = DateTime->today( time_zone => C4::Context->tz() )->add( days => 1 );
     Koha::Patron::Debarments::AddDebarment( { borrowernumber => $patron->{borrowernumber}, expiration => $tomorrow } );
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron, $item_2->{barcode} );
-    is( keys(%$question) + keys(%$alerts), 0 );
-    is( $error->{USERBLOCKEDWITHENDDATE}, output_pref( { dt => $tomorrow, dateformat => 'sql', dateonly => 1 } ) );
+    is( keys(%$question) + keys(%$alerts),  0, 'No key for question and alert ' . keys(%$question) . ' ' . keys(%$alerts) );
+    is( $error->{USERBLOCKEDWITHENDDATE}, output_pref( { dt => $tomorrow, dateformat => 'sql', dateonly => 1 } ), 'USERBLOCKEDWITHENDDATE should be tomorrow' );
 
     Koha::Patron::Debarments::AddDebarment( { borrowernumber => $patron->{borrowernumber} } );
     ( $error, $question, $alerts ) = CanBookBeIssued( $patron, $item_2->{barcode} );
-    is( keys(%$question) + keys(%$alerts), 0 );
-    is( $error->{USERBLOCKEDNOENDDATE},    '9999-12-31' );
+    is( keys(%$question) + keys(%$alerts),  0, 'No key for question and alert ' . keys(%$question) . ' ' . keys(%$alerts) );
+    is( $error->{USERBLOCKEDNOENDDATE},    '9999-12-31', 'USERBLOCKEDNOENDDATE should be 9999-12-31 for unlimited debarments' );
 };
 
 subtest 'MultipleReserves' => sub {
@@ -1631,9 +1648,59 @@ subtest 'AddReturn + CumulativeRestrictionPeriods' => sub {
     is( $debarments->[0]->{expiration}, $expected_expiration );
 };
 
+subtest 'Set waiting flag' => sub {
+    plan tests => 4;
+
+    my $library_1 = $builder->build( { source => 'Branch' } );
+    my $patron_1  = $builder->build( { source => 'Borrower', value => { branchcode => $library_1->{branchcode} } } );
+    my $library_2 = $builder->build( { source => 'Branch' } );
+    my $patron_2  = $builder->build( { source => 'Borrower', value => { branchcode => $library_2->{branchcode} } } );
+
+    my $biblio = $builder->build( { source => 'Biblio' } );
+    my $biblioitem = $builder->build( { source => 'Biblioitem', value => { biblionumber => $biblio->{biblionumber} } } );
+    my $item = $builder->build(
+        {
+            source => 'Item',
+            value  => {
+                homebranch    => $library_1->{branchcode},
+                holdingbranch => $library_1->{branchcode},
+                notforloan    => 0,
+                itemlost      => 0,
+                withdrawn     => 0,
+                biblionumber  => $biblioitem->{biblionumber},
+            }
+        }
+    );
+
+
+
+    set_userenv( $library_2 );
+    my $reserve_id = AddReserve(
+        $library_2->{branchcode}, $patron_2->{borrowernumber}, $biblioitem->{biblionumber},
+        '', 1, undef, undef, '', undef, $item->{itemnumber},
+    );
+
+    set_userenv( $library_1 );
+    my $do_transfer = 1;
+    my ( $res, $rr ) = AddReturn( $item->{barcode}, $library_1->{branchcode} );
+    ModReserveAffect( $item->{itemnumber}, undef, $do_transfer, $reserve_id );
+    my $hold = Koha::Holds->find( $reserve_id );
+    is( $hold->found, 'T', 'Hold is in transit' );
+
+    my ( $status ) = CheckReserves($item->{itemnumber});
+    is( $status, 'Reserved', 'Hold is not waiting yet');
+
+    set_userenv( $library_2 );
+    $do_transfer = 0;
+    AddReturn( $item->{barcode}, $library_2->{branchcode} );
+    ModReserveAffect( $item->{itemnumber}, undef, $do_transfer, $reserve_id );
+    $hold = Koha::Holds->find( $reserve_id );
+    is( $hold->found, 'W', 'Hold is waiting' );
+    ( $status ) = CheckReserves($item->{itemnumber});
+    is( $status, 'Waiting', 'Now the hold is waiting');
+};
+
 sub set_userenv {
     my ( $library ) = @_;
     C4::Context->set_userenv(0,0,0,'firstname','surname', $library->{branchcode}, $library->{branchname}, '', '', '');
 }
-
-1;

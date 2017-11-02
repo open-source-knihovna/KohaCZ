@@ -169,7 +169,10 @@ sub add_accounts_to_template {
 sub get_for_redirect {
     my ( $name, $name_in, $money ) = @_;
     my $s     = q{&} . $name . q{=};
-    my $value = uri_escape_utf8( $input->param($name_in) );
+    my $value;
+    if (defined $input->param($name_in)) {
+        $value = uri_escape_utf8( scalar $input->param($name_in) );
+    }
     if ( !defined $value ) {
         $value = ( $money == 1 ) ? 0 : q{};
     }
@@ -197,7 +200,7 @@ sub redirect_to_paycollect {
     $redirect .= get_for_redirect( 'notify_id',    "notify_id$line_no",    0 );
     $redirect .= get_for_redirect( 'notify_level', "notify_level$line_no", 0 );
     $redirect .= get_for_redirect( 'accountlines_id', "accountlines_id$line_no", 0 );
-    $redirect .= q{&} . 'payment_note' . q{=} . uri_escape_utf8( $input->param("payment_note_$line_no") );
+    $redirect .= q{&} . 'payment_note' . q{=} . uri_escape_utf8( scalar $input->param("payment_note_$line_no") );
     $redirect .= '&remote_user=';
     $redirect .= $user;
     return print $input->redirect($redirect);
@@ -262,13 +265,13 @@ sub payselected {
     foreach (@params) {
         if (/^incl_par_(\d+)$/) {
             my $index = $1;
-            push @lines_to_pay, $input->param("accountlines_id$index");
+            push @lines_to_pay, scalar $input->param("accountlines_id$index");
             $amt += $input->param("amountoutstanding$index");
         }
     }
     $amt = '&amt=' . $amt;
     my $sel = '&selected=' . join ',', @lines_to_pay;
-    my $notes = '&notes=' . join("%0A", map { $input->param("payment_note_$_") } @lines_to_pay );
+    my $notes = '&notes=' . join("%0A", map { scalar $input->param("payment_note_$_") } @lines_to_pay );
     my $redirect =
         "/cgi-bin/koha/members/paycollect.pl?borrowernumber=$borrowernumber"
       . $amt
