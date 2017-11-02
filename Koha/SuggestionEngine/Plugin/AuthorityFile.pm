@@ -30,8 +30,7 @@ Plugin to get suggestions from Koha's authority file
 
 =cut
 
-use strict;
-use warnings;
+use Modern::Perl;
 use Carp;
 
 use base qw(Koha::SuggestionEngine::Base);
@@ -94,7 +93,7 @@ sub get_suggestions {
     foreach my $auth (@$searchresults) {
         push @results,
           {
-            'search'  => "an=$auth->{'authid'}",
+            'search'  => "an:$auth->{'authid'}",
             relevance => $count--,
             label     => $auth->{summary}->{authorized}->[0]->{heading}
           };

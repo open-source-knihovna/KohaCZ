@@ -109,7 +109,6 @@ BEGIN {
         &GetReservesFromBorrowernumber
 	    &GetReserveFromBorrowernumberAndItemnumber
         &GetReservesForBranch
-        &GetReservesToBranch
         &GetReserveCount
         &GetReserveCountFromItemnumber
         &GetReserveFee
@@ -814,33 +813,6 @@ SELECT COUNT(*) FROM reserves WHERE biblionumber=? AND borrowernumber<>?
     return $fee;
 }
 
-=head2 GetReservesToBranch
-
-  @transreserv = GetReservesToBranch( $frombranch );
-
-Get reserve list for a given branch
-
-=cut
-
-sub GetReservesToBranch {
-    my ( $frombranch ) = @_;
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare(
-        "SELECT reserve_id,borrowernumber,reservedate,itemnumber,timestamp
-         FROM reserves
-         WHERE priority='0'
-           AND branchcode=?"
-    );
-    $sth->execute( $frombranch );
-    my @transreserv;
-    my $i = 0;
-    while ( my $data = $sth->fetchrow_hashref ) {
-        $transreserv[$i] = $data;
-        $i++;
-    }
-    return (@transreserv);
-}
-
 =head2 GetReserveFromBorrowernumberAndItemnumber
 
     $reserve = GetReserveFromBorrowernumberAndItemnumber($borrowernumber, $itemnumber);
@@ -1034,7 +1006,11 @@ sub CheckReserves {
         my $priority = 10000000;
         foreach my $res (@reserves) {
             if ( $res->{'itemnumber'} == $itemnumber && $res->{'priority'} == 0) {
-                return ( "Waiting", $res, \@reserves ); # Found it
+                if ($res->{'found'} eq 'W') {
+                    return ( "Waiting", $res, \@reserves ); # Found it, it is waiting
+                } else {
+                    return ( "Reserved", $res, \@reserves ); # Found determinated hold, e. g. the tranferred one
+                }
             } else {
                 my $borrowerinfo;
                 my $iteminfo;
