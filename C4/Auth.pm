@@ -161,15 +161,13 @@ sub get_template_and_user {
 
     C4::Context->interface( $in->{type} );
 
-    my $safe_chars = 'a-zA-Z0-9_\-\/';
-    die "bad template path" unless $in->{'template_name'} =~ m/^[$safe_chars]+\.tt$/ig; #sanitize input
-
     $in->{'authnotrequired'} ||= 0;
+
+    # the following call includes a bad template check; might croak
     my $template = C4::Templates::gettemplate(
         $in->{'template_name'},
         $in->{'type'},
         $in->{'query'},
-        $in->{'is_plugin'}
     );
 
     if ( $in->{'template_name'} !~ m/maintenance/ ) {
@@ -417,6 +415,8 @@ sub get_template_and_user {
     my $https = $in->{query}->https();
     my $using_https = ( defined $https and $https ne 'OFF' ) ? 1 : 0;
 
+    my $minPasswordLength = C4::Context->preference('minPasswordLength');
+    $minPasswordLength = 3 if not $minPasswordLength or $minPasswordLength < 3;
     $template->param(
         "BiblioDefaultView" . C4::Context->preference("BiblioDefaultView") => 1,
         EnhancedMessagingPreferences                                       => C4::Context->preference('EnhancedMessagingPreferences'),
@@ -438,6 +438,7 @@ sub get_template_and_user {
         noItemTypeImages   => C4::Context->preference("noItemTypeImages"),
         marcflavour        => C4::Context->preference("marcflavour"),
         OPACBaseURL        => C4::Context->preference('OPACBaseURL'),
+        minPasswordLength  => $minPasswordLength,
     );
     if ( $in->{'type'} eq "intranet" ) {
         $template->param(

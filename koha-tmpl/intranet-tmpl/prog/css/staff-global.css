@@ -688,6 +688,9 @@ fieldset.rows fieldset {
 .yui-b fieldset.rows td label, .yui-b fieldset.rows td span.label {
         width: auto;
 }
+.yui-b fieldset.rows ol.oladditemtype label, .yui-b fieldset.rows ol.oladditemtype span.label {
+    width: 13em;
+}
 
 .yui-b fieldset.rows div.hint {
 	margin-left : 10.5em;
@@ -799,6 +802,15 @@ fieldset.action, div.action {
     margin: 0.9em 0 0 0;
     padding: 0.4em;
     width: auto;
+}
+
+#fixedlengthbuilderaction {
+    padding: 5px 5px 5px 5px;
+    border: 3px solid #E6F0F2;
+    top: -80px;
+    left: 80%;
+    position: relative;
+    width: 12%;
 }
 
 .btn-toolbar fieldset.action {
@@ -1552,6 +1564,18 @@ li.email {
 	float : right;
 	font-size : 125%;
 	padding : 5px 25em 0 0;
+}
+
+#searchheader .dropdown-menu > li > a {
+    padding: 2px 10px;
+}
+
+#searchheader .dropdown-menu > li > a {
+    padding: 2px 10px;
+}
+
+#searchheader .dropdown-header {
+    padding: 4px 5px
 }
 
 #search-facets ul {
@@ -2486,6 +2510,12 @@ a.dropdown-toggle {
     background-image: linear-gradient(to bottom, #0088cc, #0077b3);
     background-repeat: repeat-x;
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff0088cc', endColorstr='#ff0077b3', GradientType=0);
+}
+
+.dropdown-header {
+    border-top: 1px solid #EEE;
+    color: #000;
+    font-weight: bold;
 }
 
 a.disabled {

@@ -35,8 +35,31 @@ $(document).ready(function() {
 	[% END %]
 });
 
-$(document).ready(function() {
+function update_cardnumber_warning(size){
+    var max_len = [% maxlength_cardnumber %];
+    if ( size >= max_len ) {
+        $("#cn_max").show();
+    } else {
+        $("#cn_max").hide();
+    }
+}
 
+$(document).ready(function() {
+    $("#cn_max").hide();
+    var content;
+    $("#cardnumber").on("keydown", function(e){
+        content = $(this).val();
+    });
+    $("#cardnumber").on("keyup", function(e){
+        // .val() will return the value of the input after the key has been released
+        var l = $(this).val().length;
+        if ( l == content.length + 1 ) { l--; }
+        update_cardnumber_warning(l);
+    });
+    $("#cardnumber").bind("paste", function(e){
+        var pastedData = e.originalEvent.clipboardData.getData('text');
+        update_cardnumber_warning(pastedData.length - 1);
+    } );
     var toggle_quick_add = $(".toggle_quick_add");
     $(toggle_quick_add).click(function(e){
         toggle_quick_add.toggle();
@@ -70,12 +93,38 @@ $(document).ready(function() {
         }
         else {return false;}
     });
+
+    $("#entryform").validate({
+        rules: {
+            password: {
+                required: true,
+                password_strong: true,
+                password_no_spaces: true
+            },
+            password2: {
+                required: true,
+                password_match: true
+            }
+        }
+    });
+
     $("#saverecord").click(function(){
         if( check_form_borrowers() ){
             $("#entryform").submit();
         }
     });
 
+    $('#duplicate').on('click', function() {
+        $("input[name='op']").val('modify');
+        $("input[name='borrowernumber']").val('[% check_member %]');
+        $("input[name='check_member']").val('');
+        $('#entryform').submit();
+    });
+
+    $('#not-duplicate').on('click', function() {
+        $("input[name='nodouble']").val('1');
+        $('#entryform').submit();
+    });
 });
 
         var MSG_SEPARATOR = _("Separator must be / in field %s");
@@ -86,8 +135,6 @@ $(document).ready(function() {
         var MSG_DUPLICATE_ORGANIZATION = _("Warning: Duplicate organization");
         var MSG_LATE_EXPIRY = _("Warning: Expiration date falls before enrollment date");
         var MSG_DUPLICATE_SUSPICION = _("Please confirm whether this is a duplicate patron");
-        var MSG_PASSWORD_MISMATCH = _("The passwords entered do not match");
-        var MSG_PASSWORD_CONTAINS_TRAILING_SPACES = _("Password contains leading and/or trailing spaces.");
         var MSG_MONTH = _("%s month")
         var MSG_MONTHS = _("%s months")
         var MSG_YEAR = _("%s year")
@@ -138,18 +185,10 @@ $(document).ready(function() {
 			<div class="dialog alert">
 				<h3>Duplicate patron record?</h3>
                 <p><a class="popup" href="#" onclick="Dopop('moremember.pl?print=brief&amp;borrowernumber=[% check_member %]');return false;" >View existing record</a></p>
-                <form action="/cgi-bin/koha/members/memberentry.pl" method="get">
-                    <input type="hidden" name="op" value="modify" />
-                    <input type="hidden" name="borrowernumber" value="[% check_member %]" />
-                    <input type="hidden" name="csrf_token" value="[% csrf_token %]" />
-                    <button type="submit" class="new"><i class="fa fa-pencil"></i> It is a duplicate.
-                    Edit existing record</button>
-                </form>
+                <button id="duplicate" type="submit" class="new"><i class="fa fa-pencil"></i> It is a duplicate.
+                Edit existing record</button>
 
-                <form name="form" action="/cgi-bin/koha/members/memberentry.pl" method="post" autocomplete="off">
-				<input type="hidden" name="nodouble" value="1" />
-                <input type="hidden" name="csrf_token" value="[% csrf_token %]" />
-                <button type="submit" class="new"><i class="fa fa-plus"></i> Not a duplicate.
+                <button type="submit" id="not-duplicate" class="new"><i class="fa fa-plus"></i> Not a duplicate.
                 Save as new record</button>
 			</div>
 	[% END %]
@@ -183,9 +222,15 @@ $(document).ready(function() {
 			[% IF ( ERROR_dateexpiry ) %]
 				<li id="ERROR_dateexpiry">Date of expiration is invalid.</li>
 			[% END %]
-			[% IF ( ERROR_short_password ) %]
-				<li id="ERROR_short_password">Password must be at least [% minPasswordLength %] characters long.</li>
-			[% END %]
+            [% IF ( ERROR_password_too_short ) %]
+                <li id="ERROR_short_password">Password must be at least [% minPasswordLength %] characters long.</li>
+            [% END %]
+            [% IF ( ERROR_password_too_weak ) %]
+                <li id="ERROR_weak_password">Password must contain at least one digit, one lowercase and one uppercase.</li>
+            [% END %]
+            [% IF ( ERROR_password_has_whitespaces ) %]
+                <li id="ERROR_weak_password">Password must not contain leading or trailing whitespaces.</li>
+            [% END %]
 			[% IF ( ERROR_password_mismatch ) %]
 				<li id="ERROR_password_mismatch">Passwords do not match.</li>
 			[% END %]
@@ -222,8 +267,10 @@ $(document).ready(function() {
 [% END %]
 </div>
 
-[% UNLESS ( check_member ) %]<form name="form" id="entryform"  action="/cgi-bin/koha/members/memberentry.pl" method="post" autocomplete="off" class="toggler" >
-<input type="hidden" name="nodouble"  value="[% nodouble %]" /> [% END %]
+<form name="form" id="entryform"  action="/cgi-bin/koha/members/memberentry.pl" method="post" autocomplete="off" class="toggler" >
+[% UNLESS ( check_member ) %]
+    <input type="hidden" name="nodouble"  value="[% nodouble %]" />
+[% END %]
 <!--    field always hidden in different form (1,2,3) -->
 <input type="hidden" name="BorrowerMandatoryField" value="[% BorrowerMandatoryField %]" />
 <input type="hidden" name="category_type" value="[% category_type %]" />
@@ -611,15 +658,15 @@ $(document).ready(function() {
           [% END %]
           [% IF minlength_cardnumber == maxlength_cardnumber %]
                 <input type="text" id="cardnumber" name="cardnumber" size="20" value="[% cardnumber | html %]" minlength="[% minlength_cardnumber %]" maxlength="[% maxlength_cardnumber %]" />
-                [% IF mandatorycardnumber and not autoMemberNum %]<span class="required">Required</span>[% END %]
+                [% IF mandatorycardnumber and not autoMemberNum %]<span class="required">Required</span>[% END %]<span id="cn_max" class="required">Card number must not be more than [% maxlength_cardnumber %] characters.</span>
                 <div class="hint">Card number must be exactly [% minlength_cardnumber %] characters.</div>
           [% ELSIF minlength_cardnumber && maxlength_cardnumber %]
                 <input type="text" id="cardnumber" name="cardnumber" size="20" value="[% cardnumber | html %]" minlength="[% minlength_cardnumber %]" maxlength="[% maxlength_cardnumber %]" />
-                [% IF mandatorycardnumber and not autoMemberNum %]<span class="required">Required</span>[% END %]
+                [% IF mandatorycardnumber and not autoMemberNum %]<span class="required">Required</span>[% END %]<span id="cn_max" class="required">Card number must not be more than [% maxlength_cardnumber %] characters.</span>
                 <div class="hint">Card number must be between [% minlength_cardnumber %] and [% maxlength_cardnumber %] characters.</div>
           [% ELSIF maxlength_cardnumber %]
                 <input type="text" id="cardnumber" name="cardnumber" size="20" value="[% cardnumber | html %]" maxlength="[% maxlength_cardnumber %]" />
-                [% IF mandatorycardnumber and not autoMemberNum %]<span class="required">Required</span>[% END %]
+                [% IF mandatorycardnumber and not autoMemberNum %]<span class="required">Required</span>[% END %]<span id="cn_max" class="required">Card number must not be more than [% maxlength_cardnumber %] characters.</span>
                 <div class="hint">Card number can be up to [% maxlength_cardnumber %] characters.</div>
           [% ELSE %]
                 <input type="text" id="cardnumber" name="cardnumber" size="20" value="[% cardnumber | html %]" />
@@ -897,8 +944,11 @@ $(document).ready(function() {
 				[% END %]
 			[% END %]
 			[% END %]
-	  [% IF ( mandatorypassword ) %]<span class="required">Required</span>[% END %][% IF ( ERROR_short_password ) %]<span class="required">Password is too short</span>[% END %]
-[% IF ( minPasswordLength ) %]<div class="hint">Minimum password length: [% minPasswordLength %]</div>[% END %]
+            [% IF ( mandatorypassword ) %]<span class="required">Required</span>[% END %]
+            [% IF ( ERROR_password_too_short ) %]<span class="required">Password is too short</span>[% END %]
+            [% IF ( ERROR_password_too_weak ) %]<span class="required">Password is too weak</span>[% END %]
+            [% IF ( ERROR_password_has_whitespaces ) %]<span class="required">Password has leading or trailing whitespaces</span>[% END %]
+            <div class="hint">Minimum password length: [% minPasswordLength %]</div>
 		</li>
 		<li>
 			[% IF ( mandatorypassword ) %]
@@ -1259,4 +1309,5 @@ $(document).ready(function() {
 [% END %]
 </div>
 [% INCLUDE 'intranet-bottom.inc' %]
-
+[% PROCESS 'password_check.inc' %]
+[% PROCESS 'add_password_check' new_password => 'password' %]

@@ -28,10 +28,9 @@ my ( $template, $dummy, $cookie ) = get_template_and_user(
 my $email          = $query->param('email') // q{};
 my $password       = $query->param('password');
 my $repeatPassword = $query->param('repeatPassword');
-my $minPassLength  = C4::Context->preference('minPasswordLength');
 my $id             = $query->param('id');
 my $uniqueKey      = $query->param('uniqueKey');
-my $username       = $query->param('username');
+my $username       = $query->param('username') // q{};
 my $borrower_number;
 
 #errors
@@ -47,13 +46,10 @@ my $errBadEmail;
 
 #new password form error
 my $errLinkNotValid;
-my $errPassNotMatch;
-my $errPassTooShort;
 
 if ( $query->param('sendEmail') || $query->param('resendEmail') ) {
 
     #try with the main email
-    $email ||= '';    # avoid undef
     my $borrower;
     my $search_results;
 
@@ -65,7 +61,7 @@ if ( $query->param('sendEmail') || $query->param('resendEmail') ) {
         $search_results = Koha::Patrons->search( { -or => { email => $email, emailpro => $email, B_email  => $email } } );
     }
 
-    if ( not $search_results || $search_results->count < 1) {
+    if ( !defined $search_results || $search_results->count < 1) {
         $hasError           = 1;
         $errNoBorrowerFound = 1;
     }
@@ -78,7 +74,6 @@ if ( $query->param('sendEmail') || $query->param('resendEmail') ) {
         $errMultipleAccountsForEmail = 1;
     }
     elsif ( $borrower = $search_results->next() ) {    # One matching borrower
-        $username ||= $borrower->userid;
         my @emails = ( $borrower->email, $borrower->emailpro, $borrower->B_email );
 
         my $firstNonEmptyEmail = '';
@@ -93,8 +88,8 @@ if ( $query->param('sendEmail') || $query->param('resendEmail') ) {
             $errNoBorrowerFound = 1;
         }
 
-# If we dont have an email yet. Get one of the borrower's email or raise an error.
-        elsif ( !$email && !( $email = $firstNonEmptyEmail ) ) {
+        # If there is no given email, and there is no email on record
+        elsif ( !$email && !$firstNonEmptyEmail ) {
             $hasError           = 1;
             $errNoBorrowerEmail = 1;
         }
@@ -108,6 +103,10 @@ if ( $query->param('sendEmail') || $query->param('resendEmail') ) {
             else {
                 DeleteExpiredPasswordRecovery( $borrower->borrowernumber );
             }
+        }
+        # Set the $email, if we don't have one.
+        if ( !$hasError && !$email ) {
+            $email = $firstNonEmptyEmail;
         }
     }
     else {    # 0 matching borrower
@@ -128,7 +127,7 @@ if ( $query->param('sendEmail') || $query->param('resendEmail') ) {
             username                => $username
         );
     }
-    elsif ( SendPasswordRecoveryEmail( $borrower, $email, $query->param('resendEmail') ) ) {    # generate uuid and send recovery email
+    elsif ( SendPasswordRecoveryEmail( $borrower, $email, scalar $query->param('resendEmail') ) ) {    # generate uuid and send recovery email
         $template->param(
             mail_sent => 1,
             email     => $email
@@ -145,37 +144,33 @@ if ( $query->param('sendEmail') || $query->param('resendEmail') ) {
 elsif ( $query->param('passwordReset') ) {
     ( $borrower_number, $username ) = GetValidLinkInfo($uniqueKey);
 
-    #validate password length & match
-    if (   ($borrower_number)
-        && ( $password eq $repeatPassword )
-        && ( length($password) >= $minPassLength ) )
-    {    #apply changes
-        Koha::Patrons->find($borrower_number)->update_password( $username, hash_password($password) );
-        CompletePasswordRecovery($uniqueKey);
-        $template->param(
-            password_reset_done => 1,
-            username            => $username
-        );
+    my $error;
+    if ( not $borrower_number ) {
+        $error = 'errLinkNotValid';
+    } elsif ( $password ne $repeatPassword ) {
+        $error = 'errPassNotMatch';
+    } else {
+        my ( $is_valid, $err) = Koha::AuthUtils::is_password_valid( $password );
+        unless ( $is_valid ) {
+            $error = 'password_too_short' if $err eq 'too_short';
+            $error = 'password_too_weak' if $err eq 'too_weak';
+            $error = 'password_has_whitespaces' if $err eq 'has_whitespaces';
+        } else {
+            Koha::Patrons->find($borrower_number)->update_password( $username, hash_password($password) );
+            CompletePasswordRecovery($uniqueKey);
+            $template->param(
+                password_reset_done => 1,
+                username            => $username
+            );
+        }
     }
-    else {    #errors
-        if ( !$borrower_number ) {    #parameters not valid
-            $errLinkNotValid = 1;
-        }
-        elsif ( $password ne $repeatPassword ) {    #passwords does not match
-            $errPassNotMatch = 1;
-        }
-        elsif ( length($password) < $minPassLength ) {    #password too short
-            $errPassTooShort = 1;
-        }
+    if ( $error ) {
         $template->param(
-            new_password    => 1,
-            minPassLength   => $minPassLength,
-            email           => $email,
-            uniqueKey       => $uniqueKey,
-            errLinkNotValid => $errLinkNotValid,
-            errPassNotMatch => $errPassNotMatch,
-            errPassTooShort => $errPassTooShort,
-            hasError        => 1
+            new_password => 1,
+            email        => $email,
+            uniqueKey    => $uniqueKey,
+            hasError     => 1,
+            $error       => 1,
         );
     }
 }
@@ -189,7 +184,6 @@ elsif ($uniqueKey) {    #reset password form
 
     $template->param(
         new_password    => 1,
-        minPassLength   => $minPassLength,
         email           => $email,
         uniqueKey       => $uniqueKey,
         username        => $username,

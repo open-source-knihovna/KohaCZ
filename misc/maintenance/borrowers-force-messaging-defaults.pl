@@ -39,10 +39,10 @@ sub usage {
 
 
 sub force_borrower_messaging_defaults {
-    my ($doit, $truncate, $since) = @_;
+    my ($doit, $truncate, $since, $not_expired) = @_;
 
     $since = '0000-00-00' if (!$since);
-    print $since;
+    print "Since: $since\n";
 
     my $dbh = C4::Context->dbh;
     $dbh->{AutoCommit} = 0;
@@ -54,7 +54,11 @@ sub force_borrower_messaging_defaults {
         $dbh->do(q|SET FOREIGN_KEY_CHECKS = 1|);
     }
 
-    my $sth = $dbh->prepare("SELECT borrowernumber, categorycode FROM borrowers WHERE dateenrolled >= ?");
+    my $sql = "SELECT borrowernumber, categorycode FROM borrowers WHERE dateenrolled >= ?";
+    if ($not_expired) {
+        $sql .= " AND dateexpiry >= NOW()"
+    }
+    my $sth = $dbh->prepare($sql);
     $sth->execute($since);
     while ( my ($borrowernumber, $categorycode) = $sth->fetchrow ) {
         print "$borrowernumber: $categorycode\n";
@@ -68,28 +72,30 @@ sub force_borrower_messaging_defaults {
 }
 
 
-my ($doit, $truncate, $since, $help);
+my ($doit, $truncate, $since, $help, $not_expired);
 my $result = GetOptions(
-    'doit'     => \$doit,
-    'truncate' => \$truncate,
-    'since:s'  => \$since,
-    'help|h'   => \$help,
+    'doit'        => \$doit,
+    'truncate'    => \$truncate,
+    'since:s'     => \$since,
+    'not-expired' => \$not_expired,
+    'help|h'      => \$help,
 );
 
 usage() if $help;
 
-force_borrower_messaging_defaults( $doit, $truncate, $since );
+force_borrower_messaging_defaults( $doit, $truncate, $since, $not_expired );
 
 =head1 NAME
 
-force-borrower-messaging-defaults
+borrowers-force-messaging-defaults.pl
 
 =head1 SYNOPSIS
 
-  force-borrower-messaging-defaults 
-  force-borrower-messaging-defaults --help
-  force-borrower-messaging-defaults --doit
-  force-borrower-messaging-defaults --doit --truncate
+  borrowers-force-messaging-defaults.pl
+  borrowers-force-messaging-defaults.pl --help
+  borrowers-force-messaging-defaults.pl --doit
+  borrowers-force-messaging-defaults.pl --doit --truncate
+  borrowers-force-messaging-defaults.pl --doit --not-expired
 
 =head1 DESCRIPTION
 
@@ -110,14 +116,17 @@ Prints this help
 
 =item B<--doit>
 
-Process actually the borrowers.
+Actually update the borrowers.
 
 =item B<--truncate>
 
 Truncate all borrowers transport preferences before (re-)creating them. It
 affects borrower_message_preferences table.
 
+=item B<--not-expired>
+
+Will only update active borrowers (borrowers who didn't pass their expiration date).
+
 =back
 
 =cut
-

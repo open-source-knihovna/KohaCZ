@@ -15,6 +15,7 @@ debian/scripts/koha-create-dirs             usr/sbin
 debian/scripts/koha-disable                 usr/sbin
 debian/scripts/koha-dump                    usr/sbin
 debian/scripts/koha-dump-defaults           usr/sbin
+debian/scripts/koha-elasticsearch           usr/sbin
 debian/scripts/koha-email-disable           usr/sbin
 debian/scripts/koha-email-enable            usr/sbin
 debian/scripts/koha-enable                  usr/sbin
@@ -37,6 +38,7 @@ debian/scripts/koha-stop-zebra              usr/sbin
 debian/scripts/koha-translate               usr/sbin
 debian/scripts/koha-upgrade-schema          usr/sbin
 debian/scripts/koha-upgrade-to-3.4          usr/sbin
+debian/scripts/koha-zebra                   usr/sbin
 debian/scripts/koha-start-sip               usr/sbin
 debian/scripts/koha-stop-sip                usr/sbin
 debian/scripts/koha-enable-sip              usr/sbin

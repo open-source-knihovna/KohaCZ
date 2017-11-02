@@ -406,6 +406,12 @@ Circulation:
                   nothing : "do nothing"
             - .
         -
+            - pref: MarkLostItemsAsReturned
+              choices:
+                  yes: "Mark"
+                  no: "Do not mark"
+            - "items as returned when flagged as lost"
+        -
             - pref: AllowMultipleIssuesOnABiblio
               choices:
                   yes: Allow
@@ -740,10 +746,27 @@ Circulation:
                   any_time_is_placed: "any time a hold is placed."
                   not_always: "only if all items are checked out and the record has at least one hold already."
                   any_time_is_collected: "any time a hold is collected."
+        -
+            - pref: useDefaultReplacementCost
+              choices:
+                  yes: use
+                  no: "Don't use"
+            - the default replacement cost defined in item type.
+        -
+            - "Set the text to be recorded in the column 'note', table 'accountlines' when the processing fee (defined in item type) is applied."
+            - pref: ProcessingFeeNote
+              type: textarea
+              class: code
+
     Self Checkout:
         -
             - "Include the following JavaScript on all pages in the web-based self checkout:"
             - pref: SCOUserJS
+              type: textarea
+              class: code
+        -
+            - "Include the following HTML on the the web-based self checkout screen:"
+            - pref: SCOMainUserBlock
               type: textarea
               class: code
         -
@@ -768,7 +791,7 @@ Circulation:
             - pref: SelfCheckoutByLogin
               choices:
                   yes: Username and Password
-                  no: Barcode
+                  no: Cardnumber
         -
             - "Time out the current patron's web-based self checkout system login after"
             - pref: SelfCheckTimeout

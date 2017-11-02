@@ -1,3 +1,4 @@
+[% USE HtmlTags %]
 [% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; About Koha</title>
@@ -139,40 +140,38 @@
 
         [% IF has_ai_issues %]
             <h2>Data problems</h2>
-            <p>
-            Some of your tables have problems with their auto_increment values which may lead to data loss. <strong>You should not ignore this warning</strong>.
-            The problem is that InnoDB does not keep auto_increment across SQL server restarts (it is only set in memory).
-            So on server startup the auto_increment values are set to max(table.id)+1.
-            </p>
-            <p>
-            See the <a href="https://wiki.koha-community.org/wiki/DBMS_auto_increment_fix">related wiki page</a> to know how to avoid this problem.
+            <p>Some of your tables have problems with their auto_increment values which may lead to data loss.</p>
+            <p><strong>You should not ignore this warning.</strong></p>
+            <p>The problem is that InnoDB does not keep auto_increment across SQL server restarts (it is only set in memory). So on server startup the auto_increment values are set to max(table.id)+1.</p>
+            <p>To know how to avoid this problem see the related wiki page:
+            <a href="https://wiki.koha-community.org/wiki/DBMS_auto_increment_fix">DBMS auto increment fix</a>
             </p>
 
             <h3>Problems found</h3>
             [% IF ai_patrons %]
                 <h4>Patrons</h4>
-                <p>The following ids exist in both <strong>borrowers</strong> and <strong>deletedborrowers</strong> tables:
-                [% FOR p IN ai_patrons %][% p.borrowernumber %][% UNLESS loop.last %], [% END %][% END %]</p>
+                <p>The following ids exist in both tables [% "borrowers" | $HtmlTags tag="strong" %] and [% "deletedborrowers" | $HtmlTags tag="strong" %]:</p>
+                <p>[% FOR p IN ai_patrons %][% p.borrowernumber %][% UNLESS loop.last %], [% END %][% END %]</p>
             [% END %]
             [% IF ai_biblios %]
                 <h4>Biblios</h4>
-                <p>The following ids exist in both <strong>biblio</strong> and <strong>deletedbiblio</strong> tables:
-                [% FOR b IN ai_biblios %][% b.biblionumber %][% UNLESS loop.last %], [% END %][% END %]</p>
+                <p>The following ids exist in both tables [% "biblio" | $HtmlTags tag="strong" %] and [% "deletedbiblio" | $HtmlTags tag="strong" %]:</p>
+                <p>[% FOR b IN ai_biblios %][% b.biblionumber %][% UNLESS loop.last %], [% END %][% END %]</p>
             [% END %]
             [% IF ai_items %]
                 <h4>Items</h4>
-                <p>The following ids exist in both <strong>items</strong> and <strong>deleteditems</strong> tables:
-                [% FOR i IN ai_items %][% i.itemnumber %][% UNLESS loop.last %], [% END %][% END %]</p>
+                <p>The following ids exist in both tables [% "items" | $HtmlTags tag="strong" %] and [% "deleteditems" | $HtmlTags tag="strong" %]:</p>
+                <p>[% FOR i IN ai_items %][% i.itemnumber %][% UNLESS loop.last %], [% END %][% END %]</p>
             [% END %]
             [% IF ai_checkouts %]
                 <h4>Checkouts</h4>
-                <p>The following ids exist in both <strong>issues</strong> and <strong>old_issues</strong> tables:
-                [% FOR c IN ai_checkouts %][% c.issue_id %][% UNLESS loop.last %], [% END %][% END %]</p>
+                <p>The following ids exist in both tables [% "issues" | $HtmlTags tag="strong" %] and [% "old_issues" | $HtmlTags tag="strong" %]:</p>
+                <p>[% FOR c IN ai_checkouts %][% c.issue_id %][% UNLESS loop.last %], [% END %][% END %]</p>
             [% END %]
             [% IF ai_holds %]
                 <h4>Holds</h4>
-                <p>The following ids exist in both <strong>holds</strong> and <strong>old_reserves</strong> table:
-                [% FOR h IN ai_holds %][% h.reserve_id %][% UNLESS loop.last %], [% END %][% END %]</p>
+                <p>The following ids exist in both tables [% "holds" | $HtmlTags tag="strong" %] and [% "old_reserves" | $HtmlTags tag="strong" %]:</p>
+                <p>[% FOR h IN ai_holds %][% h.reserve_id %][% UNLESS loop.last %], [% END %][% END %]</p>
             [% END %]
             <br/>
         [% END %]
@@ -422,6 +421,7 @@
                 <li>Chloe Alabaster</li>
                 <li>Edward Allen</li>
                 <li>Francisco M. Marzoa Alonso</li>
+                <li>Morgane Alonso</li>
                 <li>Joseph Alway</li>
                 <li>Cindy Murdock Ames</li>
                 <li>Aleisha Amohia</li>
@@ -433,7 +433,7 @@
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544730094">Tomás Cohen Arazi (3.18 - 3.22 Release Manager; 3.12 Release Maintainer; 16.05 - 17.05 QA Team Member)</a></li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692124662">Andrew Arensburger (the small and great C4::Context module)</a></li>
                 <li>Alex Arnaud</li>
-                <li>Petter Goksoyr Asen</li>
+                <li>Petter Goksøyr Åsen</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544614259">Joe Atzberger</a></li>
                 <li>Héctor Eduardo Castro Avalos</li>
                 <li>Larry Baerveldt</li>
@@ -452,13 +452,18 @@
                 <li>Pablo Bianchi</li>
                 <li>David Birmingham</li>
                 <li>Florian Bischof</li>
+                <li>Oliver Bock</li>
                 <li>Gaetan Boisson</li>
+                <li>David Bourgault</li>
+                <li>Rebecca Blundell</li>
                 <li>Danny Bouman</li>
                 <li>Christopher Brannon (3.20 QA Team Member)</li>
                 <li>Stan Brinkerhoff</li>
                 <li>Isaac Brodsky</li>
                 <li>Ivan Brown</li>
                 <li>Roger Buck</li>
+                <li>Alex Buckley</li>
+                <li>Michael Andrew Cabus</li>
                 <li>Steven Callender</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692376789">Jared Camins-Esakov (3.12 Release Manager; 3.6 Release Maintainer)</a></li>
                 <li>Colin Campbell (3.4 QA Manager)</li>
@@ -494,6 +499,8 @@
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692210484">Frédéric Demians (3.4 - 3.10 Translation Manager; 3.20, 16.05 Release Maintainer)</a></li>
                 <li>Connor Dewar</li>
                 <li>Srikanth Dhondi</li>
+                <li>Leire Diez</li>
+                <li>Yarik</li>
                 <li>Rocio Dressler</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618545125093">Jonathan Druart (3.8 - 17.05 QA Team Member)</a></li>
                 <li>Serhij Dubyk</li>
@@ -536,8 +543,10 @@
                 <li>Daniel Kahn Gillmor</li>
                 <li>David Goldfein</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544839606">Bernardo González Kriegel (3.14 - 17.05 Translation Manager; 3.10 Release Maintainer)</a></li>
+                <li>Caitlin Goodger</li>
                 <li>Briana Greally</li>
                 <li>Daniel Grobani</li>
+                <li>David Gustafsson</li>
                 <li>Amit Gupta</li>
                 <li>Indranil Das Gupta</li>
                 <li>Michael Hafen</li>
@@ -563,6 +572,7 @@
                 <li>Karl Holten</li>
                 <li>Daniel Holth</li>
                 <li>Andrew Hooper</li>
+                <li>Luke Honiss</li>
                 <li>Alexandra Horsman</li>
                 <li>Tom Houlker</li>
                 <li>Matthew Hunt</li>
@@ -573,20 +583,24 @@
                 <li>Srdjan Jankovic</li>
                 <li>Philippe Jaillon</li>
                 <li><a href="https://www.openhub.net/accounts/kohaaloha">Mason James (3.10 - 3.14 QA Team Member, 3.16, 16.05 Release Maintainer)</a></li>
+                <li>Karen Jen</li>
                 <li>Mike Johnson</li>
                 <li>Donovan Jones</li>
                 <li>Bart Jorgensen</li>
                 <li>Janusz Kaczmarek</li>
                 <li>Koustubha Kale</li>
                 <li>Pasi Kallinen</li>
+                <li>Dimitris Kamenopoulos</li>
                 <li>Peter Crellan Kelly</li>
                 <li>Jorgia Kelsey</li>
                 <li>Olli-Antti Kivilahti</li>
                 <li>Attila Kinali</li>
                 <li>Chris Kirby</li>
                 <li>Ulrich Kleiber</li>
+                <li>Jon Knight</li>
                 <li>Rafal Kopaczka</li>
                 <li>Piotr Kowalski</li>
+                <li>David Kuhn</li>
                 <li>Joonas Kylmälä</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544614275">Henri-Damien Laurent (3.0 Release Maintainer)</a></li>
                 <li>Arnaud Laurin</li>
@@ -597,7 +611,9 @@
                 <li>Gynn Lomax</li>
                 <li>Peter Lorimer</li>
                 <li>Robert Lyon (Corporate Serials)</li>
+                <li>Ere Maijala</li>
                 <li>Merllisia Manueli</li>
+                <li>Florent Mara</li>
                 <li>Francois Marier</li>
                 <li>Patricio Marrone</li>
                 <li>Jesse Maseto</li>
@@ -606,6 +622,7 @@
                 <li>Julian Maurice (3.18, 17.05 QA Team Member; 3.22 Release Maintainer)</li>
                 <li>Remi Mayrand-Provencher</li>
                 <li>Brig C. McCoy</li>
+                <li>Grace McKenzie</li>
                 <li>Tim McMahon</li>
                 <li>Dorian Meid (German translation)</li>
                 <li>Meenakshi. R</li>
@@ -625,6 +642,7 @@
                 <li>Mike Mylonas</li>
                 <li>Natasha ?? [Catalyst Academy]</li>
                 <li>Nadia Nicolaides</li>
+                <li>Nazlı</li>
                 <li>Joy Nelson</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544615991">Chris Nighswonger (3.2 - 3.6 Release Maintainer)</a></li>
                 <li>Brian Norris</li>
@@ -638,9 +656,12 @@
                 <li>Maxime Pelletier</li>
                 <li>Shari Perkins</li>
                 <li>Martin Persson</li>
+                <li>Dominic Pichette</li>
                 <li>Fred Pierre</li>
+                <li>Eric Phetteplace (phette23)</li>
                 <li>Genevieve Plantin</li>
                 <li>Polytechnic University</li>
+                <li>Pongtawat</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544612249">Paul Poulain (2.0, 2.2, 3.8, 3.10 Release Manager; 2.2 Release Maintainer; 3.12 - 16.05 QA Team Member)</a></li>
                 <li>Karam Qubsi</li>
                 <li>Romina Racca</li>
@@ -650,6 +671,7 @@
                 <li>Allen Reinmeyer</li>
                 <li>Serge Renaux</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544785220">Martin Renvoize (3.16 - 17.05 QA Team Member)</a></li>
+                <li>Francesco Rivetti</li>
                 <li>Abby Robertson</li>
                 <li>Waylon Robertson</li>
                 <li>Benjamin Rokseth</li>
@@ -664,16 +686,18 @@
                 <li>Viktor Sarge</li>
                 <li>Alex Sassmannshausen</li>
                 <li>Adrien Saurat</li>
+                <li>Zoe Schoeler</li>
                 <li>Dan Scott</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544619438">Robin Sheat (3.2 - 3.22 Packaging Manager)</a></li>
                 <li>Juhani Seppälä</li>
                 <li>John Seymour</li>
                 <li>Juan Romay Sieira</li>
                 <li>Zach Sim</li>
-                <li>Radek Siman</li>
+                <li>Radek Šiman</li>
                 <li>Silvia Simonetti</li>
                 <li>Savitra Sirohi</li>
                 <li>Pawel Skuza (Polish for 1.2)</li>
+                <li>Emma Smith</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692831733">Fridolin Somers (3.14 Release Maintainer, 17.05 QA Team Member)</a></li>
                 <li>Southeastern University</li>
                 <li>Martin Stenberg</li>
@@ -699,6 +723,8 @@
                 <li>Kathryn Tyree</li>
                 <li>Darrell Ulm</li>
                 <li>Universidad ORT Uruguay (Ernesto Silva, Andres Tarallo)</li>
+                <li>Eric Vantillard </li>
+                <li>Oleg Vasylenko</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618545408147">Marc Véron</a></li>
                 <li>Justin Vos</li>
                 <li>Aleksa Vujicic</li>
@@ -718,6 +744,7 @@
                 <li>Robert Williams</li>
                 <li>James Winter</li>
                 <li>Lars Wirzenius</li>
+                <li>Baptiste Wojtkowski</li>
                 <li>Thomas Wright</li>
                 <li>Jen Zajac</li>
                 <li>Kenza Zaki</li>

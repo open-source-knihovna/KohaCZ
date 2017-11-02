@@ -65,8 +65,15 @@
                                 [% IF field == "emailpro" %]<li>Contact information: <a href="#borrower_emailpro">secondary email address</a></li>[% END %]
                                 [% IF field == "B_email" %]<li>Alternate address information: <a href="#borrower_B_email">email address</a></li>[% END %]
                                 [% IF field == "password_match" %]<li>Passwords do not match! <a href="#password">password</a></li>[% END %]
-                                [% IF field == "password_invalid" %]<li>Password does not meet minimum requirements! <a href="#password">password</a></li>[% END %]
-                                [% IF field == "password_spaces" %]<li>Password contains leading and/or trailing spaces! <a href="#password">password</a></li>[% END %]
+                                [% IF field == "password_too_short" %]
+                                    <li>Password must be at least [% minPasswordLength %] characters long.</li>
+                                [% END %]
+                                [% IF field == "password_too_weak" %]
+                                    <li>Password must contain at least one digit, one lowercase and one uppercase.</li>
+                                [% END %]
+                                [% IF field == "password_has_whitespaces" %]
+                                    <li>Password must not contain leading or trailing whitespaces.</li>
+                                [% END %]
                                 [% IF field == "duplicate_email" %]
                                     <li>This email address already exists in our database.</li>
                                 [% END %]
@@ -799,16 +806,12 @@
                 [% UNLESS action == 'edit' || hidden.defined('password') %]
                     <fieldset class="rows" id="memberentry_password">
                         <legend id="contact_legend">Password</legend>
-                        [% IF Koha.Preference('minPasswordLength') || !mandatory.defined('password') %]
-                            <div class="alert alert-info">
-                                [% IF Koha.Preference('minPasswordLength') %]
-                                    <p>Your password must be at least [% Koha.Preference('minPasswordLength') %] characters long.</p>
-                                [% END %]
-                                [% UNLESS mandatory.defined('password') %]
-                                    <div>If you do not enter a password a system generated password will be created.</div>
-                                [% END %]
-                            </div>
-                        [% END %]
+                        <div class="alert alert-info">
+                            <p>Your password must be at least [% Koha.Preference('minPasswordLength') %] characters long.</p>
+                            [% UNLESS mandatory.defined('password') %]
+                                <div>If you do not enter a password a system generated password will be created.</div>
+                            [% END %]
+                        </div>
 
                         [% IF mandatory.defined('password') %]
                             <ol>
@@ -931,6 +934,8 @@
 [% INCLUDE 'opac-bottom.inc' %]
 [% BLOCK jsinclude %]
     <script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/plugins/jquery.validate.min.js"></script>
+    [% PROCESS 'password_check.inc' %]
+    [% PROCESS 'add_password_check' new_password => 'borrower_password' %]
     <script type="text/javascript">
         //<![CDATA[
         $(document).ready(function() {
@@ -953,6 +958,22 @@
                     },
                     borrower_B_email: {
                         email: true
+                    },
+                    borrower_password: {
+                        [% IF mandatory.defined('password') %]
+                        required: true,
+                        [% END %]
+                        password_strong: true,
+                        password_no_spaces: true
+                    },
+                    borrower_password2: {
+                        [% IF mandatory.defined('password') %]
+                        required: true,
+                        [% END %]
+                        password_match: true
+                    },
+                    captcha: {
+                        required: true,
                     }
                 },
                 submitHandler: function(form) {

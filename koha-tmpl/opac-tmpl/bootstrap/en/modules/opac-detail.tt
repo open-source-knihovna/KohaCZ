@@ -2,6 +2,7 @@
 [% USE Koha %]
 [% USE KohaDates %]
 [% USE Branches %]
+[% USE ColumnsSettings %]
 [% USE AuthorisedValues %]
 [% SET TagsShowEnabled = ( ( Koha.Preference( 'TagsEnabled' ) == 1 ) && TagsShowOnDetail ) %]
 [% SET TagsInputEnabled = ( ( Koha.Preference( 'opacuserlogin' ) == 1 ) && ( Koha.Preference( 'TagsEnabled' ) == 1 ) && TagsInputOnDetail ) %]
@@ -653,7 +654,7 @@
                         [% IF too_many_items %]
                             <p>This record has many physical items ([% items_count %]). <a href="/cgi-bin/koha/opac-detail.pl?biblionumber=[% biblionumber | html %]&amp;viewallitems=1">Click here to view them all.</a></p>
                         [% ELSIF ( itemloop.size ) %]
-                            [% INCLUDE items_table items=itemloop tab="holdings" %]
+                            [% INCLUDE items_table items=itemloop tab="holdings" table_id="holdingst" %]
                             [% IF Koha.Preference('OPACAcquisitionDetails') and acquisition_details.total_quantity > 0 %]
                               [% IF acquisition_details.total_quantity == 1 %]
                                 <span>1 item is on order.</span>
@@ -700,7 +701,7 @@
                     [% IF (SeparateHoldings) %]
                         <div id="otherholdings">
                             [% IF (otheritemloop.size) %]
-                                [% INCLUDE items_table items=otheritemloop tab="otherholdings" %]
+                                [% INCLUDE items_table items=otheritemloop tab="otherholdings" table_id="otherholdingst" %]
                             [% ELSE %]
                                 <span>No other items.</span>
                             [% END %]
@@ -1176,33 +1177,38 @@
 [%# End of template %]
 
 [% BLOCK items_table %]
-    <table class="holdingst table table-bordered table-striped">
+    <table class="table table-bordered table-striped" id="[% table_id %]">
         <thead>
             <tr>
-                [% IF ( item_level_itypes ) %]<th id="item_itemtype" class="itype">Item type</th>[% END %]
-                [% IF ( OpacLocationBranchToDisplay == 'holding' || OpacLocationBranchToDisplay == 'both' || singleBranchMode ) %]
-                    <th id="item_current_location" class="item_location">Current location</th>
-                [% END %]
-                [% UNLESS ( singleBranchMode ) %]
-                    [% IF ( OpacLocationBranchToDisplay == 'home' || OpacLocationBranchToDisplay == 'both' ) %]
-                        <th id="item_home_location" class="item_location">Home library</th>
-                    [% END %]
-                [% END %]
-                [% IF ( itemdata_ccode ) %]<th id="item_ccode" class="collection">Collection</th>[% END %]
-                <th id="item_callnumber" class="call_no">Call number</th>
-                [% IF ( itemdata_enumchron ) %]<th id="item_enumchron" class="vol_info">Vol info</th>[% END %]
-                [% IF ( itemdata_uri ) %]<th id="item_url" class="url">URL</th>[% END %]
-                [% IF ( itemdata_copynumber ) %]<th id="item_copy" class="copynumber">Copy number</th>[% END %]
-                <th id="item_status" class="status">Status</th>
-                [% IF ( itemdata_itemnotes ) %]<th id="item_notes" class="notes">Notes</th>[% END %]
-                <th id="item_datedue" class="date_due">Date due</th>
-                [% IF ( OPACShowBarcode ) %]<th id="item_barcode" class="barcode">Barcode</th>[% END %]
-                [% IF holds_count.defined %]
-                    <th id="item_holds">Item holds</th>
-                [% ELSIF show_priority %]
-                    <th id="item_priority">Item hold queue priority</th>
-                [% END %]
-                [% IF ( ShowCourseReservesHeader ) %]<th id="item_coursereserves">Course reserves</th>[% END %]
+        [% IF ( item_level_itypes ) %]
+                <th id="item_itemtype" data-colname="item_itemtype" class="itype">Item type</th>[% END %]
+        [% IF ( OpacLocationBranchToDisplay == 'holding' || OpacLocationBranchToDisplay == 'both' ) %]
+                <th id="item_current_location" data-colname="item_current_location" class="item_location">Current location</th>[% END %]
+        [% IF ( OpacLocationBranchToDisplay == 'home' || OpacLocationBranchToDisplay == 'both' ) %]
+                <th id="item_home_location" data-colname="item_home_location" class="item_location">Home library</th>[% END %]
+        [% IF ( itemdata_ccode ) %]
+                <th id="item_ccode" data-colname="item_ccode" class="collection">Collection</th>[% END %]
+        [% IF ( Koha.Preference('OpacLocationOnDetail') == 'column' && itemdata_location ) %]
+                <th id="item_shelving_location" data-colname="item_shelving_location" class="shelving_location">Shelving location</th>[% END %]
+                <th id="item_callnumber" data-colname="item_callnumber" class="call_no">Call number</th>
+        [% IF ( itemdata_enumchron ) %]
+                <th id="item_enumchron" data-colname="item_enumchron" class="vol_info">Vol info</th>[% END %]
+        [% IF ( itemdata_uri ) %]
+                <th id="item_url" data-colname="item_url" class="url">URL</th>[% END %]
+        [% IF ( itemdata_copynumber ) %]
+                <th id="item_copy" data-colname="item_copy" class="copynumber">Copy number</th>[% END %]
+                <th id="item_status" data-colname="item_status" class="status">Status</th>
+        [% IF ( itemdata_itemnotes ) %]
+                <th id="item_notes" data-colname="item_notes" class="notes">Notes</th>[% END %]
+                <th id="item_datedue" data-colname="item_datedue" class="date_due">Date due</th>
+                <th id="item_barcode" data-colname="item_barcode" class="barcode">Barcode</th>
+        [% IF holds_count.defined %]
+                <th id="item_holds" data-colname="item_holds">Item holds</th>
+        [% ELSIF show_priority %]
+                <th id="item_priority" data-colname="item_priority">Item hold queue priority</th>
+        [% END %]
+        [% IF ( ShowCourseReservesHeader ) %]
+                <th id="item_coursereserves" data-colname="item_coursereserves">Course reserves</th>[% END %]
             </tr>
         </thead>
         <tbody>
@@ -1222,59 +1228,59 @@
                             [% ITEM_RESULT.description %]
                         </td>
                     [% END %]
-                    [% UNLESS singleBranchMode %]
-                        [% IF ( OpacLocationBranchToDisplay == 'holding' || OpacLocationBranchToDisplay == 'both' ) %]
-                            <td class="location" property="seller">
-                                <link property="itemOffered" href="#record" />
-                                <link property="businessFunction" href="http://purl.org/goodrelations/v1#LeaseOut">
-                                <span class="[% ITEM_RESULT.holding_branch_opac_info ? 'branch-info-tooltip-trigger' : '' %]" title="">
-                                    [% IF ( ITEM_RESULT.branchurl ) %]
-                                        <a href="[% ITEM_RESULT.branchurl %]">[% ITEM_RESULT.branchname %]</a>
-                                    [% ELSE %]
-                                        <span>[% ITEM_RESULT.branchname %]</span>
-                                    [% END %]
-                                </span>
-                                <div class="branch-info-tooltip">[% ITEM_RESULT.holding_branch_opac_info %]</div>
-
-                                [% IF ( OpacLocationBranchToDisplayShelving == 'holding' || OpacLocationBranchToDisplayShelving == 'both' ) %]
-                                    <span class="shelvingloc">[% ITEM_RESULT.location_description %]</span>
+                    [% IF ( OpacLocationBranchToDisplay == 'holding' || OpacLocationBranchToDisplay == 'both' ) %]
+                        <td class="location" property="seller">
+                            <link property="itemOffered" href="#record" />
+                            <link property="businessFunction" href="http://purl.org/goodrelations/v1#LeaseOut">
+                            <span class="[% ITEM_RESULT.holding_branch_opac_info ? 'branch-info-tooltip-trigger' : '' %]" title="">
+                                [% IF ( ITEM_RESULT.branchurl ) %]
+                                    <a href="[% ITEM_RESULT.branchurl %]">[% ITEM_RESULT.branchname %]</a>
+                                [% ELSE %]
+                                    <span>[% ITEM_RESULT.branchname %]</span>
                                 [% END %]
+                            </span>
+                            <div class="branch-info-tooltip">[% ITEM_RESULT.holding_branch_opac_info %]</div>
 
-                            </td>
-                        [% END %]
+                            [% IF ( Koha.Preference('OpacLocationOnDetail') == 'holding' || Koha.Preference('OpacLocationOnDetail') == 'both' ) %]
+                                <span class="shelvingloc">[% ITEM_RESULT.location_description %]</span>
+                            [% END %]
 
-                        [% IF ( OpacLocationBranchToDisplay == 'home' || OpacLocationBranchToDisplay == 'both' ) %]
-                            <td class="location" property="seller">
-                                <link property="itemOffered" href="#record" />
-                                <link property="businessFunction" href="http://purl.org/goodrelations/v1#LeaseOut">
-                                <span class="[% ITEM_RESULT.home_branch_opac_info ? 'branch-info-tooltip-trigger' : '' %]" title="">
-                                    [% IF Branches.GetURL( ITEM_RESULT.homebranch ) %]
-                                        [% home_branch_url = Branches.GetURL( ITEM_RESULT.homebranch ) %]
-                                        [% IF ( home_branch_url ) %]
-                                             <a href="[% home_branch_url %]">[% Branches.GetName( ITEM_RESULT.homebranch ) %]</a>
-                                        [% ELSE %]
-                                            <span>[% Branches.GetName( ITEM_RESULT.homebranch ) %]</span>
-                                        [% END %]
+                        </td>
+                    [% END %]
+
+                    [% IF ( OpacLocationBranchToDisplay == 'home' || OpacLocationBranchToDisplay == 'both' ) %]
+                        <td class="location" property="seller">
+                            <link property="itemOffered" href="#record" />
+                            <link property="businessFunction" href="http://purl.org/goodrelations/v1#LeaseOut">
+                            <span class="[% ITEM_RESULT.home_branch_opac_info ? 'branch-info-tooltip-trigger' : '' %]" title="">
+                                [% IF Branches.GetURL( ITEM_RESULT.homebranch ) %]
+                                    [% home_branch_url = Branches.GetURL( ITEM_RESULT.homebranch ) %]
+                                    [% IF ( home_branch_url ) %]
+                                         <a href="[% home_branch_url %]">[% Branches.GetName( ITEM_RESULT.homebranch ) %]</a>
                                     [% ELSE %]
                                         <span>[% Branches.GetName( ITEM_RESULT.homebranch ) %]</span>
                                     [% END %]
-                                </span>
-                                <div class="branch-info-tooltip">[% ITEM_RESULT.home_branch_opac_info %]</div>
-
-                                [% IF ( OpacLocationBranchToDisplayShelving == 'home' || OpacLocationBranchToDisplayShelving == 'both' ) %]
-                                    <span class="shelvingloc">[% ITEM_RESULT.location_description %]</span>
+                                [% ELSE %]
+                                    <span>[% Branches.GetName( ITEM_RESULT.homebranch ) %]</span>
                                 [% END %]
+                            </span>
+                            <div class="branch-info-tooltip">[% ITEM_RESULT.home_branch_opac_info %]</div>
 
-                            </td>
-                        [% END %]
+                            [% IF ( Koha.Preference('OpacLocationOnDetail') == 'home' || Koha.Preference('OpacLocationOnDetail') == 'both' ) %]
+                                <span class="shelvingloc">[% ITEM_RESULT.location_description %]</span>
+                            [% END %]
 
-                    [% ELSE %]
-                         <td class="location"><span class="shelvingloc">[% ITEM_RESULT.location_description %]</span></td>
+                        </td>
                     [% END %]
 
                     [% IF ( itemdata_ccode ) %]
                         <td class="collection">[% ITEM_RESULT.ccode %]</td>
                     [% END %]
+
+                    [% IF ( Koha.Preference('OpacLocationOnDetail') == 'column' && itemdata_location ) %]
+                        <td class="shelving_location">[% ITEM_RESULT.location_description %]</td>
+                    [% END %]
+
                     <td class="call_no" property="sku">
                         [% IF ( ITEM_RESULT.itemcallnumber ) %]
                             [% ITEM_RESULT.itemcallnumber %]
@@ -1329,7 +1335,7 @@
                     <td class="status">[% INCLUDE 'item-status-schema-org.inc' item = ITEM_RESULT %][% INCLUDE 'item-status.inc' item = ITEM_RESULT %]</td>
                     [% IF ( itemdata_itemnotes ) %]<td class="notes" property="description">[% ITEM_RESULT.itemnotes %]</td>[% END %]
                     <td class="date_due"><span title="[% ITEM_RESULT.datedue %]">[% ITEM_RESULT.datedue | $KohaDates as_due_date => 1 %]</span></td>
-                    [% IF ( OPACShowBarcode ) %]<td class="barcode" property="serialNumber">[% ITEM_RESULT.barcode %]</td>[% END %]
+                        <td class="barcode" property="serialNumber">[% ITEM_RESULT.barcode %]</td>
                     [% IF holds_count.defined || show_priority %]
                         <td class="holds_count">
                             [% IF holds_count.defined %] [% ITEM_RESULT.holds_count %] [% END %]
@@ -1368,6 +1374,7 @@
 
 [% BLOCK jsinclude %]
 [% INCLUDE 'datatables.inc' %]
+[% INCLUDE 'columns_settings.inc' %]
 [% IF ( SocialNetworks ) %]
     <script type="text/javascript" src="https://apis.google.com/js/plusone.js">
     //<![CDATA[
@@ -1434,6 +1441,27 @@
                 return element.html();
             }
         });
+
+        var columns_settings = [% ColumnsSettings.GetColumns( 'opac', 'biblio-detail', 'holdingst', 'json' ) %];
+
+        KohaTable("#holdingst", {
+            dom: 'B<"clearfix">t',
+            "columnDefs": [
+                { "aTargets": [ -1 ], "bSortable": false, "bSearchable": false },
+                { "sType": "title-string", "aTargets" : [ "title-string" ] }
+                ],
+            "bKohaColumnsUseNames": true
+        }, columns_settings);
+
+        KohaTable("#otherholdingst", {
+            dom: 'B<"clearfix">t',
+            "columnDefs": [
+                { "aTargets": [ -1 ], "bSortable": false, "bSearchable": false },
+                { "sType": "title-string", "aTargets" : [ "title-string" ] }
+                ],
+            "bKohaColumnsUseNames": true
+        }, columns_settings);
+
 [% IF ( TagsInputEnabled && loggedinusername ) %]
         $(".tag_add").click(function(){
             var thisid = $(this).attr("id");
@@ -1476,31 +1504,6 @@
         [% ELSE %]
             var default_order_index = 0;
         [% END %]
-        $(".holdingst").dataTable($.extend(true, {}, dataTablesDefaults, {
-            "aoColumns": [
-                [% IF ( item_level_itypes ) %]null,[% END %]
-                [% IF ( OpacLocationBranchToDisplay == 'holding' || OpacLocationBranchToDisplay == 'both' || singleBranchMode ) %]null,[% END %]
-                [% UNLESS ( singleBranchMode ) %]
-                    [% IF ( OpacLocationBranchToDisplay == 'home' || OpacLocationBranchToDisplay == 'both' ) %]null,[% END %]
-                [% END %]
-                [% IF ( itemdata_ccode ) %]null,[% END %]
-                null,
-                [% IF ( itemdata_enumchron ) %]null,[% END %]
-                [% IF ( itemdata_uri ) %]null,[% END %]
-                [% IF ( itemdata_copynumber ) %]null,[% END %]
-                null,
-                [% IF ( itemdata_itemnotes ) %]null,[% END %]
-                { "sType": "title-string" },
-                [% IF ( OPACShowBarcode ) %]null,[% END %]
-                [% IF holds_count.defined %]
-                    null,
-                [% ELSIF show_priority %]
-                    null,
-                [% END %]
-                [% IF ( ShowCourseReservesHeader ) %]null,[% END %]
-            ],
-            "aaSorting": [[ default_order_index, 'asc' ]]
-        }));
 
         [% IF ( query_desc ) %][% IF ( OpacHighlightedWords ) %]var query_desc = "[% query_desc |replace("'", "\'") |replace('\n', '\\n') |replace('\r', '\\r') |html %]";
             q_array = query_desc.split(" ");

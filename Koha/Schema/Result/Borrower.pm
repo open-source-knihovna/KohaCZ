@@ -33,7 +33,7 @@ __PACKAGE__->table("borrowers");
 
   data_type: 'varchar'
   is_nullable: 1
-  size: 16
+  size: 32
 
 =head2 surname
 
@@ -457,7 +457,7 @@ __PACKAGE__->add_columns(
   "borrowernumber",
   { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "cardnumber",
-  { data_type => "varchar", is_nullable => 1, size => 16 },
+  { data_type => "varchar", is_nullable => 1, size => 32 },
   "surname",
   { data_type => "mediumtext", is_nullable => 0 },
   "firstname",
@@ -706,21 +706,6 @@ Related object: L<Koha::Schema::Result::Accountline>
 __PACKAGE__->has_many(
   "accountlines",
   "Koha::Schema::Result::Accountline",
-  { "foreign.borrowernumber" => "self.borrowernumber" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
-=head2 accountoffsets
-
-Type: has_many
-
-Related object: L<Koha::Schema::Result::Accountoffset>
-
-=cut
-
-__PACKAGE__->has_many(
-  "accountoffsets",
-  "Koha::Schema::Result::Accountoffset",
   { "foreign.borrowernumber" => "self.borrowernumber" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
@@ -1386,8 +1371,8 @@ Composing rels: L</aqorder_users> -> ordernumber
 __PACKAGE__->many_to_many("ordernumbers", "aqorder_users", "ordernumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-09-19 03:00:28
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ZZDjvikajGC+2s4vkp9stw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-10-27 13:24:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:vWgO9UIYOpDt7Pp09KFcYA
 
 __PACKAGE__->belongs_to(
     "guarantor",

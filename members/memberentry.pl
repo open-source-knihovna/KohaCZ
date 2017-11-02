@@ -37,6 +37,7 @@ use C4::Koha;
 use C4::Log;
 use C4::Letters;
 use C4::Form::MessagingPreferences;
+use Koha::AuthUtils;
 use Koha::AuthorisedValues;
 use Koha::Patron::Debarments;
 use Koha::Cities;
@@ -107,7 +108,7 @@ my $userenv = C4::Context->userenv;
 
 ## Deal with debarments
 $template->param(
-    debarments => GetDebarments( { borrowernumber => $borrowernumber } ) );
+    debarments => scalar GetDebarments( { borrowernumber => $borrowernumber } ) );
 my @debarments_to_remove = $input->multi_param('remove_debarment');
 foreach my $d ( @debarments_to_remove ) {
     DelDebarment( $d );
@@ -132,9 +133,6 @@ if ( $input->param('add_debarment') ) {
 }
 
 $template->param("uppercasesurnames" => C4::Context->preference('uppercasesurnames'));
-
-my $minpw = C4::Context->preference('minPasswordLength');
-$template->param("minPasswordLength" => $minpw);
 
 # function to designate mandatory fields (visually with css)
 my $check_BorrowerMandatoryField=C4::Context->preference("BorrowerMandatoryField");
@@ -356,11 +354,19 @@ if ($op eq 'save' || $op eq 'insert'){
   unless (Check_Userid($userid,$borrowernumber)) {
     push @errors, "ERROR_login_exist";
   }
-  
+
   my $password = $input->param('password');
   my $password2 = $input->param('password2');
   push @errors, "ERROR_password_mismatch" if ( $password ne $password2 );
-  push @errors, "ERROR_short_password" if( $password && $minpw && $password ne '****' && (length($password) < $minpw) );
+
+  if ( $password and $password ne '****' ) {
+      my ( $is_valid, $error ) = Koha::AuthUtils::is_password_valid( $password );
+      unless ( $is_valid ) {
+          push @errors, 'ERROR_password_too_short' if $error eq 'too_short';
+          push @errors, 'ERROR_password_too_weak' if $error eq 'too_weak';
+          push @errors, 'ERROR_password_has_whitespaces' if $error eq 'has_whitespaces';
+      }
+  }
 
   # Validate emails
   my $emailprimary = $input->param('email');
@@ -517,10 +523,18 @@ if ((!$nok) and $nodouble and ($op eq 'insert' or $op eq 'save')){
             C4::Form::MessagingPreferences::handle_form_action($input, { borrowernumber => $borrowernumber }, $template);
         }
 	}
-	print scalar ($destination eq "circ") ? 
-		$input->redirect("/cgi-bin/koha/circ/circulation.pl?borrowernumber=$borrowernumber") :
-		$input->redirect("/cgi-bin/koha/members/moremember.pl?borrowernumber=$borrowernumber") ;
-	exit;		# You can only send 1 redirect!  After that, content or other headers don't matter.
+
+    if ( $destination eq 'circ' and not C4::Auth::haspermission( C4::Context->userenv->{id}, { circulate => 'circulate_remaining_permissions' } ) ) {
+        # If we want to redirect to circulation.pl and need to check if the logged in user has the necessary permission
+        $destination = 'not_circ';
+    }
+    print scalar( $destination eq "circ" )
+      ? $input->redirect(
+        "/cgi-bin/koha/circ/circulation.pl?borrowernumber=$borrowernumber")
+      : $input->redirect(
+        "/cgi-bin/koha/members/moremember.pl?borrowernumber=$borrowernumber"
+      );
+    exit; # You can only send 1 redirect!  After that, content or other headers don't matter.
 }
 
 if ($delete){

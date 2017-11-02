@@ -80,7 +80,7 @@ Patrons:
            choices:
                yes: "Allow"
                no: "Don't allow"
-         - "staff to access a patron's checkout history (reading history is still stored, regardless of staff being allowed access or not)."
+         - "staff to access a patron's checkout and hold history (reading history is still stored, regardless of staff being allowed access or not)."
      -
          - The late fine for all checkouts will only go up to
          - pref: MaxFine
@@ -92,6 +92,13 @@ Patrons:
          - pref: minPasswordLength
            class: integer
          - characters long.
+     -
+         - pref: RequireStrongPassword
+           choices:
+               yes: "Require"
+               no: "Don't require"
+         - a strong password for staff and patrons
+         - (Must contain at least one digit, one lowercase and one uppercase).
      -
          - Show a notice if the patron is about to expire or has expired
          - pref: NotifyBorrowerDeparture
@@ -170,7 +177,7 @@ Patrons:
          - Card numbers for patrons must be
          - pref: CardnumberLength
          - "characters long. The length can be a single number to specify an exact length, a range separated by a comma (i.e., 'Min,Max'), or a maximum with no minimum (i.e., ',Max')."
-         - "If 'cardnumber' is included in the BorrowerMandatoryField list, the minimum length, if not specified here, defaults to one. Maximum cannot be bigger than the database field size."
+         - "If 'cardnumber' is included in the BorrowerMandatoryField list, the minimum length, if not specified here, defaults to one. Maximum cannot be bigger than the database field size of 32."
      -
          - pref: useDischarge
            choices:

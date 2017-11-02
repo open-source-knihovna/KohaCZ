@@ -15,6 +15,7 @@ use C4::Members;
 use C4::Circulation;
 use CGI qw ( -utf8 );
 use C4::Members::Attributes qw(GetBorrowerAttributes);
+use Koha::AuthUtils;
 use Koha::Token;
 
 use Koha::Patrons;
@@ -74,10 +75,16 @@ if ( ( $member ne $loggedinuser ) && ( $category_type eq 'S' ) ) {
 
 push( @errors, 'NOMATCH' ) if ( ( $newpassword && $newpassword2 ) && ( $newpassword ne $newpassword2 ) );
 
-my $minpw = C4::Context->preference('minPasswordLength');
-push( @errors, 'SHORTPASSWORD' ) if ( $newpassword && $minpw && ( length($newpassword) < $minpw ) );
+if ( $newpassword and not @errors ) {
+    my ( $is_valid, $error ) = Koha::AuthUtils::is_password_valid( $newpassword );
+    unless ( $is_valid ) {
+        push @errors, 'ERROR_password_too_short' if $error eq 'too_short';
+        push @errors, 'ERROR_password_too_weak' if $error eq 'too_weak';
+        push @errors, 'ERROR_password_has_whitespaces' if $error eq 'has_whitespaces';
+    }
+}
 
-if ( $newpassword && !scalar(@errors) ) {
+if ( $newpassword and not @errors) {
 
     die "Wrong CSRF token"
         unless Koha::Token->new->check_csrf({
@@ -100,18 +107,6 @@ if ( $newpassword && !scalar(@errors) ) {
     else {
         push( @errors, 'BADUSERID' );
     }
-}
-else {
-    my $userid = $bor->{'userid'};
-
-    my $chars              = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    my $length             = int( rand(2) ) + C4::Context->preference("minPasswordLength");
-    my $defaultnewpassword = '';
-    for ( my $i = 0 ; $i < $length ; $i++ ) {
-        $defaultnewpassword .= substr( $chars, int( rand( length($chars) ) ), 1 );
-    }
-
-    $template->param( defaultnewpassword => $defaultnewpassword );
 }
 
 if ( $category_type eq 'C') {
@@ -158,7 +153,6 @@ $template->param(
     userid                     => $bor->{'userid'},
     destination                => $destination,
     is_child                   => ( $category_type eq 'C' ),
-    minPasswordLength          => $minpw,
     RoutingSerials             => C4::Context->preference('RoutingSerials'),
     csrf_token                 => Koha::Token->new->generate_csrf({ session_id => scalar $input->cookie('CGISESSID'), }),
 );

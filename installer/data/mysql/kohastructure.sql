@@ -568,7 +568,7 @@ CREATE TABLE `deletedbiblioitems` ( -- information about bibliographic records t
 DROP TABLE IF EXISTS `deletedborrowers`;
 CREATE TABLE `deletedborrowers` ( -- stores data related to the patrons/borrowers you have deleted
   `borrowernumber` int(11) NOT NULL default 0, -- primary key, Koha assigned ID number for patrons/borrowers
-  `cardnumber` varchar(16) default NULL, -- unique key, library assigned ID number for patrons/borrowers
+  `cardnumber` varchar(32) default NULL, -- unique key, library assigned ID number for patrons/borrowers
   `surname` mediumtext NOT NULL, -- patron/borrower's last name (surname)
   `firstname` text, -- patron/borrower's first name
   `title` mediumtext, -- patron/borrower's title, for example: Mr. or Mrs.
@@ -988,7 +988,9 @@ DROP TABLE IF EXISTS `itemtypes`;
 CREATE TABLE `itemtypes` ( -- defines the item types
   itemtype varchar(10) NOT NULL default '', -- unique key, a code associated with the item type
   description mediumtext, -- a plain text explanation of the item type
-  rentalcharge double(16,4) default NULL, -- the amount charged when this item is checked out/issued
+  rentalcharge decimal(28,6) default NULL, -- the amount charged when this item is checked out/issued
+  defaultreplacecost decimal(28,6) default NULL, -- default replacement cost
+  processfee decimal(28,6) default NULL, -- default text be recorded in the column note when the processing fee is applied
   notforloan smallint(6) default NULL, -- 1 if the item is not for loan, 0 if the item is available for loan
   imageurl varchar(200) default NULL, -- URL for the item type icon
   summary text, -- information from the summary field, may include HTML
@@ -1383,7 +1385,7 @@ CREATE TABLE pending_offline_operations (
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `action` varchar(10) NOT NULL,
   barcode varchar(20) DEFAULT NULL,
-  cardnumber varchar(16) DEFAULT NULL,
+  cardnumber varchar(32) DEFAULT NULL,
   amount decimal(28,6) DEFAULT NULL,
   PRIMARY KEY (operationid)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -1612,7 +1614,7 @@ CREATE TABLE `sms_providers` (
 DROP TABLE IF EXISTS `borrowers`;
 CREATE TABLE `borrowers` ( -- this table includes information about your patrons/borrowers/members
   `borrowernumber` int(11) NOT NULL auto_increment, -- primary key, Koha assigned ID number for patrons/borrowers
-  `cardnumber` varchar(16) default NULL, -- unique key, library assigned ID number for patrons/borrowers
+  `cardnumber` varchar(32) default NULL, -- unique key, library assigned ID number for patrons/borrowers
   `surname` mediumtext NOT NULL, -- patron/borrower's last name (surname)
   `firstname` text, -- patron/borrower's first name
   `title` mediumtext, -- patron/borrower's title, for example: Mr. or Mrs.
@@ -2506,7 +2508,7 @@ CREATE TABLE `tmp_holdsqueue` (
   `firstname` text,
   `phone` text,
   `borrowernumber` int(11) NOT NULL,
-  `cardnumber` varchar(16) default NULL,
+  `cardnumber` varchar(32) default NULL,
   `reservedate` date default NULL,
   `title` mediumtext,
   `itemcallnumber` varchar(255) default NULL,
@@ -2774,17 +2776,31 @@ CREATE TABLE `accountlines` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Table structure for table `accountoffsets`
+-- Table structure for table `account_offset_types`
 --
 
-DROP TABLE IF EXISTS `accountoffsets`;
-CREATE TABLE `accountoffsets` (
-  `borrowernumber` int(11) NOT NULL default 0,
-  `accountno` smallint(6) NOT NULL default 0,
-  `offsetaccount` smallint(6) NOT NULL default 0,
-  `offsetamount` decimal(28,6) default NULL,
-  `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  CONSTRAINT `accountoffsets_ibfk_1` FOREIGN KEY (`borrowernumber`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE CASCADE ON UPDATE CASCADE
+DROP TABLE IF EXISTS `account_offset_types`;
+CREATE TABLE `account_offset_types` (
+  `type` varchar(16) NOT NULL, -- The type of offset this is
+  PRIMARY KEY (`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table structure for table `account_offsets`
+--
+
+DROP TABLE IF EXISTS `account_offsets`;
+CREATE TABLE `account_offsets` (
+  `id` int(11) NOT NULL auto_increment, -- unique identifier for each offset
+  `credit_id` int(11) NULL DEFAULT NULL, -- The id of the accountline the increased the patron's balance
+  `debit_id` int(11) NULL DEFAULT NULL, -- The id of the accountline that decreased the patron's balance
+  `type` varchar(16) NOT NULL, -- The type of offset this is
+  `amount` decimal(26,6) NOT NULL, -- The amount of the change
+  `created_on` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `account_offsets_ibfk_p` FOREIGN KEY (`credit_id`) REFERENCES `accountlines` (`accountlines_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `account_offsets_ibfk_f` FOREIGN KEY (`debit_id`) REFERENCES `accountlines` (`accountlines_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `account_offsets_ibfk_t` FOREIGN KEY (`type`) REFERENCES `account_offset_types` (`type`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -3426,7 +3442,7 @@ CREATE TABLE IF NOT EXISTS `borrower_modifications` (
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `verification_token` varchar(255) NOT NULL DEFAULT '',
   `borrowernumber` int(11) NOT NULL DEFAULT '0',
-  `cardnumber` varchar(16) DEFAULT NULL,
+  `cardnumber` varchar(32) DEFAULT NULL,
   `surname` mediumtext,
   `firstname` text,
   `title` mediumtext,
@@ -3960,6 +3976,7 @@ CREATE TABLE IF NOT EXISTS `housebound_role` (
 -- Table structure for table 'article_requests'
 --
 
+DROP TABLE IF EXISTS `article_requests`;
 CREATE TABLE `article_requests` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `borrowernumber` int(11) NOT NULL,
@@ -3993,6 +4010,7 @@ CREATE TABLE `article_requests` (
 -- Table structure for table `biblio_metadata`
 --
 
+DROP TABLE IF EXISTS `biblio_metadata`;
 CREATE TABLE biblio_metadata (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `biblionumber` INT(11) NOT NULL,
@@ -4008,6 +4026,7 @@ CREATE TABLE biblio_metadata (
 -- Table structure for table `deletedbiblio_metadata`
 --
 
+DROP TABLE IF EXISTS `deletedbiblio_metadata`;
 CREATE TABLE deletedbiblio_metadata (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `biblionumber` INT(11) NOT NULL,

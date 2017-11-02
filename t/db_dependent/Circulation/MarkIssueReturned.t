@@ -17,44 +17,74 @@
 
 use Modern::Perl;
 
-use Test::More tests => 2;
+use Test::More tests => 6;
 use Test::Warn;
 
 use t::lib::Mocks;
 use t::lib::TestBuilder;
 
 use C4::Circulation;
+use C4::Context;
 use C4::Members;
-use Koha::Library;
+use Koha::Checkouts;
+use Koha::Database;
 
 my $schema = Koha::Database->schema;
-my $dbh = C4::Context->dbh;
-
 $schema->storage->txn_begin;
 
 my $builder = t::lib::TestBuilder->new;
 
-t::lib::Mocks::mock_preference('AnonymousPatron', '');
+my $library = $builder->build({ source => 'Branch' });
 
-my $branchcode = $builder->build({ source => 'Branch' })->{ branchcode };
-my $categorycode = $builder->build({ source => 'Category' })->{ categorycode };
+C4::Context->_new_userenv('xxx');
+C4::Context->set_userenv(0,0,0,'firstname','surname', $library->{branchcode}, $library->{branchname}, '', '', '');
 
-my %item_branch_infos = (
-    homebranch => $branchcode,
-    holdingbranch => $branchcode,
+my $patron_category = $builder->build({ source => 'Category', value => { categorycode => 'NOT_X', category_type => 'P', enrolmentfee => 0 } });
+my $patron = $builder->build({ source => 'Borrower', value => { branchcode => $library->{branchcode}, categorycode => $patron_category->{categorycode} } } );
+
+my $biblioitem = $builder->build( { source => 'Biblioitem' } );
+my $item = $builder->build(
+    {
+        source => 'Item',
+        value  => {
+            homebranch    => $library->{branchcode},
+            holdingbranch => $library->{branchcode},
+            notforloan    => 0,
+            itemlost      => 0,
+            withdrawn     => 0,
+            biblionumber  => $biblioitem->{biblionumber},
+        }
+    }
 );
 
-my $borrowernumber = AddMember( categorycode => $categorycode, branchcode => $branchcode );
+subtest 'anonymous patron' => sub {
+    plan tests => 2;
+    # The next call will raise an error, because data are not correctly set
+    t::lib::Mocks::mock_preference('AnonymousPatron', '');
+    my $issue = C4::Circulation::AddIssue( $patron, $item->{barcode} );
+    eval { C4::Circulation::MarkIssueReturned( $patron->{borrowernumber}, $item->{itemnumber}, 'dropbox_branch', 'returndate', 2 ) };
+    like ( $@, qr<Fatal error: the patron \(\d+\) .* AnonymousPatron>, 'AnonymousPatron is not set - Fatal error on anonymization' );
+    Koha::Checkouts->find( $issue->issue_id )->delete;
 
-eval { C4::Circulation::MarkIssueReturned( $borrowernumber, 'itemnumber', 'dropbox_branch', 'returndate', 2 ) };
-like ( $@, qr<Fatal error: the patron \(\d+\) .* AnonymousPatron>, );
+    my $anonymous_borrowernumber = C4::Members::AddMember( categorycode => $patron_category->{categorycode}, branchcode => $library->{branchcode} );
+    t::lib::Mocks::mock_preference('AnonymousPatron', $anonymous_borrowernumber);
+    $issue = C4::Circulation::AddIssue( $patron, $item->{barcode} );
+    eval { C4::Circulation::MarkIssueReturned( $patron->{borrowernumber}, $item->{itemnumber}, 'dropbox_branch', 'returndate', 2 ) };
+    is ( $@, q||, 'AnonymousPatron is set correctly - no error expected');
+};
 
-my $anonymous_borrowernumber = AddMember( categorycode => $categorycode, branchcode => $branchcode );
-t::lib::Mocks::mock_preference('AnonymousPatron', $anonymous_borrowernumber);
-# The next call will raise an error, because data are not correctly set
-$dbh->{PrintError} = 0;
-eval { C4::Circulation::MarkIssueReturned( $borrowernumber, 'itemnumber', 'dropbox_branch', 'returndate', 2 ) };
-unlike ( $@, qr<Fatal error: the patron \(\d+\) .* AnonymousPatron>, );
+my ( $issue_id, $issue );
+# The next call will return undef for invalid item number
+eval { $issue_id = C4::Circulation::MarkIssueReturned( $patron->{borrowernumber}, 'invalid_itemnumber', 'dropbox_branch', 'returndate', 0 ) };
+is( $@, '', 'No die triggered by invalid itemnumber' );
+is( $issue_id, undef, 'No issue_id returned' );
+
+# In the next call we return the item and try it another time
+$issue = C4::Circulation::AddIssue( $patron, $item->{barcode} );
+eval { $issue_id = C4::Circulation::MarkIssueReturned( $patron->{borrowernumber}, $item->{itemnumber}, undef, undef, 0 ) };
+is( $issue_id, $issue->issue_id, "Item has been returned (issue $issue_id)" );
+eval { $issue_id = C4::Circulation::MarkIssueReturned( $patron->{borrowernumber}, $item->{itemnumber}, undef, undef, 0 ) };
+is( $@, '', 'No crash on returning item twice' );
+is( $issue_id, undef, 'Cannot return an item twice' );
 
 $schema->storage->txn_rollback;
-

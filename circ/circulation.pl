@@ -380,7 +380,7 @@ if (@$barcodes) {
         }
     }
 
-    unless( $onsite_checkout and C4::Context->preference("OnSiteCheckoutsForce") ) {
+    if ( $error->{UNKNOWN_BARCODE} or not $onsite_checkout or not C4::Context->preference("OnSiteCheckoutsForce") ) {
         delete $question->{'DEBT'} if ($debt_confirmed);
         foreach my $impossible ( keys %$error ) {
             $template_params->{$impossible} = $$error{$impossible};
@@ -388,7 +388,8 @@ if (@$barcodes) {
             $blocker = 1;
         }
     }
-    if( !$blocker || $force_allow_issue ){
+
+    if( $item and ( !$blocker or $force_allow_issue ) ){
         my $confirm_required = 0;
         unless($issueconfirmed){
             #  Get the item title for more information
@@ -660,7 +661,7 @@ $template->param(
     debt_confirmed            => $debt_confirmed,
     SpecifyDueDate            => $duedatespec_allow,
     CircAutocompl             => C4::Context->preference("CircAutocompl"),
-    debarments                => GetDebarments({ borrowernumber => $borrowernumber }),
+    debarments                => scalar GetDebarments({ borrowernumber => $borrowernumber }),
     todaysdate                => output_pref( { dt => dt_from_string()->set(hour => 23)->set(minute => 59), dateformat => 'sql' } ),
     has_modifications         => $has_modifications,
     override_high_holds       => $override_high_holds,

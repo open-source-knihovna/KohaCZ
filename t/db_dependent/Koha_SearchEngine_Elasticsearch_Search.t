@@ -81,7 +81,7 @@ subtest 'json2marc' => sub {
 };
 
 subtest 'build_query tests' => sub {
-    plan tests => 6;
+    plan tests => 18;
 
     t::lib::Mocks::mock_preference('DisplayLibraryFacets','both');
     my $query = $builder->build_query();
@@ -101,5 +101,96 @@ subtest 'build_query tests' => sub {
         'homebranch added to facets if DisplayLibraryFacets=home' );
     ok( !defined $query->{aggregations}{holdingbranch},
         'holdingbranch not added to facets if DisplayLibraryFacets=home' );
+
+    t::lib::Mocks::mock_preference( 'QueryAutoTruncate', '' );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['donald duck'] );
+    is(
+        $query->{query}{query_string}{query},
+        "(donald duck)",
+        "query not altered if QueryAutoTruncate disabled"
+    );
+
+    t::lib::Mocks::mock_preference( 'QueryAutoTruncate', '1' );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['donald duck'] );
+    is(
+        $query->{query}{query_string}{query},
+        "(donald* duck*)",
+        "simple query is auto truncated when QueryAutoTruncate enabled"
+    );
+
+    # Ensure reserved words are not truncated
+    ( undef, $query ) = $builder->build_query_compat( undef,
+        ['donald or duck and mickey not mouse'] );
+    is(
+        $query->{query}{query_string}{query},
+        "(donald* or duck* and mickey* not mouse*)",
+        "reserved words are not affected by QueryAutoTruncate"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['donald* duck*'] );
+    is(
+        $query->{query}{query_string}{query},
+        "(donald* duck*)",
+        "query with '*' is unaltered when QueryAutoTruncate is enabled"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['donald duck and the mouse'] );
+    is(
+        $query->{query}{query_string}{query},
+        "(donald* duck* and the* mouse*)",
+        "individual words are all truncated and stopwords ignored"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['*'] );
+    is(
+        $query->{query}{query_string}{query},
+        "(*)",
+        "query of just '*' is unaltered when QueryAutoTruncate is enabled"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['"donald duck"'] );
+    is(
+        $query->{query}{query_string}{query},
+        '("donald duck")',
+        "query with quotes is unaltered when QueryAutoTruncate is enabled"
+    );
+
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['"donald duck" and "the mouse"'] );
+    is(
+        $query->{query}{query_string}{query},
+        '("donald duck" and "the mouse")',
+        "all quoted strings are unaltered if more than one in query"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['barcode:123456'] );
+    is(
+        $query->{query}{query_string}{query},
+        '(barcode:123456*)',
+        "query of specific field is truncated"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['title:"donald duck"'] );
+    is(
+        $query->{query}{query_string}{query},
+        '(title:"donald duck")',
+        "query of specific field is not truncated when surrouned by quotes"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['title:"donald duck"'], undef, undef, undef, undef, undef, { suppress => 1 } );
+    is(
+        $query->{query}{query_string}{query},
+        '(title:"donald duck") AND suppress:0',
+        "query of specific field is added AND suppress:0"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['title:"donald duck"'], undef, undef, undef, undef, undef, { suppress => 0 } );
+    is(
+        $query->{query}{query_string}{query},
+        '(title:"donald duck")',
+        "query of specific field is not added AND suppress:0"
+    );
 };
 

@@ -7,7 +7,7 @@ use t::lib::TestBuilder;
 
 use C4::Context;
 
-use Test::More tests => 53;
+use Test::More tests => 54;
 use MARC::Record;
 use C4::Biblio;
 use C4::Items;
@@ -121,6 +121,7 @@ ok( $hold_branch == $hold->branch(), "branch method returns stashed branch" );
 my $hold_found = $hold->found();
 $hold->set({ found => 'W'})->store();
 is( Koha::Holds->waiting()->count(), 1, "Koha::Holds->waiting returns waiting holds" );
+is( Koha::Holds->unfilled()->count(), 4, "Koha::Holds->unfilled returns unfilled holds" );
 
 my $patron = Koha::Patrons->find( $borrowernumbers[0] );
 $holds = $patron->holds;
@@ -361,18 +362,18 @@ $dbh->do(q{
 ($item_bibnum, $item_bibitemnum, $itemnumber) = AddItem(
     { homebranch => $branch_1, holdingbranch => $branch_1, itype => 'CANNOT' } , $bibnum);
 is(CanItemBeReserved($borrowernumbers[0], $itemnumber), 'notReservable',
-    "CanItemBeReserved should returns 'notReservable'");
+    "CanItemBeReserved should return 'notReservable'");
 
 ($item_bibnum, $item_bibitemnum, $itemnumber) = AddItem(
     { homebranch => $branch_2, holdingbranch => $branch_1, itype => 'CAN' } , $bibnum);
 is(CanItemBeReserved($borrowernumbers[0], $itemnumber),
     'cannotReserveFromOtherBranches',
-    "CanItemBeReserved should returns 'cannotReserveFromOtherBranches'");
+    "CanItemBeReserved should return 'cannotReserveFromOtherBranches'");
 
 ($item_bibnum, $item_bibitemnum, $itemnumber) = AddItem(
     { homebranch => $branch_1, holdingbranch => $branch_1, itype => 'CAN' } , $bibnum);
 is(CanItemBeReserved($borrowernumbers[0], $itemnumber), 'OK',
-    "CanItemBeReserved should returns 'OK'");
+    "CanItemBeReserved should return 'OK'");
 
 # Bug 12632
 t::lib::Mocks::mock_preference( 'item-level_itypes',     1 );

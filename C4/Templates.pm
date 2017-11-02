@@ -25,7 +25,7 @@ use List::MoreUtils qw/ any uniq /;
 
 =head1 NAME 
 
-    Koha::Templates - Object for manipulating templates for use with Koha
+C4::Templates - Object for manipulating templates for use with Koha
 
 =cut
 
@@ -37,6 +37,7 @@ use C4::Languages qw(getTranslatedLanguages get_bidi regex_lang_subtags language
 use C4::Context;
 
 use Koha::Cache::Memory::Lite;
+use Koha::Exceptions;
 
 __PACKAGE__->mk_accessors(qw( theme activethemes preferredtheme lang filename htdocs interface vars));
 
@@ -162,20 +163,50 @@ sub _get_template_file {
     my $htdocs = C4::Context->config($is_intranet ? 'intrahtdocs' : 'opachtdocs');
     my ($theme, $lang, $availablethemes) = themelanguage($htdocs, $tmplbase, $interface, $query);
     $lang //= 'en';
-    my $filename = "$htdocs/$theme/$lang/modules/$tmplbase";
+    $theme //= '';
+    $tmplbase = "$htdocs/$theme/$lang/modules/$tmplbase" if $tmplbase !~ /^\//;
+        # do not prefix an absolute path
 
-    return ($htdocs, $theme, $lang, $filename);
+    return ( $htdocs, $theme, $lang, $tmplbase );
 }
 
+=head2 badtemplatecheck
+
+    badtemplatecheck( $template_path );
+
+    The sub will throw an exception if the template path is not allowed.
+
+    Note: At this moment the sub is actually a helper routine for
+    sub gettemplate.
+
+=cut
+
+sub badtemplatecheck {
+    my ( $template ) = @_;
+    if( !$template || $template !~ m/^[a-zA-Z0-9_\-\/]+\.(tt|pref)$/ ) {
+        # This also includes two dots
+        Koha::Exceptions::NoPermission->throw( 'bad template path' );
+    } else {
+        # Check allowed dirs
+        my $dirs = C4::Context->config("pluginsdir");
+        $dirs = [ $dirs ] if !ref($dirs);
+        unshift @$dirs, C4::Context->config('opachtdocs'), C4::Context->config('intrahtdocs');
+        my $found = 0;
+        foreach my $dir ( @$dirs ) {
+            $dir .= '/' if $dir !~ m/\/$/;
+            $found++ if $template =~ m/^$dir/;
+            last if $found;
+        }
+        Koha::Exceptions::NoPermission->throw( 'bad template path' ) if !$found;
+    }
+}
 
 sub gettemplate {
-    my ( $tmplbase, $interface, $query, $is_plugin ) = @_;
+    my ( $tmplbase, $interface, $query ) = @_;
     ($query) or warn "no query in gettemplate";
-    die "bad template path" unless $tmplbase =~ m/^[a-zA-Z0-9_\-\/]+\.(tt|pref)$/; # Will be extended on bug 17989
-    my $path = C4::Context->preference('intranet_includes') || 'includes';
     my ($htdocs, $theme, $lang, $filename)
        =  _get_template_file($tmplbase, $interface, $query);
-    $filename = $tmplbase if ( $is_plugin );
+    badtemplatecheck( $filename ); # single trip for bad templates
     my $template = C4::Templates->new($interface, $filename, $tmplbase, $query);
 
 # NOTE: Commenting these out rather than deleting them so that those who need

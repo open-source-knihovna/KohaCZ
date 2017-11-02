@@ -51,6 +51,12 @@ $(document).ready(function(){
                 });
             });
 
+    $("#addnewitem").click(function(){
+        if ( confirm(_("Are you sure you want to add a new item? Any changes made on this page will be lost.")) ){
+            window.location.href = "/cgi-bin/koha/cataloguing/additem.pl?biblionumber=[% biblionumber %]";
+        }
+    });
+
     var columns_settings = [% ColumnsSettings.GetColumns( 'cataloguing', 'additem', 'itemst', 'json' ) %]
     // Skip the first column
     columns_settings.unshift( { cannot_be_toggled: "1" } );
@@ -212,6 +218,7 @@ function confirm_deletion() {
                         [% ELSE %]
                               <li><a href="additem.pl?op=edititem&amp;biblionumber=[% biblionumber %]&amp;itemnumber=[% item_loo.itemnumber %]&amp;searchid=[% searchid %]#edititem">Edit</a></li>
                               <li><a href="additem.pl?op=dupeitem&amp;biblionumber=[% biblionumber %]&amp;itemnumber=[% item_loo.itemnumber %]&amp;searchid=[% searchid %]#additema">Duplicate</a></li>
+                              <li class="print_label"><a href="/cgi-bin/koha/labels/label-edit-batch.pl?op=add&amp;number_type=itemnumber&amp;number_list=[% item_loo.itemnumber %]" target="_blank" >Print Label</a></li>
                           [% IF ( item_loo.countanalytics ) %]
                               <li><a href="/cgi-bin/koha/catalogue/search.pl?idx=hi&amp;q=% item_loo.itemnumber %]">View analytics</a></li>
                           [% ELSE %]
@@ -354,7 +361,9 @@ function confirm_deletion() {
     <input type="hidden" name="tag" value="[% itemtagfield %]" />
     <input type="hidden" name="subfield" value="[% itemtagsubfield %]" />
     <input type="hidden" name="field_value" value="[% itemnumber %]" />
-    <input type="submit" value="Save changes" onclick="return Check(this.form)" />
+    <input type="submit" value="Save changes" onclick="return Check(this.form)">
+    <input type="button" id="addnewitem" value="Add a new item">
+    <a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblionumber %]">Cancel</a>
     [% END %]</fieldset>
     
     [%# Fields for fast cataloging %]

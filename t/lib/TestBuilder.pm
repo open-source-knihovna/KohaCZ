@@ -4,6 +4,7 @@ use Modern::Perl;
 
 use Koha::Database;
 
+use Bytes::Random::Secure;
 use Carp;
 use Module::Load;
 use String::Random;
@@ -188,8 +189,8 @@ sub _buildColumnValues {
     my @columns = $self->schema->source($source)->columns;
     my %unique_constraints = $self->schema->source($source)->unique_constraints();
 
-    my $build_value = 3;
-    # we try max three times if there are unique constraints
+    my $build_value = 5;
+    # we try max $build_value times if there are unique constraints
     BUILD_VALUE: while ( $build_value ) {
         # generate random values for all columns
         for my $col_name( @columns ) {
@@ -432,17 +433,21 @@ sub _gen_datetime {
 sub _gen_text {
     my ($self, $params) = @_;
     # From perldoc String::Random
-    # max: specify the maximum number of characters to return for * and other
-    # regular expression patters that don't return a fixed number of characters
-    my $regex = '[A-Za-z][A-Za-z0-9_]*';
-    my $size = $params->{info}{size};
-    if ( defined $size and $size > 1 ) {
-        $size--;
-    } elsif ( defined $size and $size == 1 ) {
-        $regex = '[A-Za-z]';
-    }
-    my $random = String::Random->new( max => $size );
+    my $size = $params->{info}{size} // 10;
+    $size -= alt_rand(0.5 * $size);
+    my $regex = $size > 1
+        ? '[A-Za-z][A-Za-z0-9_]{'.($size-1).'}'
+        : '[A-Za-z]';
+    my $random = String::Random->new( rand_gen => \&alt_rand );
+    # rand_gen is only supported from 0.27 onward
     return $random->randregex($regex);
+}
+
+sub alt_rand { #Alternative randomizer
+    my ($max) = @_;
+    my $random = Bytes::Random::Secure->new( NonBlocking => 1 );
+    my $r = $random->irand / 2**32;
+    return int( $r * $max );
 }
 
 sub _gen_set_enum {

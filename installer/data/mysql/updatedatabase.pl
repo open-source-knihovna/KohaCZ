@@ -14930,6 +14930,204 @@ if( CheckVersion( $DBversion ) ) {
     print "Upgrade to $DBversion done (Bug 15685 - Allow creation of items (AcqCreateItem) to be customizable per-basket)\n";
 }
 
+$DBversion = '17.06.00.015';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (`variable`, `value`, `options`, `explanation`, `type`) VALUES
+        ('SelfCheckoutByLogin','0',NULL,'Have patrons login into the web-based self checkout system with their username/password or their cardnumber','YesNo')
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 19186 - Insert system preference SelfCheckoutByLogin if missing)\n";
+}
+
+$DBversion = '17.06.00.016';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (`variable`, `value`, `options`, `explanation`, `type`)
+        VALUES ('RequireStrongPassword','0','','Require a strong login password for staff and patrons','YesNo');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18298 - Allow enforcing password complexity (system preference RequireStrongPassword))\n";
+}
+
+$DBversion = '17.06.00.017';
+if( CheckVersion( $DBversion ) ) {
+    unless (TableExists('account_offsets')) {
+        $dbh->do(q{
+            DROP TABLE IF EXISTS `accountoffsets`;
+        });
+
+        $dbh->do(q{
+            CREATE TABLE IF NOT EXISTS `account_offset_types` (
+              `type` varchar(16) NOT NULL, -- The type of offset this is
+              PRIMARY KEY (`type`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        });
+
+        $dbh->do(q{
+            CREATE TABLE IF NOT EXISTS `account_offsets` (
+              `id` int(11) NOT NULL auto_increment, -- unique identifier for each offset
+              `credit_id` int(11) NULL DEFAULT NULL, -- The id of the accountline the increased the patron's balance
+              `debit_id` int(11) NULL DEFAULT NULL, -- The id of the accountline that decreased the patron's balance
+              `type` varchar(16) NOT NULL, -- The type of offset this is
+              `amount` decimal(26,6) NOT NULL, -- The amount of the change
+              `created_on` timestamp NOT NULL default CURRENT_TIMESTAMP,
+              PRIMARY KEY (`id`),
+              CONSTRAINT `account_offsets_ibfk_p` FOREIGN KEY (`credit_id`) REFERENCES `accountlines` (`accountlines_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+              CONSTRAINT `account_offsets_ibfk_f` FOREIGN KEY (`debit_id`) REFERENCES `accountlines` (`accountlines_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+              CONSTRAINT `account_offsets_ibfk_t` FOREIGN KEY (`type`) REFERENCES `account_offset_types` (`type`) ON DELETE CASCADE ON UPDATE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        });
+
+        $dbh->do(q{
+            INSERT IGNORE INTO account_offset_types ( type ) VALUES
+            ('Writeoff'),
+            ('Payment'),
+            ('Lost Item'),
+            ('Processing Fee'),
+            ('Manual Debit'),
+            ('Reverse Payment'),
+            ('Forgiven'),
+            ('Dropbox'),
+            ('Rental Fee'),
+            ('Fine Update'),
+            ('Fine');
+        });
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 14826 - Resurrect account offsets table (Add new tables account_offsets and account_offset_types))\n";
+}
+
+$DBversion = '17.06.00.018';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,type) VALUES ('useDefaultReplacementCost',0,'default replacement cost defined in item type','YesNo');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,type) VALUES ('ProcessingFeeNote','','Set the text to be recorded in the column note, table accountlines when the processing fee (defined in item type) is applied','textarea');
+    });
+    $dbh->do(q{
+        ALTER TABLE `itemtypes` MODIFY COLUMN `rentalcharge` DECIMAL(28,6) NULL DEFAULT NULL;
+    });
+    unless ( column_exists( 'itemtypes', 'defaultreplacecost' ) ) {
+        $dbh->do(q{
+            ALTER TABLE `itemtypes` ADD `defaultreplacecost` DECIMAL(28,6) NULL DEFAULT NULL AFTER `rentalcharge`;
+        });
+    }
+    unless ( column_exists( 'itemtypes', 'processfee' ) ) {
+        $dbh->do(q{
+            ALTER TABLE `itemtypes` ADD `processfee` DECIMAL(28,6) NULL DEFAULT NULL AFTER `defaultreplacecost`;
+        });
+
+    }
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 12768 - Insert system preferences useDefaultReplacementCost and ProcessingFeeNote + Add new columns defaultreplacecost and processfee to the itemtypes table)\n";
+}
+
+$DBversion = '17.06.00.019';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO account_offset_types ( type ) VALUES ( 'Processing Fee' );
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 12768 - Add 'Processing Fee' to the account_offset_types table if missing)\n";
+}
+
+$DBversion = '17.06.00.020';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        UPDATE systempreferences
+        SET
+            variable='OpacLocationOnDetail',
+            options='holding|home|both|column',
+            explanation='In the OPAC detail, display the shelving location on its own column or under a library columns.'
+        WHERE
+            variable='OpacLocationBranchToDisplayShelving'
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 19028: Add 'shelving location' to holdings table in detail page (Rename syspref OpacLocationBranchToDisplayShelving with OpacLocationOnDetail))\n";
+}
+
+$DBversion = '17.06.00.021';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (`variable`, `value`, `options`, `explanation`, `type` ) VALUES ('SCOMainUserBlock','','70|10','Add a block of HTML that will display on the self checkout screen','Textarea')
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17381 - Add system preference SCOMainUserBlock)\n";
+}
+
+$DBversion = '17.06.00.022';
+if( CheckVersion( $DBversion ) ) {
+    my $hide_barcode = C4::Context->preference('OPACShowBarcode') ? 0 : 1;
+    $dbh->do(q{
+        DELETE FROM systempreferences
+        WHERE
+            variable='OPACShowBarcode'
+    });
+
+    # Configure column visibility if it isn't
+    $dbh->do(q{
+        INSERT IGNORE INTO columns_settings
+            (module,page,tablename,columnname,cannot_be_toggled,is_hidden)
+        VALUES
+            ('opac','biblio-detail','holdingst','item_barcode',0,?)
+    }, undef, $hide_barcode);
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 19038: Remove OPACShowBarcode syspref)\n";
+}
+
+$DBversion = '17.06.00.023';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('MarkLostItemsAsReturned','1','','Mark items as returned when flagged as lost','YesNo');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 12363 - Add system preference MarkLostItemsAsReturned)\n";
+}
+
+$DBversion = '17.06.00.024';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (`variable`,`value`,`options`,`explanation`,`type`) VALUES
+        ('OPACUserSummary', 1, NULL, "Show the summary of a logged in user's checkouts, overdues, holds and fines on the mainpage", 'YesNo');
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 2093 - Add system preference OPACUserSummary)\n";
+}
+
+$DBversion = '17.06.00.025';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        ALTER TABLE borrowers MODIFY cardnumber varchar(32);
+    });
+    $dbh->do(q{
+        ALTER TABLE borrower_modifications MODIFY cardnumber varchar(32);
+    });
+    $dbh->do(q{
+        ALTER TABLE deletedborrowers MODIFY cardnumber varchar(32);
+    });
+    $dbh->do(q{
+        ALTER TABLE pending_offline_operations MODIFY cardnumber varchar(32);
+    });
+    $dbh->do(q{
+        ALTER TABLE tmp_holdsqueue MODIFY cardnumber varchar(32);
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 13178 - Increase cardnumber fields to VARCHAR(32))\n";
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.
