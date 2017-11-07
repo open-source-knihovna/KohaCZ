@@ -43,7 +43,10 @@ sub new {
     my $parser = XML::LibXML->new();
     my $record_dom = $parser->parse_string( $marcxml );
     my $format =  $args{metadataPrefix};
-    if ( $format ne 'marc21' && $format ne 'marcxml' ) {
+    my $xsl_file = $repository->{conf}->{format}->{$format}->{xsl_file};
+    if (($format ne 'marc21' && $format ne 'marcxml')
+        || $xsl_file
+    ) {
         my %args = (
             OPACBaseURL => "'" . C4::Context->preference('OPACBaseURL') . "'"
         );
