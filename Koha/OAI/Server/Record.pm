@@ -41,10 +41,14 @@ sub new {
         $self->header->setSpec($setSpec);
     }
 
+<<<<<<< HEAD
     my $format = $args{metadataPrefix};
     my $record_dom;
-    if ( $format ne 'marcxml' && $format ne 'marc21' ) {
-        my $args = {
+    my $xsl_file = $repository->{conf}->{format}->{$format}->{xsl_file};
+    if (($format ne 'marc21' && $format ne 'marcxml')
+        || $xsl_file
+    ) {
+        my $args = (
             OPACBaseURL => "'" . C4::Context->preference('OPACBaseURL') . "'"
         };
         # call Koha::XSLT_Handler now
