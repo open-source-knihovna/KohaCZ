@@ -27,7 +27,7 @@ __PACKAGE__->table("account_debit_types");
 
   data_type: 'varchar'
   is_nullable: 0
-  size: 5
+  size: 32
 
 =head2 default_amount
 
@@ -57,7 +57,7 @@ __PACKAGE__->table("account_debit_types");
 
 __PACKAGE__->add_columns(
   "type_code",
-  { data_type => "varchar", is_nullable => 0, size => 5 },
+  { data_type => "varchar", is_nullable => 0, size => 32 },
   "default_amount",
   { data_type => "decimal", is_nullable => 1, size => [28, 6] },
   "description",
@@ -81,8 +81,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("type_code");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-11-23 12:41:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:UtAqvoSzWkOVSJTqlbL8VQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-11-07 11:25:24
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ooo0nNuLFIvb/x6IvxTGmw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

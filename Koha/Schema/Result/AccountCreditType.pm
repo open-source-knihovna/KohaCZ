@@ -27,7 +27,7 @@ __PACKAGE__->table("account_credit_types");
 
   data_type: 'varchar'
   is_nullable: 0
-  size: 5
+  size: 32
 
 =head2 description
 
@@ -51,7 +51,7 @@ __PACKAGE__->table("account_credit_types");
 
 __PACKAGE__->add_columns(
   "type_code",
-  { data_type => "varchar", is_nullable => 0, size => 5 },
+  { data_type => "varchar", is_nullable => 0, size => 32 },
   "description",
   { data_type => "varchar", is_nullable => 1, size => 200 },
   "can_be_deleted",
@@ -73,8 +73,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("type_code");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-11-23 14:11:07
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QwGpcrmSuarm9pnZ+s4VNg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-11-07 11:25:24
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JZIwWHW2ClV3wololG/odQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

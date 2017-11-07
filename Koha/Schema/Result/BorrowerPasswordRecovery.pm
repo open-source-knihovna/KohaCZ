@@ -57,9 +57,21 @@ __PACKAGE__->add_columns(
   },
 );
 
+=head1 PRIMARY KEY
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-02-15 09:10:53
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KXvGFIo4iVnjShybIpt/TA
+=over 4
+
+=item * L</borrowernumber>
+
+=back
+
+=cut
+
+__PACKAGE__->set_primary_key("borrowernumber");
+
+
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-11-07 11:25:24
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0jPv7ldNUOOLewK1571hbw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
