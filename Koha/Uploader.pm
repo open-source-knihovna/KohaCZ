@@ -143,7 +143,7 @@ sub result {
 
 =head2 err
 
-    Returns hash with errors in format { file => err, ... }
+    Returns hashref with errors in format { file => { code => err }, ... }
     Undefined if there are no errors.
 
 =cut
@@ -153,7 +153,7 @@ sub err {
     my $err;
     foreach my $f ( keys %{ $self->{files} } ) {
         my $e = $self->{files}->{$f}->{errcode};
-        $err->{ $f } = $e if $e;
+        $err->{ $f }->{code} = $e if $e;
     }
     return $err;
 }

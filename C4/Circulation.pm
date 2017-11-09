@@ -1436,6 +1436,7 @@ sub AddIssue {
                     other          => ( $sipmode ? "SIP-$sipmode" : '' ),
                     itemnumber     => $item->{'itemnumber'},
                     itemtype       => $item->{'itype'},
+                    location       => $item->{location},
                     borrowernumber => $borrower->{'borrowernumber'},
                     ccode          => $item->{'ccode'}
                 }
@@ -1911,6 +1912,10 @@ sub AddReturn {
         $doreturn = 0 if C4::Context->preference("BlockReturnOfWithdrawnItems");
     }
 
+    if ( $item->{itemlost} and C4::Context->preference("BlockReturnOfLostItems") ) {
+        $doreturn = 0;
+    }
+
     # case of a return of document (deal with issues and holdingbranch)
     my $today = DateTime->now( time_zone => C4::Context->tz() );
 
@@ -1988,8 +1993,7 @@ sub AddReturn {
     # fix up the accounts.....
     if ( $item->{'itemlost'} ) {
         $messages->{'WasLost'} = 1;
-
-        if ( $item->{'itemlost'} ) {
+        unless ( C4::Context->preference("BlockReturnOfLostItems") ) {
             if (
                 Koha::RefundLostItemFeeRules->should_refund(
                     {
@@ -2000,7 +2004,8 @@ sub AddReturn {
                 )
               )
             {
-                _FixAccountForLostAndReturned( $item->{'itemnumber'}, $borrowernumber, $barcode );
+                _FixAccountForLostAndReturned( $item->{'itemnumber'},
+                    $borrowernumber, $barcode );
                 $messages->{'LostItemFeeRefunded'} = 1;
             }
         }
@@ -2903,6 +2908,7 @@ sub AddRenewal {
             amount         => $charge,
             itemnumber     => $itemnumber,
             itemtype       => $item->{itype},
+            location       => $item->{location},
             borrowernumber => $borrowernumber,
             ccode          => $item->{'ccode'}
         }

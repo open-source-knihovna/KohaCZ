@@ -1023,18 +1023,19 @@ ENDSQL
 
 =head2 SendQueuedMessages ([$hashref]) 
 
-  my $sent = SendQueuedMessages( { verbose => 1 } );
+    my $sent = SendQueuedMessages({ verbose => 1, limit => 50 });
 
-sends all of the 'pending' items in the message queue.
+Sends all of the 'pending' items in the message queue, unless the optional
+limit parameter is passed too. The verbose parameter is also optional.
 
-returns number of messages sent.
+Returns number of messages sent.
 
 =cut
 
 sub SendQueuedMessages {
     my $params = shift;
 
-    my $unsent_messages = _get_unsent_messages();
+    my $unsent_messages = _get_unsent_messages( { limit => $params->{limit} } );
     MESSAGE: foreach my $message ( @$unsent_messages ) {
         # warn Data::Dumper->Dump( [ $message ], [ 'message' ] );
         warn sprintf( 'sending %s message to patron: %s',
@@ -1268,12 +1269,12 @@ sub _get_unsent_messages {
     my $params = shift;
 
     my $dbh = C4::Context->dbh();
-    my $statement = << 'ENDSQL';
-SELECT mq.message_id, mq.borrowernumber, mq.subject, mq.content, mq.message_transport_type, mq.status, mq.time_queued, mq.from_address, mq.to_address, mq.content_type, b.branchcode, mq.letter_code
-  FROM message_queue mq
-  LEFT JOIN borrowers b ON b.borrowernumber = mq.borrowernumber
- WHERE status = ?
-ENDSQL
+    my $statement = qq{
+        SELECT mq.message_id, mq.borrowernumber, mq.subject, mq.content, mq.message_transport_type, mq.status, mq.time_queued, mq.from_address, mq.to_address, mq.content_type, b.branchcode, mq.letter_code
+        FROM message_queue mq
+        LEFT JOIN borrowers b ON b.borrowernumber = mq.borrowernumber
+        WHERE status = ?
+    };
 
     my @query_params = ('pending');
     if ( ref $params ) {
