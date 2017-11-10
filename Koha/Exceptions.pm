@@ -12,7 +12,7 @@ use Exception::Class (
         isa => 'Koha::Exceptions::Exception',
         description => 'Bad parameter was given',
         fields => ["parameter"],
-    }
+    },
     'Koha::Exceptions::BadSystemPreference' => {
         isa => 'Koha::Exceptions::Exception',
         description => 'System preference value is incomprehensible',
