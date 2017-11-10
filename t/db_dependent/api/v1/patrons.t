@@ -153,12 +153,8 @@ my $loggedinuser = $builder->build({
     value => {
         branchcode   => $branchcode,
         categorycode => $categorycode,
-<<<<<<< HEAD
-        flags        => 16, # borrowers flag
+        flags        => 1040, # borrowers and updatecharges (2^4 | 2^10)
         password     => Koha::AuthUtils::hash_password($password),
-=======
-        flags        => 1040 # borrowers and updatecharges (2^4 | 2^10)
->>>>>>> Bug 15165 - Add API routes to pay accountlines
     }
 });
 
@@ -241,10 +237,6 @@ $tx->req->cookies({name => 'CGISESSID', value => $session3->id});
 $t->request_ok($tx)
   ->status_is(200);
 
-<<<<<<< HEAD
-$schema->storage->txn_rollback;
-=======
-
 # Payment tests
 my $borrower2 = $builder->build({
     source => 'Borrower',
@@ -255,17 +247,19 @@ my $borrower2 = $builder->build({
 });
 my $borrowernumber2 = $borrower2->{borrowernumber};
 
-$dbh->do(q|
-    INSERT INTO accountlines (borrowernumber, amount, accounttype, amountoutstanding)
-    VALUES (?, 26, 'A', 26)
-    |, undef, $borrowernumber2);
+Koha::Account::Line->new( {
+    borrowernumber => $borrowernumber2,
+    amount => 26,
+    accounttype => 'A',
+    amountoutstanding => 26,
+} )->store();
 
 $t->post_ok("/api/v1/patrons/$borrowernumber2/payment" => json => {'amount' => 8})
     ->status_is(401);
 
 my $post_data2 = {
-    'amount' => 24,
-    'note' => 'Partial payment'
+    amount => 24,
+    note => 'Partial payment'
 };
 
 $tx = $t->ua->build_tx(POST => "/api/v1/patrons/8789798797/payment" => json => $post_data2);
@@ -296,5 +290,4 @@ my $accountline_partiallypaid = Koha::Account::Lines->search({'borrowernumber' =
 
 is($accountline_partiallypaid->{amountoutstanding}, '2.000000');
 
-$dbh->rollback;
->>>>>>> Bug 15165 - Add API routes to pay accountlines
+$schema->storage->txn_rollback;

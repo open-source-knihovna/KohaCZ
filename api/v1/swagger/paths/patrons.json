@@ -110,34 +110,34 @@
   },
   "/patrons/{borrowernumber}/password": {
     "patch": {
-      "operationId": "changepasswordPatron",
-      "tags": ["patrons"],
-      "parameters": [{
+        "x-mojo-to": "Patron#changepassword",
+        "operationId": "changepasswordPatron",
+        "tags": ["patrons"],
+        "parameters": [{
           "$ref": "../parameters.json#/borrowernumberPathParam"
         }, {
           "name": "body",
           "in": "body",
           "description": "A JSON object containing informations about passwords",
-	  "required": true,
-	  "schema": {
-	      "type": "object",
-	      "properties": {
-		  "current_password": {
-		      "description": "Current password",
-		      "type": "string"
-		  },
-		  "new_password": {
-		      "description": "New password",
-		      "type": "string"
-		  }
-	      }
-	  }
-	}
-      ],
-      "produces": [
-          "application/json"
-      ],
-      "responses": {
+          "required": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+                "current_password": {
+                    "description": "Current password",
+                    "type": "string"
+                },
+                "new_password": {
+                    "description": "New password",
+                    "type": "string"
+                }
+            }
+          }
+        }],
+        "produces": [
+            "application/json"
+        ],
+        "responses": {
           "200": {
               "description": "Password changed"
           },
@@ -145,8 +145,8 @@
               "description": "Bad request",
               "schema": {
                   "$ref": "../definitions.json#/error"
-	      }
-	  },
+              }
+          },
           "403": {
               "description": "Access forbidden",
               "schema": {
@@ -154,12 +154,12 @@
               }
           },
           "404": {
-		"description": "Patron not found",
-	        "schema": {
-		    "$ref": "../definitions.json#/error"
-	        }
-	    }
-	},
+              "description": "Patron not found",
+              "schema": {
+                  "$ref": "../definitions.json#/error"
+              }
+          }
+        },
         "x-koha-authorization": {
             "allow-owner": true,
             "permissions": {
@@ -171,7 +171,8 @@
 
   "/patrons/{borrowernumber}/payment": {
     "post": {
-      "operationId": "payForPatron",
+      "x-mojo-to": "Patron#pay",  
+      "operationId": "payPatron",
       "tags": ["accountlines"],
       "produces": [
         "application/json"
@@ -210,7 +211,7 @@
         "400": {
           "description": "Missing or wrong parameters",
           "schema": { "$ref": "../definitions.json#/error" }
-	},
+        },
         "403": {
           "description": "Access forbidden",
           "schema": {

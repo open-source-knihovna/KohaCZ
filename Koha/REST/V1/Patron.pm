@@ -50,66 +50,66 @@ sub get {
 }
 
 sub changepassword {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
+
+    my $args = $c->req->params->to_hash // {};
 
     my $patron;
-    my $user;
     try {
-
-        $patron = Koha::Patrons->find($args->{borrowernumber});
-        $user = $c->stash('koha.user');
+        $patron = Koha::Patrons->find($args->{'borrowernumber'});
 
         my $OpacPasswordChange = C4::Context->preference("OpacPasswordChange");
-        my $haspermission = haspermission($user->userid, {borrowers => 1});
-        unless ($OpacPasswordChange && $user->borrowernumber == $args->{borrowernumber}) {
+        unless ($OpacPasswordChange) {
             Koha::Exceptions::BadSystemPreference->throw(
                 preference => 'OpacPasswordChange'
-            ) unless $haspermission;
+            );
         }
 
         my $pw = $args->{'body'};
+        my $pw = $c->req->json;
         my $dbh = C4::Context->dbh;
-        unless ($haspermission || checkpw_internal($dbh, $patron->userid, $pw->{'current_password'})) {
+        unless (checkpw_internal($dbh, $patron->userid, $pw->{'current_password'})) {
             Koha::Exceptions::Password::Invalid->throw;
         }
         $patron->change_password_to($pw->{'new_password'});
-        return $c->$cb({}, 200);
+        return $c->render( status => 200, openapi => {} );
     }
     catch {
         if (not defined $patron) {
-            return $c->$cb({ error => "Patron not found." }, 404);
-        }
-        elsif (not defined $user) {
-            return $c->$cb({ error => "User must be defined." }, 500);
+            return $c->render( status => 404, openapi => { error => "Patron not found." } );
         }
 
         die $_ unless blessed $_ && $_->can('rethrow');
         if ($_->isa('Koha::Exceptions::Password::Invalid')) {
-            return $c->$cb({ error => "Wrong current password." }, 400);
+            return $c->render( status =>  400, openapi => { error => "Wrong current password." } );
         }
         elsif ($_->isa('Koha::Exceptions::Password::TooShort')) {
-            return $c->$cb({ error => $_->error }, 400);
+            return $c->render( status => 400, openapi => { error => $_->error } );
         }
         elsif ($_->isa('Koha::Exceptions::Password::TrailingWhitespaces')) {
-            return $c->$cb({ error => $_->error }, 400);
+            return $c->render( status => 400, openapi => { error => $_->error } );
         }
         elsif ($_->isa('Koha::Exceptions::BadSystemPreference')
                && $_->preference eq 'OpacPasswordChange') {
-            return $c->$cb({ error => "OPAC password change is disabled" }, 403);
+            return $c->render( status => 403, openapi =>  { error => "OPAC password change is disabled" } );
         }
         else {
-            return $c->$cb({ error => "Something went wrong. $_" }, 500);
+            return $c->render( status => 500, openapi => { error => "Something went wrong. $_" } );
         }
     }
 }
 
 sub pay {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
+
+    my $args = $c->req->params->to_hash // {};
+
+    my $borrowernumber = $c->validation->param('borrowernumber');
 
     return try {
-        my $patron = Koha::Patrons->find($args->{borrowernumber});
+        my $patron = Koha::Patrons->find($borrowernumber);
         unless ($patron) {
-            return $c->$cb({error => "Patron not found"}, 404);
+            return $c->render( status => 404, openapi => {error => "Patron $borrowernumber not found" } );
         }
 
         my $body = $c->req->json;
@@ -127,15 +127,14 @@ sub pay {
             }
           );
 
-        return $c->$cb('', 204);
+        return $c->render( status => 204, openapi => {} );
     } catch {
         if ($_->isa('DBIx::Class::Exception')) {
-            return $c->$cb({ error => $_->msg }, 500);
-        }
-        else {
-            return $c->$cb({
+            return $c->render( status => 500, openapi => { error => $_->msg } );
+        } else {
+            return $c->render( status => 500, openapi => {
                 error => 'Something went wrong, check the logs.'
-            }, 500);
+            } );
         }
     };
 }
