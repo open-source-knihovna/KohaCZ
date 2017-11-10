@@ -63,33 +63,6 @@ if ($add){
         my $type=$input->param('type');
         my $error   = manualinvoice( $borrowernumber, $itemnum, $desc, $type, $amount );
     }
-
-    if ( $patron->category->category_type eq 'C') {
-        my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
-        $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
-        $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
-    }
-
-    $template->param( adultborrower => 1 ) if ( $patron->category->category_type =~ /^(A|I)$/ );
-    $template->param( picture => 1 ) if $patron->image;
-
-    if (C4::Context->preference('ExtendedPatronAttributes')) {
-        my $attributes = GetBorrowerAttributes($borrowernumber);
-        $template->param(
-            ExtendedPatronAttributes => 1,
-            extendedattributes => $attributes
-        );
-    }
-
-    $template->param(%{ $patron->unblessed });
-    $template->param(
-        finesview      => 1,
-        borrowernumber => $borrowernumber,
-        categoryname   => $patron->category->description,
-        is_child       => ($patron->category->category_type eq 'C'),
-        RoutingSerials => C4::Context->preference('RoutingSerials'),
-    );
-    output_html_with_http_headers $input, $cookie, $template->output;
 }
 print $input->redirect("/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber");
 exit;
