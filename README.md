@@ -1,3 +1,9 @@
+Experimentální větev s REST API
+=
+<img src="http://online.swagger.io/validator?url=https://koha-devel-test.knihovna-uo.cz/api/v1/" />
+
+V této větvi se snažíme o co nejaktuálnější verzi REST API. Ne všechno je 100% funkční. Ale ledy se hýbou. ;)
+
 Pravidla vývoje KohaCZ
 =
 [![Gitter](https://badges.gitter.im/open-source-knihovna/KohaCZ.svg)](https://gitter.im/open-source-knihovna/KohaCZ?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
