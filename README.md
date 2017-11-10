@@ -2,6 +2,8 @@ Experimentální větev s REST API
 =
 <img src="http://online.swagger.io/validator?url=https://koha-devel-test.knihovna-uo.cz/api/v1/" />
 
+<a href="http://online.swagger.io/validator/debug?url=https://koha-devel-test.knihovna-uo.cz/api/v1/">Více informací o definici API</a>
+
 V této větvi se snažíme o co nejaktuálnější verzi REST API. Ne všechno je 100% funkční. Ale ledy se hýbou. ;)
 
 Pravidla vývoje KohaCZ
