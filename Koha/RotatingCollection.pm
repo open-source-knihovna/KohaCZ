@@ -21,6 +21,8 @@ use Modern::Perl;
 
 use Carp;
 
+use C4::Context;
+
 use Koha::Database;
 use Koha::DateUtils;
 use Koha::Exceptions;
@@ -40,6 +42,23 @@ Koha::RotatingCollection - Koha Rotating collection Object class
 
 =cut
 
+=head3 new
+
+    $collection = Koha::RotatingCollection->new();
+
+    This sub automatically adds date of creation and librarian who created collection if it is not present in params.
+
+=cut
+
+sub new {
+    my ($class, $params) = @_;
+    $params->{createdOn} //= output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
+    $params->{createdBy} = undef;
+    $params->{createdBy} = C4::Context->userenv->{number} if defined C4::Context->userenv;
+
+    return $class->SUPER::new($params);
+}
+
 =head3 items
 
 =cut
@@ -52,6 +71,30 @@ sub items {
         },
         {
             join => [ 'collections_trackings' ]
+        }
+    );
+
+    return $items;
+}
+
+=head3 untransferred_items
+
+my $untransferred_items = $collection->untransferred_items;
+
+Return all items which are not transferred yet
+
+=cut
+
+sub untransferred_items {
+    my ( $self ) = @_;
+
+    my $items = Koha::Items->search(
+        {
+            'collections_trackings.colId' => $self->colId,
+            'branchtransfers.branchtransfer_id' => undef,
+        },
+        {
+            join => [ 'collections_trackings', 'branchtransfers' ]
         }
     );
 
@@ -134,7 +177,9 @@ sub transfer {
 
     Koha::Exceptions::ObjectNotFound->throw if ref($library) ne 'Koha::Library';
 
-    $self->colBranchcode( $library->branchcode )->store;
+    $self->colBranchcode( $library->branchcode );
+    $self->lastTransferredOn( output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }) );
+    $self->store;
 
     my $from;
     $from = C4::Context->userenv->{'branch'} if C4::Context->userenv;
@@ -160,6 +205,24 @@ sub transfer {
             $item->holdingbranch( $library->branchcode )->store;
         }
     }
+}
+
+=head3 creator
+
+    $creator = $collection->creator
+
+    return creator (Koha::Patron object) of this collection
+
+=cut
+
+sub creator {
+    my ( $self ) = @_;
+
+    return unless $self->createdBy;
+
+    my $patron = Koha::Patrons->find( $self->createdBy );
+
+    return $patron;
 }
 
 =head3 type

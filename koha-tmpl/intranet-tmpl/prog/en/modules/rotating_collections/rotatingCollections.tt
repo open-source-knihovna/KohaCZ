@@ -1,4 +1,5 @@
 [% USE Branches %]
+[% USE KohaDates %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Tools &rsaquo; Rotating collections</title>
 [% INCLUDE 'doc-head-close.inc' %]
@@ -102,6 +103,10 @@
                                     <th>Title</th>
                                     <th>Description</th>
                                     <th>Library</th>
+                                    <th class="title-string">Date created</th>
+                                    <th>Created by</th>
+                                    <th>Number of items</td>
+                                    <th>Number of untransferred items</td>
                                     <th>&nbsp;</th>
                                 </tr>
                             </thead>
@@ -111,6 +116,22 @@
                                     <td><a href="/cgi-bin/koha/rotating_collections/addItems.pl?colId=[% collectionsLoo.colId %]">[% collectionsLoo.colTitle %]</a></td>
                                     <td>[% collectionsLoo.colDesc %]</td>
                                     <td>[% Branches.GetName( collectionsLoo.colBranchcode ) %]</td>
+                                    <td>
+                                        [% IF collectionsLoo.createdOn %]
+                                            <span title="[% collectionsLoo.createdOn %]">[% collectionsLoo.createdOn | $KohaDates %]</span>
+                                        [% ELSE %]
+                                            <span title="0000-00-00"></span>
+                                        [% END %]
+                                    </td>
+                                    <td>
+                                      [% IF collectionsLoo.creator %]
+                                        <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% collectionsLoo.creator.borrowernumber %]">
+                                          [% collectionsLoo.creator.firstname %] [% collectionsLoo.creator.surname %]
+                                        </a>
+                                      [% END %]
+                                    </td>
+                                    <td>[% collectionsLoo.items.count %]</td>
+                                    <td>[% collectionsLoo.untransferred_items.count %]</td>
                                     <td>
                                     <div class="dropdown">
                                         <a class="btn btn-default btn-xs" dropdown-toggle" id="collectionsactions[% collectionsLoo.colId %]" role="button" data-toggle="dropdown" href="#">
