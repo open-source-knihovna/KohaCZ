@@ -348,6 +348,9 @@ CREATE TABLE collections (
   colTitle varchar(100) NOT NULL DEFAULT '',
   colDesc text NOT NULL,
   colBranchcode varchar(10) DEFAULT NULL, -- 'branchcode for branch where item should be held.'
+  createdBy int(11) default NULL,
+  createdOn datetime default NULL,
+  lastTransferredOn datetime default NULL,
   PRIMARY KEY (colId)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -356,6 +359,9 @@ CREATE TABLE collections (
 --
 ALTER TABLE `collections`
   ADD CONSTRAINT `collections_ibfk_1` FOREIGN KEY (`colBranchcode`) REFERENCES `branches` (`branchcode`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `collections`
+  ADD CONSTRAINT `collections_ibfk_2` FOREIGN KEY (`createdBy`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Table structure for table `branch_borrower_circ_rules`
