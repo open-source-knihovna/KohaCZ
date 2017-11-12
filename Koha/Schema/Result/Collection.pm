@@ -52,6 +52,27 @@ __PACKAGE__->table("collections");
   is_nullable: 1
   size: 10
 
+=head2 createdBy
+
+  accessor: 'created_by'
+  data_type: 'integer'
+  is_foreign_key: 1
+  is_nullable: 1
+
+=head2 createdOn
+
+  accessor: 'created_on'
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  is_nullable: 1
+
+=head2 lastTransferredOn
+
+  accessor: 'last_transferred_on'
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -79,6 +100,27 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 1,
     size => 10,
+  },
+  "createdBy",
+  {
+    accessor       => "created_by",
+    data_type      => "integer",
+    is_foreign_key => 1,
+    is_nullable    => 1,
+  },
+  "createdOn",
+  {
+    accessor => "created_on",
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    is_nullable => 1,
+  },
+  "lastTransferredOn",
+  {
+    accessor => "last_transferred_on",
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    is_nullable => 1,
   },
 );
 
@@ -131,9 +173,29 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 created_by
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2018-03-05 11:15:27
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rpcRZuYeV6k8GvddpikSSQ
+Type: belongs_to
+
+Related object: L<Koha::Schema::Result::Borrower>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "created_by",
+  "Koha::Schema::Result::Borrower",
+  { borrowernumber => "createdBy" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "SET NULL",
+    on_update     => "CASCADE",
+  },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-11-12 10:32:36
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WvtZW+gjkxy8J1EL2oF0oA
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration
