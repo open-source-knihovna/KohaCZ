@@ -17,21 +17,27 @@
 
 use Modern::Perl;
 
-use Test::More tests => 2;
+use Test::More tests => 4;
 use C4::Context;
 use Koha::Biblios;
+use Koha::Biblioitems;
 use Koha::Database;
-use Koha::Library;
+use Koha::DateUtils;
 use Koha::RotatingCollections;
 use Koha::Items;
 use Koha::Item::Transfers;
 use Koha::Libraries;
+use Koha::Patrons;
 
 use t::lib::TestBuilder;
+use Test::MockModule;
 
 my $schema = Koha::Database->new->schema;
 my $builder = t::lib::TestBuilder->new;
 
+
+# TODO test for untransferred_items
+#
 subtest 'remove_and_add_items' => sub {
     plan tests => 8;
 
@@ -137,6 +143,119 @@ subtest 'transfer' => sub {
         datearrived => undef,
     } );
     is( $transfer->count, 1, 'There should be transfer started for item in collection');
+
+    $schema->storage->txn_rollback;
+};
+
+subtest 'new_create_creator' => sub {
+    plan tests => 3;
+
+    $schema->storage->txn_begin;
+
+    my $collection1 = Koha::RotatingCollection->new( {
+        colTitle => "Collection 1",
+        colDesc => "Collection 1 description",
+    } )->store;
+
+    is($collection1->creator, undef, "Creator should not be set if patron is not set in userenv");
+
+    my $categorycode = $builder->build({ source => 'Category' })->{categorycode};
+    my $branchcode = $builder->build({ source => 'Branch' })->{branchcode};
+
+    my $patron = Koha::Patron->new( {
+        firstname => "Creative",
+        surname => "Librarian",
+        categorycode => $categorycode,
+        branchcode => $branchcode,
+    })->store;
+
+    my $context = new Test::MockModule('C4::Context');
+    $context->mock('userenv', sub {
+        return {
+            number => $patron->borrowernumber,
+        }
+    });
+    my $today = output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 });
+
+    my $collection2 = Koha::RotatingCollection->new( {
+        colTitle => "Collection 2",
+        colDesc  => "Collection 2 description",
+    } )->store;
+
+    is( $collection2->createdOn, $today , "Collection create day should be set");
+    is( $collection2->creator->borrowernumber, $patron->borrowernumber, "Collection creator should be set");
+
+    $schema->storage->txn_rollback;
+};
+
+subtest 'untransferred_items' => sub {
+    plan tests => 5;
+
+    $schema->storage->txn_begin;
+
+    my $library1 = Koha::Library->new({
+        branchcode => "LIBCOL1",
+        branchname => "Library for testing collection 1",
+    })->store;
+
+    my $library2 = Koha::Library->new({
+        branchcode => "LIBCOL2",
+        branchname => "Library for testing colletions 2",
+    })->store;
+
+    my $biblio = Koha::Biblio->new({
+        author => "Some author 1",
+        title => "Some title 2",
+    })->store;
+
+    my $biblioitem = Koha::Biblioitem->new({
+        biblionumber => $biblio->biblionumber,
+    })->store;
+
+    my $item1 = Koha::Item->new({
+        barcode => "BC1000001",
+        biblionumber => $biblio->biblionumber,
+        biblioitemnumber => $biblioitem->biblioitemnumber,
+        homebranch => $library1->branchcode,
+        holdingbranch => $library1->branchcode,
+    })->store;
+
+    my $item2 = Koha::Item->new({
+        barcode => "BC1000002",
+        biblionumber => $biblio->biblionumber,
+        biblioitemnumber => $biblioitem->biblioitemnumber,
+        homebranch => $library1->branchcode,
+        holdingbranch => $library1->branchcode,
+    })->store;
+
+    my $item3 = Koha::Item->new({
+        barcode => "BC1000003",
+        biblionumber => $biblio->biblionumber,
+        biblioitemnumber => $biblioitem->biblioitemnumber,
+        homebranch => $library1->branchcode,
+        holdingbranch => $library1->branchcode,
+    })->store;
+
+    my $collection = Koha::RotatingCollection->new({
+        colTitle => "Collection",
+        colDesc => "Collection description",
+    })->store;
+
+    is($collection->untransferred_items->count, 0, "There are no items, so no untransferred");
+
+    $collection->add_item( $item1 );
+    $collection->add_item( $item2 );
+
+    is($collection->untransferred_items->count, 2, "We added 2 items");
+
+    $collection->transfer( $library2 );
+
+    is($collection->untransferred_items->count, 0, "There are no untransferred items after transfer");
+
+    $collection->add_item( $item3 );
+
+    is($collection->untransferred_items->count, 1, "We added 1 more item");
+    is($collection->untransferred_items->next->itemnumber, $item3->itemnumber, "The returned item is the one added after transfer");
 
     $schema->storage->txn_rollback;
 };
