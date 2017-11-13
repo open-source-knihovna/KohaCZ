@@ -2878,6 +2878,7 @@ sub AddRenewal {
     }
     _FixOverduesOnReturn( $borrowernumber, $itemnumber );
 
+    my $currentDateDue = dt_from_string( $issuedata->{date_due} );
     # If the due date wasn't specified, calculate it by adding the
     # book's loan length to today's date or the current due date
     # based on the value of the RenewalPeriodBase syspref.
@@ -2886,7 +2887,7 @@ sub AddRenewal {
         my $itemtype = (C4::Context->preference('item-level_itypes')) ? $biblio->{'itype'} : $biblio->{'itemtype'};
 
         $datedue = (C4::Context->preference('RenewalPeriodBase') eq 'date_due') ?
-                                        dt_from_string( $issuedata->{date_due} ) :
+                                        $currentDateDue :
                                         DateTime->now( time_zone => C4::Context->tz());
         $datedue =  CalcDateDue($datedue, $itemtype, _GetCircControlBranch($item, $borrower), $borrower, 'is a renewal', $resfound);
     }
@@ -2898,6 +2899,11 @@ sub AddRenewal {
                             WHERE borrowernumber=? 
                             AND itemnumber=?"
     );
+
+    if (C4::Context->preference('DontShortenAnyLoanPeriod') && DateTime->compare( $currentDateDue, $datedue ) )  {
+        # Do not shorten loan period
+        return $currentDateDue;
+    }
 
     $sth->execute( $datedue->strftime('%Y-%m-%d %H:%M'), $renews, $lastreneweddate, $borrowernumber, $itemnumber );
 

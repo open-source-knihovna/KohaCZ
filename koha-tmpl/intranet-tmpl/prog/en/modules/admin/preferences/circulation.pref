@@ -473,6 +473,13 @@ Circulation:
                   yes: Block
                   no: Allow
             - his/her auto renewals.
+        -
+            - pref: DontShortenAnyLoanPeriod
+              choices:
+                  yes: "Don't"
+                  no: Do (if applicable)
+            - shorten loan period by renewing (when the renewing period is shorten then loan period and renewing due date is based on original checkout date)
+
     Checkin Policy:
         -
             - pref: BlockReturnOfWithdrawnItems
