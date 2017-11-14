@@ -409,7 +409,7 @@ $(document).ready(function() {
                         }
 
                         var can_force_renew = ( oObj.onsite_checkout == 0 ) && ( oObj.can_renew_error != "on_reserve" );
-                        var can_renew = ( oObj.renewals_remaining > 0  && !oObj.can_renew_error );
+                        var can_renew = ( oObj.renewals_remaining > 0  && !oObj.can_renew_error && (oObj.periodleft === null || oObj.periodleft > 0));
                         if ( can_renew || can_force_renew ) {
                             content += "<span class='" + span_class + "' style='" + span_style + "'>"
                                     +  "<input type='checkbox' ";
@@ -418,14 +418,18 @@ $(document).ready(function() {
                             }
                             content += "class='renew' id='renew_" + oObj.itemnumber + "' name='renew' value='" + oObj.itemnumber +"'/>"
                                     +  "</span>";
-
-                            content += "<span class='renewals'>("
+                            if (oObj.periodleft === null) {
+                                content += "<span class='renewals'>("
                                     + RENEWALS_REMAINING.format( oObj.renewals_remaining, oObj.renewals_allowed )
                                     + ")</span>";
+                            } else {
+                                content += "<span class='renewals'>("
+                                    + "Zbývá " + oObj.periodleft + " dnů"
+                                    + ")</span>";
+                            }
                         }
 
                         content += "</span>";
-
                         return content;
                     }
                 },

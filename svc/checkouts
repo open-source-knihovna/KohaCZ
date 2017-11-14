@@ -146,7 +146,7 @@ while ( my $c = $sth->fetchrow_hashref() ) {
       )
       : undef;
 
-    my ( $renewals_count, $renewals_allowed, $renewals_remaining ) =
+    my ( $renewals_count, $renewals_allowed, $renewals_remaining, $periodleft ) =
       GetRenewCount( $c->{borrowernumber}, $c->{itemnumber} );
 
     my $itemtype = Koha::ItemTypes->find( $item_level_itypes ? $c->{itype} : $c->{itemtype} );
@@ -197,6 +197,7 @@ while ( my $c = $sth->fetchrow_hashref() ) {
         renewals_count      => $renewals_count,
         renewals_allowed    => $renewals_allowed,
         renewals_remaining  => $renewals_remaining,
+        periodleft          => $periodleft,
         issuedate_formatted => output_pref(
             {
                 dt          => dt_from_string( $c->{issuedate} ),

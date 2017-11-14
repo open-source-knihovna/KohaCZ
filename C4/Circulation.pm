@@ -1475,7 +1475,7 @@ sub GetLoanLength {
     my ( $borrowertype, $itemtype, $branchcode ) = @_;
     my $dbh = C4::Context->dbh;
     my $sth = $dbh->prepare(qq{
-        SELECT issuelength, lengthunit, renewalperiod
+        SELECT issuelength, maxissuelength, lengthunit, renewalperiod
         FROM issuingrules
         WHERE   categorycode=?
             AND itemtype=?
@@ -2676,8 +2676,21 @@ sub CanBookBeRenewed {
         }
     );
 
+    my $max_date_due;
+    if (defined $issuing_rule && $issuing_rule->maxissuelength) {
+        $max_date_due = $issue->issuedate->clone->add( $issuing_rule->lengthunit => $issuing_rule->maxissuelength );
+
+        if ($issuing_rule->lengthunit == "days") {
+            $max_date_due->set_hour(23);
+            $max_date_due->set_minute(59);
+        }
+        $max_date_due->truncate( to => 'minute' );
+    }
+
     return ( 0, "too_many" )
-      if not $issuing_rule or $issuing_rule->renewalsallowed <= $issue->renewals;
+        if not $issuing_rule or (
+            $issuing_rule->renewalsallowed <= $issue->renewals
+            or (defined $max_date_due && $max_date_due <= $issue->date_due ) );
 
     my $overduesblockrenewing = C4::Context->preference('OverduesBlockRenewing');
     my $restrictionblockrenewing = C4::Context->preference('RestrictionBlockRenewing');
@@ -2831,7 +2844,7 @@ sub AddRenewal {
         $datedue = (C4::Context->preference('RenewalPeriodBase') eq 'date_due') ?
                                         $currentDateDue :
                                         DateTime->now( time_zone => C4::Context->tz());
-        $datedue =  CalcDateDue($datedue, $itemtype, _GetCircControlBranch($item, $patron_unblessed), $patron_unblessed, 'is a renewal');
+        $datedue =  CalcDateDue($datedue, $itemtype, _GetCircControlBranch($item, $patron_unblessed), $patron_unblessed, 'is a renewal', $issue->issuedate);
     }
 
     # Update the issues record to have the new due date, and a new count
@@ -2930,6 +2943,7 @@ sub GetRenewCount {
     my $renewcount    = 0;
     my $renewsallowed = 0;
     my $renewsleft    = 0;
+    my $periodleft    = undef;
 
     my $patron = Koha::Patrons->find( $bornum );
     my $item     = GetItem($itemno);
@@ -2961,7 +2975,26 @@ sub GetRenewCount {
     $renewsallowed = $issuing_rule ? $issuing_rule->renewalsallowed : 0;
     $renewsleft    = $renewsallowed - $renewcount;
     if($renewsleft < 0){ $renewsleft = 0; }
-    return ( $renewcount, $renewsallowed, $renewsleft );
+
+    if (defined $issuing_rule && $issuing_rule->maxissuelength) {
+        my $max_date_due = dt_from_string($data->{issuedate})->add($issuing_rule->lengthunit => $issuing_rule->maxissuelength);
+        if ($issuing_rule->lengthunit == "days") {
+            $max_date_due->set_hour(23);
+            $max_date_due->set_minute(59);
+        }
+        $max_date_due->truncate( to => 'minute' );
+        my $date_due = dt_from_string($data->{date_due});
+        if ($max_date_due > $date_due) {
+            if ($issuing_rule->lengthunit == "days") {
+                $periodleft = $max_date_due->delta_days($date_due)->in_units('days');
+            } else {
+                $periodleft = $max_date_due->delta_ms($date_due)->in_units('hours');
+            }
+        } else {
+            $periodleft = 0;
+        }
+    }
+    return ( $renewcount, $renewsallowed, $renewsleft, $periodleft );
 }
 
 =head2 GetSoonestRenewDate
@@ -3443,11 +3476,12 @@ C<$itemtype>  = itemtype code of item in question
 C<$branch>  = location whose calendar to use
 C<$borrower> = Borrower object
 C<$isrenewal> = Boolean: is true if we want to calculate the date due for a renewal. Else is false.
+C<$issuedate> = DateTime object representing original issue date
 
 =cut
 
 sub CalcDateDue {
-    my ( $startdate, $itemtype, $branch, $borrower, $isrenewal ) = @_;
+    my ( $startdate, $itemtype, $branch, $borrower, $isrenewal, $issuedate ) = @_;
 
     $isrenewal ||= 0;
 
@@ -3536,6 +3570,16 @@ sub CalcDateDue {
               $datedue = $calendar->prev_open_day( $datedue );
           }
         }
+    }
+
+    if (defined $issuedate && $loanlength->{maxissuelength} ) {
+        my $max_date_due = $issuedate->clone->add( $loanlength->{lengthunit} => $loanlength->{maxissuelength} );
+        if ($loanlength->{lengthunit} == "days") {
+            $max_date_due->set_hour(23);
+            $max_date_due->set_minute(59);
+        }
+        $max_date_due->truncate( to => 'minute' );
+        $datedue = $max_date_due if ( $max_date_due < $datedue );
     }
 
     return $datedue;
