@@ -2842,7 +2842,7 @@ sub AddRenewal {
                             AND itemnumber=?"
     );
 
-    if (C4::Context->preference('DontShortenAnyLoanPeriod') && DateTime->compare( $currentDateDue, $datedue ) )  {
+    if (C4::Context->preference('DontShortenAnyLoanPeriod') && ( $currentDateDue > $datedue ) )  {
         # Do not shorten loan period
         return $currentDateDue;
     }
