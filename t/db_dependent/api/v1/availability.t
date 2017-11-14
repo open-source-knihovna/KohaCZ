@@ -53,10 +53,9 @@ subtest '/availability/biblio' => sub {
         set_default_system_preferences();
 
         my $item = build_a_test_item();
-        my $item2 = build_a_test_item(
-            Koha::Biblios->find($item->biblionumber),
-            Koha::Biblioitems->find($item->biblioitemnumber)
-        );
+        my $biblio = Koha::Biblios->find($item->biblionumber);
+        my $biblioitem = Koha::Biblioitems->find($item->biblioitemnumber);
+        my $item2 = build_a_test_item( $biblio, $biblioitem );
         my ($patron, $session_id) = create_user_and_session();
         $patron = Koha::Patrons->find($patron);
         my $route = '/api/v1/availability/biblio/hold';
@@ -142,10 +141,9 @@ subtest '/availability/biblio' => sub {
         set_default_system_preferences();
 
         my $item = build_a_test_item();
-        my $item2 = build_a_test_item(
-            Koha::Biblios->find($item->biblionumber),
-            Koha::Biblioitems->find($item->biblioitemnumber)
-        );
+        my $biblio = Koha::Biblios->find($item->biblionumber);
+        my $biblioitem = Koha::Biblioitems->find($item->biblioitemnumber);
+        my $item2 = build_a_test_item( $biblio, $biblioitem );
         my $route = '/api/v1/availability/biblio/search';
         my $tx = $t->ua->build_tx( GET => $route . '?biblionumber='.$item->biblionumber );
         $tx->req->env( { REMOTE_ADDR => $remote_address } );
@@ -301,10 +299,9 @@ subtest '/availability/item' => sub {
         set_default_system_preferences();
 
         my $item = build_a_test_item();
-        my $item2 = build_a_test_item(
-            Koha::Biblios->find($item->biblionumber),
-            Koha::Biblioitems->find($item->biblioitemnumber)
-        );
+        my $biblio = Koha::Biblios->find($item->biblionumber),;
+        my $biblioitem = Koha::Biblioitems->find($item->biblioitemnumber);
+        my $item2 = build_a_test_item( $biblio, $biblioitem );
         my $route = '/api/v1/availability/biblio/search';
         my $tx = $t->ua->build_tx( GET => $route . '?biblionumber='.$item->biblionumber );
         $tx->req->env( { REMOTE_ADDR => $remote_address } );
