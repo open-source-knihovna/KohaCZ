@@ -51,7 +51,7 @@ $(document).ready(function() {
                 itm = $(this).text();
                 itm = itm.replace(/^\s*|\s*$/g,'');
                 var current_column = $("#edit_row td:eq("+i+")");
-                if ( i == 6 ) {
+                if ( i == 7 ) {
                     // specific processing for the Hard due date column
                     var select_value = $(this).find("input[type='hidden'][name='hardduedatecomparebackup']").val();
                     var input_value = '';
@@ -62,7 +62,7 @@ $(document).ready(function() {
                     }
                     $(current_column).find("input[type='text']").val(input_value);
                     $(current_column).find("select").val(select_value);
-                } else if ( i == 12 ) {
+                } else if ( i == 13 ) {
                     // specific processing for cap_fine_to_replacement_price
                     var cap_fine_to_replacement_price = $(this).find("input[type='checkbox']");
                     $('#cap_fine_to_replacement_price').prop('checked', cap_fine_to_replacement_price.is(':checked') );
@@ -171,6 +171,7 @@ $(document).ready(function() {
                 <th>Current checkouts allowed</th>
                 <th>Current on-site checkouts allowed</th>
                 <th>Loan period</th>
+                <th>Maximum loan period</th>
                 <th>Unit</th>
                 <th>Hard due date</th>
                 <th>Fine amount</th>
@@ -226,6 +227,7 @@ $(document).ready(function() {
                                 [% END %]
                             </td>
 							<td>[% rule.issuelength %]</td>
+              <td>[% rule.maxissuelength %]</td>
 							<td>
 							    [% rule.lengthunit %]
 							</td>
@@ -322,6 +324,7 @@ $(document).ready(function() {
                     <td><input type="text" name="maxissueqty" id="maxissueqty" size="3" /></td>
                     <td><input type="text" name="maxonsiteissueqty" id="maxonsiteissueqty" size="3" /></td>
                     <td><input type="text" name="issuelength" id="issuelength" size="3" /> </td>
+                    <td><input type="text" name="maxissuelength" id="maxissuelength" size="3" /> </td>
                     <td>
                       <select name="lengthunit" id="lengthunit">
                         <option value="days" selected="selected">Days</option>

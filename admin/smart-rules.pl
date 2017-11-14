@@ -152,6 +152,8 @@ elsif ($op eq 'add') {
     $maxonsiteissueqty = undef if $maxonsiteissueqty !~ /^\d+/;
     my $issuelength  = $input->param('issuelength');
     $issuelength = $issuelength eq q{} ? undef : $issuelength;
+    my $maxissuelength  = $input->param('maxissuelength');
+    $maxissuelength = $maxissuelength eq q{} ? undef : $maxissuelength;
     my $lengthunit  = $input->param('lengthunit');
     my $hardduedate = $input->param('hardduedate') || undef;
     $hardduedate = eval { dt_from_string( $input->param('hardduedate') ) } if ( $hardduedate );
@@ -187,6 +189,7 @@ elsif ($op eq 'add') {
         reservesallowed               => $reservesallowed,
         holds_per_record              => $holds_per_record,
         issuelength                   => $issuelength,
+        maxissuelength                => $maxissuelength,
         lengthunit                    => $lengthunit,
         hardduedate                   => $hardduedate,
         hardduedatecompare            => $hardduedatecompare,

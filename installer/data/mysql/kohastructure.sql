@@ -870,6 +870,7 @@ CREATE TABLE `issuingrules` ( -- circulation and fine rules
   `maxissueqty` int(4) default NULL, -- total number of checkouts allowed
   `maxonsiteissueqty` int(4) default NULL, -- total number of on-site checkouts allowed
   `issuelength` int(4) default NULL, -- length of checkout in the unit set in issuingrules.lengthunit
+  `maxissuelength` int(4) default NULL, -- maximum length of checkout in the unit set in issuingrules.lengthunit
   `lengthunit` varchar(10) default 'days', -- unit of checkout length (days, hours)
   `hardduedate` date default NULL, -- hard due date
   `hardduedatecompare` tinyint NOT NULL default "0", -- type of hard due date (1 = after, 0 = on, -1 = before)
@@ -887,6 +888,9 @@ CREATE TABLE `issuingrules` ( -- circulation and fine rules
   onshelfholds tinyint(1) NOT NULL default 0, -- allow holds for items that are on shelf
   opacitemholds char(1) NOT NULL default 'N', -- allow opac users to place specific items on hold
   article_requests enum('no','yes','bib_only','item_only') NOT NULL DEFAULT 'no', -- allow article requests to be placed,
+  renew_reserved BOOLEAN default FALSE,
+  reserved_renew_count int(4) default NULL,
+  reserved_renew_period int(4) default NULL,
   PRIMARY KEY  (`branchcode`,`categorycode`,`itemtype`),
   KEY `categorycode` (`categorycode`),
   KEY `itemtype` (`itemtype`)
