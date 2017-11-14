@@ -103,6 +103,7 @@ $tx->req->env({REMOTE_ADDR => '127.0.0.1'});
 $t->request_ok($tx)
   ->status_is(403);
 
+  warn "here";
 $tx = $t->ua->build_tx(GET => "/api/v1/accountlines?borrowernumber=$borrowernumber");
 $tx->req->cookies({name => 'CGISESSID', value => $session->id});
 $tx->req->env({REMOTE_ADDR => '127.0.0.1'});

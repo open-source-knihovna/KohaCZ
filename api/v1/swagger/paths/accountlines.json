@@ -1,6 +1,7 @@
 {
   "/accountlines": {
     "get": {
+      "x-mojo-to": "Accountline#list",
       "operationId": "listAccountlines",
       "tags": ["accountlines"],
       "parameters": [
@@ -39,6 +40,7 @@
   },
   "/accountlines/{accountlines_id}": {
     "put": {
+      "x-mojo-to": "Accountline#edit",
       "operationId": "editAccountlines",
       "tags": ["accountlines"],
       "produces": [
@@ -101,6 +103,7 @@
   },
   "/accountlines/{accountlines_id}/payment": {
     "post": {
+      "x-mojo-to": "Accountline#pay",
       "operationId": "payAccountlines",
       "tags": ["accountlines"],
       "produces": [
