@@ -52,11 +52,11 @@ sub get {
 sub changepassword {
     my $c = shift->openapi->valid_input or return;
 
-    my $args = $c->req->params->to_hash // {};
+    my $borrowernumber = $c->validation->param('borrowernumber');
 
     my $patron;
     try {
-        $patron = Koha::Patrons->find($args->{'borrowernumber'});
+        $patron = Koha::Patrons->find($borrowernumber);
 
         my $OpacPasswordChange = C4::Context->preference("OpacPasswordChange");
         unless ($OpacPasswordChange) {
@@ -65,8 +65,10 @@ sub changepassword {
             );
         }
 
-        my $pw = $args->{'body'};
         my $pw = $c->req->json;
+
+	warn "current password" . $pw->{'current_password'} . ";";
+	warn "new password" . $pw->{'new_password'} . ";";
         my $dbh = C4::Context->dbh;
         unless (checkpw_internal($dbh, $patron->userid, $pw->{'current_password'})) {
             Koha::Exceptions::Password::Invalid->throw;
@@ -118,7 +120,7 @@ sub pay {
 
         Koha::Account->new(
             {
-                patron_id => $args->{borrowernumber},
+                patron_id => $borrowernumber,
             }
           )->pay(
             {
