@@ -67,8 +67,6 @@ sub changepassword {
 
         my $pw = $c->req->json;
 
-	warn "current password" . $pw->{'current_password'} . ";";
-	warn "new password" . $pw->{'new_password'} . ";";
         my $dbh = C4::Context->dbh;
         unless (checkpw_internal($dbh, $patron->userid, $pw->{'current_password'})) {
             Koha::Exceptions::Password::Invalid->throw;
@@ -83,12 +81,15 @@ sub changepassword {
 
         die $_ unless blessed $_ && $_->can('rethrow');
         if ($_->isa('Koha::Exceptions::Password::Invalid')) {
+            warn "invalid";
             return $c->render( status =>  400, openapi => { error => "Wrong current password." } );
         }
         elsif ($_->isa('Koha::Exceptions::Password::TooShort')) {
+            warn "tooshort";
             return $c->render( status => 400, openapi => { error => $_->error } );
         }
         elsif ($_->isa('Koha::Exceptions::Password::TrailingWhitespaces')) {
+            warn "trailing";
             return $c->render( status => 400, openapi => { error => $_->error } );
         }
         elsif ($_->isa('Koha::Exceptions::BadSystemPreference')
