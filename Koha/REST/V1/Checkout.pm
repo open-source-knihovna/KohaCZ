@@ -25,41 +25,41 @@ use C4::Circulation;
 use Koha::Checkouts;
 
 sub list {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
 
-    my $borrowernumber = $c->param('borrowernumber');
-    my $checkouts = C4::Circulation::GetIssues({
+    my $borrowernumber = $c->validation->param('borrowernumber');
+    my $checkouts = Koha::Checkouts->search({
         borrowernumber => $borrowernumber
     });
 
-    $c->$cb($checkouts, 200);
+    $c->render( status => 200, openapi => $checkouts );
 }
 
 sub get {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
 
-    my $checkout_id = $args->{checkout_id};
+    my $checkout_id = $c->validation->param('checkout_id');
     my $checkout = Koha::Checkouts->find($checkout_id);
 
     if (!$checkout) {
-        return $c->$cb({
+        return $c->render( status => 404, openapi => {
             error => "Checkout doesn't exist"
-        }, 404);
+        });
     }
 
-    return $c->$cb($checkout->unblessed, 200);
+    return $c->render( status => 200, openapi => $checkout );
 }
 
 sub renew {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
 
-    my $checkout_id = $args->{checkout_id};
+    my $checkout_id = $c->validation->param('checkout_id');
     my $checkout = Koha::Checkouts->find($checkout_id);
 
     if (!$checkout) {
-        return $c->$cb({
+        return $c->render( status => 404, openapi => {
             error => "Checkout doesn't exist"
-        }, 404);
+        });
     }
 
     my $borrowernumber = $checkout->borrowernumber;
@@ -69,7 +69,9 @@ sub renew {
     unless (C4::Context->preference('OpacRenewalAllowed')) {
         my $user = $c->stash('koha.user');
         unless ($user && haspermission($user->userid, { circulate => "circulate_remaining_permissions" })) {
-            return $c->$cb({error => "Opac Renewal not allowed"}, 403);
+            return $c->render( status => 403, openapi => 
+		    { error => "Opac Renewal not allowed" }
+	    );	
         }
     }
 
@@ -77,13 +79,15 @@ sub renew {
         $borrowernumber, $itemnumber);
 
     if (!$can_renew) {
-        return $c->$cb({error => "Renewal not authorized ($error)"}, 403);
+        return $c->render(status => 403, openapi => 
+		{ error => "Renewal not authorized ($error)" }
+	);
     }
 
     AddRenewal($borrowernumber, $itemnumber, $checkout->branchcode);
     $checkout = Koha::Checkouts->find($checkout_id);
 
-    return $c->$cb($checkout->unblessed, 200);
+    return $c->render(status => 200, openapi => $checkout );
 }
 
 1;
