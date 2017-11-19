@@ -33,21 +33,21 @@ use MARC::File::XML;
 use Data::Dumper;
 
 sub get {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
 
-    my $biblio = &GetBiblioData($args->{biblionumber});
+    my $biblio = &GetBiblioData($c->validation->param('biblionumber'));
     unless ($biblio) {
-        return $c->$cb({error => "Biblio not found"}, 404);
+        return $c->render( status => 404, openapi => {error => "Biblio not found"});
     }
-    return $c->$cb($biblio, 200);
+    return $c->render(status => 200, openapi => $biblio);
 }
 
 sub getitems {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
 
-    my $biblio = Koha::Biblios->find($args->{biblionumber});
+    my $biblio = Koha::Biblios->find($c->validation->param('biblionumber'));
     unless ($biblio) {
-        return $c->$cb({error => "Biblio not found"}, 404);
+        return $c->render( status => 404, openapi => {error => "Biblio not found"});
     }
 
     my $items = $biblio->items->unblessed;
@@ -57,15 +57,15 @@ sub getitems {
         $items = _filter_hidden_items($items);
     }
 
-    return $c->$cb({ biblio => $biblio->unblessed, items => $items }, 200);
+    return $c->render(status => 200, openapi => { biblio => $biblio, items => $items });
 }
 
 sub getexpanded {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
 
-    my $biblio = Koha::Biblios->find($args->{biblionumber});
+    my $biblio = Koha::Biblios->find($c->validation->param('biblionumber'));
     unless ($biblio) {
-        return $c->$cb({error => "Biblio not found"}, 404);
+        return $c->render(status => 404, openapi => {error => "Biblio not found"});
     }
 
     my $expanded = $biblio->items->unblessed;
@@ -101,23 +101,23 @@ sub getexpanded {
         }
     }
 
-    return $c->$cb({ biblio => $biblio->unblessed, items => $expanded }, 200);
+    return $c->render(status => 200, openapi => { biblio => $biblio, items => $expanded });
 }
 
 sub add {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
 
     my $biblionumber;
     my $biblioitemnumber;
 
     my $body = $c->req->body;
     unless ($body) {
-        return $c->$cb({error => "Missing MARCXML body"}, 400);
+        return $c->render(status => 400, openapi => {error => "Missing MARCXML body"});
     }
 
     my $record = eval {MARC::Record::new_from_xml( $body, "utf8", '')};
     if ($@) {
-        return $c->$cb({error => $@}, 400);
+        return $c->render(status => 400, openapi => {error => $@});
     } else {
         ( $biblionumber, $biblioitemnumber ) = &AddBiblio($record, '');
     }
@@ -125,49 +125,49 @@ sub add {
         $c->res->headers->location($c->url_for('/api/v1/biblios/')->to_abs . $biblionumber);
         my ( $itemnumbers, $errors ) = &AddItemBatchFromMarc( $record, $biblionumber, $biblioitemnumber, '' );
         unless (@{$errors}) {
-            return $c->$cb({biblionumber => $biblionumber, items => join(",", @{$itemnumbers})}, 201);
+            return $c->render(status => 201, openapi => {biblionumber => $biblionumber, items => join(",", @{$itemnumbers})});
         } else {
             warn Dumper($errors);
-            return $c->$cb({error => "Error creating items, see Koha Logs for details.", biblionumber => $biblionumber, items => join(",", @{$itemnumbers})}, 400);
+            return $c->render(status => 400, openapi => {error => "Error creating items, see Koha Logs for details.", biblionumber => $biblionumber, items => join(",", @{$itemnumbers})});
         }
     } else {
-        return $c->$cb({error => "unable to create record"}, 400);
+        return $c->render(status => 400, openapi => {error => "unable to create record"});
     }
 }
 
 # NB: This will not update any items, Items should be a separate API route
 sub update {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
 
-    my $biblionumber = $args->{biblionumber};
+    my $biblionumber = $c->validation->param('biblionumber');
 
     my $biblio = Koha::Biblios->find($biblionumber);
     unless ($biblio) {
-        return $c->$cb({error => "Biblio not found"}, 404);
+        return $c->render(status => 404, openapi => {error => "Biblio not found"});
     }
 
     my $success;
     my $body = $c->req->body;
     my $record = eval {MARC::Record::new_from_xml( $body, "utf8", '')};
     if ($@) {
-        return $c->$cb({error => $@}, 400);
+        return $c->render(status => 400, openapi => {error => $@});
     } else {
         $success = &ModBiblio($record, $biblionumber, '');
     }
     if ($success) {
         $c->res->headers->location($c->url_for('/api/v1/biblios/')->to_abs . $biblionumber);
-        return $c->$cb({biblio => Koha::Biblios->find($biblionumber)->unblessed}, 200);
+        return $c->render(status => 200, openapi => {biblio => Koha::Biblios->find($biblionumber) });
     } else {
-        return $c->$cb({error => "unable to update record"}, 400);
+        return $c->render(status => 400, openapi => {error => "unable to update record"});
     }
 }
 
 sub delete {
-    my ($c, $args, $cb) = @_;
+    my $c = shift->openapi->valid_input or return;
 
-    my $biblio = Koha::Biblios->find($args->{biblionumber});
+    my $biblio = Koha::Biblios->find($c->validation->param('biblionumber'));
     unless ($biblio) {
-        return $c->$cb({error => "Biblio not found"}, 404);
+        return $c->render(status => 404, openapi => {error => "Biblio not found"});
     }
     my @items = $biblio->items;
     # Delete items first
@@ -180,11 +180,11 @@ sub delete {
     }
     my $res = $biblio->delete;
     if ($res eq '1') {
-        return $c->$cb({}, 200);
+        return $c->render(status => 200, openapi => {});
     } elsif ($res eq '-1') {
-        return $c->$cb({error => "Not found. Error code: " . $res, items => @item_errors}, 404);
+        return $c->render(status => 404, openapi => {error => "Not found. Error code: " . $res, items => @item_errors});
     } else {
-        return $c->$cb({error => "Error code: " . $res, items => @item_errors}, 400);
+        return $c->render(status => 400, openapi => {error => "Error code: " . $res, items => @item_errors});
     }
 }
 
