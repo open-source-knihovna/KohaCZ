@@ -112,7 +112,8 @@
   },
   "/biblios/{biblionumber}/expanded": {
     "get": {
-      "operationId": "getexpandedByBiblio",
+      "x-mojo-to": "Biblio#getexpanded",
+      "operationId": "getexpandedBiblio",
       "tags": ["biblios", "items", "item status"],
       "parameters": [
         { "$ref": "../parameters.json#/biblionumberPathParam" }
@@ -135,6 +136,7 @@
   },
   "/biblios": {
     "post": {
+      "x-mojo-to": "Biblio#add",
       "operationId": "addBiblio",
       "tags": ["biblios"],
       "produces": ["application/json"],

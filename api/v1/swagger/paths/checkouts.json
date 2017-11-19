@@ -1,6 +1,7 @@
 {
   "/checkouts": {
     "get": {
+      "x-mojo-to": "Checkout#list",
       "operationId": "listCheckouts",
       "tags": ["patrons", "checkouts"],
       "parameters": [{
@@ -36,6 +37,7 @@
   },
   "/checkouts/{checkout_id}": {
     "get": {
+      "x-mojo-to": "Checkout#get",
       "operationId": "getCheckout",
       "tags": ["patrons", "checkouts"],
       "parameters": [{
@@ -65,6 +67,7 @@
       }
     },
     "put": {
+      "x-mojo-to": "Checkout#renew",
       "operationId": "renewCheckout",
       "tags": ["patrons", "checkouts"],
       "parameters": [{
