@@ -31,18 +31,16 @@ use Try::Tiny;
 sub search {
     my $c = shift->openapi->valid_input or return;
 
-    my $biblios = $c->validation->param('biblionumber');
-
-    warn "This is biblio " . $biblios;
+    my @biblios = $c->validation->param('biblionumber');
 
     my @availabilities;
 
     return try {
-        foreach my $biblionumber (@$biblios) {
+        foreach my $biblionumber (@biblios) {
             if (my $biblio = Koha::Biblios->find($biblionumber)) {
                 push @availabilities, Koha::Availability::Search->biblio({
                     biblio => $biblio
-                }); #->in_opac->swaggerize;
+                })->in_opac->swaggerize;
             }
         }
         return $c->render( status => 200 , openapi => \@availabilities );
@@ -50,12 +48,10 @@ sub search {
     catch {
         if ( $_->isa('DBIx::Class::Exception') ) {
             return $c->render( status => 500, openapi => { error => $_->{msg} } );
-            warn "dbix exception";
         }
         else {
             return $c->render( status => 500, openapi =>
                 { error => "Something went wrong, check the logs." } );
-            warn "Something wrong";
         }
     };
 }
@@ -74,7 +70,7 @@ sub hold {
     return try {
         ($patron, $librarian) = _get_patron($c, $user, $borrowernumber);
 
-        my $biblios = $c->validation->param('biblionumber');;
+        my @biblios = $c->validation->param('biblionumber');;
         my $params = {
             patron => $patron,
         };
@@ -82,7 +78,7 @@ sub hold {
         $params->{'to_branch'} = $to_branch if $to_branch;
         $params->{'limit'} = $limit_items if $limit_items;
 
-        foreach my $biblionumber (@$biblios) {
+        foreach my $biblionumber (@biblios) {
             if (my $biblio = Koha::Biblios->find($biblionumber)) {
                 $params->{'biblio'} = $biblio;
                 my $availability = Koha::Availability::Hold->biblio($params);
@@ -98,7 +94,7 @@ sub hold {
     }
     catch {
         if ( $_->isa('DBIx::Class::Exception') ) {
-            return $c->render( status => 500, { error => $_->{msg} } );
+            return $c->render( status => 500, openapi => { error => $_->{msg} } );
         }
         elsif ($_->isa('Koha::Exceptions::AuthenticationRequired')) {
             return $c->render( status => 401, openapi =>

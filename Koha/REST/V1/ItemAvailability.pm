@@ -31,18 +31,15 @@ use Try::Tiny;
 
 sub checkout {
     my $c = shift->openapi->valid_input or return;
-
     my @availabilities;
     my $user = $c->stash('koha.user');
     my $borrowernumber = $c->validation->param('borrowernumber');
     my $patron;
     my $librarian;
-
     return try {
         ($patron, $librarian) = _get_patron($c, $user, $borrowernumber);
-
-        my $items = $c->validation->param('itemnumber');
-        foreach my $itemnumber (@$items) {
+        my @items = $c->validation->param('itemnumber');
+        foreach my $itemnumber (@items) {
             if (my $item = Koha::Items->find($itemnumber)) {
                 push @availabilities, Koha::Availability::Checkout->item({
                     patron => $patron,
@@ -85,14 +82,14 @@ sub hold {
     return try {
         ($patron, $librarian) = _get_patron($c, $user, $borrowernumber);
 
-        my $items = $c->validation->param('itemnumber');
+        my @items = $c->validation->param('itemnumber');
         my $params = {
             patron => $patron,
         };
         if ($to_branch) {
             $params->{'to_branch'} = $to_branch;
         }
-        foreach my $itemnumber (@$items) {
+        foreach my $itemnumber (@items) {
             if (my $item = Koha::Items->find($itemnumber)) {
                 $params->{'item'} = $item;
                 my $availability = Koha::Availability::Hold->item($params);
@@ -132,8 +129,8 @@ sub search {
     my @availabilities;
 
     return try {
-        my $items = $c->validation->param('itemnumber');
-        foreach my $itemnumber (@$items) {
+        my @items = $c->validation->param('itemnumber');
+        foreach my $itemnumber (@items) {
             if (my $item = Koha::Items->find($itemnumber)) {
                 push @availabilities, Koha::Availability::Search->item({
                     item => $item
@@ -180,7 +177,6 @@ sub _get_patron {
     } else {
         $patron = $user;
     }
-
     return ($patron, $librarian);
 }
 

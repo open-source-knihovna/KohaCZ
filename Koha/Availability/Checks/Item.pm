@@ -65,7 +65,7 @@ Returns Koha::Exceptions::Item::CheckedOut if item is checked out.
 sub checked_out {
     my ($self, $issue) = @_;
 
-    $issue ||= C4::Circulation::GetItemIssue($self->item->itemnumber);
+    $issue ||= $self->item->checkout;
     if (ref($issue) eq 'Koha::Checkout') {
         $issue = $issue->unblessed;
         $issue->{date_due} = dt_from_string($issue->{date_due});
