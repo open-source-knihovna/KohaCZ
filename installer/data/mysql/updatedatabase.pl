@@ -14550,12 +14550,12 @@ if( CheckVersion( $DBversion ) ) {
             $requested_expiration = dt_from_string($hold->expirationdate);
         }
 
-        my $calendar = Koha::Calendar->new( branchcode => $hold->branchcode );
-        my $expirationdate = dt_from_string();
-        $expirationdate->add(days => $max_pickup_delay);
-
+        my $expirationdate = dt_from_string($hold->waitingdate);
         if ( C4::Context->preference("ExcludeHolidaysFromMaxPickUpDelay") ) {
-            $expirationdate = $calendar->days_forward( dt_from_string(), $max_pickup_delay );
+            my $calendar = Koha::Calendar->new( branchcode => $hold->branchcode );
+            $expirationdate = $calendar->days_forward( $expirationdate, $max_pickup_delay );
+        } else {
+            $expirationdate->add( days => $max_pickup_delay );
         }
 
         my $cmp = $requested_expiration ? DateTime->compare($requested_expiration, $expirationdate) : 0;
@@ -15216,6 +15216,12 @@ if( CheckVersion( $DBversion ) ) {
 
     SetVersion( $DBversion );
     print "Upgrade to $DBversion done (Bug 7317 - Add an Interlibrary Loan Module to Circulation and OPAC)\n";
+}
+
+$DBversion = '17.11.00.000';
+if( CheckVersion( $DBversion ) ) {
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Koha 17.11)\n";
 }
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
