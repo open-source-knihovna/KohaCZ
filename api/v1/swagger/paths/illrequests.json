@@ -1,0 +1,125 @@
+{
+    "/illrequests": {
+        "get": {
+            "x-mojo-to": "Illrequests#list",
+            "operationId": "listIllrequests",
+            "tags": ["illrequests"],
+            "parameters": [{
+                "name": "embed",
+                "in": "query",
+                "description": "Additional objects that should be embedded in the response",
+                "required": false,
+                "type": "array",
+                "collectionFormat": "csv",
+                "items": {
+                    "type": "string",
+                    "enum": [
+                        "patron",
+                        "library",
+                        "capabilities",
+                        "metadata"
+                    ]
+                }
+            }, {
+                "name": "backend",
+                "in": "query",
+                "description": "The name of a ILL backend",
+                "required": false,
+                "type": "string"
+            }, {
+                "name": "orderid",
+                "in": "query",
+                "description": "The order ID of a request",
+                "required": false,
+                "type": "string"
+            }, {
+                "name": "biblionumber",
+                "in": "query",
+                "description": "Internal biblio identifier",
+                "required": false,
+                "type": "integer"
+            }, {
+                "$ref": "../parameters.json#/borrowernumberQueryParam"
+            }, {
+                "name": "completed",
+                "in": "query",
+                "description": "The date the request was considered completed",
+                "required": false,
+                "type": "string"
+            }, {
+                "name": "status",
+                "in": "query",
+                "description": "A full status string e.g. REQREV",
+                "required": false,
+                "type": "string"
+            }, {
+                "name": "medium",
+                "in": "query",
+                "description": "The medium of the requested item",
+                "required": false,
+                "type": "string"
+            }, {
+                "name": "updated",
+                "in": "query",
+                "description": "The last updated date of the request",
+                "required": false,
+                "type": "string"
+            }, {
+                "name": "placed",
+                "in": "query",
+                "description": "The date the request was placed",
+                "required": false,
+                "type": "string"
+            }, {
+                "name": "branchcode",
+                "in": "query",
+                "description": "Library ID",
+                "required": false,
+                "type": "string"
+            }],
+            "produces": [
+                "application/json"
+            ],
+            "responses": {
+                "200": {
+                    "description": "A list of ILL requests"
+                },
+                "401": {
+                  "description": "Authentication required",
+                  "schema": {
+                    "$ref": "../definitions.json#/error"
+                  }
+                },
+                "403": {
+                  "description": "Access forbidden",
+                  "schema": {
+                    "$ref": "../definitions.json#/error"
+                  }
+                },
+                "404": {
+                  "description": "ILL requests not found",
+                  "schema": {
+                    "$ref": "../definitions.json#/error"
+                  }
+                },
+                "500": {
+                  "description": "Internal server error",
+                  "schema": {
+                    "$ref": "../definitions.json#/error"
+                  }
+                },
+                "503": {
+                  "description": "Under maintenance",
+                  "schema": {
+                    "$ref": "../definitions.json#/error"
+                  }
+                }
+            },
+            "x-koha-authorization": {
+                "permissions": {
+                    "ill": "1"
+                }
+            }
+        }
+    }
+}

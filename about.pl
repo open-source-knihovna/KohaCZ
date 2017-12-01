@@ -35,9 +35,11 @@ use C4::Installer;
 
 use Koha;
 use Koha::Acquisition::Currencies;
+use Koha::Patron::Categories;
 use Koha::Patrons;
 use Koha::Caches;
 use Koha::Config::SysPrefs;
+use Koha::Illrequest::Config;
 use C4::Members::Statistics;
 
 #use Smart::Comments '####';
@@ -258,6 +260,36 @@ if ( !defined C4::Context->config('use_zebra_facets') ) {
             error => 'use_zebra_facets_needs_dom'
         } if C4::Context->config('zebra_bib_index_mode') ne 'dom' ;
     }
+}
+
+# ILL module checks
+if ( C4::Context->preference('ILLModule') ) {
+    my $warnILLConfiguration = 0;
+    my $ill_config_from_file = C4::Context->config("interlibrary_loans");
+    my $ill_config = Koha::Illrequest::Config->new;
+
+    my $available_ill_backends =
+      ( scalar @{ $ill_config->available_backends } > 0 );
+
+    # Check backends
+    if ( !$available_ill_backends ) {
+        $template->param( no_ill_backends => 1 );
+        $warnILLConfiguration = 1;
+    }
+
+    # Check partner_code
+    if ( !Koha::Patron::Categories->find($ill_config->partner_code) ) {
+        $template->param( ill_partner_code_doesnt_exist => $ill_config->partner_code );
+        $warnILLConfiguration = 1;
+    }
+
+    if ( !$ill_config_from_file->{partner_code} ) {
+        # partner code not defined
+        $template->param( ill_partner_code_not_defined => 1 );
+        $warnILLConfiguration = 1;
+    }
+
+    $template->param( warnILLConfiguration => $warnILLConfiguration );
 }
 
 # Sco Patron should not contain any other perms than circulate => self_checkout
