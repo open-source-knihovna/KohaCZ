@@ -72,6 +72,8 @@
     <div class="dialog alert">
         No system preferences matched your search for: <strong>[% searchfield |html %]</strong>
     </div>
+    [% ELSIF searchfield %]
+        <h1>You searched for: [% searchfield | html %]</h1>
     [% END %]
     [% FOREACH TAB IN TABS %]
     <div class="prefs-tab">
