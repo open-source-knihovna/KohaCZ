@@ -23,9 +23,11 @@ use CGI qw ( -utf8 );
 use C4::Output;
 use C4::Auth;
 use C4::AuthoritiesMarc;
-use Koha::MetadataRecord::Authority;
 use C4::Koha;
 use C4::Biblio;
+
+use Koha::Authority::Types;
+use Koha::MetadataRecord::Authority;
 
 my $input  = new CGI;
 my @authid = $input->multi_param('authid');
@@ -50,12 +52,28 @@ if ($merge) {
 
     # Creating a new record from the html code
     my $record   = TransformHtmlToMarc($input, 0);
-    my $recordid1   = $input->param('recordid1');
-    my $recordid2   = $input->param('recordid2');
+    my $recordid1   = $input->param('recordid1') // q{};
+    my $recordid2   = $input->param('recordid2') // q{};
     my $typecode = $input->param('frameworkcode');
 
+    # Some error checking
+    if( $recordid1 eq $recordid2 ) {
+        push @errors, { code => 'DESTRUCTIVE_MERGE' };
+    } elsif( !$typecode || !Koha::Authority::Types->find($typecode) ) {
+        push @errors, { code => 'WRONG_FRAMEWORK' };
+    } elsif( scalar $record->fields == 0 ) {
+        push @errors, { code => 'EMPTY_MARC' };
+    }
+    if( @errors ) {
+        $template->param( errors => \@errors );
+        output_html_with_http_headers $input, $cookie, $template->output;
+        exit;
+    }
+
     # Rewriting the leader
-    $record->leader( GetAuthority($recordid1)->leader() );
+    if( my $authrec = GetAuthority($recordid1) ) {
+        $record->leader( $authrec->leader() );
+    }
 
     # Modifying the reference record
     # This triggers a merge for the biblios attached to $recordid1
@@ -85,23 +103,38 @@ else {
 
     if ( scalar(@authid) != 2 ) {
         push @errors, { code => "WRONG_COUNT", value => scalar(@authid) };
-    }
-    else {
-        my $recordObj1 = Koha::MetadataRecord::Authority->get_from_authid($authid[0]) || Koha::MetadataRecord::Authority->new();
-        my $recordObj2;
-
-        if (defined $mergereference && $mergereference eq 'breeding') {
-            $recordObj2 =  Koha::MetadataRecord::Authority->get_from_breeding($authid[1]) || Koha::MetadataRecord::Authority->new();
-        } else {
-            $recordObj2 =  Koha::MetadataRecord::Authority->get_from_authid($authid[1]) || Koha::MetadataRecord::Authority->new();
+    } elsif( $authid[0] eq $authid[1] ) {
+        push @errors, { code => 'DESTRUCTIVE_MERGE' };
+    } else {
+        my $recordObj1 = Koha::MetadataRecord::Authority->get_from_authid($authid[0]);
+        if (!$recordObj1) {
+            push @errors, { code => "MISSING_RECORD", value => $authid[0] };
         }
 
-        if ($mergereference) {
+
+        my $recordObj2;
+        if (defined $mergereference && $mergereference eq 'breeding') {
+            $recordObj2 =  Koha::MetadataRecord::Authority->get_from_breeding($authid[1]);
+        } else {
+            $recordObj2 =  Koha::MetadataRecord::Authority->get_from_authid($authid[1]);
+        }
+        if (!$recordObj2) {
+            push @errors, { code => "MISSING_RECORD", value => $authid[1] };
+        }
+
+        unless ( $recordObj1 && $recordObj2 ) {
+            if (@errors) {
+                $template->param( errors => \@errors );
+            }
+            output_html_with_http_headers $input, $cookie, $template->output;
+            exit;
+        }
+
+        if ($mergereference ) {
 
             my $framework;
             if ( $recordObj1->authtypecode ne $recordObj2->authtypecode && $mergereference ne 'breeding' ) {
-                $framework = $input->param('frameworkcode')
-                  or push @errors, { code => 'FRAMEWORK_NOT_SELECTED' };
+                $framework = $input->param('frameworkcode');
             }
             else {
                 $framework = $recordObj1->authtypecode;
@@ -163,17 +196,9 @@ else {
                 title2          => $recordObj2->authorized_heading,
             );
             if ( $recordObj1->authtypecode ne $recordObj2->authtypecode ) {
-                my $authority_types = Koha::Authority::Types->search( {}, { order_by => ['authtypecode'] } );
-                my @frameworkselect;
-                while ( my $authority_type = $authority_types->next ) {
-                    my %row = (
-                        value => $authority_type->authtypecode,
-                        frameworktext => $authority_type->authtypetext,
-                    );
-                    push @frameworkselect, \%row;
-                }
+                my $authority_types = Koha::Authority::Types->search( { authtypecode => { '!=' => '' } }, { order_by => ['authtypecode'] } );
                 $template->param(
-                    frameworkselect => \@frameworkselect,
+                    frameworkselect => $authority_types->unblessed,
                     frameworkcode1  => $recordObj1->authtypecode,
                     frameworkcode2  => $recordObj2->authtypecode,
                 );
@@ -182,22 +207,7 @@ else {
     }
 }
 
-my $authority_types = Koha::Authority::Types->search({}, { order_by => ['authtypetext']});
-$template->param( authority_types => $authority_types );
-
 if (@errors) {
-
-    # Errors
     $template->param( errors => \@errors );
 }
-
 output_html_with_http_headers $input, $cookie, $template->output;
-exit;
-
-=head1 FUNCTIONS
-
-=cut
-
-# ------------------------
-# Functions
-# ------------------------

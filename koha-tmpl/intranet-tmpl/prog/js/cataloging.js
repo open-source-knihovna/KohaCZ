@@ -77,16 +77,20 @@ function ExpandField(index) {
 
 var Select2Utils = {
   removeSelect2: function(element) {
-    var selects = element.getElementsByTagName('select');
-    for (var i=0; i < selects.length; i++) {
-      $(selects[i]).select2('destroy');
+    if ($.fn.select2) {
+      var selects = element.getElementsByTagName('select');
+      for (var i=0; i < selects.length; i++) {
+        $(selects[i]).select2('destroy');
+      }
     }
   },
 
   initSelect2: function(element) {
-    var selects = element.getElementsByTagName('select');
-    for (var i=0; i < selects.length; i++) {
-      $(selects[i]).select2();
+    if ($.fn.select2) {
+      var selects = element.getElementsByTagName('select');
+      for (var i=0; i < selects.length; i++) {
+        $(selects[i]).select2();
+      }
     }
   }
 };
@@ -315,6 +319,7 @@ function CloneSubfield(index, advancedMARCEditor){
         id_input = selects[i].getAttribute('id')+new_key;
         selects[i].setAttribute('id',selects[i].getAttribute('id')+new_key);
         selects[i].setAttribute('name',selects[i].getAttribute('name')+new_key);
+        linkid = id_input;
     }
 
     // textarea

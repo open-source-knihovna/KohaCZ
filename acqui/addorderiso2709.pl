@@ -244,6 +244,8 @@ if ($op eq ""){
             for (my $i = 0; $i < $count; $i++) {
                 $budget_hash->{$budget_codes[$i]}->{quantity} += 1;
                 $budget_hash->{$budget_codes[$i]}->{price} = $itemprices[$i];
+                $budget_hash->{$budget_codes[$i]}->{itemnumbers} //= [];
+                push @{ $budget_hash->{$budget_codes[$i]}->{itemnumbers} }, $itemnumbers[$i];
             }
 
             # Create orderlines from MarcItemFieldsToOrder
@@ -266,22 +268,12 @@ if ($op eq ""){
                         $orderinfo{tax_rate} = $bookseller->tax_rate;
                         my $c = $c_discount ? $c_discount : $bookseller->discount / 100;
                         $orderinfo{discount} = $c;
-                        if ( $bookseller->listincgst ) {
-                            if ( $c_discount ) {
-                                $orderinfo{ecost} = $price;
-                                $orderinfo{rrp}   = $orderinfo{ecost} / ( 1 - $c );
-                            } else {
-                                $orderinfo{ecost} = $price * ( 1 - $c );
-                                $orderinfo{rrp}   = $price;
-                            }
+                        if ( $c_discount ) {
+                            $orderinfo{ecost} = $price;
+                            $orderinfo{rrp}   = $orderinfo{ecost} / ( 1 - $c );
                         } else {
-                            if ( $c_discount ) {
-                                $orderinfo{ecost} = $price / ( 1 + $orderinfo{tax_rate} );
-                                $orderinfo{rrp}   = $orderinfo{ecost} / ( 1 - $c );
-                            } else {
-                                $orderinfo{rrp}   = $price / ( 1 + $orderinfo{tax_rate} );
-                                $orderinfo{ecost} = $orderinfo{rrp} * ( 1 - $c );
-                            }
+                            $orderinfo{ecost} = $price * ( 1 - $c );
+                            $orderinfo{rrp}   = $price;
                         }
                         $orderinfo{listprice} = $orderinfo{rrp} / $active_currency->rate;
                         $orderinfo{unitprice} = $orderinfo{ecost};
@@ -305,7 +297,7 @@ if ($op eq ""){
                     };
 
                     my $order = Koha::Acquisition::Order->new( \%orderinfo )->insert;
-                    $order->add_item( $_ ) for @itemnumbers;
+                    $order->add_item( $_ ) for @{ $budget_hash->{$budget_id}->{itemnumbers} };
                 }
             }
         } else {
@@ -336,22 +328,12 @@ if ($op eq ""){
                 $orderinfo{tax_rate} = $bookseller->tax_rate;
                 my $c = $c_discount ? $c_discount : $bookseller->discount / 100;
                 $orderinfo{discount} = $c;
-                if ( $bookseller->listincgst ) {
-                    if ( $c_discount ) {
-                        $orderinfo{ecost} = $price;
-                        $orderinfo{rrp}   = $orderinfo{ecost} / ( 1 - $c );
-                    } else {
-                        $orderinfo{ecost} = $price * ( 1 - $c );
-                        $orderinfo{rrp}   = $price;
-                    }
+                if ( $c_discount ) {
+                    $orderinfo{ecost} = $price;
+                    $orderinfo{rrp}   = $orderinfo{ecost} / ( 1 - $c );
                 } else {
-                    if ( $c_discount ) {
-                        $orderinfo{ecost} = $price / ( 1 + $orderinfo{tax_rate} );
-                        $orderinfo{rrp}   = $orderinfo{ecost} / ( 1 - $c );
-                    } else {
-                        $orderinfo{rrp}   = $price / ( 1 + $orderinfo{tax_rate} );
-                        $orderinfo{ecost} = $orderinfo{rrp} * ( 1 - $c );
-                    }
+                    $orderinfo{ecost} = $price * ( 1 - $c );
+                    $orderinfo{rrp}   = $price;
                 }
                 $orderinfo{listprice} = $orderinfo{rrp} / $active_currency->rate;
                 $orderinfo{unitprice} = $orderinfo{ecost};

@@ -715,11 +715,14 @@ to ensure those parts are correct.
 sub _clean_search_term {
     my ( $self, $term ) = @_;
 
+    my $auto_truncation = C4::Context->preference("QueryAutoTruncate") || 0;
+
     # Some hardcoded searches (like with authorities) produce things like
     # 'an=123', when it ought to be 'an:123' for our purposes.
     $term =~ s/=/:/g;
     $term = $self->_convert_index_strings_freeform($term);
     $term =~ s/[{}]/"/g;
+    $term = $self->_truncate_terms($term) if ($auto_truncation);
     return $term;
 }
 
@@ -778,6 +781,35 @@ sub _sort_field {
         $f .= '__sort';
     }
     return $f;
+}
+
+=head2 _truncate_terms
+
+    my $query = $self->_truncate_terms($query);
+
+Given a string query this function appends '*' wildcard  to all terms except
+operands and double quoted strings.
+
+=cut
+
+sub _truncate_terms {
+    my ( $self, $query ) = @_;
+
+    # '"donald duck" title:"the mouse" and peter" get split into
+    # ['', '"donald duck"', '', ' ', '', 'title:"the mouse"', '', ' ', 'and', ' ', 'pete']
+    my @tokens = split /((?:\w+:)?"[^"]+"|\s+)/, $query;
+
+    # Filter out empty tokens
+    my @words = grep { $_ !~ /^\s*$/ } @tokens;
+
+    # Append '*' to words if needed, ie. if it's not surrounded by quotes, not
+    # terminated by '*' and not a keyword
+    my @terms = map {
+        my $w = $_;
+        (/"$/ or /\*$/ or grep {lc($w) eq $_} qw/and or not/) ? $_ : "$_*";
+    } @words;
+
+    return join ' ', @terms;
 }
 
 1;

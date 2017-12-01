@@ -14746,8 +14746,52 @@ if ( CheckVersion($DBversion) ) {
         ('DontShortenAnyLoanPeriod','1','','Do not shorten any loan period by renewing','YesNo');
     });
 
-    SetVersion($DBversion);
+    SetVersion( $DBversion );
     print "Upgrade to $DBversion done - dontShortenAnyLoanPeriod\n";
+}
+
+$DBversion = '17.05.05.002';
+if ( CheckVersion($DBversion) ) {
+    print q{WARNING: Bug 18811 fixed an inconsistency in the visibility settings for authority frameworks. It is recommended that you run script misc/maintenance/auth_show_hidden_data.pl to check if you have data in hidden fields and adjust your frameworks accordingly to prevent data loss when editing such records.};
+    print "\n";
+
+    print "Upgrade to $DBversion done (Bug 18811 - Visibility settings inconsistent between framework and authority editor)\n";
+
+    # Fetch all auth types
+    my $authtypes = $dbh->selectcol_arrayref(q|SELECT authtypecode FROM auth_types|);
+
+    if ( grep { $_ eq 'Default' } @$authtypes ) {
+
+        # If this exists as an authtypecode, we don't do anything
+    }
+    else {
+        # Replace the incorrect Default by empty string
+        $dbh->do(q|
+            UPDATE auth_header SET authtypecode='' WHERE authtypecode='Default'
+        |);
+    }
+
+    SetVersion($DBversion);
+    print "Upgrade to $DBversion done (Bug 18801 - Update incorrect Default auth type codes)\n";
+}
+
+$DBversion = '17.05.05.003';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        ALTER TABLE borrowers MODIFY COLUMN login_attempts int(4) AFTER lang;
+    });
+    $dbh->do(q{
+        ALTER TABLE deletedborrowers MODIFY COLUMN login_attempts int(4) AFTER lang;
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 19344 -  Reorder lang and login_attempts in the [deleted]borrowers tables)\n";
+}
+
+$DBversion = "17.05.06.000";
+if ( CheckVersion($DBversion) ) {
+    SetVersion($DBversion);
+    print "Upgrade to $DBversion done (Koha 17.05.06)\n";
 }
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
