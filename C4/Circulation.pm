@@ -3556,16 +3556,24 @@ sub CalcDateDue {
           ->truncate( to => 'minute' );
     }
 
-
+    my $max_date_due;
     # calculate the datedue as normal
     if ( C4::Context->preference('useDaysMode') eq 'Days' )
     {    # ignoring calendar
+        if (defined $issuedate && $loanlength->{maxissuelength} ) {
+            $max_date_due = $issuedate->clone->add( $loanlength->{lengthunit} => $loanlength->{maxissuelength} );
+        }
         if ( $loanlength->{lengthunit} eq 'hours' ) {
             $datedue->add( hours => $loanlength->{$length_key} );
         } else {    # days
             $datedue->add( days => $loanlength->{$length_key} );
             $datedue->set_hour(23);
             $datedue->set_minute(59);
+            if (defined $max_date_due) {
+                $max_date_due->set_hour(23);
+                $max_date_due->set_minute(59);
+                $max_date_due->truncate( to => 'minute' );
+            }
         }
     } else {
         my $dur;
@@ -3577,9 +3585,20 @@ sub CalcDateDue {
         }
         my $calendar = Koha::Calendar->new( branchcode => $branch );
         $datedue = $calendar->addDate( $datedue, $dur, $loanlength->{lengthunit} );
+
+        if (defined $issuedate && $loanlength->{maxissuelength} ) {
+            my $maxdur = DateTime::Duration->new( $loanlength->{lengthunit} => $loanlength->{maxissuelength} );
+            $max_date_due = $calendar->addDate( $issuedate, $maxdur, $loanlength->{lengthunit} );
+        }
+
         if ($loanlength->{lengthunit} eq 'days') {
             $datedue->set_hour(23);
             $datedue->set_minute(59);
+            if (defined $max_date_due) {
+                $max_date_due->set_hour(23);
+                $max_date_due->set_minute(59);
+                $max_date_due->truncate( to => 'minute' );
+            }
         }
     }
 
@@ -3615,15 +3634,7 @@ sub CalcDateDue {
         }
     }
 
-    if (defined $issuedate && $loanlength->{maxissuelength} ) {
-        my $max_date_due = $issuedate->clone->add( $loanlength->{lengthunit} => $loanlength->{maxissuelength} );
-        if ($loanlength->{lengthunit} == "days") {
-            $max_date_due->set_hour(23);
-            $max_date_due->set_minute(59);
-        }
-        $max_date_due->truncate( to => 'minute' );
-        $datedue = $max_date_due if ( $max_date_due < $datedue );
-    }
+    $datedue = $max_date_due if (defined $max_date_due &&  $max_date_due < $datedue );
 
     return $datedue;
 }
