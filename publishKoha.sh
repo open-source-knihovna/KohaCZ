@@ -17,9 +17,7 @@ DEB_BUILD_OPTIONS=nocheck ./debian/build-git-snapshot -r ~/debian -v $VERSION -d
 echo "Build finished, press any key to upload deb files to repository server..."
 read -n 1 -s
 
-scp "../debian/koha-deps_${VERSION}_all.deb" $SERVER:/root/kohadeb/
-scp "../debian/koha-perldeps_${VERSION}_all.deb" $SERVER:/root/kohadeb/
-scp "../debian/koha-common_${VERSION}_all.deb" $SERVER:/root/kohadeb/
+scp ../debian/koha-*_${VERSION}_all.deb root@$SERVER:/root/kohadeb/
 
 ssh root@$SERVER <<ENDSSH
     cd /root/
