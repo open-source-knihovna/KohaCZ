@@ -45,6 +45,10 @@ sub _type {
     return 'Collection';
 }
 
+=head3 object_class
+
+=cut
+
 sub object_class {
     return 'Koha::RotatingCollection';
 }

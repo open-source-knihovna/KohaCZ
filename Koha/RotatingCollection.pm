@@ -136,7 +136,8 @@ sub transfer {
 
     $self->colBranchcode( $library->branchcode )->store;
 
-    my $from = C4::Context->userenv->{'branch'} if C4::Context->userenv;
+    my $from;
+    $from = C4::Context->userenv->{'branch'} if C4::Context->userenv;
 
     my $items = $self->items;
     while ( my $item = $items->next ) {
