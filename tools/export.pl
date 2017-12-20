@@ -22,6 +22,7 @@ use MARC::File::XML;
 use List::MoreUtils qw(uniq);
 use C4::Auth;
 use C4::Output;
+use C4::RotatingCollections;
 
 use Koha::Authority::Types;
 use Koha::Biblioitems;
@@ -41,6 +42,7 @@ my $output_format     = $query->param("format") || $query->param("output_format"
 my $backupdir         = C4::Context->config('backupdir');
 my $filename          = $query->param("filename") || ( $output_format eq 'csv' ? 'koha.csv' : 'koha.mrc' );
 $filename =~ s/(\r|\n)//;
+my $rotating_collection = $query->param("rotating_collection") || undef;
 
 my $dbh = C4::Context->dbh;
 
@@ -83,13 +85,19 @@ if ( $op eq 'export' ) {
 }
 
 if ( $op eq "export" ) {
-
     my $export_remove_fields = $query->param("export_remove_fields") || q||;
     my @biblionumbers      = $query->multi_param("biblionumbers");
     my @itemnumbers        = $query->multi_param("itemnumbers");
     my $strip_nonlocal_items =  $query->param('strip_nonlocal_items');
     my @sql_params;
     my $sql_query;
+
+    if ($rotating_collection) {
+        $record_type = "bibs";
+        @biblionumbers = GetBiblioNumbersInCollection($rotating_collection);
+        @record_ids = @biblionumbers;
+        @itemnumbers = GetItemNumbersInCollection($rotating_collection);
+    }
 
     my $libraries = $strip_nonlocal_items
         ? [ Koha::Libraries->find(C4::Context->userenv->{branch})->unblessed ]

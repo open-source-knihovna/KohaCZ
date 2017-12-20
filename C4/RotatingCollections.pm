@@ -65,6 +65,9 @@ BEGIN {
       WasBiblioTransferedBefore
 
       GetCollectionItemBranches
+
+      GetBiblioNumbersInCollection
+      GetItemNumbersInCollection
     );
 }
 
@@ -610,6 +613,48 @@ sub isItemInAnyCollection {
     else {
         return 0;
     }
+}
+
+sub GetBiblioNumbersInCollection {
+    my ($colId) = @_;
+    my $dbh = C4::Context->dbh;
+
+    my $sth = $dbh->prepare(
+        "SELECT DISTINCT items.biblionumber
+            FROM collections, collections_tracking, items
+            WHERE collections.colId = collections_tracking.colId
+            AND collections_tracking.itemnumber = items.itemnumber
+            AND collections.colId = ?"
+    );
+    $sth->execute($colId) or return;
+
+    my @results;
+    while ( my $row = $sth->fetchrow_hashref ) {
+        push( @results, $row->{'biblionumber'} );
+    }
+
+    return @results;
+}
+
+sub GetItemNumbersInCollection {
+    my ($colId) = @_;
+    my $dbh = C4::Context->dbh;
+
+    my $sth = $dbh->prepare(
+            "SELECT DISTINCT items.itemnumber
+            FROM collections, collections_tracking, items
+            WHERE collections.colId = collections_tracking.colId
+            AND collections_tracking.itemnumber = items.itemnumber
+            AND collections.colId = ?"
+    );
+    $sth->execute($colId) or return;
+
+    my @results;
+    while ( my $row = $sth->fetchrow_hashref ) {
+        push( @results, $row->{'itemnumber'} );
+    }
+
+    return @results;
 }
 
 1;
