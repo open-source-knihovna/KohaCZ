@@ -276,7 +276,7 @@ sub _handle_one_result {
     my $error;
     ( $marcrecord, $error ) = _do_xslt_proc($marcrecord, $servhref, $xslh);
 
-    my $batch_id = GetZ3950BatchId($servhref->{servername});
+    my $batch_id = C4::ImportBatch::GetZ3950BatchId($servhref->{servername});
     my $breedingid = AddBiblioToBatch($batch_id, $seq, $marcrecord, 'UTF-8', 0, 0);
         #FIXME passing 0 for z3950random
         #Will eliminate this unused field in a followup report
