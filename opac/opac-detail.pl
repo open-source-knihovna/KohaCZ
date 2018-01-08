@@ -92,6 +92,8 @@ if ( ! $record ) {
     print $query->redirect("/cgi-bin/koha/errors/404.pl"); # escape early
     exit;
 }
+
+my $biblio = Koha::Biblios->find( $biblionumber );
 my $framework = &GetFrameworkCode( $biblionumber );
 my $record_processor = Koha::RecordProcessor->new({
     filters => 'ViewPolicy',
@@ -133,7 +135,7 @@ if (C4::Context->preference('OpacSuppression')) {
     }
 }
 
-$template->param( biblionumber => $biblionumber );
+$template->param( biblio => $biblio );
 
 # get biblionumbers stored in the cart
 my @cart_list;
@@ -601,7 +603,6 @@ for ( C4::Context->preference("OPACShowHoldQueueDetails") ) {
 }
 my $has_hold;
 if ( $show_holds_count || $show_priority) {
-    my $biblio = Koha::Biblios->find( $biblionumber );
     my $holds = $biblio->holds;
     $template->param( holds_count  => $holds->count );
     while ( my $hold = $holds->next ) {
