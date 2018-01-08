@@ -129,27 +129,27 @@ if (not defined $format) {
         my $biblionumber = $1;
 
         my $content;
-        eval {
-            my $marcxml = GetXmlBiblio($biblionumber);
-            unless (defined $marcxml) {
-                # no bib, so 404
-                print $cgi->header( -status => '404 record not found');
-                exit 0;
-            }
 
-            my $xslt_file = get_xslt_file( $format, $format_to_stylesheet_map, $format_info );
-            unless( defined $xslt_file ) {
-                print $cgi->header( -status => '406 invalid format requested' );
-                exit 0;
-            }
-            my $xslt_engine = Koha::XSLT_Handler->new;
-            $content = $xslt_engine->transform({
-                xml => $marcxml,
-                file => $xslt_file,
-            });
-        };
-        if ($@) {
-            print $cgi->header( -status => '500 internal error ' . $@ );
+        my $marcxml = GetXmlBiblio($biblionumber);
+        unless (defined $marcxml) {
+            # no bib, so 404
+            print $cgi->header( -status => '404 record not found');
+            exit 0;
+        }
+
+        my $xslt_file = get_xslt_file( $format, $format_to_stylesheet_map, $format_info );
+        unless( defined $xslt_file ) {
+            print $cgi->header( -status => '406 invalid format requested' );
+            exit 0;
+        }
+        my $xslt_engine = Koha::XSLT_Handler->new;
+        $content = $xslt_engine->transform({
+            xml => $marcxml,
+            file => $xslt_file,
+        });
+
+        if( !defined $content || $xslt_engine->err ) {
+            print $cgi->header( -status => '500 internal error' );
             exit 0;
         }
 

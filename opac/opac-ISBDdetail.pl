@@ -55,7 +55,7 @@ use C4::Koha;
 use Koha::ItemTypes;
 use Koha::Patrons;
 use Koha::RecordProcessor;
-
+use Koha::Biblios;
 
 my $query = CGI->new();
 my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
@@ -100,6 +100,9 @@ if ( ! $record ) {
     print $query->redirect("/cgi-bin/koha/errors/404.pl");
     exit;
 }
+
+my $biblio = Koha::Biblios->find( $biblionumber );
+
 my $framework = GetFrameworkCode( $biblionumber );
 my $record_processor = Koha::RecordProcessor->new({
     filters => 'ViewPolicy',
@@ -185,7 +188,7 @@ $template->param(
     AllowOnShelfHolds   => $allow_onshelf_holds,
     norequests   => $norequests,
     ISBD         => $res,
-    biblionumber => $biblionumber,
+    biblio       => $biblio,
 );
 
 #Search for title in links
