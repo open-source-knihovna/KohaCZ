@@ -10399,7 +10399,7 @@ msgstr "Pokud chcete tuto chybu nahlásit, kontaktujte správce systému Koha."
 #, fuzzy, c-format
 msgid "To reset your password, enter your login or your email address. "
 msgstr ""
-"Pokud chcete obnovit heslo, zadejte vaše přihlašovací jméno a emailovou "
+"Pokud chcete obnovit heslo, zadejte vaše přihlašovací jméno nebo emailovou "
 "adresu. "
 
 #. SCRIPT
