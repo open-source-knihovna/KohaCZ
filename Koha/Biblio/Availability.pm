@@ -134,7 +134,6 @@ sub new {
 
 Returns a HASHref that contains biblio availability information as well as
 availability information for each item of this biblio.
-
 Numifies numbers for Swagger to be numbers instead of strings.
 
 =cut
@@ -142,12 +141,12 @@ Numifies numbers for Swagger to be numbers instead of strings.
 sub swaggerize {
     my ($self) = @_;
 
-    my $item_availabilities = [];
+    my @item_availabilities;
     foreach my $item_availability (@{$self->item_availabilities}) {
-        push $item_availabilities, $item_availability->swaggerize;
+        push @item_availabilities, $item_availability->swaggerize;
     }
     foreach my $item_availability (@{$self->item_unavailabilities}) {
-        push $item_availabilities, $item_availability->swaggerize;
+        push @item_availabilities, $item_availability->swaggerize;
     }
     my $confirmations = $self->SUPER::_swaggerize_exception($self->confirmations);
     my $notes = $self->SUPER::_swaggerize_exception($self->notes);
@@ -170,7 +169,7 @@ sub swaggerize {
     my $hash = {
         biblionumber => 0+$self->biblio->biblionumber,
         availability => $availability,
-        item_availabilities => $item_availabilities,
+        item_availabilities => \@item_availabilities,
     };
     return $hash;
 }
