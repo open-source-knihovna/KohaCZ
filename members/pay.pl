@@ -106,7 +106,7 @@ if ($writeoff_all) {
     print $input->redirect( "/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber" );
 } elsif ($writeoff_item) {
     my $accountlines_id = $input->param('accountlines_id');
-    my $amount       = $input->param('amountoutstanding');
+    my $amount       = $input->param('amountwrittenoff');
     my $payment_note = $input->param("payment_note");
 
     Koha::Account->new( { patron_id => $borrowernumber } )->pay(
@@ -133,7 +133,6 @@ for (@names) {
 
 $template->param(
     finesview => 1,
-    RoutingSerials => C4::Context->preference('RoutingSerials'),
 );
 
 add_accounts_to_template();
@@ -252,7 +251,7 @@ sub borrower_add_additional_fields {
     if ( $b_ref->{category_type} eq 'C' ) {
         my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
         $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
-        $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
+        $template->param( 'catcode' => $patron_categories->next->categorycode )  if $patron_categories->count == 1;
     } elsif ( $b_ref->{category_type} eq 'A' || $b_ref->{category_type} eq 'I' ) {
         $b_ref->{adultborrower} = 1;
     }

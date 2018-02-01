@@ -14488,7 +14488,7 @@ if( CheckVersion( $DBversion ) ) {
 
     $dbh->do(q|
         INSERT IGNORE INTO letter (`module`, `code`, `branchcode`, `name`, `is_html`, `title`, `content`, `message_transport_type`)
-        VALUES ('circulation', 'PATRON_NOTE', '', 'Patron note on item', '0', 'Patron issue note', '<<borrowers.firstname>> <<borrowers.surname>> has added a note to the item <<biblio.item>> - <<biblio.author>> (<<biblio.biblionumber>>).','email');
+        VALUES ('circulation', 'CHECKOUT_NOTE', '', 'Checkout note on item set by patron', '0', 'Checkout note', '<<borrowers.firstname>> <<borrowers.surname>> has added a note to the item <<biblio.title>> - <<biblio.author>> (<<biblio.biblionumber>>).','email');
     |);
 
     $dbh->do(q|
@@ -15250,6 +15250,41 @@ $DBversion = '17.11.01.000';
 if( CheckVersion( $DBversion ) ) {
     SetVersion( $DBversion );
     print "Upgrade to $DBversion done (Koha 17.11)\n";
+}
+
+$DBversion = '17.11.01.001';
+if( CheckVersion( $DBversion ) ) {
+    #For installations having the note already
+    $dbh->do(q{
+        UPDATE letter
+        SET code = 'CHECKOUT_NOTE',
+            name = 'Checkout note on item set by patron',
+            title = 'Checkout note',
+            content = REPLACE(content, "<<biblio.item>>", "<<biblio.title>>")
+        WHERE code = 'PATRON_NOTE';
+    });
+    #For installations coming from 17.11
+    $dbh->do(q{
+        INSERT IGNORE INTO `letter` (`module`, `code`, `branchcode`, `name`, `is_html`, `title`, `content`, `message_transport_type`)
+        VALUES ('circulation', 'CHECKOUT_NOTE', '', 'Checkout note on item set by patron', '0', 'Checkout note', '<<borrowers.firstname>> <<borrowers.surname>> has added a note to the item <<biblio.title>> - <<biblio.author>> (<<biblio.biblionumber>>).','email')
+    });
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18915 - Correct CHECKOUT_NOTE notice template)\n";
+}
+
+$DBversion = '17.11.01.002';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        UPDATE systempreferences SET value=replace(value, "http://www.scholar", "https://scholar") WHERE variable='OPACSearchForTitleIn';
+    });
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17682 - Update URL for Google Scholar in OPACSearchForTitleIn)\n";
+}
+
+$DBversion = '17.11.02.000';
+if( CheckVersion( $DBversion ) ) {
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (17.11.02 release)\n";
 }
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory

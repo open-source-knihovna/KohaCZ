@@ -169,7 +169,7 @@ if ( $action eq 'create' ) {
                 $verification_token = md5_hex( time().{}.rand().{}.$$ );
             }
 
-            $borrower{password}           = Koha::AuthUtils::generate_password;
+            $borrower{password}           = Koha::AuthUtils::generate_password unless $borrower{password};
             $borrower{verification_token} = $verification_token;
 
             Koha::Patron::Modification->new( \%borrower )->store();
@@ -441,10 +441,15 @@ sub ParseCgiForBorrower {
     my $scrubber = C4::Scrubber->new();
     my %borrower;
 
-    foreach ( $cgi->param ) {
-        if ( $_ =~ '^borrower_' ) {
-            my ($key) = substr( $_, 9 );
-            $borrower{$key} = $scrubber->scrub( scalar $cgi->param($_) );
+    foreach my $field ( $cgi->param ) {
+        if ( $field =~ '^borrower_' ) {
+            my ($key) = substr( $field, 9 );
+            if ( $field !~ '^borrower_password' ) {
+                $borrower{$key} = $scrubber->scrub( scalar $cgi->param($field) );
+            } else {
+                # Allow html characters for passwords
+                $borrower{$key} = $cgi->param($field);
+            }
         }
     }
 

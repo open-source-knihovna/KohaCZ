@@ -297,6 +297,9 @@ Using this account is not recommended because some parts of Koha will not functi
                                                     [% ELSIF ISSUE.auto_too_much_oweing %]
                                                         Automatic renewal failed, you have unpaid fines.
                                                         <span class="renewals">([% ISSUE.renewsleft %] of [% ISSUE.renewsallowed %] renewals remaining)</span>
+                                                    [% ELSIF ISSUE.auto_account_expired %]
+                                                        Automatic renewal failed, your account is expired.
+                                                        <span class="renewals">([% ISSUE.renewsleft %] of [% ISSUE.renewsallowed %] renewals remaining)</span>
                                                     [% ELSIF ( ISSUE.auto_renew || ISSUE.auto_too_soon ) %]
                                                         Automatic renewal
                                                         <span class="renewals">([% ISSUE.renewsleft %] of [% ISSUE.renewsallowed %] renewals remaining)</span>
@@ -986,7 +989,7 @@ Using this account is not recommended because some parts of Koha will not functi
                     };
 
                     $.ajax({
-                        url: '/cgi-bin/koha/svc/patron_notes/',
+                        url: '/cgi-bin/koha/svc/checkout_notes/',
                         type: 'POST',
                         dataType: 'json',
                         data: ajaxData,
