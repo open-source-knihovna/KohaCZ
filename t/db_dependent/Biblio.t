@@ -17,14 +17,17 @@
 
 use Modern::Perl;
 
-use Test::More tests => 7;
+use Test::More tests => 9;
 use Test::MockModule;
-
 use List::MoreUtils qw( uniq );
 use MARC::Record;
+
 use t::lib::Mocks qw( mock_preference );
+use t::lib::TestBuilder;
 
 use Koha::Database;
+use Koha::Caches;
+use Koha::MarcSubfieldStructures;
 
 BEGIN {
     use_ok('C4::Biblio');
@@ -33,9 +36,10 @@ BEGIN {
 my $schema = Koha::Database->new->schema;
 $schema->storage->txn_begin;
 my $dbh = C4::Context->dbh;
+Koha::Caches->get_instance->clear_from_cache( "MarcSubfieldStructure-" );
 
 subtest 'GetMarcSubfieldStructureFromKohaField' => sub {
-    plan tests => 23;
+    plan tests => 25;
 
     my @columns = qw(
         tagfield tagsubfield liblibrarian libopac repeatable mandatory kohafield tab
@@ -44,7 +48,7 @@ subtest 'GetMarcSubfieldStructureFromKohaField' => sub {
     );
 
     # biblio.biblionumber must be mapped so this should return something
-    my $marc_subfield_structure = GetMarcSubfieldStructureFromKohaField('biblio.biblionumber', '');
+    my $marc_subfield_structure = GetMarcSubfieldStructureFromKohaField('biblio.biblionumber');
 
     ok(defined $marc_subfield_structure, "There is a result");
     is(ref $marc_subfield_structure, "HASH", "Result is a hashref");
@@ -54,11 +58,69 @@ subtest 'GetMarcSubfieldStructureFromKohaField' => sub {
     is($marc_subfield_structure->{kohafield}, 'biblio.biblionumber', "Result is the good result");
     like($marc_subfield_structure->{tagfield}, qr/^\d{3}$/, "tagfield is a valid tagfield");
 
+    # Add a test for list context (BZ 10306)
+    my @results = GetMarcSubfieldStructureFromKohaField('biblio.biblionumber');
+    is( @results, 1, 'We expect only one mapping' );
+    is_deeply( $results[0], $marc_subfield_structure,
+        'The first entry should be the same hashref as we had before' );
+
     # foo.bar does not exist so this should return undef
-    $marc_subfield_structure = GetMarcSubfieldStructureFromKohaField('foo.bar', '');
+    $marc_subfield_structure = GetMarcSubfieldStructureFromKohaField('foo.bar');
     is($marc_subfield_structure, undef, "invalid kohafield returns undef");
+
 };
 
+subtest "GetMarcSubfieldStructure" => sub {
+    plan tests => 5;
+
+    # Add multiple Koha to Marc mappings
+    Koha::MarcSubfieldStructures->search({ frameworkcode => '', tagfield => '399', tagsubfield => [ 'a', 'b' ] })->delete;
+    Koha::MarcSubfieldStructure->new({ frameworkcode => '', tagfield => '399', tagsubfield => 'a', kohafield => "mytable.nicepages" })->store;
+    Koha::MarcSubfieldStructure->new({ frameworkcode => '', tagfield => '399', tagsubfield => 'b', kohafield => "mytable.nicepages" })->store;
+    Koha::Caches->get_instance->clear_from_cache( "MarcSubfieldStructure-" );
+    my $structure = C4::Biblio::GetMarcSubfieldStructure('');
+
+    is( @{ $structure->{"mytable.nicepages"} }, 2,
+        'GetMarcSubfieldStructure should return two entries for nicepages' );
+    is( $structure->{"mytable.nicepages"}->[0]->{tagfield}, '399',
+        'Check tagfield for first entry' );
+    is( $structure->{"mytable.nicepages"}->[0]->{tagsubfield}, 'a',
+        'Check tagsubfield for first entry' );
+    is( $structure->{"mytable.nicepages"}->[1]->{tagfield}, '399',
+        'Check tagfield for second entry' );
+    is( $structure->{"mytable.nicepages"}->[1]->{tagsubfield}, 'b',
+        'Check tagsubfield for second entry' );
+};
+
+subtest "GetMarcFromKohaField" => sub {
+    plan tests => 8;
+
+    #NOTE: We are building on data from the previous subtest
+    # With: field 399 / mytable.nicepages
+
+    # Check call in list context for multiple mappings
+    my @retval = C4::Biblio::GetMarcFromKohaField('mytable.nicepages');
+    is( @retval, 4, 'Should return two tags and subfields' );
+    is( $retval[0], '399', 'Check first tag' );
+    is( $retval[1], 'a', 'Check first subfield' );
+    is( $retval[2], '399', 'Check second tag' );
+    is( $retval[3], 'b', 'Check second subfield' );
+
+    # Check same call in scalar context
+    is( C4::Biblio::GetMarcFromKohaField('mytable.nicepages'), '399',
+        'GetMarcFromKohaField returns first tag in scalar context' );
+
+    # Bug 19096 Default is authoritative
+    # If we add a new empty framework, we should still get the mappings
+    # from Default. CAUTION: This test passes intentionally the obsoleted
+    # framework parameter.
+    my $new_fw = t::lib::TestBuilder->new->build({source => 'BiblioFramework'});
+    @retval = C4::Biblio::GetMarcFromKohaField(
+        'mytable.nicepages', $new_fw->{frameworkcode},
+    );
+    is( @retval, 4, 'Still got two pairs of tags/subfields' );
+    is( $retval[0].$retval[1], '399a', 'Including 399a' );
+};
 
 # Mocking variables
 my $biblio_module = new Test::MockModule('C4::Biblio');
@@ -75,12 +137,12 @@ $biblio_module->mock(
         my ( $itemnumber_field,       $itemnumber_subfield )       = get_itemnumber_field();
 
         return {
-            'biblio.title'                 => { tagfield => $title_field,            tagsubfield => $title_subfield },
-            'biblio.biblionumber'          => { tagfield => $biblionumber_field,     tagsubfield => $biblionumber_subfield },
-            'biblioitems.isbn'             => { tagfield => $isbn_field,             tagsubfield => $isbn_subfield },
-            'biblioitems.issn'             => { tagfield => $issn_field,             tagsubfield => $issn_subfield },
-            'biblioitems.biblioitemnumber' => { tagfield => $biblioitemnumber_field, tagsubfield => $biblioitemnumber_subfield },
-            'items.itemnumber'             => { tagfield => $itemnumber_subfield,    tagsubfield => $itemnumber_subfield },
+            'biblio.title'                 => [ { tagfield => $title_field,            tagsubfield => $title_subfield } ],
+            'biblio.biblionumber'          => [ { tagfield => $biblionumber_field,     tagsubfield => $biblionumber_subfield } ],
+            'biblioitems.isbn'             => [ { tagfield => $isbn_field,             tagsubfield => $isbn_subfield } ],
+            'biblioitems.issn'             => [ { tagfield => $issn_field,             tagsubfield => $issn_subfield } ],
+            'biblioitems.biblioitemnumber' => [ { tagfield => $biblioitemnumber_field, tagsubfield => $biblioitemnumber_subfield } ],
+            'items.itemnumber'             => [ { tagfield => $itemnumber_subfield,    tagsubfield => $itemnumber_subfield } ],
         };
       }
 );
@@ -391,3 +453,6 @@ subtest 'deletedbiblio_metadata' => sub {
     is( $moved, $biblionumber, 'Found in deletedbiblio_metadata' );
 };
 
+# Cleanup
+Koha::Caches->get_instance->clear_from_cache( "MarcSubfieldStructure-" );
+$schema->storage->txn_rollback;

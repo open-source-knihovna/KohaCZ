@@ -1,22 +1,10 @@
 [% USE Koha %]
 [% USE KohaDates %]
-
+[% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
 
 <title>Koha &rsaquo; Circulation &rsaquo; Renew [% title |html %]</title>
-
 [% INCLUDE 'doc-head-close.inc' %]
-
-[% IF error %]
-    <script type="text/javascript">
-    //<![CDATA[
-        $( document ).ready(function() {
-            removeFocus()
-        });
-    //]]>
-    </script>
-[% END %]
-
 </head>
 
 <body id="circ_renew" class="circ">
@@ -81,6 +69,18 @@
                             [% ELSIF error == "auto_too_late" %]
 
                                 <p>[% item.biblio.title %] [% item.biblioitem.subtitle %] ( [% item.barcode %] ) has been scheduled for automatic renewal and cannot be renewed anymore since [% latestautorenewdate | $KohaDates %]. </p>
+
+                                [% IF Koha.Preference('AllowRenewalLimitOverride') %]
+                                    <form method="post" action="/cgi-bin/koha/circ/renew.pl">
+                                        <input type="hidden" name="barcode" value="[% item.barcode %]"/>
+                                        <input type="hidden" name="override_limit" value="1" />
+                                        <input type="submit" class="approve" value="Override and renew" />
+                                    </form>
+                                [% END %]
+
+                            [% ELSIF error == "auto_account_expired" %]
+
+                                <p>[% item.biblio.title %] [% item.biblioitem.subtitle %] ( [% item.barcode %] ) has been scheduled for automatic renewal and cannot be renewed because the patron's account is expired</p>
 
                                 [% IF Koha.Preference('AllowRenewalLimitOverride') %]
                                     <form method="post" action="/cgi-bin/koha/circ/renew.pl">
@@ -173,5 +173,15 @@
 </div>
 [% END %]
 <div>
+
+[% MACRO jsinclude BLOCK %]
+    [% IF error %]
+        <script type="text/javascript">
+            $( document ).ready(function() {
+                removeFocus();
+            });
+        </script>
+    [% END %]
+[% END %]
 
 [% INCLUDE 'intranet-bottom.inc' %]

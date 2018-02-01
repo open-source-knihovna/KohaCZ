@@ -22,6 +22,7 @@ use base qw(Class::Accessor);
 use C4::Context;
 
 use Koha::Database;
+use Koha::Exceptions::Config;
 use Koha::SearchFields;
 use Koha::SearchMarcMaps;
 
@@ -29,6 +30,8 @@ use Carp;
 use JSON;
 use Modern::Perl;
 use Readonly;
+use Search::Elasticsearch;
+use Try::Tiny;
 use YAML::Syck;
 
 use Data::Dumper;    # TODO remove
@@ -215,9 +218,10 @@ sub get_elasticsearch_mappings {
                     search_analyzer => 'simple',
                 };
             }
-            # Sort may be true, false, or undef. Here we care if it's
-            # anything other than undef.
-            if (defined $sort) {
+            # Sort is a bit special as it can be true, false, undef.
+            # We care about "true" or "undef",
+            # "undef" means to do the default thing, which is make it sortable.
+            if ($sort || !defined $sort) {
                 $mappings->{data}{properties}{ $name . '__sort' } = {
                     search_analyzer => "analyser_phrase",
                     analyzer  => "analyser_phrase",
@@ -296,7 +300,6 @@ sub reset_elasticsearch_mappings {
 # sort_fields isn't set, then it'll generate it.
 sub sort_fields {
     my $self = shift;
-
     if (@_) {
         $self->_sort_fields_accessor(@_);
         return;
@@ -346,10 +349,6 @@ sub get_fixer_rules {
             if ($type eq 'sum' ) {
                 push @rules, "sum('$name')";
             }
-            # Sort is a bit special as it can be true, false, undef. For
-            # fixer rules, we care about "true", or "undef" if there is
-            # special handling of this field from other one. "undef" means
-            # to do the default thing, which is make it sortable.
             if ($self->sort_fields()->{$name}) {
                 if ($sort || !defined $sort) {
                     push @rules, "marc_map('$marc_field','${name}__sort.\$append', $options)";
@@ -477,6 +476,65 @@ sub process_error {
     return "Unable to understand your search query, please rephrase and try again.\n" if $msg =~ /ParseException/;
 
     return "Unable to perform your search. Please try again.\n";
+}
+
+=head2 _read_configuration
+
+    my $conf = _read_configuration();
+
+Reads the I<configuration file> and returns a hash structure with the
+configuration information. It raises an exception if mandatory entries
+are missing.
+
+The hashref structure has the following form:
+
+    {
+        'nodes' => ['127.0.0.1:9200', 'anotherserver:9200'],
+        'index_name' => 'koha_instance',
+    }
+
+This is configured by the following in the C<config> block in koha-conf.xml:
+
+    <elasticsearch>
+        <server>127.0.0.1:9200</server>
+        <server>anotherserver:9200</server>
+        <index_name>koha_instance</index_name>
+    </elasticsearch>
+
+=cut
+
+sub _read_configuration {
+
+    my $configuration;
+
+    my $conf = C4::Context->config('elasticsearch');
+    Koha::Exceptions::Config::MissingEntry->throw(
+        "Missing 'elasticsearch' block in config file")
+      unless defined $conf;
+
+    if ( $conf && $conf->{server} ) {
+        my $nodes = $conf->{server};
+        if ( ref($nodes) eq 'ARRAY' ) {
+            $configuration->{nodes} = $nodes;
+        }
+        else {
+            $configuration->{nodes} = [$nodes];
+        }
+    }
+    else {
+        Koha::Exceptions::Config::MissingEntry->throw(
+            "Missing 'server' entry in config file for elasticsearch");
+    }
+
+    if ( defined $conf->{index_name} ) {
+        $configuration->{index_name} = $conf->{index_name};
+    }
+    else {
+        Koha::Exceptions::Config::MissingEntry->throw(
+            "Missing 'index_name' entry in config file for elasticsearch");
+    }
+
+    return $configuration;
 }
 
 1;

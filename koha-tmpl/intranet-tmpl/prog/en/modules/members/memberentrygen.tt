@@ -1040,6 +1040,7 @@ $(document).ready(function() {
                                  <th>Type</th>
                                  <th>Comment</th>
                                  <th>Expiration</th>
+                                 <th>Created</th>
                                  [% IF CAN_user_borrowers && CAN_user_circulate_manage_restrictions %]
                                    <th>Remove?</th>
                                  [% END %]
@@ -1058,6 +1059,7 @@ $(document).ready(function() {
                                     [% END %]
                                     </td>
                                     <td>[% IF d.expiration %] [% d.expiration | $KohaDates %] [% ELSE %] <i>Indefinite</i> [% END %]</td>
+                                    <td>[% d.created | $KohaDates %]</td>
                                     [% IF CAN_user_borrowers && CAN_user_circulate_manage_restrictions %]
                                       <td>
                                         <input type="checkbox" id="debarment_[% d.borrower_debarment_id %]" name="remove_debarment" value="[% d.borrower_debarment_id %]" />
@@ -1241,6 +1243,7 @@ $(document).ready(function() {
         <p><label for="SMSnumber">SMS number:</label>
             <input type="text" id="SMSnumber" name="SMSnumber" value="[% SMSnumber %]" />
         </p>
+        [% UNLESS nosms_provider_id %]
         <p>
             <label for="sms_provider_id">SMS provider:</label>
             <select id="sms_provider_id" name="sms_provider_id"/>
@@ -1254,6 +1257,7 @@ $(document).ready(function() {
                 [% END %]
             </select>
         </p>
+        [% END %]
     [% END %]
   </fieldset>
 [% END %] [% END %]

@@ -1287,21 +1287,6 @@ CREATE TABLE `need_merge_authorities` ( -- keeping track of authority records st
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Table structure for table `notifys`
---
-
-DROP TABLE IF EXISTS `notifys`;
-CREATE TABLE `notifys` (
-  `notify_id` int(11) NOT NULL default 0,
-  `borrowernumber` int(11) NOT NULL default 0,
-  `itemnumber` int(11) NOT NULL default 0,
-  `notify_date` date default NULL,
-  `notify_send_date` date default NULL,
-  `notify_level` int(1) NOT NULL default 0,
-  `method` varchar(20) NOT NULL default ''
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
 -- Table structure for table `oai_sets`
 --
 
@@ -2764,8 +2749,6 @@ CREATE TABLE `accountlines` (
   `amountoutstanding` decimal(28,6) default NULL,
   `lastincrement` decimal(28,6) default NULL,
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `notify_id` int(11) NOT NULL default 0,
-  `notify_level` int(2) NOT NULL default 0,
   `note` text NULL default NULL,
   `manager_id` int(11) NULL,
   PRIMARY KEY (`accountlines_id`),
@@ -4018,9 +4001,11 @@ CREATE TABLE biblio_metadata (
     `format` VARCHAR(16) NOT NULL,
     `marcflavour` VARCHAR(16) NOT NULL,
     `metadata` LONGTEXT NOT NULL,
+    `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     UNIQUE KEY `biblio_metadata_uniq_key` (`biblionumber`,`format`,`marcflavour`),
-    CONSTRAINT `record_metadata_fk_1` FOREIGN KEY (biblionumber) REFERENCES biblio (biblionumber) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT `record_metadata_fk_1` FOREIGN KEY (biblionumber) REFERENCES biblio (biblionumber) ON DELETE CASCADE ON UPDATE CASCADE,
+    KEY `timestamp` (`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
@@ -4034,9 +4019,11 @@ CREATE TABLE deletedbiblio_metadata (
     `format` VARCHAR(16) NOT NULL,
     `marcflavour` VARCHAR(16) NOT NULL,
     `metadata` LONGTEXT NOT NULL,
+    `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
     PRIMARY KEY(id),
     UNIQUE KEY `deletedbiblio_metadata_uniq_key` (`biblionumber`,`format`,`marcflavour`),
-    CONSTRAINT `deletedrecord_metadata_fk_1` FOREIGN KEY (biblionumber) REFERENCES deletedbiblio (biblionumber) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT `deletedrecord_metadata_fk_1` FOREIGN KEY (biblionumber) REFERENCES deletedbiblio (biblionumber) ON DELETE CASCADE ON UPDATE CASCADE,
+    KEY `timestamp` (`timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --

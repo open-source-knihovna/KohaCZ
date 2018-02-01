@@ -17,7 +17,8 @@
 
 use Modern::Perl;
 
-use Test::More tests => 9;
+use Test::More tests => 10;
+use Test::Exception;
 use Test::Warn;
 
 use C4::Context;
@@ -146,18 +147,23 @@ subtest 'discard_changes' => sub {
 
 subtest 'TO_JSON tests' => sub {
 
-    plan tests => 5;
+    plan tests => 7;
 
     $schema->storage->txn_begin;
 
+    my $dt = dt_from_string();
     my $borrowernumber = $builder->build(
         { source => 'Borrower',
           value => { lost => 1,
-                     gonenoaddress => 0 } })->{borrowernumber};
+                     gonenoaddress => 0,
+                     updated_on => $dt,
+                     lastseen   => $dt, } })->{borrowernumber};
 
     my $patron = Koha::Patrons->find($borrowernumber);
     my $lost = $patron->TO_JSON()->{lost};
     my $gonenoaddress = $patron->TO_JSON->{gonenoaddress};
+    my $updated_on = $patron->TO_JSON->{updated_on};
+    my $lastseen = $patron->TO_JSON->{lastseen};
 
     ok( $lost->isa('JSON::PP::Boolean'), 'Boolean attribute type is correct' );
     is( $lost, 1, 'Boolean attribute value is correct (true)' );
@@ -166,6 +172,23 @@ subtest 'TO_JSON tests' => sub {
     is( $gonenoaddress, 0, 'Boolean attribute value is correct (false)' );
 
     ok( !isvstring($patron->borrowernumber), 'Integer values are not coded as strings' );
+
+    my $rfc3999_regex = qr/
+            (?<year>\d{4})
+            -
+            (?<month>\d{2})
+            -
+            (?<day>\d{2})
+            ([Tt\s])
+            (?<hour>\d{2})
+            :
+            (?<minute>\d{2})
+            :
+            (?<second>\d{2})
+            (([Zz])|([\+|\-]([01][0-9]|2[0-3]):[0-5][0-9]))
+        /xms;
+    like( $updated_on, $rfc3999_regex, "Date-time $updated_on formatted correctly");
+    like( $lastseen, $rfc3999_regex, "Date-time $updated_on formatted correctly");
 
     $schema->storage->txn_rollback;
 };
@@ -193,6 +216,96 @@ subtest "Test update method" => sub {
     # Check if the columns are not updated
     is( $library->branchcity, 'AMS', 'First column not updated' );
     is( $library->branchname, 'New_Name', 'Third column not updated' );
+
+    $schema->storage->txn_rollback;
+};
+
+subtest 'store() tests' => sub {
+
+    plan tests => 10;
+
+    $schema->storage->txn_begin;
+
+    # Create a category to make sure its ID doesn't exist on the DB
+    my $category = $builder->build_object({ class => 'Koha::Patron::Categories' });
+    my $category_id = $category->id;
+    $category->delete;
+
+    my $patron = Koha::Patron->new({ categorycode => $category_id });
+
+    my $print_error = $schema->storage->dbh->{PrintError};
+    $schema->storage->dbh->{PrintError} = 0;
+    throws_ok
+        { $patron->store }
+        'Koha::Exceptions::Object::FKConstraint',
+        'Exception is thrown correctly';
+    is(
+        $@->message,
+        "Broken FK constraint",
+        'Exception message is correct'
+    );
+    is(
+        $@->broken_fk,
+        'categorycode',
+        'Exception field is correct'
+    );
+
+    my $library = $builder->build_object({ class => 'Koha::Libraries' });
+    $category   = $builder->build_object({ class => 'Koha::Patron::Categories' });
+    $patron     = $builder->build_object({ class => 'Koha::Patrons' });
+
+    my $new_patron = Koha::Patron->new({
+        branchcode   => $library->id,
+        cardnumber   => $patron->cardnumber,
+        categorycode => $category->id
+    });
+
+    throws_ok
+        { $new_patron->store }
+        'Koha::Exceptions::Object::DuplicateID',
+        'Exception is thrown correctly';
+
+    is(
+        $@->message,
+        'Duplicate ID',
+        'Exception message is correct'
+    );
+
+    is(
+       $@->duplicate_id,
+       'cardnumber',
+       'Exception field is correct'
+    );
+
+    $new_patron = Koha::Patron->new({
+        branchcode   => $library->id,
+        userid       => $patron->userid,
+        categorycode => $category->id
+    });
+
+    throws_ok
+        { $new_patron->store }
+        'Koha::Exceptions::Object::DuplicateID',
+        'Exception is thrown correctly';
+
+    is(
+        $@->message,
+        'Duplicate ID',
+        'Exception message is correct'
+    );
+
+    is(
+       $@->duplicate_id,
+       'userid',
+       'Exception field is correct'
+    );
+
+    $schema->storage->dbh->{PrintError} = $print_error;
+
+    # Successful test
+    $patron->set({ firstname => 'Manuel' });
+    my $ret = $patron->store;
+    is( ref($ret), 'Koha::Patron', 'store() returns the object on success' );
 
     $schema->storage->txn_rollback;
 };

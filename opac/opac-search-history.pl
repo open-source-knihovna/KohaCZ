@@ -41,10 +41,14 @@ my ($template, $loggedinuser, $cookie) = get_template_and_user(
         query => $cgi,
         type => "opac",
         authnotrequired => ( C4::Context->preference("OpacPublic") ? 1 : 0 ),
-        flagsrequired => {borrowers => 1},
         debug => 1,
     }
 );
+
+unless ( C4::Context->preference("EnableOpacSearchHistory") ) {
+    print $cgi->redirect("/cgi-bin/koha/errors/404.pl"); # escape early
+    exit;
+}
 
 my $type = $cgi->param('type');
 my $action = $cgi->param('action') || q{};

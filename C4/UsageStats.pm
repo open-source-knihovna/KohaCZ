@@ -247,7 +247,6 @@ sub BuildReport {
         OPACShowCheckoutName
         OpacShowFiltersPulldownMobile
         OPACShowHoldQueueDetails
-        OpacShowLibrariesPulldownMobile
         OpacShowRecentComments
         OPACShowUnusedAuthorities
         OpacStarRatings
@@ -297,7 +296,6 @@ sub BuildReport {
         EnhancedMessagingPreferences
         ExtendedPatronAttributes
         intranetreadinghistory
-        memberofinstitution
         patronimages
         TalkingTechItivaPhoneNotification
         uppercasesurnames

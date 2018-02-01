@@ -97,8 +97,6 @@ if ( $individual || $writeoff ) {
     $itemnumber  = $input->param('itemnumber');
     my $description  = $input->param('description');
     my $title        = $input->param('title');
-    my $notify_id    = $input->param('notify_id');
-    my $notify_level = $input->param('notify_level');
     $total_due = $amountoutstanding;
     $template->param(
         accounttype       => $accounttype,
@@ -108,8 +106,6 @@ if ( $individual || $writeoff ) {
         title             => $title,
         itemnumber        => $itemnumber,
         individual_description => $description,
-        notify_id         => $notify_id,
-        notify_level      => $notify_level,
         payment_note    => $payment_note,
     );
 } elsif ($select_lines) {
@@ -213,7 +209,6 @@ $template->param(
     borrower      => $borrower,
     categoryname  => $borrower->{description},
     total         => $total_due,
-    RoutingSerials => C4::Context->preference('RoutingSerials'),
     ExtendedPatronAttributes => C4::Context->preference('ExtendedPatronAttributes'),
 
     csrf_token => Koha::Token->new->generate_csrf({ session_id => scalar $input->cookie('CGISESSID') }),
@@ -230,7 +225,7 @@ sub borrower_add_additional_fields {
     if ( $b_ref->{category_type} eq 'C' ) {
         my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
         $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
-        $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
+        $template->param( 'catcode' => $patron_categories->next->categorycode )  if $patron_categories->count == 1;
     } elsif ( $b_ref->{category_type} eq 'A' || $b_ref->{category_type} eq 'I' ) {
         $b_ref->{adultborrower} = 1;
     }

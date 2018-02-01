@@ -1,28 +1,13 @@
 [% USE Koha %]
 [% USE KohaDates %]
 [% USE Branches %]
+[% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Circulation &rsaquo; Holds awaiting pickup</title>
 [% INCLUDE 'doc-head-close.inc' %]
 <link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/datatables.css" />
-[% INCLUDE 'datatables.inc' %]
-<script type="text/javascript">
-//<![CDATA[
-     $(document).ready(function() {
-         $('#resultlist').tabs();
-         $("th a").hide();
-        $("#holdst,#holdso").dataTable($.extend(true, {}, dataTablesDefaults, {
-            "aoColumnDefs": [
-                { "aTargets": [ -1 ], "bSortable": false, "bSearchable": false },
-                { "sType": "anti-the", "aTargets" : [ "anti-the" ] },
-                { "sType": "title-string", "aTargets" : [ "title-string" ] }
-            ],
-            "sPaginationType": "four_button"
-        }));
-      });
-//]]>
-</script>
 </head>
+
 <body id="circ_waitingreserves" class="circ">
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'circ-search.inc' %]
@@ -32,7 +17,7 @@
 &rsaquo; <a href="/cgi-bin/koha/circ/waitingreserves.pl">Holds awaiting pickup</a>
 </div>
 
-[% IF Koha.Preference('CircSidebar') %]<div id="doc3" class="yui-t2">[% ELSE %]<div id="doc" class="yui-t7">[% END %]
+[% IF Koha.Preference('CircSidebar') %]<div id="doc3" class="yui-t2">[% ELSE %]<div id="doc3" class="yui-t7">[% END %]
 
    <div id="bd">
     <div id="yui-main">
@@ -84,7 +69,8 @@
             [% IF ( reserveloop ) %]
                <table id="holdst">
                <thead><tr>
-                    <th class="title-string">Available since</th>
+                    <th class="title-string">Waiting since</th>
+                    <th class="title-string">Date hold placed</th>
                     <th class="anti-the">Title</th>
                     <th>Patron</th>
                     <th>Home branch</th>
@@ -97,6 +83,7 @@
                <tbody>[% FOREACH reserveloo IN reserveloop %]
                 <tr>
                     <td><span title="[% reserveloo.waitingdate %]">[% reserveloo.waitingdate | $KohaDates %]</span></td>
+                    <td><span title="[% reserveloo.reservedate %]">[% reserveloo.reservedate | $KohaDates %]</span></td>
                     <td>[% INCLUDE 'biblio-default-view.inc' biblionumber = reserveloo.biblionumber %]
                         [% reserveloo.title |html %] [% FOREACH subtitl IN reserveloo.subtitle %] [% subtitl.subfield %][% END %]
                         </a>
@@ -153,7 +140,8 @@
 
                <table id="holdso">
                <thead><tr>
-                    <th class="title-string">Available since</th>
+                    <th class="title-string">Waiting since</th>
+                    <th class="title-string">Date hold placed</th>
                     <th class="anti-the">Title</th>
                     <th>Patron</th>
                     <th>Home branch</th>
@@ -165,7 +153,8 @@
                </tr></thead>
                <tbody>[% FOREACH overloo IN overloop %]
                     <tr>
-                        <td><p><span title="[% overloo.waitingdate %]">[% overloo.waitingdate | $KohaDates %]</span></p></td>
+                        <td><span title="[% overloo.waitingdate %]">[% overloo.waitingdate | $KohaDates %]</span></td>
+                        <td><span title="[% overloo.reservedate %]">[% overloo.reservedate | $KohaDates %]</span></td>
                         <td>[% INCLUDE 'biblio-default-view.inc' biblionumber = overloo.biblionumber %][% overloo.title |html %]
                             [% FOREACH subtitl IN overloo.subtitle %] [% subtitl.subfield %][% END %]
                         </a>
@@ -213,4 +202,23 @@
 </div>
 [% END %]
 </div>
+
+[% MACRO jsinclude BLOCK %]
+    [% INCLUDE 'datatables.inc' %]
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#resultlist').tabs();
+            $("th a").hide();
+            $("#holdst,#holdso").dataTable($.extend(true, {}, dataTablesDefaults, {
+                "aoColumnDefs": [
+                    { "aTargets": [ -1 ], "bSortable": false, "bSearchable": false },
+                    { "sType": "anti-the", "aTargets" : [ "anti-the" ] },
+                    { "sType": "title-string", "aTargets" : [ "title-string" ] }
+                ],
+                "sPaginationType": "four_button"
+            }));
+        });
+    </script>
+[% END %]
+
 [% INCLUDE 'intranet-bottom.inc' %]

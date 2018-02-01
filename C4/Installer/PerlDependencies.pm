@@ -595,7 +595,7 @@ our $PERL_DEPS = {
     'Test::More' => {
         'usage'    => 'Core',
         'required' => '1',
-        'min_ver'  => '0.8'
+        'min_ver'  => '1.302073'
     },
     'Test::Strict' => {
         'usage'    => 'Core',
@@ -865,7 +865,7 @@ our $PERL_DEPS = {
     'WebService::ILS' => {
         'usage'    => 'Interface third party systems',
         'required' => '0',
-        'min_ver'  => '0.07',
+        'min_ver'  => '0.17',
     },
 };
 

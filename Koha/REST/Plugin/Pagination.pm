@@ -52,6 +52,8 @@ Adds a Link header to the response message $c carries, following RFC5988, includ
 the following relation types: 'prev', 'next', 'first' and 'last'.
 It also adds X-Total-Count, containing the total results count.
 
+If page size is omitted, it defaults to the value of the RESTdefaultPageSize syspref.
+
 =cut
 
     $app->helper(
@@ -60,7 +62,11 @@ It also adds X-Total-Count, containing the total results count.
 
             my $total    = $args->{total};
             my $req_page = $args->{params}->{_page};
-            my $per_page = $args->{params}->{_per_page};
+            my $per_page = $args->{params}->{_per_page} //
+                            C4::Context->preference('RESTdefaultPageSize') // 20;
+
+            # do we need to paginate?
+            return $c unless $req_page;
 
             my $pages = int $total / $per_page;
             $pages++
@@ -105,6 +111,32 @@ It also adds X-Total-Count, containing the total results count.
             # Add X-Total-Count header
             $c->res->headers->add( 'X-Total-Count' => $total );
             return $c;
+        }
+    );
+
+=head3 dbic_merge_pagination
+
+    $filter = $c->dbic_merge_pagination({
+        filter => $filter,
+        params => {
+            page     => $params->{_page},
+            per_page => $params->{_per_page}
+        }
+    });
+
+Adds I<page> and I<rows> elements to the filter parameter.
+
+=cut
+
+    $app->helper(
+        'dbic_merge_pagination' => sub {
+            my ( $c, $args ) = @_;
+            my $filter = $args->{filter};
+
+            $filter->{page} = $args->{params}->{_page};
+            $filter->{rows} = $args->{params}->{_per_page};
+
+            return $filter;
         }
     );
 }

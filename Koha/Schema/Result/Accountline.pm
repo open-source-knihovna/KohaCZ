@@ -106,18 +106,6 @@ __PACKAGE__->table("accountlines");
   default_value: current_timestamp
   is_nullable: 0
 
-=head2 notify_id
-
-  data_type: 'integer'
-  default_value: 0
-  is_nullable: 0
-
-=head2 notify_level
-
-  data_type: 'integer'
-  default_value: 0
-  is_nullable: 0
-
 =head2 note
 
   data_type: 'text'
@@ -169,10 +157,6 @@ __PACKAGE__->add_columns(
     default_value => \"current_timestamp",
     is_nullable => 0,
   },
-  "notify_id",
-  { data_type => "integer", default_value => 0, is_nullable => 0 },
-  "notify_level",
-  { data_type => "integer", default_value => 0, is_nullable => 0 },
   "note",
   { data_type => "text", is_nullable => 1 },
   "manager_id",
@@ -259,8 +243,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-11-23 12:41:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JiVg7P7Y+CRHQ1jxn2OSxg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-10-23 12:27:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:S70xVMIJONd30d0kDrgF2A
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

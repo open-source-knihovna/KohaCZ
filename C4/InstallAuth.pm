@@ -149,6 +149,10 @@ sub get_template_and_user {
             $template->param( CAN_user_serials          => 1 );
             $template->param( CAN_user_reports          => 1 );
         }
+
+        my $minPasswordLength = C4::Context->preference('minPasswordLength');
+        $minPasswordLength = 3 if not $minPasswordLength or $minPasswordLength < 3;
+        $template->param(minPasswordLength => $minPasswordLength,);
     }
     return ( $template, $borrowernumber, $cookie );
 }
@@ -417,16 +421,6 @@ sub checkpw {
             C4::Context->config('user'),
             "", "NO_LIBRARY_SET", 1
         );
-        return 2;
-    }
-    if (   $userid
-        && $userid     eq 'demo'
-        && "$password" eq 'demo'
-        && C4::Context->config('demo') )
-    {
-
-# DEMO => the demo user is allowed to do everything (if demo set to 1 in koha.conf
-# some features won't be effective : modify systempref, modify MARC structure,
         return 2;
     }
     return 0;

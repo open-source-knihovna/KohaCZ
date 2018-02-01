@@ -16,10 +16,11 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
+use DateTime;
 
 use C4::Circulation;
 use Koha::Database;
-use Koha::Patron;
+use Koha::Patrons;
 use Koha::Biblio;
 use Koha::Item;
 use Koha::Holds;
@@ -42,6 +43,10 @@ $dbh->do('DELETE FROM issuingrules');
 $dbh->do('DELETE FROM borrowers');
 $dbh->do('DELETE FROM items');
 
+my $now_value       = DateTime->now();
+my $mocked_datetime = Test::MockModule->new('DateTime');
+$mocked_datetime->mock( 'now', sub { return $now_value; } );
+
 my $library  = $builder->build( { source => 'Branch' } );
 my $category = $builder->build( { source => 'Category' } );
 my $itemtype = $builder->build( { source => 'Itemtype' } )->{itemtype};
@@ -51,7 +56,7 @@ C4::Context->_new_userenv('xxx');
 C4::Context->set_userenv( 0, 0, 0, 'firstname', 'surname', $library->{branchcode}, 'Midway Public Library', '', '', '' );
 is( C4::Context->userenv->{branch}, $library->{branchcode}, 'userenv set' );
 
-my $patron_category = $builder->build({ source => 'Category', value => { categorycode => 'NOT_X', category_type => 'P', enrolmentfee => 0 } });
+my $patron_category = $builder->build({ source => 'Category', value => { category_type => 'P', enrolmentfee => 0 } });
 my @patrons;
 for my $i ( 1 .. 20 ) {
     my $patron = Koha::Patron->new(
@@ -184,10 +189,11 @@ is( $data->{exceeded}, 1, "Should exceed threshold with one withdrawn item" );
 
 t::lib::Mocks::mock_preference('CircControl', 'PatronLibrary');
 
-my ( $un, $needsconfirmation ) = CanBookBeIssued( $patron_hr, $item->barcode );
+my $patron_object = Koha::Patrons->find( $patron_hr->{borrowernumber} );
+my ( undef, $needsconfirmation ) = CanBookBeIssued( $patron_object, $item->barcode );
 ok( $needsconfirmation->{HIGHHOLDS}, "High holds checkout needs confirmation" );
 
-( undef, $needsconfirmation ) = CanBookBeIssued( $patron_hr, $item->barcode, undef, undef, undef, { override_high_holds => 1 } );
+( undef, $needsconfirmation ) = CanBookBeIssued( $patron_object, $item->barcode, undef, undef, undef, { override_high_holds => 1 } );
 ok( !$needsconfirmation->{HIGHHOLDS}, "High holds checkout does not need confirmation" );
 
 $schema->storage->txn_rollback();

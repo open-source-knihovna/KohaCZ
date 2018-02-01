@@ -188,7 +188,7 @@ if ($input->param('newflags')) {
     if ( $category_type eq 'C') {
         my $patron_categories = Koha::Patron::Categories->search_limited({ category_type => 'A' }, {order_by => ['categorycode']});
         $template->param( 'CATCODE_MULTI' => 1) if $patron_categories->count > 1;
-        $template->param( 'catcode' => $patron_categories->next )  if $patron_categories->count == 1;
+        $template->param( 'catcode' => $patron_categories->next->categorycode )  if $patron_categories->count == 1;
     }
 
 $template->param( adultborrower => 1 ) if ( $category_type =~ /^(A|I)$/ );
@@ -226,7 +226,6 @@ $template->param(
     branchcode     => $bor->{'branchcode'},
     loop           => \@loop,
     is_child       => ( $category_type eq 'C' ),
-    RoutingSerials => C4::Context->preference('RoutingSerials'),
     csrf_token =>
         Koha::Token->new->generate_csrf( { session_id => scalar $input->cookie('CGISESSID'), } ),
 );

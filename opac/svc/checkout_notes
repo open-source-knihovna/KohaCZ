@@ -34,7 +34,7 @@ use Koha::Patrons;
 
 =head1 NAME
 
-svc/patron_notes - Web service for setting patron notes on items
+svc/checkout_notes - Web service for setting patron notes on items
 
 =head1 DESCRIPTION
 
@@ -82,14 +82,25 @@ if ($is_ajax) {
                 my $biblionumber = $issue->item->biblionumber;
                 my $letter = C4::Letters::GetPreparedLetter (
                     module => 'circulation',
-                    letter_code => 'PATRON_NOTE',
+                    letter_code => 'CHECKOUT_NOTE',
                     branchcode => $branch,
                     tables => {
                         'biblio' => $biblionumber,
                         'borrowers' => $borrowernumber,
+                        'issues' => $issue->itemnumber,
                     },
                 );
-                C4::Message->enqueue($letter, $patron->unblessed, 'email');
+
+                my $to_address = $branch->branchemail || $branch->branchreplyto || C4::Context->preference('ReplytoDefault') || C4::Context->preference('KohaAdminEmailAddress');
+                my $from_address = $patron->email || $patron->emailpro || $patron->B_email;
+
+                C4::Letters::EnqueueLetter({
+                    letter => $letter,
+                    message_transport_type => 'email',
+                    borrowernumber => $patron->borrowernumber,
+                    to_address => $to_address,
+                    from_address => $from_address,
+                });
             } else { # note empty, i.e removed
                 $status = "removed";
             }

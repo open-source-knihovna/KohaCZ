@@ -1,4 +1,5 @@
 [% USE HtmlTags %]
+[% USE Koha %]
 [% SET footerjs = 1 %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; About Koha</title>
@@ -44,6 +45,31 @@
             <tr><th scope="row">Apache version: </th><td>[% apacheVersion |html %]</td></tr>
           [% IF (is_psgi) %]
             <tr><th scope="row">PSGI: </th><td>[% psgi_server |html %]</td></tr>
+          [% END %]
+          [% IF Koha.Preference('SearchEngine') == 'Elasticsearch' %]
+            <tr>
+                <th scope="row">Elasticsearch: </th>
+            [% IF elasticsearch_fatal_config_error %]
+                <td><span class="status_warn">[% elasticsearch_fatal_config_error %]</span></td>
+            [% ELSE %]
+                <td>
+                    Nodes:
+                    <span>[% elasticsearch_status.nodes.join(' / ') %]</span>
+                    |
+                    Status:
+                [% IF elasticsearch_status.running %]
+                    <span class="status_ok">running</span>
+                    |
+                    Indices:
+                  [% FOREACH index IN elasticsearch_status.indexes %]
+                      [% index.index_name %] (count: <emph>[% index.count %]</emph>)[% UNLESS loop.last %], [% END %]
+                  [% END %]
+                [% ELSE %]
+                    <span class="status_warn">not running</span>
+                [% END %]
+                </td>
+            [% END %]
+            </tr>
           [% END %]
             <tr><th scope="row">Memcached: </th>
                 <td>
@@ -464,6 +490,7 @@
                 <li>Benedykt P. Barszcz (Polish for 2.0)</li>
                 <li>D Ruth Bavousett (3.12 Translation Manager)</li>
                 <li>Maxime Beaulieu</li>
+                <li>Zoe Bennett</li>
                 <li>Natalie Bennison</li>
                 <li>John Beppu</li>
                 <li>Pablo Bianchi</li>
@@ -501,8 +528,10 @@
                 <li>Garry Collum</li>
                 <li>David Cook</li>
                 <li>John Copeland</li>
+                <li>Charlotte Cordwell</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544609030">Chris Cormack (1.x, 3.4 and 3.6 Release Manager; 3.8, 3.10, 3.18 and 3.20 Release Maintainer; 3.2 Translation Manager; 3.14 QA Team Member; 17.05 Documentation Manager)</a></li>
                 <li>Jeremy Crabtree</li>
+                <li>Bonnie Crawford</li>
                 <li>Samuel Crosby</li>
                 <li>Christophe Croullebois</li>
                 <li>Olivier Crouzet</li>
@@ -549,6 +578,7 @@
                 <li>Clay Fouts</li>
                 <li>Brendon Ford</li>
                 <li>Claudia Forsman</li>
+                <li>Jessica Freeman</li>
                 <li>Corey Fuimaono</li>
                 <li>Marco Gaiarin</li>
                 <li>Pierrick Le Gall</li>
@@ -556,13 +586,15 @@
                 <li>Tumer Garip</li>
                 <li>Russel Garlick</li>
                 <li>Mark Gavillet</li>
-                <li>Claire Gravely</li>
                 <li>Daniel Kahn Gillmor</li>
                 <li>David Goldfein</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544839606">Bernardo González Kriegel (3.14 - 17.05 Translation Manager; 3.10 Release Maintainer)</a></li>
                 <li>Caitlin Goodger</li>
+                <li>Claire Gravely</li>
                 <li>Briana Greally</li>
                 <li>Daniel Grobani</li>
+                <li>Victor Grousset</li>
+                <li>Isabel Grubi</li>
                 <li>David Gustafsson</li>
                 <li>Amit Gupta</li>
                 <li>Indranil Das Gupta</li>
@@ -596,6 +628,7 @@
                 <li>Matthew Hunt</li>
                 <li>Christopher Hyde</li>
                 <li>Rolando Isidoro</li>
+                <li>Te Rauhina Jackson</li>
                 <li>Cory Jaeger</li>
                 <li>Lee Jamison</li>
                 <li>Srdjan Jankovic</li>
@@ -604,6 +637,7 @@
                 <li>Karen Jen</li>
                 <li>Mike Johnson</li>
                 <li>Donovan Jones</li>
+                <li>Andreas Jonsson</li>
                 <li>Bart Jorgensen</li>
                 <li>Janusz Kaczmarek</li>
                 <li>Koustubha Kale</li>
@@ -630,6 +664,7 @@
                 <li>Peter Lorimer</li>
                 <li>Robert Lyon (Corporate Serials)</li>
                 <li>Ere Maijala</li>
+                <li>Sherryn Mak</li>
                 <li>Merllisia Manueli</li>
                 <li>Florent Mara</li>
                 <li>Francois Marier</li>
@@ -669,6 +704,7 @@
                 <li>Albert Oller</li>
                 <li>Eric Olsen</li>
                 <li>H. Passini</li>
+                <li>Priya Patel</li>
                 <li>Aliki Pavlidou</li>
                 <li>Dobrica Pavlinusic</li>
                 <li>Maxime Pelletier</li>
@@ -678,6 +714,7 @@
                 <li>Fred Pierre</li>
                 <li>Eric Phetteplace (phette23)</li>
                 <li>Genevieve Plantin</li>
+                <li>Simon Pouchol</li>
                 <li>Polytechnic University</li>
                 <li>Pongtawat</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544612249">Paul Poulain (2.0, 2.2, 3.8, 3.10 Release Manager; 2.2 Release Maintainer; 3.12 - 16.05 QA Team Member)</a></li>
@@ -694,7 +731,6 @@
                 <li>Waylon Robertson</li>
                 <li>Benjamin Rokseth</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6618544727712">Marcel de Rooy (3.8 - 17.05 QA Team Member)</a></li>
-                <li>Andreas Jonsson</li>
                 <li>Andreas Roussos</li>
                 <li>Salvador Zaragoza Rubio</li>
                 <li>Mathieu Saby</li>
@@ -717,6 +753,7 @@
                 <li>Savitra Sirohi</li>
                 <li>Pawel Skuza (Polish for 1.2)</li>
                 <li>Emma Smith</li>
+                <li>Grace Smyth</li>
                 <li><a href="https://www.openhub.net/p/koha/contributors/6620692831733">Fridolin Somers (3.14 Release Maintainer, 17.05 QA Team Member)</a></li>
                 <li>Southeastern University</li>
                 <li>Martin Stenberg</li>
@@ -753,6 +790,7 @@
                 <li><a href="https://www.openhub.net/accounts/janewagner">Jane Wagner</a></li>
                 <li>Ward van Wanrooij</li>
                 <li><a href="https://www.openhub.net/accounts/pianohacker">Jesse Weaver (16.05, 16.11 QA Team Member)</a></li>
+                <li>Chris Weeks</li>
                 <li>Stefan Weil</li>
                 <li>Aaron Wells</li>
                 <li>Rick Welykochy</li>

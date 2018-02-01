@@ -161,6 +161,26 @@ function checkMultiHold() {
             $("#requestany").prop("checked",true);
         }
     });
+    var prev_rank_request;
+    $("select[name=rank-request]").on("focus", function() {
+        prev_rank_request = $(this).val();
+    }).change(function() {
+        var row = $(this).parents("tr:first");
+        var value = parseInt($(this).val());
+        var after = row.parent().find("tr:nth-child("+(value+1)+")");
+
+        if (prev_rank_request > value) {
+            row.insertBefore(after);
+        } else {
+            row.insertAfter(after);
+        }
+
+        var next_priority = 1;
+        $("select[name=rank-request]").each(function () {
+            $(this).val(next_priority);
+            next_priority++;
+        });
+    });
 
     $(".clear-date").on("click",function(e){
         e.preventDefault();
@@ -323,7 +343,7 @@ function checkMultiHold() {
     [% END %]
 
     [% IF ( diffbranch ) %]
-    <li> <strong>Pickup library is different. </strong>Patron: <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %]</a> Patron's home library: ([% borrower_branchname %] / [% borrower_branchcode %] )</li>
+    <li> <strong>Pickup library is different. </strong>Patron: <a href="/cgi-bin/koha/members/moremember.pl?borrowernumber=[% borrowernumber %]">[% borrowerfirstname %] [% borrowersurname %]</a> Patron's home library: ([% Branches.GetName(borrower_branchcode) %] / [% borrower_branchcode %] )</li>
     [% END %]
 
 </ul></div>
@@ -584,7 +604,7 @@ function checkMultiHold() {
                     Not on hold
                 [% END %]
 
-                [% IF itemloo.item_level_holds == "" %]
+                [% IF itemloo.item_level_holds == "N" %]
                     <br/>Item level hold not allowed from OPAC
                 [% ELSIF itemloo.item_level_holds == "F" %]
                     <br/>Item level hold forced from OPAC

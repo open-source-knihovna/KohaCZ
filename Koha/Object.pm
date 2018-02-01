@@ -22,9 +22,11 @@ use Modern::Perl;
 
 use Carp;
 use Mojo::JSON;
+use Try::Tiny;
 
 use Koha::Database;
 use Koha::Exceptions::Object;
+use Koha::DateUtils;
 
 =head1 NAME
 
@@ -118,7 +120,32 @@ Returns:
 sub store {
     my ($self) = @_;
 
-    return $self->_result()->update_or_insert() ? $self : undef;
+    try {
+        return $self->_result()->update_or_insert() ? $self : undef;
+    }
+    catch {
+        # Catch problems and raise relevant exceptions
+        if (ref($_) eq 'DBIx::Class::Exception') {
+            if ( $_->{msg} =~ /Cannot add or update a child row: a foreign key constraint fails/ ) {
+                # FK constraints
+                # FIXME: MySQL error, if we support more DB engines we should implement this for each
+                if ( $_->{msg} =~ /FOREIGN KEY \(`(?<column>.*?)`\)/ ) {
+                    Koha::Exceptions::Object::FKConstraint->throw(
+                        error     => 'Broken FK constraint',
+                        broken_fk => $+{column}
+                    );
+                }
+            }
+            elsif( $_->{msg} =~ /Duplicate entry '(.*?)' for key '(?<key>.*?)'/ ) {
+                Koha::Exceptions::Object::DuplicateID->throw(
+                    error => 'Duplicate ID',
+                    duplicate_id => $+{key}
+                );
+            }
+        }
+        # Catch-all for foreign key breakages. It will help find other use cases
+        $_->rethrow();
+    }
 }
 
 =head3 $object->delete();
@@ -221,8 +248,28 @@ sub TO_JSON {
             # is ported to whatever distro we support by that time
             $unblessed->{$col} += 0;
         }
+        elsif ( _datetime_column_type( $columns_info->{$col}->{data_type} ) ) {
+            eval {
+                return unless $unblessed->{$col};
+                $unblessed->{$col} = output_pref({
+                    dateformat => 'rfc3339',
+                    dt         => dt_from_string($unblessed->{$col}, 'sql'),
+                });
+            };
+        }
     }
     return $unblessed;
+}
+
+sub _datetime_column_type {
+    my ($column_type) = @_;
+
+    my @dt_types = (
+        'timestamp',
+        'datetime'
+    );
+
+    return ( grep { $column_type eq $_ } @dt_types) ? 1 : 0;
 }
 
 sub _numeric_column_type {

@@ -32,9 +32,6 @@ use warnings;
 
 # FIXME There are weird things going on with $patron and $borrowernumber in this script
 
-use Carp 'verbose';
-$SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
-
 use CGI qw ( -utf8 );
 use DateTime;
 use C4::Context;
@@ -266,6 +263,7 @@ if ($barcode) {
     my $item = Koha::Items->find({ barcode => $barcode });
 
     if ( $item ) {
+        $itemnumber = $item->itemnumber;
         # Check if we should display a checkin message, based on the the item
         # type of the checked in item
         my $itemtype = Koha::ItemTypes->find( $item->effective_itemtype );
@@ -278,15 +276,14 @@ if ($barcode) {
 
         # make sure return branch respects home branch circulation rules, default to homebranch
         my $hbr = GetBranchItemRule($item->homebranch, $itemtype ? $itemtype->itemtype : undef )->{'returnbranch'} || "homebranch";
-        $returnbranch = $item->$hbr;
+        $returnbranch = $hbr ne 'noreturn' ? $item->$hbr : $userenv_branch; # can be noreturn, homebranch or holdingbranch
 
         my $materials = $item->materials;
         my $descriptions = Koha::AuthorisedValues->get_description_by_koha_field({frameworkcode => '', kohafield =>'items.materials', authorised_value => $materials });
         $materials = $descriptions->{lib} // $materials;
 
-        my $issue = Koha::Checkouts->find( { itemnumber => $itemnumber } );
-
-        my $biblio = $item->biblio;
+        my $checkout = $item->checkout;
+        my $biblio   = $item->biblio;
         $template->param(
             title            => $biblio->title,
             homebranch       => $item->homebranch,
@@ -300,7 +297,7 @@ if ($barcode) {
             biblionumber     => $biblio->biblionumber,
             borrower         => $borrower,
             additional_materials => $materials,
-            issue            => $issue,
+            issue            => $checkout,
         );
     } # FIXME else we should not call AddReturn but set BadBarcode directly instead
 

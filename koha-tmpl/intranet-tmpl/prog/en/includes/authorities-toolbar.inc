@@ -59,9 +59,11 @@
             [% END %]
         </ul>
     </div>
-    <div class="btn-group">
-        <a class="btn btn-default btn-sm" id="z3950submit" href="#"><i class="fa fa-search"></i> New from Z39.50</a>
-    </div>
+    [% IF servers.count > 0 %]
+        <div class="btn-group">
+            <a class="btn btn-default btn-sm" id="z3950submit" href="#"><i class="fa fa-search"></i> New from Z39.50</a>
+        </div>
+    [% END %]
     [% IF ( z3950updateservers ) %]
         <div class="btn-group">
             <a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-download"></i> Push to Z39.50 server

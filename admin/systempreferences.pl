@@ -276,7 +276,7 @@ if ( $op eq 'update_and_reedit' ) {
         }
     }
     my $variable = $input->param('variable');
-    C4::Context->set_preference($variable, $value) unless C4::Context->config('demo');
+    C4::Context->set_preference($variable, $value);
 }
 
 ################## ADD_FORM ##################################
@@ -335,8 +335,7 @@ if ( $op eq 'add_form' ) {
         $value = encode_base64($value);
     }
 
-    C4::Context->set_preference( $variable, $value, $expl, $type, $options )
-        unless C4::Context->config('demo');
+    C4::Context->set_preference( $variable, $value, $expl, $type, $options );
     print $input->redirect("/cgi-bin/koha/admin/systempreferences.pl?tab=");
     exit;
 ################## DELETE_CONFIRM ##################################
@@ -392,7 +391,7 @@ sub get_prefs_from_files {
                         '/prog/en/modules/admin/preferences';
     # Get all .pref file names
     opendir ( my $fh, $path_pref_en );
-    my @pref_files = grep { /.pref/ } readdir($fh);
+    my @pref_files = grep { /.pref$/ } readdir($fh);
     close $fh;
 
     my @names = ();

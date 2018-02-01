@@ -14488,7 +14488,7 @@ if( CheckVersion( $DBversion ) ) {
 
     $dbh->do(q|
         INSERT IGNORE INTO letter (`module`, `code`, `branchcode`, `name`, `is_html`, `title`, `content`, `message_transport_type`)
-        VALUES ('circulation', 'PATRON_NOTE', '', 'Patron note on item', '0', 'Patron issue note', '<<borrowers.firstname>> <<borrowers.surname>> has added a note to the item <<biblio.item>> - <<biblio.author>> (<<biblio.biblionumber>>).','email');
+        VALUES ('circulation', 'CHECKOUT_NOTE', '', 'Checkout note on item set by patron', '0', 'Checkout note', '<<borrowers.firstname>> <<borrowers.surname>> has added a note to the item <<biblio.title>> - <<biblio.author>> (<<biblio.biblionumber>>).','email');
     |);
 
     $dbh->do(q|
@@ -15222,6 +15222,182 @@ $DBversion = '17.11.00.000';
 if( CheckVersion( $DBversion ) ) {
     SetVersion( $DBversion );
     print "Upgrade to $DBversion done (Koha 17.11)\n";
+}
+
+$DBversion = '17.12.00.000';
+if( CheckVersion( $DBversion ) ) {
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Tē tōia, tē haumatia)\n";
+}
+
+$DBversion = '17.12.00.001';
+if( CheckVersion( $DBversion ) ) {
+    foreach my $table (qw(biblio_metadata deletedbiblio_metadata)) {
+        if (!column_exists($table, 'timestamp')) {
+            $dbh->do(qq{
+                ALTER TABLE `$table`
+                ADD COLUMN `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `metadata`,
+                ADD KEY `timestamp` (`timestamp`)
+            });
+            $dbh->do(qq{
+                UPDATE $table metadata
+                    LEFT JOIN biblioitems ON (biblioitems.biblionumber = metadata.biblionumber)
+                    LEFT JOIN biblio ON (biblio.biblionumber = metadata.biblionumber)
+                SET metadata.timestamp = GREATEST(biblioitems.timestamp, biblio.timestamp);
+            });
+        }
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 19724 - Add [deleted]biblio_metadata.timestamp)\n";
+}
+
+$DBversion = '17.12.00.002';
+if( CheckVersion( $DBversion ) ) {
+
+    my $msss = $dbh->selectall_arrayref(q|
+        SELECT kohafield, tagfield, tagsubfield, frameworkcode
+        FROM marc_subfield_structure
+        WHERE   frameworkcode != ''
+    |, { Slice => {} });
+
+
+    my $sth = $dbh->prepare(q|
+        SELECT kohafield
+        FROM marc_subfield_structure
+        WHERE frameworkcode = ''
+        AND tagfield = ?
+        AND tagsubfield = ?
+    |);
+
+    my @exceptions;
+    for my $mss ( @$msss ) {
+        $sth->execute($mss->{tagfield}, $mss->{tagsubfield} );
+        my ( $default_kohafield ) = $sth->fetchrow_array();
+        if( $mss->{kohafield} ) {
+            push @exceptions, { frameworkcode => $mss->{frameworkcode}, tagfield => $mss->{tagfield}, tagsubfield => $mss->{tagsubfield}, kohafield => $mss->{kohafield} } if not $default_kohafield or $default_kohafield ne $mss->{kohafield};
+        } else {
+            push @exceptions, { frameworkcode => $mss->{frameworkcode}, tagfield => $mss->{tagfield}, tagsubfield => $mss->{tagsubfield}, kohafield => q{} } if $default_kohafield;
+        }
+    }
+
+    if (@exceptions) {
+        print "WARNING: The Default framework is now considered as authoritative for Koha to MARC mappings. We have found that your additional frameworks contained "
+          . scalar(@exceptions)
+          . " mapping(s) that deviate from the standard mappings. Please look at the following list and consider if you need to add them again in Default (possibly as a second mapping).\n";
+        for my $exception (@exceptions) {
+            print "Field "
+              . $exception->{tagfield} . '$'
+              . $exception->{tagsubfield}
+              . " in framework "
+              . $exception->{frameworkcode} . ': ';
+            if ( $exception->{kohafield} ) {
+                print "Mapping to "
+                  . $exception->{kohafield}
+                  . " has been adjusted.\n";
+            }
+            else {
+                print "Mapping has been reset.\n";
+            }
+        }
+
+        # Sync kohafield
+
+        # Clear the destination frameworks first
+        $dbh->do(q|
+            UPDATE marc_subfield_structure
+            SET kohafield = NULL
+            WHERE   frameworkcode > ''
+                AND     Kohafield > ''
+        |);
+
+        # Now copy from Default
+        my $msss = $dbh->selectall_arrayref(q|
+            SELECT kohafield, tagfield, tagsubfield
+            FROM marc_subfield_structure
+            WHERE   frameworkcode = ''
+                AND     kohafield > ''
+        |, { Slice => {} });
+        my $sth = $dbh->prepare(q|
+            UPDATE marc_subfield_structure
+            SET kohafield = ?
+            WHERE frameworkcode > ''
+            AND tagfield = ?
+            AND tagsubfield = ?
+        |);
+        for my $mss (@$msss) {
+            $sth->execute( $mss->{kohafield}, $mss->{tagfield},
+                $mss->{tagsubfield} );
+        }
+
+        # Clear the cache
+        my @frameworkcodes = $dbh->selectall_arrayref(q|
+            SELECT frameworkcode FROM biblio_framework WHERE frameworkcode > ''
+        |);
+        for my $frameworkcode (@frameworkcodes) {
+            Koha::Caches->get_instance->clear_from_cache("MarcSubfieldStructure-$frameworkcode");
+        }
+        Koha::Caches->get_instance->clear_from_cache("default_value_for_mod_marc-");
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 19096 - Make Default authoritative for Koha to MARC mappings)\n";
+}
+
+$DBversion = '17.12.00.003';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q|DROP TABLE IF EXISTS notifys|);
+
+    if( column_exists( 'accountlines', 'notify_id' ) ) {
+        $dbh->do(q|ALTER TABLE accountlines DROP COLUMN notify_id|);
+        $dbh->do(q|ALTER TABLE accountlines DROP COLUMN notify_level|);
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 10021 - Drop notifys-related table and columns)\n";
+}
+
+$DBversion = '17.12.00.004';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` )
+        VALUES
+            ('RESTdefaultPageSize','20','','Set the default number of results returned by the REST API endpoints','Integer')
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 19278 - Add a configurable default page size for REST endpoints)\n";
+}
+
+$DBversion = '17.12.00.005';
+if( CheckVersion( $DBversion ) ) {
+    # For installations having the note already
+    $dbh->do(q{
+        UPDATE letter
+        SET code    = 'CHECKOUT_NOTE',
+            name    = 'Checkout note on item set by patron',
+            title   = 'Checkout note',
+            content = REPLACE(content, "<<biblio.item>>", "<<biblio.title>>")
+        WHERE code = 'PATRON_NOTE'
+    });
+    # For installations coming from 17.11
+    $dbh->do(q{
+        INSERT IGNORE INTO `letter` (`module`, `code`, `branchcode`, `name`, `is_html`, `title`, `content`, `message_transport_type`)
+        VALUES ('circulation', 'CHECKOUT_NOTE', '', 'Checkout note on item set by patron', '0', 'Checkout note', '<<borrowers.firstname>> <<borrowers.surname>> has added a note to the item <<biblio.title>> - <<biblio.author>> (<<biblio.biblionumber>>).','email')
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 18915 - Correct CHECKOUT_NOTE notice template)\n";
+}
+
+$DBversion = '17.12.00.006';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{
+        UPDATE systempreferences SET value=replace(value, "http://www.scholar", "https://scholar") WHERE variable='OPACSearchForTitleIn';
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 17682 - Update URL for Google Scholar in OPACSearchForTitleIn)\n";
 }
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory

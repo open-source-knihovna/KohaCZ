@@ -104,7 +104,6 @@ BEGIN {
     @EXPORT = qw(
         &AddReserve
 
-        &GetReservesForBranch
         &GetReserveStatus
 
         &GetOtherReserves
@@ -126,8 +125,6 @@ BEGIN {
         &AutoUnsuspendReserves
 
         &IsAvailableForItemLevelRequest
-
-        &OPACItemHoldsAllowed
 
         &AlterPriority
         &ToggleLowestPriority
@@ -562,41 +559,6 @@ SELECT COUNT(*) FROM reserves WHERE biblionumber=? AND borrowernumber<>?
     return $fee;
 }
 
-=head2 GetReservesForBranch
-
-  @transreserv = GetReservesForBranch($frombranch);
-
-=cut
-
-sub GetReservesForBranch {
-    my ($frombranch) = @_;
-    my $dbh = C4::Context->dbh;
-
-    my $query = "
-        SELECT reserve_id,borrowernumber,reservedate,itemnumber,waitingdate, expirationdate
-        FROM   reserves
-        WHERE   priority='0'
-        AND found='W'
-    ";
-    $query .= " AND branchcode=? " if ( $frombranch );
-    $query .= "ORDER BY waitingdate" ;
-
-    my $sth = $dbh->prepare($query);
-    if ($frombranch){
-     $sth->execute($frombranch);
-    } else {
-        $sth->execute();
-    }
-
-    my @transreserv;
-    my $i = 0;
-    while ( my $data = $sth->fetchrow_hashref ) {
-        $transreserv[$i] = $data;
-        $i++;
-    }
-    return (@transreserv);
-}
-
 =head2 GetReserveStatus
 
   $reservestatus = GetReserveStatus($itemnumber);
@@ -890,8 +852,9 @@ sub ModReserve {
 
     my $hold;
     unless ( $reserve_id ) {
-        $hold = Koha::Holds->search({ biblionumber => $biblionumber, borrowernumber => $borrowernumber, itemnumber => $itemnumber });
-        return unless $hold; # FIXME Should raise an exception
+        my $holds = Koha::Holds->search({ biblionumber => $biblionumber, borrowernumber => $borrowernumber, itemnumber => $itemnumber });
+        return unless $holds->count; # FIXME Should raise an exception
+        $hold = $holds->next;
         $reserve_id = $hold->reserve_id;
     }
 
@@ -1646,7 +1609,7 @@ sub _koha_notify_reserve {
     my $patron = Koha::Patrons->find( $borrowernumber );
 
     # Try to get the borrower's email address
-    my $to_address = C4::Members::GetNoticeEmailAddress($borrowernumber);
+    my $to_address = $patron->notice_email_address;
 
     my $messagingprefs = C4::Members::Messaging::GetMessagingPreferences( {
             borrowernumber => $borrowernumber,
@@ -1755,54 +1718,6 @@ sub _ShiftPriorityByDateAndPriority {
     }
 
     return $new_priority;  # so the caller knows what priority they wind up receiving
-}
-
-=head2 OPACItemHoldsAllowed
-
-  OPACItemHoldsAllowed($item_record,$borrower_record);
-
-Checks issuingrules, using the borrowers categorycode, the itemtype, and branchcode to see
-if specific item holds are allowed, returns true if so.
-
-=cut
-
-sub OPACItemHoldsAllowed {
-    my ($item,$borrower) = @_;
-
-    my $branchcode = $item->{homebranch} or die "No homebranch";
-    my $itype;
-    my $dbh = C4::Context->dbh;
-    if (C4::Context->preference('item-level_itypes')) {
-       # We can't trust GetItem to honour the syspref, so safest to do it ourselves
-       # When GetItem is fixed, we can remove this
-       $itype = $item->{itype};
-    }
-    else {
-       my $query = "SELECT itemtype FROM biblioitems WHERE biblioitemnumber = ? ";
-       my $sth = $dbh->prepare($query);
-       $sth->execute($item->{biblioitemnumber});
-       if (my $data = $sth->fetchrow_hashref()){
-           $itype = $data->{itemtype};
-       }
-    }
-
-    my $query = "SELECT opacitemholds,categorycode,itemtype,branchcode FROM issuingrules WHERE
-          (issuingrules.categorycode = ? OR issuingrules.categorycode = '*')
-        AND
-          (issuingrules.itemtype = ? OR issuingrules.itemtype = '*')
-        AND
-          (issuingrules.branchcode = ? OR issuingrules.branchcode = '*')
-        ORDER BY
-          issuingrules.categorycode desc,
-          issuingrules.itemtype desc,
-          issuingrules.branchcode desc
-       LIMIT 1";
-    my $sth = $dbh->prepare($query);
-    $sth->execute($borrower->{categorycode},$itype,$branchcode);
-    my $data = $sth->fetchrow_hashref;
-    my $opacitemholds = uc substr ($data->{opacitemholds}, 0, 1);
-    return '' if $opacitemholds eq 'N';
-    return $opacitemholds;
 }
 
 =head2 MoveReserve

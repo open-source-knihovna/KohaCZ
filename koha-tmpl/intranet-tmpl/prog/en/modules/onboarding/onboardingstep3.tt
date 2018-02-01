@@ -1,3 +1,4 @@
+[% USE Koha %]
 [% INCLUDE 'doc-head-open.inc' %]
 <title>Koha &rsaquo; Web installer &rsaquo; Create Koha administrator patron</title>
 [% INCLUDE 'installer-doc-head-close.inc' %]
@@ -101,7 +102,7 @@
                             <span class="breadcrumbs">Patrons &rsaquo; New patron</span>
                         </p>
                         <p>
-                            To give the new patron superlibrarian permissions go to:
+                            To edit patron permissions, go to:
                             <span class="breadcrumbs">More &rsaquo; Set permissions</span>
                         </p>
                     </fieldset>
@@ -112,3 +113,5 @@
         </div> <!-- / .row -->
 
 [% INCLUDE 'intranet-bottom.inc' %]
+[% PROCESS 'password_check.inc' %]
+[% PROCESS 'add_password_check' new_password => 'password' %]

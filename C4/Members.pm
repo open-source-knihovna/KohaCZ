@@ -64,11 +64,7 @@ BEGIN {
         &GetPendingIssues
         &GetAllIssues
 
-        &GetFirstValidEmailAddress
-        &GetNoticeEmailAddress
-
         &GetMemberAccountRecords
-        &GetBorNotifyAcctRecord
 
         &GetBorrowersToExpunge
 
@@ -388,6 +384,14 @@ sub AddMember {
     my $dbh = C4::Context->dbh;
     my $schema = Koha::Database->new()->schema;
 
+    my $category = Koha::Patron::Categories->find( $data{categorycode} );
+    unless ($category) {
+        Koha::Exceptions::BadParameter->throw(
+            error => 'Invalid parameter passed',
+            parameter => 'categorycode'
+        );
+    }
+
     # trim whitespace from data which has some non-whitespace in it.
     foreach my $field_name (keys(%data)) {
         if ( defined $data{$field_name} && $data{$field_name} =~ /\S/ ) {
@@ -400,7 +404,7 @@ sub AddMember {
       if ( $data{'userid'} eq '' || !Check_Userid( $data{'userid'} ) );
 
     # add expiration date if it isn't already there
-    $data{dateexpiry} ||= Koha::Patron::Categories->find( $data{categorycode} )->get_expiry_date;
+    $data{dateexpiry} ||= $category->get_expiry_date;
 
     # add enrollment date if it isn't already there
     unless ( $data{'dateenrolled'} ) {
@@ -413,12 +417,11 @@ sub AddMember {
         }
     }
 
-    my $patron_category = $schema->resultset('Category')->find( $data{'categorycode'} );
     $data{'privacy'} =
-        $patron_category->default_privacy() eq 'default' ? 1
-      : $patron_category->default_privacy() eq 'never'   ? 2
-      : $patron_category->default_privacy() eq 'forever' ? 0
-      :                                                    undef;
+        $category->default_privacy() eq 'default' ? 1
+      : $category->default_privacy() eq 'never'   ? 2
+      : $category->default_privacy() eq 'forever' ? 0
+      :                                             undef;
 
     $data{'privacy_guarantor_checkouts'} = 0 unless defined( $data{'privacy_guarantor_checkouts'} );
 
@@ -814,51 +817,6 @@ sub GetMemberAccountBalance {
     return ( $total, $total - $other_charges, $other_charges);
 }
 
-=head2 GetBorNotifyAcctRecord
-
-  ($total, $acctlines, $count) = &GetBorNotifyAcctRecord($params,$notifyid);
-
-Looks up accounting data for the patron with the given borrowernumber per file number.
-
-C<&GetBorNotifyAcctRecord> returns a three-element array. C<$acctlines> is a
-reference-to-array, where each element is a reference-to-hash; the
-keys are the fields of the C<accountlines> table in the Koha database.
-C<$count> is the number of elements in C<$acctlines>. C<$total> is the
-total amount outstanding for all of the account lines.
-
-=cut
-
-sub GetBorNotifyAcctRecord {
-    my ( $borrowernumber, $notifyid ) = @_;
-    my $dbh = C4::Context->dbh;
-    my @acctlines;
-    my $numlines = 0;
-    my $sth = $dbh->prepare(
-            "SELECT * 
-                FROM accountlines 
-                WHERE borrowernumber=? 
-                    AND notify_id=? 
-                    AND amountoutstanding != '0' 
-                ORDER BY notify_id,accounttype
-                ");
-
-    $sth->execute( $borrowernumber, $notifyid );
-    my $total = 0;
-    while ( my $data = $sth->fetchrow_hashref ) {
-        if ( $data->{itemnumber} ) {
-            my $item = Koha::Items->find( $data->{itemnumber} );
-            my $biblio = $item->biblio;
-            $data->{biblionumber} = $biblio->biblionumber;
-            $data->{title}        = $biblio->title;
-        }
-        $acctlines[$numlines] = $data;
-        $numlines++;
-        $total += int(100 * $data->{'amountoutstanding'});
-    }
-    $total /= 100;
-    return ( $total, \@acctlines, $numlines );
-}
-
 sub checkcardnumber {
     my ( $cardnumber, $borrowernumber ) = @_;
 
@@ -916,53 +874,6 @@ sub get_cardnumber_length {
     }
     $min = $max if $min > $max;
     return ( $min, $max );
-}
-
-=head2 GetFirstValidEmailAddress
-
-  $email = GetFirstValidEmailAddress($borrowernumber);
-
-Return the first valid email address for a borrower, given the borrowernumber.  For now, the order 
-is defined as email, emailpro, B_email.  Returns the empty string if the borrower has no email 
-addresses.
-
-=cut
-
-sub GetFirstValidEmailAddress {
-    my $borrowernumber = shift;
-
-    my $borrower = Koha::Patrons->find( $borrowernumber );
-
-    return $borrower->first_valid_email_address();
-}
-
-=head2 GetNoticeEmailAddress
-
-  $email = GetNoticeEmailAddress($borrowernumber);
-
-Return the email address of borrower used for notices, given the borrowernumber.
-Returns the empty string if no email address.
-
-=cut
-
-sub GetNoticeEmailAddress {
-    my $borrowernumber = shift;
-
-    my $which_address = C4::Context->preference("AutoEmailPrimaryAddress");
-    # if syspref is set to 'first valid' (value == OFF), look up email address
-    if ( $which_address eq 'OFF' ) {
-        return GetFirstValidEmailAddress($borrowernumber);
-    }
-    # specified email address field
-    my $dbh = C4::Context->dbh;
-    my $sth = $dbh->prepare( qq{
-        SELECT $which_address AS primaryemail
-        FROM borrowers
-        WHERE borrowernumber=?
-    } );
-    $sth->execute($borrowernumber);
-    my $data = $sth->fetchrow_hashref;
-    return $data->{'primaryemail'} || '';
 }
 
 =head2 GetBorrowersToExpunge

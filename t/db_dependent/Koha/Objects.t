@@ -20,6 +20,7 @@
 use Modern::Perl;
 
 use Test::More tests => 15;
+use Test::Exception;
 use Test::Warn;
 
 use Koha::Authority::Types;
@@ -237,4 +238,4 @@ subtest '->is_paged and ->pager tests' => sub {
        'Koha::Objects->pager returns a valid DBIx::Class object' );
 
     $schema->storage->txn_rollback;
-}
+};

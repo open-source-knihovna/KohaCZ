@@ -529,14 +529,26 @@ sub add_enrolment_fee_if_needed {
 
 =head3 checkouts
 
-my $issues = $patron->checkouts
+my $checkouts = $patron->checkouts
 
 =cut
 
 sub checkouts {
     my ($self) = @_;
-    my $issues = $self->_result->issues;
-    return Koha::Checkouts->_new_from_dbic( $issues );
+    my $checkouts = $self->_result->issues;
+    return Koha::Checkouts->_new_from_dbic( $checkouts );
+}
+
+=head3 old_checkouts
+
+my $old_checkouts = $patron->old_checkouts
+
+=cut
+
+sub old_checkouts {
+    my ($self) = @_;
+    my $old_checkouts = $self->_result->old_issues;
+    return Koha::Old::Checkouts->_new_from_dbic( $old_checkouts );
 }
 
 =head3 get_overdues
@@ -624,7 +636,34 @@ sub old_holds {
     return Koha::Old::Holds->_new_from_dbic($old_holds_rs);
 }
 
+=head3 notice_email_address
+
+  my $email = $patron->notice_email_address;
+
+Return the email address of patron used for notices.
+Returns the empty string if no email address.
+
+=cut
+
+sub notice_email_address{
+    my ( $self ) = @_;
+
+    my $which_address = C4::Context->preference("AutoEmailPrimaryAddress");
+    # if syspref is set to 'first valid' (value == OFF), look up email address
+    if ( $which_address eq 'OFF' ) {
+        return $self->first_valid_email_address;
+    }
+
+    return $self->$which_address || '';
+}
+
 =head3 first_valid_email_address
+
+my $first_valid_email_address = $patron->first_valid_email_address
+
+Return the first valid email address for a patron.
+For now, the order  is defined as email, emailpro, B_email.
+Returns the empty string if the borrower has no email addresses.
 
 =cut
 

@@ -3,7 +3,7 @@
 [% USE Branches %]
 [% USE Price %]
 [% INCLUDE 'doc-head-open.inc' %]
-<title>Koha &rsaquo; Patrons &rsaquo; Pay Fines for  [% borrower.firstname %] [% borrower.surname %]</title>
+<title>Koha &rsaquo; Patrons &rsaquo; Pay Fines for  [% borrower.firstname |html %] [% borrower.surname |html %]</title>
 [% INCLUDE 'doc-head-close.inc' %]
 <script type="text/javascript" src="[% interface %]/lib/jquery/plugins/jquery.checkboxes.min.js"></script>
 <script type= "text/javascript">
@@ -48,7 +48,7 @@ function enableCheckboxActions(){
 [% INCLUDE 'header.inc' %]
 [% INCLUDE 'patron-search.inc' %]
 
-<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/members/members-home.pl">Patrons</a>  &rsaquo; Pay fines for [% borrower.firstname %] [% borrower.surname %]</div>
+<div id="breadcrumbs"><a href="/cgi-bin/koha/mainpage.pl">Home</a> &rsaquo; <a href="/cgi-bin/koha/members/members-home.pl">Patrons</a>  &rsaquo; Pay fines for [% borrower.firstname |html %] [% borrower.surname |html %]</div>
 
 <div id="doc3" class="yui-t2">
    
@@ -78,21 +78,18 @@ function enableCheckboxActions(){
     <th>Description</th>
     <th>Payment note</th>
     <th>Account type</th>
-    <th>Notify id</th>
-    <th>Level</th>
     <th>Amount</th>
     <th>Amount outstanding</th>
 </tr>
 </thead>
 <tfoot>
 <tr>
-    <td class="total" colspan="8">Total due:</td>
+    <td class="total" colspan="6">Total due:</td>
     <td style="text-align: right;">[% total | $Price %]</td>
 </tr>
 </tfoot>
 <tbody>
-[% FOREACH account_grp IN accounts %]
-    [% FOREACH line IN account_grp.accountlines %]
+[% FOREACH line IN accounts %]
 <tr>
     <td>
     [% IF ( line.amountoutstanding > 0 ) %]
@@ -111,9 +108,6 @@ function enableCheckboxActions(){
     <input type="hidden" name="accountlines_id[% line.accountlines_id %]" value="[% line.accountlines_id %]" />
     <input type="hidden" name="amountoutstanding[% line.accountlines_id %]" value="[% line.amountoutstanding %]" />
     <input type="hidden" name="borrowernumber[% line.accountlines_id %]" value="[% line.borrowernumber %]" />
-    <input type="hidden" name="notify_id[% line.accountlines_id %]" value="[% line.notify_id %]" />
-    <input type="hidden" name="notify_level[% line.accountlines_id %]" value="[% line.notify_level %]" />
-    <input type="hidden" name="totals[% line.accountlines_id %]" value="[% line.totals %]" />
     </td>
     <td>
         [% SWITCH line.accounttype %]
@@ -144,8 +138,6 @@ function enableCheckboxActions(){
     </td>
     <td><input type="text" name="payment_note_[% line.accountlines_id %]" /></td>
     <td>[% line.accounttype %]</td>
-    <td>[% line.notify_id %]</td>
-    <td>[% line.notify_level %]</td>
     <td class="debit" style="text-align: right;">[% line.amount | $Price %]</td>
     <td class="debit" style="text-align: right;">[% line.amountoutstanding | $Price %]</td>
 </tr>
@@ -157,7 +149,6 @@ function enableCheckboxActions(){
     <td style="text-align: right;">[% account_grp.total | $Price %]</td>
 </tr>
 [% END %]
-[% END %]
 </tbody>
 </table>
 <fieldset class="action">
@@ -168,7 +159,7 @@ function enableCheckboxActions(){
 </fieldset>
 </form>
 [% ELSE %]
-    <p>[% borrower.firstname %] [% borrower.surname %] has no outstanding fines.</p>
+    <p>[% borrower.firstname |html %] [% borrower.surname |html %] has no outstanding fines.</p>
 [% END %]
 </div></div>
 
