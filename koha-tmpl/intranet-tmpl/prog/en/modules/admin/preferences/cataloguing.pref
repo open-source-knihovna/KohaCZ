@@ -230,6 +230,13 @@ Cataloging:
             - "<li>value of 001</li>"
             - "<li>subfields a and b of fields 245</li>"
             - "<li>all subfields of fields 600</li>"
+        -
+            - pref: UseConspectusMethod
+              choices:
+                  yes: Use
+                  no: Don't use
+            - Conspectus in cataloguing
+
     Importing:
         -
             - When matching on ISBN with the record import tool,

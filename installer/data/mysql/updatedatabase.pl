@@ -15396,8 +15396,11 @@ if( CheckVersion( $DBversion ) ) {
         UPDATE systempreferences SET value=replace(value, "http://www.scholar", "https://scholar") WHERE variable='OPACSearchForTitleIn';
     });
 
+    $dbh->do("INSERT INTO systempreferences VALUES ('UseConspectusMethod','0','','Whether to use Conspectus method in cataloguing - Czech Republic only','YesNo'));
+
     SetVersion( $DBversion );
     print "Upgrade to $DBversion done (Bug 17682 - Update URL for Google Scholar in OPACSearchForTitleIn)\n";
+    print "System preference for Conspectus added\n";
 }
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
