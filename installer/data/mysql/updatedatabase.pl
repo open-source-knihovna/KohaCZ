@@ -14818,8 +14818,10 @@ if( CheckVersion( $DBversion ) ) {
 
 $DBversion = "17.05.07.000";
 if ( CheckVersion($DBversion) ) {
+     $dbh->do("INSERT INTO systempreferences VALUES ('UseConspectusMethod','0','','Whether to use Conspectus method in cataloguing - Czech Republic only','YesNo'));
     SetVersion($DBversion);
     print "Upgrade to $DBversion done (Koha 17.05.07)\n";
+    print "System preference for Conspectus added\n";
 }
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
