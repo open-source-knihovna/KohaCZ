@@ -728,6 +728,10 @@ function Changefwk() {
 
 </form>
 
+[% IF Koha.Preference( 'UseConspectusMethod' ) %]
+<script type="text/javascript" src="[% interface %]/js/konspekt.js"></script>
+[% END %]
+
 </div>
 </div>
 </div>

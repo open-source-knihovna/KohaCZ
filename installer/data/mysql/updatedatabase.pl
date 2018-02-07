@@ -13153,10 +13153,10 @@ uth type codes)\n";
 
 $DBversion = "16.05.19.000";
 if ( CheckVersion($DBversion) ) {
+    $dbh->do("INSERT INTO systempreferences VALUES ('UseConspectusMethod','0','','Whether to use Conspectus method in cataloguing - Czech Republic only','YesNo'));
     print "Upgrade to $DBversion done (Koha 16.05.19)\n";
     SetVersion($DBversion);
 }
-
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug sss
