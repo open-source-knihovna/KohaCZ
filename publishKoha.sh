@@ -16,6 +16,12 @@ msgcat misc/translator/po/cs-CZ-pref-orig.po misc/translator/po/cs-CZ-pref-kohac
 
 DEB_BUILD_OPTIONS=nocheck ./debian/build-git-snapshot -r ~/debian -v $VERSION -d --noautoversion
 
+# Cleaning translations
+rm misc/translator/po/cs-CZ-opac-bootstrap.po
+rm misc/translator/po/cs-CZ-staff-prog.po
+rm misc/translator/po/cs-CZ-pref.po
+
+
 echo "Build finished, press any key to upload deb files to repository server..."
 read -n 1 -s
 
@@ -28,8 +34,4 @@ ssh root@$SERVER <<ENDSSH
     aptly repo add kohacz kohadeb/koha-common_${VERSION}_all.deb
     aptly snapshot create $VERSION from repo kohacz
 ENDSSH
-
-rm misc/translator/po/cs-CZ-opac-bootstrap.po
-rm misc/translator/po/cs-CZ-staff-prog.po
-rm misc/translator/po/cs-CZ-pref.po
 
