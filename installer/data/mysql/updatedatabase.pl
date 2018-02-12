@@ -14089,8 +14089,8 @@ if ( CheckVersion($DBversion) ) {
 
 $DBversion = "16.11.15.000";
 if ( CheckVersion($DBversion) ) {
-    $dbh->do("INSERT INTO systempreferences VALUES ('UseConspectusMethod','0','','Whether to use Conspectus method in cataloguing - Czech Republic only','YesNo'));
-    print "Upgrade to $DBversion done (Koha 16.11.14)\n";
+     $dbh->do("INSERT INTO systempreferences VALUES ('UseConspectusMethod','0','','Whether to use Conspectus method in cataloguing - Czech Republic only','YesNo')");
+    print "Upgrade to $DBversion done (Koha 16.11.15)\n";
     print "System preference for Conspectus added\n";
     SetVersion($DBversion);
 }
