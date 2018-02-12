@@ -8,6 +8,8 @@ fi
 VERSION=$1
 SERVER=192.168.1.113
 
+git tag $VERSION
+
 msgcat misc/translator/po/cs-CZ-opac-bootstrap-orig.po misc/translator/po/cs-CZ-opac-bootstrap-kohacz.po > misc/translator/po/cs-CZ-opac-bootstrap.po
 msgcat misc/translator/po/cs-CZ-staff-prog-orig.po misc/translator/po/cs-CZ-staff-prog-kohacz.po > misc/translator/po/cs-CZ-staff-prog.po
 msgcat misc/translator/po/cs-CZ-pref-orig.po misc/translator/po/cs-CZ-pref-kohacz.po > misc/translator/po/cs-CZ-pref.po
