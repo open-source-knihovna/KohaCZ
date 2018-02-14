@@ -97,7 +97,7 @@ if ($writeoff_all) {
     print $input->redirect( "/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber" );
 } elsif ($writeoff_item) {
     my $accountlines_id = $input->param('accountlines_id');
-    my $amount       = $input->param('amountoutstanding');
+    my $amount       = $input->param('amountwrittenoff');
     my $payment_note = $input->param("payment_note");
 
     Koha::Account->new( { patron_id => $borrowernumber } )->pay(
@@ -124,7 +124,6 @@ for (@names) {
 
 $template->param(
     finesview => 1,
-    RoutingSerials => C4::Context->preference('RoutingSerials'),
 );
 
 add_accounts_to_template();

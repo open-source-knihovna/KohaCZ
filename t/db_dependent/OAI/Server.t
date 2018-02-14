@@ -85,7 +85,7 @@ foreach my $index ( 0 .. NUMBER_OF_MARC_RECORDS - 1 ) {
     $sth->execute($biblionumber);
     my $timestamp = $sth->fetchrow_array . 'Z';
     $timestamp =~ s/ /T/;
-    $record = GetMarcBiblio({ biblionumber => $biblionumber });
+    $record = GetMarcBiblio($biblionumber);
     $record = XMLin($record->as_xml_record);
     push @header, { datestamp => $timestamp, identifier => "TEST:$biblionumber" };
     my $dc = {
@@ -349,7 +349,7 @@ subtest 'Bug 19725: OAI-PMH ListRecords and ListIdentifiers should use biblio_me
 
     # Modify record to trigger auto update of timestamp
     (my $biblionumber = $marcxml[0]->{header}->{identifier}) =~ s/^.*:(.*)/$1/;
-    my $record = GetMarcBiblio({biblionumber => $biblionumber});
+    my $record = GetMarcBiblio($biblionumber);
     $record->append_fields(MARC::Field->new(999, '', '', z => '_'));
     ModBiblio($record, $biblionumber);
     $oaidc[0]->{header}->{datestamp} = $from;

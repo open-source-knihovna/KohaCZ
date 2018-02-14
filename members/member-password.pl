@@ -153,7 +153,6 @@ $template->param(
     destination                => $destination,
     is_child                   => ( $bor->{'category_type'} eq 'C' ),
     minPasswordLength          => $minpw,
-    RoutingSerials             => C4::Context->preference('RoutingSerials'),
     csrf_token                 => Koha::Token->new->generate_csrf({ session_id => scalar $input->cookie('CGISESSID'), }),
 );
 

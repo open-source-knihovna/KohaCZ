@@ -17,7 +17,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 100;
+use Test::More tests => 101;
 
 use DateTime;
 
@@ -58,7 +58,16 @@ my $itemtype = $builder->build(
         value  => { notforloan => undef, rentalcharge => 0 }
     }
 )->{itemtype};
-my $patron_category = $builder->build({ source => 'Category', value => { categorycode => 'NOT_X', category_type => 'P', enrolmentfee => 0 } });
+my $patron_category = $builder->build(
+    {
+        source => 'Category',
+        value  => {
+            category_type                 => 'P',
+            enrolmentfee                  => 0,
+            BlockExpiredPatronOpacActions => -1, # Pick the pref value
+        }
+    }
+);
 
 my $CircControl = C4::Context->preference('CircControl');
 my $HomeOrHoldingBranch = C4::Context->preference('HomeOrHoldingBranch');
@@ -208,14 +217,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 # CanBookBeRenewed tests
 
     # Generate test biblio
-    my $biblio = MARC::Record->new();
     my $title = 'Silence in the library';
-    $biblio->append_fields(
-        MARC::Field->new('100', ' ', ' ', a => 'Moffat, Steven'),
-        MARC::Field->new('245', ' ', ' ', a => $title),
-    );
-
-    my ($biblionumber, $biblioitemnumber) = AddBiblio($biblio, '');
+    my ($biblionumber, $biblioitemnumber) = add_biblio($title, 'Moffat, Steven');
 
     my $barcode = 'R00000342';
     my $branch = $library2->{branchcode};
@@ -288,13 +291,23 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         branchcode => $branch,
     );
 
+    my %expired_borrower_data = (
+        firstname =>  'Ça',
+        surname => 'Glisse',
+        categorycode => $patron_category->{categorycode},
+        branchcode => $branch,
+        dateexpiry => dt_from_string->subtract( months => 1 ),
+    );
+
     my $renewing_borrowernumber = AddMember(%renewing_borrower_data);
     my $reserving_borrowernumber = AddMember(%reserving_borrower_data);
     my $hold_waiting_borrowernumber = AddMember(%hold_waiting_borrower_data);
     my $restricted_borrowernumber = AddMember(%restricted_borrower_data);
+    my $expired_borrowernumber = AddMember(%expired_borrower_data);
 
     my $renewing_borrower = GetMember( borrowernumber => $renewing_borrowernumber );
     my $restricted_borrower = GetMember( borrowernumber => $restricted_borrowernumber );
+    my $expired_borrower = GetMember( borrowernumber => $expired_borrowernumber );
 
     my $bibitems       = '';
     my $priority       = '1';
@@ -693,6 +706,58 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         $dbh->do('DELETE FROM accountlines WHERE borrowernumber=?', undef, $renewing_borrowernumber);
     };
 
+    subtest "auto_account_expired | BlockExpiredPatronOpacActions" => sub {
+        plan tests => 6;
+        my $item_to_auto_renew = $builder->build({
+            source => 'Item',
+            value => {
+                biblionumber => $biblionumber,
+                homebranch       => $branch,
+                holdingbranch    => $branch,
+            }
+        });
+
+        $dbh->do('UPDATE issuingrules SET norenewalbefore = 10, no_auto_renewal_after = 11');
+
+        my $ten_days_before = dt_from_string->add( days => -10 );
+        my $ten_days_ahead = dt_from_string->add( days => 10 );
+
+        # Patron is expired and BlockExpiredPatronOpacActions=0
+        # => auto renew is allowed
+        t::lib::Mocks::mock_preference('BlockExpiredPatronOpacActions', 0);
+        my $patron = $expired_borrower;
+        my $checkout = AddIssue( $patron, $item_to_auto_renew->{barcode}, $ten_days_ahead, undef, $ten_days_before, undef, { auto_renew => 1 } );
+        ( $renewokay, $error ) =
+          CanBookBeRenewed( $patron->{borrowernumber}, $item_to_auto_renew->{itemnumber} );
+        is( $renewokay, 0, 'Do not renew, renewal is automatic' );
+        is( $error, 'auto_renew', 'Can auto renew, patron is expired but BlockExpiredPatronOpacActions=0' );
+        Koha::Checkouts->find( $checkout->issue_id )->delete;
+
+
+        # Patron is expired and BlockExpiredPatronOpacActions=1
+        # => auto renew is not allowed
+        t::lib::Mocks::mock_preference('BlockExpiredPatronOpacActions', 1);
+        $patron = $expired_borrower;
+        $checkout = AddIssue( $patron, $item_to_auto_renew->{barcode}, $ten_days_ahead, undef, $ten_days_before, undef, { auto_renew => 1 } );
+        ( $renewokay, $error ) =
+          CanBookBeRenewed( $patron->{borrowernumber}, $item_to_auto_renew->{itemnumber} );
+        is( $renewokay, 0, 'Do not renew, renewal is automatic' );
+        is( $error, 'auto_account_expired', 'Can not auto renew, lockExpiredPatronOpacActions=1 and patron is expired' );
+        Koha::Checkouts->find( $checkout->issue_id )->delete;
+
+
+        # Patron is not expired and BlockExpiredPatronOpacActions=1
+        # => auto renew is allowed
+        t::lib::Mocks::mock_preference('BlockExpiredPatronOpacActions', 1);
+        $patron = $renewing_borrower;
+        $checkout = AddIssue( $patron, $item_to_auto_renew->{barcode}, $ten_days_ahead, undef, $ten_days_before, undef, { auto_renew => 1 } );
+        ( $renewokay, $error ) =
+          CanBookBeRenewed( $patron->{borrowernumber}, $item_to_auto_renew->{itemnumber} );
+        is( $renewokay, 0, 'Do not renew, renewal is automatic' );
+        is( $error, 'auto_renew', 'Can auto renew, BlockExpiredPatronOpacActions=1 but patron is not expired' );
+        Koha::Checkouts->find( $checkout->issue_id )->delete;
+    };
+
     subtest "GetLatestAutoRenewDate" => sub {
         plan tests => 5;
         my $item_to_auto_renew = $builder->build(
@@ -827,13 +892,8 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my $branch   = $library2->{branchcode};
 
     #Create another record
-    my $biblio2 = MARC::Record->new();
     my $title2 = 'Something is worng here';
-    $biblio2->append_fields(
-        MARC::Field->new('100', ' ', ' ', a => 'Anonymous'),
-        MARC::Field->new('245', ' ', ' ', a => $title2),
-    );
-    my ($biblionumber2, $biblioitemnumber2) = AddBiblio($biblio2, '');
+    my ($biblionumber2, $biblioitemnumber2) = add_biblio($title2, 'Anonymous');
 
     #Create third item
     AddItem(
@@ -912,8 +972,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my $barcode  = '1234567890';
     my $branch   = $library2->{branchcode};
 
-    my $biblio = MARC::Record->new();
-    my ($biblionumber, $biblioitemnumber) = AddBiblio($biblio, '');
+    my ($biblionumber, $biblioitemnumber) = add_biblio();
 
     #Create third item
     my ( undef, undef, $itemnumber ) = AddItem(
@@ -969,8 +1028,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
         undef,  0,
         .10, 1
     );
-    my $biblio = MARC::Record->new();
-    my ( $biblionumber, $biblioitemnumber ) = AddBiblio( $biblio, '' );
+    my ( $biblionumber, $biblioitemnumber ) = add_biblio();
 
     my $barcode1 = '1234';
     my ( undef, undef, $itemnumber1 ) = AddItem(
@@ -1053,12 +1111,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
     my $branch   = $library->{branchcode};
 
     #Create another record
-    my $biblio = MARC::Record->new();
-    $biblio->append_fields(
-        MARC::Field->new('100', ' ', ' ', a => 'Anonymous'),
-        MARC::Field->new('245', ' ', ' ', a => 'A title'),
-    );
-    my ($biblionumber, $biblioitemnumber) = AddBiblio($biblio, '');
+    my ($biblionumber, $biblioitemnumber) = add_biblio('A title', 'Anonymous');
 
     my (undef, undef, $itemnumber) = AddItem(
         {
@@ -1087,8 +1140,7 @@ C4::Context->dbh->do("DELETE FROM accountlines");
 {
     my $library = $builder->build({ source => 'Branch' });
 
-    my $biblio = MARC::Record->new();
-    my ($biblionumber, $biblioitemnumber) = AddBiblio($biblio, '');
+    my ($biblionumber, $biblioitemnumber) = add_biblio();
 
     my $barcode = 'just a barcode';
     my ( undef, undef, $itemnumber ) = AddItem(
@@ -1356,14 +1408,8 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
 subtest 'MultipleReserves' => sub {
     plan tests => 3;
 
-    my $biblio = MARC::Record->new();
     my $title = 'Silence in the library';
-    $biblio->append_fields(
-        MARC::Field->new('100', ' ', ' ', a => 'Moffat, Steven'),
-        MARC::Field->new('245', ' ', ' ', a => $title),
-    );
-
-    my ($biblionumber, $biblioitemnumber) = AddBiblio($biblio, '');
+    my ($biblionumber, $biblioitemnumber) = add_biblio($title, 'Moffat, Steven');
 
     my $branch = $library2->{branchcode};
 
@@ -1709,4 +1755,27 @@ sub str {
     $s .= %$question ? ' (question: ' . join( ' ', keys %$question ) . ')' : '';
     $s .= %$alert    ? ' (alert: '    . join( ' ', keys %$alert    ) . ')' : '';
     return $s;
+}
+
+sub add_biblio {
+    my ($title, $author) = @_;
+
+    my $marcflavour = C4::Context->preference('marcflavour');
+
+    my $biblio = MARC::Record->new();
+    if ($title) {
+        my $tag = $marcflavour eq 'UNIMARC' ? '200' : '245';
+        $biblio->append_fields(
+            MARC::Field->new($tag, ' ', ' ', a => $title),
+        );
+    }
+
+    if ($author) {
+        my ($tag, $code) = $marcflavour eq 'UNIMARC' ? (200, 'f') : (100, 'a');
+        $biblio->append_fields(
+            MARC::Field->new($tag, ' ', ' ', $code => $author),
+        );
+    }
+
+    return AddBiblio($biblio, '');
 }
