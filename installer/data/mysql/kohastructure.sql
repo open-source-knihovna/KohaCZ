@@ -3957,6 +3957,7 @@ CREATE TABLE IF NOT EXISTS `housebound_role` (
 -- Table structure for table 'article_requests'
 --
 
+DROP TABLE IF EXISTS `article_requests`;
 CREATE TABLE `article_requests` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `borrowernumber` int(11) NOT NULL,
@@ -3990,6 +3991,7 @@ CREATE TABLE `article_requests` (
 -- Table structure for table `biblio_metadata`
 --
 
+DROP TABLE IF EXISTS `biblio_metadata`;
 CREATE TABLE biblio_metadata (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `biblionumber` INT(11) NOT NULL,
@@ -4007,6 +4009,7 @@ CREATE TABLE biblio_metadata (
 -- Table structure for table `deletedbiblio_metadata`
 --
 
+DROP TABLE IF EXISTS `deletedbiblio_metadata`;
 CREATE TABLE deletedbiblio_metadata (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
     `biblionumber` INT(11) NOT NULL,

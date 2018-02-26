@@ -57,14 +57,6 @@ if ($add){
         my $amount=$input->param('amount');
         my $type=$input->param('type');
         my $error   = manualinvoice( $borrowernumber, $itemnum, $desc, $type, $amount );
-
-        #TODO - we need a correct error handling - better do this through REST API
-        #if ($error) {
-        #     if ( $error =~ /FOREIGN KEY/ && $error =~ /itemnumber/ ) {
-        #        $template->param( 'ITEMNUMBER' => 1 );
-        #    }
-        #    $template->param( 'ERROR' => $error );
-        #}
     }
 }
 print $input->redirect("/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber");

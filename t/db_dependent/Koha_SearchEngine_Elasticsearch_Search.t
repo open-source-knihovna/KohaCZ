@@ -96,7 +96,7 @@ subtest 'json2marc' => sub {
 };
 
 subtest 'build_query tests' => sub {
-    plan tests => 16;
+    plan tests => 21;
 
     t::lib::Mocks::mock_preference('DisplayLibraryFacets','both');
     my $query = $builder->build_query();
@@ -185,6 +185,41 @@ subtest 'build_query tests' => sub {
         $query->{query}{query_string}{query},
         '(barcode:123456*)',
         "query of specific field is truncated"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['Local-number:"123456"'] );
+    is(
+        $query->{query}{query_string}{query},
+        '(Local-number:"123456")',
+        "query of specific field including hyphen and quoted is not truncated"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['Local-number:123456'] );
+    is(
+        $query->{query}{query_string}{query},
+        '(Local-number:123456*)',
+        "query of specific field including hyphen and not quoted is truncated"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['Local-number.raw:123456'] );
+    is(
+        $query->{query}{query_string}{query},
+        '(Local-number.raw:123456*)',
+        "query of specific field including period and not quoted is truncated"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['Local-number.raw:"123456"'] );
+    is(
+        $query->{query}{query_string}{query},
+        '(Local-number.raw:"123456")',
+        "query of specific field including period and quoted is not truncated"
+    );
+
+    ( undef, $query ) = $builder->build_query_compat( undef, ['J.R.R'] );
+    is(
+        $query->{query}{query_string}{query},
+        '(J.R.R*)',
+        "query including period is truncated but not split at periods"
     );
 
     ( undef, $query ) = $builder->build_query_compat( undef, ['title:"donald duck"'] );

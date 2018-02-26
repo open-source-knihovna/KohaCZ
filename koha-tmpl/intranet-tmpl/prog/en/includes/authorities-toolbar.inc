@@ -59,19 +59,21 @@
             [% END %]
         </ul>
     </div>
-    <div class="btn-group">
-        <a class="btn btn-default btn-sm" id="z3950submit" href="#"><i class="fa fa-search"></i> New from Z39.50</a>
-    </div>
+    [% IF servers.count > 0 %]
+        <div class="btn-group">
+            <a class="btn btn-default btn-sm" id="z3950submit" href="#"><i class="fa fa-search"></i> New from Z39.50</a>
+        </div>
+    [% END %]
     [% IF ( z3950updateservers ) %]
         <div class="btn-group">
             <a class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-download"></i> Push to Z39.50 server
             <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-	        [% FOREACH z3950updateserver IN z3950updateservers %]
-                    <li><a href="/cgi-bin/koha/authorities/detail.pl?authid=[% authid %]&pushToZ3950Server&sid=[% z3950updateserver.id %]">[% z3950updateserver.servername %]</a></li>
-		[% END %]
-	    </ul>
+            [% FOREACH z3950updateserver IN z3950updateservers %]
+                <li><a href="/cgi-bin/koha/authorities/detail.pl?authid=[% authid %]&pushToZ3950Server&sid=[% z3950updateserver.id %]">[% z3950updateserver.servername %]</a></li>
+            [% END %]
+            </ul>
         </div>
     [% END %]
 [% END %]
