@@ -46,8 +46,7 @@ unless ( $staffClientUrl ) {
     exit;
 }
 
-
-my $phase = $cgi->param('phase');
+my $phase = $cgi->url_param('phase');
 if ($phase && $phase eq 'return') {
     my $plugin = Koha::Plugins::Handler->run( { class => $class, method => 'opac_online_payment_end', cgi => $cgi } );
     exit;
