@@ -14861,6 +14861,32 @@ if( CheckVersion( $DBversion ) ) {
 
 $DBversion = "17.05.09.000";
 if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO `letter` (module, code, branchcode, name, is_html, title, content, message_transport_type)
+        VALUES ('reserves','HOLDPLACED_CONTACT','','Hold Placed on Item, Contact Patrons','0','Item Return Required','Dear <<borrowers.firstname>> <<borrowers.surname>>,\r\na hold has been placed on the following item: <<biblio.title>> (<<biblio.biblionumber>>) by another patron. Please, return it as soon as possible.\r\n\r\nThank you!','email');
+    });
+    print "Add HOLDPLACED_CONTACT template\n";
+
+    $dbh->do("INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('NotifyToReturnItemWhenHoldIsPlaced', '0', 'If ON, notifies the patrons to return an item whenever a hold is placed on it', NULL, 'YesNo');");
+    $dbh->do("INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('NotifyToReturnItemFromLibrary', 'ItemHomeLibrary', 'Restricts what library to take into consideration when notifying patrons to return items on hold', 'RequestorLibrary|ItemHomeLibrary|AnyLibrary', 'Choice');");
+    print "System preference for notifying patrons about hold placed on their checkouts\n";
+
+    if( !column_exists( 'issuingrules', 'maxissuelength' ) ) {
+        $dbh->do( "ALTER TABLE issuingrules ADD COLUMN maxissuelength int(4) default NULL AFTER issuelength" );
+    }
+    print "Add maxissuelength issuing rule\n";
+
+    if( !column_exists( 'issuingrules', 'renew_reserved' ) ) {
+        $dbh->do( "ALTER TABLE issuingrules ADD COLUMN renew_reserved BOOLEAN default FALSE AFTER article_requests" );
+    }
+    if( !column_exists( 'issuingrules', 'reserved_renew_count' ) ) {
+        $dbh->do( "ALTER TABLE issuingrules ADD COLUMN reserved_renew_count int(4) default NULL AFTER renew_reserved" );
+    }
+    if( !column_exists( 'issuingrules', 'reserved_renew_period' ) ) {
+        $dbh->do( "ALTER TABLE issuingrules ADD COLUMN reserved_renew_period int(4) default NULL AFTER reserved_renew_count" );
+    }
+    print "Upgrade done (Ability to renew reserved items)\n";
+
     SetVersion($DBversion);
     print "Upgrade to $DBversion done (Koha 17.05.09)\n";
 }

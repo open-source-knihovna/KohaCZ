@@ -1,2 +1,0 @@
-INSERT IGNORE INTO `letter` (module, code, branchcode, name, is_html, title, content, message_transport_type)
-VALUES ('reserves','HOLDPLACED_CONTACT','','Hold Placed on Item, Contact Patrons','0','Item Return Required','Dear <<borrowers.firstname>> <<borrowers.surname>>,\r\na hold has been placed on the following item: <<biblio.title>> (<<biblio.biblionumber>>) by another patron. Please, return it as soon as possible.\r\n\r\nThank you!','email');
