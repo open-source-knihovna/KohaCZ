@@ -27,36 +27,30 @@ use Modern::Perl;
 use C4::Auth;
 use C4::Output;
 use CGI qw ( -utf8 );
-use C4::Members;
 use C4::Accounts;
-use C4::Items;
-use C4::Members::Attributes qw(GetBorrowerAttributes);
 
-use Koha::Patron::Images;
-use Koha::Patron::Categories;
-use Koha::Account::DebitTypes;
-use Koha::Account::CreditTypes;
+use Koha::Items;
 
-my $input=new CGI;
+my $input = new CGI;
 my $flagsrequired = { borrowers => 1, updatecharges => 'remaining_permissions' };
 
 my $borrowernumber=$input->param('borrowernumber');
 
 # get borrower details
-my $data=GetMember('borrowernumber'=>$borrowernumber);
-my $add=$input->param('add');
+my $add = $input->param('add');
 if ($add){
     if ( checkauth( $input, 0, $flagsrequired, 'intranet' ) ) {
         #  print $input->header;
-        my $barcode=$input->param('barcode');
-        my $itemnum;
-        if ($barcode) {
-            $itemnum = GetItemnumberFromBarcode($barcode);
+        my $barcode = $input->param('barcode');
+        my $item = Koha::Items->find({ barcode => $barcode });
+        my $itemnumber;
+        if ($item) {
+            $itemnumber = $item->itemnumber;
         }
-        my $desc=$input->param('desc');
-        my $amount=$input->param('amount');
-        my $type=$input->param('type');
-        my $error   = manualinvoice( $borrowernumber, $itemnum, $desc, $type, $amount );
+        my $desc = $input->param('desc');
+        my $amount = $input->param('amount');
+        my $type = $input->param('type');
+        my $error = manualinvoice( $borrowernumber, $itemnumber, $desc, $type, $amount );
     }
 }
 print $input->redirect("/cgi-bin/koha/members/boraccount.pl?borrowernumber=$borrowernumber");
