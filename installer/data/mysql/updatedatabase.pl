@@ -14095,6 +14095,32 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
+$DBversion = "16.11.16.000";
+if ( CheckVersion($DBversion) ) {
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
+        ('PosTerminalIP', '', NULL , 'POS Terminal IP address', 'Free'),
+        ('PosTerminalPort',  '', NULL ,  'POS Terminal port',  'Integer'),
+        ('PosTerminalCurrencyCode',  '', NULL ,  'POS Terminal currency code number',  'Integer');
+    });
+    print "Upgrade - pos terminal preferences\n";
+
+    # Create pos_terminal_transactions table:
+    $dbh->do( "CREATE TABLE IF NOT EXISTS `pos_terminal_transactions` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `accountlines_id` int(11) NOT NULL,
+        `status` varchar(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'new',
+        `response_code` varchar(5) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
+        `message_log` text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        PRIMARY KEY (`id`),
+        KEY `accountlines_id` (`accountlines_id`),
+        CONSTRAINT `pos_terminal_transactions_ibfk1` FOREIGN KEY (`accountlines_id`) REFERENCES `accountlines` (`accountlines_id`) ON DELETE CASCADE ON UPDATE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" );
+    print "Upgrade done (Bug 17705 - Payments with cards through payment terminal)\n";
+    print "Upgrade to $DBversion done (Koha 16.11.16)\n";
+    SetVersion($DBversion);
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.
