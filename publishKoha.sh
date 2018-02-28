@@ -15,9 +15,16 @@ msgcat misc/translator/po/cs-CZ-opac-bootstrap-orig.po misc/translator/po/cs-CZ-
 msgcat misc/translator/po/cs-CZ-staff-prog-orig.po misc/translator/po/cs-CZ-staff-prog-kohacz.po > misc/translator/po/cs-CZ-staff-prog.po
 msgcat misc/translator/po/cs-CZ-pref-orig.po misc/translator/po/cs-CZ-pref-kohacz.po > misc/translator/po/cs-CZ-pref.po
 
+git add misc/translator/po/cs-CZ-opac-bootstrap.po
+git add misc/translator/po/cs-CZ-pref.po
+git add misc/translator/po/cs-CZ-staff-prog.po
+
+git commit -m "Temporary translation commit"
+
 DEB_BUILD_OPTIONS=nocheck ./debian/build-git-snapshot -r ~/debian -v $VERSION -d --noautoversion --distribution jessie
 
 # Cleaning translations
+git reset HEAD~
 rm misc/translator/po/cs-CZ-opac-bootstrap.po
 rm misc/translator/po/cs-CZ-staff-prog.po
 rm misc/translator/po/cs-CZ-pref.po
