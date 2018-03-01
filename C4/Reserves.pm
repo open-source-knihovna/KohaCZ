@@ -1116,6 +1116,7 @@ item-level hold request.  An item is available if
 * it is not lost AND
 * it is not damaged AND
 * it is not withdrawn AND
+* a waiting or in transit reserve is placed on
 * does not have a not for loan value > 0
 
 Need to check the issuingrules onshelfholds column,
@@ -1178,9 +1179,9 @@ sub IsAvailableForItemLevelRequest {
         }
 
         return $any_available ? 0 : 1;
+    } else { # on_shelf_holds == 0 "If any unavailable" (the description is rather cryptic and could still be improved)
+        return $item->{onloan} || IsItemOnHoldAndFound( $item->{itemnumber} );
     }
-
-    return $item->{onloan} || GetReserveStatus($item->{itemnumber}) eq "Waiting";
 }
 
 =head2 OnShelfHoldsAllowed
