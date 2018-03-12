@@ -57,6 +57,7 @@ if ( $action eq 'addItem' ) {
     my $item       = Koha::Items->find( { barcode => $barcode } );
 
     my ( $success, $errorCode, $errorMessage );
+    my $libraryName;
 
     $template->param( barcode => $barcode );
     $template->param( item => $item );
@@ -83,6 +84,8 @@ if ( $action eq 'addItem' ) {
             push @errors, { code => 'error_removing_item' };
         } else {
             push @messages, { code => 'success_removing_item' };
+            my $hold_library = Koha::RotatingCollections->get_hold_from_lists($item);
+            $template->param( hold_library => $hold_library );
         }
 
         $template->param(

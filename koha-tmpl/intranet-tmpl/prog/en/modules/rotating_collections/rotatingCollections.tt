@@ -54,6 +54,9 @@
                 [% END %]
 
                 [% IF ( removeSuccess ) %]
+                    [% IF ( hold_library ) %]
+                        <div class="dialog alert"><h1>Nalezena rezervace</h1><p>Dokument je rezervován pro knihovnu <strong>[% hold_library.branchname %]</strong></p></div>
+                    [% END %]
                     <div class="dialog message">
                         <p>Item with barcode '[% barcode %]' was removed from a collection and returned to homebranch.<br/><br />
                         Author: <strong>[% item.biblio.author %]</strong><br />

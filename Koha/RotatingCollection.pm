@@ -29,6 +29,8 @@ use Koha::Exceptions;
 use Koha::Holds;
 use Koha::Items;
 use Koha::RotatingCollection::Trackings;
+use Koha::Virtualshelfcontents;
+use Koha::Virtualshelves;
 
 use base qw(Koha::Object);
 
@@ -157,7 +159,9 @@ sub remove_item {
 
     Koha::Exceptions::ObjectNotFound->throw if not defined $collection_tracking;
 
-    return $collection_tracking->delete;
+    my $delete = $collection_tracking->delete;
+
+    return $delete;
 }
 
 =head3 transfer
@@ -176,6 +180,8 @@ sub transfer {
     Koha::Exceptions::MissingParameter->throw if not defined $library;
 
     Koha::Exceptions::ObjectNotFound->throw if ref($library) ne 'Koha::Library';
+
+    my $shelf = Koha::Virtualshelves->find({ shelfname => $library->branchcode });
 
     $self->colBranchcode( $library->branchcode );
     $self->lastTransferredOn( output_pref({ dt => dt_from_string, dateformat => 'iso', dateonly => 1 }) );
@@ -204,6 +210,13 @@ sub transfer {
             } )->store;
             $item->holdingbranch( $library->branchcode )->store;
         }
+
+        # Remove item from list if it was hold
+        my $hold = Koha::Virtualshelfcontents->find({
+            shelfnumber => $shelf->shelfnumber,
+            biblionumber => $item->biblionumber,
+        }) if $shelf;
+        $hold->delete if $hold;
     }
 }
 

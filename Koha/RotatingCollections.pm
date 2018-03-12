@@ -23,7 +23,9 @@ use Carp;
 
 use Koha::Database;
 
+use Koha::Exceptions;
 use Koha::RotatingCollection;
+use Koha::Virtualshelfcontents;
 
 use base qw(Koha::Objects);
 
@@ -36,6 +38,40 @@ Koha::RotatingCollections - Koha Rotating collection Object set class
 =head2 Class Methods
 
 =cut
+
+=head3 get_hold_from_lists
+
+my $library = Koha::RotatingfCollections->get_hold_from_lists( $item_object )
+
+return a Library object if there is any hold for a library, ot undef
+
+throws
+    Koha::Exceptions::MissingParameter;
+
+=cut
+
+sub get_hold_from_lists {
+    my ( $self, $item ) = @_;
+
+    Koha::Exceptions::MissingParameter->throw if not defined $item;
+
+    my $hold = Koha::Virtualshelfcontents->search({
+            'me.biblionumber' => $item->biblionumber,
+        }, {
+            'join' => [ 'shelfnumber' ],
+            '+select' => ['shelfnumber.shelfname'],
+            '+as' => ['shelfname'],
+            'order_by' => 'dateadded',
+            'limit' => 1,
+        });
+
+    my $library;
+    $library = Koha::Libraries->find( $hold->next->get_column('shelfname'))
+        if $hold->count;
+
+    return $library;
+}
+
 
 =head3 type
 

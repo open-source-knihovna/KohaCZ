@@ -34,6 +34,10 @@
                       </div>
                 [% END %]
 
+              [% IF ( hold_library ) %]
+                <div class="dialog alert"><h1>Nalezena rezervace</h1><p>Dokument je rezervován pro knihovnu <strong>[% hold_library.branchname %]</strong></p></div>
+              [% END %]
+
               [% IF ( messages ) %]
                 <div class="dialog message">
                   [% FOR message IN messages %]
@@ -45,26 +49,6 @@
                       Item with barcode '[% barcode %]' removed successfully<br />
                       Author: <strong>[% item.biblio.author %]</strong><br />
                       Title: <strong>[% item.biblio.title %]</strong>
-                    [% END %]
-                  [% END %]
-                </div>
-              [% END %]
-
-              [% IF ( errors ) %]
-                <div class="dialog alert">
-                  [% FOR error IN errors %]
-                    [% IF error.code == 'error_adding_item' %]
-                      Failed to add item with barcode '[% barcode %]'<br />
-                      [% IF ( item ) %]
-                        Author: <strong>[% item.biblio.author %]</strong><br />
-                        Title: <strong>[% item.biblio.title %]</strong>
-                      [% END %]
-                    [% ELSIF error.code == 'error_removing_item' %]
-                      Failed to remove item with barcode <i>[% barcode %]</i><br />
-                      [% IF ( item ) %]
-                        Author: <strong>[% item.biblio.author %]</strong><br />
-                        Title: <strong>[% item.biblio.title %]</strong>
-                      [% END %]
                     [% END %]
                   [% END %]
                 </div>

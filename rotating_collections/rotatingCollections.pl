@@ -58,7 +58,9 @@ if ( $action eq 'removeItem' ) {
         my $collection = $item->rotating_collection;
         if ($collection) {
             $collection->remove_item($item);
+            my $hold_library = Koha::RotatingCollections->get_hold_from_lists($item);
             $template->param( removeSuccess => 1 );
+            $template->param( hold_library => $hold_library );
         } else {
             $template->param( removeFailure  => 1 );
             $template->param( failureMessage => "NOT_IN_COLLECTION" );

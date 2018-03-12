@@ -340,30 +340,6 @@ CREATE TABLE `categories` ( -- this table shows information related to Koha patr
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Table: collections
---
-DROP TABLE IF EXISTS collections;
-CREATE TABLE collections (
-  colId integer(11) NOT NULL auto_increment,
-  colTitle varchar(100) NOT NULL DEFAULT '',
-  colDesc text NOT NULL,
-  colBranchcode varchar(10) DEFAULT NULL, -- 'branchcode for branch where item should be held.'
-  createdBy int(11) default NULL,
-  createdOn datetime default NULL,
-  lastTransferredOn datetime default NULL,
-  PRIMARY KEY (colId)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Constraints for table `collections`
---
-ALTER TABLE `collections`
-  ADD CONSTRAINT `collections_ibfk_1` FOREIGN KEY (`colBranchcode`) REFERENCES `branches` (`branchcode`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `collections`
-  ADD CONSTRAINT `collections_ibfk_2` FOREIGN KEY (`createdBy`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE;
-
---
 -- Table structure for table `branch_borrower_circ_rules`
 --
 
@@ -996,24 +972,6 @@ CREATE TABLE `itemtypes` ( -- defines the item types
   PRIMARY KEY  (`itemtype`),
   UNIQUE KEY `itemtype` (`itemtype`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Table: collections_tracking
---
-
-DROP TABLE IF EXISTS collections_tracking;
-CREATE TABLE collections_tracking (
-  collections_tracking_id integer(11) NOT NULL auto_increment,
-  colId integer(11) NOT NULL DEFAULT 0 comment 'collections.colId',
-  itemnumber integer(11) NOT NULL DEFAULT 0 comment 'items.itemnumber',
-  PRIMARY KEY (collections_tracking_id)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-ALTER TABLE `collections_tracking`
-  ADD CONSTRAINT `collections_tracking_ibfk_1` FOREIGN KEY (`colId`) REFERENCES `collections` (`colId`) ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE `collections_tracking`
-  ADD CONSTRAINT `collections_tracking_ibfk_2` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Table structure for table `default_branch_item_rules`
@@ -1769,6 +1727,49 @@ CREATE TABLE borrower_sync (
   KEY borrowernumber (borrowernumber),
   CONSTRAINT borrower_sync_ibfk_1 FOREIGN KEY (borrowernumber) REFERENCES borrowers (borrowernumber) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Table: collections
+--
+DROP TABLE IF EXISTS collections;
+CREATE TABLE collections (
+    colId integer(11) NOT NULL auto_increment,
+    colTitle varchar(100) NOT NULL DEFAULT '',
+    colDesc text NOT NULL,
+    colBranchcode varchar(10) DEFAULT NULL, -- 'branchcode for branch where item should be held.'
+    createdBy int(11) default NULL,
+    createdOn datetime default NULL,
+    lastTransferredOn datetime default NULL,
+    PRIMARY KEY (colId)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Constraints for table `collections`
+--
+ALTER TABLE `collections`
+ADD CONSTRAINT `collections_ibfk_1` FOREIGN KEY (`colBranchcode`) REFERENCES `branches` (`branchcode`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `collections`
+ADD CONSTRAINT `collections_ibfk_2` FOREIGN KEY (`createdBy`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+
+--
+-- Table: collections_tracking
+--
+
+DROP TABLE IF EXISTS collections_tracking;
+CREATE TABLE collections_tracking (
+    collections_tracking_id integer(11) NOT NULL auto_increment,
+    colId integer(11) NOT NULL DEFAULT 0 comment 'collections.colId',
+    itemnumber integer(11) NOT NULL DEFAULT 0 comment 'items.itemnumber',
+    PRIMARY KEY (collections_tracking_id)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `collections_tracking`
+ADD CONSTRAINT `collections_tracking_ibfk_1` FOREIGN KEY (`colId`) REFERENCES `collections` (`colId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `collections_tracking`
+ADD CONSTRAINT `collections_tracking_ibfk_2` FOREIGN KEY (`itemnumber`) REFERENCES `items` (`itemnumber`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Table structure for table `issues`
