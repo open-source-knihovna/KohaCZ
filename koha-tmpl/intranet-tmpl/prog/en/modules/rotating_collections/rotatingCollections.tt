@@ -51,8 +51,11 @@
                         <p>Item was issued by [% borrower.firstname %] [% borrower.surname %] ([% borrower.cardnumber %]) and now is returned</p>
                       </div>
                 [% END %]
-                 
+
                 [% IF ( removeSuccess ) %]
+                    [% IF ( libraryName ) %]
+                        <div class="dialog alert"><h1>Nalezena rezervace</h1><p>Dokument je rezervován pro knihovnu <strong>[% libraryName %]</strong></p></div>
+                    [% END %]
                     <div class="dialog message">
                         <p>Item with barcode '[% barcode %]' was removed from a collection and returned to homebranch.<br/>
                         Author: [% itemInfo.author %]<br />

@@ -64,6 +64,9 @@
               [% END %]
 
               [% IF ( previousActionRemove ) %]
+                [% IF ( libraryName ) %]
+                  <div class="dialog alert"><h1>Nalezena rezervace</h1><p>Dokument je rezervován pro knihovnu <strong>[% libraryName %]</strong></p></div>
+                [% END %]
                 [% IF ( removeSuccess ) %]
                   <div class="dialog message">Item with barcode <i>[% barcode %]</i> removed successfully<br/>
                   Author: [% itemInfo.author %]<br />

@@ -58,14 +58,17 @@ if ( $query->param('action') eq 'removeItem' ) {
   $template->param( barcode => $barcode );
   $template->param( itemInfo => $itemInfo );
 
-  my ( $success, $errorcode, $errormessage ) = RemoveItemFromAnyCollection($itemnumber);
+  my ( $success, $libraryName ) = RemoveItemFromAnyCollection($itemnumber);
 
   if ($success) {
       $template->param( removeSuccess => 1 );
+      if ($libraryName) {
+          $template->param( libraryName => $libraryName );
+      }
   }
   else {
       $template->param( removeFailure  => 1 );
-      $template->param( failureMessage => $errormessage );
+      $template->param( failureMessage => "An error occurred" );
   }
 
 }

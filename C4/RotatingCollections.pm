@@ -30,6 +30,8 @@ use C4::Reserves qw(CheckReserves);
 use Koha::Database;
 use C4::Items;
 
+use Koha::Virtualshelfcontents;
+
 use DBI;
 
 use Data::Dumper;
@@ -362,7 +364,7 @@ sub AddItemToCollection {
 
 =head2  RemoveItemFromCollection
 
- ( $success, $errorcode, $errormessage ) = RemoveItemFromCollection( $colId, $itemnumber );
+ ( $success, $libraryName ) = RemoveItemFromCollection( $colId, $itemnumber );
 
 Removes an item to a collection
 
@@ -372,8 +374,7 @@ Removes an item to a collection
 
  Output:
    $success: 1 if all database operations were successful, 0 otherwise
-   $errorCode: Code for reason of failure, good for translating errors in templates
-   $errorMessage: English description of error
+   $libraryName: If there is a list with transfers requests for libraries, return first library name
 
 =cut
 
@@ -398,7 +399,45 @@ sub RemoveItemFromCollection {
     );
     $sth->execute($itemnumber) or return ( 0, 3, $sth->errstr() );
 
-    return 1;
+    my $libraryName = _find_hold_library( $itemnumber );
+
+    return (1, $libraryName);
+}
+
+=head2 _find_hold_library
+
+  $libraryName = _find_hold_library( $itemnumber );
+
+Input:
+    $itemnumber
+
+Output:
+    $libraryName or undef
+
+=cut
+
+sub _find_hold_library {
+    my ( $itemnumber ) = @_;
+    my $dbh = C4::Context->dbh;
+    my $sqlBiblionumber = "SELECT biblionumber FROM items WHERE itemnumber = ?";
+    my $sthBiblionumber = $dbh->prepare( $sqlBiblionumber );
+    $sthBiblionumber->execute( $itemnumber );
+    my $biblioRow = $sthBiblionumber->fetchrow_hashref;
+    my $biblionumber = $biblioRow->{biblionumber};
+
+    my $sqlHold = "SELECT b.branchname FROM
+        branches b
+        JOIN virtualshelves vs ON b.branchcode = vs.shelfname
+        JOIN virtualshelfcontents vc ON vs.shelfnumber = vc.shelfnumber
+        WHERE vc.biblionumber = ?
+        ORDER BY vc.dateadded ASC
+        LIMIT 1";
+    my $sthHold = $dbh->prepare( $sqlHold );
+    $sthHold->execute( $biblionumber );
+    my $holdRow = $sthHold->fetchrow_hashref;
+    my $libraryName = $holdRow->{branchname} // undef;
+
+    return $libraryName;
 }
 
 =head2  RemoveItemFromAnyCollection
@@ -410,7 +449,9 @@ sub RemoveItemFromCollection {
    $itemnumber: Item to be removed from collection
 
  Output:
+   $success: 1 if all database operations were successful, 0 otherwise
    $colTitle: Title of collection in which the item was
+   $libraryName: If there is a list with transfers requests for libraries, return first library name
    $branchReturned: homebranch of the item
    $success: 1 if all database operations were successful, 0 otherwise
    $errorCode: Code for reason of failure, good for translating errors in templates
@@ -443,7 +484,9 @@ sub RemoveItemFromAnyCollection {
     my $homebranch = $item->{homebranch};
     ModItem( { holdingbranch => $homebranch }, undef, $itemnumber);
 
-    return 1;
+    my $libraryName = _find_hold_library( $itemnumber );
+
+    return (1, $libraryName);
 }
 
 
@@ -477,6 +520,13 @@ sub TransferCollection {
 
     my $dbh = C4::Context->dbh;
 
+    my $sthList = $dbh->prepare("SELECT shelfnumber FROM virtualshelves WHERE shelfname = ?");
+    $sthList->execute( $colBranchcode);
+    my $shelf;
+    if ( my $listRow = $sthList->fetchrow_hashref ) {
+        $shelf = $listRow->{shelfnumber};
+    }
+
     my $sth;
     $sth = $dbh->prepare(
         "UPDATE collections
@@ -487,20 +537,29 @@ sub TransferCollection {
     $sth->execute( $colBranchcode, $colId ) or return ( 0, 4, $sth->errstr() );
 
     $sth = $dbh->prepare(q{
-        SELECT items.itemnumber, items.barcode FROM collections_tracking
+        SELECT items.itemnumber, items.biblionumber, items.barcode FROM collections_tracking
         LEFT JOIN items ON collections_tracking.itemnumber = items.itemnumber
         LEFT JOIN issues ON items.itemnumber = issues.itemnumber
         WHERE issues.borrowernumber IS NULL
           AND collections_tracking.colId = ?
     });
+
     $sth->execute($colId) or return ( 0, 4, $sth->errstr );
     my @results;
     while ( my $item = $sth->fetchrow_hashref ) {
         my ($status) = CheckReserves( $item->{itemnumber} );
         my @transfers = C4::Circulation::GetTransfers( $item->{itemnumber} );
         C4::Circulation::transferbook( $colBranchcode, $item->{barcode}, my $ignore_reserves = 1 ) unless ( $status eq 'Waiting' || @transfers );
+        if ( $shelf ) {
+            my $content = Koha::Virtualshelfcontents->find({
+                shelfnumber => $shelf,
+                biblionumber => $item->{biblionumber},
+            });
+            if ( $content ) {
+                $content->delete;
+            }
+        }
     }
-
     return 1;
 
 }

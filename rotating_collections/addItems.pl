@@ -50,6 +50,7 @@ if ( $query->param('action') eq 'addItem' ) {
     my $itemInfo = &GetBiblioFromItemNumber($itemnumber, undef);
 
     my ( $success, $errorCode, $errorMessage );
+    my $libraryName;
 
     $template->param( barcode => $barcode );
     $template->param( itemInfo => $itemInfo );
@@ -72,9 +73,9 @@ if ( $query->param('action') eq 'addItem' ) {
     }
     else {
         ## Remove the given item from the collection
-        ( $success, $errorCode, $errorMessage ) =
+        ( $success, $libraryName ) =
           RemoveItemFromCollection( $colId, $itemnumber );
-
+        print $libraryName;
         my ($doreturn, $messages, $iteminformation, $borrower);
 
         if (IsItemIssued($itemnumber)) {
@@ -83,7 +84,6 @@ if ( $query->param('action') eq 'addItem' ) {
           $template->param( borrower => $borrower);
         }
 
-
         $template->param(
             previousActionRemove => 1,
             removeChecked        => 1,
@@ -91,6 +91,9 @@ if ( $query->param('action') eq 'addItem' ) {
 
         if ($success) {
             $template->param( removeSuccess => 1 );
+            if ($libraryName) {
+                $template->param( libraryName => $libraryName );
+            }
         }
         else {
             $template->param( removeFailure  => 1 );
