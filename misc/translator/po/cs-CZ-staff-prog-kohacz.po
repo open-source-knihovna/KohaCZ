@@ -633,7 +633,12 @@ msgstr "Tvorba čtenářských průkazů"
 #: intranet-tmpl/prog/en/modules/circ/circulation.tt:290
 #, c-format
 msgid "Patron has previously checked out this title: "
-msgstr "Čtenář již měl vypůjčený tento titul: "
+msgstr "Čtenář již měl tento titul vypůjčený: "
+
+#: intranet-tmpl/prog/en/modules/reserve/request.tt:100
+#, c-format
+msgid "Patron has previously checked out this title on "
+msgstr "Čtenář již měl tento titul vypůjčený dne "
 
 #: intranet-tmpl/prog/en/modules/circ/circulation.tt:163
 #, c-format
