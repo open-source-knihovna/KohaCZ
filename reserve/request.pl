@@ -205,7 +205,11 @@ $template->param( messageborrower => $messageborrower );
 my $borrowerinfo = GetMember( borrowernumber => $borrowernumber_hold );
 
 my $logged_in_patron = Koha::Patrons->find( $borrowernumber );
-
+my $patron = $logged_in_patron;
+my $wants_check;
+if ($patron) {
+    $wants_check = $patron->wants_check_for_previous_checkout;
+}
 my $itemdata_enumchron = 0;
 my @biblioloop = ();
 foreach my $biblionumber (@biblionumbers) {
@@ -359,6 +363,18 @@ foreach my $biblionumber (@biblionumbers) {
         foreach my $itemnumber ( @{ $itemnumbers_of_biblioitem{$biblioitemnumber} } )    {
             my $item = $iteminfos_of->{$itemnumber};
 
+            if ( $patron ) {
+                my $do_check = $patron->do_check_for_previous_checkout($item) if $wants_check;
+                if ( $do_check && $wants_check ) {
+                    $item->{checked_previously} = $do_check;
+                    if ( $multihold ) {
+                        $biblioloopiter{checked_previously} = $do_check;
+                    } else {
+                        $template->param( checked_previously => $do_check );
+                    }
+                }
+
+            }
             $item->{force_hold_level} = $force_hold_level;
 
             unless (C4::Context->preference('item-level_itypes')) {
