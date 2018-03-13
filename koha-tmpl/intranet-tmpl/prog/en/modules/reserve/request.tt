@@ -97,7 +97,7 @@ function check() {
 }
 
 function checkMultiHold() {
-    var spans = $(".multi_hold_item");
+    var spans = $(".multi_hold_item_checkbox:checked");
     if ($(spans).size() == 0) {
         alert(MSG_NO_ITEMS_AVAILABLE);
         return false;
@@ -120,7 +120,6 @@ function checkMultiHold() {
     $("#bad_bibs").val(badBibs);
 
     $('#hold-request-form').preventDoubleFormSubmit();
-
     return true;
 }
 
@@ -274,6 +273,14 @@ function checkMultiHold() {
         [% END %]
     </form>
   [% ELSIF NOT noitems %]
+
+[% IF ( checked_previously && !multi_hold ) %]
+<div class="dialog alert">
+  <ul>
+    <li>Patron has previously checked out this title on <strong>[% checked_previously | $KohaDates %]</strong></li>
+  </ul>
+</div>
+[% END %]
 
 [% IF ( exceeded_maxreserves || exceeded_holds_per_record || alreadyreserved || none_available || alreadypossession || ageRestricted ) %]
     <div class="dialog alert">
@@ -614,6 +621,7 @@ function checkMultiHold() {
 
     <table id="requesttitles">
       <tr>
+        <th>&nbsp;</th>
         <th>Title</th>
         [% UNLESS ( item_level_itypes ) %]
           <th>Item type</th>
@@ -628,6 +636,10 @@ function checkMultiHold() {
           <tr>
         [% END %]
           <td>
+            [% UNLESS ( biblioloo.warn ) %]
+              <input class="multi_hold_item_checkbox" type="checkbox" checked="checked" title="[% biblioloo.biblionumber %]"/></td>
+            [% END %]
+            <td>
             <ul>
               <li><a href="/cgi-bin/koha/catalogue/detail.pl?biblionumber=[% biblioloo.biblionumber %]">[% biblioloo.title |html %]</a></li>
               [% IF ( biblioloo.publicationyear ) %]
@@ -647,6 +659,9 @@ function checkMultiHold() {
           [% END %]
             <td>[% biblioloo.rank %]</td>
           <td>
+            [% IF ( biblioloo.checked_previously ) %]
+              <span class="alert">Patron has previously checked out this title on <b>[% biblioloo.checked_previously | $KohaDates %]</b></span><br/>
+            [% END %]
             [% IF ( biblioloo.alreadyres ) %]
               <ul>
             [% ELSE %]
@@ -684,7 +699,11 @@ function checkMultiHold() {
             [% ELSIF ( none_available ) %]
                 <input type="submit" disabled="disabled" value="Place hold" />
             [% ELSE %]
-                <input type="submit" value="Place hold" />
+                [% IF ( multi_hold ) %]
+                    <input type="submit" value="Place hold" id="multi_hold_submit"/>
+                [% ELSE %]
+                    <input type="submit" value="Place hold" />
+                [% END %]
             [% END %]
         [% END %]
     </fieldset>
