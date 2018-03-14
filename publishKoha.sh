@@ -37,9 +37,9 @@ scp ../debian/koha-*_${VERSION}-1_all.deb $USER@$SERVER:/root/kohadeb/
 
 ssh $USER@$SERVER <<ENDSSH
     cd /root/
-    aptly repo add kohacz kohadeb/koha-deps_${VERSION}_all.deb
-    aptly repo add kohacz kohadeb/koha-perldeps_${VERSION}_all.deb
-    aptly repo add kohacz kohadeb/koha-common_${VERSION}_all.deb
+    aptly repo add kohacz kohadeb/koha-deps_${VERSION}-1_all.deb
+    aptly repo add kohacz kohadeb/koha-perldeps_${VERSION}-1_all.deb
+    aptly repo add kohacz kohadeb/koha-common_${VERSION}-1_all.deb
     aptly snapshot create $VERSION from repo kohacz
 ENDSSH
 
