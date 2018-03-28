@@ -199,8 +199,6 @@ foreach my $item (@items){
             $item->{borrowersurname} = $curr_borrower->surname;
         }
     }
-
-    $item->{reservescount} = C4::Reserves::GetReserveCountFromItemnumber($item->{itemnumber});
 }
 
 my $mss = Koha::MarcSubfieldStructures->search({ frameworkcode => $fw, kohafield => 'items.itemlost', authorised_value => { not => undef } });

@@ -196,22 +196,15 @@
                             <input type="hidden" name="itemlost" value="[% ITEM_DAT.itemlost %]" />
                             <input type="hidden" name="damaged" value="[% ITEM_DAT.damaged %]" />
                             [% PROCESS 'av-build-dropbox.inc' name="withdrawn_categorycode", category="WITHDRAWN_REASON", default="focus", all=0 %]
-                            [% UNLESS ( ITEM_DAT.reservescount ) %]
-                              <button value="submit_perm" name="submit" type="submit" class="submit" onclick="return confirm('Do you really want to withdraw this item?\nThis action cannot be undone.');" >Withdraw permanently</button>
-                            [% ELSE %]
-                              <button value="submit_perm" name="submit" type="submit" class="submit" onclick="return confirm('!! ATTENTION !!\nIt has been placed a reservation on this item\n\nDo you really want to withdraw this item?\nThis action cannot be undone.');" >Withdraw permanently</button>
-                            [% END %]
+                            <button value="submit_perm" name="submit" type="submit" class="submit" onclick="return confirm('Do you really want to withdraw this item?\nThis action cannot be undone.');" >Withdraw permanently</button>
                         </form></li>
                         [% END %]
 
             [% IF ITEM_DAT.withdrawn_permanent %]<li><span class="label">Withdraw number:</span>[% ITEM_DAT.withdrawn_permanent %]</li>[% END %]
-            [% IF ITEM_DAT.withdrawn_categorycode %]<li><span class="label">Withdrawn description:</span>
-                   [% ITEM_DAT.withdrawn_categorycode %]
-            &nbsp;</li>[% END %]
+            [% IF ITEM_DAT.withdrawn_categorycode %]<li><span class="label">Withdrawn description:</span>[% ITEM_DAT.withdrawn_categorycode %]</li>[% END %]
 
-                [% IF ITEM_DAT.IsInRotatingCollection %]
-                    <li><span class="label">Rotating collection:</span><a href="/cgi-bin/koha/rotating_collections/addItems.pl?colId=[% ITEM_DAT.rotating_collection.colId %]">[% ITEM_DAT.rotating_collection.colTitle %]</a></li>
-                [% END %]
+            [% IF ITEM_DAT.IsInRotatingCollection %]
+                <li><span class="label">Rotating collection:</span><a href="/cgi-bin/koha/rotating_collections/addItems.pl?colId=[% ITEM_DAT.rotating_collection.colId %]">[% ITEM_DAT.rotating_collection.colTitle %]</a></li>
             [% END %]
 
             </ol></div>
