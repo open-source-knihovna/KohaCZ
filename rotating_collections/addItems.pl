@@ -48,11 +48,13 @@ my @messages;
 my $colId = $query->param('colId');
 my $collection = Koha::RotatingCollections->find($colId);
 
-if ( $query->param('action') eq 'addItem' ) {
+my $action = $query->param('action') || '';
+
+if ( $action eq 'addItem' ) {
     ## Add the given item to the collection
     my $barcode    = $query->param('barcode');
     my $removeItem = $query->param('removeItem');
-    my $item       = Koha::Items->search( { barcode => $barcode } )->next;
+    my $item       = Koha::Items->find( { barcode => $barcode } );
 
     my ( $success, $errorCode, $errorMessage );
 
@@ -72,10 +74,9 @@ if ( $query->param('action') eq 'addItem' ) {
         my $deleted = eval { $collection->remove_item( $item ) };
         my ($doreturn, $messages, $iteminformation, $borrower);
 
-        if (IsItemIssued($item->itemnumber)) {
+        if ( $item->checkout ) {
           $template->param( returnNote => "ITEM_ISSUED" );
-          ($doreturn, $messages, $iteminformation, $borrower) = AddReturn($barcode);
-          $template->param( borrower => $borrower);
+          AddReturn($barcode);
         }
 
         if ( $@ or not $deleted ) {

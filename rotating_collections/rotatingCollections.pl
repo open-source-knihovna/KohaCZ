@@ -23,10 +23,9 @@ use CGI qw ( -utf8 );
 use C4::Output;
 use C4::Auth;
 use C4::Context;
-use C4::Items;
-use C4::Biblio;
 use C4::Circulation;
 
+use Koha::Items;
 use Koha::RotatingCollections;
 
 my $query = new CGI;
@@ -42,36 +41,33 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
     }
 );
 
-if ( $query->param('action') eq 'removeItem' ) {
+my $action = $query->param('action') || '';
 
-  my $barcode = $query->param('barcode');
-  my $itemnumber = GetItemnumberFromBarcode($barcode);
-  my $itemInfo = &GetBiblioFromItemNumber($itemnumber, undef);
+if ( $action eq 'removeItem' ) {
+    my $barcode = $query->param('barcode');
+    my $item = Koha::Items->find({ barcode => $barcode });
+    if ( $item ) {
+        if ( $item->checkout ) {
+            $template->param( returnNote => "ITEM_ISSUED" );
+            AddReturn($barcode);
+        }
 
-  my ($doreturn, $messages, $iteminformation, $borrower);
+        $template->param( barcode => $barcode );
+        $template->param( item => $item );
 
-  if (IsItemIssued($itemnumber)) {
-      $template->param( returnNote => "ITEM_ISSUED" );
-      ($doreturn, $messages, $iteminformation, $borrower) = AddReturn($barcode);
-      $template->param( borrower => $borrower);
-  }
-
-  $template->param( barcode => $barcode );
-  $template->param( itemInfo => $itemInfo );
-
-  my ( $success, $errorcode, $errormessage ) = RemoveItemFromAnyCollection($itemnumber);
-
-  if ($success) {
-      $template->param( removeSuccess => 1 );
-  }
-  else {
-      $template->param( removeFailure  => 1 );
-      $template->param( failureMessage => $errormessage );
-  }
-
+        my $collection = $item->rotating_collection;
+        if ($collection) {
+            $collection->remove_item($item);
+            $template->param( removeSuccess => 1 );
+        } else {
+            $template->param( removeFailure  => 1 );
+            $template->param( failureMessage => "NOT_IN_COLLECTION" );
+        }
+    } else {
+        $template->param( removeFailure => 1 );
+        $template->param( failureMessage => "ITEM_NOT_FOUND" );
+    }
 }
-
-my $branchcode = $query->cookie('branch');
 
 my $collections = Koha::RotatingCollections->search;
 

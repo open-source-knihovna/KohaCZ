@@ -48,27 +48,32 @@
                 <h1>Rotating collections</h1>
                 [% IF ( returnNote == "ITEM_ISSUED" ) %]
                       <div class="dialog message">
-                        <p>Item was issued by [% borrower.firstname %] [% borrower.surname %] ([% borrower.cardnumber %]) and now is returned</p>
+                        <p>Item was issued in the other library and now is returned</p>
                       </div>
                 [% END %]
-                 
+
                 [% IF ( removeSuccess ) %]
                     <div class="dialog message">
-                        <p>Item with barcode '[% barcode %]' was removed from a collection and returned to homebranch.<br/>
-                        Author: [% itemInfo.author %]<br />
-                        Title: [% itemInfo.title %]
+                        <p>Item with barcode '[% barcode %]' was removed from a collection and returned to homebranch.<br/><br />
+                        Author: <strong>[% item.biblio.author %]</strong><br />
+                        Title: <strong>[% item.biblio.title %]</strong>
 "                       </p>
                     </div>
                 [% END %]
                 [% IF ( removeFailure ) %]
                     <div class="dialog alert">
                         <p>Item with barcode '[% barcode %]' was not removed from collection:
-                        [% IF ( itemInfo ) %]
-                          <br/>
-                          Author: [% itemInfo.author %]<br />
-                          Title: [% itemInfo.title %]
+                        [% IF ( item ) %]
+                          <br/><br />
+                          Author: <strong>[% item.biblio.author %]</strong><br />
+                          Title: <strong>[% item.biblio.title %]</strong>
                         [% END %]
-                        <p>[% failureMessage %]
+                        </p>
+                        <p>[% IF ( failureMessage == "NOT_IN_COLLECTION" ) %]
+                        This item is not part of any collection.
+                        [% ELSIF ( failureMessage == "ITEM_NOT_FOUND" ) %]
+                        The barcode was not found in the database.
+                        [% ELSE %][% failureMessage %][% END %]
                     </div>
                 [% END %]
                 <div>

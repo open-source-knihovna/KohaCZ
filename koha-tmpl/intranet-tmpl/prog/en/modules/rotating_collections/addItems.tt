@@ -30,7 +30,7 @@
               <h1>Collection <i>[% collection.colTitle %]</i></h1>
                 [% IF ( returnNote == "ITEM_ISSUED") %]
                       <div class="dialog message">
-                        <p>Item was issued by [% borrower.firstname %] [% borrower.surname %] ([% borrower.cardnumber %]) and now is returned</p>
+                        <p>Item was issued in the other library and now is returned</p>
                       </div>
                 [% END %]
 
@@ -39,10 +39,12 @@
                   [% FOR message IN messages %]
                     [% IF message.code == 'success_adding_item' %]
                       Item with barcode '[% barcode %]' added successfully<br />
-                      Author: [% item.biblio.author %]<br />
-                      Title: [% item.biblio.title %]
+                      Author: <strong>[% item.biblio.author %]</strong><br />
+                      Title: <strong>[% item.biblio.title %]</strong>
                     [% ELSIF message.code == 'success_removing_item' %]
                       Item with barcode '[% barcode %]' removed successfully<br />
+                      Author: <strong>[% item.biblio.author %]</strong><br />
+                      Title: <strong>[% item.biblio.title %]</strong>
                     [% END %]
                   [% END %]
                 </div>
@@ -54,11 +56,15 @@
                     [% IF error.code == 'error_adding_item' %]
                       Failed to add item with barcode '[% barcode %]'<br />
                       [% IF ( item ) %]
-                        Author: [% item.biblio.author %]<br />
-                        Title: [% item.biblio.title %]
+                        Author: <strong>[% item.biblio.author %]</strong><br />
+                        Title: <strong>[% item.biblio.title %]</strong>
                       [% END %]
                     [% ELSIF error.code == 'error_removing_item' %]
                       Failed to remove item with barcode <i>[% barcode %]</i><br />
+                      [% IF ( item ) %]
+                        Author: <strong>[% item.biblio.author %]</strong><br />
+                        Title: <strong>[% item.biblio.title %]</strong>
+                      [% END %]
                     [% END %]
                   [% END %]
                 </div>
