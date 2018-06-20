@@ -94,20 +94,6 @@ $(document).ready(function() {
         else {return false;}
     });
 
-    $("#entryform").validate({
-        rules: {
-            password: {
-                required: true,
-                password_strong: true,
-                password_no_spaces: true
-            },
-            password2: {
-                required: true,
-                password_match: true
-            }
-        }
-    });
-
     $("#saverecord").click(function(){
         if( check_form_borrowers() ){
             $("#entryform").submit();
@@ -1297,6 +1283,7 @@ $(document).ready(function() {
                     $("#quick_add_form #memberentry_guarantor").append("<p>" + _("Note: Quick add guarantor form populates address fields in full form") + "</p>");
                     $("#quick_add_list #guarantordelete").prop('id','qagd');
                 }
+
             $("#qagd").click(function() { $("#guarantordelete").click(); });
             $("#quick_add_form").show();
         });

@@ -38,8 +38,8 @@ BEGIN {
 my $schema  = Koha::Database->new->schema;
 my $builder = t::lib::TestBuilder->new();
 
-subtest 'is_changed' => sub {
-    plan tests => 6;
+subtest 'is_changed / make_column_dirty' => sub {
+    plan tests => 11;
 
     $schema->storage->txn_begin;
 
@@ -64,6 +64,16 @@ subtest 'is_changed' => sub {
     is( $object->is_changed(), 1, "Object is changed after Set" );
     $object->store();
     is( $object->is_changed(), 0, "Object no longer marked as changed after being stored" );
+
+    # Test make_column_dirty
+    is( $object->make_column_dirty('firstname'), '', 'make_column_dirty returns empty string on success' );
+    is( $object->make_column_dirty('firstname'), 1, 'make_column_dirty returns 1 if already dirty' );
+    is( $object->is_changed, 1, "Object is changed after make dirty" );
+    $object->store;
+    is( $object->is_changed, 0, "Store clears dirty mark" );
+    $object->make_column_dirty('firstname');
+    $object->discard_changes;
+    is( $object->is_changed, 0, "Discard clears dirty mark too" );
 
     $schema->storage->txn_rollback;
 };

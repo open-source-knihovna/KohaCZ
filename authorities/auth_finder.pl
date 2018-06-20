@@ -25,9 +25,10 @@ use CGI qw ( -utf8 );
 use C4::Output;
 use C4::Auth;
 use C4::Context;
-use C4::AuthoritiesMarc;
 use C4::Acquisition;
 use C4::Koha;
+use Koha::SearchEngine::Search;
+use Koha::SearchEngine::QueryBuilder;
 
 use Koha::Authority::Types;
 
@@ -62,17 +63,25 @@ if ( $op eq "do_search" ) {
     my @value     = (
         $query->param('value_mainstr') || undef,
         $query->param('value_main')    || undef,
+        $query->param('value_match')   || undef,
         $query->param('value_any')     || undef,
-        $query->param('value_match')   || undef
     );
     my $orderby        = $query->param('orderby')        || '';
     my $startfrom      = $query->param('startfrom')      || 0;
     my $resultsperpage = $query->param('resultsperpage') || 20;
 
+    my $builder = Koha::SearchEngine::QueryBuilder->new(
+        { index => $Koha::SearchEngine::AUTHORITIES_INDEX } );
+    my $searcher = Koha::SearchEngine::Search->new(
+        { index => $Koha::SearchEngine::AUTHORITIES_INDEX } );
+    my $search_query = $builder->build_authorities_query_compat(
+        \@marclist, \@and_or, \@excluding, \@operator,
+        \@value, $authtypecode, $orderby
+    );
+    my $offset = $startfrom * $resultsperpage;
     my ( $results, $total ) =
-      SearchAuthorities( \@marclist, \@and_or, \@excluding, \@operator, \@value,
-        $startfrom * $resultsperpage,
-        $resultsperpage, $authtypecode, $orderby );
+        $searcher->search_auth_compat( $search_query, $offset,
+        $resultsperpage );
 
     # multi page display gestion
     my $displaynext = 0;

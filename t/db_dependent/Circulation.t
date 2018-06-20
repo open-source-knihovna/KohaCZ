@@ -1207,10 +1207,6 @@ subtest 'CanBookBeIssued & AllowReturnToBranch' => sub {
             value  => {
                 homebranch    => $homebranch->{branchcode},
                 holdingbranch => $holdingbranch->{branchcode},
-                notforloan    => 0,
-                itemlost      => 0,
-                withdrawn     => 0,
-                restricted    => 0,
                 biblionumber  => $biblioitem->{biblionumber}
             }
         }
@@ -1368,10 +1364,6 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
             value  => {
                 homebranch    => $library->{branchcode},
                 holdingbranch => $library->{branchcode},
-                notforloan    => 0,
-                itemlost      => 0,
-                withdrawn     => 0,
-                restricted    => 0,
                 biblionumber  => $biblioitem_1->{biblionumber}
             }
         }
@@ -1382,10 +1374,6 @@ subtest 'CanBookBeIssued + Koha::Patron->is_debarred|has_overdues' => sub {
             value  => {
                 homebranch    => $library->{branchcode},
                 holdingbranch => $library->{branchcode},
-                notforloan    => 0,
-                itemlost      => 0,
-                withdrawn     => 0,
-                restricted    => 0,
                 biblionumber  => $biblioitem_2->{biblionumber}
             }
         }
@@ -1449,10 +1437,6 @@ subtest 'CanBookBeIssued + Statistic patrons "X"' => sub {
             value  => {
                 homebranch    => $library->branchcode,
                 holdingbranch => $library->branchcode,
-                notforloan    => 0,
-                itemlost      => 0,
-                withdrawn     => 0,
-                restricted    => 0,
                 biblionumber  => $biblioitem_1->{biblionumber}
             }
         }
@@ -1545,7 +1529,7 @@ subtest 'MultipleReserves' => sub {
 
     {
         my ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber1, 1);
-        is($renewokay, 0, 'Bug 17641 - should cover the case where 2 books are both reserved, so failing');
+        is($renewokay, 0, 'Bug 17941 - should cover the case where 2 books are both reserved, so failing');
     }
 
     my $barcode3 = 'R00110003';
@@ -1562,7 +1546,7 @@ subtest 'MultipleReserves' => sub {
 
     {
         my ( $renewokay, $error ) = CanBookBeRenewed($renewing_borrowernumber, $itemnumber1, 1);
-        is($renewokay, 1, 'Bug 17641 - should cover the case where 2 books are reserved, but a third one is available');
+        is($renewokay, 1, 'Bug 17941 - should cover the case where 2 books are reserved, but a third one is available');
     }
 };
 
@@ -1579,9 +1563,6 @@ subtest 'CanBookBeIssued + AllowMultipleIssuesOnABiblio' => sub {
             value  => {
                 homebranch    => $library->{branchcode},
                 holdingbranch => $library->{branchcode},
-                notforloan    => 0,
-                itemlost      => 0,
-                withdrawn     => 0,
                 biblionumber  => $biblionumber,
             }
         }
@@ -1591,9 +1572,6 @@ subtest 'CanBookBeIssued + AllowMultipleIssuesOnABiblio' => sub {
             value  => {
                 homebranch    => $library->{branchcode},
                 holdingbranch => $library->{branchcode},
-                notforloan    => 0,
-                itemlost      => 0,
-                withdrawn     => 0,
                 biblionumber  => $biblionumber,
             }
         }

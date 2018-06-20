@@ -58,7 +58,7 @@
                     <dt><a href="/cgi-bin/koha/admin/account_types.pl">Account types</a></dt>
                     <dd>Define debit and credit types.</dd>
                 </dl>
-                [% IF CAN_user_plugins %]
+                [% IF CAN_user_plugins && plugins_enabled %]
                     <h3>Plugins</h3>
                     <dl>
                         <dt><a href="/cgi-bin/koha/plugins/plugins-home.pl">Manage plugins</a></dt>

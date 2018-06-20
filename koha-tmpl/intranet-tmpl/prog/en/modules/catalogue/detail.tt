@@ -411,7 +411,15 @@
                         [% END %]
 
                         [% IF ( item.withdrawn ) %]
-                            <span class="wdn">Withdrawn</span>
+                            [% IF itemwithdrawnloop %]
+                                [% FOREACH itemwithdrawnloo IN itemwithdrawnloop %]
+                                    [% IF itemwithdrawnloo.authorised_value == item.withdrawn %]
+                                        <span class="wdn">[% itemwithdrawnloo.lib %]</span>
+                                    [% END %]
+                                [% END %]
+                            [% ELSE %]
+                                <span class="wdn">Withdrawn</span>
+                            [% END %]
                         [% END %]
 
                         [% IF ( item.damaged ) %]
@@ -690,6 +698,7 @@
       <thead>
         <tr>
           <th>Vendor</th>
+          <th>Invoice</th>
           <th>Basket group</th>
           <th>Basket</th>
           <th>Order number</th>
@@ -705,6 +714,17 @@
             <td>
             [% IF (order.id) %]
                 <a href="/cgi-bin/koha/acqui/supplier.pl?booksellerid=[% order.id %]" title="Vendor detail page">[% order.name %]</a>
+            [% END %]
+            </td>
+            <td>
+            [% IF (order.invoiceid) %]
+                [% IF CAN_user_acquisition %]
+                    <a href="/cgi-bin/koha/acqui/invoice.pl?invoiceid=[% order.invoiceid %]"
+                       title="Invoice detail page">
+                       [% order.invoicenumber %]</a>
+                [% ELSE %]
+                    [% order.invoicenumber %]
+                [% END %]
             [% END %]
             </td>
             <td>

@@ -5,10 +5,12 @@
 # Required-Stop:     $remote_fs
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: Start Zebra server for each Koha instance
+# Short-Description: Start required services for each Koha instance
 # Description:       For each enabled Koha instance on this host,
-#                    as listed by "koha-list --enabled", start a Zebra
-#                    server (using koha-start-zebra).
+#                    if enabled, start:
+#                      - a Zebra server (using koha-zebra)
+#                      - a Plack server (using koha-plack)
+#                      - a SIP server   (using koha-start-sip)
 ### END INIT INFO
 
 # Author: Lars Wirzenius <lars@catalyst.net.nz>
@@ -22,7 +24,7 @@ NAME="koha-common"
 SCRIPTNAME=/etc/init.d/$NAME
 
 # Exit if the package is not installed
-[ -x /usr/sbin/koha-start-zebra ] || exit 0
+[ -x /usr/sbin/koha-zebra ] || exit 0
 
 # Read configuration variable file if it is present
 if [ -r /etc/default/$NAME ]; then
@@ -55,7 +57,7 @@ do_start()
 {
     # We insure all required directories exist, including disabled ones.
     koha-create-dirs $(koha-list)
-    koha-start-zebra $(koha-list --enabled)
+    koha-zebra --start $(koha-list --enabled)
     koha-start-sip $(koha-list --enabled)
     koha-plack --start $(koha-list --enabled --plack)
 
@@ -70,7 +72,7 @@ do_start()
 do_stop()
 {
     # We stop everything, including disabled ones.
-    koha-stop-zebra $(koha-list) || true
+    koha-zebra --stop $(koha-list) || true
     koha-stop-sip $(koha-list) || true
     koha-plack --stop --quiet $(koha-list --enabled --plack)
 
@@ -83,7 +85,7 @@ do_stop()
 # Function that sends a SIGHUP to the daemon/service
 #
 do_reload() {
-    koha-restart-zebra $(koha-list --enabled)
+    koha-zebra --restart $(koha-list --enabled)
     koha-stop-sip $(koha-list) || true
     koha-start-sip $(koha-list --enabled)
     koha-plack --restart --quiet $(koha-list --enabled --plack)

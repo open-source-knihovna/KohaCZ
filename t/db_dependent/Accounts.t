@@ -18,7 +18,7 @@
 
 use Modern::Perl;
 
-use Test::More tests => 23;
+use Test::More tests => 24;
 use Test::MockModule;
 use Test::Warn;
 
@@ -625,6 +625,53 @@ subtest "Koha::Account::chargelostitem tests" => sub {
     $procfee  = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber4, accounttype => 'PF' });
     is( $lostfine->amount, "6.120000", "Lost fine equals replacementcost when pref on and default set");
     is( $procfee->amount, "2.040000",  "Processing fee if processing fee");
+};
+
+subtest "Koha::Account::non_issues_charges tests" => sub {
+    plan tests => 9;
+
+    my $patron = $builder->build_object(
+        {
+            class => "Koha::Patrons",
+            value => {
+                firstname    => 'Test',
+                surname      => 'Patron',
+                categorycode => $categorycode,
+                branchcode   => $branchcode
+            }
+        }
+    );
+
+    my $debit = Koha::Account::Line->new({ borrowernumber => $patron->id, date => '1900-01-01', amountoutstanding => 0 })->store();
+    my $credit = Koha::Account::Line->new({ borrowernumber => $patron->id, date => '1900-01-01', amountoutstanding => -5 })->store();
+    my $offset = Koha::Account::Offset->new({ credit_id => $credit->id, debit_id => $debit->id, type => 'Payment' })->store();
+    purge_zero_balance_fees( 1 );
+    my $debit_2 = Koha::Account::Lines->find( $debit->id );
+    my $credit_2 = Koha::Account::Lines->find( $credit->id );
+    ok( $debit_2, 'Debit was correctly not deleted when credit has balance' );
+    ok( $credit_2, 'Credit was correctly not deleted when credit has balance' );
+    is( Koha::Account::Lines->count({ borrowernumber => $patron->id }), 2, "The 2 account lines still exists" );
+
+    $debit = Koha::Account::Line->new({ borrowernumber => $patron->id, date => '1900-01-01', amountoutstanding => 5 })->store();
+    $credit = Koha::Account::Line->new({ borrowernumber => $patron->id, date => '1900-01-01', amountoutstanding => 0 })->store();
+    $offset = Koha::Account::Offset->new({ credit_id => $credit->id, debit_id => $debit->id, type => 'Payment' })->store();
+    purge_zero_balance_fees( 1 );
+    $debit_2 = $credit_2 = undef;
+    $debit_2 = Koha::Account::Lines->find( $debit->id );
+    $credit_2 = Koha::Account::Lines->find( $credit->id );
+    ok( $debit_2, 'Debit was correctly not deleted when debit has balance' );
+    ok( $credit_2, 'Credit was correctly not deleted when debit has balance' );
+    is( Koha::Account::Lines->count({ borrowernumber => $patron->id }), 2 + 2, "The 2 + 2 account lines still exists" );
+
+    $debit = Koha::Account::Line->new({ borrowernumber => $patron->id, date => '1900-01-01', amountoutstanding => 0 })->store();
+    $credit = Koha::Account::Line->new({ borrowernumber => $patron->id, date => '1900-01-01', amountoutstanding => 0 })->store();
+    $offset = Koha::Account::Offset->new({ credit_id => $credit->id, debit_id => $debit->id, type => 'Payment' })->store();
+    purge_zero_balance_fees( 1 );
+    $debit_2 = Koha::Account::Lines->find( $debit->id );
+    $credit_2 = Koha::Account::Lines->find( $credit->id );
+    ok( !$debit_2, 'Debit was correctly deleted' );
+    ok( !$credit_2, 'Credit was correctly deleted' );
+    is( Koha::Account::Lines->count({ borrowernumber => $patron->id }), 2 + 2, "The 2 + 2 account lines still exists, the last 2 have been deleted ok" );
 };
 
 1;

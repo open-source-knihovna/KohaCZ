@@ -46,7 +46,6 @@ unless ( $patron ) {
 my $add = $input->param('add');
 if ($add){
     if ( checkauth( $input, 0, $flagsrequired, 'intranet' ) ) {
-        #  print $input->header;
         my $barcode = $input->param('barcode');
         my $item = Koha::Items->find({ barcode => $barcode });
         my $itemnumber;

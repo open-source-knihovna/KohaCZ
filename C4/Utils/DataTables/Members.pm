@@ -176,8 +176,9 @@ sub search {
         # FIXME Should be formatted from the template
         $patron->{fines} = sprintf("%.2f", $balance);
 
-        if($patron->{dateexpiry} and $patron->{dateexpiry} ne '0000-00-00') {
-            $patron->{dateexpiry} = output_pref( { dt => dt_from_string( $patron->{dateexpiry}, 'iso'), dateonly => 1} );
+        if( $patron->{dateexpiry} ) {
+            # FIXME We should not format the date here, do it in template-side instead
+            $patron->{dateexpiry} = output_pref( { dt => scalar dt_from_string( $patron->{dateexpiry}, 'iso'), dateonly => 1} );
         } else {
             $patron->{dateexpiry} = '';
         }

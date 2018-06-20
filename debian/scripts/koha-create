@@ -123,6 +123,11 @@ generate_config_file() {
 }
 
 getmysqlhost() {
+    if [ ! -f /etc/mysql/debian.cnf ]
+    then
+        echo localhost
+        return
+    fi
     awk '
         BEGIN { FS="=" }
         $1 ~/\[/ { inclient=0 }
@@ -686,7 +691,13 @@ then
     # Set up MySQL database for this instance.
     if [ "$op" = create ]
     then
-        mysql --defaults-extra-file=/etc/mysql/koha-common.cnf <<eof
+        if [ ! -e /etc/mysql/debian.cnf ]; then
+            MYSQL_OPTIONS="-u root"
+            echo "WARNING: The koha-common.cnf file is a dead soft link!"
+        else
+            MYSQL_OPTIONS="--defaults-extra-file=/etc/mysql/koha-common.cnf"
+        fi
+        mysql $MYSQL_OPTIONS <<eof
 CREATE DATABASE \`$mysqldb\`;
 CREATE USER \`$mysqluser\`@'$mysql_hostname' IDENTIFIED BY '$mysqlpwd';
 CREATE USER \`$mysqluser\`@'%' IDENTIFIED BY '$mysqlpwd';
@@ -805,7 +816,7 @@ then
     service apache2 restart
 
     # Start Zebra.
-    koha-start-zebra "$name"
+    koha-zebra --start "$name"
 
     if [ "$USE_INDEXER_DAEMON" = "yes" ]; then
         # Start Indexer daemon

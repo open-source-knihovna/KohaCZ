@@ -1573,7 +1573,7 @@ sub buildQuery {
                     $stemming = $auto_truncation = $weight_fields = $fuzzy_enabled = 0;
                 }
                 # ISBN,ISSN,Standard Number, don't need special treatment
-                elsif ( $index eq 'nb' || $index eq 'ns' ) {
+                elsif ( $index eq 'nb' || $index eq 'ns' || $index eq 'hi' ) {
                     (
                         $stemming,      $auto_truncation,
                         $weight_fields, $fuzzy_enabled
@@ -1865,7 +1865,7 @@ sub searchResults {
       { map { $_->{authorised_value} => $_->{lib} } Koha::AuthorisedValues->get_descriptions_by_koha_field( { frameworkcode => '', kohafield => 'items.location' } ) };
 
     # get notforloan authorised value list (see $shelflocations  FIXME)
-    my $av = Koha::MarcSubfieldStructures->search({ frameworkcode => '', kohafield => 'items.notforloan', authorised_value => { not => undef } });
+    my $av = Koha::MarcSubfieldStructures->search({ frameworkcode => '', kohafield => 'items.notforloan', authorised_value => [ -and => {'!=' => undef }, {'!=' => ''}] });
     my $notforloan_authorised_value = $av->count ? $av->next->authorised_value : undef;
 
     #Get itemtype hash

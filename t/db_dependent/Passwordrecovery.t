@@ -18,12 +18,26 @@
 use Modern::Perl;
 
 use C4::Context;
+use Mail::Sendmail;
 use C4::Letters;
 use Koha::Database;
 use Koha::Patrons;
 use t::lib::TestBuilder;
 
-use Test::More tests => 18;
+use Test::More tests => 22;
+use Test::MockModule;
+use Test::Warn;
+use Carp;
+
+my %mail;
+my $module = Test::MockModule->new('Mail::Sendmail');
+$module->mock(
+    'sendmail',
+    sub {
+        carp 'Fake sendmail';
+        %mail = @_;
+    }
+);
 
 use_ok('Koha::Patron::Password::Recovery');
 
@@ -51,7 +65,12 @@ my $uuid2   = "WXYZ0987";
 my $uuid3   = "LMNO4561";
 
 my $patron_category = $builder->build({ source => 'Category' });
-my $branch = $builder->build({ source => 'Branch' });
+my $branch = $builder->build({
+    source => 'Branch',
+    value => {
+        branchreturnpath => $email1,
+    },
+});
 
 $schema->resultset('BorrowerPasswordRecovery')->delete_all();
 
@@ -175,14 +194,23 @@ ok( Koha::Patron::Password::Recovery::DeleteExpiredPasswordRecovery($borrowernum
 ###############################################################
 
 my $borrower = Koha::Patrons->search( { userid => $userid1 } )->next;
-ok( Koha::Patron::Password::Recovery::SendPasswordRecoveryEmail($borrower, $email1, 0) == 1, "[SendPasswordRecoveryEmail] Returns 1 on success" );
+my $success;
+warning_is {
+    $success = Koha::Patron::Password::Recovery::SendPasswordRecoveryEmail($borrower, $email1, 0); }
+    "Fake sendmail",
+    '[SendPasswordRecoveryEmail] expecting fake sendmail';
+ok( $success == 1, '[SendPasswordRecoveryEmail] Returns 1 on success');
+
 my $letters = C4::Letters::GetQueuedMessages( { borrowernumber => $borrowernumber1, limit => 99 } );
 ok( scalar @$letters == 1, "[SendPasswordRecoveryEmail] There is a letter in the queue for our borrower");
 
 my $bpr = $schema->resultset('BorrowerPasswordRecovery')->search( { borrowernumber => $borrowernumber1 } );
 my $tempuuid1 = $bpr->next->uuid;
 
-Koha::Patron::Password::Recovery::SendPasswordRecoveryEmail($borrower, $email1, 1);
+warning_is {
+    Koha::Patron::Password::Recovery::SendPasswordRecoveryEmail($borrower, $email1, 1); }
+    "Fake sendmail",
+    '[SendPasswordRecoveryEmail] expecting fake sendmail';
 
 $bpr = $schema->resultset('BorrowerPasswordRecovery')->search( { borrowernumber => $borrowernumber1 } );
 my $tempuuid2 = $bpr->next->uuid;
@@ -191,6 +219,11 @@ $letters = C4::Letters::GetQueuedMessages( { borrowernumber => $borrowernumber1,
 
 ok( $tempuuid1 ne $tempuuid2, "[SendPasswordRecoveryEmail] UPDATE == ON changes uuid in the database and updates the expirydate");
 ok( scalar @$letters == 2, "[SendPasswordRecoveryEmail] UPDATE == ON sends a new letter with updated uuid");
+
+foreach my $letter (@$letters) {
+    ok( $letter->{status} eq 'sent',
+        'Test SendPasswordRecoverEmail sent due to TestBuilder Sender being a valid email address as expected.' );
+}
 
 $schema->storage->txn_rollback();
 

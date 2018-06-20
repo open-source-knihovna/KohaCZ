@@ -435,6 +435,7 @@ sub build_authorities_query_compat {
             unless exists $koha_to_index_name->{$m};
     }
     for ( my $i = 0 ; $i < @$value ; $i++ ) {
+        next unless $value->[$i]; #clean empty form values, ES doesn't like undefined searches
         push @searches,
           {
             where    => $koha_to_index_name->{$marclist->[$i]},
@@ -486,11 +487,11 @@ sub _convert_sort_fields {
         pubdate     => 'pubdate',
     );
     my %sort_order_convert =
-      ( qw( dsc desc ), qw( asc asc ), qw( az asc ), qw( za desc ) );
+      ( qw( desc desc ), qw( dsc desc ), qw( asc asc ), qw( az asc ), qw( za desc ) );
 
     # Convert the fields and orders, drop anything we don't know about.
     grep { $_->{field} } map {
-        my ( $f, $d ) = split /_/;
+        my ( $f, $d ) = /(.+)_(.+)/;
         {
             field     => $sort_field_convert{$f},
             direction => $sort_order_convert{$d}
