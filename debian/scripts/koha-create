@@ -123,6 +123,11 @@ generate_config_file() {
 }
 
 getmysqlhost() {
+    if [ ! -f /etc/mysql/debian.cnf ]
+    then
+        echo localhost
+        return
+    fi
     awk '
         /^\[/ { inclient = 0 }
         /^\[client\]/ { inclient = 1 }
@@ -672,7 +677,13 @@ then
     # Set up MySQL database for this instance.
     if [ "$op" = create ]
     then
-        mysql --defaults-extra-file=/etc/mysql/koha-common.cnf <<eof
+        if [ ! -e /etc/mysql/debian.cnf ]; then
+            MYSQL_OPTIONS="-u root"
+            echo "WARNING: The koha-common.cnf file is a dead soft link!"
+        else
+            MYSQL_OPTIONS="--defaults-extra-file=/etc/mysql/koha-common.cnf"
+        fi
+        mysql $MYSQL_OPTIONS <<eof
 CREATE DATABASE \`$mysqldb\`;
 CREATE USER \`$mysqluser\`@'$mysql_hostname' IDENTIFIED BY '$mysqlpwd';
 CREATE USER \`$mysqluser\`@'%' IDENTIFIED BY '$mysqlpwd';

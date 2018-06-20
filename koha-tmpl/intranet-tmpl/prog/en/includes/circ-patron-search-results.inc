@@ -25,17 +25,17 @@
     </thead>
     <tbody>
         [% FOREACH borrower IN borrowers %]
-            [% IF ( destination == "circ" ) %]
+            [% IF destination == "circ" %]
                 <tr class="clickable" data-url="/cgi-bin/koha/circ/circulation.pl?borrowernumber=[% borrower.borrowernumber %]">
                     <td><a href="/cgi-bin/koha/circ/circulation.pl?borrowernumber=[% borrower.borrowernumber %]">[% borrower.surname %], [% borrower.firstname %]</a></td>
-            [% ELSE %]
+            [% ELSIF destination == "holds" %]
                 [% IF ( multi_hold) %]
-                    <tr class="clickable" data-url="/cgi-bin/koha/reserve/request.pl?borrowernumber=[% borrower.borrowernumber %]&amp;biblionumbers=[% biblionumbers %]&multi_hold=1">
-                    <td><a href="/cgi-bin/koha/reserve/request.pl?borrowernumber=[% borrower.borrowernumber %]&amp;biblionumbers=[% biblionumbers %]&multi_hold=1">[% borrower.surname %], [% borrower.firstname %]</a></td>
+                    [% SET data_url =  "/cgi-bin/koha/reserve/request.pl?borrowernumber=" _ borrower.borrowernumber _ "&amp;multi_hold=1&amp;biblionumbers=" _ biblionumbers %]
                 [% ELSE %]
-                    <tr class="clickable" data-url="/cgi-bin/koha/reserve/request.pl?borrowernumber=[% borrower.borrowernumber %]&amp;biblionumber=[% biblionumber %]">
-                        <td><a href="/cgi-bin/koha/reserve/request.pl?borrowernumber=[% borrower.borrowernumber %]&amp;biblionumber=[% biblionumber %]">[% borrower.surname %], [% borrower.firstname %]</a></td>
+                    [% SET data_url = "/cgi-bin/koha/reserve/request.pl?borrowernumber=" _ borrower.borrowernumber _ "&amp;biblionumber=" _ biblionumber %]
                 [% END %]
+                <tr class="clickable" data-url="[% data_url %]">
+                    <td><a href="[% data_url %]">[% borrower.surname %], [% borrower.firstname %]</a></td>
             [% END %]
                 <td>[% borrower.cardnumber %]</td>
                 <td>[% borrower.dateofbirth | $KohaDates %]</td>

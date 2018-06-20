@@ -461,7 +461,7 @@ RECORD: while (  ) {
                 next RECORD;
             }
  			else{
-				printlog({id=>$id||$originalid||$biblionumber, op=>"insert",status=>"ok"}) if ($logfile);
+				printlog({id=>$id||$originalid||$biblionumber, op=>"insertitem",status=>"ok"}) if ($logfile);
 			}
             if ($dedup_barcode && grep { exists $_->{error_code} && $_->{error_code} eq 'duplicate_barcode' } @$errors_ref) {
                 # Find the record called 'barcode'
@@ -501,7 +501,7 @@ RECORD: while (  ) {
                     ModBiblioMarc( $record, $biblionumber, $framework );
                     next RECORD;
                 } else {
-                    printlog({id=>$id||$originalid||$biblionumber, op=>"insert",status=>"ok"}) if ($logfile);
+                    printlog({id=>$id||$originalid||$biblionumber, op=>"insertitem",status=>"ok"}) if ($logfile);
                 }
                 push @$errors_ref, @{ $more_errors };
             }

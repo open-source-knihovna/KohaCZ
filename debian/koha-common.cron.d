@@ -9,7 +9,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 # Uncomment the following line if you do not want to use the koha-index-daemon integration
 # */5 * * * * root test -x /usr/sbin/koha-rebuild-zebra && koha-rebuild-zebra -q $(koha-list --enabled)
 
-*/15 * * * * root koha-foreach --enabled --email /usr/share/koha/bin/cronjobs/process_message_queue.pl
+*/15 * * * * root koha-foreach --chdir --enabled --email /usr/share/koha/bin/cronjobs/process_message_queue.pl
 
 # Uncomment the following line if you want use Z39.50 Update authorities of National Library Prague
 #@reboot zebedee -T 57779 8888:vega.nkp.cz:7777

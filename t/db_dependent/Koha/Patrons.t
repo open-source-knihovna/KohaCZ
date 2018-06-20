@@ -185,13 +185,11 @@ subtest 'update_password' => sub {
 };
 
 subtest 'is_expired' => sub {
-    plan tests => 5;
+    plan tests => 4;
     my $patron = $builder->build({ source => 'Borrower' });
     $patron = Koha::Patrons->find( $patron->{borrowernumber} );
     $patron->dateexpiry( undef )->store->discard_changes;
     is( $patron->is_expired, 0, 'Patron should not be considered expired if dateexpiry is not set');
-    $patron->dateexpiry( '0000-00-00' )->store->discard_changes;
-    is( $patron->is_expired, 0, 'Patron should not be considered expired if dateexpiry is not 0000-00-00');
     $patron->dateexpiry( dt_from_string )->store->discard_changes;
     is( $patron->is_expired, 0, 'Patron should not be considered expired if dateexpiry is today');
     $patron->dateexpiry( dt_from_string->add( days => 1 ) )->store->discard_changes;
@@ -203,13 +201,11 @@ subtest 'is_expired' => sub {
 };
 
 subtest 'is_going_to_expire' => sub {
-    plan tests => 9;
+    plan tests => 8;
     my $patron = $builder->build({ source => 'Borrower' });
     $patron = Koha::Patrons->find( $patron->{borrowernumber} );
     $patron->dateexpiry( undef )->store->discard_changes;
     is( $patron->is_going_to_expire, 0, 'Patron should not be considered going to expire if dateexpiry is not set');
-    $patron->dateexpiry( '0000-00-00' )->store->discard_changes;
-    is( $patron->is_going_to_expire, 0, 'Patron should not be considered going to expire if dateexpiry is not 0000-00-00');
 
     t::lib::Mocks::mock_preference('NotifyBorrowerDeparture', 0);
     $patron->dateexpiry( dt_from_string )->store->discard_changes;
@@ -526,17 +522,17 @@ subtest 'get_age' => sub {
 
     $patron->dateofbirth( undef );
     is( $patron->get_age, undef, 'get_age should return undef if no dateofbirth is defined' );
-    $patron->dateofbirth( $today->clone->add( years => -12, months => -6, days => -1 ) );
+    $patron->dateofbirth( $today->clone->add( years => -12, months => -6, days => -1, end_of_month => 'limit'  ) );
     is( $patron->get_age, 12, 'Patron should be 12' );
-    $patron->dateofbirth( $today->clone->add( years => -18, months => 0, days => 1 ) );
+    $patron->dateofbirth( $today->clone->add( years => -18, months => 0, days => 1, end_of_month => 'limit'  ) );
     is( $patron->get_age, 17, 'Patron should be 17, happy birthday tomorrow!' );
-    $patron->dateofbirth( $today->clone->add( years => -18, months => 0, days => 0 ) );
+    $patron->dateofbirth( $today->clone->add( years => -18, months => 0, days => 0, end_of_month => 'limit'  ) );
     is( $patron->get_age, 18, 'Patron should be 18' );
-    $patron->dateofbirth( $today->clone->add( years => -18, months => -12, days => -31 ) );
+    $patron->dateofbirth( $today->clone->add( years => -18, months => -12, days => -31, end_of_month => 'limit'  ) );
     is( $patron->get_age, 19, 'Patron should be 19' );
-    $patron->dateofbirth( $today->clone->add( years => -18, months => -12, days => -30 ) );
+    $patron->dateofbirth( $today->clone->add( years => -18, months => -12, days => -30, end_of_month => 'limit'  ) );
     is( $patron->get_age, 19, 'Patron should be 19 again' );
-    $patron->dateofbirth( $today->clone->add( years => 0,   months => -1, days => -1 ) );
+    $patron->dateofbirth( $today->clone->add( years => 0,   months => -1, days => -1, end_of_month => 'limit'  ) );
     is( $patron->get_age, 0, 'Patron is a newborn child' );
 
     $patron->delete;

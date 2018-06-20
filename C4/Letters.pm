@@ -36,6 +36,7 @@ use Koha::DateUtils;
 use Koha::SMS::Providers;
 
 use Koha::Email;
+use Koha::Notice::Messages;
 use Koha::DateUtils qw( format_sqldatetime dt_from_string );
 
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -1033,6 +1034,11 @@ sub SendQueuedMessages {
 
     my $unsent_messages = _get_unsent_messages();
     MESSAGE: foreach my $message ( @$unsent_messages ) {
+        my $message_object = Koha::Notice::Messages->find( $message->{message_id} );
+        # If this fails the database is unwritable and we won't manage to send a message that continues to be marked 'pending'
+        $message_object->make_column_dirty('status');
+        return unless $message_object->store;
+
         # warn Data::Dumper->Dump( [ $message ], [ 'message' ] );
         warn sprintf( 'sending %s message to patron: %s',
                       $message->{'message_transport_type'},
@@ -1469,7 +1475,8 @@ sub _process_tt {
 
     my $tt_params = { %{ _get_tt_params( $tables ) }, %{ _get_tt_params( $loops, 'is_a_loop' ) } };
 
-    $content = qq|[% USE KohaDates %]$content|;
+    $content = add_tt_filters( $content );
+    $content = qq|[% USE KohaDates %][% USE Remove_MARC_punctuation %]$content|;
 
     my $output;
     $template->process( \$content, $tt_params, \$output ) || croak "ERROR PROCESSING TEMPLATE: " . $template->error();
@@ -1495,6 +1502,12 @@ sub _get_tt_params {
             singular => 'biblio',
             plural   => 'biblios',
             pk       => 'biblionumber',
+        },
+        biblioitems => {
+            module   => 'Koha::Biblioitems',
+            singular => 'biblioitem',
+            plural   => 'biblioitems',
+            pk       => 'biblioitemnumber',
         },
         borrowers => {
             module   => 'Koha::Patrons',
@@ -1628,6 +1641,22 @@ sub _get_tt_params {
     return $params;
 }
 
+=head3 add_tt_filters
+
+$content = add_tt_filters( $content );
+
+Add TT filters to some specific fields if needed.
+
+For now we only add the Remove_MARC_punctuation TT filter to biblio and biblioitem fields
+
+=cut
+
+sub add_tt_filters {
+    my ( $content ) = @_;
+    $content =~ s|\[%\s*biblio\.(.*?)\s*%\]|[% biblio.$1 \| \$Remove_MARC_punctuation %]|gxms;
+    $content =~ s|\[%\s*biblioitem\.(.*?)\s*%\]|[% biblioitem.$1 \| \$Remove_MARC_punctuation %]|gxms;
+    return $content;
+}
 
 1;
 __END__
