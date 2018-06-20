@@ -128,6 +128,7 @@ if ( $biblionumbers ) {
     push @biblionumbers, $input->multi_param('biblionumber');
 }
 
+my $multihold = scalar $input->param('multi_hold');
 # FIXME multi_hold should not be a variable but depends on the number of elements in @biblionumbers
 $template->param(multi_hold => scalar $input->param('multi_hold'));
 
@@ -206,7 +207,8 @@ $template->param( messageborrower => $messageborrower );
 my $borrowerinfo = GetMember( borrowernumber => $borrowernumber_hold );
 
 my $logged_in_patron = Koha::Patrons->find( $borrowernumber );
-my $patron = $logged_in_patron;
+
+my $patron = Koha::Patrons->find( $borrowernumber_hold );
 my $wants_check;
 if ($patron) {
     $wants_check = $patron->wants_check_for_previous_checkout;

@@ -246,7 +246,9 @@ sub do_check_for_previous_checkout {
     my ( $self, $item ) = @_;
 
     my $biblio = Koha::Biblios->find( $item->{biblionumber} );
-    my @codes = split('\|', C4::Context->preference('CheckPrevCheckoutSerialFrameworks'));
+    my @codes = ();
+    @codes = split('\|', C4::Context->preference('CheckPrevCheckoutSerialFrameworks'))
+        if C4::Context->preference('CheckPrevCheckoutSerialFrameworks');
     my @item_nos;
     if ( any { $_ eq $biblio->frameworkcode } @codes ) {
         # It is serial
@@ -272,7 +274,7 @@ sub do_check_for_previous_checkout {
 
     # Check current issues table
     my $issues = Koha::Checkouts->search($criteria, $params);
-    return $issues->next->issuedate if $issues->count;    
+    return $issues->next->issuedate if $issues->count;
 
     # Check old issues table
     my $old_issues = Koha::Old::Checkouts->search($criteria, $params);
