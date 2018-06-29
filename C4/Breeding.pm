@@ -424,7 +424,7 @@ sub ImportBreedingAuth {
 
     my $dbh = C4::Context->dbh;
 
-    my $batch_id = GetZ3950BatchId($filename);
+    my $batch_id = C4::ImportBatch::GetZ3950BatchId($filename);
     my $searchbreeding = $dbh->prepare("select import_record_id from import_auths where control_number=? and authorized_heading=?");
 
     my $marcflavour = C4::Context->preference('marcflavour');
