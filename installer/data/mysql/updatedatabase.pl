@@ -15317,19 +15317,21 @@ if( CheckVersion( $DBversion ) ) {
 
 $DBversion = '17.11.07.000';
 if( CheckVersion( $DBversion ) ) {
-    SetVersion( $DBversion );
     print "Upgrade to $DBversion done (17.11.07 release)\n";
-}
 
-$DBversion = '17.05.05.001';
-if ( CheckVersion($DBversion) ) {
     $dbh->do(q{
         INSERT IGNORE INTO systempreferences ( `variable`, `value`, `options`, `explanation`, `type` ) VALUES
         ('DontShortenAnyLoanPeriod','1','','Do not shorten any loan period by renewing','YesNo');
     });
 
-    SetVersion($DBversion);
     print "Upgrade to $DBversion done - dontShortenAnyLoanPeriod\n";
+
+    if( !column_exists( 'issuingrules', 'maxissuelength' ) ) {
+        $dbh->do( "ALTER TABLE issuingrules ADD COLUMN maxissuelength int(4) default NULL AFTER issuelength" );
+    }
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Max issue length)\n";
 }
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
