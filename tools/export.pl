@@ -31,6 +31,7 @@ use Koha::DateUtils qw( dt_from_string output_pref );
 use Koha::Exporter::Record;
 use Koha::ItemTypes;
 use Koha::Libraries;
+use Koha::RotatingCollections;
 
 my $query = new CGI;
 
@@ -41,6 +42,7 @@ my $output_format     = $query->param("format") || $query->param("output_format"
 my $backupdir         = C4::Context->config('backupdir');
 my $filename          = $query->param("filename") || ( $output_format eq 'csv' ? 'koha.csv' : 'koha.mrc' );
 $filename =~ s/(\r|\n)//;
+my $rotating_collection = $query->param("rotating_collection") || undef;
 
 my $dbh = C4::Context->dbh;
 
@@ -90,6 +92,17 @@ if ( $op eq "export" ) {
     my $strip_items_not_from_libraries =  $query->param('strip_items_not_from_libraries');
     my @sql_params;
     my $sql_query;
+
+    my $collection = Koha::RotatingCollections->find( $rotating_collection );
+    $record_type = "bibs" if $rotating_collection;
+    if ($collection) {
+        my $items = $collection->items;
+        if ($items->count) {
+            @biblionumbers = $items->get_column("biblionumber");
+            @record_ids = @biblionumbers;
+            @itemnumbers = $items->get_column("itemnumber");
+        }
+    }
 
     my $libraries = Koha::Libraries->search_filtered->unblessed;
     my $only_export_items_for_branches = $strip_items_not_from_libraries ? \@branch : undef;
