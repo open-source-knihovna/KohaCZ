@@ -475,7 +475,7 @@ $(document).ready(function() {
                     fnCallback(json)
                 } );
             },
-            "fnInitComplete": function(oSettings) {
+            "fnInitComplete": function(oSettings, json) {
                 // Disable rowGrouping plugin after first use
                 // so any sorting on the table doesn't use it
                 var oSettings = issuesTable.fnSettings();
@@ -488,6 +488,24 @@ $(document).ready(function() {
                 }
 
                 oSettings.aaSortingFixed = null;
+
+                // Build a summary of checkouts grouped by itemtype
+                var checkoutsByItype = json.aaData.reduce(function (obj, row) {
+                    obj[row.itemtype_description] = (obj[row.itemtype_description] || 0) + 1;
+                    return obj;
+                }, {});
+                var ul = $('<ul>');
+                Object.keys(checkoutsByItype).sort().forEach(function (itype) {
+                    var li = $('<li>')
+                        .append($('<strong>').html(itype || MSG_NO_ITEMTYPE))
+                        .append(': ' + checkoutsByItype[itype]);
+                    ul.append(li);
+                })
+                $('<details>')
+                    .addClass('checkouts-by-itemtype')
+                    .append($('<summary>').html(MSG_CHECKOUTS_BY_ITEMTYPE))
+                    .append(ul)
+                    .insertBefore(oSettings.nTableWrapper)
             },
         }, columns_settings).rowGrouping(
             {

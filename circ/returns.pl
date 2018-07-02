@@ -80,6 +80,7 @@ if ( $query->param('print_slip') ) {
         print_slip     => 1,
         borrowernumber => scalar $query->param('borrowernumber'),
         biblionumber   => scalar $query->param('biblionumber'),
+        itemnumber     => scalar $query->param('itemnumber'),
     );
 }
 
@@ -618,7 +619,7 @@ foreach ( sort { $a <=> $b } keys %returneditems ) {
         $ri{homebranch}          = $item->homebranch;
         $ri{holdingbranch}       = $item->holdingbranch;
 
-        $ri{location}         = $biblio->{'location'};
+        $ri{location} = $item->location;
         my $shelfcode = $ri{'location'};
         $ri{'location'} = $shelflocations->{$shelfcode} if ( defined( $shelfcode ) && defined($shelflocations) && exists( $shelflocations->{$shelfcode} ) );
 

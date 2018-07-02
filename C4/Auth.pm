@@ -33,6 +33,7 @@ use C4::Search::History;
 use Koha;
 use Koha::Caches;
 use Koha::AuthUtils qw(get_script_name hash_password);
+use Koha::DateUtils qw(dt_from_string);
 use Koha::Libraries;
 use Koha::LibraryCategories;
 use Koha::Patrons;
@@ -55,7 +56,7 @@ BEGIN {
     @ISA       = qw(Exporter);
     @EXPORT    = qw(&checkauth &get_template_and_user &haspermission &get_user_subpermissions);
     @EXPORT_OK = qw(&check_api_auth &get_session &check_cookie_auth &checkpw &checkpw_internal &checkpw_hash
-      &get_all_subpermissions &get_user_subpermissions
+      &get_all_subpermissions &get_user_subpermissions track_login_daily
     );
     %EXPORT_TAGS = ( EditPermissions => [qw(get_all_subpermissions get_user_subpermissions)] );
     $ldap      = C4::Context->config('useldapserver') || 0;
@@ -772,6 +773,8 @@ sub checkauth {
     my $casparam = $query->param('cas');
     my $q_userid = $query->param('userid') // '';
 
+    my $session;
+
     # Basic authentication is incompatible with the use of Shibboleth,
     # as Shibboleth may return REMOTE_USER as a Shibboleth attribute,
     # and it may not be the attribute we want to use to match the koha login.
@@ -797,7 +800,7 @@ sub checkauth {
     }
     elsif ( $sessionID = $query->cookie("CGISESSID") )
     {    # assignment, not comparison
-        my $session = get_session($sessionID);
+        $session = get_session($sessionID);
         C4::Context->_new_userenv($sessionID);
         my ( $ip, $lasttime, $sessiontype );
         my $s_userid = '';
@@ -1188,11 +1191,7 @@ sub checkauth {
             );
         }
 
-        if ( $userid ) {
-            # track_login also depends on pref TrackLastPatronActivity
-            my $patron = Koha::Patrons->find({ userid => $userid });
-            $patron->track_login if $patron;
-        }
+        track_login_daily( $userid );
 
         return ( $userid, $cookie, $sessionID, $flags );
     }
@@ -2097,6 +2096,30 @@ sub getborrowernumber {
         }
     }
     return 0;
+}
+
+=head2 track_login_daily
+
+    track_login_daily( $userid );
+
+Wraps the call to $patron->track_login, the method used to update borrowers.lastseen. We only call track_login once a day.
+
+=cut
+
+sub track_login_daily {
+    my $userid = shift;
+    return if !$userid || !C4::Context->preference('TrackLastPatronActivity');
+
+    my $cache     = Koha::Caches->get_instance();
+    my $cache_key = "track_login_" . $userid;
+    my $cached    = $cache->get_from_cache($cache_key);
+    my $today = dt_from_string()->ymd;
+    return if $cached && $cached eq $today;
+
+    my $patron = Koha::Patrons->find({ userid => $userid });
+    return unless $patron;
+    $patron->track_login;
+    $cache->set_in_cache( $cache_key, $today );
 }
 
 END { }    # module clean-up code here (global destructor)

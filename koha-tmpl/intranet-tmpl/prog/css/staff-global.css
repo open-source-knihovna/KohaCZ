@@ -378,6 +378,21 @@ legend {
     width: auto;
 }
 
+details > summary {
+    cursor: pointer;
+}
+
+details > summary::before {
+    content: "\f0da";
+    display: inline-block;
+    font-family: FontAwesome;
+    width: 1em;
+}
+
+details[open] > summary::before {
+    content: "\f0d7";
+}
+
 #floating-save {
     background-color: rgba(185, 216, 217, 0.6);
     bottom: 3%;
@@ -1077,6 +1092,11 @@ tr.expired td {
 span.expired {
 	color : #990000;
 	font-style : italic;
+}
+
+details.checkouts-by-itemtype li {
+    display: inline-block;
+    margin-right: 1em;
 }
 
 div.help {
@@ -3214,4 +3234,23 @@ table#ill-requests {
     .loggedin-menu-label {
         display: none;
     }
+}
+
+span.name {
+    font-weight: bold;
+    font-style: italic;
+}
+
+.result-biblio-itemtype {
+    float: right;
+    padding: .5em;
+    margin: .5em;
+    font-size: 85%;
+    text-align: center;
+}
+
+.result-biblio-itemtype img {
+    display: block;
+    margin: auto;
+    margin-bottom: 2px;
 }

@@ -1964,7 +1964,15 @@ sub RevertWaitingStatus {
 
 =head2 ReserveSlip
 
-  ReserveSlip($branchcode, $borrowernumber, $biblionumber)
+ReserveSlip(
+    {
+        branchcode     => $branchcode,
+        borrowernumber => $borrowernumber,
+        biblionumber   => $biblionumber,
+        [ itemnumber   => $itemnumber, ]
+        [ barcode      => $barcode, ]
+    }
+  )
 
 Returns letter hash ( see C4::Letters::GetPreparedLetter ) or undef
 
@@ -1981,19 +1989,44 @@ available within the slip:
 =cut
 
 sub ReserveSlip {
-    my ($branch, $borrowernumber, $biblionumber) = @_;
+    my ($args) = @_;
+    my $branchcode     = $args->{branchcode};
+    my $borrowernumber = $args->{borrowernumber};
+    my $biblionumber   = $args->{biblionumber};
+    my $itemnumber     = $args->{itemnumber};
+    my $barcode        = $args->{barcode};
 
-#   return unless ( C4::Context->boolean_preference('printreserveslips') );
-    my $patron = Koha::Patrons->find( $borrowernumber );
 
-    my $hold = Koha::Holds->search({biblionumber => $biblionumber, borrowernumber => $borrowernumber })->next;
+    my $patron = Koha::Patrons->find($borrowernumber);
+
+    my $hold;
+    if ($itemnumber || $barcode ) {
+        $itemnumber ||= Koha::Items->find( { barcode => $barcode } )->itemnumber;
+
+        $hold = Koha::Holds->search(
+            {
+                biblionumber   => $biblionumber,
+                borrowernumber => $borrowernumber,
+                itemnumber     => $itemnumber
+            }
+        )->next;
+    }
+    else {
+        $hold = Koha::Holds->search(
+            {
+                biblionumber   => $biblionumber,
+                borrowernumber => $borrowernumber
+            }
+        )->next;
+    }
+
     return unless $hold;
     my $reserve = $hold->unblessed;
 
     return  C4::Letters::GetPreparedLetter (
         module => 'circulation',
         letter_code => 'HOLD_SLIP',
-        branchcode => $branch,
+        branchcode => $branchcode,
         lang => $patron->lang,
         tables => {
             'reserves'    => $reserve,

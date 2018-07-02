@@ -18,6 +18,7 @@
 # along with Koha; if not, see <http://www.gnu.org/licenses>.
 
 use Modern::Perl;
+use Test::MockTime qw/set_fixed_time restore_time/;
 
 use Test::More tests => 29;
 use DateTime;
@@ -30,7 +31,10 @@ use t::lib::Mocks;
 
 use C4::Biblio;
 use C4::Context;
+
+use Koha::Biblio::Metadatas;
 use Koha::Database;
+use Koha::DateUtils;
 
 BEGIN {
     use_ok('Koha::OAI::Server::DeletedRecord');
@@ -66,10 +70,14 @@ $dbh->do('DELETE FROM deletedbiblioitems');
 $dbh->do('DELETE FROM deleteditems');
 $dbh->do('DELETE FROM oai_sets');
 
-my $date_added = DateTime->now() . 'Z';
+set_fixed_time(CORE::time());
+
+my $base_datetime = DateTime->now();
+my $date_added = $base_datetime->ymd . ' ' .$base_datetime->hms . 'Z';
 my $date_to = substr($date_added, 0, 10) . 'T23:59:59Z';
 my (@header, @marcxml, @oaidc);
-my $sth = $dbh->prepare('SELECT timestamp FROM biblioitems WHERE biblionumber=?');
+my $sth = $dbh->prepare('UPDATE biblioitems     SET timestamp=? WHERE biblionumber=?');
+my $sth2 = $dbh->prepare('UPDATE biblio_metadata SET timestamp=? WHERE biblionumber=?');
 
 # Add biblio records
 foreach my $index ( 0 .. NUMBER_OF_MARC_RECORDS - 1 ) {
@@ -82,8 +90,10 @@ foreach my $index ( 0 .. NUMBER_OF_MARC_RECORDS - 1 ) {
         $record->append_fields( MARC::Field->new('245', '', '', 'a' => "Title $index" ) );
     }
     my ($biblionumber) = AddBiblio($record, '');
-    $sth->execute($biblionumber);
-    my $timestamp = $sth->fetchrow_array . 'Z';
+    my $timestamp = $base_datetime->ymd . ' ' .$base_datetime->hms;
+    $sth->execute($timestamp,$biblionumber);
+    $sth2->execute($timestamp,$biblionumber);
+    $timestamp .= 'Z';
     $timestamp =~ s/ /T/;
     $record = GetMarcBiblio({ biblionumber => $biblionumber });
     $record = XMLin($record->as_xml_record);
@@ -338,20 +348,23 @@ test_query(
     },
 });
 
+restore_time();
+
 subtest 'Bug 19725: OAI-PMH ListRecords and ListIdentifiers should use biblio_metadata.timestamp' => sub {
     plan tests => 1;
 
     # Wait 1 second to be sure no timestamp will be equal to $from defined below
     sleep 1;
 
-    my $from_dt = DateTime->now;
-    my $from = $from_dt->ymd . 'T' . $from_dt->hms . 'Z';
-
     # Modify record to trigger auto update of timestamp
     (my $biblionumber = $marcxml[0]->{header}->{identifier}) =~ s/^.*:(.*)/$1/;
     my $record = GetMarcBiblio({biblionumber => $biblionumber});
     $record->append_fields(MARC::Field->new(999, '', '', z => '_'));
-    ModBiblio($record, $biblionumber);
+    ModBiblio( $record, $biblionumber );
+    my $from_dt = dt_from_string(
+        Koha::Biblio::Metadatas->find({ biblionumber => $biblionumber, format => 'marcxml', marcflavour => 'MARC21' })->timestamp
+    );
+    my $from = $from_dt->ymd . 'T' . $from_dt->hms . 'Z';
     $oaidc[0]->{header}->{datestamp} = $from;
 
     test_query(
