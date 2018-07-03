@@ -2675,7 +2675,7 @@ sub CanBookBeRenewed {
 
     my $max_date_due;
     if (defined $issuing_rule && $issuing_rule->maxissuelength) {
-        $max_date_due = $issue->issuedate->clone->add( $issuing_rule->lengthunit => $issuing_rule->maxissuelength );
+        $max_date_due = dt_from_string($issue->issuedate)->clone->add( $issuing_rule->lengthunit => $issuing_rule->maxissuelength );
 
         if ($issuing_rule->lengthunit == "days") {
             $max_date_due->set_hour(23);
@@ -2692,7 +2692,7 @@ sub CanBookBeRenewed {
     return ( 0, "too_many" )
         if not $issuing_rule or (
             $issuing_rule->renewalsallowed <= $issue->renewals
-            or (defined $max_date_due && $max_date_due <= $issue->date_due ) );
+            or (defined $max_date_due && $max_date_due <= dt_from_string($issue->date_due) ) );
 
     my $overduesblockrenewing = C4::Context->preference('OverduesBlockRenewing');
     my $restrictionblockrenewing = C4::Context->preference('RestrictionBlockRenewing');
