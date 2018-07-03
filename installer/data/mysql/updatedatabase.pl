@@ -15332,10 +15332,7 @@ if( CheckVersion( $DBversion ) ) {
 
     SetVersion( $DBversion );
     print "Upgrade to $DBversion done (Max issue length)\n";
-}
 
-$DBversion = "17.05.04.0001";
-if ( CheckVersion($DBversion) ) {
     $dbh->do(q{INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type) VALUES ('AutoSwitchPatron', '0', '', 'Auto switch to patron', 'YesNo');});
     $dbh->do(q{INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type) VALUES ('AutoSwitchPatronReturn', '0', '', 'Auto switch to patron when checking in', 'YesNo');});
     print "Upgrade to $DBversion done - Auto switch patron\n";
