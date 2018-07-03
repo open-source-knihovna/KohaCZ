@@ -2687,7 +2687,7 @@ sub CanBookBeRenewed {
     return ( 1, undef ) if $override_limit;
 
     return ( 0, "on_reserve" )
-      if not $issuing_rule or ( $resfound && $issuing_rule->reserved_renew_count <= $itemissue->{renewals} );
+      if not $issuing_rule or ( $resfound && $issuing_rule->reserved_renew_count <= $issue->renewals );
 
     return ( 0, "too_many" )
         if not $issuing_rule or (
