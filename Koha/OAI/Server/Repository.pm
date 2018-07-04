@@ -168,7 +168,7 @@ sub get_biblio_marcxml {
 
 sub stylesheet {
     my ( $self, $format ) = @_;
-    my $xsl_file = $self->{ conf }
+    my $xsl_file = ( $self->{ conf } && $self->{ conf }->{ format }->{ $format }->{ xsl_file } )
         ? $self->{ conf }->{ format }->{ $format }->{ xsl_file }
         : ( C4::Context->config('intrahtdocs') .
             '/prog/en/xslt/' .
