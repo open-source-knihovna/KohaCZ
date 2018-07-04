@@ -3589,7 +3589,7 @@ sub CalcDateDue {
     }
 
     if (defined $issuedate && $loanlength->{maxissuelength} ) {
-        my $max_date_due = $issuedate->clone->add( $loanlength->{lengthunit} => $loanlength->{maxissuelength} );
+        my $max_date_due = dt_from_string($issuedate)->clone->add( $loanlength->{lengthunit} => $loanlength->{maxissuelength} );
         if ($loanlength->{lengthunit} == "days") {
             $max_date_due->set_hour(23);
             $max_date_due->set_minute(59);
