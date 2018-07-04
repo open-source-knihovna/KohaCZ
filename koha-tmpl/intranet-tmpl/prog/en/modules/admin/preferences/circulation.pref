@@ -15,7 +15,7 @@ Circulation:
             - the automatic redirection to another patron when a patron barcode is scanned instead of a book.
             - This should not be enabled if you have overlapping patron and book barcodes.
         -
-            - pref: AutoSwitchPatroniReturn
+            - pref: AutoSwitchPatronReturn
               choices:
                   yes: "Enable"
                   no: "Don't enable"

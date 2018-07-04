@@ -90,6 +90,8 @@ my $findborrower;
 my $autoswitched;
 my $borrowernumber = $query->param('borrowernumber');
 
+$autoswitched = 1 if $query->param('autoswitched');
+
 if (C4::Context->preference("AutoSwitchPatron") && $barcode) {
     if (Koha::Patrons->search( { cardnumber => $barcode} )->count() > 0) {
         $findborrower = $barcode;
