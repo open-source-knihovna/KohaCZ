@@ -277,7 +277,7 @@ sub _handle_one_result {
     ( $marcrecord, $error ) = _do_xslt_proc($marcrecord, $servhref, $xslh);
 
     my $batch_id = C4::ImportBatch::GetZ3950BatchId($servhref->{servername});
-    my $breedingid = AddBiblioToBatch($batch_id, $seq, $marcrecord, 'UTF-8', 0, 0);
+    my $breedingid = C4::ImportBatch::AddBiblioToBatch($batch_id, $seq, $marcrecord, 'UTF-8', 0, 0);
         #FIXME passing 0 for z3950random
         #Will eliminate this unused field in a followup report
         #Last zero indicates: no update for batch record counts
@@ -474,9 +474,9 @@ sub ImportBreedingAuth {
                     $alreadyinfarm++;
                 } else {
                     if ($breedingid && $overwrite_auth eq '1') {
-                        ModAuthorityInBatch($breedingid, $marcrecord);
+                        C4::ImportBatch::ModAuthorityInBatch($breedingid, $marcrecord);
                     } else {
-                        my $import_id = AddAuthToBatch($batch_id, $imported, $marcrecord, $encoding, $z3950random);
+                        my $import_id = C4::ImportBatch::AddAuthToBatch($batch_id, $imported, $marcrecord, $encoding, $z3950random);
                         $breedingid = $import_id;
                     }
                     $imported++;
