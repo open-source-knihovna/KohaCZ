@@ -313,6 +313,12 @@ sub ModMember {
         }
     }
 
+    if ( C4::Context->preference("autoMemberNum") ) {
+        if ( not exists $data{cardnumber} or not defined $data{cardnumber} or $data{cardnumber} eq '' ) {
+            $data{cardnumber} = fixup_cardnumber( $data{cardnumber} );
+        }
+    }
+
     my $old_categorycode = Koha::Patrons->find( $data{borrowernumber} )->categorycode;
 
     # get only the columns of a borrower
