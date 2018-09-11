@@ -176,7 +176,7 @@ sub generate_subfield_form {
                 }
             }
             elsif ( $subfieldlib->{authorised_value} eq "itemtypes" ) {
-                  push @authorised_values, "" unless ( $subfieldlib->{mandatory} );
+                  push @authorised_values, "";
                   my $itemtypes = Koha::ItemTypes->search_with_localization;
                   while ( my $itemtype = $itemtypes->next ) {
                       push @authorised_values, $itemtype->itemtype;
@@ -192,7 +192,7 @@ sub generate_subfield_form {
                   #---- class_sources
             }
             elsif ( $subfieldlib->{authorised_value} eq "cn_source" ) {
-                  push @authorised_values, "" unless ( $subfieldlib->{mandatory} );
+                  push @authorised_values, "";
                     
                   my $class_sources = GetClassSources();
                   my $default_source = C4::Context->preference("DefaultClassificationSource");
@@ -209,7 +209,7 @@ sub generate_subfield_form {
                   #---- "true" authorised value
             }
             else {
-                  push @authorised_values, qq{} unless ( $subfieldlib->{mandatory} );
+                  push @authorised_values, qq{};
                   my $av = GetAuthorisedValues( $subfieldlib->{authorised_value} );
                   for my $r ( @$av ) {
                       push @authorised_values, $r->{authorised_value};
@@ -221,7 +221,7 @@ sub generate_subfield_form {
                 $subfield_data{marc_value} = {
                     type        => 'hidden',
                     id          => $subfield_data{id},
-                    maxlength   => $subfield_data{max_length},
+                    maxlength   => $subfield_data{maxlength},
                     value       => $value,
                 };
             }
@@ -240,7 +240,7 @@ sub generate_subfield_form {
                 $subfield_data{marc_value} = {
                     type         => 'text_auth',
                     id           => $subfield_data{id},
-                    maxlength    => $subfield_data{max_length},
+                    maxlength    => $subfield_data{maxlength},
                     value        => $value,
                     authtypecode => $subfieldlib->{authtypecode},
                 };
@@ -260,7 +260,7 @@ sub generate_subfield_form {
                 $subfield_data{marc_value} = {
                     type        => 'text_plugin',
                     id          => $subfield_data{id},
-                    maxlength   => $subfield_data{max_length},
+                    maxlength   => $subfield_data{maxlength},
                     value       => $value,
                     class       => $class,
                     nopopup     => $plugin->noclick,
@@ -271,7 +271,7 @@ sub generate_subfield_form {
                 $subfield_data{marc_value} = {
                     type        => 'text',
                     id          => $subfield_data{id},
-                    maxlength   => $subfield_data{max_length},
+                    maxlength   => $subfield_data{maxlength},
                     value       => $value,
                 }; # supply default input form
             }
@@ -280,7 +280,7 @@ sub generate_subfield_form {
             $subfield_data{marc_value} = {
                 type        => 'hidden',
                 id          => $subfield_data{id},
-                maxlength   => $subfield_data{max_length},
+                maxlength   => $subfield_data{maxlength},
                 value       => $value,
             };
         }
@@ -288,7 +288,7 @@ sub generate_subfield_form {
             $subfield_data{marc_value} = {
                 type        => 'text',
                 id          => $subfield_data{id},
-                maxlength   => $subfield_data{max_length},
+                maxlength   => $subfield_data{maxlength},
                 value       => $value,
             };
         }
@@ -314,7 +314,7 @@ sub generate_subfield_form {
             $subfield_data{marc_value} = {
                 type        => 'text',
                 id          => $subfield_data{id},
-                maxlength   => $subfield_data{max_length},
+                maxlength   => $subfield_data{maxlength},
                 value       => $value,
             };
         }
@@ -797,22 +797,16 @@ foreach my $field (@fields) {
         }
         $this_row{itemnumber} = $subfieldvalue if ($field->tag() eq $itemtagfield && $subfieldcode eq $itemtagsubfield);
 
-	if ( C4::Context->preference('EasyAnalyticalRecords') ) {
-	    foreach my $hostitemnumber (@hostitemnumbers){
-            my $item = Koha::Items->find( $hostitemnumber );
-		if ($this_row{itemnumber} eq $hostitemnumber){
-			$this_row{hostitemflag} = 1;
-            $this_row{hostbiblionumber}= $item->biblio->biblionumber;
-			last;
-		}
-	    }
-
-#	    my $countanalytics=GetAnalyticsCount($this_row{itemnumber});
-#           if ($countanalytics > 0){
-#                $this_row{countanalytics} = $countanalytics;
-#           }
-	}
-
+        if ( C4::Context->preference('EasyAnalyticalRecords') ) {
+            foreach my $hostitemnumber (@hostitemnumbers) {
+                my $item = Koha::Items->find( $hostitemnumber );
+                if ($this_row{itemnumber} eq $hostitemnumber) {
+                    $this_row{hostitemflag} = 1;
+                    $this_row{hostbiblionumber}= $item->biblio->biblionumber;
+                    last;
+                }
+            }
+        }
     }
     if (%this_row) {
         push(@big_array, \%this_row);

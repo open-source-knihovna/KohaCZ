@@ -872,6 +872,21 @@ our $PERL_DEPS = {
         'required' => '0',
         'min_ver'  => '0.17',
     },
+    'CGI::Emulate::PSGI' => {
+        usage    => 'Plack',
+        required => '1',
+        min_ver  => '0.20',
+    },
+    'CGI::Compile' => {
+       usage    => 'Plack',
+       required => '1',
+       min_ver  => '0.17'
+    },
+    'Clone' => {
+        usage    => 'ILL, Test suite',
+        required => '1',
+        min_ver  => '0.37',
+    },
 };
 
 1;

@@ -1,5 +1,6 @@
 [% IF ( PAGE_NUMBERS ) %]
   <div class="pages">
+   [% IF hits_to_paginate < total %]<h6>[% hits_to_paginate %] of [% total %] results loaded, refine your search to view other records</h6>[% END %]
     [% IF ( previous_page ) %]
       <a class="nav" href="?[% FOREACH fp IN follower_params %][% fp.var |url %]=[% fp.val |url %]&amp;[% END %]page=[% previous_page |url %]">&lt;&lt; Previous</a>
     [% END %]

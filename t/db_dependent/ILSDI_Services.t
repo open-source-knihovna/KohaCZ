@@ -42,9 +42,17 @@ subtest 'AuthenticatePatron test' => sub {
 
     my $plain_password = 'tomasito';
 
+    $builder->build({
+        source => 'Borrower',
+        value => {
+            cardnumber => undef,
+        }
+    });
+
     my $borrower = $builder->build({
         source => 'Borrower',
         value  => {
+            cardnumber => undef,
             password => Koha::AuthUtils::hash_password( $plain_password )
         }
     });
@@ -132,8 +140,17 @@ subtest 'GetPatronInfo/GetBorrowerAttributes test for extended patron attributes
     my $attr_type = $builder->build( {
         source => 'BorrowerAttributeType',
         value  => {
-            code                      => 'DOORCODE',
+            code                      => 'HIDEME',
             opac_display              => 0,
+            authorised_value_category => '',
+            class                     => '',
+        }
+    } );
+    my $attr_type_visible = $builder->build( {
+        source => 'BorrowerAttributeType',
+        value  => {
+            code                      => 'SHOWME',
+            opac_display              => 1,
             authorised_value_category => '',
             class                     => '',
         }
@@ -157,17 +174,34 @@ subtest 'GetPatronInfo/GetBorrowerAttributes test for extended patron attributes
     } );
 
     # Set the new attribute for our user:
-    my $attr = $builder->build( {
+    my $attr_hidden = $builder->build( {
         source => 'BorrowerAttribute',
         value  => {
             borrowernumber => $brwr->{'borrowernumber'},
             code           => $attr_type->{'code'},
-            attribute      => '1337',
+            attribute      => '1337 hidden',
+        }
+    } );
+    my $attr_shown = $builder->build( {
+        source => 'BorrowerAttribute',
+        value  => {
+            borrowernumber => $brwr->{'borrowernumber'},
+            code           => $attr_type_visible->{'code'},
+            attribute      => '1337 shown',
         }
     } );
 
-    my $members = Test::MockModule->new('C4::Members');
-    $members->mock( 'GetMemberAccountBalance', sub { return ( 10, 10, 0 ); } );
+    $builder->build(
+        {
+            source => 'Accountline',
+            value  => {
+                borrowernumber    => $brwr->{borrowernumber},
+                accountno         => 1,
+                accounttype       => 'xxx',
+                amountoutstanding => 10
+            }
+        }
+    );
 
     # Prepare and send web request for IL-SDI server:
     my $query = new CGI;
@@ -179,12 +213,12 @@ subtest 'GetPatronInfo/GetBorrowerAttributes test for extended patron attributes
 
     # Build a structure for comparison:
     my $cmp = {
-        category_code     => $attr_type->{'category_code'},
-        class             => $attr_type->{'class'},
-        code              => $attr->{'code'},
-        description       => $attr_type->{'description'},
-        display_checkout  => $attr_type->{'display_checkout'},
-        value             => $attr->{'attribute'},
+        category_code     => $attr_type_visible->{'category_code'},
+        class             => $attr_type_visible->{'class'},
+        code              => $attr_shown->{'code'},
+        description       => $attr_type_visible->{'description'},
+        display_checkout  => $attr_type_visible->{'display_checkout'},
+        value             => $attr_shown->{'attribute'},
         value_description => undef,
     };
 

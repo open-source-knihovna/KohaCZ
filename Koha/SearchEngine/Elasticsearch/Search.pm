@@ -399,6 +399,34 @@ sub json2marc {
     return $marc;
 }
 
+=head2 max_result_window
+
+Returns the maximum number of results that can be fetched
+
+This directly requests Elasticsearch for the setting index.max_result_window (or
+the default value for this setting in case it is not set)
+
+=cut
+
+sub max_result_window {
+    my ($self) = @_;
+
+    $self->store(
+        Catmandu::Store::ElasticSearch->new(%{ $self->get_elasticsearch_params })
+    ) unless $self->store;
+
+    my $index_name = $self->store->index_name;
+    my $settings = $self->store->es->indices->get_settings(
+        index  => $index_name,
+        params => { include_defaults => 1, flat_settings => 1 },
+    );
+
+    my $max_result_window = $settings->{$index_name}->{settings}->{'index.max_result_window'};
+    $max_result_window //= $settings->{$index_name}->{defaults}->{'index.max_result_window'};
+
+    return $max_result_window;
+}
+
 =head2 _convert_facets
 
     my $koha_facets = _convert_facets($es_facets, $expanded_facet);

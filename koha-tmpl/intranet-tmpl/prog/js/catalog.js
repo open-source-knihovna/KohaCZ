@@ -20,8 +20,8 @@ function printBiblio() {window.print(); }
 
 /* IF CAN_user_editcatalogue_edit_catalogue or ( frameworkcode == 'FA' and CAN_user_editcatalogue_fast_cataloging ) */
 
-function confirm_deletion() {
-    var order_manage_permission = $(this).data("order-manage");
+function confirm_deletion(link) {
+    var order_manage_permission = $(link).data("order-manage");
     var is_confirmed;
     if (count > 0){
         is_confirmed = alert( MSG_DELETE_ALL_ITEMS.format(count) );
@@ -35,7 +35,7 @@ function confirm_deletion() {
         if( order_manage_permission ){
             is_confirmed = confirm( CONFIRM_IN_DELETED_ORDERS.format(countdeletedorders) );
         } else {
-            is_confirmed = alert( MSG_IN_DELTED_ORDERS.format(countdeletedorders) );
+            is_confirmed = alert( MSG_IN_DELETED_ORDERS.format(countdeletedorders) );
         }
     } else if ( holdcount > 0 ) {
         is_confirmed = confirm( CONFIRM_DELETION_HOLDS.format(holdcount) );
@@ -80,7 +80,7 @@ $(document).ready(function() {
         return false;
     });
     $("#deletebiblio").click(function(){
-        confirm_deletion();
+        confirm_deletion(this);
         return false;
     });
     $("#deleteallitems").click(function(){

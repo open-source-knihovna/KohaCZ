@@ -118,8 +118,7 @@ if ( $input->param('add_debarment') ) {
     my $expiration = $input->param('debarred_expiration');
     $expiration =
       $expiration
-      ? output_pref(
-        { 'dt' => dt_from_string($expiration), 'dateformat' => 'iso' } )
+      ? dt_from_string($expiration)->ymd
       : undef;
 
     AddDebarment(
@@ -610,7 +609,7 @@ foreach my $category_type (qw(C A S P I X)) {
           { 'categorycode' => $patron_category->categorycode,
             'categoryname' => $patron_category->description,
             'categorycodeselected' =>
-              ( ( defined( $borrower_data->{'categorycode'} ) && $patron_category->categorycode eq $borrower_data->{'categorycode'} ) || ( defined($categorycode) && $patron_category->categorycode eq $categorycode ) ),
+              ( defined($categorycode) && $patron_category->categorycode eq $categorycode ),
           };
     }
     my %typehash;

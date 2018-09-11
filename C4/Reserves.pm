@@ -174,6 +174,16 @@ sub AddReserve {
 
     $expdate = output_pref({ str => $expdate, dateonly => 1, dateformat => 'iso' });
 
+    # if we have an item selectionned, and the pickup branch is the same as the holdingbranch
+    # of the document, we force the value $priority and $found .
+    if ( $checkitem and not C4::Context->preference('ReservesNeedReturns') ) {
+        $priority = 0;
+        my $item = Koha::Items->find( $checkitem ); # FIXME Prevent bad calls
+        if ( $item->holdingbranch eq $branch ) {
+            $found = 'W';
+        }
+    }
+
     if ( C4::Context->preference('AllowHoldDateInFuture') ) {
 
         # Make room in reserves for this before those of a later reserve date
@@ -206,6 +216,7 @@ sub AddReserve {
             itemtype       => $itemtype,
         }
     )->store();
+    $hold->set_waiting() if $found eq 'W';
 
     logaction( 'HOLDS', 'CREATE', $hold->id, Dumper($hold->unblessed) )
         if C4::Context->preference('HoldsLog');

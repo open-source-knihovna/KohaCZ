@@ -14379,7 +14379,7 @@ if( CheckVersion( $DBversion ) ) {
           borrowernumber int(11) NOT NULL,
           date_enrolled timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
           date_canceled timestamp NULL DEFAULT NULL,
-          date_created timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+          date_created timestamp NULL DEFAULT NULL,
           date_updated timestamp NULL DEFAULT NULL,
           branchcode varchar(10) NULL DEFAULT NULL,
           PRIMARY KEY (id),
@@ -15336,6 +15336,40 @@ if( CheckVersion( $DBversion ) ) {
     $dbh->do(q{INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type) VALUES ('AutoSwitchPatron', '0', '', 'Auto switch to patron', 'YesNo');});
     $dbh->do(q{INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type) VALUES ('AutoSwitchPatronReturn', '0', '', 'Auto switch to patron when checking in', 'YesNo');});
     print "Upgrade to $DBversion done - Auto switch patron\n";
+}
+
+$DBversion = '17.11.07.001';
+if( CheckVersion( $DBversion ) ) {
+
+    $dbh->do(q|
+        ALTER TABLE club_enrollments MODIFY date_created timestamp NULL DEFAULT NULL;
+    |);
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 20175 - Set DEFAULT NULL value for club_enrollments.date_created)\n";
+}
+
+$DBversion = '17.11.08.000';
+if( CheckVersion( $DBversion ) ) {
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (17.11.08 release)\n";
+}
+
+$DBversion = '17.11.08.001';
+if( CheckVersion( $DBversion ) ) {
+    my $dtf  = Koha::Database->new->schema->storage->datetime_parser;
+    my $days = C4::Context->preference('MaxPickupDelay') || 7;
+    my $date = DateTime->now()->add( days => $days );
+    my $sql  = q|UPDATE reserves SET expirationdate = ? WHERE expirationdate IS NULL AND waitingdate IS NOT NULL|;
+    $dbh->do( $sql, undef, $dtf->format_datetime($date) );
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 20773 - expirationdate filled for waiting holds)\n";
+}
+
+$DBversion = '17.11.09.000';
+if( CheckVersion( $DBversion ) ) {
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (17.11.09 release)\n";
 }
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory

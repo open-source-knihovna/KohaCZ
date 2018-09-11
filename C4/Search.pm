@@ -1532,7 +1532,7 @@ sub buildQuery {
         for ( my $i = 0 ; $i <= @operands ; $i++ ) {
 
             # COMBINE OPERANDS, INDEXES AND OPERATORS
-            if ( $operands[$i] ) {
+            if ( ($operands[$i] // '') ne '' ) {
 		$operands[$i]=~s/^\s+//;
 
               # A flag to determine whether or not to add the index to the query
@@ -1677,7 +1677,7 @@ sub buildQuery {
                     query_desc => $query_desc,
                     operator => ($operators[ $i - 1 ]) ? $operators[ $i - 1 ] : '',
                     parsed_operand => $operand,
-                    original_operand => ($operands[$i]) ? $operands[$i] : '',
+                    original_operand => $operands[$i] // '',
                     index => $index,
                     index_plus => $index_plus,
                     indexes_set => $indexes_set,
@@ -2506,7 +2506,7 @@ sub new_record_from_zebra {
     # Set the default indexing modes
     my $search_engine = C4::Context->preference("SearchEngine");
     if ($search_engine eq 'Elasticsearch') {
-        return $raw_data;
+        return ref $raw_data eq 'MARC::Record' ? $raw_data : MARC::Record->new_from_xml( $raw_data, 'UTF-8' );
     }
     my $index_mode = ( $server eq 'biblioserver' )
                         ? C4::Context->config('zebra_bib_index_mode') // 'dom'

@@ -108,8 +108,23 @@ Using this account is not recommended because some parts of Koha will not functi
                                         </li>
                                     [% ELSE %]
                                         <li id="userdebarred"><strong>Please note:</strong> Your account has been frozen.
-                                        [% IF ( BORROWER_INFO.debarredcomment ) %] Comment: <span id="userdebarred_comment">"[% BORROWER_INFO.debarredcomment %]"</span>[% END %]
-                                        [% IF ( BORROWER_INFO.userdebarreddate ) %] End date: <span id="userdebarred_date">[% BORROWER_INFO.userdebarreddate | $KohaDates %]</span>[% END %]
+                                        [% IF ( BORROWER_INFO.debarredcomment ) %]
+                                            Comment:
+                                            <span id="userdebarred_comment">
+                                                <strong>
+                                                    [% IF BORROWER_INFO.debarredcomment.search('OVERDUES_PROCESS') %]
+                                                        Restriction added by overdues process [% BORROWER_INFO.debarredcomment.remove('OVERDUES_PROCESS ') | html_line_break %]
+                                                    [% ELSE %]
+                                                        [% BORROWER_INFO.debarredcomment | html_line_break %]
+                                                    [% END %]
+                                                </strong>
+                                            </span>
+                                        [% END %]
+                                        [% IF ( BORROWER_INFO.userdebarreddate && debarred_date != '9999-12-31' ) %]
+                                            End date:
+                                            <span id="userdebarred_date">[% BORROWER_INFO.userdebarreddate | $KohaDates %]</span>
+                                        [% END %]
+
                                         <em>Usually the reason for freezing an account is old overdues or damage fees. If your account shows to be clear, please contact the library.</em> <a href="/cgi-bin/koha/opac-account.pl">Go to your account page</a></li>
                                     [% END %]
                                 [% END %]
@@ -589,7 +604,9 @@ Using this account is not recommended because some parts of Koha will not functi
                                             <th class="anti-the">Title</th>
                                             <th class="psort title-string">Placed on</th>
                                             <th class="title-string">Expires on</th>
-                                            <th>Pick up location</th>
+                                            [% UNLESS( singleBranchMode) %]
+                                                <th>Pick up location</th>
+                                            [% END %]
                                             [% IF ( showpriority ) %]
                                                 <th>Priority</th>
                                             [% END %]
@@ -648,10 +665,12 @@ Using this account is not recommended because some parts of Koha will not functi
                                                     <span title="0000-00-00">-</span>
                                                 [% END %]
                                             </td>
-                                            <td class="branch">
-                                                <span class="tdlabel">Pick up location:</span>
-                                                [% RESERVE.branch.branchname %]
-                                            </td>
+                                            [% UNLESS( singleBranchMode) %]
+                                                <td class="branch">
+                                                    <span class="tdlabel">Pick up location:</span>
+                                                    [% RESERVE.branch.branchname %]
+                                                </td>
+                                            [% END %]
                                             [% IF ( showpriority ) %]
                                                  <td class="priority">
                                                     <span class="tdlabel">Priority:</span>
@@ -695,7 +714,7 @@ Using this account is not recommended because some parts of Koha will not functi
                                             </td>
                                             [% IF SuspendHoldsOpac %]
                                                 <td>
-                                                    [% IF ( RESERVE.is_cancelable ) %]
+                                                    [% IF ( RESERVE.is_cancelable_from_opac ) %]
                                                         [% IF RESERVE.suspend %]
                                                             <form class="form-inline" action="/cgi-bin/koha/opac-modrequest-suspend.pl" method="post">
                                                                 <input type="hidden" name="reserve_id" value="[% RESERVE.reserve_id %]" />
@@ -736,11 +755,11 @@ Using this account is not recommended because some parts of Koha will not functi
                                                                 </form>
                                                             [% END # / IF AutoResumeSuspendedHolds %]
                                                         [% END # / IF RESERVE.suspend %]
-                                                    [% END # / IF ( RESERVE.is_cancelable )%]
+                                                    [% END # / IF ( RESERVE.is_cancelable_from_opac )%]
                                                 </td>
                                             [% END # / IF SuspendHoldsOpac %]
                                             <td class="modify">
-                                                [% IF ( RESERVE.is_cancelable ) %]
+                                                [% IF ( RESERVE.is_cancelable_from_opac ) %]
                                                     <form action="/cgi-bin/koha/opac-modrequest.pl" method="post">
                                                     <input type="hidden" name="biblionumber" value="[% RESERVE.biblionumber %]" />
                                                     <input type="hidden" name="reserve_id" value="[% RESERVE.reserve_id %]" />

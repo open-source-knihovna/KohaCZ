@@ -354,7 +354,7 @@ sub AuthenticatePatron {
     my ($status, $cardnumber, $userid) = C4::Auth::checkpw( C4::Context->dbh, $username, $password );
     if ( $status ) {
         # Get the borrower
-        my $patron = Koha::Patrons->find( { cardnumber => $cardnumber } );
+        my $patron = Koha::Patrons->find( { userid => $userid } );
         return { id => $patron->borrowernumber };
     }
     else {
@@ -380,6 +380,9 @@ Parameters:
     whether or not to return hold request information in the response
   - show_loans (Optional, default 0)
     whether or not to return loan information request information in the response
+  - show_attributes (Optional, default 0)
+    whether or not to return additional patron attributes, when enabled the attributes
+    are limited to those marked as opac visible only.
 
 =cut
 
@@ -472,7 +475,7 @@ sub GetPatronInfo {
     }
 
     if ( $cgi->param('show_attributes') eq "1" ) {
-        my $attrs = GetBorrowerAttributes( $borrowernumber, 0, 1 );
+        my $attrs = GetBorrowerAttributes( $borrowernumber, 1 );
         $borrower->{'attributes'} = $attrs;
     }
 

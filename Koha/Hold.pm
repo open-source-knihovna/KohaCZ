@@ -224,23 +224,21 @@ sub is_in_transit {
     return $self->found() eq 'T';
 }
 
-=head3 is_cancelable
+=head3 is_cancelable_from_opac
 
 Returns true if hold is a cancelable hold
 
-Holds may be canceled if they not found, or
-are found and waiting. A hold found but in
-transit cannot be canceled.
+Holds may be only canceled if they are not found.
+
+This is used from the OPAC.
 
 =cut
 
-sub is_cancelable {
+sub is_cancelable_from_opac {
     my ($self) = @_;
 
     return 1 unless $self->is_found();
-    return 0 if $self->is_in_transit();
-    return 1 if $self->is_waiting();
-    return 0;
+    return 0; # if ->is_in_transit or if ->is_waiting
 }
 
 =head3 is_at_destination

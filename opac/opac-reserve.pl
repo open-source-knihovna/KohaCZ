@@ -266,17 +266,9 @@ if ( $query->param('place_reserve') ) {
 
         my $expiration_date = $query->param("expiration_date_$biblioNum");
 
-      # If a specific item was selected and the pickup branch is the same as the
-      # holdingbranch, force the value $rank and $found.
         my $rank = $biblioData->{rank};
         if ( $itemNum ne '' ) {
             $canreserve = 1 if CanItemBeReserved( $borrowernumber, $itemNum ) eq 'OK';
-            $rank = '0' unless C4::Context->preference('ReservesNeedReturns');
-            my $item = GetItem($itemNum);
-            if ( $item->{'holdingbranch'} eq $branch ) {
-                $found = 'W'
-                  unless C4::Context->preference('ReservesNeedReturns');
-            }
         }
         else {
             $canreserve = 1 if CanBookBeReserved( $borrowernumber, $biblioNum ) eq 'OK';
@@ -329,7 +321,8 @@ if ( $query->param('place_reserve') ) {
 my $noreserves     = 0;
 my $maxoutstanding = C4::Context->preference("maxoutstanding");
 $template->param( noreserve => 1 ) unless $maxoutstanding;
-my ( $amountoutstanding ) = GetMemberAccountRecords($borrowernumber);
+my $amountoutstanding = $patron ? $patron->account->balance : 0;
+
 if ( $amountoutstanding && ($amountoutstanding > $maxoutstanding) ) {
     my $amount = sprintf "%.02f", $amountoutstanding;
     $template->param( message => 1 );

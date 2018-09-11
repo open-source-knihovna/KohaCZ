@@ -100,6 +100,9 @@ if ($version || ($input_marc_file eq '')) {
     pod2usage( -verbose => 2 );
     exit;
 }
+if( $update && !( $match || $isbn_check ) ) {
+    warn "Using -update without -match or -isbn seems to be useless.\n";
+}
 
 if(defined $localcust) { #local customize module
     if(!-e $localcust) {
@@ -296,11 +299,11 @@ RECORD: while (  ) {
     &$localcust($record) if $localcust;
     my $isbn;
     # remove trailing - in isbn (only for biblios, of course)
-    if ($biblios && $cleanisbn) {
+    if( $biblios ) {
         my $tag = $marcFlavour eq 'UNIMARC' ? '010' : '020';
         my $field = $record->field($tag);
-        my $isbn = $field && $field->subfield('a');
-        if ( $isbn ) {
+        $isbn = $field && $field->subfield('a');
+        if ( $isbn && $cleanisbn ) {
             $isbn =~ s/-//g;
             $field->update('a' => $isbn);
         }
@@ -451,7 +454,7 @@ RECORD: while (  ) {
                     $biblioitemnumber = Koha::Biblios->find( $biblionumber )->biblioitem->biblioitemnumber;
                 };
                 if ($update) {
-                    eval { ( $biblionumber, $biblioitemnumber ) = ModBiblio( $record, $biblionumber, GetFrameworkCode($biblionumber) ) };
+                    eval { ModBiblio( $record, $biblionumber, GetFrameworkCode($biblionumber) ) };
                     if ($@) {
                         warn "ERROR: Edit biblio $biblionumber failed: $@\n";
                         printlog( { id => $id || $originalid || $biblionumber, op => "update", status => "ERROR" } ) if ($logfile);
@@ -473,7 +476,9 @@ RECORD: while (  ) {
                         printlog( { id => $id || $originalid || $biblionumber, op => "insert", status => "ok" } ) if ($logfile);
                     }
                 } else {
+                    warn "WARNING: Updating record ".($id||$originalid)." failed";
                     printlog( { id => $id || $originalid || $biblionumber, op => "update", status => "warning : not in database" } ) if ($logfile);
+                    next RECORD;
                 }
             }
             eval { ( $itemnumbers_ref, $errors_ref ) = AddItemBatchFromMarc( $record, $biblionumber, $biblioitemnumber, '' ); };

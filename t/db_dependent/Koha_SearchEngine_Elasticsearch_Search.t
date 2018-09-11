@@ -17,10 +17,12 @@
 
 use Modern::Perl;
 
-use Test::More tests => 13;
+use Test::More tests => 15;
 use t::lib::Mocks;
 
 use Koha::SearchEngine::Elasticsearch::QueryBuilder;
+use Koha::SearchEngine::Elasticsearch::Indexer;
+
 
 my $builder = Koha::SearchEngine::Elasticsearch::QueryBuilder->new( { index => 'mydb' } );
 
@@ -41,8 +43,10 @@ SKIP: {
 
     eval { $builder->get_elasticsearch_params; };
 
-    skip 'ElasticSeatch configuration not available', 6
+    skip 'ElasticSeatch configuration not available', 8
         if $@;
+
+    Koha::SearchEngine::Elasticsearch::Indexer->new({ index => 'mydb' })->drop_index;
 
     ok( my $results = $searcher->search( $query) , 'Do a search ' );
 
@@ -56,6 +60,13 @@ SKIP: {
 
     is ( $count = $searcher->count_auth_use($searcher,1), 0, 'Testing count_auth_use');
 
+    is ($searcher->max_result_window, 10000, 'By default, max_result_window is 10000');
+    $searcher->store->es->indices->put_settings(index => $searcher->store->index_name, body => {
+        'index' => {
+            'max_result_window' => 12000,
+        },
+    });
+    is ($searcher->max_result_window, 12000, 'max_result_window returns the correct value');
 }
 
 subtest 'json2marc' => sub {
@@ -81,7 +92,7 @@ subtest 'json2marc' => sub {
 };
 
 subtest 'build_query tests' => sub {
-    plan tests => 23;
+    plan tests => 24;
 
     t::lib::Mocks::mock_preference('DisplayLibraryFacets','both');
     my $query = $builder->build_query();
@@ -221,12 +232,14 @@ subtest 'build_query tests' => sub {
         "query of specific field is added AND suppress:0"
     );
 
-    ( undef, $query ) = $builder->build_query_compat( undef, ['title:"donald duck"'], undef, undef, undef, undef, undef, { suppress => 0 } );
+    my ($simple_query, $query_cgi);
+    ( undef, $query, $simple_query, $query_cgi ) = $builder->build_query_compat( undef, ['title:"donald duck"'], undef, undef, undef, undef, undef, { suppress => 0 } );
     is(
         $query->{query}{query_string}{query},
         '(title:"donald duck")',
         "query of specific field is not added AND suppress:0"
     );
+    is($query_cgi, 'q=title%3A%22donald%20duck%22', 'query cgi');
 };
 
 subtest "_convert_sort_fields" => sub {
