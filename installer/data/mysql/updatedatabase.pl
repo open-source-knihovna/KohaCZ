@@ -15381,6 +15381,85 @@ if( CheckVersion( $DBversion ) ) {
     });
     print "Generate account_offsets table\n";
 
+    if( !column_exists( 'collections', 'createdBy' ) ) {
+        $dbh->do( "ALTER TABLE collections ADD COLUMN createdBy int(11) default NULL AFTER colBranchcode" );
+    }
+    $dbh->do( "ALTER TABLE collections ADD CONSTRAINT `collections_ibfk_2` FOREIGN KEY (`createdBy`) REFERENCES `borrowers` (`borrowernumber`) ON DELETE SET NULL ON UPDATE CASCADE");
+    if( !column_exists( 'collections', 'createdOn' ) ) {
+        $dbh->do( "ALTER TABLE collections ADD COLUMN createdOn datetime default NULL AFTER createdBy" );
+    }
+    if( !column_exists( 'collections', 'lastTransferredOn' ) ) {
+        $dbh->do( "ALTER TABLE collections ADD COLUMN lastTransferredOn datetime default NULL AFTER createdOn" );
+    }
+    print "Bug 19520 - Add additional information to rotating collections\n";
+
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('SelfCheckInMainUserBlock', '', '70|10', 'Add a block of HTML that will display on the self check-in screen.', 'Textarea');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('SelfCheckInModule', 0, NULL, 'Enable the standalone self-checkin module.', 'YesNo');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('SelfCheckInModuleUserID', NULL, NULL, 'Patron ID (borrowernumber) to be allowed on the self-checkin module.', 'Integer');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('SelfCheckInTimeout', 120, NULL, 'Define the number of seconds before the self check-in module times out.', 'Integer');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('SelfCheckInUserCSS', '', NULL, 'Add CSS to be included in the self check-in module in an embedded <style> tag.', 'free');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO systempreferences (variable,value,options,explanation,type)
+        VALUES ('SelfCheckInUserJS', '', NULL, 'Define custom javascript for inclusion in the self check-in module.', 'free');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO userflags (bit,flag,flagdesc,defaulton) VALUES
+            (23,'self_check','Self check modules',0);
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO permissions (module_bit,code,description)
+        VALUES (23, 'self_checkin_module', 'Log into the self check-in module');
+    });
+    $dbh->do(q{
+        INSERT IGNORE INTO permissions (module_bit,code,description)
+        VALUES (23, 'self_checkout_module', 'Perform self checkout at the OPAC. It should be used for the patron matching the AutoSelfCheckID');
+    });
+    $dbh->do(q{
+        UPDATE user_permissions
+        SET module_bit = 23,
+                  code = 'self_checkout_module'
+        WHERE module_bit = 1 AND code = 'self_checkout';
+    });
+    $dbh->do(q{
+        DELETE IGNORE FROM permissions
+        WHERE  code='self_checkout';
+    });
+    print "Upgrade to $DBversion done (Bug 15492: Add a standalone self-checkin module)\n";
+
+    if( !column_exists( 'issuingrules', 'renew_reserved' ) ) {
+        $dbh->do( "ALTER TABLE issuingrules ADD COLUMN renew_reserved BOOLEAN default FALSE AFTER article_requests" );
+    }
+    if( !column_exists( 'issuingrules', 'reserved_renew_count' ) ) {
+        $dbh->do( "ALTER TABLE issuingrules ADD COLUMN reserved_renew_count int(4) default NULL AFTER renew_reserved" );
+    }
+    if( !column_exists( 'issuingrules', 'reserved_renew_period' ) ) {
+        $dbh->do( "ALTER TABLE issuingrules ADD COLUMN reserved_renew_period int(4) default NULL AFTER reserved_renew_count" );
+    }
+    print "Ability to renew reserved items\n";
+
+    # Remove lines referencing non existing collections
+    $dbh->do( "DELETE FROM collections_tracking WHERE colId NOT IN (SELECT colId FROM collections)" );
+    # Remove lines referencing non existing items
+    $dbh->do( "DELETE FROM collections_tracking WHERE itemnumber NOT IN (SELECT itemnumber FROM items)" );
+    $dbh->do( "ALTER TABLE collections_tracking ADD CONSTRAINT collections_tracking_ibfk_1 FOREIGN KEY (colId) REFERENCES collections (colId) ON DELETE CASCADE ON UPDATE CASCADE" );
+    $dbh->do( "ALTER TABLE collections_tracking ADD CONSTRAINT collections_tracking_ibfk_2 FOREIGN KEY (itemnumber) REFERENCES items (itemnumber) ON DELETE CASCADE ON UPDATE CASCADE" );
+    print "Bug 18606 - Rotating collections objects\n";
+
     SetVersion( $DBversion );
     print "Upgrade to $DBversion done (17.11.09 release)\n";
 }
