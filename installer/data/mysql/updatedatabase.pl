@@ -15368,6 +15368,19 @@ if( CheckVersion( $DBversion ) ) {
 
 $DBversion = '17.11.09.000';
 if( CheckVersion( $DBversion ) ) {
+
+    $dbh->do(q{
+        INSERT INTO account_offsets (credit_id, debit_id, type, amount, created_on)
+        SELECT p.accountlines_id AS credit_id, s.other AS debit_id,
+        "Payment" AS type, d.amount * -1 AS amount,
+        p.timestamp AS created_on
+        FROM accountlines p
+        JOIN statistics s ON p.timestamp = s.datetime AND p.borrowernumber = s.borrowernumber
+        JOIN accountlines d ON s.other = d.accountlines_id
+        WHERE p.accounttype LIKE "Pay%"
+    });
+    print "Generate account_offsets table\n";
+
     SetVersion( $DBversion );
     print "Upgrade to $DBversion done (17.11.09 release)\n";
 }
