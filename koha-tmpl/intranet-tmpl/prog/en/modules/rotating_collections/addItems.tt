@@ -54,6 +54,34 @@
                 </div>
               [% END %]
 
+              [% IF ( needconfirmation ) %]
+                <div class="dialog alert">
+                  [% FOR c IN needconfirmation %]
+                    <h3>You need to confirm adding to collection</h3>
+                    [% IF c.code == 'was_before_in_library' %]
+                      <p>
+                        This title was at least once in this library.
+                      </p><p>
+                        Author: <strong>[% item.biblio.author %]</strong><br />
+                        Title: <strong>[% item.biblio.title %]</strong>
+                      </p>
+                    [% END %]
+                  [% END %]
+                  <p>Would you like to add it to this collection anyway?</p>
+                  <form action="addItems.pl" method="post">
+                    <input type="hidden" name="confirmed" value="1" />
+                    <input type="hidden" name="barcode" value="[% barcode %]" />
+                    <input type="hidden" id="colId" name="colId" value="[% collection.colId %]" />
+                    <input type="hidden" name="action" value="addItem" />
+                    <button type="submit" class="approve"><i class="fa fa-fw fa-check"></i> Yes, add it to collection</button>
+                  </form>
+                  <form action="addItems.pl" method="post">
+                    <input type="hidden" id="colId" name="colId" value="[% collection.colId %]" />
+                    <button type="submit" class="deny"><i class="fa fa-fw fa-remove"></i> No, do not add it</button>
+                  </form>
+                </div>
+              [% END %]
+
               <div>
                 <form action="addItems.pl" method="post">
                     <fieldset class="brief">

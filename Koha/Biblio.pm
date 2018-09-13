@@ -33,6 +33,7 @@ use Koha::Biblioitems;
 use Koha::ArticleRequests;
 use Koha::ArticleRequest::Status;
 use Koha::IssuingRules;
+use Koha::Item::Transfers;
 use Koha::Subscriptions;
 
 =head1 NAME
@@ -339,6 +340,31 @@ sub has_items_waiting_or_intransit {
     }
 
     return 0;
+}
+
+=head3 was_in_library_before
+
+$was_in_library = $biblio->was_in_library_before($library);
+
+Takes a Koha::Library object and say if any item of this biblio was anytime transferred into this library
+
+=cut
+
+sub was_in_library_before {
+    my ($self, $library) = @_;
+
+    if (not defined $library || ref $library != "Koha::Library") {
+        return 0;
+    }
+
+    my $transfers = Koha::Item::Transfers->search({
+            tobranch => $library->branchcode,
+            datearrived => { '!=' => undef },
+            'itemnumber.biblionumber' => $self->biblionumber,
+        },{
+            join => 'itemnumber',
+        })->count;
+     return $transfers;
 }
 
 =head3 type

@@ -45,8 +45,10 @@ my ( $template, $loggedinuser, $cookie ) = get_template_and_user(
 
 my @errors;
 my @messages;
+my @needconfirmation;
 my $colId = $query->param('colId');
 my $collection = Koha::RotatingCollections->find($colId);
+my $confirmed = $query->param('confirmed') || 0;
 
 my $action = $query->param('action') || '';
 
@@ -55,14 +57,21 @@ if ( $action eq 'addItem' ) {
     my $barcode    = $query->param('barcode');
     my $removeItem = $query->param('removeItem');
     my $item       = Koha::Items->find( { barcode => $barcode } );
+    my $was_before_in_library = 0;
+
+    if (defined $collection->colBranchcode && !$confirmed) {
+        my $library = Koha::Libraries->find($collection->colBranchcode);
+        $was_before_in_library = $item->biblio->was_in_library_before($library);
+    }
 
     my ( $success, $errorCode, $errorMessage );
-    my $libraryName;
 
     $template->param( barcode => $barcode );
     $template->param( item => $item );
 
-    if ( !$removeItem ) {
+    if ($was_before_in_library && !$confirmed) {
+        push @needconfirmation, { code => 'was_before_in_library' };
+    } elsif ( !$removeItem ) {
         my $added = eval { $collection->add_item( $item ) };
 
         if ( $@ or not $added ) {
@@ -98,6 +107,7 @@ $template->param(
     collection => $collection,
     messages   => \@messages,
     errors     => \@errors,
+    needconfirmation => \@needconfirmation,
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;
