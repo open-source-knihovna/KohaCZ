@@ -1,3 +1,15 @@
+# #-#-#-#-#  cs-CZ-staff-prog-orig.po (Koha 17.11)  #-#-#-#-#
+# LibLime Koha Translation Manager
+# Copyright (C) 2007 LibLime
+# http://liblime.com <info@liblime.com>
+# Based on Kartouche http://www.dotmon.com/kartouche/
+# #-#-#-#-#  cs-CZ-staff-prog.po (PACKAGE VERSION)  #-#-#-#-#
+# #-#-#-#-#  cs-CZ-staff-prog-orig.po (Koha 17.11)  #-#-#-#-#
+# LibLime Koha Translation Manager
+# Copyright (C) 2007 LibLime
+# http://liblime.com <info@liblime.com>
+# Based on Kartouche http://www.dotmon.com/kartouche/
+# #-#-#-#-#  cs-CZ-staff-prog-kohacz.po  #-#-#-#-#
 # #-#-#-#-#  cs-CZ-staff-prog.po  #-#-#-#-#
 # #-#-#-#-#  cs-CZ-staff-prog-orig.po (PACKAGE VERSION)  #-#-#-#-#
 # LibLime Koha Translation Manager
@@ -16,9 +28,9 @@
 # Based on Kartouche http://www.dotmon.com/kartouche/
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"POT-Creation-Date: 2017-05-03 12:08+0000\n"
-"PO-Revision-Date: 2017-05-03 15:18+0200\n"
+"Project-Id-Version: Koha 17.11\n"
+"POT-Creation-Date: 2018-08-17 07:33-0300\n"
+"PO-Revision-Date: 2018-09-17 09:09+0200\n"
 "Last-Translator: Josef Moravec <josef.moravec@gmail.com>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
 ">\n"
@@ -27,13 +39,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.7.1\n"
-"X-POOTLE-MTIME: 1492501598.000000\n"
-"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.7.1\n"
-"X-POOTLE-MTIME: 1463580765.000000\n"
+"X-Generator: Poedit 2.0.6\n"
+"X-POOTLE-MTIME: 1536832569.117423\n"
+"X-Pootle-Path: /cs/17.11/cs-CZ-staff-prog.po\n"
+"X-Pootle-Revision: 1\n"
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2017-04-16 10:46-0300\n"
+"POT-Creation-Date: 2018-09-14 15:27+0000\n"
 "PO-Revision-Date: 2017-04-18 07:46+0000\n"
 "Last-Translator: Josef <josef.moravec@knihovna-uo.cz>\n"
 "Language-Team: Czech <http://hosted.weblate.org/projects/koha/staff-prog/cs/"
@@ -43,8 +54,265 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Pootle 2.8\n"
+"X-POOTLE-MTIME: 1536832569.117423\n"
+"X-Pootle-Path: /cs/17.11/cs-CZ-staff-prog.po\n"
+"X-Pootle-Revision: 1\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"X-POOTLE-MTIME: 1492501598.000000\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"X-POOTLE-MTIME: 1463580765.000000\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Pootle 2.5.1.1\n"
 "X-POOTLE-MTIME: 1492501598.000000\n"
+
+#. %1$s:  END
+#. %2$s:  END
+#. %3$s:  END
+#. %4$s:  END
+#. %5$s:  BLOCK language
+#. %6$s:  SWITCH lang
+#. %7$s:  CASE ['en', 'eng']
+#. %8$s:  CASE ['fr', 'fre']
+#. %9$s:  CASE ['it', 'ita']
+#. %10$s:  CASE ['de', 'ger', 'deu']
+#. %11$s:  CASE ['es', 'spa']
+#. %12$s:  CASE ['heb']
+#. %13$s:  CASE ['ara']
+#. %14$s:  CASE ['gre']
+#. %15$s:  CASE ['grc']
+#. %16$s:  CASE
+#. %17$s:  lang
+#. %18$s:  END
+#. %19$s:  END
+#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:118
+#, c-format
+msgid ""
+"%s %s %s %s %s %s %sEnglish %sFrench %sItalian %sGerman %sSpanish %sHebrew "
+"%sArabic %sGreek (modern) %sGreek (to 1453) %s%s %s %s "
+msgstr ""
+"%s %s %s %s %s %s %sAngličtina %sFrancouzština %sItalština %sNěmčina "
+"%sŠpanělština %sHebrejština %sArabština %sŘečtina (moderní) %sŘečtina (do "
+"roku 1453) %s%s %s %s "
+
+#. %1$s:  INCLUDE 'doc-head-open.inc'
+#. %2$s:  BLOCK ServerType
+#. %3$s:  IF (server.servertype||type) == 'sru'
+#. %4$s:  ELSIF (server.servertype||type) == 'zed'
+#. %5$s:  END
+#. %6$s:  END
+#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:1
+#, c-format
+msgid "%s %s %s SRU %s Z39.50 %s %s "
+msgstr "%s %s %s SRU %s Z39.50 %s %s "
+
+#. %1$s:  IF ( ERROR )
+#. %2$s:  IF ( ITEMNUMBER )
+#. %3$s:  END
+#. %4$s:  ELSE
+#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:43
+#, c-format
+msgid ""
+"%s %s ERROR an invalid itemnumber was entered, please hit back and try again "
+"%s %s "
+msgstr ""
+"%s %s CHYBA bylo zadáno neplatné přírůstkové číslo, klikněte na zpět a "
+"zkuste to znovu %s %s "
+
+#. %1$s:  SWITCH account.accounttype
+#. %2$s:  CASE 'Pay'
+#. %3$s:  CASE 'Pay00'
+#. %4$s:  CASE 'Pay01'
+#. %5$s:  CASE 'Pay02'
+#. %6$s:  CASE 'N'
+#. %7$s:  CASE 'F'
+#. %8$s:  CASE 'A'
+#. %9$s:  CASE 'M'
+#. %10$s:  CASE 'L'
+#. %11$s:  CASE 'W'
+#. %12$s:  CASE 'FU'
+#. %13$s:  CASE 'HE'
+#. %14$s:  CASE 'Rent'
+#. %15$s:  CASE 'FOR'
+#. %16$s:  CASE 'LR'
+#. %17$s:  CASE 'PF'
+#. %18$s:  CASE 'PAY'
+#. %19$s:  CASE 'WO'
+#. %20$s:  CASE 'C'
+#. %21$s:  CASE 'CR'
+#. %22$s:  CASE
+#. %23$s:  account.accounttype
+#. %24$s: - END -
+#. %25$s: - IF account.description
+#. %26$s:  account.description
+#. %27$s:  END
+#. %28$s:  IF ( account.itemnumber )
+#: intranet-tmpl/prog/en/modules/members/boraccount.tt:86
+#, c-format
+msgid ""
+"%s %sPayment, thanks %sPayment, thanks (cash via SIP2) %sPayment, thanks "
+"(VISA via SIP2) %sPayment, thanks (credit card via SIP2) %sNew card %sFine "
+"%sAccount management fee %sSundry %sLost item %sWriteoff %sAccruing fine "
+"%sHold waiting too long %sRental fee %sForgiven %sLost item fee refund "
+"%sProcessing fee %sPayment %sWriteoff %sCredit %sCredit %s%s %s %s, %s%s "
+"&nbsp;%s"
+msgstr ""
+"%s %sPlatba %sPlatba (hotově přes SIP2) %sPlatba (VISA přes SIP2) %sPlatba "
+"(kreditní karta přes SIP2) %sDuplikát průkazky %sUpomínka %sRegistrační "
+"poplatek %sOstatní %sZtracený dokument %s Prominuto %sNabíhající upomínka "
+"%sDlouho čekající rezervace %sPoplatek za půjčení %sOdpuštěno %sVrácení "
+"poplatku za ztrátu dokumentu %sPoplatek za zpracování %sPlatba %sProminuto "
+"%sKredit %sKredit %s%s %s %s, %s%s &nbsp;%s"
+
+#. %1$s:  IF failureMessage == "NO_ID"
+#. %2$s:  ELSIF failureMessage == "DUPLICATE_TITLE"
+#. %3$s:  ELSE
+#. %4$s:  failureMessage
+#. %5$s:  END
+#: intranet-tmpl/prog/en/modules/rotating_collections/editCollections.tt:72
+#, c-format
+msgid "%s No collection id given. %s Title already in use. %s %s %s "
+msgstr "%s Nebylo uvedeno žádné ID sbírky. %s Název se již používáT. %s %s %s "
+
+#. %1$s:  IF failureMessage == "NO_ITEM"
+#. %2$s:  ELSIF failureMessage == "IN_COLLECTION_OTHER"
+#. %3$s:  ELSIF failureMessage == "IN_COLLECTION"
+#. %4$s:  ELSE
+#. %5$s:  failureMessage
+#. %6$s:  END
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:38
+#, c-format
+msgid ""
+"%s No item with matching barcode found %s Item is already in a different "
+"rotating collection %s Item is already in this collection %s %s %s "
+msgstr ""
+"%s Nebyla nalezena jednotka, která by odpovídala zadanému čárovému kódu %s "
+"IJednotka je součástí jiné sbírky %s Jednotka je již součástí sbírky %s %s "
+"%s "
+
+#. %1$s:  IF failureMessage == "NO_ITEM"
+#. %2$s:  ELSIF failureMessage == "NOT_IN_COLLECTION"
+#. %3$s:  ELSE
+#. %4$s:  failureMessage
+#. %5$s:  END
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:59
+#, c-format
+msgid ""
+"%s No item with matching barcode found %s Item is not in this collection %s "
+"%s %s "
+msgstr ""
+"%s Jednotka s tímto čárovým kódem nebyla nalezena %s Jednotka se v tomto "
+"souboru nenachází %s %s %s "
+
+#. %1$s:  IF failureMessage == "NO_TITLE"
+#. %2$s:  ELSIF failureMessage == "DUPLICATE_TITLE"
+#. %3$s:  ELSIF failureMessage == "NO_DESCRIPTION"
+#. %4$s:  ELSE
+#. %5$s:  failureMessage
+#. %6$s:  END
+#: intranet-tmpl/prog/en/modules/rotating_collections/editCollections.tt:37
+#, c-format
+msgid ""
+"%s No title entered. %s Title already in use. %s No description entered. %s "
+"%s %s "
+msgstr ""
+"%s Nebyl zadán název. %s Název je již použit. %s Nebyl zadán popis. %s %s %s "
+
+#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:26
+#, c-format
+msgid "&rsaquo; Manual invoice"
+msgstr "&rsaquo; Další poplatky"
+
+#. SCRIPT
+#: intranet-tmpl/prog/en/includes/rotating-collections-toolbar.inc:1
+msgid "Are you sure you want to delete this rotating collection?"
+msgstr "Opravdu chcete odstranit tento výměnný soubor?"
+
+#. %1$s:  IF ( del )
+#. %2$s:  ELSE
+#. %3$s:  END
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:23
+#, c-format
+msgid "Batch item %sdeletion%smodification%s"
+msgstr "%sDávkové mazání%sDávková úprava%s jednotek"
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:37
+#, c-format
+msgid "Failed to add item with barcode "
+msgstr "Nepodařilo se přidat jednotku s čárovým kódem "
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:57
+#, c-format
+msgid "Failed to remove item with barcode "
+msgstr "Nepodařilo se odebrat jednotku s čárovým kódem "
+
+#: intranet-tmpl/prog/en/modules/members/mancredit.tt:45
+#, c-format
+msgid "Forgiven"
+msgstr "Prominuto"
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:55
+#, c-format
+msgid "Item with barcode "
+msgstr "Jednotka s čárovým kódem "
+
+#. %1$s:  barcode
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:34
+#, c-format
+msgid "Item with barcode '%s' added successfully"
+msgstr "Jednotka s čárovým kódem '%s' byla úspěšně přidána"
+
+#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:3
+#, c-format
+msgid "Koha &rsaquo; Patrons &rsaquo; Create manual invoice"
+msgstr "Koha &rsaquo; Čtenáři &rsaquo; Další platby"
+
+#. %1$s:  IF ( del )
+#. %2$s:  ELSE
+#. %3$s:  END
+#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:2
+#, c-format
+msgid ""
+"Koha &rsaquo; Tools &rsaquo; %sBatch item deletion%sBatch item modification"
+"%s "
+msgstr ""
+"Koha &rsaquo; Nástroje &rsaquo; %sZrušení položky v dávce%sZměna položky v "
+"dávce%s "
+
+#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:53
+#, c-format
+msgid "Manual invoice"
+msgstr "Další poplatky"
+
+#: intranet-tmpl/prog/en/modules/circ/circulation.tt:290
+#, c-format
+msgid "Patron has previously checked out this title: "
+msgstr "﻿Tuto jednotku již měl čtenář vypůjčenou: "
+
+#: intranet-tmpl/prog/en/modules/about.tt:214
+#, c-format
+msgid ""
+"The patron used for the self checkout module at the OPAC does not have the "
+"circulate => self_checkout permission. "
+msgstr ""
+"Uživatel používaný pro modul samoobslužných výpůjček nemá nastaveno "
+"oprávnění circulate => self_checkout. "
+
+#: intranet-tmpl/prog/en/modules/about.tt:219
+#, c-format
+msgid ""
+"The patron used for the self checkout module at the OPAC has too many "
+"permissions. They should only have circulate => self_checkout. "
+msgstr ""
+"Uživatel používaný pro modul samoobslužných výpůjček má příliš mnoho "
+"oprávnění. Měl by mít nastaveno pouze circulate => self_checkout. "
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:55
+#, c-format
+msgid "removed successfully"
+msgstr "úspěšně odstraněna"
 
 #. %1$s:  END
 #. %2$s:  END
@@ -67,7 +335,7 @@ msgstr ""
 #. %19$s:  lang
 #. %20$s:  END
 #. %21$s:  END
-#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:136
+#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:126
 #, c-format
 msgid ""
 "%s %s %s %s %s %s %s %s %sEnglish %sFrench %sItalian %sGerman %sSpanish "
@@ -110,6 +378,14 @@ msgstr ""
 "účtu nastala chyba. Zkontrolujte provozní záznamy. %s Typ účtu byl úspěšně "
 "uložen. %s Typ účtu byl úspěšně odstraněn. %s %s %s "
 
+#. %1$s:  FOR message IN messages
+#. %2$s:  IF message.code == 'success_adding_item'
+#. %3$s:  barcode
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:42
+#, c-format
+msgid "%s %s Item with barcode '%s' added successfully"
+msgstr "%s %s Jednotka s čárovým kódem '%s' byla úspěšně přidána"
+
 #. %1$s:  SWITCH account.accounttype
 #. %2$s:  CASE 'Pay'
 #. %3$s:  CASE 'Pay00'
@@ -126,13 +402,14 @@ msgstr ""
 #. %14$s:  CASE 'Rent'
 #. %15$s:  CASE 'FOR'
 #. %16$s:  CASE 'LR'
-#. %17$s:  CASE 'PAY'
-#. %18$s:  CASE 'WO'
-#. %19$s:  CASE 'C'
-#. %20$s:  CASE 'CR'
-#. %21$s:  CASE
-#. %22$s:  account.accounttype
-#. %23$s: - END -
+#. %17$s:  CASE 'PF'
+#. %18$s:  CASE 'PAY'
+#. %19$s:  CASE 'WO'
+#. %20$s:  CASE 'C'
+#. %21$s:  CASE 'CR'
+#. %22$s:  CASE
+#. %23$s:  account.accounttype
+#. %24$s: - END -
 #: intranet-tmpl/prog/en/modules/members/boraccount.tt:160
 #, c-format
 msgid ""
@@ -140,13 +417,13 @@ msgid ""
 "(VISA via SIP2) %sPayment, thanks (credit card via SIP2) %sNew card %sFine "
 "%sAccount management fee %sSundry %sLost item %sWriteoff %sAccruing fine "
 "%sHold waiting too long %sRental fee %sForgiven %sLost item fee refund "
-"%sPayment %sWriteoff %sCredit %sCredit %s%s %s "
+"%sProcessing fee %sPayment %sWriteoff %sCredit %sCredit %s%s %s "
 msgstr ""
-"%s %sPlatba, díky %sPlatba, díky (hotově přes SIP2) %sPlatba, díky (VISA "
-"přes SIP2) %sPlatba, díky (kreditní karta přes SIP2) %sNový průkaz "
-"%sUpomínka %sRegistrační poplatek %sOstatní %sZtracený dokument %s Prominuto "
-"%sNabíhající upomínka %sDlouho čekající rezervace %sPoplatek za půjčení "
-"%sProminuto %sVrácení poplatku za ztrátu dokumentu %sPlatba %sProminuto "
+"%s %sPlatba %sPlatba (hotově přes SIP2) %sPlatba (VISA přes SIP2) %sPlatba "
+"(kreditní karta přes SIP2) %sDuplikát průkazky %sUpomínka %sRegistrační "
+"poplatek %sOstatní %sZtracený dokument %s Prominuto %sNabíhající upomínka "
+"%sDlouho čekající rezervace %sPoplatek za půjčení %sOdpuštěno %sVrácení "
+"poplatku za ztrátu dokumentu %sPoplatek za zpracování %sPlatba %sProminuto "
 "%sKredit %sKredit %s%s %s "
 
 #. %1$s:  IF op == 'add_form'
@@ -166,6 +443,27 @@ msgstr ""
 "%s &rsaquo; %sUpravit%sNový%s Typ účtu - %s %s &rsaquo; Potvrdit odstranění "
 "typu účtu - %s %s "
 
+#. %1$s:  ELSIF message.code == 'success_removing_item'
+#. %2$s:  barcode
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:47
+#, c-format
+msgid "%s Item with barcode '%s' removed successfully"
+msgstr "%s Jednotka s čárovým kódem '%s' byla úspěšně odebrána"
+
+#. %1$s:  IF ( failureMessage == "NOT_IN_COLLECTION" )
+#. %2$s:  ELSIF ( failureMessage == "ITEM_NOT_FOUND" )
+#. %3$s:  ELSE
+#. %4$s:  failureMessage
+#. %5$s:  END
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:76
+#, c-format
+msgid ""
+"%s This item is not part of any collection. %s The barcode was not found in "
+"the database. %s%s%s "
+msgstr ""
+"%s Tato jednotak není v žádném souboru. %s Čárový kód nebyl v databázi "
+"nalezen. %s%s%s "
+
 #. %1$s:  not_deleted_items
 #. %2$s:  FOREACH not_deleted_itemnumber IN not_deleted_itemnumbers
 #. %3$s:  not_deleted_itemnumber.itemnumber
@@ -181,15 +479,20 @@ msgstr "%s jednotek nelze odepsat: %s%s%s"
 msgid "%s item(s) withdrawn."
 msgstr "%s jednotek bylo odepsáno."
 
-#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
+#. %1$s:  CASE 'cannot_see_patron_infos'
+#. %2$s:  CASE
+#. %3$s:  blocking_error
+#. %4$s:  END
+#. %5$s:  STOP
+#. %6$s: # Will stop gracefully without processing any more of the template document.
+#. %7$s:  END
+#: intranet-tmpl/prog/en/includes/blocking_errors.inc:4
 #, c-format
-msgid ". Check out anyway?"
-msgstr ". Přesto vypůjčit?"
-
-#. META http-equiv=refresh
-#: intranet-tmpl/prog/en/modules/installer/step3.tt:2
-msgid "5; url=/cgi-bin/koha/mainpage.pl"
-msgstr "5; url=/cgi-bin/koha/mainpage.pl"
+msgid ""
+"%sYou are not allowed to see the information of this patron. %s%s %s %s %s "
+"%s "
+msgstr ""
+"%s Nemáte povoleno zobrazit informace o tomto čtenáři. %s%s %s %s %s %s "
 
 #. %1$s:  type
 #: intranet-tmpl/prog/en/modules/admin/account_types.tt:72
@@ -226,10 +529,30 @@ msgstr "Popis typu účtu"
 msgid "Account types"
 msgstr "Typy účtu"
 
-#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:134
+#. %1$s:  pushAuthResult.addInfo
+#. %2$s:  END
+#. %3$s:  IF ( pushAuthResult.record )
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:86
+#, c-format
+msgid "Added information: %s%s %s"
+msgstr "Doplňující informace %s%s %s"
+
+#. %1$s:  age_low
+#. %2$s:  age_high
+#: intranet-tmpl/prog/en/includes/category-out-of-age-limit.inc:2
+#, c-format
+msgid "Ages allowed are %s-%s. "
+msgstr "Povolený věk je %s-%s. "
+
+#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:124
 #, c-format
 msgid "Another details:"
 msgstr "Další podrobnosti:"
+
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:82
+#, c-format
+msgid "Authority was successfully sent."
+msgstr "Autority byla odeslána."
 
 #. %1$s:  IF ( del )
 #. %2$s:  ELSIF ( withdrawal )
@@ -241,10 +564,10 @@ msgid "Batch item %sdeletion%swithdrawal%smodification%s"
 msgstr "Dávkové %smazání%sodpisy%súprava%s jednotek"
 
 #: intranet-tmpl/prog/en/modules/tools/batchMod.tt:15
-#: intranet-tmpl/prog/en/modules/tools/tools-home.tt:123
+#: intranet-tmpl/prog/en/modules/tools/tools-home.tt:128
 #: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:31
 #: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:37
-#: intranet-tmpl/prog/en/includes/tools-menu.inc:60
+#: intranet-tmpl/prog/en/includes/tools-menu.inc:65
 #, c-format
 msgid "Batch item withdrawal"
 msgstr "Dávkové odpisy jednotek"
@@ -263,7 +586,7 @@ msgstr "Lze vložit ručně"
 #: intranet-tmpl/prog/en/modules/admin/account_types.tt:91
 #, c-format
 msgid "Can be added manually? "
-msgstr "Lze vložit ručně?"
+msgstr "Lze vložit ručně? "
 
 #: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:40
 #: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:41
@@ -271,12 +594,12 @@ msgstr "Lze vložit ručně?"
 msgid "Cannot Withdraw"
 msgstr "Nelze odepsat"
 
-#: intranet-tmpl/prog/en/modules/admin/categories.tt:351
+#: intranet-tmpl/prog/en/includes/category-out-of-age-limit.inc:4
 #, c-format
-msgid "Check previous íssues"
-msgstr "Kontrolovat zdali již měl půjčeno"
+msgid "Change category"
+msgstr "Změnit kategorii"
 
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:186
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:188
 #, c-format
 msgid "Create fine"
 msgstr "Vložit poplatek"
@@ -291,6 +614,11 @@ msgstr "Vytvořit nový typ platby"
 msgid "Create new debit type"
 msgstr "Vytvořit nový typ poplatku"
 
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:109
+#, c-format
+msgid "Date created"
+msgstr "Datum vytvoření"
+
 #: intranet-tmpl/prog/en/modules/admin/account_types.tt:144
 #, c-format
 msgid "Default amount"
@@ -304,7 +632,7 @@ msgstr "Výchozí částka:\t"
 #: intranet-tmpl/prog/en/modules/admin/admin-home.tt:59
 #, c-format
 msgid "Define debit and credit types."
-msgstr "Definuje typy poplatků a plateb"
+msgstr "Definuje typy poplatků a plateb."
 
 #. %1$s:  type
 #. %2$s:  account_type.description
@@ -313,12 +641,32 @@ msgstr "Definuje typy poplatků a plateb"
 msgid "Delete account %s type \"%s?\""
 msgstr "Odstranit typ účtu (%s) \"%s\"?"
 
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:38
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:58
+#, c-format
+msgid "Dokument je rezervován pro knihovnu "
+msgstr "Dokument je rezervován pro knihovnu "
+
+#. %1$s:  pushAuthResult.errMsg
+#. %2$s:  END
+#. %3$s:  IF ( pushAuthResult.addInfo )
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:85
+#, c-format
+msgid "Error message: %s%s %s"
+msgstr "Chybová zpráva: %s%s %s"
+
+#. %1$s:  IF ( pushAuthResult.errMsg )
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:84
+#, c-format
+msgid "Error sending authority. %s"
+msgstr "Při odesílání autority nastala chyba.%s"
+
 #: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:226
 #, c-format
 msgid "Example: 100$7"
 msgstr "Příklad: 100$7"
 
-#: intranet-tmpl/prog/en/includes/members-toolbar.inc:300
+#: intranet-tmpl/prog/en/includes/members-toolbar.inc:306
 #, c-format
 msgid "Example: 5.00 "
 msgstr "Příklad: 5.00 "
@@ -328,45 +676,41 @@ msgstr "Příklad: 5.00 "
 msgid "Example: 900$a"
 msgstr "Příklad: 900$a"
 
-#: intranet-tmpl/prog/en/modules/circ/pendingreserves.tt:100
+#: intranet-tmpl/prog/en/modules/acqui/basket.tt:235
+#: intranet-tmpl/prog/en/modules/acqui/basket.tt:312
 #, c-format
-msgid "First patron"
-msgstr "První čtenář"
+msgid "Export this basket as CSV"
+msgstr "Exportovat tento košík jako CSV"
 
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:78
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:87
 #, c-format
 msgid ""
 "Insert barcode and given item will be immediately remove from any collection "
 "and returned back to home library"
 msgstr ""
 "Vložte čárový kód a daná jednotka bude vrácena ze souboru a přesunuta do své "
-"domovské knihovny."
+"domovské knihovny"
 
-#. For the first occurrence,
-#. %1$s:  borrower.firstname
-#. %2$s:  borrower.surname
-#. %3$s:  borrower.cardnumber
+#: intranet-tmpl/prog/en/modules/catalogue/detail.tt:473
+#, c-format
+msgid "Item is part of rotating collection "
+msgstr "Tato jednotka je součástí výměnného souboru "
+
 #: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:33
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:51
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:52
 #, c-format
-msgid "Item was issued by %s %s (%s) and now is returned"
-msgstr "Jednotka byla vypůjčena čtenáři %s %s (%s) a nyní byla vrácena"
+msgid "Item was issued in the other library and now is returned"
+msgstr "Jednotka byla vypůjčena a nyní byla vrácena"
 
 #. %1$s:  barcode
-#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:40
-#, c-format
-msgid "Item with barcode '%s' added successfully."
-msgstr "Jednotka s čárovým kódem '%s' byla úspěšně přidána!"
-
-#. %1$s:  barcode
-#. %2$s:  IF ( itemInfo )
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:65
+#. %2$s:  IF ( item )
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:69
 #, c-format
 msgid "Item with barcode '%s' was not removed from collection: %s "
 msgstr "Jednotka s čárovým kódem '%s' nemohla být odstraněna ze souboru: %s "
 
 #. %1$s:  barcode
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:57
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:61
 #, c-format
 msgid ""
 "Item with barcode '%s' was removed from a collection and returned to "
@@ -416,6 +760,15 @@ msgstr ""
 msgid "Koha &rsaquo; Tools &rsaquo; Batch item withdrawal"
 msgstr "Koha &rsaquo; Nástroje &rsaquo; Dávkový odpis jednotek"
 
+#: intranet-tmpl/prog/en/includes/permissions.inc:113
+#, c-format
+msgid ""
+"Log into the self check-in module. Note: this permission prevents the patron "
+"from using any other OPAC functionality"
+msgstr ""
+"Přihlásit se do modulu samoobslužného vracení. Poznámka: toto oprávnění je "
+"exkluzivní, tento čtenář nebude moci použít jiné funkce on-line katalogu"
+
 #: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:224
 #, c-format
 msgid "MARC authoritative id field: "
@@ -430,6 +783,12 @@ msgstr "Pole MARCu pro vložení vaší zprávy: "
 #, c-format
 msgid "MARC fields not to send to update server: "
 msgstr "Pole MARCu, která nebudou odesílána: "
+
+#: intranet-tmpl/prog/en/modules/admin/smart-rules.tt:191
+#: intranet-tmpl/prog/en/modules/admin/smart-rules.tt:439
+#, c-format
+msgid "Maximum loan period"
+msgstr "Maximální délka výpůjčky"
 
 #: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:234
 #, c-format
@@ -446,6 +805,12 @@ msgstr "Zpráva odesílaná při aktualizaci záznamu: "
 #, c-format
 msgid "Modify an account %s type"
 msgstr "Upravit typ účtu (%s)"
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:38
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:58
+#, c-format
+msgid "Nalezena rezervace"
+msgstr "Nalezena rezervace"
 
 #: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:260
 #, c-format
@@ -468,30 +833,82 @@ msgstr "Nový typ platby"
 msgid "New debit type"
 msgstr "Nový typ poplatku"
 
+#: intranet-tmpl/prog/en/modules/rotating_collections/editCollections.tt:100
+#, c-format
+msgid "No library, will select during transfer"
+msgstr "Knihovna bude vybrána až při přesunu"
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:80
+#, c-format
+msgid "No, do not add it"
+msgstr "Ne, nepřidávat"
+
 #: intranet-tmpl/prog/en/modules/members/boraccount.tt:133
 #, c-format
 msgid "Notify level"
 msgstr "Úroveň oznámení"
 
-#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:111
 #, c-format
-msgid "Patron has previously checked out this title: "
-msgstr "Tento dokument již měl tento čtenář vypůjčený: "
+msgid "Number of items"
+msgstr "Počet jednotek"
 
-#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:201
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:112
+#, c-format
+msgid "Number of untransferred items"
+msgstr "Počet nepřesunutých jednotek"
+
+#: intranet-tmpl/prog/en/modules/reserve/request.tt:280
+#: intranet-tmpl/prog/en/modules/reserve/request.tt:663
+#, c-format
+msgid "Patron has previously checked out this title on "
+msgstr "Tento dokument již měl tento čtenář vypůjčený dne "
+
+#: intranet-tmpl/prog/en/modules/circ/circulation.tt:163
+#, c-format
+msgid ""
+"Patron was automatically switched by reading the patron card during checking "
+"out. Ensure you are working with the right patron."
+msgstr ""
+"Proběhlo automatické přepnutí na tohoto čtenáře načtením jeho průkazu v "
+"průběhu půjčování. Ujistěte se, že pracujete se správným čtenářem."
+
+#: intranet-tmpl/prog/en/includes/category-out-of-age-limit.inc:2
+#, c-format
+msgid "Patron's age is incorrect for their category."
+msgstr "Věk čtenáře je nesprávný pro jeho kategorii."
+
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:191
 #, c-format
 msgid "Permanent withdrawal:"
 msgstr "Trvalý odpis:"
 
-#: intranet-tmpl/prog/en/includes/authorities-toolbar.inc:67
+#: intranet-tmpl/prog/en/includes/authorities-toolbar.inc:69
 #, c-format
 msgid "Push to Z39.50 server "
 msgstr "Odeslat na Z39.50 server "
 
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:77
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:96
+#, c-format
+msgid "Pushed record"
+msgstr "Odeslaný záznam"
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:86
 #, c-format
 msgid "Remove item"
 msgstr "Odstranit jednotku"
+
+#: intranet-tmpl/prog/en/modules/admin/smart-rules.tt:205
+#: intranet-tmpl/prog/en/modules/admin/smart-rules.tt:453
+#, c-format
+msgid "Renewal period for reserved items"
+msgstr "Rezervované lze prodloužit o"
+
+#: intranet-tmpl/prog/en/modules/admin/smart-rules.tt:204
+#: intranet-tmpl/prog/en/modules/admin/smart-rules.tt:452
+#, c-format
+msgid "Renewals allowed for reserved items (count)"
+msgstr "Povolený počet prodloužení pro rezervované jednotky"
 
 #: intranet-tmpl/prog/en/modules/admin/account_types.tt:77
 #, c-format
@@ -504,10 +921,20 @@ msgstr "Povinné. Maximální délka je 5 znaků"
 msgid "Return to batch item withdrawal"
 msgstr "Návrat k dávkovému odpisu jednotek"
 
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:207
+#, c-format
+msgid "Rotating collection:"
+msgstr "Výměnný soubor:"
+
 #: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:132
 #, c-format
 msgid "Selected withdrawal type is "
 msgstr "Důvod odpisu je "
+
+#: intranet-tmpl/prog/en/includes/permissions.inc:24
+#, c-format
+msgid "Self check modules"
+msgstr "Modul samoobslužných výpůjček"
 
 #: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:221
 #, c-format
@@ -520,6 +947,29 @@ msgstr "Více polí/podpolí oddělte čárkou. Například: 200$7, 005, 900$a"
 msgid "Server type"
 msgstr "Typ serveru"
 
+#: intranet-tmpl/prog/en/modules/authorities/detail.tt:87
+#, c-format
+msgid "Show sent record"
+msgstr "Zobrazit odeslaný záznam"
+
+#: intranet-tmpl/prog/en/modules/about.tt:214
+#, c-format
+msgid ""
+"The patron used for the self checkout module at the OPAC does not have the "
+"self_check => self_checkout_module permission. "
+msgstr ""
+"Uživatel používaný pro modul samoobslužných výpůjček nemá nastaveno "
+"oprávnění self_check => self_checkout_module permission. "
+
+#: intranet-tmpl/prog/en/modules/about.tt:219
+#, c-format
+msgid ""
+"The patron used for the self checkout module at the OPAC has too many "
+"permissions. They should only have self_check => self_checkout_module. "
+msgstr ""
+"Uživatel používaný pro modul samoobslužných výpůjček má příliš mnoho "
+"oprávnění. Měl by mít nastaveno pouze self_check => self_checkout_module. "
+
 #: intranet-tmpl/prog/en/modules/admin/account_types.tt:197
 #, c-format
 msgid "There are no account credit types defined. "
@@ -530,6 +980,11 @@ msgstr "Nejsou definovány žádné typy plateb. "
 msgid "There are no account debit types defined. "
 msgstr "Nejsou definovány žádné typy poplatků. "
 
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:62
+#, c-format
+msgid "This title was at least once in this library. "
+msgstr "Tento dokument byl již alespoň jednou této knihovně zapůjčen. "
+
 #. %1$s:  IF ( too_many_items )
 #. %2$s:  ELSE
 #. %3$s:  END
@@ -538,39 +993,22 @@ msgstr "Nejsou definovány žádné typy poplatků. "
 msgid "This will withdraw %sall the%sthe selected%s items."
 msgstr "Tímto budou odepsány %s všechny %s vybrané %s jednotky."
 
-#. %1$s:  itemInfo.title
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:58
-#, c-format
-msgid "Title: %s \" "
-msgstr "Název: %s \" "
-
-#. For the first occurrence,
-#. %1$s:  itemInfo.title
-#. %2$s:  END
-#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:48
-#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:76
-#: intranet-tmpl/prog/en/modules/rotating_collections/rotatingCollections.tt:68
-#, c-format
-msgid "Title: %s %s "
-msgstr "Název: %s %s "
-
 #. INPUT type=submit name=mainformsubmit
 #: intranet-tmpl/prog/en/modules/tools/batchMod-withdrawal.tt:142
 msgid "Withdraw ALL submitted items"
 msgstr "Odepsat VŠECHNY vložené jednotky"
 
-#: intranet-tmpl/prog/en/modules/tools/tools-home.tt:124
+#: intranet-tmpl/prog/en/modules/tools/tools-home.tt:129
 #, c-format
 msgid "Withdraw a batch of items"
 msgstr "Odepsat dávku jednotek"
 
-#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:217
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:203
 #, c-format
 msgid "Withdraw number:"
 msgstr "Úbytkové číslo:"
 
-#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:210
-#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:212
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:199
 #, c-format
 msgid "Withdraw permanently"
 msgstr "Trvale odepsat"
@@ -590,181 +1028,37 @@ msgstr "Důvod odpisu"
 msgid "Withdrawal reason:"
 msgstr "Důvod odpisu:"
 
-#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:218
+#: intranet-tmpl/prog/en/modules/catalogue/moredetail.tt:204
 #, c-format
 msgid "Withdrawn description:"
 msgstr "Popis odpisu:"
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:70
+#, c-format
+msgid "Would you like to add it to this collection anyway?"
+msgstr "Chcete tuto jednotku přesto zařadit do souboru?"
 
 #: intranet-tmpl/prog/en/modules/members/paycollect.tt:149
 #, c-format
 msgid "Write off outstanding part"
 msgstr "Prominout zbývající část poplatku"
 
-#. %1$s:  # If there is amount outstanding, we have at least two actions (pay, print, sometimes writeoff), so we need dropdown
-#: intranet-tmpl/prog/en/modules/members/boraccount.tt:197
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:76
 #, c-format
-msgid "a %s "
-msgstr " %s "
+msgid "Yes, add it to collection"
+msgstr "Ano, přidat do souboru"
+
+#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:60
+#, c-format
+msgid "You need to confirm adding to collection"
+msgstr "Je třeba potvrdit zařazení jednotky do souboru"
 
 #: intranet-tmpl/prog/en/modules/acqui/basket.tt:6
 #, c-format
 msgid "default"
 msgstr "výchozí"
 
-#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
+#: intranet-tmpl/prog/en/modules/circ/circulation.tt:294
 #, c-format
 msgid "on "
 msgstr "dne "
-
-#. %1$s:  END
-#. %2$s:  END
-#. %3$s:  END
-#. %4$s:  END
-#. %5$s:  BLOCK language
-#. %6$s:  SWITCH lang
-#. %7$s:  CASE ['en', 'eng']
-#. %8$s:  CASE ['fr', 'fre']
-#. %9$s:  CASE ['it', 'ita']
-#. %10$s:  CASE ['de', 'ger', 'deu']
-#. %11$s:  CASE ['es', 'spa']
-#. %12$s:  CASE ['heb']
-#. %13$s:  CASE ['ara']
-#. %14$s:  CASE ['gre']
-#. %15$s:  CASE ['grc']
-#. %16$s:  CASE
-#. %17$s:  lang
-#. %18$s:  END
-#. %19$s:  END
-#: intranet-tmpl/prog/en/includes/authorities-search-results.inc:128
-#, c-format
-msgid ""
-"%s %s %s %s %s %s %sEnglish %sFrench %sItalian %sGerman %sSpanish %sHebrew "
-"%sArabic %sGreek (modern) %sGreek (to 1453) %s%s %s %s "
-msgstr ""
-"%s %s %s %s %s %s %sAngličtina %sFrancouzština %sItalština %sNěmčina "
-"%sŠpanělština %sHebrejština %sArabština %sŘečtina (moderní) %sŘečtina (do "
-"roku 1453) %s%s %s %s "
-
-#. %1$s:  INCLUDE 'doc-head-open.inc'
-#. %2$s:  BLOCK ServerType
-#. %3$s:  IF (server.servertype||type) == 'sru'
-#. %4$s:  ELSIF (server.servertype||type) == 'zed'
-#. %5$s:  END
-#. %6$s:  END
-#: intranet-tmpl/prog/en/modules/admin/z3950servers.tt:1
-#, c-format
-msgid "%s %s %s SRU %s Z39.50 %s %s "
-msgstr "%s %s %s SRU %s Z39.50 %s %s "
-
-#. %1$s:  IF ( ERROR )
-#. %2$s:  IF ( ITEMNUMBER )
-#. %3$s:  END
-#. %4$s:  ELSE
-#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:35
-#, c-format
-msgid ""
-"%s %s ERROR an invalid itemnumber was entered, please hit back and try again "
-"%s %s "
-msgstr ""
-"%s %s CHYBA: bylo zadáno neplatné přírůstkové číslo, klikněte na zpět a "
-"zkuste to znovu %s %s "
-
-#. %1$s:  SWITCH account.accounttype
-#. %2$s:  CASE 'Pay'
-#. %3$s:  CASE 'Pay00'
-#. %4$s:  CASE 'Pay01'
-#. %5$s:  CASE 'Pay02'
-#. %6$s:  CASE 'N'
-#. %7$s:  CASE 'F'
-#. %8$s:  CASE 'A'
-#. %9$s:  CASE 'M'
-#. %10$s:  CASE 'L'
-#. %11$s:  CASE 'W'
-#. %12$s:  CASE 'FU'
-#. %13$s:  CASE 'HE'
-#. %14$s:  CASE 'Rent'
-#. %15$s:  CASE 'FOR'
-#. %16$s:  CASE 'LR'
-#. %17$s:  CASE 'PAY'
-#. %18$s:  CASE 'WO'
-#. %19$s:  CASE 'C'
-#. %20$s:  CASE 'CR'
-#. %21$s:  CASE
-#. %22$s:  account.accounttype
-#. %23$s: - END -
-#. %24$s: - IF account.description
-#. %25$s:  account.description
-#. %26$s:  END
-#. %27$s:  IF ( account.itemnumber )
-#: intranet-tmpl/prog/en/modules/members/boraccount.tt:84
-#, c-format
-msgid ""
-"%s %sPayment, thanks %sPayment, thanks (cash via SIP2) %sPayment, thanks "
-"(VISA via SIP2) %sPayment, thanks (credit card via SIP2) %sNew card %sFine "
-"%sAccount management fee %sSundry %sLost item %sWriteoff %sAccruing fine "
-"%sHold waiting too long %sRental fee %sForgiven %sLost item fee refund "
-"%sPayment %sWriteoff %sCredit %sCredit %s%s %s %s, %s%s &nbsp;%s"
-msgstr ""
-"%s %sPlatba, díky %sPlatba, díky (hotově přes SIP2) %sPlatba, díky (VISA "
-"přes SIP2) %sPlatba, díky (kreditní karta přes SIP2) %sDuplikát průkazky "
-"%sPoplatek %sRegistrační poplatek %sOstatní %sZtracený dokument %s Prominuto "
-"%sNabíhající upomínka %sDlouho čekající rezervace %sPoplatek za půjčení "
-"%sProminuto %sVrácení poplatku za ztrátu dokumentu %sPlatba %sProminuto "
-"%sKredit %sKredit %s%s %s %s, %s%s &nbsp;%s"
-
-#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:18
-#, c-format
-msgid "&rsaquo; Manual invoice"
-msgstr "&rsaquo; Další poplatky"
-
-#. META http-equiv=refresh
-#: intranet-tmpl/prog/en/modules/installer/step3.tt:2
-msgid "10; url=/cgi-bin/koha/mainpage.pl"
-msgstr "10; url=/cgi-bin/koha/mainpage.pl"
-
-#. %1$s:  IF ( del )
-#. %2$s:  ELSE
-#. %3$s:  END
-#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:23
-#, c-format
-msgid "Batch item %sdeletion%smodification%s"
-msgstr "%sDávkové mazání%sDávková úprava%s jednotek"
-
-#: intranet-tmpl/prog/en/modules/members/mancredit.tt:44
-#, c-format
-msgid "Forgiven"
-msgstr "Prominuto"
-
-#. %1$s:  barcode
-#: intranet-tmpl/prog/en/modules/rotating_collections/addItems.tt:34
-#, c-format
-msgid "Item with barcode '%s' added successfully"
-msgstr "Jednotka s čárovým kódem '%s' byla úspěšně přidána!"
-
-#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:3
-#, c-format
-msgid "Koha &rsaquo; Patrons &rsaquo; Create manual invoice"
-msgstr "Koha &rsaquo; Čtenáři &rsaquo; Další platby"
-
-#. %1$s:  IF ( del )
-#. %2$s:  ELSE
-#. %3$s:  END
-#: intranet-tmpl/prog/en/modules/tools/batchMod.tt:2
-#, c-format
-msgid ""
-"Koha &rsaquo; Tools &rsaquo; %sBatch item deletion%sBatch item modification"
-"%s "
-msgstr ""
-"Koha &rsaquo; Nástroje &rsaquo; %sZrušení položky v dávce%sZměna položky v "
-"dávce%s "
-
-#: intranet-tmpl/prog/en/modules/members/maninvoice.tt:44
-#, c-format
-msgid "Manual invoice"
-msgstr "Další poplatky"
-
-#: intranet-tmpl/prog/en/modules/circ/circulation.tt:286
-#, c-format
-msgid ""
-"This item has previously been checked out to this patron. Check out anyway?"
-msgstr "Tuto jednotku již měl tento čtenář vypůjčenou. Přesto vypůjčit?"
