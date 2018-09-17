@@ -33,7 +33,7 @@ rm misc/translator/po/cs-CZ-pref.po
 echo "Build finished, press any key to upload deb files to repository server..."
 read -n 1 -s
 
-scp "../debian/koha-*_${VERSION}-*_all.deb" $USER@$SERVER:/root/kohadeb/
+scp ../debian/koha-*_${VERSION}-*_all.deb $USER@$SERVER:/root/kohadeb/
 
 ssh $USER@$SERVER <<ENDSSH
     cd /root/
