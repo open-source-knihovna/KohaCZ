@@ -203,6 +203,21 @@ __PACKAGE__->set_primary_key("branchcode");
 
 =head1 RELATIONS
 
+=head2 account_offsets
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::AccountOffset>
+
+=cut
+
+__PACKAGE__->has_many(
+  "account_offsets",
+  "Koha::Schema::Result::AccountOffset",
+  { "foreign.transaction_library" => "self.branchcode" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 aqbaskets
 
 Type: has_many

@@ -161,6 +161,8 @@ sub remove_item {
 
     my $delete = $collection_tracking->delete;
 
+    
+
     return $delete;
 }
 
