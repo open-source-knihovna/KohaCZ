@@ -2036,7 +2036,7 @@ CREATE TABLE `statistics` ( -- information related to transactions (circulation 
   `branch` varchar(10) default NULL, -- foreign key, branch where the transaction occurred
   `proccode` varchar(4) default NULL, -- type of procedure used when making payments (does not appear in the code)
   `value` double(16,4) default NULL, -- monetary value associated with the transaction
-  `type` varchar(16) default NULL, -- transaction type (locause, issue, return, renew, writeoff, payment, Credit*)
+  `type` varchar(16) default NULL, -- transaction type (localuse, issue, return, renew, writeoff, payment)
   `other` mediumtext, -- used by SIP
   `usercode` varchar(10) default NULL, -- unused in Koha
   `itemnumber` int(11) default NULL, -- foreign key from the items table, links transaction to a specific item
@@ -2153,6 +2153,7 @@ CREATE TABLE `subscription` ( -- information related to the subscription
   `itemtype` VARCHAR( 10 ) NULL,
   `previousitemtype` VARCHAR( 10 ) NULL,
   PRIMARY KEY  (`subscriptionid`),
+  KEY `by_biblionumber` (`biblionumber`),
   CONSTRAINT subscription_ibfk_1 FOREIGN KEY (periodicity) REFERENCES subscription_frequencies (id) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT subscription_ibfk_2 FOREIGN KEY (numberpattern) REFERENCES subscription_numberpatterns (id) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -2931,8 +2932,8 @@ CREATE TABLE `aqbudgets` ( -- information related to Funds
   `budget_name` varchar(80) default NULL, -- name assigned to the fund by the user
   `budget_branchcode` varchar(10) default NULL, -- branch that this fund belongs to (branches.branchcode)
   `budget_amount` decimal(28,6) NULL default '0.00', -- total amount for this fund
-  `budget_encumb` decimal(28,6) NULL default '0.00', -- not used in the code
-  `budget_expend` decimal(28,6) NULL default '0.00', -- not used in the code
+  `budget_encumb` decimal(28,6) NULL default '0.00', -- budget warning at percentage
+  `budget_expend` decimal(28,6) NULL default '0.00', -- budget warning at amount
   `budget_notes` mediumtext, -- notes related to this fund
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP, -- date and time this fund was last touched (created or modified)
   `budget_period_id` int(11) default NULL, -- id of the budget that this fund belongs to (aqbudgetperiods.budget_period_id)

@@ -316,7 +316,8 @@
                 </xsl:call-template>
                 <xsl:text> </xsl:text>
                 <!-- 13381 add additional subfields-->
-                <xsl:for-each select="marc:subfield[contains('bchknps', @code)]">
+                <!-- bz 17625 adding subfields f and g -->
+                <xsl:for-each select="marc:subfield[contains('bcfghknps', @code)]">
                     <xsl:choose>
                         <xsl:when test="@code='h'">
                             <!--  13381 Span class around subfield h so it can be suppressed via css -->
@@ -886,7 +887,7 @@
             <xsl:call-template name="chopPunctuation">
               <xsl:with-param name="chopString">
                 <xsl:call-template name="subfieldSelect">
-                    <xsl:with-param name="codes">abceg</xsl:with-param>
+                    <xsl:with-param name="codes">abcefg</xsl:with-param>
                 </xsl:call-template>
                </xsl:with-param>
            </xsl:call-template>

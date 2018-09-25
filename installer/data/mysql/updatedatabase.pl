@@ -15464,6 +15464,39 @@ if( CheckVersion( $DBversion ) ) {
     print "Upgrade to $DBversion done (17.11.09 release)\n";
 }
 
+$DBversion = '17.11.09.001';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q{DELETE FROM systempreferences where variable="OCLCAffiliateID";});
+    $dbh->do(q{DELETE FROM systempreferences where variable="XISBN";});
+    $dbh->do(q{DELETE FROM systempreferences where variable="XISBNDailyLimit";});
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 21226 - Remove prefs OCLCAffiliateID, XISBN and XISBNDailyLimit)\n";
+}
+
+$DBversion = '17.11.09.002';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q|INSERT IGNORE INTO authorised_value_categories (category_name) VALUES ('ROADTYPE');|);
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 21144: Add ROADTYPE to default authorised values categories)\n";
+}
+
+$DBversion = '17.11.09.003';
+if( CheckVersion( $DBversion ) ) {
+    unless ( index_exists( 'subscription', 'by_biblionumber' ) ) {
+        $dbh->do(q{
+            CREATE INDEX `by_biblionumber` ON `subscription` (`biblionumber`)
+        });
+    }
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 21288: Slowness in acquisition caused by GetInvoices\n";
+}
+
+$DBversion = '17.11.10.000';
+if( CheckVersion( $DBversion ) ) {
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (17.11.10 release)\n";
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.
