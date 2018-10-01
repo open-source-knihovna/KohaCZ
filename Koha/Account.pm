@@ -250,18 +250,6 @@ sub pay {
         $o->store();
     }
 
-    $library_id ||= $userenv ? $userenv->{'branch'} : undef;
-
-    UpdateStats(
-        {
-            branch         => $library_id,
-            type           => $type,
-            amount         => $amount,
-            borrowernumber => $self->{patron_id},
-            accountno      => $accountno,
-        }
-    );
-
     if ( C4::Context->preference("FinesLog") ) {
         logaction(
             "FINES", 'CREATE',
