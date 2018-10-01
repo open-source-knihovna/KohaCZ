@@ -890,6 +890,21 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 collections
+
+Type: has_many
+
+Related object: L<Koha::Schema::Result::Collection>
+
+=cut
+
+__PACKAGE__->has_many(
+  "collections",
+  "Koha::Schema::Result::Collection",
+  { "foreign.createdBy" => "self.borrowernumber" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 course_instructors
 
 Type: has_many
@@ -1386,8 +1401,8 @@ Composing rels: L</aqorder_users> -> ordernumber
 __PACKAGE__->many_to_many("ordernumbers", "aqorder_users", "ordernumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-11-09 11:42:45
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:UitEC1xK/a76Ff4ZCS2BKA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2018-10-01 06:42:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Jjd/kgAZv4Rzv27GCSuNcg
 
 __PACKAGE__->belongs_to(
     "guarantor",

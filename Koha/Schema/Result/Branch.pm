@@ -634,8 +634,8 @@ Composing rels: L</branchrelations> -> categorycode
 __PACKAGE__->many_to_many("categorycodes", "branchrelations", "categorycode");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2017-11-09 11:42:45
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:LmN2FlbKiZTRX+egCHuDjQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2018-10-01 06:42:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rPbZEFc/97k9ioNZyOKXJA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

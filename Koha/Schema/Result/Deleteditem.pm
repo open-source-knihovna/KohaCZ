@@ -411,8 +411,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("itemnumber");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2016-03-31 17:10:17
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:npNexLgE7AxLp6iVy1FxgQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2018-10-01 06:42:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tJS+f2hIgevJNazTl/wviQ
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -706,8 +706,8 @@ __PACKAGE__->might_have(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2018-03-05 11:15:27
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:+SVF41JJgpeEiLgy9KXznw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2018-10-01 06:42:08
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sQiPdVY39N4LVrFzZf3DlA
 
 __PACKAGE__->belongs_to( biblioitem => "Koha::Schema::Result::Biblioitem", "biblioitemnumber" );
 
