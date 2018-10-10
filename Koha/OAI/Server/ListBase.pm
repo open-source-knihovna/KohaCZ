@@ -71,6 +71,7 @@ sub GetRecords {
                 OR biblionumber IN (SELECT biblionumber from deleteditems WHERE timestamp >= ? AND timestamp <= ?)
             ";
             push @bind_params, ($token->{'from_arg'}, $token->{'until_arg'});
+
             if (!$deleted) {
                 $sql .= "
                     OR biblionumber IN (SELECT biblionumber from items WHERE timestamp >= ? AND timestamp <= ?)
@@ -151,7 +152,14 @@ sub GetRecords {
             }
             if ( $metadata ) {
                 my $marcxml = !$deleted ? $repository->get_biblio_marcxml($biblionumber, $format) : undef;
-                if ( $marcxml ) {
+
+                # When all items are withdrawn (this search return 0), we consider the record as deleted too
+                my $number_of_items = Koha::Items->search({
+                    biblionumber => $biblionumber,
+                    withdrawn => 0,
+                })->count;
+
+                if ( $marcxml && $number_of_items ) {
                   $self->record( Koha::OAI::Server::Record->new(
                       $repository, $marcxml, $timestamp, \@setSpecs,
                       identifier      => $repository->{ koha_identifier } . ':' . $biblionumber,
