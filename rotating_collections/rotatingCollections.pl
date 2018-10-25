@@ -24,6 +24,7 @@ use C4::Output;
 use C4::Auth;
 use C4::Context;
 use C4::Circulation;
+use C4::Items;
 
 use Koha::Items;
 use Koha::RotatingCollections;
@@ -47,6 +48,7 @@ if ( $action eq 'removeItem' ) {
     my $barcode = $query->param('barcode');
     my $item = Koha::Items->find({ barcode => $barcode });
     if ( $item ) {
+        ModDateLastSeen( $item->itemnumber );
         if ( $item->checkout ) {
             $template->param( returnNote => "ITEM_ISSUED" );
             AddReturn($barcode);

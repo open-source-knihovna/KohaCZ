@@ -57,6 +57,7 @@ if ( $action eq 'addItem' ) {
     my $barcode    = $query->param('barcode');
     my $removeItem = $query->param('removeItem');
     my $item       = Koha::Items->find( { barcode => $barcode } );
+    ModDateLastSeen( $item->itemnumber );
     my $was_before_in_library = 0;
 
     if (defined $collection->colBranchcode && !$confirmed) {
@@ -72,6 +73,11 @@ if ( $action eq 'addItem' ) {
     if ($was_before_in_library && !$confirmed) {
         push @needconfirmation, { code => 'was_before_in_library' };
     } elsif ( !$removeItem ) {
+        # If item is part of a collection, remove it befora adding to this collection
+        my $old_collection = $item->rotating_collection;
+        if ($old_collection) {
+            $old_collection->remove_item( $item );
+        }
         my $added = eval { $collection->add_item( $item ) };
 
         if ( $@ or not $added ) {
