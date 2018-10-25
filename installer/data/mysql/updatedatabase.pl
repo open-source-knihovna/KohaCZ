@@ -15503,6 +15503,42 @@ if( CheckVersion( $DBversion ) ) {
     print "Upgrade to $DBversion done (17.11.10 release)\n";
 }
 
+$DBversion = '17.11.10.001';
+if( CheckVersion( $DBversion ) ) {
+    # We make some mistakes before when creating offsets from statistis, better to do it again
+    $dbh->do( "DELETE FROM account_offsets" );
+
+    $dbh->do( q{
+        INSERT INTO account_offsets (credit_id, debit_id, type, amount, created_on, transaction_library)
+        SELECT p.accountlines_id AS credit_id, s.other AS debit_id,
+            "Payment" AS type, s.value * -1 AS amount,
+            p.timestamp AS created_on, b.branchcode AS transaction_library
+        FROM accountlines p
+        JOIN statistics s ON abs(p.timestamp - s.datetime) < 2 AND p.borrowernumber = s.borrowernumber and s.type = "payment"
+        JOIN accountlines d ON s.other = d.accountlines_id
+        LEFT OUTER JOIN branches b ON s.branch = b.branchcode
+        WHERE p.accounttype LIKE "Pay%"
+    });
+
+    $dbh->do( q{
+        INSERT IGNORE INTO `letter` (module, code, branchcode, name, is_html, title, content, message_transport_type)
+        VALUES ('reserves','HOLDPLACED_CONTACT','','Hold Placed on Item, Contact Patrons','0','Item Return Required','Dear <<borrowers.firstname>> <<borrowers.surname>>,\r\na hold has been placed on the following item: <<biblio.title>> (<<biblio.biblionumber>>) by another patron. Please, return it as soon as possible.\r\n\r\nThank you!','email')
+    });
+
+    $dbh->do( q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('NotifyToReturnItemWhenHoldIsPlaced', '0', 'If ON, notifies the patrons to return an item whenever a hold is placed on it', NULL, 'YesNo')
+    });
+
+    $dbh->do( q{
+        INSERT IGNORE INTO systempreferences (variable,value,explanation,options,type) VALUES ('NotifyToReturnItemFromLibrary', 'ItemHomeLibrary', 'Restricts what library to take into consideration when notifying patrons to return items on hold', 'RequestorLibrary|ItemHomeLibrary|AnyLibrary', 'Choice')
+    });
+
+    SetVersion( $DBversion );
+    print "Upgrade do $DBversion done (Fix account offsets)\n";
+    print "Upgrade done (Bug 17509 - Notify patrons about hold requested on their checkouts)\n";
+}
+
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.
