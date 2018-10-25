@@ -161,7 +161,7 @@ sub remove_item {
 
     my $delete = $collection_tracking->delete;
 
-    
+    $item->holdingbranch($item->homebranch)->store;
 
     return $delete;
 }
