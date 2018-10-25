@@ -15506,7 +15506,9 @@ if( CheckVersion( $DBversion ) ) {
 $DBversion = '17.11.10.001';
 if( CheckVersion( $DBversion ) ) {
     # We make some mistakes before when creating offsets from statistis, better to do it again
-    $dbh->do( "DELETE FROM account_offsets" );
+    $dbh->do( q{
+        DELETE FROM account_offsets WHERE type="Payment"
+    });
 
     $dbh->do( q{
         INSERT INTO account_offsets (credit_id, debit_id, type, amount, created_on, transaction_library)
