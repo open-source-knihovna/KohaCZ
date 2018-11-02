@@ -461,7 +461,7 @@ msgid ""
 "%s This item is not part of any collection. %s The barcode was not found in "
 "the database. %s%s%s "
 msgstr ""
-"%s Tato jednotak není v žádném souboru. %s Čárový kód nebyl v databázi "
+"%s Tato jednotka není v žádném souboru. %s Čárový kód nebyl v databázi "
 "nalezen. %s%s%s "
 
 #. %1$s:  not_deleted_items
