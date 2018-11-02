@@ -1,3 +1,4 @@
+[%- USE KohaPlugins -%]
 [% UNLESS ( is_popup ) %]
     [% SET OpacLangSelectorMode = Koha.Preference('OpacLangSelectorMode') %]
     [% IF ( opaccredits ) %]
@@ -157,15 +158,18 @@ $.widget.bridge('uitooltip', $.ui.tooltip);
         Dopop('opac-addbybiblionumber.pl?biblionumber=[% biblionumber | html %]');
         return false;
     });
-    $(".addrecord").on("click",function(){
-        addRecord('[% biblionumber | html %]');
-        return false;
+    $("body").on("click", ".addtocart", function(e){
+        e.preventDefault();
+        var biblionumber = $(this).data("biblionumber");
+        addRecord( biblionumber );
     });
-    $(".cartRemove").on("click",function(){
-        delSingleRecord('[% biblionumber | html %]');
-        return false;
+    $("body").on("click", ".cartRemove", function(e){
+        e.preventDefault();
+        var biblionumber = $(this).data("biblionumber");
+        delSingleRecord( biblionumber );
     });
-    $(".clearsh").on("click", function(){
+    $(".clearsh").on("click", function(e){
+        e.preventDefault();
         return confirmDelete(MSG_DELETE_SEARCH_HISTORY);
     });
     //]]>
@@ -271,5 +275,6 @@ $(document).ready(function() {
         </script>
     [% END %]
 [% END %]
+[% KohaPlugins.get_plugins_opac_js %]
 </body>
 </html>

@@ -1,4 +1,5 @@
 [% USE Koha %]
+[% USE KohaPlugins %]
 [% USE String %]
 [% PROCESS 'html_helpers.inc' %]
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -22,6 +23,8 @@
     <link rel="stylesheet" type="text/css" href="[% interface %]/[% theme %]/css/login.css" />
 [% END %]
 [% IF ( IntranetUserCSS ) %]<style type="text/css">[% IntranetUserCSS %]</style>[% END %]
+
+[% KohaPlugins.get_plugins_intranet_head %]
 
 [% UNLESS ( footerjs ) %]
     [% INCLUDE js_includes.inc %]

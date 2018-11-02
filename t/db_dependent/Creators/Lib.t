@@ -18,7 +18,7 @@
 
 use Modern::Perl;
 use Graphics::Magick;
-use Test::More tests => 645;
+use Test::More tests => 646;
 use Test::MockModule;
 use t::lib::Mocks;
 use t::lib::TestBuilder;
@@ -87,7 +87,7 @@ my $query = '
      (profile_id      , template_code, template_desc, page_width,
       page_height     , label_width  , label_height , top_text_margin,
       left_text_margin, top_margin   , left_margin  , cols,
-      rows            , col_gap      , row_gap      , units,
+      `rows`            , col_gap      , row_gap      , units,
       creator)
   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)';
 my $insert_sth = $dbh->prepare($query);
@@ -369,7 +369,7 @@ $templates = get_all_templates( { filters => { rows => 7} } );
 $query = '
   SELECT count(*)
   FROM   creator_templates
-  WHERE  rows = 7
+  WHERE  `rows` = 7
   ';
 $count = $dbh->selectrow_array($query);
 is( $count,      1,      'There is 1 template matching' );
@@ -398,7 +398,7 @@ is( $templates->[0]->{creator},          'Labels',     'creator          is good
 $templates = get_all_templates( { filters => { rows => [-42, 7]} } );
 is( @$templates, $count, 'There is 1 template matching' );
 # With orderby param ------------------
-$templates = get_all_templates( { orderby => 'rows DESC' } );
+$templates = get_all_templates( { orderby => '`rows` DESC' } );
 
 $query = '
   SELECT    count(*)
@@ -1438,6 +1438,16 @@ is( $records->[0]->{firstname},    $firstname1,   'firstname    is good' );
 is( $records->[0]->{cardnumber},   $cardnumber1,  'cardnumber   is good' );
 is( $records->[0]->{branchcode},   $branchcode,   'branchcode   is good' );
 is( $records->[0]->{categorycode}, $categorycode, 'categorycode is good' );
+
+subtest '_add_backtics' => sub {
+    plan tests => 7;
+    my @a = ( 'rows', 'rows ', ' rows ', 'table.rows,field2', 'table.field1, table.field_2_a', 'table1.*, *', 'COUNT(id) AS mycount, count(*) as mycount2' );
+    my @a_exp = ( '`rows`', '`rows` ', ' `rows` ', '`table`.`rows`,`field2`', '`table`.`field1`, `table`.`field_2_a`', '`table1`.*, *', 'COUNT(`id`) AS `mycount`, COUNT(*) AS `mycount2`' ); # expected results
+    my @b = C4::Creators::Lib::_add_backtics(@a);
+    while( my $f = shift @a_exp ) {
+        is( shift @b, $f, (shift @a). ' became '. $f );
+    }
+};
 
 # ---------- Sub ------------------------------------------
 my %preferences;

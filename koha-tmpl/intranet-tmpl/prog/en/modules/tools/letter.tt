@@ -226,7 +226,21 @@ $(document).ready(function() {
                 [% can_edit = lette.branchcode || !independant_branch %]
                 <tr>
                   <td>[% IF lette.branchname %][% lette.branchname %][% ELSE %](All libraries)[% END %]</td>
-                  <td>[% lette.module %]</td>
+                  <td>
+                      [% SWITCH lette.module %]
+                          [% CASE 'acquisition' %]<span>Acquisition</span>
+                          [% CASE 'catalogue' %]<span>Catalog</span>
+                          [% CASE 'circulation' %]<span>Circulation</span>
+                          [% CASE 'orderacquisition' %]<span>Order acquisition</span>
+                          [% CASE 'claimacquisition' %]<span>Claim acquisition</span>
+                          [% CASE 'claimissues' %]<span>Claim serial issue</span>
+                          [% CASE 'reserves' %]<span>Holds</span>
+                          [% CASE 'members' %]<span>Patrons</span>
+                          [% CASE 'serial' %]<span>Serials (new issue)</span>
+                          [% CASE 'suggestions' %]<span>Suggestions</span>
+                          [% CASE %]<span>[% lette.module | html %]</span>
+                      [% END %]
+                  </td>
                   <td>[% lette.code %]</td>
                   <td>[% lette.name %]</td>
                   <td class="actions">
@@ -367,9 +381,9 @@ $(document).ready(function() {
                                       <option value="reserves">Holds</option>
                                     [% END %]
                                     [% IF ( module == "members" ) %]
-                                      <option value="members" selected="selected">Members</option>
+                                      <option value="members" selected="selected">Patrons</option>
                                     [% ELSE %]
-                                      <option value="members">Members</option>
+                                      <option value="members">Patrons</option>
                                     [% END %]
                                     [% IF ( module == "serial" ) %]
                                       <option value="serial" selected="selected">Serials (routing list)</option>

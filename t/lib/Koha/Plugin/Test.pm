@@ -58,6 +58,26 @@ sub opac_online_payment_end {
     return "Koha::Plugin::Test::opac_online_payment_end";
 }
 
+sub opac_head {
+    my ( $self, $args ) = @_;
+    return "Koha::Plugin::Test::opac_head";
+}
+
+sub opac_js {
+    my ( $self, $args ) = @_;
+    return "Koha::Plugin::Test::opac_js";
+}
+
+sub intranet_head {
+    my ( $self, $args ) = @_;
+    return "Koha::Plugin::Test::intranet_head";
+}
+
+sub intranet_js {
+    my ( $self, $args ) = @_;
+    return "Koha::Plugin::Test::intranet_js";
+}
+
 sub configure {
     my ( $self, $args ) = @_;
     return "Koha::Plugin::Test::configure";;
@@ -66,6 +86,11 @@ sub configure {
 sub install {
     my ( $self, $args ) = @_;
     return "Koha::Plugin::Test::install";
+}
+
+sub upgrade {
+    my ( $self, $args ) = @_;
+    return "Koha::Plugin::Test::upgrade";
 }
 
 sub uninstall {

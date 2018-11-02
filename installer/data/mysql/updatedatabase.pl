@@ -15540,6 +15540,21 @@ if( CheckVersion( $DBversion ) ) {
     print "Upgrade done (Bug 17509 - Notify patrons about hold requested on their checkouts)\n";
 }
 
+$DBversion = '17.11.10.002';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do(q|ALTER TABLE items                   CHANGE COLUMN ccode ccode varchar(80) default NULL|);
+    $dbh->do(q|ALTER TABLE deleteditems            CHANGE COLUMN ccode ccode varchar(80) default NULL|);
+    $dbh->do(q|ALTER TABLE branch_transfer_limits  CHANGE COLUMN ccode ccode varchar(80) default NULL|);
+    $dbh->do(q|ALTER TABLE course_items            CHANGE COLUMN ccode ccode varchar(80) default NULL|);
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 5458: length of items.ccode disagrees with authorised_values.authorised_value)\n";
+}
+
+$DBversion = '17.11.11.000';
+if( CheckVersion( $DBversion ) ) {
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (17.11.11 release)\n";
+}
 
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068

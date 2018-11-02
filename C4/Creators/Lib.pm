@@ -67,7 +67,8 @@ C4::Creators::Lib
 
 sub _SELECT {
     my @params = @_;
-    my $query = "SELECT $params[0] FROM $params[1]";
+    my $fieldname = _add_backtics($params[0]);
+    my $query = "SELECT $fieldname FROM $params[1]";
     $params[2] ? $query .= " WHERE $params[2];" : $query .= ';';
     my $sth = C4::Context->dbh->prepare($query);
 #    $sth->{'TraceLevel'} = 3;
@@ -81,6 +82,19 @@ sub _SELECT {
         push(@$record_set, $row);
     }
     return $record_set;
+}
+
+sub _add_backtics {
+    my ( @args ) = @_;
+    s/(?:^|\b)(\w+)(?:\b|$)/`$1`/g for @args;
+    # Too bad that we need to correct a few exceptions: aggregate functions
+    my @aggregates = ( 'COUNT', 'MAX', 'MIN', 'SUM' ); # add when needed..
+    foreach my $aggr (@aggregates) {
+        s/`$aggr`\(/$aggr\(/gi for @args;
+    }
+    # And correct aliases
+    s/(`|\))\s+`AS`\s+`/$1 AS `/gi for @args;
+    return wantarray ? @args : $args[0];
 }
 
 my $barcode_types = [
@@ -144,17 +158,17 @@ my $output_formats = [
 
 sub _build_query {
     my ( $params, $table ) = @_;
-    my @fields = exists $params->{fields} ? @{ $params->{fields} } : ();
-    my $query = "SELECT " . ( @fields ? join(', ', @fields ) : '*' ) . " FROM $table";
+    my @fields = exists $params->{fields} ? _add_backtics( @{ $params->{fields} } ) : ('*');
+    my $query = "SELECT " . join(', ', @fields ) . " FROM $table";
     my @where_args;
     if ( exists $params->{filters} ) {
         $query .= ' WHERE 1 ';
         while ( my ( $field, $values ) = each %{ $params->{filters} } ) {
             if ( ref( $values ) ) {
-                $query .= " AND $field IN ( " . ( ('?,') x (@$values-1) ) . "? ) "; # a comma separates elements in a list...
+                $query .= " AND `$field` IN ( " . ( ('?,') x (@$values-1) ) . "? ) "; # a comma separates elements in a list...
                 push @where_args, @$values;
             } else {
-                $query .= " AND $field = ? ";
+                $query .= " AND `$field` = ? ";
                 push @where_args, $values;
             }
         }
