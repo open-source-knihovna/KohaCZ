@@ -57,55 +57,61 @@ if ( $action eq 'addItem' ) {
     my $barcode    = $query->param('barcode');
     my $removeItem = $query->param('removeItem');
     my $item       = Koha::Items->find( { barcode => $barcode } );
-    ModDateLastSeen( $item->itemnumber );
-    my $was_before_in_library = 0;
-
-    if (defined $collection->colBranchcode && !$confirmed) {
-        my $library = Koha::Libraries->find($collection->colBranchcode);
-        $was_before_in_library = $item->biblio->was_in_library_before($library);
-    }
-
-    my ( $success, $errorCode, $errorMessage );
 
     $template->param( barcode => $barcode );
-    $template->param( item => $item );
 
-    if ($was_before_in_library && !$confirmed) {
-        push @needconfirmation, { code => 'was_before_in_library' };
-    } elsif ( !$removeItem ) {
-        # If item is part of a collection, remove it befora adding to this collection
-        my $old_collection = $item->rotating_collection;
-        if ($old_collection) {
-            $old_collection->remove_item( $item );
-        }
-        my $added = eval { $collection->add_item( $item ) };
-
-        if ( $@ or not $added ) {
-            push @errors, { code => 'error_adding_item' };
-        } else {
-            push @messages, { code => 'success_adding_item' };
-        }
+    if ( !$item ) {
+       push @errors, { code => 'error_barcode_not_found' };
     } else {
-        ## Remove the given item from the collection
-        my $deleted = eval { $collection->remove_item( $item ) };
-        my ($doreturn, $messages, $iteminformation, $borrower);
+        ModDateLastSeen( $item->itemnumber );
+        my $was_before_in_library = 0;
 
-        if ( $item->checkout ) {
-          $template->param( returnNote => "ITEM_ISSUED" );
-          AddReturn($barcode);
+        if (defined $collection->colBranchcode && !$confirmed && $item)  {
+            my $library = Koha::Libraries->find($collection->colBranchcode);
+            $was_before_in_library = $item->biblio->was_in_library_before($library);
         }
 
-        if ( $@ or not $deleted ) {
-            push @errors, { code => 'error_removing_item' };
+        my ( $success, $errorCode, $errorMessage );
+
+        $template->param( item => $item );
+
+        if ($was_before_in_library && !$confirmed) {
+            push @needconfirmation, { code => 'was_before_in_library' };
+        } elsif ( !$removeItem ) {
+            # If item is part of a collection, remove it befora adding to this collection
+            my $old_collection = $item->rotating_collection;
+            if ($old_collection) {
+                $old_collection->remove_item( $item );
+            }
+            my $added = eval { $collection->add_item( $item ) };
+
+            if ( $@ or not $added ) {
+                push @errors, { code => 'error_adding_item' };
+            } else {
+                push @messages, { code => 'success_adding_item' };
+            }
         } else {
-            push @messages, { code => 'success_removing_item' };
-            my $hold_library = Koha::RotatingCollections->get_hold_from_lists($item);
-            $template->param( hold_library => $hold_library );
-        }
+            ## Remove the given item from the collection
+            my $deleted = eval { $collection->remove_item( $item ) };
+            my ($doreturn, $messages, $iteminformation, $borrower);
 
-        $template->param(
-            removeChecked => 1,
-        );
+            if ( $item->checkout ) {
+              $template->param( returnNote => "ITEM_ISSUED" );
+              AddReturn($barcode);
+            }
+
+            if ( $@ or not $deleted ) {
+                push @errors, { code => 'error_removing_item' };
+            } else {
+                push @messages, { code => 'success_removing_item' };
+                my $hold_library = Koha::RotatingCollections->get_hold_from_lists($item);
+                $template->param( hold_library => $hold_library );
+            }
+
+            $template->param(
+                removeChecked => 1,
+            );
+        }
     }
 }
 
