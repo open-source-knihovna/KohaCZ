@@ -15556,6 +15556,27 @@ if( CheckVersion( $DBversion ) ) {
     print "Upgrade to $DBversion done (17.11.11 release)\n";
 }
 
+$DBversion = '17.11.11.001';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do( "alter table statistics change column ccode ccode varchar(80) default NULL" );
+
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 21617: Make statistics.ccode longer)\n";
+}
+
+$DBversion = '17.11.11.002';
+if( CheckVersion( $DBversion ) ) {
+    $dbh->do( "ALTER TABLE edifact_ean MODIFY branchcode VARCHAR(10) NULL DEFAULT NULL" );
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (Bug 21417 - EDI ordering fails when basket and EAN libraries do not match)\n";
+}
+
+$DBversion = '17.11.12.000';
+if( CheckVersion( $DBversion ) ) {
+    SetVersion( $DBversion );
+    print "Upgrade to $DBversion done (17.11.12 release)\n";
+}
+
 # DEVELOPER PROCESS, search for anything to execute in the db_update directory
 # SEE bug 13068
 # if there is anything in the atomicupdate, read and execute it.

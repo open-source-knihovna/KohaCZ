@@ -68,6 +68,7 @@
           <li>
              <label for="branchcode">Library: </label>
              <select name="branchcode" id="branchcode">
+                <option value="">All libraries</option>
                 [% FOREACH branch IN branches %]
                     [% IF branch.branchcode == ean.branch.branchcode %]
                        <option value="[% branch.branchcode %]" selected="selected">[% branch.branchname %]</option>
@@ -138,9 +139,13 @@
         </tr>
         [% FOREACH ean IN eans %]
             <tr>
-                <td>[% ean.branch.branchname %]</td>
-                <td>[% ean.description %]</td>
-                <td>[% ean.ean %]</td>
+                [% IF ean.branch %]
+                <td>[% ean.branch.branchname | html %]</td>
+                [% ELSE %]
+                <td>All libraries</td>
+                [% END %]
+                <td>[% ean.description | html %]</td>
+                <td>[% ean.ean | html %]</td>
                 <td>
                  [% FOREACH qualifier IN code_qualifiers %]
                     [% IF qualifier.code == ean.id_code_qualifier %]

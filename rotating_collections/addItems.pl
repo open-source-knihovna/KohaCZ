@@ -50,9 +50,8 @@ my $colId = $query->param('colId');
 my $collection = Koha::RotatingCollections->find($colId);
 my $confirmed = $query->param('confirmed') || 0;
 
-my $action = $query->param('action') || '';
-
-if ( $action eq 'addItem' ) {
+if ( defined $query->param('action') and
+     $query->param('action') eq 'addItem' ) {
     ## Add the given item to the collection
     my $barcode    = $query->param('barcode');
     my $removeItem = $query->param('removeItem');
