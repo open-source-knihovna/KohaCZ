@@ -284,8 +284,10 @@ if ( $op eq 'do' ) {
     my @borrowernumbers = $input->multi_param('borrowernumber');
     # For each borrower selected
     for my $borrowernumber ( @borrowernumbers ) {
+        my $patron = Koha::Patrons->find( $borrowernumber );
         # If at least one field are filled, we want to modify the borrower
         if ( defined $infos ) {
+            $infos->{cardnumber} = $patron->cardnumber;
             $infos->{borrowernumber} = $borrowernumber;
             my $success = ModMember(%$infos);
             if (!$success) {
