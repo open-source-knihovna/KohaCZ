@@ -156,11 +156,14 @@ sub chargelostitem{
 
     # OK, they haven't
     unless ($existing_charges) {
+        my $checkout = Koha::Checkouts->find({ itemnumber => $itemnumber });
+        my $issue_id = $checkout ? $checkout->issue_id : undef;
         #add processing fee
         if ($processfee && $processfee > 0){
             my $accountline = Koha::Account::Line->new(
                 {
                     borrowernumber    => $borrowernumber,
+                    issue_id          => $issue_id,
                     accountno         => getnextacctno($borrowernumber),
                     date              => \'NOW()',
                     amount            => $processfee,
@@ -201,6 +204,7 @@ sub chargelostitem{
             my $accountline = Koha::Account::Line->new(
                 {
                     borrowernumber    => $borrowernumber,
+                    issue_id          => $issue_id,
                     accountno         => getnextacctno($borrowernumber),
                     date              => \'NOW()',
                     amount            => $replacementprice,

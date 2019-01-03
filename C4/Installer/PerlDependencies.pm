@@ -267,11 +267,6 @@ our $PERL_DEPS = {
         'required' => '0',
         'min_ver'  => '1.34'
     },
-    'Cache::Memory' => {
-        'usage'    => 'Caching',
-        'required' => '0',
-        'min_ver'  => '2.04'
-    },
     'Net::LDAP::Filter' => {
         'usage'    => 'LDAP Interface Feature',
         'required' => '0',
@@ -616,6 +611,11 @@ our $PERL_DEPS = {
         'usage'    => 'Core',
         'required' => '0',
         'min_ver'  => '0.04',
+    },
+    'Text::CSV::Unicode' => {
+        usage      => 'Testing suite',
+        required   => 0,
+        min_ver    => '0.40'
     },
     'Text::Unaccent' => {
         'usage'    => 'Core',

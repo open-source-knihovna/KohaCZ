@@ -489,7 +489,7 @@ subtest 'balance' => sub {
 };
 
 subtest "Koha::Account::chargelostitem tests" => sub {
-    plan tests => 32;
+    plan tests => 40;
 
     my $lostfine;
     my $procfee;
@@ -519,6 +519,12 @@ subtest "Koha::Account::chargelostitem tests" => sub {
     my $cli_itemnumber2 = $builder->build({ source => 'Item', value => { itype => $itype_replace_no_fee->{itemtype} } })->{'itemnumber'};
     my $cli_itemnumber3 = $builder->build({ source => 'Item', value => { itype => $itype_no_replace_fee->{itemtype} } })->{'itemnumber'};
     my $cli_itemnumber4 = $builder->build({ source => 'Item', value => { itype => $itype_replace_fee->{itemtype} } })->{'itemnumber'};
+
+    my $cli_issue_id_1 = $builder->build({ source => 'Issue', value => { borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber1 } })->{issue_id};
+    my $cli_issue_id_2 = $builder->build({ source => 'Issue', value => { borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber2 } })->{issue_id};
+    my $cli_issue_id_3 = $builder->build({ source => 'Issue', value => { borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber3 } })->{issue_id};
+    my $cli_issue_id_4 = $builder->build({ source => 'Issue', value => { borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber4 } })->{issue_id};
+
     my $duck = Koha::Items->find({itemnumber=>$cli_itemnumber1});
 
     t::lib::Mocks::mock_preference('item-level_itypes', '1');
@@ -553,12 +559,14 @@ subtest "Koha::Account::chargelostitem tests" => sub {
     $procfee  = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber3, accounttype => 'PF' });
     ok( !$lostfine, "No lost fine if no replacementcost and no default set when pref off");
     ok( $procfee->amount == 8.16,  "Processing fee if processing fee");
+    is( $procfee->issue_id, $cli_issue_id_3, "Processing fee issue id is correct" );
     $procfee->delete();
     C4::Accounts::chargelostitem( $cli_borrowernumber, $cli_itemnumber3, 6.12, "Perdedor");
     $lostfine = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber3, accounttype => 'L' });
     $procfee  = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber3, accounttype => 'PF' });
     ok( $lostfine->amount == 6.12 , "Lost fine equals replacementcost when pref off and no default set");
     ok( $procfee->amount == 8.16,  "Processing fee if processing fee");
+    is( $procfee->issue_id, $cli_issue_id_3, "Processing fee issue id is correct" );
     $lostfine->delete();
     $procfee->delete();
 
@@ -567,12 +575,14 @@ subtest "Koha::Account::chargelostitem tests" => sub {
     $procfee  = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber4, accounttype => 'PF' });
     ok( !$lostfine, "No lost fine if no replacementcost but default set when pref off");
     ok( $procfee->amount == 2.04,  "Processing fee if processing fee");
+    is( $procfee->issue_id, $cli_issue_id_4, "Processing fee issue id is correct" );
     $procfee->delete();
     C4::Accounts::chargelostitem( $cli_borrowernumber, $cli_itemnumber4, 6.12, "Perdedor");
     $lostfine = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber4, accounttype => 'L' });
     $procfee  = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber4, accounttype => 'PF' });
     ok( $lostfine->amount == 6.12 , "Lost fine equals replacementcost when pref off and default set");
     ok( $procfee->amount == 2.04,  "Processing fee if processing fee");
+    is( $procfee->issue_id, $cli_issue_id_4, "Processing fee issue id is correct" );
     $lostfine->delete();
     $procfee->delete();
 
@@ -606,18 +616,21 @@ subtest "Koha::Account::chargelostitem tests" => sub {
     $procfee  = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber3, accounttype => 'PF' });
     ok( !$lostfine, "No lost fine if no replacementcost and default not set when pref on");
     is( $procfee->amount, "8.160000",  "Processing fee if processing fee");
+    is( $procfee->issue_id, $cli_issue_id_3, "Processing fee issue id is correct" );
     $procfee->delete();
     C4::Accounts::chargelostitem( $cli_borrowernumber, $cli_itemnumber3, 6.12, "Perdedor");
     $lostfine = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber3, accounttype => 'L' });
     $procfee  = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber3, accounttype => 'PF' });
     is( $lostfine->amount, "6.120000", "Lost fine equals replacementcost when pref on and no default set");
     is( $procfee->amount, "8.160000",  "Processing fee if processing fee");
+    is( $procfee->issue_id, $cli_issue_id_3, "Processing fee issue id is correct" );
 
     C4::Accounts::chargelostitem( $cli_borrowernumber, $cli_itemnumber4, 0, "Perdedor");
     $lostfine = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber4, accounttype => 'L' });
     $procfee  = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber4, accounttype => 'PF' });
     is( $lostfine->amount, "4.080000", "Lost fine is default if no replacementcost but default set when pref on");
     is( $procfee->amount, "2.040000",  "Processing fee if processing fee");
+    is( $procfee->issue_id, $cli_issue_id_4, "Processing fee issue id is correct" );
     $lostfine->delete();
     $procfee->delete();
     C4::Accounts::chargelostitem( $cli_borrowernumber, $cli_itemnumber4, 6.12, "Perdedor");
@@ -625,6 +638,10 @@ subtest "Koha::Account::chargelostitem tests" => sub {
     $procfee  = Koha::Account::Lines->find({ borrowernumber => $cli_borrowernumber, itemnumber => $cli_itemnumber4, accounttype => 'PF' });
     is( $lostfine->amount, "6.120000", "Lost fine equals replacementcost when pref on and default set");
     is( $procfee->amount, "2.040000",  "Processing fee if processing fee");
+    is( $procfee->issue_id, $cli_issue_id_4, "Processing fee issue id is correct" );
+
+    # Cleanup - this must be replaced with a transaction per subtest
+    Koha::Patrons->find($cli_borrowernumber)->checkouts->delete;
 };
 
 subtest "Koha::Account::non_issues_charges tests" => sub {
