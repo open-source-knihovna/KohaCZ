@@ -578,11 +578,14 @@ sub barcode {
     $num_of_bars = 13;
         $tot_bar_length = ($bar_length * $num_of_bars) + ($guard_length * 2);
         $x_scale_factor = ($params{'width'} / $tot_bar_length) * 0.9;
+        my $barcode_data = length($params{barcode_data}) == 12 ?
+            sprintf('%012d', $params{barcode_data}) :
+            sprintf('%013d', $params{barcode_data});
         eval {
             PDF::Reuse::Barcode::EAN13(
                 x                   => $params{'llx'},
                 y                   => $params{'lly'},
-                value               => sprintf('%013d',$params{barcode_data}),
+                value               => $barcode_data,
 #                xSize               => $x_scale_factor,
 #                ySize               => $params{'y_scale_factor'},
                 mode                    => 'graphic',
