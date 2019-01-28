@@ -418,12 +418,14 @@
                             [% IF itemwithdrawnloop %]
                                 [% FOREACH itemwithdrawnloo IN itemwithdrawnloop %]
                                     [% IF itemwithdrawnloo.authorised_value == item.withdrawn %]
-                                        <span class="wdn">[% itemwithdrawnloo.lib %]</span>
+                                        <span class="wdn">[% itemwithdrawnloo.lib %] on [% item.withdrawn_on | $KohaDates %]</span>
                                     [% END %]
                                 [% END %]
                             [% ELSE %]
-                                <span class="wdn">Withdrawn</span>
+                                <span class="wdn">Withdrawn on [% item.withdrawn_on | $KohaDates %]</span>
                             [% END %]
+                            <span>Withdrawn number: </span>[% item.withdrawn_permanent %]<br />
+                            <span>With reason: </span>[% AuthorisedValues.GetByCode('WITHDRAWN_REASON', item.withdrawn_categorycode) %]
                         [% END %]
 
                         [% IF ( item.damaged ) %]
